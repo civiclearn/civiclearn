@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="title_help"></title>
+
+  <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+   <style>
+   button,
+input,
+textarea,
+.help-btn {
+  font-family: "Space Grotesk", system-ui, sans-serif !important;
+}
+    main {
+  padding: 100px 32px 40px; /* ✅ top padding leaves room for hamburger */
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 1200px;
+  margin: auto;
+}
+    h1{font-size:24px;margin:0 0 4px}
+    .muted{color:var(--muted);font-size:15px;margin-bottom:20px}
+
+    /* FAQ Accordion */
+    #faq{display:grid;gap:16px}
+    @media(min-width:900px){
+      #faq{grid-template-columns:1fr 1fr;align-items:start}
+    }
+    .faq-item{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .faq-question{padding:16px 20px;cursor:pointer;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+    .faq-question:hover{background:rgba(0,0,0,.03)}
+    .faq-answer{max-height:0;overflow:hidden;padding:0 20px;transition:all .3s ease;color:var(--muted);font-size:15px}
+    .faq-item.active .faq-answer{max-height:none;padding:16px 20px}
+    .faq-item.active .faq-question{color:var(--brand)}
+
+    /* Contact reveal */
+    #contactWrapper{overflow:hidden;max-height:0;transition:max-height .5s ease,opacity .5s ease;opacity:0}
+    #contactWrapper.visible{max-height:800px;opacity:1;margin-top:10px}
+
+    form{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:24px;display:flex;flex-direction:column;gap:14px}
+    input,textarea{font-family:inherit;font-size:15px;padding:12px 14px;border:1px solid var(--line);
+      border-radius:10px;resize:none;width:100%;background:var(--bg);color:var(--ink)}
+    button{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;
+      border:none;padding:12px 20px;font-weight:600;border-radius:10px;cursor:pointer}
+    button:hover{opacity:.9}
+    .contactBtn{margin-top:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
+      color:#fff;padding:10px 16px;border:none;border-radius:10px;font-weight:600;cursor:pointer}
+	  
+	  .faq-item:last-of-type {
+  background: linear-gradient(
+    135deg,
+    rgba(213, 43, 30, 0.06),
+    rgba(213, 43, 30, 0.03)
+  );
+  border: 1px solid rgba(213, 43, 30, 0.12);
+}
+
+  </style>
+      <script>
+  document.documentElement.classList.add("i18n-hidden");
+</script>
+<script type="module" src="/assets/js/auth-guard.js"></script>
+
+</head>
+
+<body class="test-page">
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+<div class="brand">
+  CivicLearn®
+  <svg viewBox="0 0 3 2"
+       width="22"
+       height="16"
+       style="margin-left:8px;
+              vertical-align:middle;
+              border-radius:2px;
+              overflow:hidden;">
+    <!-- Albastru -->
+    <rect width="1" height="2" x="0" y="0" fill="#002B7F"></rect>
+    <!-- Galben -->
+    <rect width="1" height="2" x="1" y="0" fill="#FCD116"></rect>
+    <!-- Roșu -->
+    <rect width="1" height="2" x="2" y="0" fill="#CE1126"></rect>
+  </svg>
+</div>
+
+<nav class="nav">
+  <a href="index.html" data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" class="sub active" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+</nav>
+
+    <div class="spacer"></div>
+
+    
+  </aside>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+  <main class="main">
+
+     <header class="ce-header ce-header-top">
+      <h1 data-i18n="title_help"></h1>
+      <div class="muted" data-i18n="help_subtitle"></div>
+    </header>
+
+   <!-- FAQ SECTION (Romanian version) -->
+<section id="faq">
+
+  <div class="faq-item">
+    <div class="faq-question">Cum resetez complet antrenamentul meu?</div>
+    <div class="faq-answer">
+      Apasă pe butonul de mai jos pentru a începe de la zero. Această acțiune va șterge toate statisticile și progresul tău, dar va păstra setările personale.<br><br>
+      <button id="resetAllFull" class="contactBtn">🔄 Resetează progresul meu</button>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Întrebările din test sunt oficiale?</div>
+    <div class="faq-answer">
+      Nu. Întrebările de pe CivicLearn sunt simulări bazate pe conținutul materialelor oficiale. 
+      Ele respectă spiritul și structura examenului real, dar nu provin de la o autoritate publică.
+      <br><br><em>Întrebările oficiale nu sunt publice și nu sunt niciodată publicate de autorități.</em>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Care este diferența dintre modurile de testare?</div>
+    <div class="faq-answer">
+      CivicLearn oferă mai multe moduri de antrenament adaptate nevoilor tale:
+      <ul>
+        <li><strong>Simulare examen:</strong> Reproduce condițiile examenului oficial (25 de întrebări, timp limită, rezultat la final).</li>
+        <li><strong>Test rapid:</strong> 5 întrebări aleatorii, fără limită de timp, cu corectare instantanee.</li>
+        <li><strong>Exersare pe teme:</strong> Alegi una sau mai multe teme. Acest mod este <em>progresiv</em>: întrebările se repetă până când răspunzi corect la toate.</li>
+        <li><strong>Capcane frecvente:</strong> Antrenament direcționat asupra întrebărilor greșite cel mai des, fără timer.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Cum funcționează modul progresiv?</div>
+    <div class="faq-answer">
+      Modul progresiv nu se oprește după un număr fix de întrebări. 
+      El repetă automat întrebările la care ai greșit, până când sunt toate stăpânite. 
+      Când nu mai rămâne nimic, apare mesajul: <strong>„Totul este stăpânit 🎉”</strong>.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">De ce apar butoanele „Reîncepe” sau „Vezi greșelile” în unele teste?</div>
+    <div class="faq-answer">
+      Aceste butoane apar doar în testele <strong>ne-progresive</strong> (cum este Simularea). 
+      Testul se încheie când ai parcurs toate întrebările, iar apoi poți revedea greșelile sau începe o nouă rundă.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Ce mod ar trebui să folosesc pentru a mă pregăti cel mai bine?</div>
+    <div class="faq-answer">
+      Pentru o pregătire completă:
+      <ul>
+        <li>Începe cu <strong>Exersare pe teme</strong> pentru a consolida fiecare domeniu.</li>
+        <li>Apoi folosește <strong>Test rapid</strong> pentru repetiție ușoară zilnică.</li>
+        <li>Finalizează cu o <strong>Simulare</strong> pentru a te testa în condiții reale.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Unde pot citi întregul manual?</div>
+    <div class="faq-answer">
+      Manualul este disponibil în secțiunea <strong>Manual oficial</strong> de pe panoul de control. 
+      Fiecare capitol include textul complet, precum și o versiune audio.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">În modul de asistență la citire, vocea are accent străin. De ce?</div>
+    <div class="faq-answer">
+      <h3>În modul de asistență la citire, vocea are accent străin. De ce?</h3>
+      <p>
+        CivicLearn folosește <strong>motorul de text-la-vorbire al browserului tău</strong>. 
+        O lectură corectă necesită o <strong>voce instalată în limba română („ro-RO”)</strong>. 
+        Dacă dispozitivul sau browserul tău <strong>nu are o voce românească instalată</strong>, 
+        va utiliza o voce generică – adesea engleză – ceea ce produce un accent străin.
+      </p>
+
+      <h4>Cum pot rezolva?</h4>
+      <ol>
+        <li>
+          Instalează o <strong>voce în limba română</strong> din setările dispozitivului:
+          <ul>
+            <li><strong>iPhone / iPad</strong>: Settings → Accessibility → Spoken Content → Voices → Romanian</li>
+            <li><strong>Android</strong>: Settings → System → Text-to-speech → Voices → Romanian</li>
+            <li><strong>Computer</strong>: Verifică setările sistemului pentru Text-to-Speech.</li>
+          </ul>
+        </li>
+        <li>Reîncarcă apoi pagina <strong>CivicLearn</strong>.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Cum pot asculta capitolele în versiune audio?</div>
+    <div class="faq-answer">
+      Accesează <strong>Ascultă manualul</strong> din meniul lateral și selectează capitolul dorit. 
+      Poți pune pauză sau relua oricând dorești.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Ce este secțiunea „Capcane frecvente”?</div>
+    <div class="faq-answer">
+      Această secțiune conține întrebările pe care utilizatorii le greșesc cel mai des. 
+      Te ajută să identifici punctele slabe și să te antrenezi mai eficient înainte de o simulare completă.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Cum activez funcția „Testul zilei”?</div>
+    <div class="faq-answer">
+      <strong>Testul zilei</strong> trimite în fiecare dimineață un scurt set de întrebări direct în browserul tău. 
+      Pentru a activa funcția, trebuie să accepți <strong>notificările</strong> când browserul întreabă. 
+      Apoi vei primi o notificare zilnică cu link către testul zilei.
+      <br><br>
+      Pentru a dezactiva funcția, deschide <em>setările site-ului</em> din browser și oprește notificările pentru CivicLearn.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Pot folosi CivicLearn pe telefon?</div>
+    <div class="faq-answer">
+      Da. CivicLearn este optimizat pentru computer, tabletă și telefon. 
+      Poți adăuga aplicația pe ecranul de start pentru acces rapid.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Se salvează progresul meu automat?</div>
+    <div class="faq-answer">
+      Da. Rezultatele și statisticile tale sunt salvate local în browser. 
+      Dacă schimbi dispozitivul sau ștergi datele, progresul se pierde.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Pot studia offline?</div>
+    <div class="faq-answer">
+      Da. După ce paginile au fost încărcate cel puțin o dată, majoritatea funcțiilor (teste, flashcarduri, manual) 
+      rămân disponibile fără internet, cu excepția formularului de contact.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Cum funcționează accesul Premium?</div>
+    <div class="faq-answer">
+      Accesul Premium este o achiziție unică, fără limită de timp. 
+      După ce plata este confirmată de <strong>Stripe</strong>, accesul tău este activat imediat și îl păstrezi permanent, fără reînnoire automată.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Pot primi o chitanță?</div>
+    <div class="faq-answer">
+      Plățile sunt procesate de <strong>Stripe</strong>, care îți trimite automat un e-mail de confirmare după achiziție. 
+      Acest mesaj servește drept chitanță oficială; nu emitem facturi PDF separate.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Pot folosi același cont pe mai multe dispozitive?</div>
+    <div class="faq-answer">
+      Da, te poți autentifica pe mai multe dispozitive cu aceeași adresă de e-mail. 
+      <strong>Dar atenție:</strong> statisticile și progresul sunt salvate local în fiecare browser. 
+      Dacă schimbi dispozitivul sau ștergi datele, istoricul se resetează.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Cum raportez o eroare?</div>
+    <div class="faq-answer">
+      Deschide formularul de contact de mai jos și menționează întrebarea respectivă. 
+      Echipa noastră va actualiza baza de date dacă este necesar.
+    </div>
+  </div>
+
+
+      <!-- Contact button -->
+      <div class="faq-item">
+        <div class="faq-question" data-i18n="contact_open_form"></div>
+        <div class="faq-answer">
+          <button id="revealContact" class="contactBtn" data-i18n="contact_open_form"></button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- CONTACT FORM -->
+    <section id="contactWrapper" class="hidden-section">
+
+      <form id="contactForm" action="https://formspree.io/f/xgvbnpog" method="POST">
+
+        <h2 data-i18n="contact_title"></h2>
+        <p class="muted" data-i18n="contact_subtitle"></p>
+
+        <label data-i18n="contact_name_label"></label>
+        <input type="text" name="name" required />
+
+        <label data-i18n="contact_email_label"></label>
+        <input type="email" name="_replyto" required />
+
+        <label data-i18n="contact_message_label"></label>
+        <textarea name="message" rows="5" required></textarea>
+
+        <input type="hidden" name="_subject" value="Message from CivicLearn">
+        <button type="submit" data-i18n="contact_submit_btn"></button>
+      </form>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script src="/assets/js/config-romania.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>
+  CivicLearnI18n.init();
+</script>
+
+<script>
+  // FAQ toggle
+  document.querySelectorAll('.faq-question').forEach(q => {
+    q.addEventListener('click', () => q.parentElement.classList.toggle('active'));
+  });
+
+  // Reveal contact
+  document.getElementById("revealContact")?.addEventListener("click", () => {
+    const form = document.getElementById("contactWrapper");
+    form.style.maxHeight = "1000px";
+    form.style.opacity = "1";
+    form.scrollIntoView({ behavior: "smooth" });
+  });
+
+  // Contact submission
+  const contactForm = document.getElementById("contactForm");
+  if (contactForm) {
+    contactForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const res = await fetch(contactForm.action, {
+        method: contactForm.method,
+        body: new FormData(contactForm),
+        headers: { Accept: "application/json" }
+      });
+
+      if (res.ok) {
+        contactForm.innerHTML = `
+          <div style="text-align:center; padding:20px;">
+            <h3 data-i18n="contact_success_title"></h3>
+            <p data-i18n="contact_success_text"></p>
+          </div>
+        `;
+        CivicLearnI18n.apply();
+      }
+    });
+  }
+
+  // Mobile menu
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.querySelector(".menu-toggle");
+    const overlay = document.getElementById("menuOverlay");
+    toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+    overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+  });
+</script>
+
+
+<script src="/assets/js/reset.js"></script>
+
+
+</body>
+</html>

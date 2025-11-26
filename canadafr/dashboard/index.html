@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CivicLearn — Tableau de bord</title>
+
+  <!-- Fonts + Core CivicEdge Styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+  <script>
+  document.documentElement.classList.add("i18n-hidden");
+</script>
+<script type="module" src="/assets/js/auth-guard.js"></script>
+ 
+</head>
+
+<body class="dashboard">
+  <button class="menu-toggle" aria-label="Menu">☰</button>
+  <div class="wrap">
+   <!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="brand">CivicLearn®
+  <svg viewBox="0 0 9600 4800" width="18" height="9">
+    <path fill="#d52b1e" d="M0 0h2400l99 99h4602l99-99h2400v4800h-2400l-99-99H2499l-99 99H0z"/>
+    <path fill="#fff" d="M2400 0h4800v4800H2400zm2490 4430-45-863a95 95 0 0 1 111-98l859 151-116-320a65 65 0 0 1 20-73l941-762-212-99a65 65 0 0 1-34-79l186-572-542 115a65 65 0 0 1-73-38l-105-247-423 454a65 65 0 0 1-111-57l204-1052-327 189a65 65 0 0 1-91-27l-332-652-332 652a65 65 0 0 1-91 27l-327-189 204 1052a65 65 0 0 1-111 57l-423-454-105 247a65 65 0 0 1-73 38l-542-115 186 572a65 65 0 0 1-34 79l-212 99 941 762a65 65 0 0 1 20 73l-116 320 859-151a95 95 0 0 1 111 98l-45 863z"/>
+  </svg>
+</div>
+
+
+       <nav class="nav">
+  <a href="index.html" class="sub active" data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+
+  <!-- Manual group -->
+  <div class="nav-group">
+<a href="#" class="has-sub" id="manualToggle" data-i18n="nav_manual"></a>
+<div class="subnav" id="chaptersSubnav">
+      <a href="droits-responsabilites.html" class="sub">Les droits et responsabilités</a>
+      <a href="canadiens.html" class="sub">Les Canadiens</a>
+      <a href="histoire.html" class="sub">L’histoire du Canada</a>
+      <a href="gouvernement.html" class="sub">Le système de gouvernement</a>
+      <a href="elections.html" class="sub">Les élections au Canada</a>
+      <a href="justice.html" class="sub">Le système de justice</a>
+      <a href="economie.html" class="sub">L’économie du Canada</a>
+      <a href="regions.html" class="sub">Les régions du Canada</a>
+      <a href="canada-moderne.html" class="sub">Le Canada moderne</a>
+      <a href="symboles.html" class="sub">Les symboles du Canada</a>
+    </div>
+  </div>
+
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+
+  <div class="spacer"></div>
+
+<div class="profile">
+  <div class="profile-info">
+    <div class="reading-inline">
+      <span data-i18n="reading_label"></span>
+      <button id="readingToggle"
+              class="reading-btn inline"
+              data-i18n="reading_tooltip"
+              data-i18n-attr="title">🔇</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+</aside>
+<!-- MOBILE OVERLAY -->
+<div class="overlay" id="menuOverlay"></div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <div class="db-main">
+
+
+
+    <!-- TOP METRICS -->
+   <div class="db-top-metrics">
+
+  <!-- Countdown -->
+  <div class="db-metric-tile mobile-essential" id="countdownCard">
+
+    <!-- big purple countdown -->
+    <div id="examCountdown" class="db-metric-value" style="display:none;">J-0</div>
+
+    <!-- small neutral placeholder when no date is set -->
+<div id="examNoDate" class="db-metric-label" data-i18n="countdown_enter_date">
+</div>
+
+<div id="openDateSheet" class="db-metric-label date-edit-link" data-i18n="countdown_set_date_btn">
+</div>
+
+
+    
+  </div>
+
+  <!-- Answered Questions -->
+  <div class="db-metric-tile">
+    <div id="tmAnswered" class="db-metric-value mobile-essential">0</div>
+    <div class="db-metric-label" data-i18n="dashboard_answered_questions">
+    </div>
+  </div>
+
+  <!-- Global Accuracy -->
+  <div class="db-metric-tile mobile-hide">
+    <div id="tmAccuracy" class="db-metric-value">0%</div>
+    <div class="db-metric-label" data-i18n="dashboard_global_accuracy">
+    </div>
+  </div>
+
+  <!-- Total Study Time -->
+  <div class="db-metric-tile mobile-hide">
+    <div id="tmTime" class="db-metric-value">0h 00m</div>
+    <div class="db-metric-label" data-i18n="dashboard_total_study_time">
+    </div>
+  </div>
+
+  <!-- Streak -->
+  <div class="db-metric-tile mobile-hide">
+    <div id="tmStreak" class="db-metric-value"></div>
+    <div class="db-metric-label" data-i18n="dashboard_streak">
+    </div>
+  </div>
+
+</div>
+
+
+
+<!-- LAUNCHERS GRID -->
+<section class="db-grid">
+
+  <!-- Download Official Manual -->
+  <div class="db-card mobile-hide">
+    <div>
+      <div class="db-icon">📘</div>
+      <h3 data-i18n="launcher_manual_title"></h3>
+      <p data-i18n="launcher_manual_sub"></p>
+    </div>
+    <a class="db-btn" 
+       href="https://media.civiclearn.com/canada-fr/decouvrir.pdf" 
+       target="_blank"
+       data-i18n="launcher_btn_open"></a>
+  </div>
+
+  <!-- Timed Simulation -->
+  <div class="db-card mobile-essential mobile-launcher">
+    <div>
+      <div class="db-icon">⏱️</div>
+      <h3 data-i18n="launcher_sim_title"></h3>
+      <p data-i18n="launcher_sim_sub"></p>
+    </div>
+    <a class="db-btn" href="simulation.html" data-i18n="launcher_btn_start"></a>
+  </div>
+
+  <!-- Quick Test -->
+  <div class="db-card mobile-essential mobile-launcher">
+    <div>
+      <div class="db-icon">⚡</div>
+      <h3 data-i18n="launcher_quick_title"></h3>
+      <p data-i18n="launcher_quick_sub"></p>
+    </div>
+    <a class="db-btn" href="quick.html" data-i18n="launcher_btn_start"></a>
+  </div>
+
+  <!-- Test à la mesure -->
+  <div class="db-card mobile-hide">
+    <div>
+      <div class="db-icon">🧪</div>
+      <h3 data-i18n="launcher_topics_title"></h3>
+      <p data-i18n="launcher_topics_sub"></p>
+    </div>
+    <a class="db-btn" href="topics.html" data-i18n="launcher_btn_start"></a>
+  </div>
+
+  <!-- Frequent Traps -->
+  <div class="db-card mobile-hide">
+    <div>
+      <div class="db-icon">🚫</div>
+      <h3 data-i18n="launcher_traps_title"></h3>
+      <p data-i18n="launcher_traps_sub"></p>
+    </div>
+    <a class="db-btn" href="traps.html" data-i18n="launcher_btn_open"></a>
+  </div>
+
+  <!-- History -->
+  <div class="db-card mobile-hide">
+    <div>
+      <div class="db-icon">📊</div>
+      <h3 data-i18n="launcher_history_title"></h3>
+      <p data-i18n="launcher_history_sub"></p>
+    </div>
+    <a class="db-btn" href="history.html" data-i18n="launcher_btn_open"></a>
+  </div>
+
+</section>
+
+
+<!-- MOBILE-ONLY MINI LAUNCHERS -->
+<section class="db-grid-mini mobile-only">
+  <div class="db-mini-card">
+    <div class="db-mini-icon">⏱️</div>
+    <div class="db-mini-title">Simulation</div>
+    <a class="db-mini-btn" href="simulation">Démarrer</a>
+  </div>
+
+  <div class="db-mini-card">
+    <div class="db-mini-icon">⚡</div>
+    <div class="db-mini-title">Test rapide</div>
+    <a class="db-mini-btn" href="quick">Lancer</a>
+  </div>
+</section>
+
+
+<!-- THREE CHARTS -->
+<section id="db-metrics-row">
+
+  <!-- Global mastery donut -->
+  <div class="db-metric-card mobile-essential">
+    <div class="globalChartWrap">
+      <canvas id="globalChart"></canvas>
+    </div>
+    <div><strong id="globalPct">0%</strong> <span data-i18n="dashboard_mastered_label"></span></div>
+    <div id="globalAnswered" class="muted" data-i18n="dashboard_questions_label"></div>
+  </div>
+
+  <!-- Topics chart -->
+  <div class="db-metric-card mobile-hide">
+    <canvas id="topicsChart"></canvas>
+    <div class="topics-legend">
+      <div class="topics-legend-title" data-i18n="dashboard_topics_legend_title"></div>
+      <div class="topics-legend-sub" id="topicsCountLabel"></div>
+    </div>
+  </div>
+
+<!-- Fact of the Day -->
+<div 
+  class="db-metric-card fact-card mobile-hide" 
+  id="factOfDayCard" 
+  style="min-height: 360px !important; padding: 32px !important;"
+>
+  <div class="fact-date muted" id="factDate"></div>
+
+  <h3 id="factTitle" data-i18n="dashboard_fact_title"></h3>
+
+  <p id="factText" class="fact-text"></p>
+
+  <div id="factQuestionBlock" class="fact-question">
+    <p id="factQuestion" class="fact-q"></p>
+   <div class="fact-row">
+  <button id="factPrev" class="fact-side-btn">←</button>
+
+  <div id="factOptions" class="fact-options"></div>
+
+  <button id="factNext" class="fact-side-btn">→</button>
+</div>
+
+
+  <div id="factFeedback" class="fact-feedback"></div>
+
+</div>
+
+
+
+</section>
+
+
+    <footer class="db-footer">
+      © 2025 CivicLearn by Testrada — Tous droits réservés.
+    </footer>
+
+  </div>
+
+</main>
+<!-- === Bottom Sheet for Exam Date Picker === -->
+<div id="dateSheetOverlay" class="sheet-overlay"></div>
+
+<div id="dateSheet" class="sheet">
+  <div class="sheet-header">
+    <h3 data-i18n="dashboard_datepicker_title"></h3>
+  </div>
+
+  <div class="sheet-body">
+    <input type="date" id="examDateInput" />
+  </div>
+
+  <div class="sheet-actions">
+    <button id="sheetCancel" class="primary" data-i18n="dashboard_datepicker_cancel"></button>
+    <button id="sheetSave" class="primary" data-i18n="dashboard_datepicker_confirm"></button>
+  </div>
+</div>
+
+<!-- === MOBILE MENU TOGGLE === -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.querySelector(".menu-toggle");
+    const overlay = document.querySelector(".overlay");
+    if (toggle && overlay) {
+      toggle.addEventListener("click", () => {
+        document.body.classList.toggle("menu-open");
+      });
+      overlay.addEventListener("click", () => {
+        document.body.classList.remove("menu-open");
+      });
+    }
+  });
+</script>
+<script>
+// SIDEBAR MANUAL TOGGLE
+(function() {
+  const toggle = document.getElementById("manualToggle");
+  const subnav = document.getElementById("chaptersSubnav");
+  if (!toggle || !subnav) return;
+
+  toggle.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggle.classList.toggle("open");
+    subnav.classList.toggle("show");
+  });
+})();
+</script>
+<script src="/assets/js/i18n.js"></script>
+<script src="/assets/js/config-canadafr.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/assets/js/reading.js"></script>
+<script src="/assets/js/engine.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    await CivicLearnI18n.init();
+  });
+</script>
+
+<script>
+function loadFactOfDay() {
+  const s2 = document.createElement("script");
+  s2.src = "/assets/js/factofday.js";
+  document.body.appendChild(s2);
+}
+
+CivicLearnI18n.onReady(() => {
+  const s1 = document.createElement("script");
+  s1.src = "/assets/js/dashboard-v2.js";
+  document.body.appendChild(s1);
+
+  // If DOM is already ready, run instantly
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    loadFactOfDay();
+  } else {
+    document.addEventListener("DOMContentLoaded", loadFactOfDay);
+  }
+});
+</script>
+
+<script>
+  // Plan B: Force Chrome to flush any delayed textContent DOM updates
+  CivicLearnI18n.onReady(() => {
+    setTimeout(() => {
+      // touch one translated node, causing forced reflow
+      const test = document.querySelector('[data-i18n]');
+      if (test) {
+        const tmp = test.textContent;
+        test.textContent = tmp; // write same value
+      }
+    }, 50);
+  });
+</script>
+
+
+</body>
+</html>
+

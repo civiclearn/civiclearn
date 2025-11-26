@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="title_help">Help & Contact</title>
+
+  <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+   <style>
+   button,
+input,
+textarea,
+.help-btn {
+  font-family: "Space Grotesk", system-ui, sans-serif !important;
+}
+    main {
+  padding: 100px 32px 40px; /* ✅ top padding leaves room for hamburger */
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 1200px;
+  margin: auto;
+}
+    h1{font-size:24px;margin:0 0 4px}
+    .muted{color:var(--muted);font-size:15px;margin-bottom:20px}
+
+    /* FAQ Accordion */
+    #faq{display:grid;gap:16px}
+    @media(min-width:900px){
+      #faq{grid-template-columns:1fr 1fr;align-items:start}
+    }
+    .faq-item{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .faq-question{padding:16px 20px;cursor:pointer;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+    .faq-question:hover{background:rgba(0,0,0,.03)}
+    .faq-answer{max-height:0;overflow:hidden;padding:0 20px;transition:all .3s ease;color:var(--muted);font-size:15px}
+    .faq-item.active .faq-answer{max-height:none;padding:16px 20px}
+    .faq-item.active .faq-question{color:var(--brand)}
+
+    /* Contact reveal */
+    #contactWrapper{overflow:hidden;max-height:0;transition:max-height .5s ease,opacity .5s ease;opacity:0}
+    #contactWrapper.visible{max-height:800px;opacity:1;margin-top:10px}
+
+    form{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:24px;display:flex;flex-direction:column;gap:14px}
+    input,textarea{font-family:inherit;font-size:15px;padding:12px 14px;border:1px solid var(--line);
+      border-radius:10px;resize:none;width:100%;background:var(--bg);color:var(--ink)}
+    button{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;
+      border:none;padding:12px 20px;font-weight:600;border-radius:10px;cursor:pointer}
+    button:hover{opacity:.9}
+    .contactBtn{margin-top:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
+      color:#fff;padding:10px 16px;border:none;border-radius:10px;font-weight:600;cursor:pointer}
+	  
+	  .faq-item:last-of-type {
+  background: linear-gradient(
+    135deg,
+    rgba(213, 43, 30, 0.06),
+    rgba(213, 43, 30, 0.03)
+  );
+  border: 1px solid rgba(213, 43, 30, 0.12);
+}
+
+  </style>
+      <script>
+  document.documentElement.classList.add("i18n-hidden");
+</script>
+<script type="module" src="/assets/js/auth-guard.js"></script>
+
+</head>
+
+<body class="test-page">
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg viewBox="0 0 9600 4800" width="18" height="9" style="margin-left:6px;vertical-align:middle;border-radius:2px;">
+        <path fill="#d52b1e" d="M0 0h2400l99 99h4602l99-99h2400v4800h-2400l-99-99H2499l-99 99H0z"/>
+        <path fill="#fff" d="M2400 0h4800v4800H2400zm2490 4430-45-863a95 95 0 0 1 111-98l859 151-116-320a65 65 0 0 1 20-73l941-762-212-99a65 65 0 0 1-34-79l186-572-542 115a65 65 0 0 1-73-38l-105-247-423 454a65 65 0 0 1-111-57l204-1052-327 189a65 65 0 0 1-91-27l-332-652-332 652a65 65 0 0 1-91 27l-327-189 204 1052a65 65 0 0 1-111 57l-423-454-105 247a65 65 0 0 1-73 38l-542-115 186 572a65 65 0 0 1-34 79l-212 99 941 762a65 65 0 0 1 20 73l-116 320 859-151a95 95 0 0 1 111 98l-45 863z"/>
+      </svg>
+    </div>
+
+       <nav class="nav">
+  <a href="index.html"  data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+
+  <!-- Manual group -->
+  <div class="nav-group">
+<a href="#" class="has-sub" id="manualToggle" data-i18n="nav_manual"></a>
+<div class="subnav" id="chaptersSubnav">
+      <a href="droits-responsabilites.html" class="sub">Les droits et responsabilités</a>
+      <a href="canadiens.html" class="sub">Les Canadiens</a>
+      <a href="histoire.html" class="sub">L’histoire du Canada</a>
+      <a href="gouvernement.html" class="sub">Le système de gouvernement</a>
+      <a href="elections.html" class="sub">Les élections au Canada</a>
+      <a href="justice.html" class="sub">Le système de justice</a>
+      <a href="economie.html" class="sub">L’économie du Canada</a>
+      <a href="regions.html" class="sub">Les régions du Canada</a>
+      <a href="canada-moderne.html" class="sub">Le Canada moderne</a>
+      <a href="symboles.html" class="sub">Les symboles du Canada</a>
+    </div>
+  </div>
+
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="help.html" class="sub active" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+    <div class="spacer"></div>
+
+    
+  </aside>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+  <main class="main">
+
+     <header class="ce-header ce-header-top">
+      <h1 data-i18n="title_help">Help & Contact</h1>
+      <div class="muted" data-i18n="help_subtitle">Frequently asked questions</div>
+    </header>
+
+    <!-- FAQ SECTION (country‑specific content) -->
+    <section id="faq">
+
+  <div class="faq-item">
+    <div class="faq-question">Comment réinitialiser entièrement mon entraînement&nbsp;?</div>
+    <div class="faq-answer">
+      Cliquez sur le bouton ci-dessous pour repartir de zéro.  
+      Cette action effacera toutes vos statistiques et votre progression, mais conservera vos paramètres personnels.<br><br>
+      <button id="resetAllFull" class="contactBtn">🔄 Réinitialiser mes progrès</button>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Les questions du test sont-elles officielles&nbsp;?</div>
+    <div class="faq-answer">
+      Non. Les questions présentes sur CivicLearn sont des simulations créées à partir du contenu du manuel officiel.  
+      Elles respectent l’esprit et la structure de l’examen réel, mais ne proviennent pas d’une source gouvernementale.  
+      <br><br><em>Les questions officielles ne sont accessibles à personne&nbsp;: elles ne sont jamais publiées par le gouvernement du Canada.</em>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Quelle est la différence entre les différents modes de test&nbsp;?</div>
+    <div class="faq-answer">
+      CivicLearn propose plusieurs modes d’entraînement adaptés à vos besoins&nbsp;:
+      <ul>
+        <li><strong>Simulation du test&nbsp;:</strong> Reproduit l’examen officiel (20 questions, minuterie, résultats à la fin).</li>
+        <li><strong>Test rapide&nbsp;:</strong> 5 questions aléatoires sans limite de temps, corrigé immédiat.</li>
+        <li><strong>Test à mesure (par thèmes)&nbsp;:</strong> Vous choisissez un ou plusieurs thèmes. 
+          Ce mode est <em>progressif</em> : les questions reviennent jusqu’à ce que vous répondiez correctement à toutes.
+        </li>
+        <li><strong>Pièges fréquents&nbsp;:</strong> Entraînement ciblé sur les erreurs les plus courantes, sans minuterie.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Comment fonctionne le mode progressif&nbsp;?</div>
+    <div class="faq-answer">
+      Le mode progressif ne s’arrête pas après un nombre fixe de questions.  
+      Il répète automatiquement les questions mal répondues jusqu’à ce que toutes soient maîtrisées.  
+      Quand il n’en reste plus, un message indique : <strong>« Tout est maîtrisé 🎉 »</strong>.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Pourquoi certains tests affichent-ils un bouton « Recommencer » ou « Revoir les erreurs »&nbsp;?</div>
+    <div class="faq-answer">
+      Ces boutons apparaissent uniquement dans les tests <strong>non progressifs</strong> (comme la Simulation).  
+      Le test se termine à la fin du questionnaire et vous pouvez ensuite revoir vos erreurs ou recommencer une nouvelle série.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Quel mode dois-je utiliser pour me préparer efficacement&nbsp;?</div>
+    <div class="faq-answer">
+      Pour une préparation complète&nbsp;:
+      <ul>
+        <li>Commencez par le <strong>Test à mesure</strong> pour consolider vos connaissances thème par thème.</li>
+        <li>Utilisez ensuite le <strong>Test rapide</strong> pour des révisions quotidiennes légères.</li>
+        <li>Terminez par une <strong>Simulation du test</strong> pour vérifier votre niveau en conditions réelles.</li>
+      </ul>
+    </div>
+  </div>
+
+
+  <div class="faq-item">
+    <div class="faq-question">Où puis-je lire le manuel complet&nbsp;?</div>
+    <div class="faq-answer">
+      Le manuel «&nbsp;Découvrir le Canada&nbsp;» est accessible dans la section <strong>Manuel officiel</strong> du tableau de bord.  
+      Chaque chapitre inclut le texte intégral et un enregistrement audio.
+    </div>
+  </div>
+  
+  <div class="faq-item">
+    <div class="faq-question">En mode « Aide à la lecture », la voix lit le texte avec un accent anglais. Pourquoi?</div>
+    <div class="faq-answer">
+      <section id="faq-tts-fr">
+  <h3>En mode « Aide à la lecture », la voix lit le texte avec un accent anglais. Pourquoi&nbsp;?</h3>
+  <p>
+    CivicLearn utilise la <strong>synthèse vocale intégrée</strong> à votre navigateur pour lire les textes à voix haute.
+    En principe, la lecture se fait avec une voix française («&nbsp;fr-FR&nbsp;»).
+    Cependant, si votre appareil ou votre navigateur <strong>n’a pas de voix française installée</strong>,
+    il utilisera une voix par défaut — souvent anglaise — et prononcera le français avec un accent étranger.
+  </p>
+
+  <h4>Comment corriger le problème&nbsp;?</h4>
+  <ol>
+    <li>
+      Installez une <strong>voix française</strong> dans les paramètres de votre appareil&nbsp;:
+      <ul>
+        <li><strong>iPhone / iPad</strong> : Réglages → Accessibilité → Contenu énoncé → Voix → Français</li>
+        <li><strong>Android</strong> : Paramètres → Système → Synthèse vocale → Voix → Français</li>
+        <li><strong>Ordinateur</strong> : Vérifiez les paramètres de synthèse vocale / lecture à voix haute du système.</li>
+      </ul>
+    </li>
+    <li>Rechargez ensuite la page <strong>CivicLearn</strong>.</li>
+  </ol>
+
+</section>
+
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Comment écouter les chapitres en version audio&nbsp;?</div>
+    <div class="faq-answer">
+      Cliquez sur <strong>Écouter le manuel</strong> dans le menu latéral, puis sélectionnez le chapitre souhaité.  
+      Vous pouvez mettre en pause ou reprendre la lecture à tout moment.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Qu’est-ce que la section «&nbsp;Pièges fréquents&nbsp;»&nbsp;?</div>
+    <div class="faq-answer">
+      Cette section regroupe les questions sur lesquelles les utilisateurs échouent le plus souvent.  
+      Elle vous aide à cibler vos faiblesses et à vous entraîner plus efficacement avant de tenter une simulation complète.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Comment activer le «&nbsp;Test du jour&nbsp;» quotidien&nbsp;?</div>
+    <div class="faq-answer">
+      Le <strong>Test du jour</strong> envoie chaque matin une courte série de questions directement dans votre navigateur.  
+      Pour l’activer, acceptez les <strong>notifications</strong> lorsque votre navigateur vous le propose.  
+      Vous recevrez ensuite une alerte quotidienne contenant le lien vers le test du jour.  
+      <br><br>
+      Pour vous désabonner, ouvrez les <em>Paramètres du site</em> de votre navigateur et désactivez les notifications pour CivicLearn.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Puis-je utiliser CivicLearn sur mon téléphone&nbsp;?</div>
+    <div class="faq-answer">
+      Oui&nbsp;! CivicLearn est une application web optimisée pour ordinateurs, tablettes et téléphones.  
+      Vous pouvez l’ajouter à votre écran d’accueil pour un accès rapide.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Mon progrès est-il enregistré automatiquement&nbsp;?</div>
+    <div class="faq-answer">
+      Oui. Vos résultats et statistiques sont sauvegardés localement dans votre navigateur.  
+      Si vous changez d’appareil ou videz votre historique, ces données seront perdues.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Puis-je étudier hors ligne&nbsp;?</div>
+    <div class="faq-answer">
+      Oui, une fois les pages chargées, la majorité des fonctions (tests, flashcards, manuel)  
+      restent accessibles sans connexion Internet, sauf la soumission du formulaire de contact.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Comment fonctionne l’accès Premium&nbsp;?</div>
+    <div class="faq-answer">
+      L’accès Premium est un achat unique, valable sans limite de temps.  
+      Une fois votre paiement confirmé par <strong>Stripe</strong>, votre compte est immédiatement activé et vous conservez l’accès à vie, sans renouvellement automatique.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Puis-je obtenir une facture&nbsp;?</div>
+    <div class="faq-answer">
+      Les paiements sont traités par <strong>Stripe</strong> qui vous envoie automatiquement un e-mail de confirmation après l’achat.  
+      Ce message tient lieu de reçu officiel&nbsp;; nous ne générons pas de factures PDF séparées.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Puis-je utiliser mon compte sur plusieurs appareils&nbsp;?</div>
+    <div class="faq-answer">
+      Oui, vous pouvez vous connecter sur plusieurs appareils avec le même courriel.  
+      <strong>Mais attention&nbsp;:</strong> vos statistiques et votre progression sont enregistrées localement dans chaque navigateur.  
+      Si vous changez d’appareil ou effacez vos données, votre historique d’étude sera réinitialisé.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Comment signaler une erreur ou une coquille&nbsp;?</div>
+    <div class="faq-answer">
+      Ouvrez le formulaire de contact ci-dessous et précisez la question concernée.  
+      Notre équipe mettra à jour la base de données si nécessaire.
+    </div>
+  </div>
+
+      <!-- Contact button -->
+      <div class="faq-item">
+        <div class="faq-question" data-i18n="contact_open_form"></div>
+        <div class="faq-answer">
+          <button id="revealContact" class="contactBtn" data-i18n="contact_open_form"></button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- CONTACT FORM -->
+    <section id="contactWrapper" class="hidden-section">
+
+      <form id="contactForm" action="https://formspree.io/f/mvgdopvr" method="POST">
+
+        <h2 data-i18n="contact_title"></h2>
+        <p class="muted" data-i18n="contact_subtitle"></p>
+
+        <label data-i18n="contact_name_label"></label>
+        <input type="text" name="name" required />
+
+        <label data-i18n="contact_email_label"></label>
+        <input type="email" name="_replyto" required />
+
+        <label data-i18n="contact_message_label"></label>
+        <textarea name="message" rows="5" required></textarea>
+
+        <input type="hidden" name="_subject" value="Message from CivicLearn">
+        <button type="submit" data-i18n="contact_submit_btn"></button>
+      </form>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script src="/assets/js/config-canadafr.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>
+  CivicLearnI18n.init();
+</script>
+
+<script>
+  // FAQ toggle
+  document.querySelectorAll('.faq-question').forEach(q => {
+    q.addEventListener('click', () => q.parentElement.classList.toggle('active'));
+  });
+
+  // Reveal contact
+  document.getElementById("revealContact")?.addEventListener("click", () => {
+    const form = document.getElementById("contactWrapper");
+    form.style.maxHeight = "1000px";
+    form.style.opacity = "1";
+    form.scrollIntoView({ behavior: "smooth" });
+  });
+
+  // Contact submission
+  const contactForm = document.getElementById("contactForm");
+  if (contactForm) {
+    contactForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const res = await fetch(contactForm.action, {
+        method: contactForm.method,
+        body: new FormData(contactForm),
+        headers: { Accept: "application/json" }
+      });
+
+      if (res.ok) {
+        contactForm.innerHTML = `
+          <div style="text-align:center; padding:20px;">
+            <h3 data-i18n="contact_success_title"></h3>
+            <p data-i18n="contact_success_text"></p>
+          </div>
+        `;
+        CivicLearnI18n.apply();
+      }
+    });
+  }
+
+  // Mobile menu
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.querySelector(".menu-toggle");
+    const overlay = document.getElementById("menuOverlay");
+    toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+    overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+  });
+</script>
+
+<!-- === MANUAL SIDEBAR TOGGLE === -->
+<script>
+(function() {
+  const toggle = document.getElementById("manualToggle");
+  const subnav = document.getElementById("chaptersSubnav");
+  if (!toggle || !subnav) return;
+
+  toggle.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggle.classList.toggle("open");
+    subnav.classList.toggle("show");
+  });
+})();
+</script>
+
+<script src="/assets/js/reset.js"></script>
+
+
+</body>
+</html>

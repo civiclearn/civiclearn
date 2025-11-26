@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title data-i18n="title_traps"></title>
+
+  <!-- Core Styles -->
+  <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+  <link rel="stylesheet" href="/assets/css/test-core.css">
+  
+<script>
+  document.documentElement.classList.add("i18n-hidden");
+</script>
+<script type="module" src="/assets/js/auth-guard.js"></script>
+
+</head>
+
+<body class="test-page">
+
+  <!-- MOBILE MENU -->
+  <button class="menu-toggle" aria-label="Menu">☰</button>
+
+  <div class="wrap">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+<div class="brand">
+  CivicLearn®
+  <svg viewBox="0 0 3 2"
+       width="22"
+       height="16"
+       style="margin-left:8px;
+              vertical-align:middle;
+              border-radius:2px;
+              overflow:hidden;">
+    <!-- Albastru -->
+    <rect width="1" height="2" x="0" y="0" fill="#002B7F"></rect>
+    <!-- Galben -->
+    <rect width="1" height="2" x="1" y="0" fill="#FCD116"></rect>
+    <!-- Roșu -->
+    <rect width="1" height="2" x="2" y="0" fill="#CE1126"></rect>
+  </svg>
+</div>
+<nav class="nav">
+  <a href="index.html" data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" class="sub active" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+  <a href="#" id="logoutLink" data-i18n="nav_logout"></a>
+</nav>
+
+      <div class="spacer"></div>
+
+<div class="profile">
+  <div class="profile-info">
+    <div class="reading-inline">
+      <span data-i18n="reading_label"></span>
+      <button id="readingToggle"
+              class="reading-btn inline"
+              data-i18n="reading_tooltip"
+              data-i18n-attr="title">🔇</button>
+    </div>
+  </div>
+</div>
+
+    </aside>
+
+    <!-- OVERLAY -->
+    <div class="overlay" id="menuOverlay"></div>
+
+    <!-- MAIN -->
+    <main>
+
+      <header class="ce-header ce-header-top">
+        <h1 data-i18n="title_traps"></h1>
+      </header>
+	  <div class="ce-progress-global">
+  <div class="ce-progress-global-bar" id="trapsProgress"></div>
+</div>
+
+      <div class="quiz-container" id="quizArea">
+        <div id="quiz"></div>
+      </div>
+
+    </main>
+
+  </div>
+
+<!-- CONFIG + I18N -->
+<script src="/assets/js/config-romania.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>
+  CivicLearnI18n.init();
+</script>
+
+<script src="/assets/js/reading.js"></script>
+<script src="/assets/js/engine.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  // MOBILE MENU (can run immediately)
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle && overlay) {
+    toggle.addEventListener("click", () => {
+      document.body.classList.toggle("menu-open");
+    });
+    overlay.addEventListener("click", () => {
+      document.body.classList.remove("menu-open");
+    });
+  }
+
+  // Everything that needs translations waits for i18n
+  CivicLearnI18n.onReady(async () => {
+
+    /* THEME */
+    try {
+      const s = JSON.parse(localStorage.getItem("civicedge_settings") || "{}");
+      if (s.theme) document.documentElement.dataset.theme = s.theme;
+    } catch {}
+
+    /* LOAD BANK */
+    const bankPath = window.CIVICEDGE_CONFIG?.bank?.path;
+    if (!bankPath) {
+      console.error("Config error: missing bank path");
+      return;
+    }
+
+    let fullBank = [];
+    try {
+      const res = await fetch(bankPath);
+      const raw = await res.json();
+      fullBank = Array.isArray(raw) ? raw : (raw.questions || []);
+    } catch (err) {
+      console.error("Bank load error", err);
+      return;
+    }
+
+    /* GET TRICKY QUESTIONS (with normalization) */
+    let progress = {};
+    try {
+      progress = JSON.parse(localStorage.getItem("civicedge_progress") || "{}");
+    } catch {}
+
+    const trickyKeys = Object.keys(progress)
+      .filter(id => (progress[id].wrongs || 0) >= 3 && (progress[id].rights || 0) < 2);
+
+    function normalizeLabel(str) {
+      return (str || "")
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .replace(/^l['’]\s*/i, "")
+        .replace(/^(le|la|les)\s+/i, "")
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, " ");
+    }
+
+    const normalizedTrickySet = new Set(
+      trickyKeys.map(k => {
+        const [topic, ...rest] = k.split(":");
+        const text = rest.join(":");
+        return `${normalizeLabel(topic)}:${text.trim()}`;
+      })
+    );
+
+    const trickySet = fullBank.filter(q => {
+      const topicRaw = q.topic || q.topicLabel || "";
+      const qKeyNormalized = `${normalizeLabel(topicRaw)}:${q.q.trim()}`;
+      return normalizedTrickySet.has(qKeyNormalized);
+    });
+
+    const quizArea = document.getElementById("quizArea");
+
+    if (trickySet.length === 0) {
+      quizArea.innerHTML = `
+        <div class="ce-card">
+          <h2 data-i18n="traps_none_title"></h2>
+          <p data-i18n="traps_none_body"></p>
+        </div>`;
+      CivicLearnI18n.apply();   // now translations are ready
+      return;
+    }
+
+    /* START TRAPS MODE – now i18n is fully ready */
+    CivicEdgeEngine.start("traps", {
+      bank: trickySet,
+      limit: 20,
+      timed: false,
+      simulation: false,
+      recursive: false,
+      showFeedback: true
+    });
+  });
+});
+</script>
+
+
+
+</body>
+</html>

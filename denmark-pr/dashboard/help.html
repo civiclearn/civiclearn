@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="title_help"></title>
+
+  <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+   <style>
+   button,
+input,
+textarea,
+.help-btn {
+  font-family: "Space Grotesk", system-ui, sans-serif !important;
+}
+    main {
+  padding: 100px 32px 40px; /* ✅ top padding leaves room for hamburger */
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 1200px;
+  margin: auto;
+}
+    h1{font-size:24px;margin:0 0 4px}
+    .muted{color:var(--muted);font-size:15px;margin-bottom:20px}
+
+    /* FAQ Accordion */
+    #faq{display:grid;gap:16px}
+    @media(min-width:900px){
+      #faq{grid-template-columns:1fr 1fr;align-items:start}
+    }
+    .faq-item{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .faq-question{padding:16px 20px;cursor:pointer;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+    .faq-question:hover{background:rgba(0,0,0,.03)}
+    .faq-answer{max-height:0;overflow:hidden;padding:0 20px;transition:all .3s ease;color:var(--muted);font-size:15px}
+    .faq-item.active .faq-answer{max-height:none;padding:16px 20px}
+    .faq-item.active .faq-question{color:var(--brand)}
+
+    /* Contact reveal */
+    #contactWrapper{overflow:hidden;max-height:0;transition:max-height .5s ease,opacity .5s ease;opacity:0}
+    #contactWrapper.visible{max-height:800px;opacity:1;margin-top:10px}
+
+    form{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:24px;display:flex;flex-direction:column;gap:14px}
+    input,textarea{font-family:inherit;font-size:15px;padding:12px 14px;border:1px solid var(--line);
+      border-radius:10px;resize:none;width:100%;background:var(--bg);color:var(--ink)}
+    button{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;
+      border:none;padding:12px 20px;font-weight:600;border-radius:10px;cursor:pointer}
+    button:hover{opacity:.9}
+    .contactBtn{margin-top:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
+      color:#fff;padding:10px 16px;border:none;border-radius:10px;font-weight:600;cursor:pointer}
+	  
+	  .faq-item:last-of-type {
+  background: linear-gradient(
+    135deg,
+    rgba(213, 43, 30, 0.06),
+    rgba(213, 43, 30, 0.03)
+  );
+  border: 1px solid rgba(213, 43, 30, 0.12);
+}
+
+  </style>
+      <script>
+  document.documentElement.classList.add("i18n-hidden");
+</script>
+ <script type="module" src="/assets/js/auth-guard.js"></script>
+
+</head>
+
+<body class="test-page">
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+<div class="brand">
+  CivicLearn®
+  <svg viewBox="0 0 28 21"
+       width="22"
+       height="16"
+       style="margin-left:8px;
+              vertical-align:middle;
+              border-radius:2px;">
+    <rect width="28" height="21" fill="#c8102e"></rect>
+    <rect x="0" y="8.4" width="28" height="4.2" fill="#ffffff"></rect>
+    <rect x="8.4" y="0" width="4.2" height="21" fill="#ffffff"></rect>
+  </svg>
+</div>
+
+<nav class="nav">
+  <a href="index.html" data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="audio.html">Lyt til Fakta-ark</a>
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="help.html" class="sub active" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+    <div class="spacer"></div>
+
+    
+  </aside>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+  <main class="main">
+
+     <header class="ce-header ce-header-top">
+      <h1 data-i18n="title_help"></h1>
+      <div class="muted" data-i18n="help_subtitle"></div>
+    </header>
+
+   <!-- FAQ SECTION (Danish version) -->
+<section id="faq">
+
+  <div class="faq-item">
+    <div class="faq-question">Hvordan nulstiller jeg hele min træning?</div>
+    <div class="faq-answer">
+      Klik på knappen nedenfor for at starte helt forfra. Denne handling sletter alle dine statistikker og al din progression, men bevarer dine personlige indstillinger.<br><br>
+      <button id="resetAllFull" class="contactBtn">🔄 Nulstil min fremgang</button>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Er testspørgsmålene officielle?</div>
+    <div class="faq-answer">
+      Nej. Spørgsmålene på CivicLearn er simulationer baseret på indholdet fra det officielle materiale. 
+      De følger ånden og strukturen i den rigtige prøve, men kommer ikke fra en offentlig myndighed.
+      <br><br><em>De officielle spørgsmål er ikke offentligt tilgængelige og udgives aldrig af myndighederne.</em>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Hvad er forskellen mellem de forskellige testtilstande?</div>
+    <div class="faq-answer">
+      CivicLearn tilbyder flere træningstilstande tilpasset dine behov:
+      <ul>
+        <li><strong>Prøvesimulation:</strong> Gengiver den officielle prøve (20 spørgsmål, timer, resultat til sidst).</li>
+        <li><strong>Hurtig test:</strong> 5 tilfældige spørgsmål uden tidsbegrænsning, med øjeblikkelig rettelse.</li>
+        <li><strong>Træning efter emne:</strong> Du vælger et eller flere emner. Denne tilstand er <em>progressiv</em>: spørgsmål gentages, indtil du har svaret rigtigt på dem alle.</li>
+        <li><strong>Typiske fælder:</strong> Målrettet træning på de oftest forvekslede spørgsmål, uden timer.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Hvordan fungerer den progressive tilstand?</div>
+    <div class="faq-answer">
+      Den progressive tilstand stopper ikke efter et fast antal spørgsmål. 
+      Den gentager automatisk de spørgsmål, du svarer forkert på, indtil alle er mestret. 
+      Når der ikke er flere tilbage, vises beskeden: <strong>“Alt er mestret 🎉”</strong>.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Hvorfor vises knapperne “Start igen” eller “Gennemgå fejl” i nogle tests?</div>
+    <div class="faq-answer">
+      Disse knapper vises kun i <strong>ikke-progressive</strong> tests (som Prøvesimulation). 
+      Testen afsluttes, når spørgeskemaet er færdigt, og derefter kan du gennemgå fejlene eller starte en ny runde.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Hvilken tilstand bør jeg bruge for at forberede mig bedst muligt?</div>
+    <div class="faq-answer">
+      For en komplet forberedelse:
+      <ul>
+        <li>Start med <strong>Træning efter emne</strong> for at styrke dine kundskaber emne for emne.</li>
+        <li>Brug derefter <strong>Hurtig test</strong> til let daglig repetition.</li>
+        <li>Afslut med en <strong>Prøvesimulation</strong> for at teste dit niveau under realistiske forhold.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Hvor kan jeg læse hele manualen?</div>
+    <div class="faq-answer">
+      Manualen er tilgængelig i sektionen <strong>Officiel manual</strong> på dit dashboard. 
+      Hvert kapitel indeholder den fulde tekst samt en lydversion.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">I læseassist-tilstand læses teksten med engelsk accent. Hvorfor?</div>
+    <div class="faq-answer">
+      <h3>I læseassist-tilstand læses teksten med engelsk accent. Hvorfor?</h3>
+      <p>
+        CivicLearn bruger <strong>den indbyggede tekst-til-tale-motor</strong> i din browser til oplæsning. 
+        Oplæsning sker normalt med en dansk stemme (“da-DK”). 
+        Hvis din enhed eller browser <strong>ikke har en dansk stemme installeret</strong>, 
+        bruges en standardstemme – ofte engelsk – hvilket giver en udenlandsk accent.
+      </p>
+
+      <h4>Hvordan løser jeg problemet?</h4>
+      <ol>
+        <li>
+          Installer en <strong>dansk stemme</strong> i dine enhedsindstillinger:
+          <ul>
+            <li><strong>iPhone / iPad</strong>: Indstillinger → Tilgængelighed → Læst op-funktion → Stemmer → Dansk</li>
+            <li><strong>Android</strong>: Indstillinger → System → Tekst til tale → Stemmer → Dansk</li>
+            <li><strong>Computer</strong>: Tjek systemets tekst-til-tale-indstillinger.</li>
+          </ul>
+        </li>
+        <li>Genindlæs derefter siden <strong>CivicLearn</strong>.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Hvordan lytter jeg til kapitlerne i lydversion?</div>
+    <div class="faq-answer">
+      Klik på <strong>Lyt til manualen</strong> i sidemenuen og vælg derefter det ønskede kapitel. 
+      Du kan til enhver tid sætte på pause eller genoptage.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Hvad er sektionen “Typiske fælder”?</div>
+    <div class="faq-answer">
+      Denne sektion samler de spørgsmål, som brugerne oftest svarer forkert på. 
+      Den hjælper dig med at identificere svagheder og træne mere effektivt før en komplet simulation.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Hvordan aktiverer jeg den daglige “Dagens test”?</div>
+    <div class="faq-answer">
+      <strong>Dagens test</strong> sender hver morgen en kort serie spørgsmål direkte til din browser. 
+      For at aktivere funktionen skal du acceptere <strong>notifikationer</strong>, når browseren spørger. 
+      Derefter modtager du en daglig påmindelse med link til dagens test.
+      <br><br>
+      For at afmelde funktionen skal du åbne browserens <em>webstedsindstillinger</em> og deaktivere notifikationer for CivicLearn.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Kan jeg bruge CivicLearn på min telefon?</div>
+    <div class="faq-answer">
+      Ja. CivicLearn er optimeret til computer, tablet og telefon. 
+      Du kan tilføje appen til din startskærm for hurtig adgang.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Gemmes min progression automatisk?</div>
+    <div class="faq-answer">
+      Ja. Dine resultater og statistikker gemmes lokalt i din browser. 
+      Hvis du skifter enhed eller rydder historikken, går dataene tabt.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Kan jeg studere offline?</div>
+    <div class="faq-answer">
+      Ja. Når siderne først er indlæst, forbliver de fleste funktioner (tests, flashcards, manual) 
+      tilgængelige uden internetforbindelse, undtagen kontaktformularen.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Hvordan fungerer Premium-adgang?</div>
+    <div class="faq-answer">
+      Premium-adgang er et engangskøb uden tidsbegrænsning. 
+      Når din betaling er bekræftet af <strong>Stripe</strong>, aktiveres din konto med det samme, og du beholder adgangen for altid uden automatisk fornyelse.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Kan jeg få en kvittering?</div>
+    <div class="faq-answer">
+      Betalinger behandles af <strong>Stripe</strong>, som automatisk sender dig en bekræftelsesmail efter købet. 
+      Denne besked fungerer som officiel kvittering; vi udsteder ikke separate PDF-fakturaer.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Kan jeg bruge min konto på flere enheder?</div>
+    <div class="faq-answer">
+      Ja, du kan logge ind på flere enheder med den samme e-mail. 
+      <strong>Men bemærk:</strong> dine statistikker og din progression gemmes lokalt i hver browser. 
+      Hvis du skifter enhed eller sletter data, nulstilles din historik.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Hvordan rapporterer jeg en fejl?</div>
+    <div class="faq-answer">
+      Åbn kontaktformularen nedenfor og angiv det pågældende spørgsmål. 
+      Vores team opdaterer databasen om nødvendigt.
+    </div>
+  </div>
+
+
+
+      <!-- Contact button -->
+      <div class="faq-item">
+        <div class="faq-question" data-i18n="contact_open_form"></div>
+        <div class="faq-answer">
+          <button id="revealContact" class="contactBtn" data-i18n="contact_open_form"></button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- CONTACT FORM -->
+    <section id="contactWrapper" class="hidden-section">
+
+      <form id="contactForm" action="https://formspree.io/f/xkgaqprd" method="POST">
+
+        <h2 data-i18n="contact_title"></h2>
+        <p class="muted" data-i18n="contact_subtitle"></p>
+
+        <label data-i18n="contact_name_label"></label>
+        <input type="text" name="name" required />
+
+        <label data-i18n="contact_email_label"></label>
+        <input type="email" name="_replyto" required />
+
+        <label data-i18n="contact_message_label"></label>
+        <textarea name="message" rows="5" required></textarea>
+
+        <input type="hidden" name="_subject" value="Message from CivicLearn">
+        <button type="submit" data-i18n="contact_submit_btn"></button>
+      </form>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script src="/assets/js/config-denmarkpr.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>
+  CivicLearnI18n.init();
+</script>
+
+<script>
+  // FAQ toggle
+  document.querySelectorAll('.faq-question').forEach(q => {
+    q.addEventListener('click', () => q.parentElement.classList.toggle('active'));
+  });
+
+  // Reveal contact
+  document.getElementById("revealContact")?.addEventListener("click", () => {
+    const form = document.getElementById("contactWrapper");
+    form.style.maxHeight = "1000px";
+    form.style.opacity = "1";
+    form.scrollIntoView({ behavior: "smooth" });
+  });
+
+  // Contact submission
+  const contactForm = document.getElementById("contactForm");
+  if (contactForm) {
+    contactForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const res = await fetch(contactForm.action, {
+        method: contactForm.method,
+        body: new FormData(contactForm),
+        headers: { Accept: "application/json" }
+      });
+
+      if (res.ok) {
+        contactForm.innerHTML = `
+          <div style="text-align:center; padding:20px;">
+            <h3 data-i18n="contact_success_title"></h3>
+            <p data-i18n="contact_success_text"></p>
+          </div>
+        `;
+        CivicLearnI18n.apply();
+      }
+    });
+  }
+
+  // Mobile menu
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.querySelector(".menu-toggle");
+    const overlay = document.getElementById("menuOverlay");
+    toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+    overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+  });
+</script>
+
+
+<script src="/assets/js/reset.js"></script>
+
+
+</body>
+</html>

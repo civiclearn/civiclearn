@@ -1,0 +1,663 @@
+/* =========================================================
+   CIVICEDGE — HISTORY PAGE
+   Date groups, collapsible, score pills
+   ========================================================= */
+/* Force font inheritance */
+body, h1, h2, h3, h4, h5, h6, p, div, span {
+  font-family: "Space Grotesk", system-ui, sans-serif;
+}
+
+/* Page title + subtitle (only on this page) */
+h1 {
+  font-size: 26px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.muted {
+  color: #777;
+  margin-bottom: 20px;
+}
+
+/* Main layout wrapper */
+.history-wrapper {
+  max-width: 760px;
+  margin-left: 0;        /* left aligned */
+  margin-right: auto;
+  padding-right: 20px;
+}
+
+/* ==============================
+   DATE GROUPS — NEW ELEGANT STYLE
+   ============================== */
+
+.history-day {
+  margin-bottom: 22px;
+}
+
+/* Clickable date header card */
+.history-day-header {
+  width: 100%;
+  border-radius: 16px;
+  padding: 16px 20px;
+  cursor: pointer;
+
+  /* Soft CivicLearn purple tint */
+  background: linear-gradient(
+    135deg,
+    rgba(124, 58, 237, 0.06) 0%,
+    rgba(124, 58, 237, 0.02) 100%
+  );
+
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.history-day-header:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* Left: arrow + date text */
+.history-day-header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Arrow */
+.day-arrow {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.18s ease;
+  opacity: 0.7;
+}
+
+/* Rotate when open */
+.history-day[data-open="true"] .day-arrow {
+  transform: rotate(90deg);
+}
+
+/* Date text */
+.history-day-header-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-main, #101013);
+}
+
+/* Session count (right) */
+.history-day-count {
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.05);
+  color: #555;
+  font-weight: 500;
+}
+
+/* Group body */
+.history-day-body {
+  margin-top: 14px;
+}
+
+
+/* Collapsed state */
+.history-day[data-open="false"] .history-day-body {
+  display: none;
+}
+
+/* ==============================
+   HISTORY LIST ITEMS — NEW MODERN STYLE
+   ============================== */
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Wrapper for correct placement of inline panel */
+.item-wrapper {
+  position: relative;
+}
+
+/* Session item card */
+.item {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* Left side: text content stacked */
+.item .left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Mode header */
+.history-item-header {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-main, #101013);
+}
+
+/* Metadata line */
+.history-item-meta {
+  font-size: 13px;
+  color: #666;
+}
+
+/* Score pill (right side) */
+.history-item-score {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: 20px;
+}
+
+/* Score colors */
+.score-good {
+  background: rgba(34, 197, 94, 0.15);
+  color: #166534;
+}
+
+.score-mid {
+  background: rgba(250, 204, 21, 0.20);
+  color: #854d0e;
+}
+
+.score-bad {
+  background: rgba(239, 68, 68, 0.18);
+  color: #b91c1c;
+}
+
+.score-empty {
+  background: rgba(107, 114, 128, 0.20);
+  color: #374151;
+}
+
+
+.history-details {
+  margin-top: 20px;
+}
+
+/* Panel itself */
+#detailsPanel {
+  display: none;
+  padding: 18px 18px 22px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+
+/* Sticky header */
+.history-details-header {
+  position: sticky;
+  top: 0;
+  background: var(--card);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Close button (X) */
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  line-height: 1;
+  color: #444;
+}
+.close-btn:hover {
+  color: #000;
+}
+
+/* Summary row */
+.history-review-summary {
+  background: #f5f5f5;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+}
+
+/* Each reviewed question row */
+.question-row {
+  background: var(--card);
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+/* Optional color accents for correct/incorrect */
+.question-row.correct {
+  border-left: 4px solid #22c55e;
+}
+
+.question-row.incorrect {
+  border-left: 4px solid #ef4444;
+}
+
+.question-q {
+  font-weight: 600;
+  margin-bottom: 4px;
+  /* Add padding to prevent topic label overlap */
+  padding-right: 75px;
+}
+
+.question-a {
+  margin-top: 2px;
+}
+/* ==============================
+   PATCH 4 — GLOBAL SPACING & ALIGNMENT FIXES
+   ============================== */
+
+/* Ensure consistent width alignment with dashboard */
+.history-wrapper {
+  max-width: 780px;
+  padding: 0 10px 40px 0;
+}
+
+/* Add breathing room between date groups */
+.history-day {
+  padding-bottom: 4px;
+  margin-bottom: 26px;
+}
+
+/* Increase spacing between session cards (already improved but reinforced) */
+.history-list {
+  gap: 16px;
+}
+
+/* Smooth spacing above inline details */
+.item-wrapper.item-open {
+  margin-bottom: 20px;
+}
+
+/* When details panel is open, give extra breathing room */
+.inline-details-panel {
+  margin-top: 18px !important;
+  margin-bottom: 12px;
+}
+
+/* Improve spacing inside questions */
+.question-row {
+  margin-bottom: 16px !important;
+}
+
+/* Improve spacing inside topics-mode history */
+.history-full-detail .attempt-history-list {
+  margin-top: 8px;
+  margin-bottom: 10px;
+}
+
+/* Final answers block spacing */
+.final-answer-row {
+  margin-top: 14px !important;
+}
+
+/* Slightly increase spacing before h3 inside details panel */
+.inline-details-panel h3 {
+  margin-top: 10px !important;
+}
+
+/* Slight global increase in vertical rhythm for text lines */
+.history-item-header,
+.history-item-meta,
+.history-day-header-text,
+.history-day-count {
+  line-height: 1.35;
+}
+
+/* Better spacing for day header */
+.history-day-header {
+  margin-bottom: 4px;
+}
+/* ==============================
+   PATCH 5 — TYPOGRAPHY & MICRO POLISH
+   ============================== */
+
+/* Ensure Space Grotesk is applied only where needed */
+.history-wrapper,
+.history-day,
+.history-list,
+.inline-details-panel {
+  font-family: "Space Grotesk", system-ui, sans-serif;
+}
+
+/* Harmonize type scale */
+.history-item-header,
+.history-day-header-text {
+  letter-spacing: 0.1px;
+}
+
+.history-item-meta {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+/* Improve readability inside details panel */
+.inline-details-panel {
+  line-height: 1.45;
+}
+
+/* Titles inside details panel */
+.inline-details-panel h3 {
+  font-size: 15.5px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+}
+
+/* Improve readability of the summary block */
+.history-review-summary {
+  line-height: 1.35;
+  font-size: 14px;
+}
+
+/* Improve question text readability */
+.question-q {
+  font-weight: 600;
+  font-size: 14.5px;
+  letter-spacing: 0.1px;
+}
+
+/* Answers displayed slightly softer */
+.question-a {
+  font-size: 14px;
+  color: #333;
+}
+
+/* Attempt history micro-polish */
+.attempt-row {
+  letter-spacing: 0.1px;
+  line-height: 1.35;
+}
+
+/* Final answer box smoother visuals */
+.final-answer-row {
+  line-height: 1.35;
+  color: #333;
+}
+
+/* Day header text spacing */
+.history-day-header-text {
+  line-height: 1.4;
+  font-size: 15px;
+}
+
+/* Session count wording smoother */
+.history-day-count {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+/* Micro shadow polish */
+.item {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+.item:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Slight softening of inline panel shadow */
+.inline-details-panel {
+  box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+}
+/* SUBJECT ABOVE QUESTION, RIGHT-ALIGNED & CLEAN */
+.question-topic {
+  text-align: right;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 6px;
+  opacity: 0.85;
+}
+/* ==============================
+   TOPIC LABEL (Upper Right Corner)
+   ============================== */
+.question-row {
+  position: relative; /* Container for absolute positioning */
+  padding-top: 24px !important; /* Make room for the topic label */
+}
+
+.question-topic-label {
+  position: absolute;
+  top: 10px; /* Position below the top padding */
+  right: 12px; /* Align to the right padding of the row */
+  
+  /* Styling as a subtle pill */
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #6d28d9; /* Deep purple text */
+  background-color: rgba(124, 58, 237, 0.08); /* Light purple background */
+  padding: 3px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.2px;
+}
+
+/* ==============================
+   COLLAPSIBLE ATTEMPTS
+   ============================== */
+.attempts-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3b82f6; /* Blue link color */
+  cursor: pointer;
+  margin-top: 8px;
+  padding: 0;
+  line-height: 1;
+  text-decoration: none; /* Remove default link underline */
+  /* Add subtle bottom border for modern link style */
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.5);
+}
+
+.attempts-toggle-btn.is-open {
+  text-decoration: none;
+  color: #059669; /* Green when open */
+}
+
+/* Style the hidden content */
+.attempt-history-list {
+  padding-top: 10px;
+  padding-bottom: 2px;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  margin-top: 10px;
+  display: none; /* Initial state (controlled by JS) */
+}
+
+.attempt-row {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Ensure the final answers section is outside the collapsible block */
+.final-answer-row {
+  padding-top: 10px;
+  margin-top: 0 !important;
+  border-top: 1px dashed rgba(0,0,0,0.1);
+}
+/* ============================================
+   BEAUTIFUL VAGUE ATTEMPT ROWS
+   ============================================ */
+
+.attempt-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 8px;
+  font-size: 13.5px;
+}
+
+.vague-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  background: rgba(124, 58, 237, 0.14);
+  color: #6d28d9;
+}
+
+/* Correct → green pill */
+.attempt-row.correct .vague-pill {
+  background: rgba(34, 197, 94, 0.20);
+  color: #166534;
+}
+
+/* Incorrect → red pill */
+.attempt-row.incorrect .vague-pill {
+  background: rgba(239, 68, 68, 0.20);
+  color: #b91c1c;
+}
+/* =====================================================
+   ATTEMPT LIST — indentation, separator, cleaner layout
+   ===================================================== */
+
+.attempt-history-list {
+  padding-left: 16px; /* Indentation block */
+  margin-top: 12px;
+  margin-bottom: 12px;
+  border-left: 2px solid rgba(0,0,0,0.06);
+}
+
+.attempt-row {
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+}
+
+.attempt-row + .attempt-row {
+  border-top: 1px solid rgba(0,0,0,0.05); /* separator between waves */
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+/* Make the pill slightly more compact now that it's indented */
+.vague-pill {
+  padding: 2px 8px;
+  font-size: 11px;
+}
+/* ============================================
+   TOPICS MODE — COMPACT WAVE STRIP
+   ============================================ */
+
+.wave-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 18px;
+}
+
+.wave-pill {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  user-select: none;
+}
+
+/* Incorrect (all previous waves) */
+.wave-pill.incorrect {
+  background: rgba(239, 68, 68, 0.20);
+  color: #b91c1c;
+}
+
+/* Final wave (correct) */
+.wave-pill.correct {
+  background: rgba(34, 197, 94, 0.20);
+  color: #166534;
+}
+
+/* Final answer pill label */
+.final-answer-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(124, 58, 237, 0.15);
+  color: #6d28d9;
+  margin-right: 10px;
+}
+/* ===============================
+   HORIZONTAL WAVE STRIP
+   =============================== */
+
+.wave-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 18px;
+}
+
+/* Pill style for waves */
+.wave-pill {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  user-select: none;
+}
+
+/* Red for incorrect waves */
+.wave-pill.incorrect {
+  background: rgba(239, 68, 68, 0.20);
+  color: #b91c1c;
+}
+
+/* Green for the final correct wave */
+.wave-pill.correct {
+  background: rgba(34, 197, 94, 0.20);
+  color: #166534;
+}
+
+/* Final answer pill */
+.final-answer-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(124, 58, 237, 0.15);
+  color: #6d28d9;
+  margin-right: 10px;
+}

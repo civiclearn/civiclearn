@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title data-i18n="title_simulation">Test Simulation</title>
+
+  <!-- Core Styles -->
+<link rel="stylesheet" href="/assets/css/dashboard-core.css">
+<link rel="stylesheet" href="/assets/css/test-core.css">
+ <script>
+  document.documentElement.classList.add("i18n-hidden");
+</script>
+<script type="module" src="/assets/js/auth-guard.js"></script>
+
+</head>
+
+<body class="test-page">
+
+  <!-- MOBILE MENU -->
+  <button class="menu-toggle" aria-label="Menu">☰</button>
+
+  <div class="wrap">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <div class="brand">
+        CivicLearn®
+        <svg viewBox="0 0 9600 4800" width="18" height="9" style="margin-left:6px;vertical-align:middle;">
+          <path fill="#d52b1e" d="M0 0h2400l99 99h4602l99-99h2400v4800h-2400l-99-99H2499l-99 99H0z"/>
+          <path fill="#fff" d="M2400 0h4800v4800H2400zm2490 4430-45-863a95 95 0 0 1 111-98l859 151-116-320a65 65 0 0 1 20-73l941-762-212-99a65 65 0 0 1-34-79l186-572-542 115a65 65 0 0 1-73-38l-105-247-423 454a65 65 0 0 1-111-57l204-1052-327 189a65 65 0 0 1-91-27l-332-652-332 652a65 65 0 0 1-91 27l-327-189 204 1052a65 65 0 0 1-111 57l-423-454-105 247a65 65 0 0 1-73 38l-542-115 186 572a65 65 0 0 1-34 79l-212 99 941 762a65 65 0 0 1 20 73l-116 320 859-151a95 95 0 0 1 111 98l-45 863z"/>
+        </svg>
+      </div>
+
+          <nav class="nav">
+  <a href="index.html"  data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" class="sub active" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+
+  <!-- Manual group -->
+  <div class="nav-group">
+<a href="#" class="has-sub" id="manualToggle" data-i18n="nav_manual"></a>
+<div class="subnav" id="chaptersSubnav">
+      <a href="droits-responsabilites.html" class="sub">Les droits et responsabilités</a>
+      <a href="canadiens.html" class="sub">Les Canadiens</a>
+      <a href="histoire.html" class="sub">L’histoire du Canada</a>
+      <a href="gouvernement.html" class="sub">Le système de gouvernement</a>
+      <a href="elections.html" class="sub">Les élections au Canada</a>
+      <a href="justice.html" class="sub">Le système de justice</a>
+      <a href="economie.html" class="sub">L’économie du Canada</a>
+      <a href="regions.html" class="sub">Les régions du Canada</a>
+      <a href="canada-moderne.html" class="sub">Le Canada moderne</a>
+      <a href="symboles.html" class="sub">Les symboles du Canada</a>
+    </div>
+  </div>
+
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+      <div class="spacer"></div>
+
+<div class="profile">
+  <div class="profile-info">
+    <div class="reading-inline">
+      <span data-i18n="reading_label"></span>
+      <button id="readingToggle"
+              class="reading-btn inline"
+              data-i18n="reading_tooltip"
+              data-i18n-attr="title">🔇</button>
+    </div>
+  </div>
+</div>
+
+    </aside>
+
+    <!-- OVERLAY -->
+    <div class="overlay" id="menuOverlay"></div>
+
+    <!-- MAIN -->
+   <main>
+
+<header class="ce-header ce-header-top">
+  <h1 data-i18n="title_simulation">Simulation du test</h1>
+
+  <div class="ce-timer-container">
+    <div id="ce-timer-ring"></div>
+    <div id="ce-timer-label" class="ce-timer-sr-only"></div>
+  </div>
+</header>
+
+<div class="ce-progress-global">
+  <div class="ce-progress-global-bar" id="simProgress"></div>
+</div>
+
+<div class="quiz-container" id="quizArea">
+  <div id="quiz"></div>
+</div>
+
+</main>
+
+
+  </div>
+
+<!-- CONFIG + I18N -->
+<script src="/assets/js/config-canadafr.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>CivicLearnI18n.init();</script>
+
+<!-- READING (static, must come BEFORE engine) -->
+<script src="/assets/js/reading.js"></script>
+
+<!-- ENGINE -->
+<script src="/assets/js/engine.js"></script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* MOBILE MENU */
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+
+  /* THEME */
+  try {
+    const s = JSON.parse(localStorage.getItem("civicedge_settings") || "{}");
+    if (s.theme) document.documentElement.dataset.theme = s.theme;
+  } catch {}
+
+  /* START SIMULATION */
+  setTimeout(() => {
+    CivicEdgeEngine.start("simulation");
+  }, 600);
+
+  /* END-SCREEN BUTTONS */
+  document.addEventListener("click", e => {
+    if (!e.target.id) return;
+
+    const backIDs = ["changeTheme", "returnBtn", "restartBtn", "ce-return"];
+
+    if (backIDs.includes(e.target.id)) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      location.reload();
+    }
+  });
+
+});
+</script>
+
+<!-- === MANUAL SIDEBAR TOGGLE === -->
+<script>
+(function() {
+  const toggle = document.getElementById("manualToggle");
+  const subnav = document.getElementById("chaptersSubnav");
+  if (!toggle || !subnav) return;
+
+  toggle.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggle.classList.toggle("open");
+    subnav.classList.toggle("show");
+  });
+})();
+</script>
+
+
+</body>
+</html>

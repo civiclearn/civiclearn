@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="title_topics"></title>
+
+  <!-- Core -->
+  <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+  <link rel="stylesheet" href="/assets/css/test-core.css">
+  
+  <style>
+    /* --- Light chip UI --- */
+    #topicContainer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .topic-chip {
+      padding: 10px 16px;
+      border-radius: 18px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      font-size: 15px;
+      user-select: none;
+      transition: 0.15s ease;
+    }
+
+    .topic-chip:hover {
+      background: rgba(0,0,0,0.04);
+    }
+
+    .topic-chip.active {
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand);
+    }
+
+    #startBtn {
+      margin-top: 20px;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      display: none; /* shown only after selection */
+    }
+	.topic-chip.mastered {
+  background: #e0ffe4;
+  border-color: #34c759;
+  color: #0a7a2a;
+}
+  </style>
+        <script>
+  document.documentElement.classList.add("i18n-hidden");
+</script>
+ <script type="module" src="/assets/js/auth-guard.js"></script>
+</head>
+
+<body class="test-page">
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+      <div class="brand">
+        CivicLearn®
+        <svg viewBox="0 0 9600 4800" width="18" height="9" style="margin-left:6px;vertical-align:middle;">
+          <path fill="#d52b1e" d="M0 0h2400l99 99h4602l99-99h2400v4800h-2400l-99-99H2499l-99 99H0z"/>
+          <path fill="#fff" d="M2400 0h4800v4800H2400zm2490 4430-45-863a95 95 0 0 1 111-98l859 151-116-320a65 65 0 0 1 20-73l941-762-212-99a65 65 0 0 1-34-79l186-572-542 115a65 65 0 0 1-73-38l-105-247-423 454a65 65 0 0 1-111-57l204-1052-327 189a65 65 0 0 1-91-27l-332-652-332 652a65 65 0 0 1-91 27l-327-189 204 1052a65 65 0 0 1-111 57l-423-454-105 247a65 65 0 0 1-73 38l-542-115 186 572a65 65 0 0 1-34 79l-212 99 941 762a65 65 0 0 1 20 73l-116 320 859-151a95 95 0 0 1 111 98l-45 863z"/>
+        </svg>
+      </div>
+
+              <nav class="nav">
+  <a href="index.html"  data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" class="sub active" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+
+  <!-- Manual group -->
+  <div class="nav-group">
+<a href="#" class="has-sub" id="manualToggle" data-i18n="nav_manual"></a>
+<div class="subnav" id="chaptersSubnav">
+      <a href="droits-responsabilites.html" class="sub">Les droits et responsabilités</a>
+      <a href="canadiens.html" class="sub">Les Canadiens</a>
+      <a href="histoire.html" class="sub">L’histoire du Canada</a>
+      <a href="gouvernement.html" class="sub">Le système de gouvernement</a>
+      <a href="elections.html" class="sub">Les élections au Canada</a>
+      <a href="justice.html" class="sub">Le système de justice</a>
+      <a href="economie.html" class="sub">L’économie du Canada</a>
+      <a href="regions.html" class="sub">Les régions du Canada</a>
+      <a href="canada-moderne.html" class="sub">Le Canada moderne</a>
+      <a href="symboles.html" class="sub">Les symboles du Canada</a>
+    </div>
+  </div>
+
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+    <div class="spacer"></div>
+
+<div class="profile">
+  <div class="profile-info">
+    <div class="reading-inline">
+      <span data-i18n="reading_label"></span>
+      <button id="readingToggle"
+              class="reading-btn inline"
+              data-i18n="reading_tooltip"
+              data-i18n-attr="title">🔇</button>
+    </div>
+  </div>
+</div>
+  </aside>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <header class="ce-header ce-header-top">
+      <h1 data-i18n="title_topics"></h1>
+      <p class="muted" data-i18n="topics_select_topics"></p>
+    </header>
+
+<div class="quiz-container" id="quizArea" style="display:none;">
+	<div class="ce-progress-global">
+  <div class="ce-progress-global-bar" id="topicsProgress"></div>
+</div>
+  <div id="quiz"></div>
+</div>
+
+    <section>
+
+      <div id="topicContainer"></div>
+
+      <button id="startBtn" data-i18n="topics_start_btn"></button>
+
+    </section>
+  </main>
+</div>
+
+<!-- CONFIG + I18N -->
+<script src="/assets/js/config-canadafr.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>
+  CivicLearnI18n.init();
+</script>
+
+<!-- READING (must come BEFORE engine.js) -->
+<script src="/assets/js/reading.js"></script>
+
+<!-- ENGINE -->
+<script src="/assets/js/engine.js"></script>
+
+<!-- MAIN TOPICS LOGIC -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const cfg = window.CIVICEDGE_CONFIG || {};
+  const topics = (cfg.topics && cfg.topics.list) || [];
+  const labels = (cfg.topics && cfg.topics.topicLabels) || {};
+  const container = document.getElementById("topicContainer");
+  const startBtn = document.getElementById("startBtn");
+  const selected = new Set();
+
+  const bankPath = cfg.bank && cfg.bank.path;
+
+  function normalizeLabel(str) {
+    return (str || "")
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .replace(/^l['’]\s*/i, "")
+      .replace(/^(le|la|les)\s+/i, "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, " ");
+  }
+
+  function groupBankByTopic(questions) {
+    const map = {};
+    questions.forEach(q => {
+      const topicLabel = q.topic || "";
+      const norm = normalizeLabel(topicLabel);
+      if (!norm) return;
+      if (!map[norm]) {
+        map[norm] = { label: topicLabel, total: 0 };
+      }
+      map[norm].total += 1;
+    });
+    return map;
+  }
+
+  async function initTopics() {
+    let topicStats = {};
+
+    if (bankPath) {
+      try {
+        const res = await fetch(bankPath);
+        const raw = await res.json();
+        const questionsArray = Array.isArray(raw) ? raw : (raw.questions || []);
+        topicStats = groupBankByTopic(questionsArray);
+      } catch (e) {
+        console.warn("Bank load failed; topic mastery chips will be approximate", e);
+      }
+    }
+
+    const prog = JSON.parse(localStorage.getItem("civicedge_progress") || "{}");
+
+    topics.forEach((t) => {
+      const chip = document.createElement("div");
+      chip.className = "topic-chip";
+      chip.dataset.topic = t;
+
+      const label = labels[t] || t;
+      chip.textContent = label;
+
+      const normLabel = normalizeLabel(label);
+      const bankInfo = topicStats[normLabel];
+      const totalInBank = bankInfo ? bankInfo.total : 0;
+
+      let masteredQuestions = 0;
+
+      for (const key in prog) {
+        const entry = prog[key];
+        if (!entry || !entry.topic) continue;
+
+        if (normalizeLabel(entry.topic) === normLabel && entry.correct === 1) {
+          masteredQuestions += 1;
+        }
+      }
+
+      let topicMastered = false;
+
+      if (totalInBank > 0) {
+        topicMastered = masteredQuestions >= totalInBank;
+      } else {
+        topicMastered = masteredQuestions > 0;
+      }
+
+      if (topicMastered) {
+        chip.classList.add("mastered");
+      }
+
+      chip.addEventListener("click", () => {
+        if (chip.classList.contains("active")) {
+          chip.classList.remove("active");
+          selected.delete(t);
+        } else {
+          chip.classList.add("active");
+          selected.add(t);
+        }
+        startBtn.style.display = selected.size > 0 ? "inline-block" : "none";
+      });
+
+      container.appendChild(chip);
+    });
+
+    startBtn.addEventListener("click", () => {
+      const pick = Array.from(selected);
+      const limit = cfg.topics && cfg.topics.questionCount
+        ? cfg.topics.questionCount
+        : 10;
+
+      document.getElementById("quizArea").style.display = "block";
+      document.querySelector("section").style.display = "none";
+
+      let quiz = document.getElementById("quiz");
+      if (!quiz) {
+        quiz = document.createElement("div");
+        quiz.id = "quiz";
+        document.getElementById("quizArea").appendChild(quiz);
+      }
+
+      CivicEdgeEngine.start("topics", {
+        topics: pick,
+        limit: limit
+      });
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    const manualToggle = document.getElementById("manualToggle");
+    const sub = document.getElementById("chaptersSubnav");
+
+  }
+
+  initTopics();
+});
+</script>
+
+
+<!-- Menu -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+
+  toggle.addEventListener("click", () => {
+    document.body.classList.toggle("menu-open");
+  });
+  overlay.addEventListener("click", () => {
+    document.body.classList.remove("menu-open");
+  });
+});
+</script>
+
+<!-- MANUAL SIDEBAR TOGGLE -->
+<script>
+(function() {
+  const toggle = document.getElementById("manualToggle");
+  const subnav = document.getElementById("chaptersSubnav");
+  if (!toggle || !subnav) return;
+
+  toggle.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggle.classList.toggle("open");
+    subnav.classList.toggle("show");
+  });
+})();
+</script>
+
+</body>
+</html>

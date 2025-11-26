@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title data-i18n="title_flashcards">Flashcards</title>
+
+  <!-- CORE STYLES -->
+  <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+  <link rel="stylesheet" href="/assets/css/flashcards.css">
+    <script>
+  document.documentElement.classList.add("i18n-hidden");
+</script>
+</head>
+
+<body class="test-page">
+
+  <!-- MOBILE MENU TOGGLE -->
+  <button class="menu-toggle" aria-label="Menu">☰</button>
+
+  <div class="wrap">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        CivicLearn®
+        <svg viewBox="0 0 9600 4800" width="18" height="9" style="margin-left:6px;vertical-align:middle;border-radius:2px;">
+          <path fill="#d52b1e" d="M0 0h2400l99 99h4602l99-99h2400v4800h-2400l-99-99H2499l-99 99H0z"/>
+          <path fill="#fff" d="M2400 0h4800v4800H2400zm2490 4430-45-863a95 95 0 0 1 111-98l859 151-116-320a65 65 0 0 1 20-73l941-762-212-99a65 65 0 0 1-34-79l186-572-542 115a65 65 0 0 1-73-38l-105-247-423 454a65 65 0 0 1-111-57l204-1052-327 189a65 65 0 0 1-91-27l-332-652-332 652a65 65 0 0 1-91 27l-327-189 204 1052a65 65 0 0 1-111 57l-423-454-105 247a65 65 0 0 1-73 38l-542-115 186 572a65 65 0 0 1-34 79l-212 99 941 762a65 65 0 0 1 20 73l-116 320 859-151a95 95 0 0 1 111 98l-45 863z"/>
+        </svg>
+      </div>
+
+       <nav class="nav">
+  <a href="index.html"  data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" class="sub active" data-i18n="nav_flashcards"></a>
+
+  <!-- Manual group -->
+  <div class="nav-group">
+<a href="#" class="has-sub" id="manualToggle" data-i18n="nav_manual"></a>
+<div class="subnav" id="chaptersSubnav">
+      <a href="droits-responsabilites.html" class="sub">Les droits et responsabilités</a>
+      <a href="canadiens.html" class="sub">Les Canadiens</a>
+      <a href="histoire.html" class="sub">L’histoire du Canada</a>
+      <a href="gouvernement.html" class="sub">Le système de gouvernement</a>
+      <a href="elections.html" class="sub">Les élections au Canada</a>
+      <a href="justice.html" class="sub">Le système de justice</a>
+      <a href="economie.html" class="sub">L’économie du Canada</a>
+      <a href="regions.html" class="sub">Les régions du Canada</a>
+      <a href="canada-moderne.html" class="sub">Le Canada moderne</a>
+      <a href="symboles.html" class="sub">Les symboles du Canada</a>
+    </div>
+  </div>
+
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+      <div class="spacer"></div>
+
+     
+    </aside>
+
+    <!-- OVERLAY -->
+    <div class="overlay" id="menuOverlay"></div>
+
+    <!-- MAIN CONTENT -->
+    <main class="flashcards-layout left">
+
+      <header class="ce-header ce-header-top">
+        <h1 data-i18n="title_flashcards">Flashcards</h1>
+      </header>
+
+      <section id="flashcardsApp">
+
+        <!-- TOPIC SELECTOR -->
+        <div id="topicsWrapper" class="fc-topics-wrapper">
+          <p class="muted" data-i18n="flashcards_select_topics"></p>
+          <div id="topicContainer" class="fc-topic-toggles"></div>
+
+          <button id="startBtn"
+                  class="btn fc-btn-primary"
+                  data-i18n="flashcards_start">
+          </button>
+        </div>
+
+        <!-- CARD -->
+        <div class="flashcard" id="card">
+          <div class="card-inner">
+            <div class="card-front" id="qText"></div>
+            <div class="card-back" id="aText"></div>
+          </div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="controls">
+          <button id="flipBtn" data-i18n="flashcards_flip"></button>
+          <button id="knownBtn" class="primary" data-i18n="flashcards_known"></button>
+          <button id="againBtn" data-i18n="flashcards_again"></button>
+        </div>
+
+        <!-- NAVIGATION -->
+        <div class="controls-row">
+       <button id="fcPrev" class="fc-nav">
+  <svg width="20" height="20" viewBox="0 0 20 20">
+    <circle cx="10" cy="10" r="9" stroke="#6A38FF" stroke-width="2" fill="none"/>
+    <path d="M11 6 L7 10 L11 14" stroke="#6A38FF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+<button id="fcNext" class="fc-nav">
+  <svg width="20" height="20" viewBox="0 0 20 20">
+    <circle cx="10" cy="10" r="9" stroke="#6A38FF" stroke-width="2" fill="none"/>
+    <path d="M9 6 L13 10 L9 14" stroke="#6A38FF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+        </div>
+
+        <!-- STATUS -->
+        <div id="status" class="fc-status"></div>
+
+      </section>
+
+    </main>
+  </div>
+
+<!-- === CONFIG + I18N === -->
+<script src="/assets/js/config-canadafr.js"></script>
+<script src="/assets/js/i18n.js"></script>
+
+<script>
+  // Start i18n
+  CivicLearnI18n.init();
+</script>
+
+<script>
+  // Load flashcards logic ONLY when translations are ready
+  CivicLearnI18n.onReady(() => {
+    const s = document.createElement("script");
+    s.src = "/assets/js/flashcards.js";
+    document.body.appendChild(s);
+  });
+</script>
+
+<!-- === MOBILE MENU TOGGLE === -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.querySelector(".menu-toggle");
+    const overlay = document.getElementById("menuOverlay");
+
+    if (toggle && overlay) {
+      toggle.addEventListener("click", () => {
+        document.body.classList.toggle("menu-open");
+      });
+      overlay.addEventListener("click", () => {
+        document.body.classList.remove("menu-open");
+      });
+    }
+  });
+</script>
+
+<!-- === MANUAL SIDEBAR TOGGLE === -->
+<script>
+(function() {
+  const toggle = document.getElementById("manualToggle");
+  const subnav = document.getElementById("chaptersSubnav");
+  if (!toggle || !subnav) return;
+
+  toggle.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggle.classList.toggle("open");
+    subnav.classList.toggle("show");
+  });
+})();
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fakta-ark – Lyd</title>
+
+  <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+  <style>
+    .audio-list { margin-top:20px; }
+    .audio-item {
+      background:#fff;
+      border-radius:12px;
+      padding:18px 22px;
+      margin-bottom:14px;
+      box-shadow:0 2px 5px rgba(0,0,0,0.05);
+    }
+    .audio-title {
+      font-size:18px;
+      font-weight:600;
+      margin-bottom:6px;
+    }
+    .audio-player {
+      width:100%;
+      margin-top:8px;
+    }
+ </style>
+ <script type="module" src="/assets/js/auth-guard.js"></script>
+</head>
+
+<body class="chapter-page">
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <!-- SIDEBAR (unchanged) -->
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg viewBox="0 0 28 21" width="22" height="16" style="margin-left:8px;vertical-align:middle;border-radius:2px;">
+        <rect width="28" height="21" fill="#c8102e"></rect>
+        <rect x="0" y="8.4" width="28" height="4.2" fill="#ffffff"></rect>
+        <rect x="8.4" y="0" width="4.2" height="21" fill="#ffffff"></rect>
+      </svg>
+    </div>
+
+<nav class="nav">
+  <a href="index.html" data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="audio.html" class="sub active">Lyt til Fakta-ark</a>
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+    <div class="spacer"></div>
+  </aside>
+
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="ce-header">
+      <h1>Fakta-ark – Lyd</h1>
+    </header>
+
+    <article class="manual-content card pad">
+      <p>Her kan du lytte til alle 26 fakta-ark som lydfiler.</p>
+
+      <div class="audio-list">
+
+        <!-- AUTO-GENERATED AUDIO BLOCKS -->
+        <script>
+          const faktaList = [
+            "Skole",
+            "Uddannelse",
+            "Dagtilbud",
+            "Det danske arbejdsmarked",
+            "Dansk erhvervsliv",
+            "Det danske velfærdssamfund",
+            "Familieliv",
+            "Forenings- og fritidsliv",
+            "Sundhed og sygdom",
+            "Ligestilling",
+            "Demokrati og grundloven",
+            "Det danske retssamfund",
+            "Folketing og regering",
+            "Det lokale selvstyre",
+            "Folkestyret i praksis – valg og partier",
+            "Borgernes rettigheder og pligter",
+            "Religion og kirke",
+            "Danmark og omverdenen",
+            "Danmarks geografi og befolkning",
+            "Danmarks historie før 1945",
+            "Danmarks historie efter 1945",
+            "Dansk kultur",
+            "Traditioner og mærkedage",
+            "Danmarks forsvars- og sikkerhedspolitik",
+            "Diskrimination, antisemitisme, hadforbrydelser og ekstremisme",
+            "Klima"
+          ];
+
+          document.write(faktaList.map((title, i) => {
+            const n = i + 1;
+            const url = `http://media.civiclearn.com/denmark-pr/mp-faktaark-${n}.mp3`;
+            return `
+              <div class="audio-item">
+                <div class="audio-title">Fakta-ark ${n}: ${title}</div>
+                <audio class="audio-player" controls preload="none">
+                  <source src="${url}" type="audio/mpeg">
+                </audio>
+              </div>
+            `;
+          }).join(""));
+        </script>
+
+      </div>
+    </article>
+  </main>
+
+</div>
+
+<!-- SCRIPTS -->
+<script src="/assets/js/config-denmarkpr.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>CivicLearnI18n.init();</script>
+<script src="/assets/js/reading.js"></script>
+
+<script>
+(function() {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (!toggle || !overlay) return;
+
+  toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+})();
+</script>
+
+
+</body>
+</html>
