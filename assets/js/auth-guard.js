@@ -27,7 +27,7 @@ async function waitForSession() {
   if (!session) {
     const parts = window.location.pathname.split("/");
     const country = parts[1];   // e.g. "canada-fr" or "denmark-pr"
-    window.location.href = `/${country}/login.html`;
+    window.location.href = `/${country}/login.html${window.location.search}`;
     return;
   }
 
