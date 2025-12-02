@@ -75,8 +75,14 @@
 <!-- MAIN -->
 <main class="main">
 
+
+
   <div class="db-main">
 
+
+<div id="welcome-banner" class="welcome-banner">
+  Bun venit<span id="welcome-name"></span>!
+</div>
 
 
     <!-- TOP METRICS -->
@@ -273,7 +279,7 @@
 
 
     <footer class="db-footer">
-      © 2025 CivicLearn by Testrada — Tous droits réservés.
+     © <span id="year"></span> — CivicLearn by Testrada — Toate drepturile rezervate.
     </footer>
 
   </div>
@@ -370,7 +376,44 @@ WonderPush.push(["init", {
 // Tag this user as Denmark permanent residency
 WonderPush.push(["addTag", "country:romania"]);
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const nameEl = document.getElementById("welcome-name");
+
+  try {
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error || !data || !data.user) {
+      nameEl.textContent = "";
+      return;
+    }
+
+    const meta = data.user.user_metadata || {};
+    let fullName = meta.full_name?.trim() || "";
+
+    // Extract only FIRST name
+    if (fullName.includes(" ")) {
+      fullName = fullName.split(" ")[0];
+    }
+
+    // Add comma only when a name exists
+    if (fullName) {
+      nameEl.textContent = ", " + fullName;
+    } else {
+      nameEl.textContent = "";
+    }
+
+  } catch (e) {
+    nameEl.textContent = "";
+  }
+});
+</script>
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+
 
 </body>
 </html>
+
 

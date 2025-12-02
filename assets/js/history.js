@@ -393,16 +393,21 @@
 
         attempts.forEach((attempt) => {
           const cls = attempt.correct ? "correct" : "incorrect";
-          html += `
-              <span class="wave-pill ${cls}">Vague ${attempt.wave}</span>
-          `;
+         html += `
+  <span class="wave-pill ${cls}">
+    ${t("history_wave_prefix", "Wave")} ${attempt.wave}
+  </span>
+`;
+
         });
 
         html += `
             </div>
 
             <div class="final-answer-row">
-              <span class="final-answer-pill">Réponse</span>
+              <span class="final-answer-pill">
+  ${t("history_answer_label", "Answer")}
+</span>
               ${canonicalQ.correctAnswerText || "—"}
             </div>
 
