@@ -11,8 +11,27 @@
   <script>
   document.documentElement.classList.add("i18n-hidden");
 </script>
-<script type="module" src="/assets/js/supabase-init.js"></script>
-<script type="module" src="/assets/js/auth-guard.js"></script>
+
+  <!-- 1. Supabase project config (safe to load early) -->
+  <script>
+    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+  </script>
+
+  <!-- 2. Load Supabase UMD dynamically and only then create client -->
+  <script>
+    const supabaseLoader = document.createElement("script");
+    supabaseLoader.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
+
+    supabaseLoader.onload = () => {
+      window.supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+    };
+
+    document.head.appendChild(supabaseLoader);
+  </script>
+
+  <!-- 3. Auth guard — safe, because it waits for window.supabase -->
+  <script src="/assets/js/auth-guard.js"></script>
  
 </head>
 
