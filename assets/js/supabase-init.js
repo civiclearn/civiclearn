@@ -1,12 +1,14 @@
-// /assets/js/supabase-init.js
-// Create ONE global Supabase client used by every script (modules + inline)
+// Remove the import statement entirely.
+// This script will now be loaded with a classic <script> tag.
 
-// 🌟 FIX: Use the stable Unpkg CDN path for deep module dependency resolution
-import { createClient } from "https://unpkg.com/@supabase/supabase-js@2.86.2/dist/module/index.js";
+// Load the Supabase client using the UMD (Universal Module Definition) build
+// which places the 'supabase' object globally.
+// The createClient function will be accessible as 'supabase.createClient'.
 
-// Supabase project config
 const SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
 const SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
 
-// Attach client to the global window scope
-window.supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+// The UMD build makes the client available via window.supabase, but 
+// we'll explicitly call the creation function and assign it to window.supabase
+// for consistency with the rest of your code.
+window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
