@@ -23,13 +23,13 @@ async function waitForSession() {
 (async function enforceAuth() {
   const session = await waitForSession();
 
-  // No session → redirect to the login page of THIS folder
+  // Not logged in → redirect to this country’s login page
   if (!session) {
     const parts = window.location.pathname.split("/");
-    const country = parts[1];   // e.g. "canada-fr" or "denmark-pr"
+    const country = parts[1]; // e.g. "romania"
     window.location.href = `/${country}/login.html${window.location.search}`;
     return;
   }
 
-  // Logged in → allow access (no country checks)
+  // Logged-in → allow access
 })();

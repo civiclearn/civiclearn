@@ -4,6 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Acces Premium – CivicLearn România</title>
+  <meta name="description" content="Activați accesul Premium pentru pregătirea interviului de cetățenie română. Simulări oficiale, sute de întrebări, analize avansate și acces pe viață. Plată unică, acces imediat.">
+
+  <link rel="canonical" href="https://civiclearn.com/romania/checkout.html">
+
+  <meta property="og:title" content="Acces Premium – Pregătire pentru interviul de cetățenie română">
+  <meta property="og:description" content="Obțineți acces complet la simulări oficiale, întrebări actualizate, sesiuni rapide și statistici avansate. Plată unică, acces imediat.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://civiclearn.com/romania/checkout.html">
+  <meta property="og:image" content="https://civiclearn.com/romania/assets/img/og-cover.webp">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Acces Premium – Pregătire pentru interviul de cetățenie română">
+  <meta name="twitter:description" content="Activați accesul Premium: simulări oficiale, sute de întrebări, sesiuni rapide și acces pe viață.">
+  <meta name="twitter:image" content="https://civiclearn.com/romania/assets/img/og-cover.webp">
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/checkout.css">
@@ -15,7 +29,7 @@
   <div class="checkout-header-inner">
 
     <div class="checkout-brand">
-      <img src="/assets/images/icons/ro.svg" alt="">
+      <img src="/assets/images/icons/ro.svg" alt="România">
       CivicLearn România
     </div>
 
@@ -30,39 +44,104 @@
 <main>
   <div class="layout">
 
+    <!-- LEFT: BENEFITS CARD -->
     <aside class="features">
       <h2>Acces Premium</h2>
-      <div class="price">29 €</div>
-      <div class="once">Plată unică, acces pe viață</div>
+      <div class="price">119 lei</div>
+      <div class="once">Plată unică · acces pe viață</div>
 
       <div class="divider"></div>
 
-      <h3>Include:</h3>
+      <h3>Ce este inclus</h3>
+
       <ul class="benefits">
         <li>Sute de întrebări de înaltă calitate</li>
         <li>Simulări oficiale nelimitate</li>
         <li>Teste rapide și personalizate</li>
         <li>Întrebări dificile grupate automat</li>
-        <li>Statistici avansate</li>
+        <li>Statistici avansate și analiză a progresului</li>
         <li>Istoric complet al sesiunilor</li>
-        <li>Ghid integrat</li>
-        <li>Actualizări gratuite</li>
+        <li>Teme și categorii structurate conform interviului oficial</li>
+        <li>Faptul zilei – învățare naturală, zilnică</li>
+        <li>Memento-uri zilnice pentru menținerea ritmului</li>
+        <li>100% optimizat pentru telefon, tabletă și laptop</li>
         <li>Acces imediat după plată</li>
+        <li>Actualizări gratuite și permanente</li>
+        <li>Acces pe viață la platformă</li>
       </ul>
 
-      <p style="font-size:.9rem;color:var(--muted);">
-        Recomandat de candidați care au promovat examenul.
+      <p class="recommend">
+        Recomandat de candidați care au promovat interviul.
       </p>
     </aside>
 
+    <!-- RIGHT: PAYMENT CARD -->
     <section class="right">
       <div class="checkout-card">
+
         <h1>Activați accesul Premium</h1>
         <div class="secure-line">Plată 100% securizată prin Stripe</div>
 
-        <a class="pay-btn" href="#">
-          Continuați la plata securizată
-        </a>
+        <!-- MULTI-STATE CHECKOUT FLOW -->
+        <div class="checkout-flow" id="checkoutFlow">
+
+          <!-- STATE 1: INITIAL BUTTON -->
+          <div class="checkout-step" id="stepInitial">
+            <button type="button" class="pay-btn" id="startCheckout">
+              Continuați către plata securizată
+            </button>
+            <p class="small-note">
+              Veți fi redirecționat către Stripe pentru plata securizată.
+            </p>
+          </div>
+
+          <!-- STATE 2: EMAIL ENTRY -->
+          <div class="checkout-step" id="stepEmail" hidden>
+            <p class="email-instructions">
+              Introduceți adresa de email pe care doriți să o folosiți pentru contul dvs. CivicLearn.
+            </p>
+
+            <div class="email-field-group">
+              <label for="checkoutEmail">Email</label>
+              <input
+                type="email"
+                id="checkoutEmail"
+                autocomplete="email"
+                placeholder="exemplu@domeniu.com"
+                inputmode="email"
+              />
+            </div>
+
+            <button type="button" class="pay-btn" id="continueWithEmail">
+              Continuă
+            </button>
+
+          </div>
+
+          <!-- STATE 3: EMAIL CONFIRMATION -->
+          <div class="checkout-step" id="stepConfirm" hidden>
+            <p class="confirm-text">
+              Contul dvs. va fi creat cu această adresă de email:
+            </p>
+            <p class="email-display" id="emailDisplay"></p>
+            <p class="confirm-warning">
+              Verificați cu atenție. Folosiți o adresă la care aveți acces pentru a primi linkul de autentificare.
+            </p>
+
+            <div class="confirm-actions">
+              <button type="button" class="pay-btn" id="confirmEmail">
+                Da, continuă către plata securizată
+              </button>
+              <button type="button" class="link-btn" id="editEmail">
+                Editează adresa de email
+              </button>
+            </div>
+          </div>
+
+          <!-- MESSAGE AREA -->
+          <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
+
+        </div>
 
         <div class="trust">
           <div>🔒 Plată securizată</div>
@@ -72,15 +151,139 @@
 
         <div class="after-text">
           Aveți deja un cont?
-          <a href="login.html" style="color:var(--brand);text-decoration:none;font-weight:600;">
-            Autentificați-vă aici
-          </a>.
+          <a href="login.html">Autentificați-vă aici</a>.
         </div>
+
       </div>
     </section>
 
   </div>
 </main>
+
+<script>
+(function() {
+  const stepInitial = document.getElementById("stepInitial");
+  const stepEmail   = document.getElementById("stepEmail");
+  const stepConfirm = document.getElementById("stepConfirm");
+
+  const startBtn        = document.getElementById("startCheckout");
+  const continueBtn     = document.getElementById("continueWithEmail");
+  const confirmBtn      = document.getElementById("confirmEmail");
+  const editEmailBtn    = document.getElementById("editEmail");
+
+  const emailInput      = document.getElementById("checkoutEmail");
+  const emailDisplay    = document.getElementById("emailDisplay");
+  const messageBox      = document.getElementById("checkoutMessage");
+
+  let currentEmail = "";
+  let isSubmitting = false;
+
+  function showStep(stepId) {
+    stepInitial.hidden = stepId !== "initial";
+    stepEmail.hidden   = stepId !== "email";
+    stepConfirm.hidden = stepId !== "confirm";
+  }
+
+  function clearMessage() {
+    messageBox.textContent = "";
+    messageBox.className = "checkout-message";
+    messageBox.style.display = "none";
+  }
+
+  function showMessage(type, text) {
+    messageBox.textContent = text;
+    messageBox.className = "checkout-message " + type;
+    messageBox.style.display = "block";
+  }
+
+  function validateEmail(value) {
+    const email = value.trim();
+    if (!email) return { ok: false, msg: "Vă rugăm să introduceți adresa de email." };
+    // Basic email shape check
+    const simplePattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    if (!simplePattern.test(email)) {
+      return { ok: false, msg: "Adresa de email nu pare validă. Verificați și încercați din nou." };
+    }
+    return { ok: true, email };
+  }
+
+  // STATE 1 → STATE 2
+  startBtn.addEventListener("click", () => {
+    clearMessage();
+    showStep("email");
+    emailInput.focus();
+  });
+
+  // STATE 2 → STATE 3
+  continueBtn.addEventListener("click", () => {
+    clearMessage();
+    const { ok, msg, email } = validateEmail(emailInput.value);
+    if (!ok) {
+      showMessage("error", msg);
+      emailInput.focus();
+      return;
+    }
+    currentEmail = email;
+    emailDisplay.textContent = currentEmail;
+    showStep("confirm");
+  });
+
+  // STATE 3 → back to email edit
+  editEmailBtn.addEventListener("click", () => {
+    clearMessage();
+    showStep("email");
+    emailInput.focus();
+  });
+
+  // STATE 3 → Stripe (create Checkout Session)
+  confirmBtn.addEventListener("click", async () => {
+    if (isSubmitting) return;
+    if (!currentEmail) {
+      showMessage("error", "Adresa de email nu este setată. Încercați din nou.");
+      showStep("email");
+      return;
+    }
+
+    isSubmitting = true;
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = "Se creează sesiunea de plată...";
+
+    clearMessage();
+    showMessage("info", "Vă conectăm la Stripe pentru plata securizată. Vă rugăm să așteptați...");
+
+    try {
+      const response = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: currentEmail,
+          country: "ro",
+          product: "romania-premium"
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("A apărut o problemă la inițierea plății. Încercați din nou.");
+      }
+
+      const data = await response.json();
+
+      if (!data || !data.url) {
+        throw new Error("Răspuns neașteptat de la serverul de plăți. Încercați din nou.");
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      showMessage("error", err.message || "A apărut o eroare neașteptată. Încercați din nou.");
+      isSubmitting = false;
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = "Da, continuă către plata securizată";
+    }
+  });
+})();
+</script>
 
 </body>
 </html>

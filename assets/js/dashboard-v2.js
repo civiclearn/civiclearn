@@ -136,13 +136,22 @@ const res = await fetch(bankPath);
   // Charts helpers
   // ------------------------------------------
 
-  function minutesToLabel(mins) {
-    if (!mins || mins <= 0) return "0m";
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    if (h > 0) return `${h}h ${String(m).padStart(2, "0")}m`;
-    return `${m}m`;
+function minutesToLabel(mins) {
+  // i18n-aware units
+  const H = t("time_unit_hour", "h");     // ex: "t" in Danish
+  const M = t("time_unit_minute", "m");   // ex: "m" universally fine
+
+  if (!mins || mins <= 0) return `0${M}`;
+
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+
+  if (h > 0) {
+    return `${h}${H} ${String(m).padStart(2, "0")}${M}`;
   }
+
+  return `${m}${M}`;
+}
 
 function computePerTopicProgressFromHistory(history) {
   const perTopic = {};
@@ -152,7 +161,7 @@ function computePerTopicProgressFromHistory(history) {
     const questions = session.questions || [];
 
     questions.forEach((q) => {
-      const topic = q.topic || "Autre";
+      const topic = q.topic || "Misc";
 
       if (!perTopic[topic]) {
         perTopic[topic] = { correct: 0, total: 0 };
@@ -500,7 +509,8 @@ function computeTrendPointsFromFirstAttempts(history) {
 
       const globalAnsweredEl = document.getElementById("globalAnswered");
       if (globalAnsweredEl) {
-        globalAnsweredEl.textContent = `${masteredQuestions} questions`;
+        const label = t("dashboard_questions_label", "questions");
+safeText(document.getElementById("globalAnswered"), masteredQuestions + " " + label);
       }
 
       // Total distinct questions seen
@@ -568,7 +578,7 @@ function computePerTopicProgressFromProgressRaw(progressRaw) {
 
   // First, initialize totals using the full bank
   bank.forEach(q => {
-    const topic = q.topic || "Autre";
+    const topic = q.topic || "Misc";
     if (!result[topic]) {
       result[topic] = { correct: 0, total: 0 };
     }
@@ -577,7 +587,7 @@ function computePerTopicProgressFromProgressRaw(progressRaw) {
 
   // Now count mastered questions (correct once)
   Object.entries(progressRaw || {}).forEach(([key, entry]) => {
-    const topic = entry.topic || "Autre";
+    const topic = entry.topic || "Misc";
     const rights = Number(entry.rights || 0);
 
     if (rights > 0 && result[topic]) {

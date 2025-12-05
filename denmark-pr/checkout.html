@@ -1,9 +1,24 @@
 <!DOCTYPE html>
-<html lang="da">
+<html lang="da-DK">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Premium Adgang – CivicLearn Danmark</title>
+  <title>Premium adgang – CivicLearn Danmark</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Aktivér Premium-adgang til forberedelse til Medborgerskabsprøven. Ubegrænsede officielle simulationer, hundreder af spørgsmål, detaljeret statistik og livstidsadgang. Ét engangsbeløb, adgang med det samme.">
+  <link rel="canonical" href="https://civiclearn.com/denmark-pr/checkout.html">
+
+  <meta property="og:title" content="Premium adgang – Medborgerskabsprøven">
+  <meta property="og:description" content="Fuld adgang til alle træningsfunktioner: officielle simulationer, spørgsmål, statistik, historik og meget mere. Engangsbetaling – adgang for livet.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://civiclearn.com/denmark-pr/checkout.html">
+  <meta property="og:image" content="https://civiclearn.com/denmark-pr/assets/img/og-cover.webp">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Premium adgang – Medborgerskabsprøven">
+  <meta name="twitter:description" content="Få fuld adgang til alt træningsmateriale. Engangsbetaling, ingen abonnementer.">
+  <meta name="twitter:image" content="https://civiclearn.com/denmark-pr/assets/img/og-cover.webp">
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/checkout.css">
@@ -15,12 +30,12 @@
   <div class="checkout-header-inner">
 
     <div class="checkout-brand">
-      <img src="/assets/images/icons/dk.svg" alt="">
-      Medborgerskabsprove.com
+      <img src="/assets/images/icons/dk.svg" alt="Danmark">
+      CivicLearn Danmark - Medborgerskabsprøve
     </div>
 
     <div class="checkout-powered">
-      <small>drevet af</small>
+      <small>drevne af</small>
       <a href="https://civiclearn.com">CivicLearn</a>
     </div>
 
@@ -30,57 +45,237 @@
 <main>
   <div class="layout">
 
+    <!-- LEFT COLUMN: BENEFITS -->
     <aside class="features">
-      <h2>Premium Adgang</h2>
-      <div class="price">499 DKK</div>
-      <div class="once">Éngangsbetaling – livstidsadgang</div>
+      <h2>Premium adgang</h2>
+      <div class="price">499 kr</div>
+      <div class="once">Engangsbetaling · adgang for livet</div>
 
       <div class="divider"></div>
 
-      <h3>Du får:</h3>
+      <h3>Hvad er inkluderet</h3>
+
       <ul class="benefits">
-        <li>800+ nøje udarbejdede spørgsmål</li>
-        <li>Ubegrænsede prøver i officielt format</li>
-        <li>Hurtige tests og tilpassede repetitionssessioner</li>
-        <li>Automatisk samling af dine fejlspørgsmål</li>
-        <li>Avanceret statistik og tydelige grafer</li>
-        <li>Komplet historik over dine tests</li>
-        <li>Digitalt kompendium (tekst + lyd)</li>
-        <li>Gratis årlige opdateringer</li>
+        <li>Hundredvis af spørgsmål baseret på Medborgerskabsprøvens temaer</li>
+        <li>Ubegrænsede officielle test-simulationer</li>
+        <li>Hurtige tests og skræddersyede øvelser</li>
+        <li>Automatisk fokus på spørgsmål du har svært ved</li>
+        <li>Avanceret statistik og detaljeret fremdrift</li>
+        <li>Komplet historik over alle dine sessioner</li>
+        <li>Fakta-ark for alle hovedtemaer</li>
+        <li>Daglige tests – hjælper dig med at holde rytmen</li>
+        <li>Optimalt design til mobil, tablet og computer</li>
         <li>Øjeblikkelig adgang efter betaling</li>
+        <li>Gratis opdateringer og livstidsadgang</li>
       </ul>
 
-      <p style="font-size:.9rem;color:var(--muted);">
-        Anbefalet af kursister siden 2004.
+      <p class="recommend">
+        Anbefalet af brugere, der har bestået prøven.
       </p>
     </aside>
 
+    <!-- RIGHT COLUMN: PAYMENT CARD -->
     <section class="right">
       <div class="checkout-card">
-        <h1>Aktivér din Premium Adgang</h1>
+
+        <h1>Aktivér din Premium-adgang</h1>
         <div class="secure-line">100% sikker betaling via Stripe</div>
 
-        <a class="pay-btn" href="/denmark-pr/stripe/start">
-          Gå til sikker betaling
-        </a>
+        <!-- MULTI-STATE CHECKOUT FLOW -->
+        <div class="checkout-flow" id="checkoutFlow">
+
+          <!-- STEP 1 -->
+          <div class="checkout-step" id="stepInitial">
+            <button type="button" class="pay-btn" id="startCheckout">
+              Fortsæt til sikker betaling
+            </button>
+            <p class="small-note">
+              Du bliver sendt videre til Stripe for at betale sikkert.
+            </p>
+          </div>
+
+          <!-- STEP 2: EMAIL ENTRY -->
+          <div class="checkout-step" id="stepEmail" hidden>
+            <p class="email-instructions">
+              Indtast den emailadresse du vil bruge til din CivicLearn-konto.
+            </p>
+
+            <div class="email-field-group">
+              <label for="checkoutEmail">Email</label>
+              <input
+                type="email"
+                id="checkoutEmail"
+                autocomplete="email"
+                placeholder="eksempel@domæne.dk"
+                inputmode="email"
+              />
+            </div>
+
+            <button type="button" class="pay-btn" id="continueWithEmail">
+              Fortsæt
+            </button>
+          </div>
+
+          <!-- STEP 3: CONFIRM EMAIL -->
+          <div class="checkout-step" id="stepConfirm" hidden>
+            <p class="confirm-text">
+              Din konto vil blive oprettet med denne adresse:
+            </p>
+
+            <p class="email-display" id="emailDisplay"></p>
+
+            <p class="confirm-warning">
+              Kontrollér venligst, at emailadressen er korrekt. Du skal kunne modtage login-linket.
+            </p>
+
+            <div class="confirm-actions">
+              <button type="button" class="pay-btn" id="confirmEmail">
+                Ja, fortsæt til sikker betaling
+              </button>
+              <button type="button" class="link-btn" id="editEmail">
+                Rediger email
+              </button>
+            </div>
+          </div>
+
+          <!-- MESSAGE -->
+          <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
+
+        </div>
 
         <div class="trust">
           <div>🔒 Sikker betaling</div>
           <div>⚡ Øjeblikkelig adgang</div>
-          <div>✔ Ingen abonnementer</div>
+          <div>✔ Intet abonnement</div>
         </div>
 
         <div class="after-text">
-          Allerede bruger?
-          <a href="/denmark-pr/dashboard" style="color:var(--brand);text-decoration:none;font-weight:600;">
-            Log ind her
-          </a>.
+          Har du allerede en konto?
+          <a href="login.html">Log ind her</a>.
         </div>
+
       </div>
     </section>
 
   </div>
 </main>
+
+<script>
+(function() {
+  const stepInitial = document.getElementById("stepInitial");
+  const stepEmail   = document.getElementById("stepEmail");
+  const stepConfirm = document.getElementById("stepConfirm");
+
+  const startBtn        = document.getElementById("startCheckout");
+  const continueBtn     = document.getElementById("continueWithEmail");
+  const confirmBtn      = document.getElementById("confirmEmail");
+  const editEmailBtn    = document.getElementById("editEmail");
+
+  const emailInput      = document.getElementById("checkoutEmail");
+  const emailDisplay    = document.getElementById("emailDisplay");
+  const messageBox      = document.getElementById("checkoutMessage");
+
+  let currentEmail = "";
+  let isSubmitting = false;
+
+  function showStep(id) {
+    stepInitial.hidden = id !== "initial";
+    stepEmail.hidden   = id !== "email";
+    stepConfirm.hidden = id !== "confirm";
+  }
+
+  function clearMessage() {
+    messageBox.textContent = "";
+    messageBox.className = "checkout-message";
+    messageBox.style.display = "none";
+  }
+
+  function showMessage(type, text) {
+    messageBox.textContent = text;
+    messageBox.className = "checkout-message " + type;
+    messageBox.style.display = "block";
+  }
+
+  function validateEmail(value) {
+    const email = value.trim();
+    if (!email) return { ok: false, msg: "Indtast venligst din emailadresse." };
+    const simplePattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    if (!simplePattern.test(email)) {
+      return { ok: false, msg: "Ugyldig emailadresse." };
+    }
+    return { ok: true, email };
+  }
+
+  // Step 1 → Step 2
+  startBtn.addEventListener("click", () => {
+    clearMessage();
+    showStep("email");
+    emailInput.focus();
+  });
+
+  // Step 2 → Step 3
+  continueBtn.addEventListener("click", () => {
+    clearMessage();
+    const { ok, msg, email } = validateEmail(emailInput.value);
+    if (!ok) {
+      showMessage("error", msg);
+      emailInput.focus();
+      return;
+    }
+    currentEmail = email;
+    emailDisplay.textContent = currentEmail;
+    showStep("confirm");
+  });
+
+  // Edit email
+  editEmailBtn.addEventListener("click", () => {
+    clearMessage();
+    showStep("email");
+    emailInput.focus();
+  });
+
+  // Final step → Stripe
+  confirmBtn.addEventListener("click", async () => {
+    if (isSubmitting) return;
+    if (!currentEmail) {
+      showMessage("error", "Email ikke angivet. Prøv igen.");
+      showStep("email");
+      return;
+    }
+
+    isSubmitting = true;
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = "Opretter betalingssession…";
+
+    clearMessage();
+    showMessage("info", "Forbinder til Stripe…");
+
+    try {
+      const response = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: currentEmail,
+          country: "denmark-pr",
+          product: "denmark-pr-premium"
+        })
+      });
+
+      if (!response.ok) throw new Error("Kunne ikke starte betalingen.");
+
+      const data = await response.json();
+      if (!data || !data.url) throw new Error("Uventet serverrespons.");
+
+      window.location.href = data.url;
+    } catch (err) {
+      showMessage("error", err.message || "En fejl opstod. Prøv igen.");
+      isSubmitting = false;
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = "Ja, fortsæt til sikker betaling";
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
