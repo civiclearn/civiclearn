@@ -105,10 +105,6 @@
 
   <div class="db-main">
 
-<div id="welcome-banner" class="welcome-banner">
-  Bienvenue<span id="welcome-name"></span>!
-</div>
-
     <!-- TOP METRICS -->
    <div class="db-top-metrics">
 
@@ -410,38 +406,7 @@ CivicLearnI18n.onReady(() => {
   // Tag this user as Canada FR
   WonderPush.push(["addTag", "country:canadafr"]);
 </script>
-<script>
-document.addEventListener("DOMContentLoaded", async () => {
-  const nameEl = document.getElementById("welcome-name");
 
-  try {
-    const { data, error } = await supabase.auth.getUser();
-
-    if (error || !data || !data.user) {
-      nameEl.textContent = "";
-      return;
-    }
-
-    const meta = data.user.user_metadata || {};
-    let fullName = meta.full_name?.trim() || "";
-
-    // Extract only FIRST name
-    if (fullName.includes(" ")) {
-      fullName = fullName.split(" ")[0];
-    }
-
-    // Add comma only when a name exists
-    if (fullName) {
-      nameEl.textContent = ", " + fullName;
-    } else {
-      nameEl.textContent = "";
-    }
-
-  } catch (e) {
-    nameEl.textContent = "";
-  }
-});
-</script>
 <script>
   document.getElementById("year").textContent = new Date().getFullYear();
 </script>

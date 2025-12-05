@@ -86,12 +86,6 @@
 <!-- MAIN -->
 <main class="main">
 
-  <div class="db-main">
-  <div id="welcome-banner" class="welcome-banner">
-  Velkommen<span id="welcome-name"></span>!
-</div>
-
-
     <!-- TOP METRICS -->
    <div class="db-top-metrics">
 
@@ -381,45 +375,6 @@ WonderPush.push(["init", {
 
 WonderPush.push(["addTag", "country:denmark-pr"]);
 </script>
-<script>
-document.addEventListener("DOMContentLoaded", async () => {
-  const nameEl = document.getElementById("welcome-name");
-
-  try {
-    // 1. Get the authenticated user object
-    const { data: authData } = await supabase.auth.getUser();
-    if (!authData?.user) {
-      nameEl.textContent = "";
-      return;
-    }
-
-    // --- FIX: Get the user's ID (UUID) ---
-    const userId = authData.user.id; 
-
-    // 2. Fetch 'full_name' by filtering on the correct column: 'id'
-    const { data: profile } = await supabase
-      .from("users") 
-      .select("full_name")
-      .eq("id", userId) // <-- Change from 'uid' back to 'id'
-      .maybeSingle();
-
-    if (!profile?.full_name) {
-      nameEl.textContent = "";
-      return;
-    }
-
-    // 3. Extract FIRST name only
-    let firstName = profile.full_name.trim().split(" ")[0];
-
-    nameEl.textContent = ", " + firstName;
-
-  } catch (error) {
-    console.error("Error fetching welcome name:", error); 
-    nameEl.textContent = "";
-  }
-});
-</script>
-
 <script>
   document.getElementById("year").textContent = new Date().getFullYear();
 </script>
