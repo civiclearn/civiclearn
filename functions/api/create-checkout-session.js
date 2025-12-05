@@ -13,7 +13,12 @@ export async function onRequestPost(context) {
       );
     }
 
-    const stripe = Stripe(STRIPE_SECRET_KEY);
+    let stripe;
+try {
+  stripe = Stripe(STRIPE_SECRET_KEY);
+} catch (e) {
+  return new Response(JSON.stringify({ error: "Stripe init failed: " + e.message }), { status: 500 });
+}
 
     // Parse incoming JSON (email, product, country)
     const body = await context.request.json();
