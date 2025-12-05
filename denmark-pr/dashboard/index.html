@@ -386,33 +386,38 @@ document.addEventListener("DOMContentLoaded", async () => {
   const nameEl = document.getElementById("welcome-name");
 
   try {
-    const { data, error } = await supabase.auth.getUser();
-
-    if (error || !data || !data.user) {
+    // 1. Auth user
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData?.user) {
       nameEl.textContent = "";
       return;
     }
 
-    const meta = data.user.user_metadata || {};
-    let fullName = meta.full_name?.trim() || "";
+    const email = authData.user.email;
 
-    // Extract only FIRST name
-    if (fullName.includes(" ")) {
-      fullName = fullName.split(" ")[0];
-    }
+    // 2. Fetch ONLY full_name from your Supabase table
+    const { data: profile } = await supabase
+      .from("users")
+      .select("full_name")
+      .eq("email", email)
+      .maybeSingle();
 
-    // Add comma only when a name exists
-    if (fullName) {
-      nameEl.textContent = ", " + fullName;
-    } else {
+    if (!profile?.full_name) {
       nameEl.textContent = "";
+      return;
     }
 
-  } catch (e) {
+    // 3. Extract FIRST name only
+    let firstName = profile.full_name.trim().split(" ")[0];
+
+    nameEl.textContent = ", " + firstName;
+
+  } catch (_) {
     nameEl.textContent = "";
   }
 });
 </script>
+
 <script>
   document.getElementById("year").textContent = new Date().getFullYear();
 </script>
