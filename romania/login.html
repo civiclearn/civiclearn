@@ -6,8 +6,26 @@
   <title>Autentificare – CivicLearn România</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/romania/assets/css/login.css">
+  <link rel="stylesheet" href="/assets/css/login.css">
+  
+    <!-- Supabase config + UMD loader -->
+  <script>
+    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+  </script>
+
+  <script>
+    (function () {
+      const supabaseLoader = document.createElement("script");
+      supabaseLoader.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
+      supabaseLoader.onload = () => {
+        window.supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+      };
+      document.head.appendChild(supabaseLoader);
+    })();
+  </script>
 </head>
+
 
 <body>
 
@@ -62,16 +80,8 @@
   }
 })();
 </script>
-
-<!-- SUPABASE AUTH + DOUBLE-ATTEMPT LOGIC -->
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-const SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
-const SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
+<!-- SUPABASE AUTH + DOUBLE-ATTEMPT LOGIC (UMD VERSION) -->
+<script>
 function showMessage(type, text) {
   const box = document.getElementById("loginMessage");
   box.className = "login-message " + type;
@@ -90,11 +100,10 @@ function handleLoginFeedback(email) {
     lastEmailAttempt = email;
   }
 
-  // Extended help message from attempt #2+
   if (attemptCount >= 2) {
     showMessage(
       "success",
-      "Dacă ați efectuat o plată, dar nu primiți emailul cu linkul de autentificare, este posibil să existe o greșeală în adresa introdusă, să fi folosit o altă adresă la achiziție sau mesajul să fi ajuns în Spam/Promoții. Verificați atent și contactați-ne dacă aveți nevoie de ajutor."
+      "Dacă ați efectuat o plată, dar nu primiți emailul cu linkul de autentificare, este posibil să existe o greșeală în adresa introdusă sau mesajul să fi ajuns în Spam/Promoții. Verificați și contactați-ne dacă aveți nevoie de ajutor."
     );
   } else {
     showMessage(
@@ -114,9 +123,14 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
     return;
   }
 
+  if (!window.supabase) {
+    showMessage("error", "Eroare tehnică. Reîncărcați pagina și încercați din nou.");
+    return;
+  }
+
   const redirectTo = `${window.location.origin}/romania/dashboard/index.html`;
 
-  const { data, error } = await supabase.auth.signInWithOtp({
+  const { data, error } = await window.supabase.auth.signInWithOtp({
     email,
     options: {
       emailRedirectTo: redirectTo,
@@ -129,10 +143,10 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
     return;
   }
 
-  // Success → handle standard vs repeated-attempt messaging
   handleLoginFeedback(email);
 });
 </script>
+
 
 </body>
 </html>

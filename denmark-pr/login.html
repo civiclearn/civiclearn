@@ -6,217 +6,25 @@
   <title>Login – Medborgerskabsprove</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="/assets/css/login.css">
+     <!-- Supabase config + UMD loader -->
+  <script>
+    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+  </script>
 
-<style>
-    :root {
-      --brand: #7c3aed;
-      --brand-dark: #5b21b6;
-      --bg-soft: #f7f2e8;
-      --text-main: #101013;
-      --muted: #555;
-      --card-bg: #ffffff;
-      --radius-lg: 1.6rem;
-    }
+  <script>
+    (function () {
+      const supabaseLoader = document.createElement("script");
+      supabaseLoader.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
+      supabaseLoader.onload = () => {
+        window.supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+      };
+      document.head.appendChild(supabaseLoader);
+    })();
+  </script>
 
-    body {
-      margin: 0;
-      padding: 0;
-      background: var(--bg-soft);
-      font-family: "Lexend", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
 
-    /* HEADER */
-    .checkout-header {
-      backdrop-filter: blur(14px);
-      background: linear-gradient(
-        to bottom,
-        rgba(247,242,232,0.94),
-        rgba(247,242,232,0.88)
-      );
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      flex-shrink: 0;
-    }
-
-    .checkout-header-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0.9rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .checkout-brand {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-weight: 600;
-      font-size: 1rem;
-    }
-
-    .checkout-brand img {
-      width: 24px;
-    }
-
-    .checkout-powered {
-      font-size: 0.75rem;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-
-    .checkout-powered a {
-      color: var(--brand);
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    /* LOGIN WRAPPER */
-    .login-wrapper {
-      flex-grow: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1.5rem;
-    }
-
-    .card {
-      width: 100%;
-      max-width: 440px;
-      background: var(--card-bg);
-      padding: 2.5rem;
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(0,0,0,0.05);
-      box-shadow: 0 6px 22px rgba(0,0,0,0.08);
-    }
-
-    h1 {
-      margin-top: 0;
-      font-size: 1.9rem;
-      font-weight: 600;
-      text-align: center;
-    }
-
-    p.subtitle {
-      color: var(--muted);
-      margin-bottom: 1.5rem;
-      text-align: center;
-      font-size: 1rem;
-    }
-
-    .card label,
-    .card input,
-    .card button,
-    .card .hint {
-      max-width: 320px;
-      margin-left: auto;
-      margin-right: auto;
-      display: block;
-    }
-
-    label {
-      font-size: .9rem;
-      font-weight: 500;
-      margin-bottom: .35rem;
-    }
-
-    input {
-      width: 100%;
-      padding: .75rem 1rem;
-      margin-bottom: 1rem;
-      border-radius: .8rem;
-      border: 1px solid rgba(0,0,0,0.1);
-      font-size: 1rem;
-    }
-
-    input:focus {
-      outline: 2px solid var(--brand);
-      border-color: transparent;
-    }
-
-    button.login-btn {
-      width: 100%;
-      padding: 1rem 1.3rem;
-      border-radius: .9rem;
-      background: var(--brand);
-      color: #fff;
-      font-weight: 600;
-      font-size: 1.05rem;
-      border: none;
-      cursor: pointer;
-      margin-top: .5rem;
-    }
-
-    button.login-btn:hover {
-      background: var(--brand-dark);
-    }
-
-    .hint {
-      text-align: center;
-      margin-top: 1.3rem;
-      font-size: .9rem;
-      color: var(--muted);
-    }
-
-    .hint a {
-      color: var(--brand);
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    /* SUCCESS + ERROR MESSAGE BOX */
-    .login-message {
-      max-width: 320px;
-      margin: 1rem auto 0;
-      padding: 0.9rem 1.1rem;
-      border-radius: 0.8rem;
-      font-size: 0.95rem;
-      line-height: 1.4;
-      animation: fadeIn 0.3s ease-out;
-      display: none;
-    }
-
-    .login-message.success {
-      background: #e8e2fb;
-      color: #3e1f94;
-      border: 1px solid #c5b7f3;
-    }
-
-    .login-message.error {
-      background: #fde8e8;
-      color: #b91c1c;
-      border: 1px solid #f5c2c2;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 480px) {
-      .card {
-        padding: 2rem 1.5rem;
-        border-radius: 1rem;
-      }
-
-      h1 {
-        font-size: 1.6rem;
-      }
-
-      .card label,
-      .card input,
-      .card button,
-      .card .hint {
-        max-width: 100%;
-      }
-    }
-
-</style>
 </head>
 
 <body>
@@ -271,15 +79,8 @@
   }
 })();
 </script>
-<!-- SUPABASE AUTH SCRIPT -->
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-const SUPABASE_URL = 'https://htgliokekeaovdiafrgs.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp';
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+<!-- MAGIC-LINK LOGIN (UMD VERSION – DANISH) -->
+<script>
 function showMessage(type, text) {
   const box = document.getElementById("loginMessage");
   box.className = "login-message " + type;
@@ -287,19 +88,48 @@ function showMessage(type, text) {
   box.style.display = "block";
 }
 
+let lastEmailAttempt = "";
+let attemptCount = 0;
+
+function handleLoginFeedback(email) {
+  if (email === lastEmailAttempt) {
+    attemptCount++;
+  } else {
+    attemptCount = 1;
+    lastEmailAttempt = email;
+  }
+
+  if (attemptCount >= 2) {
+    showMessage(
+      "success",
+      "Hvis du har gennemført en betaling men ikke modtager login-linket, kan der være en fejl i emailadressen, eller beskeden kan være endt i Spam/Promo. Tjek venligst, og kontakt os hvis du har brug for hjælp."
+    );
+  } else {
+    showMessage(
+      "success",
+      "Login-linket er sendt. Tjek venligst din email."
+    );
+  }
+}
+
 document.getElementById("sendMagicLink").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
-  const box = document.getElementById("loginMessage");
-  box.style.display = "none";
+  const msg = document.getElementById("loginMessage");
+  msg.style.display = "none";
 
   if (!email) {
-    showMessage("error", "Indtast venligst din e-mailadresse.");
+    showMessage("error", "Indtast venligst din emailadresse.");
+    return;
+  }
+
+  if (!window.supabase) {
+    showMessage("error", "Teknisk fejl. Genindlæs siden og prøv igen.");
     return;
   }
 
   const redirectTo = `${window.location.origin}/denmark-pr/dashboard/index.html`;
 
-  const { data, error } = await supabase.auth.signInWithOtp({
+  const { data, error } = await window.supabase.auth.signInWithOtp({
     email,
     options: {
       emailRedirectTo: redirectTo,
@@ -312,9 +142,11 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
     return;
   }
 
-  showMessage("success", "Login-linket er sendt. Tjek din indbakke.");
+  handleLoginFeedback(email);
 });
 </script>
+
+
 
 </body>
 </html>
