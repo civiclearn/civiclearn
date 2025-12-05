@@ -1,7 +1,8 @@
 // /assets/js/supabase-init.js
 // Create ONE global Supabase client used by every script (modules + inline)
 
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.86.2/dist/esm/wrapper.mjs";
+// 🌟 FIX: Use the standard +esm suffix for a robust module import
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.86.2/+esm";
 
 // Supabase project config
 const SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
