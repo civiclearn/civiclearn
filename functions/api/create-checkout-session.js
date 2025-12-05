@@ -1,24 +1,18 @@
-// File: functions/api/create-checkout-session.js
 import Stripe from "stripe";
 
 export async function onRequestPost(context) {
   try {
-    // Read environment variables (Stripe secret key)
     const STRIPE_SECRET_KEY = context.env.STRIPE_SECRET_KEY;
 
     if (!STRIPE_SECRET_KEY) {
-      return new Response(
-        JSON.stringify({ error: "Stripe secret key missing" }),
-        { status: 500 }
-      );
+      return new Response(JSON.stringify({ error: "Missing Stripe key" }), { status: 500 });
     }
 
-    let stripe;
-try {
-  stripe = Stripe(STRIPE_SECRET_KEY);
-} catch (e) {
-  return new Response(JSON.stringify({ error: "Stripe init failed: " + e.message }), { status: 500 });
-}
+    const stripe = new Stripe(STRIPE_SECRET_KEY, {
+      apiVersion: "2022-11-15",
+      httpClient: Stripe.createFetchHttpClient(),
+    });
+
 
     // Parse incoming JSON (email, product, country)
     const body = await context.request.json();
