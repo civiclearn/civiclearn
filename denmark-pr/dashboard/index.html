@@ -386,20 +386,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   const nameEl = document.getElementById("welcome-name");
 
   try {
-    // 1. Auth user
+    // 1. Get the authenticated user object
     const { data: authData } = await supabase.auth.getUser();
     if (!authData?.user) {
       nameEl.textContent = "";
       return;
     }
 
-    const email = authData.user.email;
+    // --- FIX: Get the user's ID (UUID) ---
+    const userId = authData.user.id; 
 
-    // 2. Fetch ONLY full_name from your Supabase table
+    // 2. Fetch 'full_name' by filtering on the correct column: 'id'
     const { data: profile } = await supabase
-      .from("users")
+      .from("users") 
       .select("full_name")
-      .eq("email", email)
+      .eq("id", userId) // <-- Change from 'uid' back to 'id'
       .maybeSingle();
 
     if (!profile?.full_name) {
@@ -412,7 +413,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     nameEl.textContent = ", " + firstName;
 
-  } catch (_) {
+  } catch (error) {
+    console.error("Error fetching welcome name:", error); 
     nameEl.textContent = "";
   }
 });
