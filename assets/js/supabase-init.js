@@ -3,9 +3,12 @@
 const SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
 const SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
 
-// CRITICAL FIX: The UMD script first creates the 'supabase' object globally.
-// The createClient function is available ON that object.
-// We must call it and then OVERWRITE the global object with the *actual client instance*.
+// CRITICAL FIX: The UMD script (loaded via the <script src="..."> tag)
+// makes the object accessible globally via the bare name 'supabase'.
 
-const supabaseClientInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// 🌟 FIX: Call the function directly from the global 'supabase' object.
+const supabaseClientInstance = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Now, assign the actual client instance back to the window.
+// This overwrites the temporary object created by the UMD script.
 window.supabase = supabaseClientInstance;
