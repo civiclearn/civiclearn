@@ -1,16 +1,17 @@
 // /assets/js/auth-guard.js
 
-// Ensure supabase is ready even if scripts load slowly
+// Ensures Supabase is ready before anything runs
 function waitForSupabase() {
   return new Promise(resolve => {
     const check = () => {
       if (window.supabase) resolve(window.supabase);
-      else setTimeout(check, 30); // retry quickly
+      else setTimeout(check, 20);
     };
     check();
   });
 }
 
+// Session fetch that works even under slow refresh or mid-transition
 async function waitForSession(supabase) {
   let { data: { session } } = await supabase.auth.getSession();
   if (session) return session;
@@ -25,9 +26,10 @@ async function waitForSession(supabase) {
       }
     );
 
+    // Safety fallback — avoids ghost refresh issues
     setTimeout(async () => {
       let { data: { session } } = await supabase.auth.getSession();
-      resolve(session);
+      resolve(session || null);
     }, 2000);
   });
 }

@@ -11,21 +11,26 @@
   <script>
   document.documentElement.classList.add("i18n-hidden");
 </script>
-<script src="https://unpkg.com/@supabase/supabase-js@2.86.2/dist/umd/index.js"></script> 
+  <!-- 1. Supabase project config (safe to load early) -->
+  <script>
+    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+  </script>
 
-<script>
-    // Supabase project config
-    const SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+  <!-- 2. Load Supabase UMD dynamically and only then create client -->
+  <script>
+    const supabaseLoader = document.createElement("script");
+    supabaseLoader.src = "https://unpkg.com/@supabase/supabase-js@2.86.2/dist/umd/index.js";
 
-    // Call the createClient function from the now-defined global 'supabase' object
-    const supabaseClientInstance = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    
-    // Assign the active client instance to the window for use by other files
-    window.supabase = supabaseClientInstance;
-</script>
+    supabaseLoader.onload = () => {
+      window.supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+    };
 
-<script src="/assets/js/auth-guard.js"></script>
+    document.head.appendChild(supabaseLoader);
+  </script>
+
+  <!-- 3. Auth guard — safe, because it waits for window.supabase -->
+  <script src="/assets/js/auth-guard.js"></script>
  
 </head>
 
