@@ -1,4 +1,5 @@
 // File: functions/api/create-checkout-session.js
+import Stripe from "stripe";
 
 export async function onRequestPost(context) {
   try {
