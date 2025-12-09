@@ -1,25 +1,27 @@
-// =============================================
-//   CivicLearn – Fact of the Day (Patched)
-//   - Adds full option randomization
-//   - Correctly handles correctIndex after shuffle
-// =============================================
+// ============================================================
+// CivicLearn — Fact of the Day
+// Loads a random fact from facts.json (bankBase/facts.json)
+// ============================================================
 
 document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("factOfDayContainer");
   if (!container) return;
 
-  fetch("/geneva/facts/fait-du-jour.json")
-    .then((res) => res.json())
+  const factsPath = `${window.CivicLearnConfig.bankBase}/facts.json`;
+
+  fetch(factsPath)
+    .then((r) => r.json())
     .then((facts) => {
       if (!Array.isArray(facts)) return;
       initFactOfDay(facts);
     })
-    .catch((err) => console.error("Fact-of-Day load error:", err));
+    .catch((e) => console.error("Fact of Day load error:", e));
 });
 
 function initFactOfDay(facts) {
-  const randomFact = facts[Math.floor(Math.random() * facts.length)];
-  renderFact(randomFact);
+  const index = Math.floor(Math.random() * facts.length);
+  const fact = facts[index];
+  renderFact(fact);
 }
 
 function renderFact(fact) {
@@ -38,61 +40,45 @@ function renderFact(fact) {
   const optionsEl = container.querySelector(".fact-options");
   const feedbackEl = container.querySelector(".fact-feedback");
 
-  // ---------------------------
-  // Shuffle answer options
-  // ---------------------------
-  const shuffled = fact.question.options.map((opt, idx) => ({
-    text: opt,
-    isCorrect: idx === fact.question.correctIndex
-  }));
-
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-
-  // Render buttons
-  shuffled.forEach((entry) => {
+  fact.question.options.forEach((opt, idx) => {
     const btn = document.createElement("button");
     btn.className = "fact-option-btn";
-    btn.textContent = entry.text;
+    btn.textContent = opt;
 
     btn.addEventListener("click", () => {
-      handleAnswer(entry.isCorrect, btn, optionsEl, shuffled, fact);
+      handleAnswer(idx, fact, optionsEl, feedbackEl);
     });
 
     optionsEl.appendChild(btn);
   });
 
-  // Hide feedback until clicked
   feedbackEl.style.display = "none";
 }
 
-// ------------------------------------------------
-//  Handle answer selection (correct + wrong answer)
-// ------------------------------------------------
-function handleAnswer(isCorrect, clickedBtn, optionsEl, shuffled, fact) {
+function handleAnswer(selectedIndex, fact, optionsEl, feedbackEl) {
   const buttons = [...optionsEl.querySelectorAll("button")];
-  const feedbackEl = document.querySelector(".fact-feedback");
+  const correct = fact.question.correctIndex;
 
-  // Disable all buttons after selection
   buttons.forEach((b) => (b.disabled = true));
 
-  if (isCorrect) {
-    clickedBtn.classList.add("fact-correct");
-    feedbackEl.textContent = "Bonne réponse !";
+  if (selectedIndex === correct) {
+    buttons[selectedIndex].classList.add("fact-correct");
+    feedbackEl.textContent = fact.feedbackCorrect || "Correct!";
   } else {
-    clickedBtn.classList.add("fact-wrong");
-    feedbackEl.textContent = "Mauvaise réponse.";
-
-    // Highlight the real correct option
-    buttons.forEach((b) => {
-      const option = shuffled.find((o) => o.text === b.textContent);
-      if (option && option.isCorrect) {
-        b.classList.add("fact-correct");
-      }
-    });
+    buttons[selectedIndex].classList.add("fact-wrong");
+    buttons[correct].classList.add("fact-correct");
+    feedbackEl.textContent = fact.feedbackWrong || "Incorrect.";
   }
 
   feedbackEl.style.display = "block";
+}
+
+// Optional hash function used in older builds
+function hashString(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (h << 5) - h + str.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
 }
