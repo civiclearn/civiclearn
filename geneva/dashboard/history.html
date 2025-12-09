@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title data-i18n="title_history">Study History</title>
+
+  <!-- Core Styles -->
+  <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+  <link rel="stylesheet" href="/assets/css/history.css">
+
+  <!-- Flag size override -->
+  <style>
+    .brand svg {
+      width: 30px !important;
+      height: 30px !important;
+    }
+  </style>
+
+  <script>
+    document.documentElement.classList.add("i18n-hidden");
+  </script>
+  <script type="module" src="/assets/js/auth-guard.js"></script>
+</head>
+
+
+<body>
+
+<!-- MOBILE MENU -->
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+<div class="brand">
+  CivicLearn®
+  <svg viewBox="0 0 32 32" width="30" height="30"
+       style="margin-left:6px;vertical-align:middle;border-radius:3px;overflow:hidden;">
+    <path d="M0 0h32v32H0z" fill="#f00"/>
+    <path d="M13 6h6v7h7v6h-7v7h-6v-7H6v-6h7z" fill="#fff"/>
+  </svg>
+</div>
+
+
+          <nav class="nav">
+  <a href="index.html"  data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="history.html"  class="sub active" data-i18n="nav_history"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+    <div class="spacer"></div>
+
+    
+
+  </aside>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+  <main>
+
+    <header class="ce-header ce-header-top">
+      <h1 data-i18n="title_history">Study History</h1>
+      <div class="muted" data-i18n="history_subtitle"></div>
+    </header>
+
+     <div class="dashboard-container">
+
+<div class="history-wrapper">
+  <div id="historyList" class="history-list"></div>
+  <div id="detailsPanel" class="history-details"></div>
+</div>
+
+
+  </div>
+
+  </main>
+
+</div>
+
+<!-- CONFIG + I18N -->
+<script src="/assets/js/config-canadafr.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>
+  CivicLearnI18n.init();
+</script>
+
+<!-- ENGINE -->
+<script src="/assets/js/engine.js"></script>
+
+<!-- HISTORY (load only after translations are ready) -->
+<script>
+  CivicLearnI18n.onReady(() => {
+    const s = document.createElement("script");
+    s.src = "/assets/js/history.js";
+    document.body.appendChild(s);
+  });
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* MOBILE MENU */
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+
+  /* THEME */
+  try {
+    const s = JSON.parse(localStorage.getItem("civicedge_settings") || "{}");
+    if (s.theme) document.documentElement.dataset.theme = s.theme;
+  } catch {}
+});
+</script>
+
+<!-- === MANUAL SIDEBAR TOGGLE === -->
+<script>
+(function() {
+  const toggle = document.getElementById("manualToggle");
+  const subnav = document.getElementById("chaptersSubnav");
+  if (!toggle || !subnav) return;
+
+  toggle.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggle.classList.toggle("open");
+    subnav.classList.toggle("show");
+  });
+})();
+</script>
+
+
+</body>
+</html>

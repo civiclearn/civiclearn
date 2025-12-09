@@ -1,132 +1,98 @@
-// ============================================================
-// FACT OF THE DAY — CivicLearn Dashboard
-// Loads facts.json, selects one stable fact per day,
-// displays fact, question, options, and feedback.
-// ============================================================
+// =============================================
+//   CivicLearn – Fact of the Day (Patched)
+//   - Adds full option randomization
+//   - Correctly handles correctIndex after shuffle
+// =============================================
 
-CivicLearnI18n.onReady(() => {
-  initFactOfDay().catch(err =>
-    console.error("Fact of the Day init error:", err)
-  );
+document.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("factOfDayContainer");
+  if (!container) return;
+
+  fetch("/geneva/facts/fait-du-jour.json")
+    .then((res) => res.json())
+    .then((facts) => {
+      if (!Array.isArray(facts)) return;
+      initFactOfDay(facts);
+    })
+    .catch((err) => console.error("Fact-of-Day load error:", err));
 });
 
-
-async function initFactOfDay() {
-  const card = document.getElementById("factOfDayCard");
-  if (!card) return;
-
-  const dateEl = document.getElementById("factDate");
-  const titleEl = document.getElementById("factTitle");
-  const factTextEl = document.getElementById("factText");
-  const qBlock = document.getElementById("factQuestionBlock");
-  const qTextEl = document.getElementById("factQuestion");
-  const optionsEl = document.getElementById("factOptions");
-  const feedbackEl = document.getElementById("factFeedback");
-
-  const btnPrev = document.getElementById("factPrev");
-  const btnNext = document.getElementById("factNext");
-
-  function t(key, fallback) {
-  try {
-    if (window.CivicLearnI18n && typeof window.CivicLearnI18n.t === "function") {
-      return window.CivicLearnI18n.t(key, fallback);
-    }
-    return fallback || key;
-  } catch {
-    return fallback || key;
-  }
+function initFactOfDay(facts) {
+  const randomFact = facts[Math.floor(Math.random() * facts.length)];
+  renderFact(randomFact);
 }
 
+function renderFact(fact) {
+  const container = document.getElementById("factOfDayContainer");
+  if (!container) return;
 
-  if (titleEl) {
-    titleEl.textContent = t("dashboard_fact_title", "Fact of the Day");
+  container.innerHTML = `
+    <div class="fact-card">
+      <div class="fact-text">${fact.fact}</div>
+      <div class="fact-question">${fact.question.text}</div>
+      <div class="fact-options"></div>
+      <div class="fact-feedback" style="display:none;"></div>
+    </div>
+  `;
+
+  const optionsEl = container.querySelector(".fact-options");
+  const feedbackEl = container.querySelector(".fact-feedback");
+
+  // ---------------------------
+  // Shuffle answer options
+  // ---------------------------
+  const shuffled = fact.question.options.map((opt, idx) => ({
+    text: opt,
+    isCorrect: idx === fact.question.correctIndex
+  }));
+
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
 
-  let facts = [];
-  try {
-    const res = await fetch(`${window.CivicLearnConfig.bankBase}/facts.json`);
-    facts = await res.json();
-    if (!Array.isArray(facts)) throw new Error("facts.json invalid");
-  } catch (err) {
-    console.error("Failed to load facts.json:", err);
-    card.style.display = "none";
-    return;
-  }
+  // Render buttons
+  shuffled.forEach((entry) => {
+    const btn = document.createElement("button");
+    btn.className = "fact-option-btn";
+    btn.textContent = entry.text;
 
-  if (facts.length === 0) {
-    card.style.display = "none";
-    return;
-  }
+    btn.addEventListener("click", () => {
+      handleAnswer(entry.isCorrect, btn, optionsEl, shuffled, fact);
+    });
 
-  // --- DAILY INDEX ---
-  const dayKey = new Date().toISOString().slice(0, 10);
-  const startIndex = hashString(dayKey) % facts.length;
+    optionsEl.appendChild(btn);
+  });
 
-  let currentIndex = startIndex;
+  // Hide feedback until clicked
+  feedbackEl.style.display = "none";
+}
 
-  // --- RENDER FUNCTION ---
-  function render() {
-    const fact = facts[currentIndex];
+// ------------------------------------------------
+//  Handle answer selection (correct + wrong answer)
+// ------------------------------------------------
+function handleAnswer(isCorrect, clickedBtn, optionsEl, shuffled, fact) {
+  const buttons = [...optionsEl.querySelectorAll("button")];
+  const feedbackEl = document.querySelector(".fact-feedback");
 
-    dateEl.textContent = ""; // still hidden by CSS
-    factTextEl.textContent = fact.fact || "";
+  // Disable all buttons after selection
+  buttons.forEach((b) => (b.disabled = true));
 
-    if (!fact.question) {
-      qBlock.style.display = "none";
-      return;
-    }
+  if (isCorrect) {
+    clickedBtn.classList.add("fact-correct");
+    feedbackEl.textContent = "Bonne réponse !";
+  } else {
+    clickedBtn.classList.add("fact-wrong");
+    feedbackEl.textContent = "Mauvaise réponse.";
 
-    qBlock.style.display = "block";
-    qTextEl.textContent = fact.question.text || "";
-    optionsEl.innerHTML = "";
-    feedbackEl.style.display = "none";
-
-    fact.question.options.forEach((opt, i) => {
-      const btn = document.createElement("button");
-      btn.className = "fact-option-btn";
-      btn.textContent = opt;
-      btn.addEventListener("click", () => handleAnswer(i, fact));
-      optionsEl.appendChild(btn);
+    // Highlight the real correct option
+    buttons.forEach((b) => {
+      const option = shuffled.find((o) => o.text === b.textContent);
+      if (option && option.isCorrect) {
+        b.classList.add("fact-correct");
+      }
     });
   }
 
-  function handleAnswer(selectedIndex, fact) {
-    const correct = fact.question.correctIndex;
-
-    const btns = optionsEl.querySelectorAll("button");
-    btns.forEach((b, idx) => {
-      b.disabled = true;
-      if (idx === correct) b.classList.add("fact-correct");
-      if (idx === selectedIndex && idx !== correct) b.classList.add("fact-wrong");
-    });
-
-    // feedback remains hidden due to CSS (intentional)
-    feedbackEl.textContent = selectedIndex === correct ? "✓" : "✗";
-    feedbackEl.style.display = "none";
-  }
-
-  // --- NAVIGATION ---
-  btnPrev.addEventListener("click", () => {
-    currentIndex = (currentIndex - 1 + facts.length) % facts.length;
-    render();
-  });
-
-  btnNext.addEventListener("click", () => {
-    currentIndex = (currentIndex + 1) % facts.length;
-    render();
-  });
-
-  // INITIAL LOAD
-  render();
-}
-
-
-// ---- Utility: simple deterministic hash ----
-function hashString(str) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = (h << 5) - h + str.charCodeAt(i);
-    h |= 0;
-  }
-  return Math.abs(h);
+  feedbackEl.style.display = "block";
 }

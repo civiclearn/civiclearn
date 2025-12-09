@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Connexion – CivicLearn Canada</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="/assets/css/login.css">
+ <!-- Supabase config + UMD loader -->
+<script>
+  window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+  window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+</script>
+
+<script>
+  (function () {
+    const supabaseLoader = document.createElement("script");
+    supabaseLoader.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
+    supabaseLoader.onload = () => {
+      window.supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+    };
+    document.head.appendChild(supabaseLoader);
+  })();
+</script>
+
+
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="brand-main">
+        <img src="/assets/images/icons/ca.svg" alt="">
+        <div class="brand-title">ExamenDeCitoyennete.ca</div>
+      </div>
+      <div class="brand-powered">
+        propulsé par <span>CivicLearn</span>
+      </div>
+    </div>
+
+    <nav class="header-nav">
+      <a href="/canadafr/">Accueil</a>
+      <a href="/canadafr/#presentation">Présentation</a>
+      <a href="/canadafr/#tarifs">Tarif</a>
+    </nav>
+
+    <a href="/canadafr/checkout.html" class="btn-small-purple">Je m’inscris</a>
+  </div>
+</header>
+
+
+<div class="login-wrapper">
+  <div class="card">
+    <h1>Connexion</h1>
+    <p class="subtitle">Entrez votre adresse courriel pour accéder à votre tableau de bord.</p>
+
+    <label for="email">Courriel</label>
+    <input id="email" type="email" placeholder="vous@example.com" />
+
+    <button type="button" class="login-btn" id="sendMagicLink">Recevoir le lien de connexion</button>
+	<div id="loginMessage" class="login-message" style="display:none;"></div>
+
+    <div class="hint">
+      Pas encore inscrit(e)&nbsp;?
+      <a href="/canadafr/checkout.html">Créer un accès</a>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("first") === "1") {
+    const box = document.getElementById("loginMessage");
+    box.className = "login-message success";
+    box.textContent =
+      "Votre compte a été activé. Entrez l’adresse courriel utilisée lors de l’achat pour accéder à votre formation.";
+    box.style.display = "block";
+  }
+})();
+</script>
+<!-- MAGIC-LINK LOGIN (UMD VERSION) -->
+<script>
+function showMessage(type, text) {
+  const box = document.getElementById("loginMessage");
+  box.className = "login-message " + type;
+  box.textContent = text;
+  box.style.display = "block";
+}
+
+let lastEmailAttempt = "";
+let attemptCount = 0;
+
+function handleLoginFeedback(email) {
+  if (email === lastEmailAttempt) {
+    attemptCount++;
+  } else {
+    attemptCount = 1;
+    lastEmailAttempt = email;
+  }
+
+  if (attemptCount >= 2) {
+    showMessage(
+      "success",
+      "Si vous avez effectué un paiement mais ne recevez pas le lien de connexion, il est possible que l’adresse soit incorrecte ou que le message soit arrivé dans Spam/Promotions. Vérifiez et contactez-nous si nécessaire."
+    );
+  } else {
+    showMessage(
+      "success",
+      "Le lien de connexion a été envoyé. Vérifiez votre courriel."
+    );
+  }
+}
+
+document.getElementById("sendMagicLink").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const msg = document.getElementById("loginMessage");
+  msg.style.display = "none";
+
+  if (!email) {
+    showMessage("error", "Veuillez entrer votre adresse courriel.");
+    return;
+  }
+
+  if (!window.supabase) {
+    showMessage("error", "Une erreur technique est survenue. Actualisez la page et réessayez.");
+    return;
+  }
+
+  const redirectTo = `${window.location.origin}/canadafr/dashboard/index.html`;
+
+  const { data, error } = await window.supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: redirectTo,
+      shouldCreateUser: false
+    }
+  });
+
+  if (error) {
+    showMessage("error", error.message);
+    return;
+  }
+
+  handleLoginFeedback(email);
+});
+</script>
+
+
+</body>
+</html>
