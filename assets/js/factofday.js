@@ -1,4 +1,3 @@
-
 // ============================================================
 // FACT OF THE DAY — CivicLearn Dashboard
 // Loads facts.json, selects one stable fact per day,
@@ -10,7 +9,6 @@ CivicLearnI18n.onReady(() => {
     console.error("Fact of the Day init error:", err)
   );
 });
-
 
 async function initFactOfDay() {
   const card = document.getElementById("factOfDayCard");
@@ -28,16 +26,15 @@ async function initFactOfDay() {
   const btnNext = document.getElementById("factNext");
 
   function t(key, fallback) {
-  try {
-    if (window.CivicLearnI18n && typeof window.CivicLearnI18n.t === "function") {
-      return window.CivicLearnI18n.t(key, fallback);
+    try {
+      if (window.CivicLearnI18n && typeof window.CivicLearnI18n.t === "function") {
+        return window.CivicLearnI18n.t(key, fallback);
+      }
+      return fallback || key;
+    } catch {
+      return fallback || key;
     }
-    return fallback || key;
-  } catch {
-    return fallback || key;
   }
-}
-
 
   if (titleEl) {
     titleEl.textContent = t("dashboard_fact_title", "Fact of the Day");
@@ -65,7 +62,9 @@ async function initFactOfDay() {
 
   let currentIndex = startIndex;
 
-  // --- RENDER FUNCTION ---
+  // ------------------------------------------------------------
+  // RENDER FUNCTION (with safe randomization added)
+  // ------------------------------------------------------------
   function render() {
     const fact = facts[currentIndex];
 
@@ -82,28 +81,51 @@ async function initFactOfDay() {
     optionsEl.innerHTML = "";
     feedbackEl.style.display = "none";
 
-    fact.question.options.forEach((opt, i) => {
+    // --------------------------------------------------------
+    // RANDOMIZE OPTIONS WITHOUT MODIFYING fact.question
+    // --------------------------------------------------------
+    const originalOptions = fact.question.options;
+    const originalCorrectIndex = fact.question.correctIndex;
+
+    // Build objects
+    let optionObjects = originalOptions.map((opt, i) => ({
+      text: opt,
+      isCorrect: i === originalCorrectIndex
+    }));
+
+    // Fisher–Yates shuffle
+    for (let i = optionObjects.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [optionObjects[i], optionObjects[j]] = [optionObjects[j], optionObjects[i]];
+    }
+
+    // Find new correct index
+    const newCorrectIndex = optionObjects.findIndex(o => o.isCorrect);
+
+    // Render shuffled buttons
+    optionObjects.forEach((obj, i) => {
       const btn = document.createElement("button");
       btn.className = "fact-option-btn";
-      btn.textContent = opt;
-      btn.addEventListener("click", () => handleAnswer(i, fact));
+      btn.textContent = obj.text;
+      btn.addEventListener("click", () => handleAnswer(i, newCorrectIndex));
       optionsEl.appendChild(btn);
     });
   }
 
-  function handleAnswer(selectedIndex, fact) {
-    const correct = fact.question.correctIndex;
-
+  // ------------------------------------------------------------
+  // HANDLE ANSWER (now receives the *shuffled* correct index)
+  // ------------------------------------------------------------
+  function handleAnswer(selectedIndex, correctIndex) {
     const btns = optionsEl.querySelectorAll("button");
+
     btns.forEach((b, idx) => {
       b.disabled = true;
-      if (idx === correct) b.classList.add("fact-correct");
-      if (idx === selectedIndex && idx !== correct) b.classList.add("fact-wrong");
+      if (idx === correctIndex) b.classList.add("fact-correct");
+      if (idx === selectedIndex && idx !== correctIndex) b.classList.add("fact-wrong");
     });
 
-    // feedback remains hidden due to CSS (intentional)
-    feedbackEl.textContent = selectedIndex === correct ? "✓" : "✗";
-    feedbackEl.style.display = "none";
+    feedbackEl.textContent = selectedIndex === correctIndex ? "✓" : "✗";
+    feedbackEl.style.display = "none"; // remains hidden
   }
 
   // --- NAVIGATION ---
@@ -120,7 +142,6 @@ async function initFactOfDay() {
   // INITIAL LOAD
   render();
 }
-
 
 // ---- Utility: simple deterministic hash ----
 function hashString(str) {
