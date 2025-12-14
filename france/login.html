@@ -5,59 +5,79 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Connexion – Examen civique France | CivicLearn</title>
 
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Shared layout styles (header, card, background) -->
   <link rel="stylesheet" href="/assets/css/login.css">
 
+  <!-- FRANCE-ONLY OVERRIDES -->
   <style>
-    .choice-group {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      margin-top: 26px;
+    /* isolate everything */
+    .fr-login-card * {
+      box-sizing: border-box;
+      font-family: "Lexend", sans-serif;
     }
 
-    .choice-btn {
+    .fr-choice-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: 28px auto 0;
+      max-width: 320px;
+    }
+
+    .fr-choice-btn {
       display: block;
       padding: 16px 18px;
       border-radius: 14px;
+      text-decoration: none !important;
       text-align: center;
       font-weight: 600;
-      font-size: 1rem;
-      text-decoration: none;
+      font-size: 1.05rem;
+      line-height: 1.25;
+      cursor: pointer;
       transition: all 0.15s ease;
     }
 
-    .choice-primary {
-      background: var(--purple);
-      color: #fff;
+    .fr-choice-btn.primary {
+      background: var(--brand);
+      color: #fff !important;
     }
 
-    .choice-primary:hover {
-      filter: brightness(1.06);
+    .fr-choice-btn.primary:hover {
+      background: var(--brand-dark);
     }
 
-    .choice-secondary {
-      background: #fff;
-      color: var(--purple);
-      border: 2px solid var(--purple);
+    .fr-choice-btn.secondary {
+      background: #ffffff;
+      color: var(--brand) !important;
+      border: 2px solid var(--brand);
     }
 
-    .choice-secondary:hover {
+    .fr-choice-btn.secondary:hover {
       background: rgba(124, 58, 237, 0.06);
     }
 
-    .choice-sub {
+    .fr-choice-sub {
       display: block;
-      font-weight: 400;
+      margin-top: 6px;
       font-size: 0.9rem;
-      margin-top: 4px;
+      font-weight: 400;
       opacity: 0.9;
     }
 
-    .hint {
+    .fr-login-hint {
       margin-top: 22px;
-      font-size: 0.95rem;
       text-align: center;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .fr-login-hint a {
+      color: var(--brand);
+      font-weight: 600;
+      text-decoration: none;
     }
   </style>
 </head>
@@ -81,7 +101,8 @@
 </header>
 
 <div class="login-wrapper">
-  <div class="card">
+  <div class="card fr-login-card">
+
     <h1>Connexion</h1>
 
     <p class="subtitle">
@@ -89,22 +110,23 @@
       Choisissez la formation correspondant à votre situation.
     </p>
 
-    <div class="choice-group">
-      <a href="/france/csp/login.html" class="choice-btn choice-primary">
+    <div class="fr-choice-group">
+      <a href="/france/csp/login.html" class="fr-choice-btn primary">
         Carte de séjour pluriannuelle
-        <span class="choice-sub">Renouvellement ou premier titre de long séjour</span>
+        <span class="fr-choice-sub">Renouvellement ou premier titre</span>
       </a>
 
-      <a href="/france/cr/login.html" class="choice-btn choice-secondary">
+      <a href="/france/cr/login.html" class="fr-choice-btn secondary">
         Carte de résident
-        <span class="choice-sub">Accès longue durée (10 ans)</span>
+        <span class="fr-choice-sub">Accès longue durée (10 ans)</span>
       </a>
     </div>
 
-    <div class="hint">
+    <div class="fr-login-hint">
       Vous ne savez pas laquelle choisir ?
       <a href="/france/checkout.html">Voir les formations</a>
     </div>
+
   </div>
 </div>
 
