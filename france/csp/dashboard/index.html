@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CivicLearn — Tableau de bord</title>
+
+  <!-- Fonts + Core CivicEdge Styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+  <!-- Flag size override -->
+  <style>
+    .brand svg {
+      width: 30px !important;
+      height: 30px !important;
+    }
+  </style>
+<style>
+  /* Dashboard: fix Fact of the Day vertical spacing */
+  #factText {
+    flex-grow: 0 !important;
+    margin-bottom: 16px; /* space before the question */
+  }
+</style>
+<style>
+/* Fixes: Truncated Y-axis labels on the "Progès par thème" chart 
+   by increasing the minimum width of the container card. */
+.db-metric-card:has(#topicsChart) {
+    min-width: 500px !important; 
+    width: 500px;
+}
+</style>
+
+  <script>
+  document.documentElement.classList.add("i18n-hidden");
+</script>
+
+  <!-- 1. Supabase project config (safe to load early) -->
+  <script>
+    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+  </script>
+
+  <!-- 2. Load Supabase UMD dynamically and only then create client -->
+  <script>
+    const supabaseLoader = document.createElement("script");
+    supabaseLoader.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
+
+    supabaseLoader.onload = () => {
+      window.supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+    };
+
+    document.head.appendChild(supabaseLoader);
+  </script>
+
+  <!-- 3. Auth guard — safe, because it waits for window.supabase -->
+  <script src="/assets/js/auth-guardZ.js"></script>
+ 
+</head>
+
+<body class="dashboard">
+  <button class="menu-toggle" aria-label="Menu">☰</button>
+  <div class="wrap">
+   <!-- SIDEBAR -->
+<aside class="sidebar">
+<div class="brand">
+  CivicLearn®
+  <svg viewBox="0 0 3 2"
+       width="30" height="20"
+       style="margin-left:6px;vertical-align:middle;border-radius:3px;overflow:hidden;">
+    <rect width="1" height="2" x="0" y="0" fill="#0055A4"/>
+    <rect width="1" height="2" x="1" y="0" fill="#FFFFFF"/>
+    <rect width="1" height="2" x="2" y="0" fill="#EF4135"/>
+  </svg>
+</div>
+
+
+
+       <nav class="nav">
+  <a href="index.html" class="sub active" data-i18n="nav_dashboard"></a>
+   <a href="essentiel.html" data-i18n="nav_essential"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+
+  <div class="spacer"></div>
+
+<div class="profile">
+  <div class="profile-info">
+    <div class="reading-inline">
+      <span data-i18n="reading_label"></span>
+      <button id="readingToggle"
+              class="reading-btn inline"
+              data-i18n="reading_tooltip"
+              data-i18n-attr="title">🔇</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+</aside>
+<!-- MOBILE OVERLAY -->
+<div class="overlay" id="menuOverlay"></div>
+
+<!-- MAIN -->
+<main class="main">
+
+<div class="db-main">
+
+  <!-- TOP METRICS -->
+  <div class="db-top-metrics">
+
+    <!-- Countdown -->
+<div class="db-metric-tile mobile-essential" id="countdownCard">
+  <div id="examCountdown" class="db-metric-value" style="display:none;">J-0</div>
+
+  <div id="examNoDate" class="db-metric-label" data-i18n="countdown_enter_date"></div>
+
+  <div id="openDateSheet" class="db-metric-label date-edit-link" data-i18n="countdown_set_date_btn"></div>
+</div>
+
+
+  <!-- Answered Questions -->
+  <div class="db-metric-tile">
+    <div id="tmAnswered" class="db-metric-value mobile-essential">0</div>
+    <div class="db-metric-label" data-i18n="dashboard_answered_questions">
+    </div>
+  </div>
+
+  <!-- Global Accuracy -->
+  <div class="db-metric-tile mobile-hide">
+    <div id="tmAccuracy" class="db-metric-value">0%</div>
+    <div class="db-metric-label" data-i18n="dashboard_global_accuracy">
+    </div>
+  </div>
+
+  <!-- Total Study Time -->
+  <div class="db-metric-tile mobile-hide">
+    <div id="tmTime" class="db-metric-value">0h 00m</div>
+    <div class="db-metric-label" data-i18n="dashboard_total_study_time">
+    </div>
+  </div>
+
+  <!-- Streak -->
+  <div class="db-metric-tile mobile-hide">
+    <div id="tmStreak" class="db-metric-value"></div>
+    <div class="db-metric-label" data-i18n="dashboard_streak">
+    </div>
+  </div>
+
+</div>
+
+
+
+<!-- LAUNCHERS GRID -->
+<section class="db-grid">
+
+
+<!-- Essentiel – Mises en situation -->
+<div class="db-card mobile-hide">
+  <div>
+    <div class="db-icon">⭐</div>
+    <h3>Mises en situation</h3>
+    <p>
+    Entraînez-vous sur les mises en situation de l’examen civique.
+    </p>
+  </div>
+
+  <a class="db-btn" href="essentiel.html">
+    Commencer
+  </a>
+</div>
+
+
+  <!-- Timed Simulation -->
+  <div class="db-card mobile-essential mobile-launcher">
+    <div>
+      <div class="db-icon">⏱️</div>
+      <h3 data-i18n="launcher_sim_title"></h3>
+      <p data-i18n="launcher_sim_sub"></p>
+    </div>
+    <a class="db-btn" href="simulation.html" data-i18n="launcher_btn_start"></a>
+  </div>
+
+  <!-- Quick Test -->
+  <div class="db-card mobile-essential mobile-launcher">
+    <div>
+      <div class="db-icon">⚡</div>
+      <h3 data-i18n="launcher_quick_title"></h3>
+      <p data-i18n="launcher_quick_sub"></p>
+    </div>
+    <a class="db-btn" href="quick.html" data-i18n="launcher_btn_start"></a>
+  </div>
+
+  <!-- Test à la mesure -->
+  <div class="db-card mobile-hide">
+    <div>
+      <div class="db-icon">🧪</div>
+      <h3 data-i18n="launcher_topics_title"></h3>
+      <p data-i18n="launcher_topics_sub"></p>
+    </div>
+    <a class="db-btn" href="topics.html" data-i18n="launcher_btn_start"></a>
+  </div>
+
+  <!-- Frequent Traps -->
+  <div class="db-card mobile-hide">
+    <div>
+      <div class="db-icon">🚫</div>
+      <h3 data-i18n="launcher_traps_title"></h3>
+      <p data-i18n="launcher_traps_sub"></p>
+    </div>
+    <a class="db-btn" href="traps.html" data-i18n="launcher_btn_open"></a>
+  </div>
+
+  <!-- History -->
+  <div class="db-card mobile-hide">
+    <div>
+      <div class="db-icon">📊</div>
+      <h3 data-i18n="launcher_history_title"></h3>
+      <p data-i18n="launcher_history_sub"></p>
+    </div>
+    <a class="db-btn" href="history.html" data-i18n="launcher_btn_open"></a>
+  </div>
+
+</section>
+
+
+<!-- MOBILE-ONLY MINI LAUNCHERS -->
+<section class="db-grid-mini mobile-only">
+  <div class="db-mini-card">
+    <div class="db-mini-icon">⏱️</div>
+    <div class="db-mini-title">Simulation</div>
+    <a class="db-mini-btn" href="simulation">Démarrer</a>
+  </div>
+
+  <div class="db-mini-card">
+    <div class="db-mini-icon">⚡</div>
+    <div class="db-mini-title">Test rapide</div>
+    <a class="db-mini-btn" href="quick">Lancer</a>
+  </div>
+</section>
+
+
+<!-- THREE CHARTS -->
+<section id="db-metrics-row">
+
+  <!-- Global mastery donut -->
+  <div class="db-metric-card mobile-essential">
+    <div class="globalChartWrap">
+      <canvas id="globalChart"></canvas>
+    </div>
+    <div><strong id="globalPct">0%</strong> <span data-i18n="dashboard_mastered_label"></span></div>
+    <div id="globalAnswered" class="muted" data-i18n="dashboard_questions_label"></div>
+  </div>
+
+  <!-- Topics chart -->
+  <div class="db-metric-card mobile-hide">
+    <canvas id="topicsChart"></canvas>
+    <div class="topics-legend">
+      <div class="topics-legend-title" data-i18n="dashboard_topics_legend_title"></div>
+      <div class="topics-legend-sub" id="topicsCountLabel"></div>
+    </div>
+  </div>
+
+<!-- Fact of the Day -->
+<div 
+  class="db-metric-card fact-card mobile-hide" 
+  id="factOfDayCard" 
+  style="min-height: 360px !important; padding: 32px !important;"
+>
+  <div class="fact-date muted" id="factDate"></div>
+
+  <h3 id="factTitle" data-i18n="dashboard_fact_title"></h3>
+
+  <p id="factText" class="fact-text"></p>
+
+  <div id="factQuestionBlock" class="fact-question">
+    <p id="factQuestion" class="fact-q"></p>
+   <div class="fact-row">
+  <button id="factPrev" class="fact-side-btn">←</button>
+
+  <div id="factOptions" class="fact-options"></div>
+
+  <button id="factNext" class="fact-side-btn">→</button>
+</div>
+
+
+  <div id="factFeedback" class="fact-feedback"></div>
+
+</div>
+
+
+
+</section>
+
+
+     <footer class="db-footer">
+     © <span id="year"></span> — CivicLearn by Testrada — Tous les droits réservés.
+    </footer>
+
+  </div>
+
+</main>
+<!-- === Bottom Sheet for Exam Date Picker === -->
+<div id="dateSheetOverlay" class="sheet-overlay"></div>
+
+<div id="dateSheet" class="sheet">
+  <div class="sheet-header">
+    <h3 data-i18n="Choisir la date de l’examen civique"</h3>
+  </div>
+
+  <div class="sheet-body">
+    <input type="date" id="examDateInput" />
+  </div>
+
+  <div class="sheet-actions">
+    <button id="sheetCancel" class="primary" data-i18n="dashboard_datepicker_cancel"></button>
+    <button id="sheetSave" class="primary" data-i18n="dashboard_datepicker_confirm"></button>
+  </div>
+</div>
+
+<!-- === MOBILE MENU TOGGLE === -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.querySelector(".menu-toggle");
+    const overlay = document.querySelector(".overlay");
+    if (toggle && overlay) {
+      toggle.addEventListener("click", () => {
+        document.body.classList.toggle("menu-open");
+      });
+      overlay.addEventListener("click", () => {
+        document.body.classList.remove("menu-open");
+      });
+    }
+  });
+</script>
+
+<script src="/assets/js/i18n.js"></script>
+<script src="/assets/js/config-france-csp.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/assets/js/reading.js"></script>
+<script src="/assets/js/engine-fr.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    await CivicLearnI18n.init();
+  });
+</script>
+
+<script>
+function loadFactOfDay() {
+  const s2 = document.createElement("script");
+  s2.src = "/assets/js/factofday.js";
+  document.body.appendChild(s2);
+}
+
+CivicLearnI18n.onReady(() => {
+  const s1 = document.createElement("script");
+  s1.src = "/assets/js/dashboard-v2.js";
+  document.body.appendChild(s1);
+
+
+
+  // If DOM is already ready, run instantly
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    loadFactOfDay();
+  } else {
+    document.addEventListener("DOMContentLoaded", loadFactOfDay);
+  }
+});
+</script>
+
+<script>
+  // Plan B: Force Chrome to flush any delayed textContent DOM updates
+  CivicLearnI18n.onReady(() => {
+    setTimeout(() => {
+      // touch one translated node, causing forced reflow
+      const test = document.querySelector('[data-i18n]');
+      if (test) {
+        const tmp = test.textContent;
+        test.textContent = tmp; // write same value
+      }
+    }, 50);
+  });
+</script>
+<script src="https://cdn.by.wonderpush.com/sdk/1.1/wonderpush-loader.min.js" async></script>
+<script>
+  window.WonderPush = window.WonderPush || [];
+  WonderPush.push(["init", {
+      webKey: "256f5d8dc847c1f1f9a267c4d77a121616a872c88e1618da8097a0d20b43fbfd",
+  }]);
+
+  // Tag this user as France CSP
+  WonderPush.push(["addTag", "country:france-csp"]);
+</script>
+
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+
+
+</body>
+</html>
+

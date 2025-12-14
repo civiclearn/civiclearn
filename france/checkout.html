@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Accès Premium – Examen civique (France)</title>
+
+  <!-- SEO -->
+  <meta name="description"
+        content="Activez l’accès Premium pour la préparation à l’examen civique en France. Contenu structuré, entraînements ciblés, accès immédiat. Paiement unique." />
+  <link rel="canonical" href="https://preparer-examen-civique.fr/checkout.html">
+
+  <meta property="og:title" content="Accès Premium – Examen civique (France)">
+  <meta property="og:description"
+        content="Préparation complète à l’examen civique pour carte de séjour pluriannuelle ou carte de résident. Paiement unique, accès immédiat.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://preparer-examen-civique.fr/checkout.html">
+
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/checkout.css">
+</head>
+
+<body>
+
+<header class="checkout-header">
+  <div class="checkout-header-inner">
+    <div class="checkout-brand">
+      <img src="/assets/images/fr.svg" alt="France">
+      CivicLearn – Examen civique
+    </div>
+    <div class="checkout-powered">
+      <small>propulsé par</small>
+      <a href="https://civiclearn.com">CivicLearn</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="layout">
+
+    <!-- LEFT COLUMN -->
+    <aside class="features">
+      <h2>Accès Premium</h2>
+      <div class="price">49 EUR</div>
+      <div class="once">Paiement unique · accès à vie</div>
+
+      <div class="divider"></div>
+
+      <h3>Ce qui est inclus</h3>
+      <ul class="benefits">
+        <li>Questions conformes au format officiel de l’examen civique</li>
+        <li>Entraînements ciblés selon votre démarche administrative</li>
+        <li>Sessions courtes et efficaces (5–10 minutes)</li>
+        <li>Questions difficiles regroupées automatiquement</li>
+        <li>Statistiques détaillées et suivi de progression</li>
+        <li>Historique complet de vos entraînements</li>
+        <li>Fait du jour pour un apprentissage régulier</li>
+        <li>Rappels pour maintenir la régularité</li>
+        <li>Optimisé pour mobile, tablette et ordinateur</li>
+        <li>Accès immédiat après paiement</li>
+        <li>Mises à jour gratuites</li>
+        <li>Accès à vie à la plateforme</li>
+      </ul>
+
+      <p class="recommend">
+        Recommandé par des candidats à la carte de séjour et à la carte de résident.
+      </p>
+    </aside>
+
+    <!-- RIGHT COLUMN -->
+    <section class="right">
+      <div class="checkout-card">
+
+        <!-- PRODUCT CHOICE -->
+        <div id="productChoice">
+          <h1>Choisissez votre accès Premium</h1>
+          <p class="secure-line">
+            Sélectionnez la démarche administrative correspondant à votre situation.
+          </p>
+
+          <div class="product-options">
+            <button type="button" class="product-btn" data-product="france-sejour-premium">
+              <strong>Accès Premium – Carte de séjour pluriannuelle</strong>
+              <span>
+                Préparation à l’examen civique requis pour la carte de séjour pluriannuelle.
+              </span>
+            </button>
+
+            <button type="button" class="product-btn" data-product="france-resident-premium">
+              <strong>Accès Premium – Carte de résident</strong>
+              <span>
+                Préparation renforcée, conforme aux exigences de la carte de résident.
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CHECKOUT FLOW -->
+        <div id="checkoutFlow" hidden>
+
+          <h1 id="selectedTitle"></h1>
+          <div class="secure-line">Paiement 100% sécurisé via Stripe</div>
+
+          <div class="checkout-step" id="stepInitial">
+            <button type="button" class="pay-btn" id="startCheckout">
+              Continuer vers le paiement sécurisé
+            </button>
+            <p class="small-note">
+              Vous serez redirigé vers Stripe pour finaliser le paiement.
+            </p>
+          </div>
+
+          <div class="checkout-step" id="stepEmail" hidden>
+            <p class="email-instructions">
+              Entrez l’adresse email que vous souhaitez utiliser pour votre compte CivicLearn.
+            </p>
+
+            <div class="email-field-group">
+              <label for="checkoutEmail">Email</label>
+              <input
+                type="email"
+                id="checkoutEmail"
+                autocomplete="email"
+                placeholder="exemple@domaine.com"
+                inputmode="email"
+              />
+            </div>
+
+            <button type="button" class="pay-btn" id="continueWithEmail">
+              Continuer
+            </button>
+          </div>
+
+          <div class="checkout-step" id="stepConfirm" hidden>
+            <p class="confirm-text">Votre compte sera créé avec cette adresse :</p>
+            <p class="email-display" id="emailDisplay"></p>
+            <p class="confirm-warning">
+              Vérifiez attentivement. Vous recevrez votre lien de connexion à cette adresse.
+            </p>
+
+            <div class="confirm-actions">
+              <button type="button" class="pay-btn" id="confirmEmail">
+                Oui, continuer vers le paiement sécurisé
+              </button>
+              <button type="button" class="link-btn" id="editEmail">
+                Modifier l’adresse email
+              </button>
+            </div>
+          </div>
+
+          <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
+
+          <div class="after-text">
+            <a href="#" id="changeProduct">Modifier le choix de l’accès</a>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+(function () {
+
+  let selectedProduct = null;
+
+  const productChoice = document.getElementById("productChoice");
+  const checkoutFlow  = document.getElementById("checkoutFlow");
+  const selectedTitle = document.getElementById("selectedTitle");
+  const changeProduct = document.getElementById("changeProduct");
+
+  const stepInitial = document.getElementById("stepInitial");
+  const stepEmail   = document.getElementById("stepEmail");
+  const stepConfirm = document.getElementById("stepConfirm");
+
+  const startBtn     = document.getElementById("startCheckout");
+  const continueBtn  = document.getElementById("continueWithEmail");
+  const confirmBtn   = document.getElementById("confirmEmail");
+  const editEmailBtn = document.getElementById("editEmail");
+
+  const emailInput   = document.getElementById("checkoutEmail");
+  const emailDisplay = document.getElementById("emailDisplay");
+
+  const PRODUCT_LABELS = {
+    "france-sejour-premium": "Accès Premium – Carte de séjour pluriannuelle",
+    "france-resident-premium": "Accès Premium – Carte de résident"
+  };
+
+  document.querySelectorAll(".product-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectedProduct = btn.dataset.product;
+      selectedTitle.textContent = PRODUCT_LABELS[selectedProduct];
+      productChoice.hidden = true;
+      checkoutFlow.hidden = false;
+    });
+  });
+
+  changeProduct.addEventListener("click", (e) => {
+    e.preventDefault();
+    selectedProduct = null;
+    checkoutFlow.hidden = true;
+    productChoice.hidden = false;
+  });
+
+  function showStep(id) {
+    stepInitial.hidden = id !== "initial";
+    stepEmail.hidden   = id !== "email";
+    stepConfirm.hidden = id !== "confirm";
+  }
+
+  function validEmail(v) {
+    return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.trim()) ? v.trim() : null;
+  }
+
+  startBtn.addEventListener("click", () => showStep("email"));
+
+  continueBtn.addEventListener("click", () => {
+    const email = validEmail(emailInput.value);
+    if (!email) return;
+    emailDisplay.textContent = email;
+    showStep("confirm");
+  });
+
+  editEmailBtn.addEventListener("click", () => showStep("email"));
+
+  confirmBtn.addEventListener("click", async () => {
+    const email = validEmail(emailInput.value);
+    if (!email || !selectedProduct) return;
+
+    const res = await fetch("https://payments.civiclearn.com/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, product: selectedProduct })
+    });
+
+    const data = await res.json();
+    if (data && data.url) window.location.href = data.url;
+  });
+
+})();
+</script>
+
+<style>
+.product-options {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 20px;
+}
+.product-btn {
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid #e5dfd2;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+.product-btn strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+.product-btn span {
+  font-size: 0.9rem;
+  color: #555;
+}
+.product-btn:hover {
+  border-color: #7c4dff;
+  background: #faf7ff;
+}
+</style>
+
+</body>
+</html>

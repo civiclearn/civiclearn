@@ -16,7 +16,7 @@ window.CIVICEDGE_CONFIG = {
 
   flashcards: {
     mode: "topics-only",
-    placeholder: "/assets/images/icons/flag-watermark-ge.svg"
+    placeholder: "/assets/images/icons/flag-watermark-ge.png"
   },
 
   simulation: {
@@ -40,7 +40,8 @@ topics: {
     "geographie-culture-suisse",
     "institutions-geneve",
     "services-publics-geneve",
-    "geneve-quotidien"
+    "geneve-quotidien",
+	"questions-essentielles"
   ],
 
   topicLabels: {
@@ -51,9 +52,10 @@ topics: {
     "organisation-federale":           "Organisation politique fédérale",
     "droits-democratie":               "Droits civiques & démocratie directe",
     "geographie-culture-suisse":       "Géographie, culture et société suisse",
-    "institutions-geneve":             "Institutions politiques du canton",
+    "institutions-geneve":             "Institutions politiques du canton de Genève",
     "services-publics-geneve":         "Services publics genevois",
-    "geneve-quotidien":                "Genève au quotidien"
+    "geneve-quotidien":                "Genève au quotidien",
+	"questions-essentielles":          "Questions essentielles"
   },
 
     maxSelectable: 12,

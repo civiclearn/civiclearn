@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Redirection…</title>
+
+  <script>
+    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+  </script>
+
+  <script>
+    (function () {
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
+      s.onload = () => {
+        window.supabase = supabase.createClient(
+          window.SUPABASE_URL,
+          window.SUPABASE_KEY
+        );
+        handlePostLogin();
+      };
+      document.head.appendChild(s);
+    })();
+  </script>
+</head>
+
+<body>
+<script>
+async function handlePostLogin() {
+  const { data: { session } } = await window.supabase.auth.getSession();
+
+  if (!session || !session.user) {
+    window.location.href = "/france/login.html";
+    return;
+  }
+
+  const userId = session.user.id;
+
+  const { data: user, error } = await window.supabase
+    .from("users")
+    .select("access_path")
+    .eq("id", userId)
+    .single();
+
+  if (error || !user || !user.access_path) {
+    window.location.href = "/france/checkout.html";
+    return;
+  }
+
+  // access_path already contains the dashboard
+  // e.g. "/france/csp/dashboard"
+  window.location.href = user.access_path;
+}
+
+handlePostLogin();
+</script>
+
+</body>
+</html>
