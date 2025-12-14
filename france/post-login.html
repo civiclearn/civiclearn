@@ -9,52 +9,50 @@
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
   </script>
 
-  <script>
-    (function () {
-      const s = document.createElement("script");
-      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
-      s.onload = () => {
-        window.supabase = supabase.createClient(
-          window.SUPABASE_URL,
-          window.SUPABASE_KEY
-        );
-        handlePostLogin();
-      };
-      document.head.appendChild(s);
-    })();
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
 </head>
 
 <body>
 <script>
-async function handlePostLogin() {
-  const { data: { session } } = await window.supabase.auth.getSession();
+const supabaseClient = supabase.createClient(
+  window.SUPABASE_URL,
+  window.SUPABASE_KEY
+);
 
+async function redirectAfterLogin(session) {
   if (!session || !session.user) {
-    window.location.href = "/france/login.html";
+    window.location.replace("/france/login.html");
     return;
   }
 
-  const userId = session.user.id;
-
-  const { data: user, error } = await window.supabase
+  const { data, error } = await supabaseClient
     .from("users")
     .select("access_path")
-    .eq("id", userId)
+    .eq("id", session.user.id)
     .single();
 
-  if (error || !user || !user.access_path) {
-    window.location.href = "/france/checkout.html";
+  if (error || !data?.access_path) {
+    window.location.replace("/france/checkout.html");
     return;
   }
 
-  // access_path already contains the dashboard
-  // e.g. "/france/csp/dashboard"
-  window.location.href = user.access_path;
+  window.location.replace(data.access_path);
 }
 
-handlePostLogin();
-</script>
+// ✅ wait for auth to be ready
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (event === "SIGNED_IN") {
+    redirectAfterLogin(session);
+  }
+});
 
+// fallback if session already exists
+(async () => {
+  const { data } = await supabaseClient.auth.getSession();
+  if (data.session) {
+    redirectAfterLogin(data.session);
+  }
+})();
+</script>
 </body>
 </html>
