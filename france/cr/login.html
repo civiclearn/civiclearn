@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Connexion – Examen civique France | CivicLearn</title>
+  <title>Connexion – Examen civique France (Carte de résident)</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/login.css">
@@ -33,11 +33,12 @@
 
 <header class="site-header">
   <div class="header-inner">
-
     <div class="header-left">
       <div class="brand-main">
         <img src="/assets/images/fr.svg" alt="France">
-        <div class="brand-title">Examen civique – France</div>
+        <div class="brand-title">
+          Examen civique – Carte de résident
+        </div>
       </div>
       <div class="brand-powered">
         propulsé par <span>CivicLearn</span>
@@ -52,7 +53,8 @@
   <div class="card">
     <h1>Connexion</h1>
     <p class="subtitle">
-      Entrez votre adresse email pour accéder à votre espace personnel.
+      Entrez votre adresse email pour accéder à votre espace
+      <strong>Carte de résident</strong>.
     </p>
 
     <label for="email">Email</label>
@@ -71,7 +73,7 @@
   </div>
 </div>
 
-<!-- First login message -->
+<!-- First-login message -->
 <script>
 (function () {
   const params = new URLSearchParams(window.location.search);
@@ -85,13 +87,37 @@
 })();
 </script>
 
-<!-- MAGIC LINK -->
+<!-- MAGIC LINK (CR FIXED DESTINATION) -->
 <script>
 function showMessage(type, text) {
   const box = document.getElementById("loginMessage");
   box.className = "login-message " + type;
   box.textContent = text;
   box.style.display = "block";
+}
+
+let lastEmailAttempt = "";
+let attemptCount = 0;
+
+function handleLoginFeedback(email) {
+  if (email === lastEmailAttempt) {
+    attemptCount++;
+  } else {
+    attemptCount = 1;
+    lastEmailAttempt = email;
+  }
+
+  if (attemptCount >= 2) {
+    showMessage(
+      "success",
+      "Si vous avez effectué un paiement mais ne recevez pas le lien, vérifiez l’adresse saisie ainsi que votre dossier Spam."
+    );
+  } else {
+    showMessage(
+      "success",
+      "Le lien de connexion a été envoyé. Vérifiez votre email."
+    );
+  }
 }
 
 document.getElementById("sendMagicLink").addEventListener("click", async () => {
@@ -107,8 +133,8 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
     return;
   }
 
-  /* 🔑 IMPORTANT PART */
-  const redirectTo = `${window.location.origin}/france/post-login.html`;
+  const redirectTo =
+    `${window.location.origin}/france/cr/dashboard/index.html`;
 
   const { error } = await window.supabase.auth.signInWithOtp({
     email,
@@ -123,7 +149,7 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
     return;
   }
 
-  showMessage("success", "Le lien de connexion a été envoyé. Vérifiez votre email.");
+  handleLoginFeedback(email);
 });
 </script>
 
