@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr-CH">
+<html lang="en-AU">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Connexion – CivicLearn Genève</title>
+  <title>Login – CivicLearn Australia</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/login.css">
@@ -33,48 +33,46 @@
 
     <div class="header-left">
       <div class="brand-main">
-        <img src="/assets/images/ch.svg" alt="CivicLearn Suisse">
-        <div class="brand-title">NaturalisationGeneve.ch</div>
+        <img src="/assets/images/au.svg" alt="Australia">
+        <div class="brand-title">CivicLearn Australia</div>
       </div>
       <div class="brand-powered">
-        propulsé par <span>CivicLearn</span>
+        powered by <span>CivicLearn</span>
       </div>
     </div>
 
     <nav class="header-nav">
-      <a href="/geneva/">Accueil</a>
-      <a href="/geneva/#presentation">Présentation</a>
-      <a href="/geneva/#tarifs">Tarif</a>
+      <a href="/australia/">Home</a>
+      <a href="/australia/#presentation">Overview</a>
+      <a href="/australia/#pricing">Pricing</a>
     </nav>
 
-    <a href="/geneva/checkout.html" class="btn-small-purple">Je m’inscris</a>
+    <a href="/australia/checkout.html" class="btn-small-purple">Sign up</a>
   </div>
 </header>
 
-
 <div class="login-wrapper">
   <div class="card">
-    <h1>Connexion</h1>
+    <h1>Login</h1>
     <p class="subtitle">
-      Entrez votre adresse email pour accéder à votre tableau de bord.
+      Enter your email address to access your dashboard.
     </p>
 
     <label for="email">Email</label>
-    <input id="email" type="email" placeholder="vous@example.com" />
+    <input id="email" type="email" placeholder="you@example.com" />
 
     <button type="button" class="login-btn" id="sendMagicLink">
-      Recevoir le lien de connexion
+      Send login link
     </button>
 
     <div id="loginMessage" class="login-message" style="display:none;"></div>
 
     <div class="hint">
-      Pas encore inscrit(e)&nbsp;?
-      <a href="/geneva/checkout.html">Créer un accès</a>
+      Don’t have access yet?
+      <a href="/australia/checkout.html">Create access</a>
     </div>
   </div>
 </div>
-
 
 <!-- MESSAGE for first login -->
 <script>
@@ -84,12 +82,11 @@
     const box = document.getElementById("loginMessage");
     box.className = "login-message success";
     box.textContent =
-      "Votre compte a été activé. Entrez l’adresse email utilisée lors de l’achat pour accéder à votre formation.";
+      "Your account has been activated. Enter the email address used during purchase to access your training.";
     box.style.display = "block";
   }
 })();
 </script>
-
 
 <!-- MAGIC LINK LOGIC -->
 <script>
@@ -114,10 +111,10 @@ function handleLoginFeedback(email) {
   if (attemptCount >= 2) {
     showMessage(
       "success",
-      "Si vous avez déjà payé mais ne recevez pas le lien, vérifiez Spam/Promotions ou contactez-nous."
+      "If you have already paid but do not receive the link, please check Spam/Promotions or contact us."
     );
   } else {
-    showMessage("success", "Le lien de connexion a été envoyé. Vérifiez votre email.");
+    showMessage("success", "Your login link has been sent. Please check your email.");
   }
 }
 
@@ -127,16 +124,16 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
   msg.style.display = "none";
 
   if (!email) {
-    showMessage("error", "Veuillez entrer votre adresse email.");
+    showMessage("error", "Please enter your email address.");
     return;
   }
 
   if (!window.supabase) {
-    showMessage("error", "Erreur technique. Actualisez la page et réessayez.");
+    showMessage("error", "Technical error. Please refresh the page and try again.");
     return;
   }
 
-  const redirectTo = `${window.location.origin}/geneva/dashboard/index.html`;
+  const redirectTo = `${window.location.origin}/australia/dashboard/index.html`;
 
   const { error } = await window.supabase.auth.signInWithOtp({
     email,

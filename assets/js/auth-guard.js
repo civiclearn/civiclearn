@@ -39,9 +39,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   const session = await waitForSession(supabase);
 
   if (!session) {
-    const parts = window.location.pathname.split("/").filter(Boolean);
-    const country = parts[0];
-    window.location.replace(`/${country}/login.html${window.location.search}`);
+const parts = window.location.pathname.split("/").filter(Boolean);
+
+// supports /france/cr/, /france/csp/, /denmark-pr/, /canadafr/, etc.
+const base =
+  parts.length >= 2 && parts[1].length <= 3
+    ? `/${parts[0]}/${parts[1]}`
+    : `/${parts[0]}`;
+
+window.location.replace(`${base}/login.html${window.location.search}`);
+
     return;
   }
 });
