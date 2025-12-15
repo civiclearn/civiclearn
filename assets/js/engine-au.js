@@ -1428,19 +1428,4 @@ function launchConfetti() {
   }, 2500);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const logout = document.getElementById("logoutLink");
-  if (!logout) return;
-
-  logout.addEventListener("click", (e) => {
-    e.preventDefault();
-    localStorage.clear();
-    sessionStorage.clear();
-
-    const base = window.location.pathname.split("/")[1]; 
-    window.location.href = `/${base}/login.html`;
-  });
-});
-
-
 })();
