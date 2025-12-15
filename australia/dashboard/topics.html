@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="title_topics"></title>
+
+  <!-- Core -->
+  <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+  <link rel="stylesheet" href="/assets/css/test-core.css">
+  
+
+ 
+  <style>
+    .brand svg {
+      width: 30px !important;
+      height: 30px !important;
+    }
+
+    /* --- Light chip UI --- */
+    #topicContainer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .topic-chip {
+      padding: 10px 16px;
+      border-radius: 18px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      font-size: 15px;
+      user-select: none;
+      transition: 0.15s ease;
+    }
+
+    .topic-chip:hover {
+      background: rgba(0,0,0,0.04);
+    }
+
+    .topic-chip.active {
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand);
+    }
+
+    #startBtn {
+      margin-top: 20px;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      display: none; /* shown only after selection */
+    }
+	.topic-chip.mastered {
+  background: #e0ffe4;
+  border-color: #34c759;
+  color: #0a7a2a;
+}
+  </style>
+        <script>
+  document.documentElement.classList.add("i18n-hidden");
+</script>
+ <script type="module" src="/assets/js/auth-guardW.js"></script>
+</head>
+
+<body class="test-page">
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+<div class="brand">
+  CivicLearn®
+  <svg viewBox="0 0 12000 6000"
+       width="30"
+       height="30"
+       style="margin-left:6px;vertical-align:middle;border-radius:3px;overflow:hidden">
+    <defs>
+      <clipPath id="clip">
+        <rect width="12000" height="6000" />
+      </clipPath>
+    </defs>
+    <g clip-path="url(#clip)">
+      <rect width="12000" height="6000" fill="#012169"/>
+      <g transform="scale(600)">
+        <rect width="10" height="5" fill="#012169"/>
+        <path d="M0,0 L10,5 M10,0 L0,5" stroke="#fff" stroke-width="1"/>
+        <path d="M0,0 L10,5 M10,0 L0,5" stroke="#C8102E" stroke-width="0.6"/>
+        <path d="M5,0 V5 M0,2.5 H10" stroke="#fff" stroke-width="1.6"/>
+        <path d="M5,0 V5 M0,2.5 H10" stroke="#C8102E" stroke-width="1"/>
+      </g>
+
+      <!-- Commonwealth Star -->
+      <g transform="translate(3000 4200) scale(450)" fill="#fff">
+        <polygon points="0,-1 0.224,-0.309 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.224,-0.309"/>
+      </g>
+
+      <!-- Southern Cross (simplified) -->
+      <g fill="#fff">
+        <circle cx="8400" cy="2700" r="180"/>
+        <circle cx="9000" cy="3600" r="160"/>
+        <circle cx="7800" cy="3600" r="160"/>
+        <circle cx="9000" cy="2000" r="140"/>
+        <circle cx="8200" cy="3200" r="90"/>
+      </g>
+    </g>
+  </svg>
+</div>
+
+
+              <nav class="nav">
+  <a href="index.html"  data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" class="sub active" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+    <div class="spacer"></div>
+
+<div class="profile">
+  <div class="profile-info">
+    <div class="reading-inline">
+      <span data-i18n="reading_label"></span>
+      <button id="readingToggle"
+              class="reading-btn inline"
+              data-i18n="reading_tooltip"
+              data-i18n-attr="title">🔇</button>
+    </div>
+  </div>
+</div>
+  </aside>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <header class="ce-header ce-header-top">
+      <h1 data-i18n="title_topics"></h1>
+      <p class="muted" data-i18n="topics_select_topics"></p>
+    </header>
+
+<div class="quiz-container" id="quizArea" style="display:none;">
+	<div class="ce-progress-global">
+  <div class="ce-progress-global-bar" id="topicsProgress"></div>
+</div>
+  <div id="quiz"></div>
+</div>
+
+    <section>
+
+      <div id="topicContainer"></div>
+
+      <button id="startBtn" data-i18n="topics_start_btn"></button>
+
+    </section>
+  </main>
+</div>
+
+<!-- CONFIG + I18N -->
+<script src="/assets/js/config-australia.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>
+  CivicLearnI18n.init();
+</script>
+
+<!-- READING (must come BEFORE engine.js) -->
+<script src="/assets/js/reading.js"></script>
+
+<!-- ENGINE -->
+<script src="/assets/js/engine-au.js"></script>
+
+<!-- MAIN TOPICS LOGIC -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const cfg = window.CIVICEDGE_CONFIG || {};
+  const topics = (cfg.topics && cfg.topics.list) || [];
+  const labels = (cfg.topics && cfg.topics.topicLabels) || {};
+  const container = document.getElementById("topicContainer");
+  const startBtn = document.getElementById("startBtn");
+  const selected = new Set();
+
+  const bankPath = cfg.bank && cfg.bank.path;
+
+  function normalizeLabel(str) {
+    return (str || "")
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .replace(/^l['’]\s*/i, "")
+      .replace(/^(le|la|les)\s+/i, "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, " ");
+  }
+
+  function groupBankByTopic(questions) {
+    const map = {};
+    questions.forEach(q => {
+      const topicLabel = q.topic || "";
+      const norm = normalizeLabel(topicLabel);
+      if (!norm) return;
+      if (!map[norm]) {
+        map[norm] = { label: topicLabel, total: 0 };
+      }
+      map[norm].total += 1;
+    });
+    return map;
+  }
+
+  async function initTopics() {
+    let topicStats = {};
+
+    if (bankPath) {
+      try {
+        const res = await fetch(bankPath);
+        const raw = await res.json();
+        const questionsArray = Array.isArray(raw) ? raw : (raw.questions || []);
+        topicStats = groupBankByTopic(questionsArray);
+      } catch (e) {
+        console.warn("Bank load failed; topic mastery chips will be approximate", e);
+      }
+    }
+
+    const prog = JSON.parse(localStorage.getItem("civicedge_progress") || "{}");
+
+    topics.forEach((t) => {
+      const chip = document.createElement("div");
+      chip.className = "topic-chip";
+      chip.dataset.topic = t;
+
+      const label = labels[t] || t;
+      chip.textContent = label;
+
+      const normLabel = normalizeLabel(label);
+      const bankInfo = topicStats[normLabel];
+      const totalInBank = bankInfo ? bankInfo.total : 0;
+
+      let masteredQuestions = 0;
+
+      for (const key in prog) {
+        const entry = prog[key];
+        if (!entry || !entry.topic) continue;
+
+        if (normalizeLabel(entry.topic) === normLabel && entry.correct === 1) {
+          masteredQuestions += 1;
+        }
+      }
+
+      let topicMastered = false;
+
+      if (totalInBank > 0) {
+        topicMastered = masteredQuestions >= totalInBank;
+      } else {
+        topicMastered = masteredQuestions > 0;
+      }
+
+      if (topicMastered) {
+        chip.classList.add("mastered");
+      }
+
+      chip.addEventListener("click", () => {
+        if (chip.classList.contains("active")) {
+          chip.classList.remove("active");
+          selected.delete(t);
+        } else {
+          chip.classList.add("active");
+          selected.add(t);
+        }
+        startBtn.style.display = selected.size > 0 ? "inline-block" : "none";
+      });
+
+      container.appendChild(chip);
+    });
+
+    startBtn.addEventListener("click", () => {
+      const pick = Array.from(selected);
+      const limit = cfg.topics && cfg.topics.questionCount
+        ? cfg.topics.questionCount
+        : 10;
+
+      document.getElementById("quizArea").style.display = "block";
+      document.querySelector("section").style.display = "none";
+
+      let quiz = document.getElementById("quiz");
+      if (!quiz) {
+        quiz = document.createElement("div");
+        quiz.id = "quiz";
+        document.getElementById("quizArea").appendChild(quiz);
+      }
+
+      CivicEdgeEngine.start("topics", {
+        topics: pick,
+        limit: limit
+      });
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    const manualToggle = document.getElementById("manualToggle");
+    const sub = document.getElementById("chaptersSubnav");
+
+  }
+
+  initTopics();
+});
+</script>
+
+
+<!-- Menu -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+
+  toggle.addEventListener("click", () => {
+    document.body.classList.toggle("menu-open");
+  });
+  overlay.addEventListener("click", () => {
+    document.body.classList.remove("menu-open");
+  });
+});
+</script>
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>
