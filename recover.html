@@ -8,7 +8,6 @@
   <script>
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-
     const FALLBACK_URL = "https://civiclearn.com";
   </script>
 
@@ -23,7 +22,6 @@
       height: 100vh;
       margin: 0;
     }
-
     .box {
       background: #fff;
       padding: 26px 30px;
@@ -32,7 +30,6 @@
       max-width: 440px;
       width: 100%;
       text-align: center;
-      font-size: 15px;
     }
   </style>
 </head>
@@ -54,40 +51,34 @@
       window.SUPABASE_KEY
     );
 
-    let redirected = false;
+    let attempts = 0;
+    const maxAttempts = 20;
 
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (redirected) return;
+    const checkSession = async () => {
+      attempts++;
 
-      if (event !== "PASSWORD_RECOVERY" && event !== "SIGNED_IN") {
+      const { data } = await supabase.auth.getSession();
+      const session = data?.session;
+
+      if (session?.user) {
+        const meta = session.user.user_metadata || {};
+        const target = meta.access_path
+          ? `${meta.access_path}/login-password.html`
+          : "/login-password.html";
+
+        window.location.replace(target);
         return;
       }
 
-      const user = session?.user;
-      if (!user) {
+      if (attempts >= maxAttempts) {
         window.location.replace(FALLBACK_URL);
         return;
       }
 
-      const meta = user.user_metadata || {};
-      let target;
+      setTimeout(checkSession, 300);
+    };
 
-      if (meta.access_path) {
-        target = `${meta.access_path}/login-password.html`;
-      } else {
-        target = "/login-password.html";
-      }
-
-      redirected = true;
-      window.location.replace(target);
-    });
-
-    // Safety net: if nothing happens after a short delay, exit cleanly
-    setTimeout(() => {
-      if (!redirected) {
-        window.location.replace(FALLBACK_URL);
-      }
-    }, 6000);
+    checkSession();
   };
 
   document.head.appendChild(s);
