@@ -3,86 +3,83 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Processing password recovery</title>
+  <title>Recovering access…</title>
 
   <script>
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-    const FALLBACK_URL = "https://civiclearn.com";
+    const FALLBACK = "https://civiclearn.com";
   </script>
 
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       background: #f7f7f9;
-      color: #333;
       display: flex;
       align-items: center;
       justify-content: center;
       height: 100vh;
       margin: 0;
     }
-    .box {
-      background: #fff;
-      padding: 26px 30px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.08);
-      max-width: 440px;
-      width: 100%;
-      text-align: center;
-    }
   </style>
 </head>
 
 <body>
-  <div class="box">
-    <strong>Processing password recovery…</strong><br>
-    Please wait a moment.
-  </div>
+  <strong>Processing password recovery…</strong>
 
 <script>
 (function () {
   const s = document.createElement("script");
   s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
 
-  s.onload = () => {
-    const supabase = window.supabase.createClient(
-      window.SUPABASE_URL,
-      window.SUPABASE_KEY
-    );
+  s.onload = async () => {
+    try {
+      const client = supabase.createClient(
+        window.SUPABASE_URL,
+        window.SUPABASE_KEY
+      );
 
-    let attempts = 0;
-    const maxAttempts = 20;
+      /* 1. PKCE flow: ?code=... */
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      if (code) {
+        const { error } = await client.auth.exchangeCodeForSession(code);
+        if (error) throw error;
+      }
 
-    const checkSession = async () => {
-      attempts++;
+      /* 2. Implicit flow: #access_token=... */
+      const hash = window.location.hash.replace(/^#/, "");
+      if (hash) {
+        const p = new URLSearchParams(hash);
+        const access_token = p.get("access_token");
+        const refresh_token = p.get("refresh_token");
+        if (access_token && refresh_token) {
+          const { error } = await client.auth.setSession({
+            access_token,
+            refresh_token
+          });
+          if (error) throw error;
+        }
+      }
 
-      const { data } = await supabase.auth.getSession();
+      /* 3. Session must now exist */
+      const { data } = await client.auth.getSession();
       const session = data?.session;
+      if (!session?.user) throw new Error("No session");
 
-      if (session?.user) {
-        const meta = session.user.user_metadata || {};
-let base = meta.access_path || "";
-base = base.replace(/\/dashboard\/?$/, "");
+      const meta = session.user.user_metadata || {};
+      const accessPath = meta.access_path;
 
-const target = base
-  ? `${base}/login-password.html`
-  : "/login-password.html";
+      if (!accessPath) throw new Error("No access_path");
 
+      /* Redirect to EXISTING set-password page */
+      window.location.replace(
+        accessPath.replace(/\/dashboard\/?$/, "") + "/login-password.html"
+      );
 
-        window.location.replace(target);
-        return;
-      }
-
-      if (attempts >= maxAttempts) {
-        window.location.replace(FALLBACK_URL);
-        return;
-      }
-
-      setTimeout(checkSession, 300);
-    };
-
-    checkSession();
+    } catch (e) {
+      window.location.replace(FALLBACK);
+    }
   };
 
   document.head.appendChild(s);
