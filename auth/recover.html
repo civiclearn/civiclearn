@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Password recovery</title>
+
+  <!-- Supabase config -->
+  <script>
+    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+  </script>
+
+  <script>
+    (function () {
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
+      s.onload = () => {
+        window.supabase = supabase.createClient(
+          window.SUPABASE_URL,
+          window.SUPABASE_KEY
+        );
+        handleRecovery();
+      };
+      document.head.appendChild(s);
+    })();
+  </script>
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f7f7f9;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .box {
+      background: #fff;
+      padding: 24px 28px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <strong>Processing password recovery…</strong>
+  </div>
+
+<script>
+async function handleRecovery() {
+  try {
+    // This consumes the recovery token from the URL
+    const { data: sessionData } = await window.supabase.auth.getSession();
+
+    if (!sessionData?.session) {
+      // Token invalid or expired → fallback
+      window.location.replace("https://civiclearn.com");
+      return;
+    }
+
+    const { data: userData } = await window.supabase.auth.getUser();
+    const user = userData?.user;
+
+    if (!user) {
+      window.location.replace("https://civiclearn.com");
+      return;
+    }
+
+    const meta = user.user_metadata || {};
+
+    /**
+     * Preferred routing key:
+     * - access_path (you already use this elsewhere)
+     */
+    if (meta.access_path) {
+      window.location.replace(
+        `${meta.access_path}/login-password.html`
+      );
+      return;
+    }
+
+    /**
+     * Fallbacks (defensive)
+     */
+    if (meta.purchase_country === "fr-fr") {
+      window.location.replace("/france/login-password.html");
+      return;
+    }
+
+    // Ultimate fallback
+    window.location.replace("https://civiclearn.com");
+  } catch (e) {
+    window.location.replace("https://civiclearn.com");
+  }
+}
+</script>
+
+</body>
+</html>
