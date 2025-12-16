@@ -62,9 +62,13 @@
 
       if (session?.user) {
         const meta = session.user.user_metadata || {};
-        const target = meta.access_path
-          ? `${meta.access_path}/login-password.html`
-          : "/login-password.html";
+let base = meta.access_path || "";
+base = base.replace(/\/dashboard\/?$/, "");
+
+const target = base
+  ? `${base}/login-password.html`
+  : "/login-password.html";
+
 
         window.location.replace(target);
         return;
