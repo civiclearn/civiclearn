@@ -3,30 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Processing Recovery Link</title>
+  <title>Processing password recovery</title>
 
   <script>
-    // ***** ACTION REQUIRED: Replace these with your actual Supabase project details. *****
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-    // **************************************************************************************
-    
-    const FALLBACK_URL = "https://civiclearn.com"; 
-  </script>
 
-  <script>
-    (function () {
-      const s = document.createElement("script");
-      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
-      s.onload = () => {
-        window.supabase = supabase.createClient(
-          window.SUPABASE_URL,
-          window.SUPABASE_KEY
-        );
-        handleRecovery();
-      };
-      document.head.appendChild(s);
-    })();
+    const FALLBACK_URL = "https://civiclearn.com";
   </script>
 
   <style>
@@ -40,67 +23,75 @@
       height: 100vh;
       margin: 0;
     }
+
     .box {
       background: #fff;
-      padding: 24px 28px;
+      padding: 26px 30px;
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0,0,0,.08);
-      max-width: 420px;
+      max-width: 440px;
       width: 100%;
       text-align: center;
+      font-size: 15px;
     }
   </style>
 </head>
 
 <body>
   <div class="box">
-    <strong>Processing password recovery… Please wait...</strong>
+    <strong>Processing password recovery…</strong><br>
+    Please wait a moment.
   </div>
 
 <script>
-async function handleRecovery() {
-  try {
-    // 1. Consume the recovery token and establish a temporary session
-    const { data: sessionData } = await window.supabase.auth.getSession();
+(function () {
+  const s = document.createElement("script");
+  s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
 
-    if (!sessionData?.session) {
-      window.location.replace(FALLBACK_URL);
-      return;
-    }
+  s.onload = () => {
+    const supabase = window.supabase.createClient(
+      window.SUPABASE_URL,
+      window.SUPABASE_KEY
+    );
 
-    const { data: userData } = await window.supabase.auth.getUser();
-    const user = userData?.user;
+    let redirected = false;
 
-    if (!user) {
-      window.location.replace(FALLBACK_URL);
-      return;
-    }
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (redirected) return;
 
-    const meta = user.user_metadata || {};
-    let redirectPath = null;
-
-    // PRIMARY ROUTING: Use the precise path from metadata (e.g., /france/cr)
-    if (meta.access_path) {
-      redirectPath = `${meta.access_path}/login-password.html`;
-    } 
-    // FALLBACK: If access_path is missing, use the generic password page at the root.
-    else {
-      redirectPath = "/login-password.html";
-    }
-
-    // 2. Final Redirect to the Password Update Page
-    if (redirectPath) {
-        window.location.replace(redirectPath);
+      if (event !== "PASSWORD_RECOVERY" && event !== "SIGNED_IN") {
         return;
-    }
+      }
 
-    // Ultimate safeguard fallback
-    window.location.replace(FALLBACK_URL);
+      const user = session?.user;
+      if (!user) {
+        window.location.replace(FALLBACK_URL);
+        return;
+      }
 
-  } catch (e) {
-    window.location.replace(FALLBACK_URL);
-  }
-}
+      const meta = user.user_metadata || {};
+      let target;
+
+      if (meta.access_path) {
+        target = `${meta.access_path}/login-password.html`;
+      } else {
+        target = "/login-password.html";
+      }
+
+      redirected = true;
+      window.location.replace(target);
+    });
+
+    // Safety net: if nothing happens after a short delay, exit cleanly
+    setTimeout(() => {
+      if (!redirected) {
+        window.location.replace(FALLBACK_URL);
+      }
+    }, 6000);
+  };
+
+  document.head.appendChild(s);
+})();
 </script>
 
 </body>
