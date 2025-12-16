@@ -15,6 +15,17 @@
 </head>
 
 <body>
+<div id="authErrorBanner" style="
+  display:none;
+  background:#fdeaea;
+  border-bottom:1px solid #f5b5b5;
+  color:#8f2f2f;
+  padding:14px 18px;
+  font-size:0.95rem;
+  text-align:center;
+">
+</div>
+
 
 <header class="site-header">
   <div class="header-inner">
@@ -279,6 +290,34 @@ document.getElementById("contactForm").addEventListener("submit", async function
     document.body.appendChild(s);
   })();
 </script>
+<script>
+(function () {
+  if (!window.location.hash) return;
+
+  const params = new URLSearchParams(window.location.hash.substring(1));
+  const errorCode = params.get("error_code");
+  if (errorCode !== "otp_expired") return;
+
+  const message = `
+    <strong>Access link expired</strong><br>
+    This access link is no longer valid. Please use the most recent email or request a new one.
+    <br><br>
+    <strong>Lien expiré</strong><br>
+    Ce lien d’accès n’est plus valide. Veuillez utiliser le message le plus récent ou demander un nouvel envoi.
+    <br><br>
+    <strong>Enlace caducado</strong><br>
+    Este enlace de acceso ya no es válido. Utiliza el correo más reciente o solicita uno nuevo.
+  `;
+
+  const banner = document.getElementById("authErrorBanner");
+  document.getElementById("authErrorText").innerHTML = message;
+  banner.style.display = "block";
+
+  // Optional: clean URL
+  history.replaceState(null, "", window.location.pathname);
+})();
+</script>
+
 
 </body>
 </html>
