@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en-AU">
+<html lang="en-GB">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – CivicLearn Australia</title>
+  <title>Login – CivicLearn UK</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/login.css">
@@ -19,7 +19,10 @@
       const supabaseLoader = document.createElement("script");
       supabaseLoader.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
       supabaseLoader.onload = () => {
-        window.supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+        window.supabase = supabase.createClient(
+          window.SUPABASE_URL,
+          window.SUPABASE_KEY
+        );
       };
       document.head.appendChild(supabaseLoader);
     })();
@@ -33,8 +36,8 @@
 
     <div class="header-left">
       <div class="brand-main">
-        <img src="/assets/images/au.svg" alt="Australia">
-        <div class="brand-title">CivicLearn Australia</div>
+        <img src="/assets/images/uk.svg" alt="United Kingdom">
+        <div class="brand-title">CivicLearn UK</div>
       </div>
       <div class="brand-powered">
         powered by <span>CivicLearn</span>
@@ -42,12 +45,12 @@
     </div>
 
     <nav class="header-nav">
-      <a href="/australia/">Home</a>
-      <a href="/australia/#presentation">Overview</a>
-      <a href="/australia/#pricing">Pricing</a>
+      <a href="/uk/">Home</a>
+      <a href="/uk/#presentation">Overview</a>
+      <a href="/uk/#pricing">Pricing</a>
     </nav>
 
-    <a href="/australia/checkout.html" class="btn-small-purple">Sign up</a>
+    <a href="/uk/checkout.html" class="btn-small-purple">Sign up</a>
   </div>
 </header>
 
@@ -55,7 +58,7 @@
   <div class="card">
     <h1>Login</h1>
     <p class="subtitle">
-      Enter your email address to access your dashboard.
+      Enter your email address to access your Life in the UK Test dashboard.
     </p>
 
     <label for="email">Email</label>
@@ -69,7 +72,7 @@
 
     <div class="hint">
       Don’t have access yet?
-      <a href="/australia/checkout.html">Create access</a>
+      <a href="/uk/checkout.html">Create access</a>
     </div>
   </div>
 </div>
@@ -82,7 +85,7 @@
     const box = document.getElementById("loginMessage");
     box.className = "login-message success";
     box.textContent =
-      "Your account has been activated. Enter the email address used during purchase to access your training.";
+      "Your access has been activated. Enter the email address used during purchase to continue.";
     box.style.display = "block";
   }
 })();
@@ -111,7 +114,7 @@ function handleLoginFeedback(email) {
   if (attemptCount >= 2) {
     showMessage(
       "success",
-      "If you have already paid but do not receive the link, please check Spam/Promotions or contact us."
+      "If you have already paid but do not receive the link, please check Spam or Promotions, or contact us."
     );
   } else {
     showMessage("success", "Your login link has been sent. Please check your email.");
@@ -133,7 +136,7 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
     return;
   }
 
-  const redirectTo = `${window.location.origin}/australia/dashboard/index.html`;
+  const redirectTo = `${window.location.origin}/uk/dashboard/index.html`;
 
   const { error } = await window.supabase.auth.signInWithOtp({
     email,
