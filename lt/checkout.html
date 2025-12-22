@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CivicLearn – Checkout</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/checkout.css">
+ <style> 
+
+.checkout-header .lang-switch {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.checkout-header .lang-switch button {
+  min-width: 38px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid #d8d6e3;
+  background: #f6f5fb;
+  color: #2d2b38;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.checkout-header .lang-switch button:hover {
+  background: #edeafc;
+  border-color: #c8c3f5;
+}
+
+.checkout-header .lang-switch button.active {
+  background: #6b4eff;
+  color: #fff;
+  border-color: #6b4eff;
+  box-shadow: 0 4px 12px rgba(107, 78, 255, 0.25);
+}
+ </style> 
+
+</head>
+
+<body>
+
+<header class="checkout-header">
+  <div class="checkout-header-inner">
+
+    <div class="checkout-brand">
+      <img src="/assets/images/lt.svg" alt="Lithuania">
+      <span data-t="brand_title"></span>
+    </div>
+
+    <div class="checkout-right">
+      <div class="lang-switch">
+        <button data-lang="lt">LT</button>
+        <button data-lang="en">EN</button>
+        <button data-lang="ru">RU</button>
+      </div>
+  
+    </div>
+
+  </div>
+</header>
+
+<main>
+  <div class="layout">
+
+    <!-- LEFT CARD -->
+    <aside class="features">
+      <h2 data-t="plan_title"></h2>
+      <div class="price" data-t="plan_price"></div>
+      <div class="once" data-t="plan_once"></div>
+
+      <div class="divider"></div>
+
+      <h3 data-t="included_title"></h3>
+
+      <ul class="benefits">
+        <li data-t="benefit_1"></li>
+        <li data-t="benefit_2"></li>
+        <li data-t="benefit_3"></li>
+        <li data-t="benefit_4"></li>
+        <li data-t="benefit_5"></li>
+        <li data-t="benefit_6"></li>
+        <li data-t="benefit_7"></li>
+        <li data-t="benefit_8"></li>
+        <li data-t="benefit_9"></li>
+        <li data-t="benefit_10"></li>
+        <li data-t="benefit_11"></li>
+        <li data-t="benefit_12"></li>
+      </ul>
+
+      <p class="recommend" data-t="social_proof"></p>
+    </aside>
+
+    <!-- RIGHT CARD -->
+    <section class="right">
+      <div class="checkout-card">
+
+        <h1 data-t="checkout_title"></h1>
+        <div class="secure-line" data-t="secure_line"></div>
+
+        <div class="checkout-flow">
+
+          <!-- STEP 1 -->
+          <div class="checkout-step" id="stepInitial">
+            <button class="pay-btn" id="startCheckout" data-t="cta_start"></button>
+            <p class="small-note" data-t="note_redirect"></p>
+          </div>
+
+          <!-- STEP 2 -->
+          <div class="checkout-step" id="stepEmail" hidden>
+            <p class="email-instructions" data-t="email_instruction"></p>
+
+    <div class="email-field-group">
+  <label for="checkoutEmail" data-t="email_label"></label>
+  <input
+    id="checkoutEmail"
+    type="email"
+    placeholder="you@example.com"
+    autocomplete="email"
+  />
+</div>
+
+
+            <button class="pay-btn" id="continueWithEmail" data-t="cta_continue"></button>
+          </div>
+
+          <!-- STEP 3 -->
+          <div class="checkout-step" id="stepConfirm" hidden>
+            <p data-t="confirm_text"></p>
+            <p class="email-display" id="emailDisplay"></p>
+            <p class="confirm-warning" data-t="confirm_warning"></p>
+
+            <div class="confirm-actions">
+              <button class="pay-btn" id="confirmEmail" data-t="cta_confirm"></button>
+              <button class="link-btn" id="editEmail" data-t="cta_edit"></button>
+            </div>
+          </div>
+
+          <div id="checkoutMessage" class="checkout-message"></div>
+        </div>
+
+        <div class="trust">
+          <div>🔒 <span data-t="trust_secure"></span></div>
+          <div>⚡ <span data-t="trust_instant"></span></div>
+          <div>✔ <span data-t="trust_no_sub"></span></div>
+        </div>
+
+        <div class="after-text">
+          <span data-t="already_account"></span>
+          <a href="/lt/login.html" data-t="login_link"></a>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- =========================
+     I18N DICTIONARY
+========================= -->
+<script>
+const I18N = {
+  lt: {
+    brand_title: "CivicLearn Lietuva – Pilietybės egzaminas",
+
+    plan_title: "Premium prieiga",
+    plan_price: "19 EUR",
+    plan_once: "Vienkartinis mokėjimas · neribota prieiga",
+
+    included_title: "Kas įskaičiuota",
+    benefit_1: "Išsamūs praktikos klausimai pagal Lietuvos Konstituciją",
+    benefit_2: "Valstybės sandara, teisės, pareigos ir institucijos",
+    benefit_3: "Trumpi, fokusuoti kartojimo testai (5–10 minučių)",
+    benefit_4: "Automatinis sudėtingų klausimų sugrupavimas",
+    benefit_5: "Pažangos stebėjimas pagal temas",
+    benefit_6: "Išsami statistika ir rezultatų apžvalga",
+    benefit_7: "Visų spręstų testų istorija",
+    benefit_8: "Kasdieniai mokymosi priminimai",
+    benefit_9: "Optimizuota telefonui, planšetei ir kompiuteriui",
+    benefit_10: "Momentinė prieiga po apmokėjimo",
+    benefit_11: "Nemokami turinio atnaujinimai",
+    benefit_12: "Nėra prenumeratos – tik vienkartinis mokėjimas",
+
+    social_proof: "Naudoja kandidatai, besiruošiantys Lietuvos pilietybės egzaminui.",
+
+    checkout_title: "Aktyvuokite Premium prieigą",
+    secure_line: "100 % saugus mokėjimas per Stripe",
+
+    cta_start: "Tęsti prie saugaus mokėjimo",
+    note_redirect: "Būsite nukreipti į Stripe, kad užbaigtumėte mokėjimą.",
+
+    email_instruction: "Įveskite el. pašto adresą, kuris bus naudojamas paskyrai.",
+    email_label: "El. paštas",
+    cta_continue: "Tęsti",
+
+    confirm_text: "Paskyra bus sukurta naudojant šį el. pašto adresą:",
+    confirm_warning: "Patikrinkite atidžiai – prisijungimo nuoroda bus išsiųsta šiuo adresu.",
+    cta_confirm: "Taip, tęsti prie saugaus mokėjimo",
+    cta_edit: "Keisti el. paštą",
+
+    trust_secure: "Saugus mokėjimas",
+    trust_instant: "Momentinė prieiga",
+    trust_no_sub: "Be prenumeratos",
+
+    already_account: "Jau turite paskyrą?",
+    login_link: "Prisijunkite čia",
+
+    msg_enter_email: "Įveskite el. pašto adresą.",
+    msg_invalid_email: "Neteisingas el. pašto adresas.",
+    msg_connecting: "Jungiama prie Stripe. Prašome palaukti…",
+    msg_error: "Įvyko klaida. Bandykite dar kartą."
+  },
+
+  en: {
+    brand_title: "CivicLearn Lithuania – Citizenship test",
+
+    plan_title: "Premium access",
+    plan_price: "19 EUR",
+    plan_once: "One-time payment · unlimited access",
+
+    included_title: "What’s included",
+    benefit_1: "Practice questions based on the Lithuanian Constitution",
+    benefit_2: "State structure, rights, duties and institutions",
+    benefit_3: "Short, focused revision tests (5–10 minutes)",
+    benefit_4: "Automatic grouping of difficult questions",
+    benefit_5: "Progress tracking by topic",
+    benefit_6: "Detailed statistics and results overview",
+    benefit_7: "Full history of completed tests",
+    benefit_8: "Daily study reminders",
+    benefit_9: "Optimized for phone, tablet and desktop",
+    benefit_10: "Instant access after payment",
+    benefit_11: "Free content updates",
+    benefit_12: "No subscription – one-time payment",
+
+    social_proof: "Used by candidates preparing for the Lithuanian citizenship test.",
+
+    checkout_title: "Activate Premium access",
+    secure_line: "100% secure payment via Stripe",
+
+    cta_start: "Continue to secure payment",
+    note_redirect: "You will be redirected to Stripe to complete payment.",
+
+    email_instruction: "Enter the email address to be used for your account.",
+    email_label: "Email",
+    cta_continue: "Continue",
+
+    confirm_text: "Your account will be created using this email address:",
+    confirm_warning: "Please check carefully. The login link will be sent to this address.",
+    cta_confirm: "Yes, continue to secure payment",
+    cta_edit: "Edit email",
+
+    trust_secure: "Secure payment",
+    trust_instant: "Instant access",
+    trust_no_sub: "No subscription",
+
+    already_account: "Already have an account?",
+    login_link: "Log in here",
+
+    msg_enter_email: "Please enter your email address.",
+    msg_invalid_email: "Invalid email address.",
+    msg_connecting: "Connecting to Stripe. Please wait…",
+    msg_error: "An error occurred. Please try again."
+  },
+
+  ru: {
+    brand_title: "CivicLearn Литва – Экзамен на гражданство",
+
+    plan_title: "Премиум-доступ",
+    plan_price: "19 EUR",
+    plan_once: "Единоразовый платеж · неограниченный доступ",
+
+    included_title: "Что включено",
+    benefit_1: "Практические вопросы по Конституции Литвы",
+    benefit_2: "Государственное устройство, права и обязанности",
+    benefit_3: "Короткие тесты для повторения (5–10 минут)",
+    benefit_4: "Автоматическая подборка сложных вопросов",
+    benefit_5: "Отслеживание прогресса по темам",
+    benefit_6: "Подробная статистика и результаты",
+    benefit_7: "История всех выполненных тестов",
+    benefit_8: "Ежедневные напоминания",
+    benefit_9: "Работает на телефоне, планшете и компьютере",
+    benefit_10: "Мгновенный доступ после оплаты",
+    benefit_11: "Бесплатные обновления контента",
+    benefit_12: "Без подписки — один платеж",
+
+    social_proof: "Используется кандидатами, готовящимися к экзамену на гражданство Литвы.",
+
+    checkout_title: "Активировать премиум-доступ",
+    secure_line: "100% безопасная оплата через Stripe",
+
+    cta_start: "Перейти к безопасной оплате",
+    note_redirect: "Вы будете перенаправлены в Stripe для завершения оплаты.",
+
+    email_instruction: "Введите адрес электронной почты для вашей учетной записи.",
+    email_label: "Эл. почта",
+    cta_continue: "Продолжить",
+
+    confirm_text: "Учетная запись будет создана с этим адресом:",
+    confirm_warning: "Проверьте внимательно — ссылка для входа будет отправлена сюда.",
+    cta_confirm: "Да, перейти к оплате",
+    cta_edit: "Изменить email",
+
+    trust_secure: "Безопасная оплата",
+    trust_instant: "Мгновенный доступ",
+    trust_no_sub: "Без подписки",
+
+    already_account: "Уже есть аккаунт?",
+    login_link: "Войти",
+
+    msg_enter_email: "Введите адрес электронной почты.",
+    msg_invalid_email: "Неверный адрес электронной почты.",
+    msg_connecting: "Подключение к Stripe. Пожалуйста, подождите…",
+    msg_error: "Произошла ошибка. Попробуйте снова."
+  }
+};
+</script>
+
+<!-- =========================
+     I18N ENGINE
+========================= -->
+<script>
+let currentLang = localStorage.getItem("lang") || "lt";
+
+function applyLang(lang) {
+  currentLang = lang;
+  localStorage.setItem("lang", lang);
+  document.documentElement.lang = lang;
+
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.lang === lang);
+  });
+
+  document.querySelectorAll("[data-t]").forEach(el => {
+    const key = el.getAttribute("data-t");
+    if (I18N[lang][key]) el.textContent = I18N[lang][key];
+  });
+}
+
+document.querySelectorAll(".lang-switch button").forEach(btn => {
+  btn.addEventListener("click", () => applyLang(btn.dataset.lang));
+});
+
+applyLang(currentLang);
+</script>
+
+<!-- =========================
+     CHECKOUT LOGIC (UNCHANGED)
+========================= -->
+<script>
+(function () {
+  const stepInitial = document.getElementById("stepInitial");
+  const stepEmail = document.getElementById("stepEmail");
+  const stepConfirm = document.getElementById("stepConfirm");
+
+  const startBtn = document.getElementById("startCheckout");
+  const continueBtn = document.getElementById("continueWithEmail");
+  const confirmBtn = document.getElementById("confirmEmail");
+  const editBtn = document.getElementById("editEmail");
+
+  const emailInput = document.getElementById("checkoutEmail");
+  const emailDisplay = document.getElementById("emailDisplay");
+  const msgBox = document.getElementById("checkoutMessage");
+
+  let currentEmail = "";
+
+  function showMessage(type, text) {
+    msgBox.className = "checkout-message " + type;
+    msgBox.textContent = text;
+    msgBox.style.display = "block";
+  }
+
+  function validateEmail(val) {
+    const email = val.trim();
+    if (!email) return { ok: false, msg: I18N[currentLang].msg_enter_email };
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      return { ok: false, msg: I18N[currentLang].msg_invalid_email };
+    }
+    return { ok: true, email };
+  }
+
+  startBtn.onclick = () => {
+    stepInitial.hidden = true;
+    stepEmail.hidden = false;
+    emailInput.focus();
+  };
+
+  continueBtn.onclick = () => {
+    const res = validateEmail(emailInput.value);
+    if (!res.ok) return showMessage("error", res.msg);
+    currentEmail = res.email;
+    emailDisplay.textContent = currentEmail;
+    stepEmail.hidden = true;
+    stepConfirm.hidden = false;
+  };
+
+  editBtn.onclick = () => {
+    stepConfirm.hidden = true;
+    stepEmail.hidden = false;
+  };
+
+  confirmBtn.onclick = async () => {
+    showMessage("info", I18N[currentLang].msg_connecting);
+
+    try {
+      const r = await fetch("https://payments.civiclearn.com/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: currentEmail,
+          product: "lt-citizenship-premium"
+        })
+      });
+
+      if (!r.ok) throw new Error();
+      const data = await r.json();
+      window.location.href = data.url;
+
+    } catch {
+      showMessage("error", I18N[currentLang].msg_error);
+    }
+  };
+})();
+</script>
+
+</body>
+</html>

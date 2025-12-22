@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title data-i18n="title_history"></title>
+
+  <!-- Core Styles -->
+  <link rel="stylesheet" href="/assets/css/dashboard-core-lt.css">
+  <link rel="stylesheet" href="/assets/css/history.css">
+
+  <!-- Flag size override -->
+  <style>
+    .brand svg {
+      width: 30px !important;
+      height: 30px !important;
+    }
+  </style>
+
+  <script>
+    document.documentElement.classList.add("i18n-hidden");
+  </script>
+  <script type="module" src="/assets/js/auth-guard.js"></script>
+</head>
+
+
+<body>
+
+<!-- MOBILE MENU -->
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+<div class="brand">
+  CivicLearn®
+  <svg
+    viewBox="0 0 12000 6000"
+    width="30"
+    height="30"
+    style="margin-left:6px;vertical-align:middle;border-radius:3px;overflow:hidden"
+    aria-label="Lithuania"
+  >
+    <defs>
+      <clipPath id="clip-lt">
+        <rect width="12000" height="6000" />
+      </clipPath>
+    </defs>
+
+    <g clip-path="url(#clip-lt)">
+      <!-- Top: Yellow -->
+      <rect x="0" y="0" width="12000" height="2000" fill="#FDB913"/>
+
+      <!-- Middle: Green -->
+      <rect x="0" y="2000" width="12000" height="2000" fill="#006A44"/>
+
+      <!-- Bottom: Red -->
+      <rect x="0" y="4000" width="12000" height="2000" fill="#C1272D"/>
+    </g>
+  </svg>
+</div>
+
+
+
+
+          <nav class="nav">
+  <a href="index.html"  data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="history.html"  class="sub active" data-i18n="nav_history"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+    <div class="spacer"></div>
+
+    <div class="profile">
+
+
+    <!-- LANGUAGE SWITCHER -->
+    <div class="lang-switch">
+      <button data-lang="lt">LT</button>
+      <button data-lang="en">EN</button>
+      <button data-lang="ru">RU</button>
+    </div>
+
+ <div class="profile-info">
+
+    <!-- READING TOGGLE -->
+    <div class="reading-inline">
+      <span data-i18n="reading_label"></span>
+      <button id="readingToggle"
+              class="reading-btn inline"
+              data-i18n="reading_tooltip"
+              data-i18n-attr="title">🔇</button>
+    </div>
+
+  </div>
+</div>
+
+  </aside>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+  <main>
+
+    <header class="ce-header ce-header-top">
+      <h1 data-i18n="title_history">Study History</h1>
+      <div class="muted" data-i18n="history_subtitle"></div>
+    </header>
+
+     <div class="dashboard-container">
+
+<div class="history-wrapper">
+  <div id="historyList" class="history-list"></div>
+  <div id="detailsPanel" class="history-details"></div>
+</div>
+
+
+  </div>
+
+  </main>
+
+</div>
+
+<!-- CONFIG + I18N -->
+<script src="/assets/js/lang-bootstrap.js"></script>
+<script src="/assets/js/config-lt.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>
+  CivicLearnI18n.init();
+</script>
+
+<!-- ENGINE -->
+<script src="/assets/js/engine-lt.js"></script>
+
+<!-- HISTORY (load only after translations are ready) -->
+<script>
+  CivicLearnI18n.onReady(() => {
+    const s = document.createElement("script");
+    s.src = "/assets/js/history-lt.js";
+    document.body.appendChild(s);
+  });
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* MOBILE MENU */
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+
+  /* THEME */
+  try {
+    const s = JSON.parse(localStorage.getItem("civicedge_settings") || "{}");
+    if (s.theme) document.documentElement.dataset.theme = s.theme;
+  } catch {}
+});
+</script>
+<script>
+  (function () {
+    const current = window.CIVICEDGE_LANG;
+
+    document.querySelectorAll(".lang-switch button").forEach(btn => {
+      const lang = btn.dataset.lang;
+
+      // Highlight active language
+      if (lang === current) {
+        btn.classList.add("active");
+      }
+
+      btn.addEventListener("click", () => {
+        if (lang === current) return;
+        localStorage.setItem("civicedge_lang", lang);
+        location.reload();
+      });
+    });
+  })();
+</script>
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>

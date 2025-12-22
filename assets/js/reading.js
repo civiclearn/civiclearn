@@ -44,22 +44,33 @@
   // ----------------------------------------------------
   // SAFE speak() – international
   // ----------------------------------------------------
-  function speak(text) {
-    try {
-      const cfg = getConfig();
+function speak(text) {
+  try {
+    const cfg = getConfig();
+    const lang = cfg.voiceLang || "en-US";
 
-      // International voice:
-      //  - uses country config voice
-      //  - falls back to English
-      const lang = cfg.voiceLang || "en-US";
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = lang;
 
-      const msg = new SpeechSynthesisUtterance(text);
-      msg.lang = lang;
+    const voices = window.speechSynthesis.getVoices();
 
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(msg);
-    } catch (_) {}
-  }
+    // Try exact match first (ru-RU)
+    let voice = voices.find(v => v.lang === lang);
+
+    // Fallback: match by language prefix (ru)
+    if (!voice) {
+      const prefix = lang.split("-")[0];
+      voice = voices.find(v => v.lang.startsWith(prefix));
+    }
+
+    if (voice) {
+      msg.voice = voice;
+    }
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(msg);
+  } catch (_) {}
+}
 
   // ----------------------------------------------------
   // Toggle reading assist

@@ -52,6 +52,7 @@ body{
   width: 100%;
   box-sizing: border-box;
   column-gap: 32px;
+  
 }
 
 /* Test pages: very small safeguard */
@@ -131,8 +132,9 @@ body{
 }
 
 .profile-info {
-  display: flex;
-  align-items: center;
+  display: flex !important;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .reading-inline {
@@ -185,27 +187,41 @@ body{
 .hello{font-weight:600;}
 .tip{color:var(--muted);font-size:14px;}
 
+/* Language switch — sidebar grade */
 .lang-switch {
   display: flex;
-  gap: 6px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #cbd5e1;
 }
 
 .lang-switch button {
   font-size: 0.75rem;
-  padding: 4px 6px;
-  border-radius: 6px;
-  border: 1px solid rgba(0,0,0,0.15);
-  background: transparent;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: inherit;
   cursor: pointer;
-  opacity: 0.6;
+  opacity: 0.65;
+  transition:
+    opacity 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.lang-switch button:hover {
+  opacity: 1;
+  background: rgba(255,255,255,0.10);
 }
 
 .lang-switch button.active {
   opacity: 1;
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.45);
   font-weight: 600;
-  border-color: currentColor;
 }
+
 
 
 /* GENERIC CARDS ------------------------------------------------------------ */
@@ -523,140 +539,115 @@ body.chapter-page *{
 }
 
 /* ============================================
-   FACT CARD — Compact, Clean, Space Grotesk
+   FACT CARD — Final Lithuanian Gradient
    ============================================ */
 
 .fact-card {
-  background: linear-gradient(
-    145deg,
-    rgba(220, 38, 38, 0.06) 0%,
-    rgba(255, 255, 255, 0.6) 100%
-  ) !important;
-
-  border: 1px solid rgba(220, 38, 38, 0.10) !important;
-  border-radius: var(--radius);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.04);
-
-  padding: 20px;
-  min-height: 280px;
-  width: 100%;
-  display: flex;
+  display: flex !important;
   flex-direction: column;
-  gap: 12px;
-  justify-content: flex-start;
-  font-family: "Space Grotesk", sans-serif;   /* <— complete inheritance */
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 32px;
+  
+  /* Layered Gradient: Colors on top of a solid white base */
+  background: 
+    linear-gradient(
+      180deg,
+      rgba(253, 185, 19, 0.15) 0%,   /* LT Yellow - Top */
+      rgba(0, 106, 68, 0.08) 50%,    /* LT Green - Middle */
+      rgba(193, 39, 45, 0.12) 100%   /* LT Red - Bottom */
+    ),
+    #ffffff !important;
+
+  border: 1px solid var(--line) !important;
+  border-radius: var(--radius);
+  min-height: 460px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Remove date + title */
-.fact-card .fact-date,
-.fact-card h3 {
-  display: none !important;
-}
-
-/* Fact text */
-.fact-card .fact-text {
-  font-size: 15px;
+/* Question Area */
+#factQuestion {
+  font-size: 1.3rem;
+  font-weight: 700;
   line-height: 1.5;
   color: var(--ink);
-  text-align: justify;
-  flex-grow: 1;
-  font-family: "Space Grotesk", sans-serif;
+  max-width: 460px;
+  margin: 0 auto 32px auto;
 }
 
-/* Question */
-.fact-card .fact-q {
-  font-weight: 700;
-  text-align: center;
-  margin: 10px 0;
-  font-size: 16px;
-  color: var(--ink);
-  font-family: "Space Grotesk", sans-serif;
-}
-
-/* Options container */
-.fact-card .fact-options {
+/* Options Container (Injected by JS) */
+.fact-options {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-width: 400px;
+  align-items: center;
+  gap: 12px;
   width: 100%;
-  margin: 0 auto 5px auto;
 }
 
 /* Option Buttons */
-.fact-card .fact-option-btn {
-  padding: 12px 18px;
-  border-radius: 12px;
-  background: var(--card);
-  border: 2px solid var(--muted);
-  color: var(--ink);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: center;
-  font-weight: 600;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  font-family: "Space Grotesk", sans-serif !important;  /* <—— FIX */
-}
-
-.fact-card .fact-option-btn:hover:not(:disabled) {
-  background: var(--brand);
-  border-color: var(--brand);
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-/* Correct/Wrong states */
-.fact-card .fact-correct {
-  background: var(--ok-soft) !important;
-  border: 2px solid var(--ok) !important;
-  color: var(--ink) !important;
-  box-shadow: 0 0 0 2px var(--ok-soft) !important;
-}
-
-.fact-card .fact-wrong {
-  background: var(--bad-soft) !important;
-  border: 2px solid var(--bad) !important;
-  color: var(--ink) !important;
-  box-shadow: 0 0 0 2px var(--bad-soft) !important;
-}
-
-/* Feedback hidden */
-.fact-card .fact-feedback {
-  display: none !important;
-}
-
-/* Navigation row */
-.fact-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
+.fact-option-btn {
   width: 100%;
-}
-
-/* Side buttons */
-.fact-side-btn {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  font-size: 22px;
+  max-width: 380px;
+  min-height: 56px;
+  padding: 12px 24px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #ffffff; /* Solid white buttons to pop against the flag */
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--ink);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
   transition: 0.2s ease;
-  font-family: "Space Grotesk", sans-serif !important;   /* <—— FIX */
+}
+
+.fact-option-btn:hover:not(:disabled) {
+  border-color: var(--brand);
+  background: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* Navigation Row */
+.fact-footer {
+  margin-top: auto;
+  padding-top: 32px;
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+}
+
+/* Side Buttons */
+.fact-side-btn {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--line);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 20px;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
 .fact-side-btn:hover {
   background: var(--brand);
+  color: white;
   border-color: var(--brand);
-  color: #fff;
 }
 
+/* Feedback States */
+.fact-correct { background-color: var(--ok-soft) !important; border-color: var(--ok) !important; color: var(--ok) !important; }
+.fact-wrong { background-color: var(--bad-soft) !important; border-color: var(--bad) !important; color: var(--bad) !important; }
 
 .sheet-overlay {
   position: fixed;
@@ -1075,12 +1066,33 @@ body.no-date #countdownValueWrapper{
   gap:24px;
 }
 
+#db-metrics-row .db-metric-card {
+  max-width: none !important;
+  width: 100% !important;
+  min-height: unset !important; /* Allows card to grow if text is long */
+  padding: 24px !important;    /* Creates a breathing buffer around text */
+}
+
+#factQuestion {
+  font-size: 0.95rem !important; /* Slightly smaller text */
+  line-height: 1.5;
+  margin-bottom: 20px !important;
+}
+
+#db-metrics-row {
+  align-items: start;
+}
+/* Topics chart: prevent vertical stretching */
+#db-metrics-row .db-card {
+  justify-content: flex-start;
+}
+
 .db-metric-card{
   background:var(--card);
   border:1px solid var(--line);
   border-radius:var(--radius);
   box-shadow:var(--shadow);
-  padding:32px;
+  padding:12px;
   min-height:360px;
   display:flex;
   flex-direction:column;
@@ -1090,9 +1102,48 @@ body.no-date #countdownValueWrapper{
 
 .db-metric-card canvas{
   width:100% !important;
-  height:100% !important;
   max-height:260px;
 }
+
+#db-metrics-row {
+  align-items: stretch !important;
+}
+
+/* =========================================
+   DASHBOARD – LAST ROW NORMALIZATION
+   Fix pie + topic bars + fact card imbalance
+   ========================================= */
+
+/* Ensure cards do not stretch the grid row */
+#db-metrics-row {
+  align-items: stretch; /* instead of start */
+}
+
+/* Topic bars card: stop vertical inflation */
+#db-metrics-row .db-card {
+  height: auto;
+  min-height: unset;
+  padding-bottom: 20px;
+}
+
+/* Fact of the day: remove hard min-height */
+#db-metrics-row .fact-card {
+  min-height: unset;        /* ← main culprit */
+  padding: 36px 28px;       /* slightly tighter */
+}
+
+/* Keep content centered without forcing height */
+#db-metrics-row .fact-card > * {
+  max-width: 100%;
+}
+
+/* Optional: cap overall visual height on desktop */
+@media (min-width: 901px) {
+  #db-metrics-row .fact-card {
+    max-height: 380px;
+  }
+}
+
 
 .globalChartWrap{
   width:100%;

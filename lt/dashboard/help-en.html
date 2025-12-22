@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="title_help">Help & Contact</title>
+
+  <link rel="stylesheet" href="/assets/css/dashboard-core-lt.css">
+
+  <style>
+    .brand svg {
+      width: 30px !important;
+      height: 30px !important;
+    }
+
+   button,
+input,
+textarea,
+.help-btn {
+  font-family: "Space Grotesk", system-ui, sans-serif !important;
+}
+    main {
+  padding: 100px 32px 40px; /* ✅ top padding leaves room for hamburger */
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 1200px;
+  margin: auto;
+}
+    h1{font-size:24px;margin:0 0 4px}
+    .muted{color:var(--muted);font-size:15px;margin-bottom:20px}
+
+    /* FAQ Accordion */
+    #faq{display:grid;gap:16px}
+    @media(min-width:900px){
+      #faq{grid-template-columns:1fr 1fr;align-items:start}
+    }
+    .faq-item{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .faq-question{padding:16px 20px;cursor:pointer;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+    .faq-question:hover{background:rgba(0,0,0,.03)}
+    .faq-answer{max-height:0;overflow:hidden;padding:0 20px;transition:all .3s ease;color:var(--muted);font-size:15px}
+    .faq-item.active .faq-answer{max-height:none;padding:16px 20px}
+    .faq-item.active .faq-question{color:var(--brand)}
+
+    /* Contact reveal */
+    #contactWrapper{overflow:hidden;max-height:0;transition:max-height .5s ease,opacity .5s ease;opacity:0}
+    #contactWrapper.visible{max-height:800px;opacity:1;margin-top:10px}
+
+    form{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:24px;display:flex;flex-direction:column;gap:14px}
+    input,textarea{font-family:inherit;font-size:15px;padding:12px 14px;border:1px solid var(--line);
+      border-radius:10px;resize:none;width:100%;background:var(--bg);color:var(--ink)}
+    button{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;
+      border:none;padding:12px 20px;font-weight:600;border-radius:10px;cursor:pointer}
+    button:hover{opacity:.9}
+    .contactBtn{margin-top:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
+      color:#fff;padding:10px 16px;border:none;border-radius:10px;font-weight:600;cursor:pointer}
+	  
+	  .faq-item:last-of-type {
+  background: linear-gradient(
+    135deg,
+    rgba(213, 43, 30, 0.06),
+    rgba(213, 43, 30, 0.03)
+  );
+  border: 1px solid rgba(213, 43, 30, 0.12);
+}
+
+  </style>
+      <script>
+  document.documentElement.classList.add("i18n-hidden");
+</script>
+<script type="module" src="/assets/js/auth-guard.js"></script>
+
+</head>
+
+<body class="test-page">
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+<div class="brand">
+  CivicLearn®
+  <svg
+    viewBox="0 0 12000 6000"
+    width="30"
+    height="30"
+    style="margin-left:6px;vertical-align:middle;border-radius:3px;overflow:hidden"
+    aria-label="Lithuania"
+  >
+    <defs>
+      <clipPath id="clip-lt">
+        <rect width="12000" height="6000" />
+      </clipPath>
+    </defs>
+
+    <g clip-path="url(#clip-lt)">
+      <!-- Top: Yellow -->
+      <rect x="0" y="0" width="12000" height="2000" fill="#FDB913"/>
+
+      <!-- Middle: Green -->
+      <rect x="0" y="2000" width="12000" height="2000" fill="#006A44"/>
+
+      <!-- Bottom: Red -->
+      <rect x="0" y="4000" width="12000" height="2000" fill="#C1272D"/>
+    </g>
+  </svg>
+</div>
+
+
+
+       <nav class="nav">
+  <a href="index.html"  data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="help.html" class="sub active" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+    <div class="spacer"></div>
+<div class="profile">
+
+
+    <!-- LANGUAGE SWITCHER -->
+    <div class="lang-switch">
+      <button data-lang="lt">LT</button>
+      <button data-lang="en">EN</button>
+      <button data-lang="ru">RU</button>
+    </div>
+
+ <div class="profile-info">
+
+    <!-- READING TOGGLE -->
+    <div class="reading-inline">
+      <span data-i18n="reading_label"></span>
+      <button id="readingToggle"
+              class="reading-btn inline"
+              data-i18n="reading_tooltip"
+              data-i18n-attr="title">🔇</button>
+    </div>
+
+  </div>
+</div>
+    
+  </aside>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+  <main class="main">
+
+     <header class="ce-header ce-header-top">
+      <h1 data-i18n="title_help">Help & Contact</h1>
+      <div class="muted" data-i18n="help_subtitle">Frequently asked questions</div>
+    </header>
+
+<!-- FAQ SECTION (UK-specific content) -->
+<section id="faq">
+
+  <div class="faq-item">
+    <div class="faq-question">How can I completely reset my training?</div>
+    <div class="faq-answer">
+      Click the button below to start from scratch.
+      This will erase all your statistics and progress, while keeping your personal settings.<br><br>
+      <button id="resetAllFull" class="contactBtn">🔄 Reset my progress</button>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">How do I enable daily reminders?</div>
+    <div class="faq-answer">
+      Simply turn on the switch below to receive a notification each evening when your Daily Test is ready.
+      You can enable or disable it at any time according to your preferences.<br><br>
+
+      <!-- WonderPush subscription switch -->
+      <div id="wonderpush-subscription-switch"></div>
+    </div>
+  </div>
+
+<div class="faq-item">
+  <div class="faq-question">Are the test questions official?</div>
+  <div class="faq-answer">
+    No. The questions on CivicLearn are <strong>educational simulations</strong> designed
+    to reflect the structure, difficulty, and key topics of the Lithuanian 
+    constitutional knowledge exam.
+    <br><br>
+    They are <strong>not official questions</strong> and are not taken from any government
+    database. Official exam questions are not publicly released by Lithuanian authorities.
+  </div>
+</div>
+
+  <div class="faq-item">
+    <div class="faq-question">What is the difference between the test modes?</div>
+    <div class="faq-answer">
+      CivicLearn offers several training modes adapted to different needs:
+      <ul>
+        <li><strong>Test Simulation:</strong> Mirrors the official test format (24 questions, timer, results at the end).</li>
+        <li><strong>Quick Test:</strong> 5 random questions, no time limit, instant correction.</li>
+        <li><strong>Custom Test:</strong> You choose one or more topics.
+          This mode is <em>adaptive</em>: questions repeat until all are answered correctly.
+        </li>
+        <li><strong>Common Traps:</strong> Targeted practice focusing on the most frequent mistakes, without a timer.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">How does the progressive mode work?</div>
+    <div class="faq-answer">
+      Progressive mode does not stop after a fixed number of questions.
+      It automatically repeats incorrectly answered questions until all are mastered.
+      When none remain, a message appears: <strong>“All mastered 🎉”</strong>.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Why do some tests show “Restart” or “Review mistakes” buttons?</div>
+    <div class="faq-answer">
+      These buttons appear only in <strong>non-progressive</strong> tests (such as the Simulation).
+      The test ends once all questions are answered, and you can then review mistakes or start a new attempt.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Which mode should I use to prepare effectively?</div>
+    <div class="faq-answer">
+      For a complete preparation:
+      <ul>
+        <li>Start with the <strong>Custom Test</strong> to build solid knowledge by topic.</li>
+        <li>Use the <strong>Quick Test</strong> for light daily revision.</li>
+        <li>Finish with a <strong>Test Simulation</strong> to assess your level under real conditions.</li>
+      </ul>
+    </div>
+  </div>
+
+<div class="faq-item">
+  <div class="faq-question">In “Reading Assistance” mode, why does the voice sound foreign?</div>
+  <div class="faq-answer">
+    CivicLearn uses your browser’s built-in <strong>text-to-speech</strong> system to read
+    questions aloud.
+    <br><br>
+    If your device does not have a high-quality voice installed for the selected language
+    (Lithuanian, Russian, or English), the browser may fall back to a different accent or
+    a generic system voice.
+    <br><br>
+    To improve pronunciation, install additional voices for your language in your
+    device’s accessibility or speech settings, then reload the page.
+  </div>
+</div>
+  
+<div class="faq-item">
+  <div class="faq-question">How is the Lithuanian citizenship test simulation graded?</div>
+  <div class="faq-answer">
+    The simulation is based on the <strong>official Lithuanian citizenship knowledge exam format</strong>.
+    <br><br>
+    The official exam consists of <strong>20 multiple-choice questions</strong>.
+    To pass, a candidate must answer at least <strong>14 questions correctly</strong>,
+    which corresponds to a <strong>70% pass mark</strong>.
+    <br><br>
+    There is <strong>no formally published time limit</strong> for the official exam.
+    However, CivicLearn applies a <strong>100-minute time limit</strong> in the simulation
+    to reflect realistic examination and interview conditions.
+    <br><br>
+    All questions are weighted equally. There are no mandatory topics that must be
+    answered perfectly, and there are no penalty points for incorrect answers.
+  </div>
+</div>
+
+
+  <div class="faq-item">
+    <div class="faq-question">What is the “Common Traps” section?</div>
+    <div class="faq-answer">
+      This section groups questions that users most often answer incorrectly.
+      It helps you focus on weak points and prepare more efficiently before attempting a full simulation.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Can I use CivicLearn on my phone?</div>
+    <div class="faq-answer">
+      Yes. CivicLearn is a web app optimised for computers, tablets, and mobile phones.
+      You can add it to your home screen for quick access.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Is my progress saved automatically?</div>
+    <div class="faq-answer">
+      Yes. Your results and statistics are saved locally in your browser.
+      If you change devices or clear your browser data, this information will be lost.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Can I study offline?</div>
+    <div class="faq-answer">
+      Yes. Once pages are loaded, most features (tests, flashcards, handbook)
+      remain available without an internet connection,
+      except for submitting the contact form.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">How does Premium access work?</div>
+    <div class="faq-answer">
+      Premium access is a one-time purchase with no time limit.
+      Once your payment is confirmed by <strong>Stripe</strong>, your account is activated immediately
+      and you keep lifetime access, with no automatic renewal.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Can I get a receipt?</div>
+    <div class="faq-answer">
+      Payments are processed by <strong>Stripe</strong>, which automatically sends you a confirmation email after purchase.
+      This email serves as your official receipt; we do not issue separate PDF invoices.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Can I use my account on multiple devices?</div>
+    <div class="faq-answer">
+      Yes, you can log in on multiple devices using the same email address.
+      <strong>Please note:</strong> your progress and statistics are stored locally on each device.
+      Changing devices or clearing browser data will reset your study history.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">How can I report an error or typo?</div>
+    <div class="faq-answer">
+      Open the contact form below and specify the question concerned.
+      Our team will review and update the database if necessary.
+    </div>
+  </div>
+
+  <!-- Contact button -->
+  <div class="faq-item">
+    <div class="faq-question" data-i18n="contact_open_form"></div>
+    <div class="faq-answer">
+      <button id="revealContact" class="contactBtn" data-i18n="contact_open_form"></button>
+    </div>
+  </div>
+
+</section>
+
+<!-- CONTACT FORM -->
+<section id="contactWrapper" class="hidden-section">
+
+  <form id="contactForm" action="https://formspree.io/f/xojadjbw" method="POST">
+
+    <h2 data-i18n="contact_title"></h2>
+    <p class="muted" data-i18n="contact_subtitle"></p>
+
+    <label data-i18n="contact_name_label"></label>
+    <input type="text" name="name" required />
+
+    <label data-i18n="contact_email_label"></label>
+    <input type="email" name="_replyto" required />
+
+    <label data-i18n="contact_message_label"></label>
+    <textarea name="message" rows="5" required></textarea>
+
+    <input type="hidden" name="_subject" value="Message from CivicLearn">
+    <button type="submit" data-i18n="contact_submit_btn"></button>
+  </form>
+
+</section>
+
+
+  </main>
+
+</div>
+<script src="/assets/js/lang-bootstrap.js"></script>
+<script src="/assets/js/config-lt.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>
+  CivicLearnI18n.init();
+</script>
+
+<script>
+  // FAQ toggle
+  document.querySelectorAll('.faq-question').forEach(q => {
+    q.addEventListener('click', () => q.parentElement.classList.toggle('active'));
+  });
+
+  // Reveal contact
+  document.getElementById("revealContact")?.addEventListener("click", () => {
+    const form = document.getElementById("contactWrapper");
+    form.style.maxHeight = "1000px";
+    form.style.opacity = "1";
+    form.scrollIntoView({ behavior: "smooth" });
+  });
+
+  // Contact submission
+  const contactForm = document.getElementById("contactForm");
+  if (contactForm) {
+    contactForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const res = await fetch(contactForm.action, {
+        method: contactForm.method,
+        body: new FormData(contactForm),
+        headers: { Accept: "application/json" }
+      });
+
+      if (res.ok) {
+        contactForm.innerHTML = `
+          <div style="text-align:center; padding:20px;">
+            <h3 data-i18n="contact_success_title"></h3>
+            <p data-i18n="contact_success_text"></p>
+          </div>
+        `;
+        CivicLearnI18n.apply();
+      }
+    });
+  }
+
+  // Mobile menu
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.querySelector(".menu-toggle");
+    const overlay = document.getElementById("menuOverlay");
+    toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+    overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+  });
+</script>
+
+<script src="/assets/js/reset.js"></script>
+<script src="https://cdn.by.wonderpush.com/sdk/1.1/wonderpush-loader.min.js" async></script>
+<script>
+  window.WonderPush = window.WonderPush || [];
+  WonderPush.push(["init", {
+      webKey: "256f5d8dc847c1f1f9a267c4d77a121616a872c88e1618da8097a0d20b43fbfd",
+  }]);
+
+  // Tag this user as LT-EN user
+  WonderPush.push(["removeTag", "lt-ru"]);
+  WonderPush.push(["removeTag", "lt-lt"]);
+  WonderPush.push(["addTag", "lt-en"]);
+</script>
+<script>
+(function () {
+  const current = window.CIVICEDGE_LANG;
+
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    const lang = btn.dataset.lang;
+
+    if (lang === current) {
+      btn.classList.add("active");
+    }
+
+    btn.addEventListener("click", () => {
+      if (lang === current) return;
+
+      // Persist UI language (optional but consistent)
+      localStorage.setItem("civicedge_lang", lang);
+
+      // If we are on a help page → redirect to correct help file
+      const path = window.location.pathname;
+      if (path.includes("help")) {
+        window.location.href = `/lt/dashboard/help-${lang}.html`;
+        return;
+      }
+
+      // Default behaviour elsewhere
+      location.reload();
+    });
+  });
+})();
+</script>
+
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>
