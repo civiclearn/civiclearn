@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title data-i18n="title_flashcards"></title>
+
+  <!-- CORE STYLES -->
+  <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+  <link rel="stylesheet" href="/assets/css/flashcards.css">
+    <!-- Flag size override -->
+  <style>
+    .brand svg {
+      width: 30px !important;
+      height: 30px !important;
+    }
+  </style>
+    <script>
+  document.documentElement.classList.add("i18n-hidden");
+</script>
+<script type="module" src="/assets/js/auth-guardA.js"></script>
+</head>
+
+<body class="test-page">
+
+  <!-- MOBILE MENU TOGGLE -->
+  <button class="menu-toggle" aria-label="Menu">☰</button>
+
+  <div class="wrap">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+<div class="brand">
+  CivicLearn®
+  <svg viewBox="0 0 3 2" width="30" height="30"
+       style="margin-left:6px;vertical-align:middle;border-radius:3px;overflow:hidden;">
+    <!-- Red top -->
+    <rect width="3" height="0.5" y="0" fill="#AA151B"/>
+    <!-- Yellow middle -->
+    <rect width="3" height="1" y="0.5" fill="#F1BF00"/>
+    <!-- Red bottom -->
+    <rect width="3" height="0.5" y="1.5" fill="#AA151B"/>
+  </svg>
+</div>
+
+       <nav class="nav">
+  <a href="index.html"  data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" class="sub active" data-i18n="nav_flashcards"></a>
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+      <div class="spacer"></div>
+
+     
+    </aside>
+
+    <!-- OVERLAY -->
+    <div class="overlay" id="menuOverlay"></div>
+
+    <!-- MAIN CONTENT -->
+    <main class="flashcards-layout left">
+
+      <header class="ce-header ce-header-top">
+        <h1 data-i18n="title_flashcards"></h1>
+      </header>
+
+      <section id="flashcardsApp">
+
+        <!-- TOPIC SELECTOR -->
+        <div id="topicsWrapper" class="fc-topics-wrapper">
+          <p class="muted" data-i18n="flashcards_select_topics"></p>
+          <div id="topicContainer" class="fc-topic-toggles"></div>
+
+          <button id="startBtn"
+                  class="btn fc-btn-primary"
+                  data-i18n="flashcards_start">
+          </button>
+        </div>
+
+        <!-- CARD -->
+        <div class="flashcard" id="card">
+          <div class="card-inner">
+            <div class="card-front" id="qText"></div>
+            <div class="card-back" id="aText"></div>
+          </div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="controls">
+          <button id="flipBtn" data-i18n="flashcards_flip"></button>
+          <button id="knownBtn" class="primary" data-i18n="flashcards_known"></button>
+          <button id="againBtn" data-i18n="flashcards_again"></button>
+        </div>
+
+        <!-- NAVIGATION -->
+        <div class="controls-row">
+       <button id="fcPrev" class="fc-nav">
+  <svg width="20" height="20" viewBox="0 0 20 20">
+    <circle cx="10" cy="10" r="9" stroke="#6A38FF" stroke-width="2" fill="none"/>
+    <path d="M11 6 L7 10 L11 14" stroke="#6A38FF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+<button id="fcNext" class="fc-nav">
+  <svg width="20" height="20" viewBox="0 0 20 20">
+    <circle cx="10" cy="10" r="9" stroke="#6A38FF" stroke-width="2" fill="none"/>
+    <path d="M9 6 L13 10 L9 14" stroke="#6A38FF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+        </div>
+
+        <!-- STATUS -->
+        <div id="status" class="fc-status"></div>
+
+      </section>
+
+    </main>
+  </div>
+
+<!-- === CONFIG + I18N === -->
+<script src="/assets/js/config-ccse.js"></script>
+<script src="/assets/js/i18n.js"></script>
+
+<script>
+  // Start i18n
+  CivicLearnI18n.init();
+</script>
+
+<script>
+  // Load flashcards logic ONLY when translations are ready
+  CivicLearnI18n.onReady(() => {
+    const s = document.createElement("script");
+    s.src = "/assets/js/flashcards.js";
+    document.body.appendChild(s);
+  });
+</script>
+
+<!-- === MOBILE MENU TOGGLE === -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.querySelector(".menu-toggle");
+    const overlay = document.getElementById("menuOverlay");
+
+    if (toggle && overlay) {
+      toggle.addEventListener("click", () => {
+        document.body.classList.toggle("menu-open");
+      });
+      overlay.addEventListener("click", () => {
+        document.body.classList.remove("menu-open");
+      });
+    }
+  });
+</script>
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>

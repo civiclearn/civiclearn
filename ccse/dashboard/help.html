@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="title_help">Help & Contact</title>
+
+  <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+
+  <style>
+    .brand svg {
+      width: 30px !important;
+      height: 30px !important;
+    }
+
+   button,
+input,
+textarea,
+.help-btn {
+  font-family: "Space Grotesk", system-ui, sans-serif !important;
+}
+    main {
+  padding: 100px 32px 40px; /* ✅ top padding leaves room for hamburger */
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 1200px;
+  margin: auto;
+}
+    h1{font-size:24px;margin:0 0 4px}
+    .muted{color:var(--muted);font-size:15px;margin-bottom:20px}
+
+    /* FAQ Accordion */
+    #faq{display:grid;gap:16px}
+    @media(min-width:900px){
+      #faq{grid-template-columns:1fr 1fr;align-items:start}
+    }
+    .faq-item{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .faq-question{padding:16px 20px;cursor:pointer;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+    .faq-question:hover{background:rgba(0,0,0,.03)}
+    .faq-answer{max-height:0;overflow:hidden;padding:0 20px;transition:all .3s ease;color:var(--muted);font-size:15px}
+    .faq-item.active .faq-answer{max-height:none;padding:16px 20px}
+    .faq-item.active .faq-question{color:var(--brand)}
+
+    /* Contact reveal */
+    #contactWrapper{overflow:hidden;max-height:0;transition:max-height .5s ease,opacity .5s ease;opacity:0}
+    #contactWrapper.visible{max-height:800px;opacity:1;margin-top:10px}
+
+    form{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:24px;display:flex;flex-direction:column;gap:14px}
+    input,textarea{font-family:inherit;font-size:15px;padding:12px 14px;border:1px solid var(--line);
+      border-radius:10px;resize:none;width:100%;background:var(--bg);color:var(--ink)}
+    button{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;
+      border:none;padding:12px 20px;font-weight:600;border-radius:10px;cursor:pointer}
+    button:hover{opacity:.9}
+    .contactBtn{margin-top:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
+      color:#fff;padding:10px 16px;border:none;border-radius:10px;font-weight:600;cursor:pointer}
+	  
+	  .faq-item:last-of-type {
+  background: linear-gradient(
+    135deg,
+    rgba(213, 43, 30, 0.06),
+    rgba(213, 43, 30, 0.03)
+  );
+  border: 1px solid rgba(213, 43, 30, 0.12);
+}
+
+  </style>
+      <script>
+  document.documentElement.classList.add("i18n-hidden");
+</script>
+<script type="module" src="/assets/js/auth-guardA.js"></script>
+
+</head>
+
+<body class="test-page">
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+<div class="brand">
+  CivicLearn®
+  <svg viewBox="0 0 3 2" width="30" height="30"
+       style="margin-left:6px;vertical-align:middle;border-radius:3px;overflow:hidden;">
+    <!-- Red top -->
+    <rect width="3" height="0.5" y="0" fill="#AA151B"/>
+    <!-- Yellow middle -->
+    <rect width="3" height="1" y="0.5" fill="#F1BF00"/>
+    <!-- Red bottom -->
+    <rect width="3" height="0.5" y="1.5" fill="#AA151B"/>
+  </svg>
+</div>
+
+       <nav class="nav">
+  <a href="index.html"  data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="help.html" class="sub active" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+    <div class="spacer"></div>
+
+    
+  </aside>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+  <main class="main">
+
+     <header class="ce-header ce-header-top">
+      <h1 data-i18n="title_help">Help & Contact</h1>
+      <div class="muted" data-i18n="help_subtitle">Frequently asked questions</div>
+    </header>
+
+<!-- FAQ SECTION (CCSE – Spain) -->
+<section id="faq">
+
+  <div class="faq-item">
+    <div class="faq-question">¿Cómo puedo reiniciar completamente mi entrenamiento?</div>
+    <div class="faq-answer">
+      Haz clic en el botón de abajo para empezar desde cero.  
+      Esta acción eliminará todas tus estadísticas y tu progreso, pero conservará tus preferencias personales.<br><br>
+      <button id="resetAllFull" class="contactBtn">🔄 Reiniciar mi progreso</button>
+    </div>
+  </div>
+  
+  <div class="faq-item">
+  <div class="faq-question">¿Qué información muestra el panel principal?</div>
+  <div class="faq-answer">
+    El panel principal te da una visión rápida de tu preparación:
+    <br><br>
+    • <strong>D-X</strong>: días restantes hasta la fecha del examen.<br>
+    • <strong>Preguntas respondidas</strong>: total acumulado de preguntas contestadas.<br>
+    • <strong>Nivel global de dominio</strong>: porcentaje de preguntas dominadas.<br>
+    • <strong>Tiempo total de estudio</strong>: tiempo activo dedicado a practicar.<br>
+    • <strong>Racha de estudio</strong>: días consecutivos con actividad.
+  </div>
+</div>
+
+<div class="faq-item">
+  <div class="faq-question">¿Para qué sirven los botones de acción (Simulación, Prueba rápida, Práctica por temas)?</div>
+  <div class="faq-answer">
+    Cada botón inicia un modo de entrenamiento distinto:
+    <br><br>
+    • <strong>Simulación cronometrada</strong>: examen completo en condiciones reales.<br>
+    • <strong>Prueba rápida</strong>: preguntas aleatorias para repasar rápidamente.<br>
+    • <strong>Práctica por temas</strong>: seleccionas uno o varios temas concretos.<br>
+    • <strong>Errores frecuentes</strong>: repaso de preguntas falladas.<br>
+    • <strong>Historial</strong>: consulta de sesiones anteriores.
+  </div>
+</div>
+
+<div class="faq-item">
+  <div class="faq-question">¿Qué significa el gráfico circular de la izquierda?</div>
+  <div class="faq-answer">
+    El gráfico circular muestra el porcentaje de preguntas que ya dominas.
+    <br><br>
+    Una pregunta se considera dominada cuando la has respondido correctamente al menos una vez.
+    El número inferior indica cuántas preguntas dominadas hay en total.
+  </div>
+</div>
+
+<div class="faq-item">
+  <div class="faq-question">¿Cómo interpretar el gráfico de “Progreso por tema”?</div>
+  <div class="faq-answer">
+    Este gráfico muestra tu nivel de dominio por cada tema oficial (Tarea 1 a Tarea 5).
+    <br><br>
+    Cada barra representa el porcentaje de preguntas dominadas dentro de ese tema,
+    lo que te permite identificar rápidamente en qué áreas necesitas reforzar.
+  </div>
+</div>
+
+<div class="faq-item">
+  <div class="faq-question">¿Qué es la tarjeta de pregunta que aparece a la derecha?</div>
+  <div class="faq-answer">
+    Es una pregunta de práctica directa desde el panel.
+    <br><br>
+    Puedes responderla, avanzar o retroceder, y tus respuestas cuentan para tus estadísticas
+    y tu progreso general.
+  </div>
+</div>
+
+  <div class="faq-item">
+    <div class="faq-question">¿Cómo puedo activar los recordatorios diarios?</div>
+    <div class="faq-answer">
+      Activa el interruptor de abajo para recibir una notificación diaria cuando tu práctica esté lista.  
+      Puedes activarlo o desactivarlo en cualquier momento según tus preferencias.<br><br>
+
+      <!-- WonderPush subscription switch -->
+      <div id="wonderpush-subscription-switch"></div>
+    </div>
+  </div>
+<div class="faq-item">
+  <div class="faq-question">¿Las preguntas son oficiales?</div>
+  <div class="faq-answer">
+    Sí. Las preguntas utilizadas en CivicLearn corresponden a las
+    <strong>preguntas oficiales del examen CCSE</strong>
+    publicadas por el <strong>Instituto Cervantes</strong>.<br><br>
+    El contenido se basa en el banco oficial de preguntas en vigor y es
+    <strong>válido para la convocatoria CCSE 2026</strong>.
+  </div>
+</div>
+
+<div class="faq-item">
+  <div class="faq-question">¿Cómo funciona la fecha del examen (D-X)?</div>
+  <div class="faq-answer">
+    La fecha del examen <strong>no se detecta automáticamente</strong>.
+    <br><br>
+    Debes introducirla tú mismo para que el contador D-X funcione correctamente.
+    Esta fecha sirve únicamente como referencia personal para tu preparación
+    y <strong>no está conectada</strong> con ninguna base de datos oficial ni con tu convocatoria real.
+    <br><br>
+    Puedes modificarla en cualquier momento desde el panel del tablero.
+  </div>
+</div>
+
+  <div class="faq-item">
+    <div class="faq-question">¿Cuál es la diferencia entre los distintos modos de práctica?</div>
+    <div class="faq-answer">
+      CivicLearn ofrece varios modos de entrenamiento para el CCSE:
+      <ul>
+        <li><strong>Simulación del examen:</strong> Reproduce las condiciones del CCSE real (25 preguntas, tiempo limitado, resultado final).</li>
+        <li><strong>Test rápido:</strong> Serie corta de preguntas aleatorias sin límite de tiempo, con corrección inmediata.</li>
+        <li><strong>Práctica por temas:</strong> Selecciona una o varias tareas (Tarea 1–5).  
+          Este modo es <em>progresivo</em>: las preguntas se repiten hasta que todas se dominen.
+        </li>
+        <li><strong>Errores frecuentes:</strong> Entrenamiento específico centrado en las preguntas donde más fallan los candidatos.</li>
+        <li><strong>Práctica secuencial en el panel:</strong> Responde todas las preguntas una tras otra, sin iniciar ningún test formal.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">¿Cómo funciona el modo progresivo?</div>
+    <div class="faq-answer">
+      El modo progresivo no se detiene tras un número fijo de preguntas.  
+      Repite automáticamente las preguntas respondidas incorrectamente hasta que todas estén dominadas.  
+      Cuando ya no queda ninguna, aparece el mensaje: <strong>«Todo dominado 🎉»</strong>.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">¿Por qué algunos tests muestran los botones «Reiniciar» o «Revisar errores»?</div>
+    <div class="faq-answer">
+      Estos botones solo aparecen en los modos <strong>no progresivos</strong> (como la Simulación del examen).  
+      El test termina al final del cuestionario y, a continuación, puedes revisar tus errores o comenzar un nuevo intento.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">¿Qué modo es el más eficaz para preparar el CCSE?</div>
+    <div class="faq-answer">
+      Para una preparación completa:
+      <ul>
+        <li>Empieza con la <strong>Práctica por temas</strong> para consolidar cada tarea.</li>
+        <li>Utiliza el <strong>Test rápido</strong> para repasos diarios.</li>
+        <li>Finaliza con la <strong>Simulación del examen</strong> para evaluar tu nivel en condiciones reales.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">En el modo «Ayuda a la lectura», la voz tiene acento extranjero. ¿Por qué?</div>
+    <div class="faq-answer">
+      CivicLearn utiliza la <strong>síntesis de voz integrada</strong> en tu navegador.
+      Normalmente se emplea una voz en español («es-ES»).  
+      Sin embargo, si tu dispositivo no tiene instalada una voz en español,
+      el sistema usará una voz predeterminada — a menudo en inglés — que leerá el texto con acento extranjero.
+      <br><br>
+      <strong>Cómo solucionarlo:</strong>
+      <ol>
+        <li>
+          Instala una <strong>voz en español</strong> en los ajustes de tu dispositivo:
+          <ul>
+            <li><strong>iPhone / iPad:</strong> Ajustes → Accesibilidad → Contenido leído → Voces → Español</li>
+            <li><strong>Android:</strong> Ajustes → Sistema → Texto a voz → Voces → Español</li>
+            <li><strong>Ordenador:</strong> Revisa los ajustes de síntesis de voz del sistema.</li>
+          </ul>
+        </li>
+        <li>Recarga la página de <strong>CivicLearn</strong>.</li>
+      </ol>
+    </div>
+  </div>
+
+<div class="faq-item">
+  <div class="faq-question">¿Qué es la sección «Errores frecuentes»?</div>
+  <div class="faq-answer">
+    Muestra las preguntas en las que <strong>tú has fallado con más frecuencia</strong> durante tu entrenamiento.
+    <br><br>
+    Esta sección se basa exclusivamente en tu propio historial de respuestas y te ayuda
+    a identificar qué contenidos necesitas reforzar antes de realizar una simulación completa.
+  </div>
+</div>
+
+  <div class="faq-item">
+    <div class="faq-question">¿Puedo usar CivicLearn en el móvil?</div>
+    <div class="faq-answer">
+      Sí. CivicLearn es una aplicación web optimizada para ordenadores, tabletas y teléfonos móviles.  
+      Puedes añadirla a tu pantalla de inicio para un acceso rápido.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">¿Se guarda automáticamente mi progreso?</div>
+    <div class="faq-answer">
+      Sí. Tus resultados y estadísticas se almacenan localmente en tu navegador.  
+      Si cambias de dispositivo o borras los datos del navegador, el progreso se perderá.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">¿Puedo estudiar sin conexión?</div>
+    <div class="faq-answer">
+      Sí. Una vez cargadas las páginas, la mayoría de las funciones (tests, práctica, manual)  
+      siguen disponibles sin conexión, excepto el envío del formulario de contacto.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">¿Cómo funciona el acceso Premium?</div>
+    <div class="faq-answer">
+      El acceso Premium es un pago único, válido sin límite de tiempo.  
+      Tras la confirmación del pago por <strong>Stripe</strong>, tu cuenta se activa inmediatamente y tendrás acceso de por vida,
+      sin renovaciones automáticas.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">¿Puedo solicitar una factura?</div>
+    <div class="faq-answer">
+      Los pagos se procesan a través de <strong>Stripe</strong>, que envía automáticamente un correo de confirmación.  
+      Este mensaje sirve como justificante de pago; no emitimos facturas PDF separadas.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">¿Puedo usar mi cuenta en varios dispositivos?</div>
+    <div class="faq-answer">
+      Sí, puedes acceder desde varios dispositivos con el mismo correo electrónico.  
+      <strong>Atención:</strong> el progreso se guarda localmente en cada navegador.  
+      Si cambias de dispositivo o borras los datos, el historial se reiniciará.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">¿Cómo puedo informar de un error en una pregunta?</div>
+    <div class="faq-answer">
+      Abre el formulario de contacto de abajo e indica la pregunta afectada.  
+      Nuestro equipo revisará y actualizará la base de datos si es necesario.
+    </div>
+  </div>
+
+  <!-- Contact button -->
+  <div class="faq-item">
+    <div class="faq-question" data-i18n="contact_open_form"></div>
+    <div class="faq-answer">
+      <button id="revealContact" class="contactBtn" data-i18n="contact_open_form"></button>
+    </div>
+  </div>
+
+</section>
+
+
+    <!-- CONTACT FORM -->
+    <section id="contactWrapper" class="hidden-section">
+
+      <form id="contactForm" action="https://formspree.io/f/xnnegalq" method="POST">
+
+        <h2 data-i18n="contact_title"></h2>
+        <p class="muted" data-i18n="contact_subtitle"></p>
+
+        <label data-i18n="contact_name_label"></label>
+        <input type="text" name="name" required />
+
+        <label data-i18n="contact_email_label"></label>
+        <input type="email" name="_replyto" required />
+
+        <label data-i18n="contact_message_label"></label>
+        <textarea name="message" rows="5" required></textarea>
+
+        <input type="hidden" name="_subject" value="Message from CivicLearn">
+        <button type="submit" data-i18n="contact_submit_btn"></button>
+      </form>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script src="/assets/js/config-ccse.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>
+  CivicLearnI18n.init();
+</script>
+
+<script>
+  // FAQ toggle
+  document.querySelectorAll('.faq-question').forEach(q => {
+    q.addEventListener('click', () => q.parentElement.classList.toggle('active'));
+  });
+
+  // Reveal contact
+  document.getElementById("revealContact")?.addEventListener("click", () => {
+    const form = document.getElementById("contactWrapper");
+    form.style.maxHeight = "1000px";
+    form.style.opacity = "1";
+    form.scrollIntoView({ behavior: "smooth" });
+  });
+
+  // Contact submission
+  const contactForm = document.getElementById("contactForm");
+  if (contactForm) {
+    contactForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const res = await fetch(contactForm.action, {
+        method: contactForm.method,
+        body: new FormData(contactForm),
+        headers: { Accept: "application/json" }
+      });
+
+      if (res.ok) {
+        contactForm.innerHTML = `
+          <div style="text-align:center; padding:20px;">
+            <h3 data-i18n="contact_success_title"></h3>
+            <p data-i18n="contact_success_text"></p>
+          </div>
+        `;
+        CivicLearnI18n.apply();
+      }
+    });
+  }
+
+  // Mobile menu
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.querySelector(".menu-toggle");
+    const overlay = document.getElementById("menuOverlay");
+    toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+    overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+  });
+</script>
+
+<script src="/assets/js/reset-es.js"></script>
+<script src="https://cdn.by.wonderpush.com/sdk/1.1/wonderpush-loader.min.js" async></script>
+<script>
+  window.WonderPush = window.WonderPush || [];
+  WonderPush.push(["init", {
+      webKey: "256f5d8dc847c1f1f9a267c4d77a121616a872c88e1618da8097a0d20b43fbfd",
+  }]);
+
+  // Tag this user as CCSE user
+  WonderPush.push(["addTag", "country:ccse"]);
+</script>
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>

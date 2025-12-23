@@ -16,51 +16,6 @@
     }
     return fallback;
   }
-  
-  function ruPlural(n, key1, key2_4, key5_0) {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-
-  if (mod100 >= 11 && mod100 <= 14) return t(key5_0);
-  if (mod10 === 1) return t(key1);
-  if (mod10 >= 2 && mod10 <= 4) return t(key2_4);
-  return t(key5_0);
-}
-  
-  function getTopicKey(topic) {
-  if (!topic) return "Misc";
-  if (typeof topic === "string") return topic;          // legacy sites
-  if (typeof topic === "object" && topic.lt) return topic.lt; // canonical LT
-  return "Misc";
-}
-
-function buildTopicLabelMap(bank, lang) {
-  const map = {};
-
-  const cfgLabels = window.CIVICEDGE_CONFIG?.topics?.topicLabels || {};
-  // Supports BOTH:
-  // 1) old: topicLabels = { "LT full": "LT short", ... }
-  // 2) new: topicLabels = { lt:{...}, ru:{...}, en:{...} }
-  const shortByLang =
-    (cfgLabels && typeof cfgLabels === "object" && (cfgLabels[lang] || cfgLabels.lt))
-      ? (cfgLabels[lang] || cfgLabels.lt)
-      : cfgLabels;
-
-  bank.forEach(q => {
-    if (!q.topic || typeof q.topic !== "object" || !q.topic.lt) return;
-    const ltKey = q.topic.lt;
-
-    if (shortByLang && shortByLang[ltKey]) {
-      map[ltKey] = shortByLang[ltKey];
-    } else {
-      map[ltKey] = q.topic[lang] || ltKey;
-    }
-  });
-
-  return map;
-}
-
-
 
   function getStreakFromHistory(history) {
     if (!Array.isArray(history)) return 0;
@@ -100,6 +55,14 @@ function buildTopicLabelMap(bank, lang) {
 
     return streak;
   }
+  
+  function getDashboardSequentialStats() {
+  try {
+    return JSON.parse(localStorage.getItem("civiclearn:ccse:stats")) || null;
+  } catch {
+    return null;
+  }
+}
 
   // ------------------------------------------
   // Stats + Progress
@@ -177,12 +140,12 @@ const res = await fetch(bankPath);
     }
   }
 
-// ------------------------------------------
-// Chart.js instances (LT dashboard)
-// ------------------------------------------
-let __globalChart = null;
-let __topicsChart = null;
-let __trendChart = null;
+  // ------------------------------------------
+  // Chart.js instances (must be destroyed on re-init)
+  // ------------------------------------------
+  let __globalChart = null;
+  let __topicsChart = null;
+  let __trendChart = null;
 
 
   // ------------------------------------------
@@ -214,7 +177,7 @@ function computePerTopicProgressFromHistory(history) {
     const questions = session.questions || [];
 
     questions.forEach((q) => {
-      const topic = getTopicKey(q.topic);
+      const topic = q.topic || "Misc";
 
       if (!perTopic[topic]) {
         perTopic[topic] = { correct: 0, total: 0 };
@@ -376,7 +339,7 @@ if (!saved) {
   // Charts init
   // ------------------------------------------
 
-  function initCharts(globalMetrics, perTopic, trendPoints, topicLabelMap) {
+  function initCharts(globalMetrics, perTopic, trendPoints) {
     if (typeof Chart === "undefined") return;
 
     // Global donut
@@ -385,12 +348,12 @@ if (!saved) {
       const ctx = globalCanvas.getContext("2d");
       const masteryPct = (globalMetrics.masteryPct ?? globalMetrics.accuracy ?? 0);
 
-      if (__globalChart) {
-  __globalChart.destroy();
-  __globalChart = null;
-}
+         if (__globalChart) {
+        __globalChart.destroy();
+        __globalChart = null;
+      }
 
-__globalChart = new Chart(ctx, {
+      __globalChart = new Chart(ctx, {
         type: "doughnut",
         data: {
           labels: [
@@ -427,15 +390,15 @@ __globalChart = new Chart(ctx, {
         return entry.total > 0 ? Math.round((entry.correct / entry.total) * 100) : 0;
       });
 
-      if (__topicsChart) {
-  __topicsChart.destroy();
-  __topicsChart = null;
-}
+            if (__topicsChart) {
+        __topicsChart.destroy();
+        __topicsChart = null;
+      }
 
-__topicsChart = new Chart(ctx, {
+      __topicsChart = new Chart(ctx, {
         type: "bar",
         data: {
-          labels: topicKeys.map(k => topicLabelMap[k] || k),// ALL topics, not only those with progress
+          labels: topicKeys, // ALL topics, not only those with progress
           datasets: [
             {
               label: t("dashboard_topics_mastery_label", "Mastery (%)"),
@@ -551,12 +514,25 @@ function computeTrendPointsFromFirstAttempts(history) {
     try {
       const stats = getStats();
       const progress = getProgress();
+	  
+	  
+	  // --- Merge Dashboard Sequential stats ---
+const dashSeq = getDashboardSequentialStats();
+
+let dashSeqAnswered = 0;
+let dashSeqCorrect = 0;
+let dashSeqByTopic = {};
+
+if (dashSeq) {
+  dashSeqAnswered = Number(dashSeq.answered || 0);
+  dashSeqCorrect = Number(dashSeq.correct || 0);
+  dashSeqByTopic = dashSeq.byTopic || {};
+}
+
+	  
       const progressRaw = progress.raw || {};
 
       await loadBankSize();
-	  
-	  const lang = window.CIVICEDGE_LANG || "lt";
-const topicLabelMap = buildTopicLabelMap(window.__ceBank || [], lang);
 
       // Countdown FIRST
       initCountdownTile();
@@ -568,83 +544,68 @@ const topicLabelMap = buildTopicLabelMap(window.__ceBank || [], lang);
       // 2. Metrics
       const entries = Object.values(progressRaw);
       const masteredQuestions = entries.filter((e) => Number(e.rights || 0) > 0).length;
-      const mastery = bankSize > 0 ? masteredQuestions / bankSize : 0;
+      const mastery = bankSize > 0
+  ? (masteredQuestions + dashSeqCorrect) / bankSize
+  : 0;
 
       // Global mastery percentage (donut + label)
       safeText(document.getElementById("globalPct"), Math.round(mastery * 100) + "%");
 
       const globalAnsweredEl = document.getElementById("globalAnswered");
       if (globalAnsweredEl) {
-function ruQuestionWord(n) {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod100 >= 11 && mod100 <= 14) return t("dashboard_questions_5_0", "вопросов");
-  if (mod10 === 1) return t("dashboard_questions_1", "вопрос");
-  if (mod10 >= 2 && mod10 <= 4) return t("dashboard_questions_2_4", "вопроса");
-  return t("dashboard_questions_5_0", "вопросов");
-}
-
-const lang = (window.CIVICEDGE_LANG || "en").toLowerCase();
-const word = (lang === "ru")
-  ? ruQuestionWord(masteredQuestions)
-  : t("dashboard_questions_label", "questions");
-
-safeText(document.getElementById("globalAnswered"), `${masteredQuestions} ${word}`);
+        const label = t("dashboard_questions_label", "questions");
+safeText(
+  document.getElementById("globalAnswered"),
+  (masteredQuestions + dashSeqCorrect) + " " + label
+);
 
       }
 
       // Total distinct questions seen
-      const seenCount = Object.keys(progressRaw).length;
-      safeText(document.getElementById("tmAnswered"), seenCount);
+const seenCount = Object.keys(progressRaw).length;
+safeText(
+  document.getElementById("tmAnswered"),
+  seenCount + dashSeqAnswered
+);
 
       // Global accuracy across all sessions
-      const avgAcc =
-        stats.totalQuestions > 0
-          ? Math.round((stats.totalCorrect / stats.totalQuestions) * 100)
-          : 0;
+const totalQ = stats.totalQuestions + dashSeqAnswered;
+const totalC = stats.totalCorrect + dashSeqCorrect;
+
+const avgAcc =
+  totalQ > 0
+    ? Math.round((totalC / totalQ) * 100)
+    : 0;
+
       safeText(document.getElementById("tmAccuracy"), avgAcc + "%");
 
       // Total study time
       safeText(document.getElementById("tmTime"), minutesToLabel(stats.totalMinutes));
 
       // Study streak
-// Study streak
-const streakDays = getStreakFromHistory(stats.history || []);
+      const streakDays = getStreakFromHistory(stats.history || []);
+      const streakKey =
+        streakDays <= 1
+          ? "dashboard_streak_day_singular"
+          : "dashboard_streak_day_plural";
 
-const applyStreak = () => {
-  const lang = (window.CIVICEDGE_LANG || "en").toLowerCase();
+      const applyStreak = () => {
+        let label = t(streakKey, "{n} jour").replace("{n}", String(streakDays));
+        // avoid raw key if i18n not ready
+        if (label.includes("dashboard_streak_day_")) {
+          label = `${streakDays} jour`;
+        }
+        safeText(document.getElementById("tmStreak"), label);
+      };
 
-  let word;
-  if (lang === "ru") {
-    word = ruPlural(
-      streakDays,
-      "streak_day_1",
-      "streak_day_2_4",
-      "streak_day_5_0"
-    );
-  } else {
-    word = t(
-      streakDays === 1
-        ? "dashboard_streak_day_singular"
-        : "dashboard_streak_day_plural"
-    );
-  }
-
-  safeText(
-    document.getElementById("tmStreak"),
-    `${streakDays} ${word}`
-  );
-};
-
-if (
-  window.CivicLearnI18n &&
-  typeof window.CivicLearnI18n.onReady === "function"
-) {
-  window.CivicLearnI18n.onReady(applyStreak);
-} else {
-  applyStreak();
-}
-
+      if (
+        window.CivicLearnI18n &&
+        typeof window.CivicLearnI18n.onReady === "function"
+      ) {
+        window.CivicLearnI18n.onReady(applyStreak);
+      } else {
+        applyStreak();
+      }
 
 
       // Optional gauge (if present)
@@ -658,7 +619,7 @@ if (
       const globalMetrics = computeGlobalMetrics(stats, bankSize, progress);
       globalMetrics.masteryPct = Math.round(mastery * 100);
 
-      initCharts(globalMetrics, perTopic, trendPoints, topicLabelMap);
+      initCharts(globalMetrics, perTopic, trendPoints);
     } catch (err) {
       console.error("Dashboard init error:", err);
     }
@@ -672,7 +633,7 @@ function computePerTopicProgressFromProgressRaw(progressRaw) {
 
   // First, initialize totals using the full bank
   bank.forEach(q => {
-    const topic = getTopicKey(q.topic);
+    const topic = q.topic || "Misc";
     if (!result[topic]) {
       result[topic] = { correct: 0, total: 0 };
     }
@@ -681,13 +642,31 @@ function computePerTopicProgressFromProgressRaw(progressRaw) {
 
   // Now count mastered questions (correct once)
   Object.entries(progressRaw || {}).forEach(([key, entry]) => {
-    const topic = getTopicKey(entry.topic);
+    const topic = entry.topic || "Misc";
     const rights = Number(entry.rights || 0);
 
     if (rights > 0 && result[topic]) {
       result[topic].correct += 1;
     }
   });
+  
+    // --- Merge Dashboard Sequential per-topic stats ---
+  try {
+    const dashSeq = JSON.parse(localStorage.getItem("civiclearn:ccse:stats"));
+    if (dashSeq && dashSeq.byTopic) {
+      Object.entries(dashSeq.byTopic).forEach(([topic, data]) => {
+        if (!result[topic]) {
+          result[topic] = { correct: 0, total: 0 };
+        }
+result[topic].correct += Number(data.correct || 0);
+// DO NOT touch result[topic].total here
+
+      });
+    }
+  } catch (e) {
+    // silent fail – dashboard sequential stats are optional
+  }
+
 
   return result;
 }
@@ -699,6 +678,7 @@ function computePerTopicProgressFromProgressRaw(progressRaw) {
     window.CivicEdgeEngine.computeTrendPointsFromFirstAttempts = computeTrendPointsFromFirstAttempts;
   }
 
+window.addEventListener("civiclearn:progress-updated", initDashboard);
   // start
     if (window.CivicLearnI18n && typeof window.CivicLearnI18n.onReady === "function") {
     window.CivicLearnI18n.onReady(initDashboard);

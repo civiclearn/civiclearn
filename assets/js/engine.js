@@ -1271,7 +1271,11 @@ function startReviewMode() {
     html += `
       <div class="ce-review-item" style="margin-bottom:32px;">
 
-        <div class="ce-q-meta">Question ${i + 1} sur ${wrong.length}</div>
+       <div class="ce-q-meta">${
+  t("question_x_of_y", "Question {x} sur {y}")
+    .replace("{x}", String(i + 1))
+    .replace("{y}", String(wrong.length))
+}</div>
         <div class="ce-q-topic">${q.topicLabel || ""}</div>
         <div class="ce-question">${q.text}</div>
 

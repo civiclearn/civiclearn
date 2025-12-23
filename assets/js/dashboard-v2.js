@@ -132,6 +132,14 @@ const res = await fetch(bankPath);
     }
   }
 
+// ------------------------------------------
+// Chart.js instances (classic dashboard)
+// ------------------------------------------
+let __globalChart = null;
+let __topicsChart = null;
+let __trendChart = null;
+
+
   // ------------------------------------------
   // Charts helpers
   // ------------------------------------------
@@ -332,7 +340,12 @@ if (!saved) {
       const ctx = globalCanvas.getContext("2d");
       const masteryPct = (globalMetrics.masteryPct ?? globalMetrics.accuracy ?? 0);
 
-      new Chart(ctx, {
+      if (__globalChart) {
+  __globalChart.destroy();
+  __globalChart = null;
+}
+
+__globalChart = new Chart(ctx, {
         type: "doughnut",
         data: {
           labels: [
@@ -369,7 +382,12 @@ if (!saved) {
         return entry.total > 0 ? Math.round((entry.correct / entry.total) * 100) : 0;
       });
 
-      new Chart(ctx, {
+      if (__topicsChart) {
+  __topicsChart.destroy();
+  __topicsChart = null;
+}
+
+__topicsChart = new Chart(ctx, {
         type: "bar",
         data: {
           labels: topicKeys, // ALL topics, not only those with progress

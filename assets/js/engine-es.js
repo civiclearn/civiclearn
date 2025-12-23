@@ -184,62 +184,77 @@ Engine.start = async function start(mode, options = {}) {
         options.limit ||
         5;
       questions = sample(fullBank, n);
+
     } else if (mode === "simulation") {
-      const n =
-        (cfg.simulation && cfg.simulation.questionCount) ||
-        options.limit ||
-        20;
-      questions = sample(fullBank, n);
-} else if (mode === "topics") {
-  const selectedKeys = options.topics || [];
-  const limit = options.limit || 20;
 
-  const topicsCfg = cfg.topics || {};
-  const topicLabels = topicsCfg.topicLabels || {};
+      // CCSE quota simulation (exact per Tarea) — driven by config
+      if (cfg.simulation && cfg.simulation.mode === "topic-quotas" && cfg.simulation.topicCounts) {
 
-  // Canonical selected topic labels (normalized)
-  const selectedLabels = selectedKeys
-    .map(k => topicLabels[k])
-    .filter(Boolean)
-    .map(lbl => normalizeLabel(lbl));
+        const perTopic = cfg.simulation.topicCounts;
+        const selected = [];
 
-  // 1. Filter full bank by selected topics
-  const filtered = fullBank.filter(q =>
-    selectedLabels.includes(normalizeLabel(q.topicLabel))
-  );
+        Object.entries(perTopic).forEach(([topicLabel, count]) => {
+          const pool = fullBank.filter(q =>
+            normalizeLabel(q.topicLabel) === normalizeLabel(topicLabel)
+          );
 
-  // 2. Load mastery progress
-  const progress = readJsonLS("civicedge_progress", {});
+          if (pool.length < count) {
+            throw new Error(`No hay suficientes preguntas para ${topicLabel}`);
+          }
 
-  // 3. Remove already mastered questions
-  const unmastered = filtered.filter(q => {
-    const key = `${q.topicLabel || q.topicKey || "topic"}:${q.text}`;
-    const entry = progress[key];
-    return !(entry && entry.correct === 1);
-  });
+          selected.push(...sample(pool, count));
+        });
 
-  // 4. Pool is ONLY unmastered questions
-  const pool = unmastered;
+        questions = shuffle(selected);
 
-// 5. Initial wave: if nothing left → finish immediately
-  questions = sample(pool, Math.min(limit, pool.length));
-  
-  // --- FIX C: Save the initial, full set of questions for history logging ---
-  if (mode === "topics") {
-    initialQuestions = questions.slice();
-    attemptLog = []; // FIX: Ensure log is clear when a new test starts
-  }
-  // -----------------------------------------------------------------------
+      } else {
+        // Fallback (if you ever run simulation without quotas)
+        const n =
+          (cfg.simulation && cfg.simulation.questionCount) ||
+          options.limit ||
+          25;
+        questions = sample(fullBank, n);
+      }
 
+    } else if (mode === "topics") {
+      const selectedKeys = options.topics || [];
+      const limit = options.limit || 20;
 
-        } else if (mode === "traps") {
+      const topicsCfg = cfg.topics || {};
+      const topicLabels = topicsCfg.topicLabels || {};
+
+      const selectedLabels = selectedKeys
+        .map(k => topicLabels[k])
+        .filter(Boolean)
+        .map(lbl => normalizeLabel(lbl));
+
+      const filtered = fullBank.filter(q =>
+        selectedLabels.includes(normalizeLabel(q.topicLabel))
+      );
+
+      const progress = readJsonLS("civicedge_progress", {});
+
+      const unmastered = filtered.filter(q => {
+        const key = `${q.topicLabel || q.topicKey || "topic"}:${q.text}`;
+        const entry = progress[key];
+        return !(entry && entry.correct === 1);
+      });
+
+      const pool = unmastered;
+      questions = sample(pool, Math.min(limit, pool.length));
+
+      initialQuestions = questions.slice();
+      attemptLog = [];
+
+    } else if (mode === "traps") {
       if (!options.bank || !Array.isArray(options.bank)) {
         console.error("Traps mode requires options.bank array");
         return;
       }
-      const limit = options.limit || 20;  // default 20 traps per session
+      const limit = options.limit || 20;
       const normalized = normalizeBank(options.bank);
       questions = sample(normalized, Math.min(limit, normalized.length));
+
     } else {
       console.error("Unknown mode:", mode);
       return;
@@ -863,13 +878,17 @@ function updateProgressBar() {
     const incorrect = state.incorrect;
     const percent = total ? Math.round((correct / total) * 100) : 0;
 
-    const simCfg = state.cfg.simulation || {};
-    const required = simCfg.passScore || null;
-    let passed = null;
+    let passed = true;
 
-    if (required !== null) {
-      passed = correct >= required;
-    }
+// ===================================================
+// CCSE
+// ===================================================
+if (state.mode === "simulation") {
+  if (correct < state.cfg.simulation.passScore) {
+    passed = false;
+  }
+}
+
 
     const durationSec = Math.round(
       (state.finishedAt - state.startedAt) / 1000
@@ -1017,39 +1036,22 @@ if (state.mode === "topics") {
     list.appendChild(liTime);
 	
 	    // --- Traps-specific summary: how many traps cleaned / remaining ---
-    if (state.mode === "traps") {
-      const progress = readJsonLS("civicedge_progress", {});
-      let remaining = 0;
-      let cleaned = 0;
+if (state.mode === "traps") {
+  const total = state.questions.length;
+  const corrected = state.questions.filter(q => q._userCorrect === true).length;
+  const remaining = total - corrected;
 
-      Object.values(progress).forEach(p => {
-        const attempts = p.attempts || 0;
-        const correctFlag = p.correct || 0;
-        if (attempts >= 3) {
-          if (correctFlag === 0) remaining += 1;
-          else cleaned += 1;
-        }
-      });
+  const trapsTitle = createEl("h3", "ce-result-traps-title");
+  trapsTitle.textContent = "Errores corregidos";
 
-      const trapsTitle = createEl("h3", "ce-result-traps-title");
-      trapsTitle.setAttribute("data-i18n", "traps_fixed_title");
-      trapsTitle.textContent = t(
-        "traps_fixed_title",
-        "Pièges corrigés"
-      );
+  const trapsLine = createEl("p", "ce-result-traps-line");
+  trapsLine.textContent =
+    `Has corregido ${corrected}. Quedan ${remaining}.`;
 
-      const trapsLine = createEl("p", "ce-result-traps-line");
-      const tmpl = t(
-        "traps_fixed_line",
-        "Vous avez corrigé {fixed}. Il en reste {remaining}."
-      );
-      trapsLine.textContent = tmpl
-        .replace("{fixed}", String(cleaned))
-        .replace("{remaining}", String(remaining));
+  card.appendChild(trapsTitle);
+  card.appendChild(trapsLine);
+}
 
-      card.appendChild(trapsTitle);
-      card.appendChild(trapsLine);
-    }
 
     if (timeUp) {
       const timeNote = createEl("p", "muted");
@@ -1080,17 +1082,18 @@ if (state.mode === "topics") {
     card.appendChild(h2);
     card.appendChild(sub);
 
-    // PASS/FAIL only for simulation, unchanged
-    if (state.mode === "simulation" && required !== null) {
-      const gradeEl = createEl("p", "ce-result-grade");
-      gradeEl.innerHTML = passed
-        ? `<span class="ce-result-status pass">${t("result_passed")}</span>`
-        : `<span class="ce-result-status fail">${t("result_failed")}</span>`;
-      card.appendChild(gradeEl);
-	    
-  if (passed) launchConfetti();
+// PASS/FAIL only for simulation, unchanged
+if (state.mode === "simulation") {
+  const gradeEl = createEl("p", "ce-result-grade");
+  gradeEl.innerHTML = passed
+    ? `<span class="ce-result-status pass">${t("result_passed", "Passed")}</span>`
+    : `<span class="ce-result-status fail">${t("result_failed", "Failed")}</span>`;
+  card.appendChild(gradeEl);
 
-    }
+  if (passed) launchConfetti();
+}
+
+
 
     card.appendChild(scoreBlock);
     card.appendChild(list);
