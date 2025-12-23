@@ -326,7 +326,219 @@
   </div>
 </footer>
 
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- scripts del mini-test SIN CAMBIOS -->
+
+<script>
+
+const MINI_QUESTIONS = [
+  {
+    q: "¿Quién elige al presidente del Gobierno?",
+    a: [
+      "El Congreso de los Diputados.",
+      "El rey",
+      "El Tribunal Supremo."
+    ]
+  },
+  {
+    q: "Los ciudadanos deben colaborar con los jueces si se lo piden.",
+    a: [
+      "Verdadero",
+      "Falso"
+    ]
+  },
+  {
+    q: "Los sindicatos pueden participar en negociaciones con empresarios y con el Gobierno.",
+    a: [
+      "Verdadero",
+      "Falso"
+    ]
+  },
+  {
+    q: "En España, los poderes públicos deben proteger la salud y promover el deporte.",
+    a: [
+      "Verdadero",
+      "Falso"
+    ]
+  },
+  {
+    q: "El parque nacional de Ordesa está en...",
+    a: [
+      "Aragón.",
+      "Navarra",
+      "Castilla-La Mancha."
+    ]
+  },
+  {
+    q: "¿Cuál de estos ríos desemboca en el mar Mediterráneo?",
+    a: [
+      "El Júcar.",
+      "El Tajo.",
+      "El Duero."
+    ]
+  },
+  {
+    q: "¿En qué lugar de España hay un clima con inviernos fríos y veranos muy calurosos?",
+    a: [
+      "Madrid",
+      "Canarias",
+      "Comunidad Valenciana"
+    ]
+  },
+  {
+    q: "¿Cuál es la capital de la comunidad autónoma de Extremadura?",
+    a: [
+      "Mérida.",
+      "Badajoz",
+      "Cáceres"
+    ]
+  },
+  {
+    q: "¿Quién escribió «La casa de Bernarda Alba»?",
+    a: [
+      "Federico García Lorca.",
+      "Antonio Machado.",
+      "Miguel de Cervantes."
+    ]
+  },
+  {
+    q: "¿Quién escribió «Nada», una novela sobre la posguerra española?",
+    a: [
+      "Carmen Laforet.",
+      "Ana María Matute.",
+      "María Dueñas."
+    ]
+  }
+];
+
+
+/* ---- Utility: shuffle ---- */
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]]; // correct swap
+  }
+  return a;
+}
+
+/* ---- Build model ---- */
+const miniModel = MINI_QUESTIONS.map((item, i) => {
+  const correct = item.a[0];
+  const shuffled = shuffle(item.a);
+  return {
+    index: i,
+    text: item.q,
+    choices: shuffled.map(opt => ({
+      text: opt,
+      isCorrect: opt === correct
+    })),
+    answered: false,
+    pickedIndex: -1
+  };
+});
+
+let qi = 0;
+let score = 0;
+const total = miniModel.length;
+
+const miniContainer   = document.getElementById("mini-test-container");
+const miniResultPanel = document.getElementById("mini-test-result");
+const miniResultText  = document.getElementById("mini-test-text");
+
+/* ---- Render question ---- */
+function renderMiniQuestion() {
+  const q = miniModel[qi];
+
+  miniContainer.style.display = "block";
+  miniResultPanel.style.display = "none";
+
+  miniContainer.innerHTML = `
+    <div class="mini-q-title">${q.text}</div>
+    <div class="choices" id="miniChoices"></div>
+    <div class="mini-next-area"></div>
+  `;
+
+  const choicesEl = document.getElementById("miniChoices");
+  q.choices.forEach((c, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "choice";
+    btn.textContent = c.text;
+    btn.addEventListener("click", () => miniPick(idx));
+    choicesEl.appendChild(btn);
+  });
+}
+
+/* ---- Handle answer ---- */
+function miniPick(idx) {
+  const q = miniModel[qi];
+  if (q.answered) return;
+
+  q.answered = true;
+  q.pickedIndex = idx;
+
+  if (q.choices[idx].isCorrect) score++;
+
+  applyMiniReveal();
+
+  const area = miniContainer.querySelector(".mini-next-area");
+  area.innerHTML = `
+    <button class="mini-next-btn" onclick="miniNext()">Siguiente →</button>
+  `;
+}
+
+/* ---- Reveal ---- */
+function applyMiniReveal() {
+  const q = miniModel[qi];
+  const buttons = miniContainer.querySelectorAll(".choice");
+
+  buttons.forEach((b, i) => {
+    b.classList.add("disabled");
+
+    if (q.choices[i].isCorrect) b.classList.add("correct");
+    if (q.pickedIndex === i && !q.choices[i].isCorrect) b.classList.add("wrong");
+  });
+}
+
+/* ---- Next ---- */
+function miniNext() {
+  qi++;
+  if (qi < total) renderMiniQuestion();
+  else finishMiniTest();
+}
+
+/* ---- Finish ---- */
+function finishMiniTest() {
+  miniContainer.style.display = "none";
+  miniResultPanel.style.display = "block";
+
+  const wrong = total - score;
+
+miniResultText.textContent =
+  `Has respondido correctamente a ${score} de ${total} preguntas. ` +
+  `Correctas: ${score}. Incorrectas: ${wrong}.`;
+
+renderMiniChart(score, wrong);
+}
+
+/* ---- Result chart ---- */
+function renderMiniChart(correct, wrong) {
+  new Chart(document.getElementById("mini-test-chart"), {
+    type: "pie",
+    data: {
+      labels: ["Correcto", "Incorrecto"],
+      datasets: [{ data: [correct, wrong] }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: "bottom" } }
+    }
+  });
+}
+
+/* ---- Start ---- */
+renderMiniQuestion();
+</script>
+
 </body>
 </html>
