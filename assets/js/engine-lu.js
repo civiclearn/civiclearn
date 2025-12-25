@@ -77,7 +77,7 @@
     // Build pools by subtopic
     const pools = {};
     for (const q of fullBank) {
-      const sub = q && q.subtopic;
+      const sub = q && (q.subtopicKey || q.subtopic);
       if (!sub) continue;
       if (!pools[sub]) pools[sub] = [];
       pools[sub].push(q);
@@ -100,6 +100,54 @@
     return shuffle(selected);
   }
 
+function buildLuxembourgSimulation(fullBank, simCfg) {
+  const quotas = simCfg.quotas;
+  if (!quotas) throw new Error("Missing simulation.quotas");
+
+  const result = [];
+
+  for (const [topicKey, totalNeeded] of Object.entries(quotas)) {
+
+    // 1. All questions of this topic
+    const topicQs = fullBank.filter(q => q.topicKey === topicKey);
+
+    // 2. Group by subtopic
+    const bySubtopic = {};
+    for (const q of topicQs) {
+      if (!bySubtopic[q.subtopicKey]) bySubtopic[q.subtopicKey] = [];
+      bySubtopic[q.subtopicKey].push(q);
+    }
+
+    const subtopics = Object.keys(bySubtopic);
+    const base = Math.floor(totalNeeded / subtopics.length);
+    const extra = totalNeeded % subtopics.length;
+
+    // 3. Shuffle subtopics to decide who gets the “+1”
+    shuffle(subtopics);
+
+    // 4. Take questions
+    let taken = 0;
+    for (let i = 0; i < subtopics.length; i++) {
+      const need = base + (i < extra ? 1 : 0);
+      const pool = shuffle(bySubtopic[subtopics[i]]);
+
+      if (pool.length < need) {
+        throw new Error(
+          `Not enough questions in ${topicKey} / ${subtopics[i]}`
+        );
+      }
+
+      result.push(...pool.slice(0, need));
+      taken += need;
+    }
+
+    if (taken !== totalNeeded) {
+      throw new Error(`Quota mismatch for ${topicKey}`);
+    }
+  }
+
+  return shuffle(result);
+}
 
 
   // LocalStorage helpers (safe)
@@ -299,11 +347,12 @@
         5;
       questions = sample(fullBank, n);
 
-    } else if (mode === "simulation") {
-      questions = buildDistributedSimulation(fullBank, cfg.simulation);
+} else if (mode === "simulation") {
+  questions = buildLuxembourgSimulation(fullBank, cfg.simulation);
+}
 
-
-    } else if (mode === "topics") {
+	
+	else if (mode === "topics") {
       const selectedKeys = options.topics || []; // these are canonical LT strings now
       const limit = options.limit || 20;
 

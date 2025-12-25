@@ -62,14 +62,6 @@ window.CIVICEDGE_CONFIG = {
     timeLimitMin: 60,
     passScore: 28,
 
-    distribution: {
-      enforced: true,
-      source: "subtopics",
-      buckets: {
-        "fundamental-rights": 10,
-        "institutions": 20,
-        "history": 10
-      }
     }
   },
 
