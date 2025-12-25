@@ -1,0 +1,316 @@
+
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CivicLearn – Login</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/login.css">
+<style>
+/* =========================
+   Language switcher (login)
+========================= */
+
+.lang-switch {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.lang-switch button {
+  width: 44px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid #d8d6e3;
+  background: #f6f5fb;
+  color: #2d2b38;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lang-switch button:hover {
+  background: #edeafc;
+  border-color: #c8c3f5;
+}
+
+.lang-switch button.active {
+  background: #6b4eff;
+  color: #fff;
+  border-color: #6b4eff;
+  box-shadow: 0 4px 12px rgba(107, 78, 255, 0.25);
+}
+</style>
+
+
+  <!-- Supabase config -->
+  <script>
+    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+  </script>
+
+  <!-- Supabase loader -->
+  <script>
+    (function () {
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
+      s.onload = () => {
+        window.supabase = supabase.createClient(
+          window.SUPABASE_URL,
+          window.SUPABASE_KEY
+        );
+      };
+      document.head.appendChild(s);
+    })();
+  </script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+
+    <div class="header-left">
+      <div class="brand-main">
+        <img src="/assets/images/lt.svg" alt="Lithuania">
+        <div class="brand-title">CivicLearn Lietuva</div>
+      </div>
+      <div class="brand-powered">
+        powered by <span>CivicLearn</span>
+      </div>
+    </div>
+
+    <nav class="header-nav">
+      <a href="/lt/" data-t="nav_home"></a>
+      <a href="/lt/#presentation" data-t="nav_overview"></a>
+      <a href="/lt/#pricing" data-t="nav_pricing"></a>
+    </nav>
+
+    <a href="/lt/checkout.html" class="btn-small-purple" data-t="nav_signup"></a>
+  </div>
+</header>
+
+<div class="login-wrapper">
+  <div class="card">
+
+    <!-- language switch -->
+    <div class="lang-switch" style="justify-content:flex-end;margin-bottom:10px;">
+      <button data-lang="lt">LT</button>
+      <button data-lang="en">EN</button>
+      <button data-lang="ru">RU</button>
+    </div>
+
+    <h1 data-t="title"></h1>
+
+    <p class="subtitle" data-t="subtitle"></p>
+
+    <label for="email" data-t="email_label"></label>
+    <input id="email" type="email" placeholder="you@example.com" />
+
+    <button type="button" class="login-btn" id="sendMagicLink" data-t="send_link"></button>
+
+    <div id="loginMessage" class="login-message" style="display:none;"></div>
+
+    <div class="hint">
+      <span data-t="no_access"></span>
+      <a href="/lt/checkout.html" data-t="create_access"></a>
+    </div>
+  </div>
+</div>
+
+<!-- =========================
+     I18N DICTIONARY
+========================= -->
+<script>
+const I18N = {
+  lt: {
+    title: "Prisijungimas",
+    subtitle: "Įveskite el. pašto adresą, kad galėtumėte prisijungti.",
+    email_label: "El. paštas",
+    send_link: "Siųsti prisijungimo nuorodą",
+    no_access: "Dar neturite prieigos?",
+    create_access: "Sukurti prieigą",
+
+    nav_home: "Pradžia",
+    nav_overview: "Apžvalga",
+    nav_pricing: "Kaina",
+    nav_signup: "Gauti prieigą",
+
+    first_login:
+      "Jūsų prieiga aktyvuota. Įveskite el. pašto adresą, naudotą pirkimo metu.",
+    sent_once:
+      "Prisijungimo nuoroda išsiųsta. Patikrinkite savo el. paštą.",
+    sent_twice:
+      "Jei jau apmokėjote, bet negaunate laiško, patikrinkite Šlamštą arba susisiekite su mumis.",
+    email_error:
+      "Įveskite el. pašto adresą.",
+    tech_error:
+      "Techninė klaida. Atnaujinkite puslapį ir bandykite dar kartą."
+  },
+
+  en: {
+    title: "Login",
+    subtitle: "Enter your email address to access your dashboard.",
+    email_label: "Email",
+    send_link: "Send login link",
+    no_access: "Don’t have access yet?",
+    create_access: "Create access",
+
+    nav_home: "Home",
+    nav_overview: "Overview",
+    nav_pricing: "Pricing",
+    nav_signup: "Sign up",
+
+    first_login:
+      "Your access has been activated. Enter the email address used during purchase.",
+    sent_once:
+      "Your login link has been sent. Please check your email.",
+    sent_twice:
+      "If you have already paid but do not receive the link, please check Spam or contact us.",
+    email_error:
+      "Please enter your email address.",
+    tech_error:
+      "Technical error. Please refresh the page and try again."
+  },
+
+  ru: {
+    title: "Вход",
+    subtitle: "Введите адрес электронной почты для входа.",
+    email_label: "Эл. почта",
+    send_link: "Отправить ссылку для входа",
+    no_access: "Ещё нет доступа?",
+    create_access: "Получить доступ",
+
+    nav_home: "Главная",
+    nav_overview: "Обзор",
+    nav_pricing: "Цена",
+    nav_signup: "Получить доступ",
+
+    first_login:
+      "Ваш доступ активирован. Введите адрес электронной почты, использованный при оплате.",
+    sent_once:
+      "Ссылка для входа отправлена. Проверьте электронную почту.",
+    sent_twice:
+      "Если вы оплатили, но не получили письмо, проверьте Спам или свяжитесь с нами.",
+    email_error:
+      "Введите адрес электронной почты.",
+    tech_error:
+      "Техническая ошибка. Обновите страницу и попробуйте снова."
+  }
+};
+</script>
+
+<!-- =========================
+     I18N ENGINE
+========================= -->
+<script>
+let currentLang = localStorage.getItem("lang") || "lt";
+
+function applyLang(lang) {
+  currentLang = lang;
+  localStorage.setItem("lang", lang);
+  document.documentElement.lang = lang;
+
+  /* ACTIVE BUTTON STATE */
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.lang === lang);
+  });
+
+  /* APPLY TEXT */
+  document.querySelectorAll("[data-t]").forEach(el => {
+    const key = el.getAttribute("data-t");
+    if (I18N[lang][key]) el.textContent = I18N[lang][key];
+  });
+}
+
+document.querySelectorAll(".lang-switch button").forEach(btn => {
+  btn.addEventListener("click", () => applyLang(btn.dataset.lang));
+});
+
+applyLang(currentLang);
+</script>
+
+<!-- =========================
+     FIRST LOGIN MESSAGE
+========================= -->
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("first") === "1") {
+    const box = document.getElementById("loginMessage");
+    box.className = "login-message success";
+    box.textContent = I18N[currentLang].first_login;
+    box.style.display = "block";
+  }
+})();
+</script>
+
+<!-- =========================
+     MAGIC LINK LOGIC
+========================= -->
+<script>
+function showMessage(type, text) {
+  const box = document.getElementById("loginMessage");
+  box.className = "login-message " + type;
+  box.textContent = text;
+  box.style.display = "block";
+}
+
+let lastEmailAttempt = "";
+let attemptCount = 0;
+
+function handleLoginFeedback(email) {
+  if (email === lastEmailAttempt) {
+    attemptCount++;
+  } else {
+    attemptCount = 1;
+    lastEmailAttempt = email;
+  }
+
+  showMessage(
+    "success",
+    attemptCount >= 2
+      ? I18N[currentLang].sent_twice
+      : I18N[currentLang].sent_once
+  );
+}
+
+document.getElementById("sendMagicLink").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+
+  if (!email) {
+    showMessage("error", I18N[currentLang].email_error);
+    return;
+  }
+
+  if (!window.supabase) {
+    showMessage("error", I18N[currentLang].tech_error);
+    return;
+  }
+
+  const redirectTo = `${window.location.origin}/lt/dashboard/index.html`;
+
+  const { error } = await window.supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: redirectTo,
+      shouldCreateUser: false
+    }
+  });
+
+  if (error) {
+    showMessage("error", error.message);
+    return;
+  }
+
+  handleLoginFeedback(email);
+});
+</script>
+
+</body>
+</html>
