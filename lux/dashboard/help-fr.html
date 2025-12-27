@@ -118,6 +118,7 @@ textarea,
   <a href="topics.html" data-i18n="nav_topics"></a>
   <a href="traps.html" data-i18n="nav_traps"></a>
   <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="reference.html"  data-i18n="nav_reference_texts"></a>
   <a href="history.html" data-i18n="nav_history"></a>
   <a href="help.html" class="sub active" data-i18n="nav_help"></a>
   <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
@@ -482,6 +483,41 @@ textarea,
   WonderPush.push(["addTag", "country:lu-fr"]);
 </script>
 <script>
+(function () {
+  const current = window.CIVICEDGE_LANG;
+
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    const lang = btn.dataset.lang;
+
+    if (lang === current) {
+      btn.classList.add("active");
+    }
+
+    btn.addEventListener("click", () => {
+      if (lang === current) return;
+
+      localStorage.setItem("civicedge_lang", lang);
+
+      const path = window.location.pathname;
+
+      // Help pages
+      if (path.includes("help")) {
+        window.location.href = `/lux/dashboard/help-${lang}.html`;
+        return;
+      }
+
+      // Reference pages
+      if (path.includes("reference")) {
+        window.location.href = `/lux/dashboard/reference-${lang}.html`;
+        return;
+      }
+
+      // Fallback
+      location.reload();
+    });
+  });
+})();
+</script>
 (function () {
   const current = window.CIVICEDGE_LANG;
 

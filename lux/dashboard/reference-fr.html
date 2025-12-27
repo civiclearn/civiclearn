@@ -370,25 +370,42 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <script>
-  (function () {
-    const current = window.CIVICEDGE_LANG;
+(function () {
+  const current = window.CIVICEDGE_LANG;
 
-    document.querySelectorAll(".lang-switch button").forEach(btn => {
-      const lang = btn.dataset.lang;
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    const lang = btn.dataset.lang;
 
-      // Highlight active language
-      if (lang === current) {
-        btn.classList.add("active");
+    if (lang === current) {
+      btn.classList.add("active");
+    }
+
+    btn.addEventListener("click", () => {
+      if (lang === current) return;
+
+      localStorage.setItem("civicedge_lang", lang);
+
+      const path = window.location.pathname;
+
+      // Help pages
+      if (path.includes("help")) {
+        window.location.href = `/lux/dashboard/help-${lang}.html`;
+        return;
       }
 
-      btn.addEventListener("click", () => {
-        if (lang === current) return;
-        localStorage.setItem("civicedge_lang", lang);
-        location.reload();
-      });
+      // Reference pages
+      if (path.includes("reference")) {
+        window.location.href = `/lux/dashboard/reference-${lang}.html`;
+        return;
+      }
+
+      // Fallback
+      location.reload();
     });
-  })();
+  });
+})();
 </script>
+
 <script src="/assets/js/signout.js"></script>
 </body>
 </html>
