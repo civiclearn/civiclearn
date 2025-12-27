@@ -17,14 +17,17 @@
     listEl.innerHTML = "";
   }
 
-  function emptyState() {
-    const div = document.createElement("div");
-    div.className = "muted";
-    div.style.padding = "1rem";
-    div.setAttribute("data-i18n", "my_list_empty");
-    div.textContent = "Your list is empty.";
-    listEl.appendChild(div);
-  }
+function emptyState() {
+  const div = document.createElement("div");
+  div.className = "muted";
+  div.style.padding = "1rem";
+  div.textContent = CivicLearnI18n.t(
+    "my_list_empty",
+    "Your list is empty"
+  );
+  listEl.appendChild(div);
+}
+
 
 function renderItem(q) {
   const card = document.createElement("div");
@@ -135,25 +138,28 @@ function render() {
   clear();
 
   const ids = CivicEdgeEngine.getSavedQuestionIds();
-  updateCount(ids.length);
 
-  if (!ids.length) {
+  // bank is already loaded by dashboard pages
+  const bank = CivicEdgeEngine.getBank?.() || [];
+  const map = new Map(bank.map((q) => [q.id, q]));
+
+  let rendered = 0;
+
+  ids.forEach((id) => {
+    const q = map.get(id);
+    if (q) {
+      listEl.appendChild(renderItem(q));
+      rendered++;
+    }
+  });
+
+  updateCount(rendered);
+
+  if (!rendered) {
     emptyState();
-    return;
   }
+}
 
-
-    // bank is already loaded by dashboard pages
-    const bank = CivicEdgeEngine.getBank?.() || [];
-    const map = new Map(bank.map((q) => [q.id, q]));
-
-    ids.forEach((id) => {
-      const q = map.get(id);
-      if (q) {
-        listEl.appendChild(renderItem(q));
-      }
-    });
-  }
 
   // -------- init --------
 

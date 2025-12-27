@@ -518,35 +518,6 @@ textarea,
   });
 })();
 </script>
-(function () {
-  const current = window.CIVICEDGE_LANG;
-
-  document.querySelectorAll(".lang-switch button").forEach(btn => {
-    const lang = btn.dataset.lang;
-
-    if (lang === current) {
-      btn.classList.add("active");
-    }
-
-    btn.addEventListener("click", () => {
-      if (lang === current) return;
-
-      // Persist UI language (optional but consistent)
-      localStorage.setItem("civicedge_lang", lang);
-
-      // If we are on a help page → redirect to correct help file
-      const path = window.location.pathname;
-      if (path.includes("help")) {
-        window.location.href = `/lt/dashboard/help-${lang}.html`;
-        return;
-      }
-
-      // Default behaviour elsewhere
-      location.reload();
-    });
-  });
-})();
-</script>
 
 <script src="/assets/js/signout.js"></script>
 </body>

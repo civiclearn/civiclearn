@@ -473,11 +473,27 @@ const unmastered = filtered.filter(q => {
       return;
     }
 
-    if (!questions.length) {
-      quizEl.innerHTML =
-        `<div class="ce-card"><p>${t("status_no_data", "Данные отсутствуют")}</p></div>`;
-      return;
-    }
+   if (!questions.length) {
+  // Silent reset for Topics: all selected topics mastered
+  if (mode === "topics") {
+    // clear ONLY topic-related progress
+    const progress = readJsonLS("civicedge_progress", {});
+    Object.keys(progress).forEach(k => {
+      if (k.includes(":")) delete progress[k];
+    });
+    writeJsonLS("civicedge_progress", progress);
+
+    // restart immediately with same selection
+    Engine.start("topics", options);
+    return;
+  }
+
+  // fallback for other modes
+  quizEl.innerHTML =
+    `<div class="ce-card"><p>${t("status_no_data", "No data available")}</p></div>`;
+  return;
+}
+
 
     state = {
       mode,
