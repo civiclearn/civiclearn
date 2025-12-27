@@ -5,6 +5,12 @@
 
   const Engine = {};
   window.CivicEdgeEngine = Engine;
+  // expose saved-questions helpers
+Engine.isQuestionSaved = isQuestionSaved;
+Engine.toggleSavedQuestion = toggleSavedQuestion;
+Engine.getSavedQuestionIds = getSavedQuestionIds;
+Engine.getBank = () => __normalizedBank || [];
+
 
   // ------------- Helpers -------------
 
@@ -23,6 +29,15 @@
     }
     return fallback || key;
   }
+  
+  function getMainTopicDisplay(rawQ) {
+  if (!rawQ || !rawQ.topic) return "";
+  const lang = getLang();
+  if (typeof rawQ.topic === "object") {
+    return rawQ.topic[lang] || rawQ.topic.en || "";
+  }
+  return String(rawQ.topic);
+}
 
   function $(sel) {
     return document.querySelector(sel);
@@ -55,6 +70,33 @@
     }
     return arr;
   }
+  
+  function samplePreferUnseen(allQuestions, count, seenIdSet) {
+  const unseen = [];
+  const seen = [];
+
+  for (const q of allQuestions) {
+    const qid = q.id || (q._raw && q._raw.id);
+if (seenIdSet && seenIdSet.has(qid)) {
+      seen.push(q);
+    } else {
+      unseen.push(q);
+    }
+  }
+
+  shuffle(unseen);
+  shuffle(seen);
+
+  const result = [];
+  result.push(...unseen.slice(0, count));
+
+  if (result.length < count) {
+    result.push(...seen.slice(0, count - result.length));
+  }
+
+  return result;
+}
+
 
   // Sample N items (without replacement)
   function sample(arr, n) {
@@ -63,92 +105,6 @@
     shuffle(copy);
     return copy.slice(0, n);
   }
-
-
-  function buildDistributedSimulation(fullBank, simCfg) {
-    const dist = simCfg && simCfg.distribution;
-
-    // If distribution is not configured, fallback to classic behavior
-    if (!dist || !dist.enforced || !dist.buckets) {
-      const n = (simCfg && simCfg.questionCount) ? simCfg.questionCount : 20;
-      return sample(fullBank, Math.min(n, fullBank.length));
-    }
-
-    // Build pools by subtopic
-    const pools = {};
-    for (const q of fullBank) {
-      const sub = q && (q.subtopicKey || q.subtopic);
-      if (!sub) continue;
-      if (!pools[sub]) pools[sub] = [];
-      pools[sub].push(q);
-    }
-
-    const selected = [];
-
-    // Enforce exact counts per subtopic bucket
-    for (const [subtopic, requiredCount] of Object.entries(dist.buckets)) {
-      const pool = pools[subtopic] || [];
-      if (pool.length < requiredCount) {
-        throw new Error(
-          `Simulation error: not enough questions for subtopic "${subtopic}" (need ${requiredCount}, have ${pool.length})`
-        );
-      }
-      selected.push(...sample(pool, requiredCount));
-    }
-
-    // Shuffle final combined set so buckets are not grouped
-    return shuffle(selected);
-  }
-
-function buildLuxembourgSimulation(fullBank, simCfg) {
-  const quotas = simCfg.quotas;
-  if (!quotas) throw new Error("Missing simulation.quotas");
-
-  const result = [];
-
-  for (const [topicKey, totalNeeded] of Object.entries(quotas)) {
-
-    // 1. All questions of this topic
-    const topicQs = fullBank.filter(q => q.topicKey === topicKey);
-
-    // 2. Group by subtopic
-    const bySubtopic = {};
-    for (const q of topicQs) {
-      if (!bySubtopic[q.subtopicKey]) bySubtopic[q.subtopicKey] = [];
-      bySubtopic[q.subtopicKey].push(q);
-    }
-
-    const subtopics = Object.keys(bySubtopic);
-    const base = Math.floor(totalNeeded / subtopics.length);
-    const extra = totalNeeded % subtopics.length;
-
-    // 3. Shuffle subtopics to decide who gets the “+1”
-    shuffle(subtopics);
-
-    // 4. Take questions
-    let taken = 0;
-    for (let i = 0; i < subtopics.length; i++) {
-      const need = base + (i < extra ? 1 : 0);
-      const pool = shuffle(bySubtopic[subtopics[i]]);
-
-      if (pool.length < need) {
-        throw new Error(
-          `Not enough questions in ${topicKey} / ${subtopics[i]}`
-        );
-      }
-
-      result.push(...pool.slice(0, need));
-      taken += need;
-    }
-
-    if (taken !== totalNeeded) {
-      throw new Error(`Quota mismatch for ${topicKey}`);
-    }
-  }
-
-  return shuffle(result);
-}
-
 
   // LocalStorage helpers (safe)
   function readJsonLS(key, fallback) {
@@ -169,6 +125,47 @@ function buildLuxembourgSimulation(fullBank, simCfg) {
       console.warn("LS write failed for", key, e);
     }
   }
+  
+    // ===============================
+  // Saved questions (My List)
+  // ===============================
+
+  const SAVED_KEY = "civicedge_saved";
+
+  function getSavedMap() {
+    try {
+      return JSON.parse(localStorage.getItem(SAVED_KEY)) || {};
+    } catch {
+      return {};
+    }
+  }
+
+  function setSavedMap(map) {
+    localStorage.setItem(SAVED_KEY, JSON.stringify(map));
+  }
+
+  function isQuestionSaved(questionId) {
+    const map = getSavedMap();
+    return !!map[questionId];
+  }
+
+  function toggleSavedQuestion(questionId) {
+    const map = getSavedMap();
+
+    if (map[questionId]) {
+      delete map[questionId];
+    } else {
+      map[questionId] = true;
+    }
+
+    setSavedMap(map);
+    return !!map[questionId];
+  }
+
+  function getSavedQuestionIds() {
+    return Object.keys(getSavedMap());
+  }
+
 
   // ------------- Multilingual helpers (NEW, minimal) -------------
 
@@ -177,25 +174,32 @@ function buildLuxembourgSimulation(fullBank, simCfg) {
   }
 
   // canonical LT topic key (stable for filtering/progress)
-  function getTopicLT(rawQ) {
-    if (!rawQ) return "";
-    const topic = rawQ.topic;
-    if (!topic) return "";
-    if (typeof topic === "object") return topic.lt || "";
-    return String(topic || "");
+function getMicrotopicCanonical(rawQ) {
+  if (!rawQ) return "";
+  const mt = rawQ.microtopic;
+  if (!mt) return "";
+
+  if (typeof mt === "object") {
+    return mt.en || "";
   }
 
+  return String(mt || "");
+}
+
+
+
   // display topic in current language (for UI)
-  function getTopicDisplay(rawQ) {
-    if (!rawQ) return "";
-    const topic = rawQ.topic;
-    if (!topic) return "";
-    if (typeof topic === "object") {
-      const lang = getLang();
-      return topic[lang] || topic.lt || "";
-    }
-    return String(topic || "");
+function getTopicDisplay(rawQ) {
+  if (!rawQ) return "";
+  const mt = rawQ.microtopic;
+  if (!mt) return "";
+  if (typeof mt === "object") {
+    const lang = getLang();
+    return mt[lang] || mt.en || "";
   }
+  return String(mt || "");
+}
+
 
   function getTextForLang(objOrStr) {
     const lang = getLang();
@@ -257,13 +261,13 @@ function buildLuxembourgSimulation(fullBank, simCfg) {
         `q:${idx}`;
 
       // Canonical LT label for keys/progress/filtering
-      const topicLabel = getTopicLT(rawQ);
+      const topicLabel = getMicrotopicCanonical(rawQ);
 
       // Display label (RU/EN/LT) for UI
       const topicDisplay = getTopicDisplay(rawQ);
 
       // Question text (RU/EN/LT)
-      const text = getTextForLang(rawQ.q);
+      const text = getTextForLang(rawQ.text || rawQ.q);
 
       // Options (RU/EN/LT)
       const optList = getOptionsForLang(rawQ);
@@ -296,15 +300,14 @@ function buildLuxembourgSimulation(fullBank, simCfg) {
         topicDisplay,             // UI label in current language
         text,
         options,
-        subtopic: rawQ.subtopic || null,
-        _raw: rawQ
+		_raw: rawQ
       };
-
     });
   }
 
+  let __normalizedBank = null;
   // ------------- State -------------
-
+ 
   let state = null;
   let timerHandle = null;
   let initialQuestions = null; // Holds the full set for Topics history
@@ -337,6 +340,7 @@ function buildLuxembourgSimulation(fullBank, simCfg) {
 
     const cfg = getConfig();
     const fullBank = await loadBankIfNeeded(options);
+	__normalizedBank = fullBank;
 
     let questions;
 
@@ -348,9 +352,79 @@ function buildLuxembourgSimulation(fullBank, simCfg) {
       questions = sample(fullBank, n);
 
 } else if (mode === "simulation") {
-  questions = buildLuxembourgSimulation(fullBank, cfg.simulation);
+  const simCfg = (cfg && cfg.simulation) || {};
+  const n = simCfg.questionCount || options.limit || 20;
+
+  const seenIds = new Set(readJsonLS("civiclearn_answered_mcqs", []));
+
+  // --- quota-aware sampling (Lux simulation rules) ---
+  const quotas = simCfg.topicQuotas || null;
+
+  if (quotas && typeof quotas === "object") {
+    const picked = [];
+    const pickedIds = new Set();
+
+    // Build buckets by MAIN topic (rawQ.topic), not microtopic.
+    const buckets = {};
+    fullBank.forEach(q => {
+      const raw = q._raw || {};
+      const top = raw.topic; // expected multilingual object or string in your LU bank
+
+      let canon = "";
+      if (top && typeof top === "object") canon = top.en || "";
+      else canon = String(top || "");
+
+      const key = normalizeLabel(canon);
+      if (!buckets[key]) buckets[key] = [];
+      buckets[key].push(q);
+    });
+
+    // 1) satisfy each quota from its bucket (prefer unseen inside each bucket)
+    Object.entries(quotas).forEach(([topicName, need]) => {
+      const key = normalizeLabel(topicName);
+      const pool = buckets[key] || [];
+
+      // remove already picked
+      const poolFresh = pool.filter(q => !pickedIds.has(q.id));
+
+      const take = Math.max(0, parseInt(need, 10) || 0);
+      const part = samplePreferUnseen(poolFresh, Math.min(take, poolFresh.length), seenIds);
+
+      part.forEach(q => {
+        if (!pickedIds.has(q.id)) {
+          picked.push(q);
+          pickedIds.add(q.id);
+        }
+      });
+    });
+
+    // 2) fill remainder (still prefer unseen), from all topics
+    if (picked.length < n) {
+      const remainingPool = fullBank.filter(q => !pickedIds.has(q.id));
+      const fill = samplePreferUnseen(remainingPool, n - picked.length, seenIds);
+      fill.forEach(q => {
+        if (!pickedIds.has(q.id)) {
+          picked.push(q);
+          pickedIds.add(q.id);
+        }
+      });
+    }
+
+    questions = picked.slice(0, n);
+  } else {
+    // fallback: old behavior
+    questions = samplePreferUnseen(fullBank, n, seenIds);
+  }
+
+  const seenCount = questions.filter(q => seenIds.has(q.id)).length;
+  console.log(
+    `[SIMULATION] seen=${seenCount}, unseen=${questions.length - seenCount}, total=${questions.length}`
+  );
 }
 
+
+
+ 
 	
 	else if (mode === "topics") {
       const selectedKeys = options.topics || []; // these are canonical LT strings now
@@ -359,26 +433,22 @@ function buildLuxembourgSimulation(fullBank, simCfg) {
       const selectedNorm = selectedKeys.map(k => normalizeLabel(k));
 
       // 1. Filter full bank by selected topics (CANONICAL LT)
-      const filtered = fullBank.filter(q =>
-        selectedNorm.includes(normalizeLabel(q.topicLabel))
-      );
+// 1. Filter full bank by selected topics (canonical OR display, language-safe)
+const filtered = fullBank.filter(q => {
+  const canon = normalizeLabel(q.topicLabel);
+  return selectedNorm.includes(canon);
+});
 
       // 2. Load mastery progress
       const progress = readJsonLS("civicedge_progress", {});
 
       // 3. Remove already mastered questions
 const unmastered = filtered.filter(q => {
-  const qTextLT =
-    q._raw &&
-    q._raw.q &&
-    typeof q._raw.q === "object"
-      ? q._raw.q.lt
-      : q.text;
-
-  const key = `${q.topicLabel || "topic"}:${qTextLT}`;
+  const key = `${q.topicLabel}:${q.id}`;
   const entry = progress[key];
   return !(entry && entry.correct === 1);
 });
+
 
 
       // 4. Pool is ONLY unmastered questions
@@ -443,6 +513,16 @@ const unmastered = filtered.filter(q => {
     }
 
     window.state = state; // debug visibility only
+	
+	if (mode === "simulation") {
+  state.simTopicRemaining = {};
+
+  questions.forEach(q => {
+    const raw = q._raw || {};
+    const key = normalizeLabel(raw.topic?.en || "");
+    state.simTopicRemaining[key] = (state.simTopicRemaining[key] || 0) + 1;
+  });
+}
 
     renderQuestion();
     updateProgressBar();
@@ -528,19 +608,64 @@ const unmastered = filtered.filter(q => {
     const q = state.questions[state.currentIndex];
 
     const card = createEl("div", "ce-card");
+	
 
-    // Meta
-    const meta = createEl("div", "ce-q-meta");
-    const idxText = t("question_x_of_y", "Question {x} sur {y}")
-      .replace("{x}", String(state.currentIndex + 1))
-      .replace("{y}", String(state.questions.length));
-    meta.textContent = idxText;
-    card.appendChild(meta);
+// === HEADER ROW ===
+const header = createEl("div", "ce-q-header");
 
-    // Topic label (DISPLAY in current language, canonical is stored separately)
-    const topicLabel = q.topicDisplay || q.topicLabel || "";
-    const topicEl = createEl("div", "ce-q-topic", topicLabel || "");
-    if (topicLabel) card.appendChild(topicEl);
+// LEFT: main topic + count (already computed earlier)
+if (state.mode === "simulation" && q._raw?.topic) {
+  const topicText = getMainTopicDisplay(q._raw);
+  const canon = normalizeLabel(q._raw.topic.en || "");
+  const remaining = state.simTopicRemaining?.[canon];
+
+  if (topicText && Number.isFinite(remaining)) {
+    const main = createEl(
+      "div",
+      "ce-q-main",
+      `${topicText} · ${remaining}`
+    );
+    header.appendChild(main);
+  }
+}
+
+// MIDDLE: question counter
+const meta = createEl("div", "ce-q-meta");
+meta.textContent = t("question_x_of_y", "Question {x} sur {y}")
+  .replace("{x}", String(state.currentIndex + 1))
+  .replace("{y}", String(state.questions.length));
+header.appendChild(meta);
+
+// RIGHT: microtopic badge + save star (same line)
+const micro = q.topicDisplay || q.topicLabel || "";
+if (micro) {
+  const wrap = createEl("div", "ce-q-subtopic-wrap");
+
+  const microEl = createEl("div", "ce-q-subtopic", micro);
+  wrap.appendChild(microEl);
+
+  const saveBtn = createEl(
+    "button",
+    "ce-save-btn",
+    ""
+  );
+
+  const qid = q.id;
+  if (Engine.isQuestionSaved(qid)) {
+    saveBtn.classList.add("active");
+  }
+
+  saveBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const saved = Engine.toggleSavedQuestion(qid);
+    saveBtn.classList.toggle("active", saved);
+  });
+
+  wrap.appendChild(saveBtn);
+  header.appendChild(wrap);
+}
+
+card.appendChild(header);
 
     // Subtopic label (safe)
     if (q.subtopic) {
@@ -619,7 +744,6 @@ const unmastered = filtered.filter(q => {
 
     // Footer with Next button
     const footer = createEl("div", "ce-q-footer");
-
     const nextBtn = createEl(
       "button",
       "btn ce-next-btn",
@@ -681,12 +805,27 @@ const unmastered = filtered.filter(q => {
     else state.incorrect += 1;
 
     updateProgress(question, opt.correct);
+	const answered = readJsonLS("civiclearn_answered_mcqs", []);
+if (!answered.includes(question.id)) {
+  answered.push(question.id);
+  writeJsonLS("civiclearn_answered_mcqs", answered);
+}
     question._userCorrect = !!opt.correct;
 
     const nextBtn = document.querySelector(".ce-next-btn");
     if (nextBtn) nextBtn.disabled = false;
 
     updateProgressBar();
+	
+	// === SIMULATION TOPIC COUNTER DECREMENT ===
+if (state.mode === "simulation" && question._raw?.topic) {
+  const canon = normalizeLabel(question._raw.topic.en || "");
+  if (state.simTopicRemaining?.[canon] > 0) {
+    state.simTopicRemaining[canon] -= 1;
+  }
+}
+
+	
   }
 
   function goNext() {
@@ -783,20 +922,13 @@ const unmastered = filtered.filter(q => {
 
       total += 1;
 
-const qTextLT =
-  q._raw &&
-  q._raw.q &&
-  typeof q._raw.q === "object"
-    ? q._raw.q.lt
-    : q.text;
-
-const key = `${q.topicLabel || "topic"}:${qTextLT}`;
+const key = `${q.topicLabel || "topic"}:${q.id}`;
 const entry = progress[key];
 
+if (!(entry && entry.correct === 1)) {
+  remaining += 1;
+}
 
-      if (!(entry && entry.correct === 1)) {
-        remaining += 1;
-      }
     });
 
     return { total, remaining };
@@ -1079,16 +1211,9 @@ const entry = progress[key];
 
   function updateProgress(question, correct) {
     // Canonical key: LT topic + full question text (already in current language; stable enough per-language banks)
-   const topicLT = question.topicLabel || "topic";
+const topicLT = question.topicLabel || "topic";
+const key = `${topicLT}:${question.id}`;
 
-const qTextLT =
-  question._raw &&
-  question._raw.q &&
-  typeof question._raw.q === "object"
-    ? question._raw.q.lt
-    : question.text;
-
-const key = `${topicLT}:${qTextLT}`;
 
 
     const progress = readJsonLS("civicedge_progress", {});
@@ -1148,6 +1273,7 @@ const key = `${topicLT}:${qTextLT}`;
       return {
         id: q.id,
         topic: q.topicLabel || null,
+		mainTopic: q._raw?.topic || null, 
 		topicDisplay: q.topicDisplay || null,
         correct: !!q._userCorrect,
         firstAttemptCorrect:

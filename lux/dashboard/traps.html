@@ -8,7 +8,7 @@
 
   <!-- Core Styles -->
   <link rel="stylesheet" href="/assets/css/dashboard-core-lt.css">
-  <link rel="stylesheet" href="/assets/css/test-core.css">
+  <link rel="stylesheet" href="/assets/css/test-core-lu.css">
   <!-- Flag size override -->
   <style>
     .brand svg {
@@ -71,7 +71,9 @@
   <a href="topics.html" data-i18n="nav_topics"></a>
   <a href="traps.html" class="sub active" data-i18n="nav_traps"></a>
   <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="reference.html"  data-i18n="nav_reference_texts"></a>
   <a href="history.html" data-i18n="nav_history"></a>
+  <a href="my-list.html" data-i18n="nav_my_list"></a>
   <a href="help.html" data-i18n="nav_help"></a>
   <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
 </nav>
@@ -196,29 +198,23 @@ document.addEventListener("DOMContentLoaded", () => {
         .replace(/\s+/g, " ");
     }
 
-    const normalizedTrickySet = new Set(
-      trickyKeys.map(k => {
-        const [topic, ...rest] = k.split(":");
-        const text = rest.join(":");
-        return `${normalizeLabel(topic)}:${text.trim()}`;
-      })
-    );
+    const normalizedTrickySet = new Set(trickyKeys);
+
 
     const trickySet = fullBank.filter(q => {
-const topicLT =
+const topicEN =
   q.topic && typeof q.topic === "object"
-    ? q.topic.lt
+    ? q.topic.en
     : q.topic;
 
-const qTextLT =
+const qText =
   q.q && typeof q.q === "object"
-    ? q.q.lt
+    ? q.q[window.CIVICEDGE_LANG] || q.q.en
     : q.q;
 
-const qKeyNormalized =
-  `${normalizeLabel(topicLT)}:${(qTextLT || "").trim()}`;
+const qKey = `${q.microtopic?.en || q.topic?.en || ""}:${q.id}`;
+return normalizedTrickySet.has(qKey);
 
-return normalizedTrickySet.has(qKeyNormalized);
 
     });
 

@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title data-i18n="title_reference_texts"></title>
+
+  <!-- Core Styles -->
+  <link rel="stylesheet" href="/assets/css/dashboard-core-lt.css">
+  <link rel="stylesheet" href="/assets/css/reference-text.css">
+
+  <!-- Flag size override -->
+  <style>
+    .brand svg {
+      width: 30px !important;
+      height: 30px !important;
+    }
+  </style>
+
+  <script>
+    document.documentElement.classList.add("i18n-hidden");
+  </script>
+  <script type="module" src="/assets/js/auth-guardS.js"></script>
+</head>
+
+
+<body>
+
+<!-- MOBILE MENU -->
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+<div class="brand">
+  CivicLearn®
+  <svg
+    viewBox="0 0 12000 6000"
+    width="30"
+    height="30"
+    style="margin-left:6px;vertical-align:middle;border-radius:3px;overflow:hidden"
+    aria-label="Luxembourg"
+  >
+    <defs>
+      <clipPath id="clip-lu">
+        <rect width="12000" height="6000" />
+      </clipPath>
+    </defs>
+
+    <g clip-path="url(#clip-lu)">
+      <!-- Top: Red -->
+      <rect x="0" y="0" width="12000" height="2000" fill="#ED2939"/>
+
+      <!-- Middle: White -->
+      <rect x="0" y="2000" width="12000" height="2000" fill="#FFFFFF"/>
+
+      <!-- Bottom: Light Blue -->
+      <rect x="0" y="4000" width="12000" height="2000" fill="#00A1DE"/>
+    </g>
+  </svg>
+</div>
+
+
+
+
+          <nav class="nav">
+  <a href="index.html"  data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="reference.html"  class="sub active" data-i18n="nav_reference_texts"></a>
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="my-list.html" data-i18n="nav_my_list"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+    <div class="spacer"></div>
+
+    <div class="profile">
+
+
+    <!-- LANGUAGE SWITCHER -->
+<div class="lang-switch">
+  <button data-lang="fr">FR</button>
+  <button data-lang="de">DE</button>
+  <button data-lang="en">EN</button>
+</div>
+
+ <div class="profile-info">
+
+    <!-- READING TOGGLE -->
+    <div class="reading-inline">
+      <span data-i18n="reading_label"></span>
+      <button id="readingToggle"
+              class="reading-btn inline"
+              data-i18n="reading_tooltip"
+              data-i18n-attr="title">🔇</button>
+    </div>
+
+  </div>
+</div>
+
+  </aside>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+  <main>
+
+    <header class="ce-header ce-header-top">
+	<div class="reference-toolbar">
+
+  <div class="reference-filters">
+    <button class="ref-filter active" data-filter="all">Tous</button>
+    <button class="ref-filter" data-filter="history">Histoire</button>
+    <button class="ref-filter" data-filter="institutions">Institutions</button>
+    <button class="ref-filter" data-filter="rights">Droits</button>
+    <button class="ref-filter" data-filter="culture">Culture</button>
+  </div>
+
+  <input
+    type="text"
+    id="referenceSearch"
+    placeholder="Rechercher un document…"
+  />
+
+</div>
+     <h1 data-i18n="title_reference_texts"></h1>
+     <div class="muted" data-i18n="reference_texts_subtitle"></div>
+    </header> <br>
+
+     <div class="dashboard-container">
+
+   <div class="reference-grid" id="referenceGrid"></div>
+   <div style="height:96px;"></div>
+
+
+  </div>
+
+  </main>
+
+</div>
+
+<!-- CONFIG + I18N -->
+<script src="/assets/js/lang-bootstrap-lu.js"></script>
+<script src="/assets/js/config-lu.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>
+  CivicLearnI18n.init();
+</script>
+
+<!-- ENGINE -->
+<script src="/assets/js/engine-lu.js"></script>
+
+<script>
+const REFERENCE_TEXTS_FR = [
+  {
+    title: "Tout savoir sur le Grand-Duché de Luxembourg",
+    description: "Présentation générale du Grand-Duché de Luxembourg, de son identité, de son histoire et de ses institutions.",
+    file: "004-TOUT-SAVOIR.pdf",
+    category: "history",
+    badge: "Officiel"
+  },
+  {
+    title: "10 fiches sur le Grand-Duché de Luxembourg",
+    description: "Brochure en dix fiches couvrant l’histoire, la population, la culture, la politique et l’économie du pays.",
+    file: "005-10FICHES.pdf",
+    category: "history",
+    badge: "Officiel"
+  },
+  {
+    title: "À propos de l’histoire du Luxembourg",
+    description: "Repères essentiels sur l’histoire du Luxembourg et la construction de l’État luxembourgeois.",
+    file: "001-HIST-LUX.pdf",
+    category: "history",
+    badge: "Officiel"
+  },
+  {
+    title: "À propos des institutions politiques au Luxembourg",
+    description: "Fonctionnement des institutions politiques et organisation constitutionnelle du Luxembourg.",
+    file: "002-INSTI-LUX.pdf",
+    category: "institutions",
+    badge: "Officiel"
+  },
+  {
+    title: "À propos du Luxembourg et de l’Union européenne",
+    description: "Le rôle du Luxembourg au sein de l’Union européenne et ses engagements européens.",
+    file: "003-EU-LUX.pdf",
+    category: "institutions",
+    badge: "Officiel"
+  },
+  {
+    title: "Le Luxembourg et l’ONU",
+    description: "Relations entre le Luxembourg et l’Organisation des Nations Unies.",
+    file: "025-LUX-ONU.pdf",
+    category: "institutions",
+    badge: "Officiel"
+  },
+  {
+    title: "La Constitution du Grand-Duché de Luxembourg",
+    description: "Texte constitutionnel définissant l’organisation de l’État et les principes fondamentaux.",
+    file: "006-CONSTI-LUX.pdf",
+    category: "institutions",
+    badge: "Officiel"
+  },
+  {
+    title: "Les droits fondamentaux de l’Homme",
+    description: "Présentation des droits fondamentaux et de leur protection.",
+    file: "007-DUDH.pdf",
+    category: "rights",
+    badge: "Officiel"
+  },
+  {
+    title: "Les médias traditionnels au Luxembourg",
+    description: "Rôle et fonctionnement des médias traditionnels dans la société luxembourgeoise.",
+    file: "008-MEDIA.pdf",
+    category: "culture",
+    badge: "Officiel"
+  },
+  {
+    title: "Les impôts au Luxembourg",
+    description: "Introduction au système fiscal luxembourgeois.",
+    file: "018-IMPOTS.pdf",
+    category: "institutions",
+    badge: "Officiel"
+  },
+  {
+    title: "Les élections européennes au Luxembourg",
+    description: "Organisation et déroulement des élections européennes au Luxembourg.",
+    file: "015-ELE-EUR-LUX.pdf",
+    category: "institutions",
+    badge: "Officiel"
+  },
+  {
+    title: "Les élections sociales au Luxembourg",
+    description: "Présentation des élections sociales et de la représentation des salariés.",
+    file: "017-ELE-SOC.pdf",
+    category: "institutions",
+    badge: "Officiel"
+  },
+  {
+    title: "Les langues au Luxembourg",
+    description: "Le multilinguisme et l’usage des langues dans la société luxembourgeoise.",
+    file: "027-LANGUES-LUX.pdf",
+    category: "culture",
+    badge: "Officiel"
+  },
+  {
+    title: "Les symboles de l’État et de la Nation",
+    description: "Symboles officiels et identité nationale du Luxembourg.",
+    file: "028-SYMBOLES.pdf",
+    category: "culture",
+    badge: "Officiel"
+  },
+  {
+    title: "Le Conseil d’État",
+    description: "Rôle et missions du Conseil d’État du Luxembourg.",
+    file: "029-CONSEIL.pdf",
+    category: "institutions",
+    badge: "Officiel"
+  },
+  {
+    title: "La Chambre des salariés",
+    description: "Fonctionnement et rôle de la Chambre des salariés.",
+    file: "024-CHAMBRE-SAL.pdf",
+    category: "institutions",
+    badge: "Officiel"
+  },
+  {
+    title: "La Monarchie au Luxembourg",
+    description: "Un aperçu du rôle et de l'histoire de la monarchie au Luxembourg.",
+    file: "026-MONARCHIE.pdf",
+    category: "institutions",
+    badge: "Officiel"
+  },
+  {
+    title: "À propos du théâtre au Luxembourg",
+    description: "Présentation du théâtre et de son importance dans la vie culturelle luxembourgeoise.",
+    file: "032-THEATRE.pdf",
+    category: "culture",
+    badge: "Officiel"
+  },
+  {
+    title: "À propos de la littérature au Luxembourg",
+    description: "Panorama de la littérature luxembourgeoise et de ses auteurs.",
+    file: "033-LIT-LUX.pdf",
+    category: "culture",
+    badge: "Officiel"
+  }
+];
+
+
+const grid = document.getElementById("referenceGrid");
+
+REFERENCE_TEXTS_FR.forEach(f => {
+  const card = document.createElement("div");
+  card.className = "reference-card";
+  card.dataset.category = f.category || "other";
+
+card.innerHTML = `
+  <div class="ref-badge">PDF</div>
+
+  <h3>${f.title}</h3>
+
+  <p>${f.description}</p>
+
+  <a href="https://media.civiclearn.com/lux/fr/${f.file}" target="_blank" rel="noopener">
+    Télécharger →
+  </a>
+`;
+
+  grid.appendChild(card);
+});
+</script>
+<script>
+const filterButtons = document.querySelectorAll(".ref-filter");
+const searchInput = document.getElementById("referenceSearch");
+const cards = Array.from(document.querySelectorAll(".reference-card"));
+
+function applyFilters() {
+  const activeFilter =
+    document.querySelector(".ref-filter.active")?.dataset.filter || "all";
+  const query = searchInput.value.toLowerCase();
+
+  cards.forEach(card => {
+    const matchesFilter =
+      activeFilter === "all" || card.dataset.category === activeFilter;
+
+    const text = card.innerText.toLowerCase();
+    const matchesSearch = text.includes(query);
+
+    card.style.display = matchesFilter && matchesSearch ? "" : "none";
+  });
+}
+
+filterButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    filterButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    applyFilters();
+  });
+});
+
+searchInput.addEventListener("input", applyFilters);
+</script>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* MOBILE MENU */
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+
+  /* THEME */
+  try {
+    const s = JSON.parse(localStorage.getItem("civicedge_settings") || "{}");
+    if (s.theme) document.documentElement.dataset.theme = s.theme;
+  } catch {}
+});
+</script>
+<script>
+  (function () {
+    const current = window.CIVICEDGE_LANG;
+
+    document.querySelectorAll(".lang-switch button").forEach(btn => {
+      const lang = btn.dataset.lang;
+
+      // Highlight active language
+      if (lang === current) {
+        btn.classList.add("active");
+      }
+
+      btn.addEventListener("click", () => {
+        if (lang === current) return;
+        localStorage.setItem("civicedge_lang", lang);
+        location.reload();
+      });
+    });
+  })();
+</script>
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>

@@ -6,8 +6,9 @@
   <title data-i18n="title_topics"></title>
 
   <!-- Core -->
+
   <link rel="stylesheet" href="/assets/css/dashboard-core-lt.css">
-  <link rel="stylesheet" href="/assets/css/test-core.css">
+  <link rel="stylesheet" href="/assets/css/test-core-lu.css">
   
 
  
@@ -18,15 +19,19 @@
     }
 
     /* --- Light chip UI --- */
-    #topicContainer {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 20px 0;
-    }
+#topicContainer{
+  display:flex;
+  font-family: inherit;
+  flex-direction:column;
+  gap:18px;
+  margin:20px 0;
+}
 
     .topic-chip {
       padding: 10px 16px;
+	  font-family: inherit;
+      font-weight: 400;
+      font-size: 14px;
       border-radius: 18px;
       background: var(--card);
       border: 1px solid var(--line);
@@ -62,6 +67,80 @@
   border-color: #34c759;
   color: #0a7a2a;
 }
+
+/* --- Grouped layout (real topic → microtopics) --- */
+.topic-group{
+  display:block;
+  font-family: inherit;
+}
+
+.topic-group-title{
+  display:flex;
+  align-items:center;
+  align-items: center;
+  gap: 10px;
+  margin:0 0 10px 0;
+  font-size:15px;
+  font-weight:600;
+  color:var(--text, #111827);
+}
+
+.topic-group-badge {
+  margin-left: 6px;
+
+  padding: 4px 10px;
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+
+  background: rgba(99, 102, 241, 0.10); /* soft indigo */
+  color: rgba(55, 48, 163, 0.85);
+
+  display: inline-flex;
+  align-items: center;
+}
+
+
+.topic-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+/* count inside chip */
+.topic-chip .chip-count {
+  margin-left: 10px;
+
+  padding: 2px 8px;
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+
+  background: rgba(99, 102, 241, 0.08); /* soft indigo */
+  color: rgba(55, 48, 163, 0.85);
+
+  display: inline-flex;
+  align-items: center;
+}
+.topic-chip.active .chip-count {
+  background: rgba(99, 102, 241, 0.15);
+  color: rgba(55, 48, 163, 1);
+}
+.topic-chip:hover .chip-count {
+  background: rgba(99, 102, 241, 0.12);
+}
+.topic-chip.active .chip-count {
+  background: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+}
+
   </style>
         <script>
   document.documentElement.classList.add("i18n-hidden");
@@ -113,7 +192,9 @@
   <a href="topics.html" class="sub active" data-i18n="nav_topics"></a>
   <a href="traps.html" data-i18n="nav_traps"></a>
   <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="reference.html"  data-i18n="nav_reference_texts"></a>
   <a href="history.html" data-i18n="nav_history"></a>
+  <a href="my-list.html" data-i18n="nav_my_list"></a>
   <a href="help.html" data-i18n="nav_help"></a>
   <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
 </nav>
@@ -191,13 +272,13 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const cfg = window.CIVICEDGE_CONFIG || {};
-  const topics = (cfg.topics && cfg.topics.list) || [];
+ 
   const container = document.getElementById("topicContainer");
   const startBtn = document.getElementById("startBtn");
   const selected = new Set();
 
   const bankPath = cfg.bank && cfg.bank.path;
-  const lang = window.CIVICEDGE_LANG || "en";
+  const lang = window.CIVICEDGE_LANG || "fr";
 
   function normalizeLabel(str) {
     return (str || "")
@@ -211,10 +292,31 @@ document.addEventListener("DOMContentLoaded", () => {
   function getTopicLabel(q) {
     if (!q || !q.topic) return "";
     if (typeof q.topic === "object") {
-      return q.topic[lang] || q.topic.lt || "";
+      return q.topic[lang] || q.topic.en || "";
     }
     return q.topic;
   }
+function isTopicMastered(microCanon, progress) {
+  // supports both known progress shapes: progress.topics[...] and progress.microtopics[...]
+  const node =
+    (progress && progress.topics && progress.topics[microCanon]) ||
+    (progress && progress.microtopics && progress.microtopics[microCanon]) ||
+    (progress && progress[microCanon]) ||
+    null;
+
+  if (!node) return false;
+
+  const seen = Number(node.seen ?? node.total ?? node.attempts ?? 0);
+  const correct = Number(node.correct ?? node.right ?? 0);
+
+  // conservative mastery rule (matches “green when completed” behavior)
+  // - must have been seen at least once
+  // - and be mostly correct
+  if (seen <= 0) return false;
+
+  const rate = seen > 0 ? correct / seen : 0;
+  return rate >= 0.8;
+}
 
   async function loadBankTopics() {
     if (!bankPath) return [];
@@ -231,103 +333,171 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function initTopics() {
     const bankQuestions = await loadBankTopics();
+	
+	const microtopics = new Map();
+
+bankQuestions.forEach(q => {
+  if (!q.microtopic || typeof q.microtopic !== "object") return;
+
+  const canon = q.microtopic.en;
+  if (!canon) return;
+
+  if (!microtopics.has(canon)) {
+    microtopics.set(canon, q.microtopic[lang] || canon);
+  }
+});
+
 
     // Build map: LT canonical topic → translated label
-    const topicLabelMap = {};
-    bankQuestions.forEach(q => {
-      if (!q.topic || typeof q.topic !== "object") return;
-      if (!q.topic.lt) return;
-      if (!topicLabelMap[q.topic.lt]) {
-        topicLabelMap[q.topic.lt] =
-          q.topic[lang] || q.topic.lt;
-      }
-    });
+// Build map: canonical EN topic → translated label
+const topicLabelMap = {};
+bankQuestions.forEach(q => {
+  if (!q.topic || typeof q.topic !== "object") return;
+  const canon = q.topic.en;
+  if (!canon) return;
+  if (!topicLabelMap[canon]) {
+    topicLabelMap[canon] = q.topic[lang] || canon;
+  }
+});
+
 
     const progress = JSON.parse(
       localStorage.getItem("civicedge_progress") || "{}"
     );
 
-    topics.forEach((topicLt) => {
-      const chip = document.createElement("div");
-      chip.className = "topic-chip";
-      chip.dataset.topic = topicLt;
+// ===== GROUP QUESTIONS BY REAL TOPIC + MICROTOPIC =====
+const groupedTopics = {};
+// realTopicLabel -> { label, total, micros: { microCanon -> { label, count } } }
 
-      // Display label from bank (language-aware)
-      const displayLabel =
-        topicLabelMap[topicLt] || topicLt;
+bankQuestions.forEach(q => {
+  if (!q.topic || !q.microtopic) return;
+  if (typeof q.topic !== "object" || typeof q.microtopic !== "object") return;
 
-      chip.textContent = displayLabel;
+  const realCanon = q.topic.en;
+  if (!realCanon) return;
 
-      // ----- mastery detection -----
-      const norm = normalizeLabel(topicLt);
+  const realLabel = q.topic[lang] || realCanon;
+  const microCanon = q.microtopic.en;
+  const microLabel = q.microtopic[lang] || microCanon;
 
-      let totalInBank = 0;
-      let mastered = 0;
+  if (!microCanon) return;
 
-      bankQuestions.forEach(q => {
-        if (
-          q.topic &&
-          typeof q.topic === "object" &&
-          normalizeLabel(q.topic.lt) === norm
-        ) {
-          totalInBank += 1;
-        }
-      });
+  if (!groupedTopics[realCanon]) {
+    groupedTopics[realCanon] = {
+      label: realLabel,
+      total: 0,
+      micros: {}
+    };
+  }
 
-      for (const key in progress) {
-        const entry = progress[key];
-        if (!entry || !entry.topic) continue;
-        if (
-          normalizeLabel(entry.topic) === norm &&
-          entry.correct === 1
-        ) {
-          mastered += 1;
-        }
-      }
+  groupedTopics[realCanon].total++;
 
-      if (totalInBank > 0 && mastered >= totalInBank) {
-        chip.classList.add("mastered");
-      }
+  if (!groupedTopics[realCanon].micros[microCanon]) {
+    groupedTopics[realCanon].micros[microCanon] = {
+      label: microLabel,
+      count: 0
+    };
+  }
 
-      // ----- selection logic -----
-      chip.addEventListener("click", () => {
-        if (chip.classList.contains("active")) {
-          chip.classList.remove("active");
-          selected.delete(topicLt);
-        } else {
-          chip.classList.add("active");
-          selected.add(topicLt);
-        }
-        startBtn.style.display =
-          selected.size > 0 ? "inline-block" : "none";
-      });
+  groupedTopics[realCanon].micros[microCanon].count++;
+});
 
-      container.appendChild(chip);
-    });
+// ===== RENDER GROUPED TOPICS =====
+container.innerHTML = "";
+
+Object.values(groupedTopics).forEach(group => {
+  const groupWrap = document.createElement("div");
+  groupWrap.className = "topic-group";
+
+  const header = document.createElement("div");
+  header.className = "topic-group-title";
+  header.innerHTML = `
+    <span>${group.label}</span>
+    <span class="topic-group-badge">${group.total}</span>
+  `;
+
+  const chipsWrap = document.createElement("div");
+  chipsWrap.className = "topic-chips";
+
+  Object.entries(group.micros).forEach(([microCanon, mt]) => {
+    const chip = document.createElement("button");
+    chip.className = "topic-chip";	
+	if (isMicrotopicMastered(microCanon, bankQuestions, progress)) {
+  chip.classList.add("mastered");
+}
+	// apply mastered state using computed logic
+if (typeof isTopicMastered === "function" && isTopicMastered(microCanon, progress)) {
+  chip.classList.add("mastered");
+}
+
+   chip.dataset.topic = mt.label;
+
+    chip.innerHTML = `
+      ${mt.label}
+      <span class="chip-count">${mt.count}</span>
+    `;
+
+    chip.addEventListener("click", () => {
+  if (chip.classList.contains("active")) {
+    chip.classList.remove("active");
+    selected.delete(microCanon);
+  } else {
+    chip.classList.add("active");
+    selected.add(microCanon);
+  }
+
+  startBtn.style.display =
+    selected.size > 0 ? "inline-block" : "none";
+});
+
+
+    chipsWrap.appendChild(chip);
+  });
+
+  groupWrap.appendChild(header);
+  groupWrap.appendChild(chipsWrap);
+  container.appendChild(groupWrap);
+});
+
 
     startBtn.addEventListener("click", () => {
-      const pick = Array.from(selected);
-      const limit =
-        (cfg.topics && cfg.topics.questionCount) || 10;
+  const pick = Array.from(selected).map(t => t);
+  const limit =
+    (cfg.topics && cfg.topics.questionCount) || 10;
 
-      document.getElementById("quizArea").style.display = "block";
-      document.querySelector("section").style.display = "none";
+  document.getElementById("quizArea").style.display = "block";
+  document.querySelector("section").style.display = "none";
 
-      let quiz = document.getElementById("quiz");
-      if (!quiz) {
-        quiz = document.createElement("div");
-        quiz.id = "quiz";
-        document.getElementById("quizArea").appendChild(quiz);
-      }
-
-      CivicEdgeEngine.start("topics", {
-        topics: pick,
-        limit: limit
-      });
-
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
+  let quiz = document.getElementById("quiz");
+  if (!quiz) {
+    quiz = document.createElement("div");
+    quiz.id = "quiz";
+    document.getElementById("quizArea").appendChild(quiz);
   }
+
+  CivicEdgeEngine.start("topics", {
+    topics: pick,
+    limit: limit
+  });
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+  }
+function isMicrotopicMastered(microCanon, bankQuestions, progress) {
+  const qs = bankQuestions.filter(
+    q => q.microtopic && q.microtopic.en === microCanon
+  );
+
+  for (const q of qs) {
+    const key = `${microCanon}:${q.id}`;
+    const entry = progress[key];
+    if (!(entry && entry.correct === 1)) {
+      return false;
+    }
+  }
+  return qs.length > 0;
+}
 
   initTopics();
 });

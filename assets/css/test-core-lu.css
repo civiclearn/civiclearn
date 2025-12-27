@@ -1,0 +1,663 @@
+/* ============================================================
+   CivicEdge — Test Core Styles (Corrected for New Engine)
+   ============================================================ */
+
+/* --- Layout basics --- */
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Space Grotesk", system-ui, sans-serif;
+}
+
+/* --- Quiz container --- */
+.ce-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 32px 36px;
+  box-shadow: 0 8px 22px rgba(0,0,0,.04);
+  transition: box-shadow .3s ease;
+}
+
+.ce-card:hover {
+  box-shadow: 0 10px 28px rgba(0,0,0,.06);
+}
+
+/* ============================================================
+   Corrected: Engine header elements
+   ============================================================ */
+
+/* “Question X sur Y” */
+.ce-q-meta {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+/* Topic label */
+.ce-q-topic {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 14px;
+  color: var(--muted);
+}
+
+/* Question text */
+.ce-question {
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.45;
+  margin: 16px 0 30px;
+}
+
+.ce-q-subtopic {
+  font-size: 14px;
+  color: var(--muted);
+  opacity: 0.8;
+  margin: 4px 0 6px;
+}
+
+/* ============================================================
+   Corrected: Options (engine uses .ce-options + .ce-option)
+   ============================================================ */
+
+.ce-options {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Map to your previous .ce-opt */
+.ce-option {
+  padding: 16px 20px;
+  border-radius: 14px;
+  border: 1px solid #e4e7ec;
+  background: #fafafa;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all .25s ease;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+}
+
+.ce-option:hover:not(:disabled) {
+  background: #f3f4ff;
+  border-color: #c7d2fe;
+  box-shadow: 0 3px 10px rgba(79,70,229,.15);
+  transform: translateY(-1px);
+}
+
+.ce-option:active {
+  transform: scale(.99);
+}
+
+/* Map correct/wrong to old styling */
+.ce-option.correct {
+  background: #dcfce7 !important;  /* green tint */
+  border-color: #16a34a !important;
+  color: #065f46 !important;
+}
+
+.ce-option.wrong {
+  background: #fee2e2 !important;  /* red tint */
+  border-color: #dc2626 !important;
+  color: #7f1d1d !important;
+}
+
+.ce-option:disabled {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* ============================================================
+   Corrected: Footer actions (.ce-q-footer)
+   ============================================================ */
+
+.ce-q-footer {
+  margin-top: 28px;
+}
+
+/* Same button style as .btn */
+.ce-q-footer .btn,
+.ce-actions button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .2s ease, filter .2s ease;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+}
+
+.ce-q-footer .btn:hover,
+.ce-actions button:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   Feedback bubble (unchanged)
+   ============================================================ */
+.ce-feedback {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f0fdf4;
+  border-left: 4px solid #16a34a;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #166534;
+  
+}
+
+/* ============================================================
+   Progress Bar (unchanged)
+   ============================================================ */
+/* LOCAL QUESTION PROGRESS BAR — curved ends */
+.ce-progress-local {
+  width: 100%;
+  max-width: 680px;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 0 auto 18px auto;
+}
+
+.ce-progress-local-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--brand);
+  border-radius: 6px;
+  transition: width 0.3s ease;
+}
+
+
+/* ============================================================
+   Buttons & Chips
+   ============================================================ */
+.btn,
+#startCustomBtn {
+  display: inline-block;
+  padding: 14px 28px;
+  border: none;
+  border-radius: 14px;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  box-shadow: 0 6px 14px rgba(79,70,229,0.25);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn:hover,
+#startCustomBtn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   Mobile fixes (unchanged)
+   ============================================================ */
+@media (max-width: 680px) {
+  body.test-page .ce-header {
+    margin-top: 36px !important;
+    padding-top: 0 !important;
+  }
+
+  body.test-page .wrap {
+    display: block !important;
+  }
+
+  body.test-page main {
+    padding-top: 12px !important;
+  }
+}   /* ← CLOSE @media */
+/* =========================================================
+   CIVICEDGE — FIXED, CLEAN, RESPONSIVE TEST UI
+   ========================================================= */
+
+
+/* ---------------------------------------------------------
+   TIMER — Container + Ring + SVG + Critical Flash
+   --------------------------------------------------------- */
+
+.ce-timer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0;
+  margin-right: 0;
+  gap: 4px;
+}
+
+#ce-timer-ring {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#ce-timer-ring svg {
+  width: 100%;
+  height: 100%;
+}
+
+#ce-timer-ring text {
+  fill: #111827;
+  font-size: 8px;
+  font-weight: 600;
+  dominant-baseline: central;
+}
+
+
+/* Flashing border when ≤ 30s left */
+.ce-timer-critical {
+  animation: ceFlash 1s infinite;
+  border: 2px solid #ef4444 !important;
+}
+
+@keyframes ceFlash {
+  0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
+  50%  { box-shadow: 0 0 12px 4px rgba(239,68,68,0.6); }
+  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
+}
+
+
+/* ---------------------------------------------------------
+   HEADER — Proper Alignment
+   --------------------------------------------------------- */
+
+.ce-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+body.test-page .ce-header-top {
+  max-width: 900px;      /* match .ce-card */
+  margin-left: 0;
+  margin-right: auto;
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+
+body.test-page .ce-header h1 {
+  text-align: left;
+  margin: 0;
+}
+
+
+/* ---------------------------------------------------------
+   QUESTION CONTENT WIDTH + LEFT ALIGN
+   --------------------------------------------------------- */
+
+body.test-page .ce-card {
+  max-width: 900px;
+  margin-left: 0;
+  margin-right: auto;
+}
+
+body.test-page .ce-question-block,
+body.test-page .ce-question-wrapper {
+  max-width: 900px;
+  margin-left: 0;
+  margin-right: auto;
+}
+
+
+/* ---------------------------------------------------------
+   RESULTS SCREEN — Typography + Spacing + Buttons
+   --------------------------------------------------------- */
+
+.ce-result-score {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.ce-result-list {
+  margin-bottom: 20px;
+}
+
+.ce-result-grade {
+  margin: 8px 0 12px;
+}
+
+body.test-page .ce-result-status {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+body.test-page .ce-result-status.pass {
+  color: #059669;
+}
+
+body.test-page .ce-result-status.fail {
+  color: #dc2626;
+}
+
+.ce-result-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+
+/* ---------------------------------------------------------
+   REVIEW MODE — Visual Feedback
+   --------------------------------------------------------- */
+
+body.review-mode .ce-q-meta {
+  opacity: 0.7;
+}
+
+body.review-mode .ce-q-topic {
+  opacity: 0.8;
+  font-style: italic;
+}
+
+body.review-mode .ce-card {
+  border-left: 4px solid #ef4444;
+}
+
+body.review-mode .ce-question {
+  font-weight: 600;
+}
+
+
+/* ---------------------------------------------------------
+   TIMER LABEL (text under ring)
+   --------------------------------------------------------- */
+
+#ce-timer-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #4b5563;
+  text-align: center;
+}
+/* Visually hide timer label, but keep it in DOM for JS */
+.ce-timer-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+/* === GLOBAL PROGRESS BAR ABOVE CARD === */
+.ce-progress-global {
+  width: 100%;
+  max-width: 900px;
+  height: 8px;
+  margin: 0 0 18px 0;
+  background: #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ce-progress-global-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--brand);
+  border-radius: 8px;
+  transition: width .35s ease;
+}
+/* Ensure top spacing for Quick Test header */
+body.test-page .ce-header {
+  margin-top: 24px;
+  margin-bottom: 12px;
+  max-width: 900px;
+  margin-left: 0;
+  margin-right: auto;
+}
+/* ============================================================
+   READING ASSIST — Speaker icons (Question + Options)
+   ============================================================ */
+
+.ce-question-wrap {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ce-speak-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.ce-speak-btn:hover {
+  opacity: 1;
+}
+
+.ce-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ce-option-label {
+  flex: 1;
+}
+
+.ce-speak-small {
+  font-size: 14px;
+}
+/* === Topics result layout with donut ring === */
+
+.ce-result-layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.ce-result-main {
+  flex: 1 1 auto;
+}
+
+.ce-result-ring {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ce-topics-ring {
+  width: 170px;           /* desktop size */
+  max-width: 40vw;        /* responsive shrink */
+}
+
+.ce-topics-ring-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.ce-topics-ring-caption {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--muted, #6b7280);
+  text-align: center;
+}
+
+<style>
+/* Make the simulation card a flex layout so header items can sit on one line */
+#quizArea .ce-card {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+/* HEADER ROW (left): Topic + Counter on same line */
+#quizArea .ce-q-topic,
+#quizArea .ce-q-meta {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  margin: 0;
+}
+
+/* Topic pill */
+#quizArea .ce-q-topic {
+  background: rgba(88, 80, 236, 0.10);
+  color: #3b38d1;
+}
+
+/* Counter pill */
+#quizArea .ce-q-meta {
+  background: rgba(0, 0, 0, 0.05);
+  color: #555;
+}
+
+/* Order of left pills */
+#quizArea .ce-q-topic { order: 1; }
+#quizArea .ce-q-meta  { order: 2; }
+
+/* Force the rest of the content onto full width below the header row */
+#quizArea .ce-question-wrap,
+#quizArea .ce-options,
+#quizArea .ce-q-footer {
+  flex: 0 0 100%;
+}
+
+#quizArea .ce-question-wrap { order: 10; }
+#quizArea .ce-options       { order: 11; }
+#quizArea .ce-q-footer      { order: 12; }
+
+/* Header row container */
+.ce-q-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+/* =========================================================
+   QUESTION HEADER — TOPIC / MICROTOPIC / STAR
+   (shared by quick, simulation, topics, traps)
+   ========================================================= */
+
+/* Header row container */
+.ce-q-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+/* Main topic pill (simulation only, but safe globally) */
+.ce-q-main {
+  order: 0;
+  font-weight: 600;
+  background: rgba(88, 80, 236, 0.08);
+  color: #3b38d1;
+  padding: 6px 12px;
+  border-radius: 999px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Question counter pill */
+.ce-q-meta {
+  order: 2;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.05);
+  color: #555;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Microtopic + star wrapper (right aligned) */
+.ce-q-subtopic-wrap {
+  order: 3;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* Microtopic pill */
+.ce-q-subtopic {
+  background: rgba(88, 80, 236, 0.12);
+  color: #3b38d1;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* Save-to-list star */
+.ce-save-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.ce-save-btn::before {
+  content: "☆";
+  font-size: 1.25rem;
+  color: #9ca3af;
+}
+
+.ce-save-btn.active::before {
+  content: "★";
+  color: #4f46e5;
+}
+
+
+/* On small screens, stack card vertically and center ring */
+
+@media (max-width: 768px) {
+  .ce-result-layout {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ce-result-ring {
+    width: 100%;
+    margin-top: 16px;
+    justify-content: center;
+  }
+
+  .ce-topics-ring {
+    width: 140px;
+    max-width: 60vw;
+  }
+}

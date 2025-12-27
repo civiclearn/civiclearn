@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title data-i18n="title_reference_texts"></title>
+
+  <!-- Core Styles -->
+  <link rel="stylesheet" href="/assets/css/dashboard-core-lt.css">
+  <link rel="stylesheet" href="/assets/css/reference-text.css">
+
+  <!-- Flag size override -->
+  <style>
+    .brand svg {
+      width: 30px !important;
+      height: 30px !important;
+    }
+  </style>
+
+  <script>
+    document.documentElement.classList.add("i18n-hidden");
+  </script>
+  <script type="module" src="/assets/js/auth-guardS.js"></script>
+</head>
+
+
+<body>
+
+<!-- MOBILE MENU -->
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+<div class="brand">
+  CivicLearn®
+  <svg
+    viewBox="0 0 12000 6000"
+    width="30"
+    height="30"
+    style="margin-left:6px;vertical-align:middle;border-radius:3px;overflow:hidden"
+    aria-label="Luxembourg"
+  >
+    <defs>
+      <clipPath id="clip-lu">
+        <rect width="12000" height="6000" />
+      </clipPath>
+    </defs>
+
+    <g clip-path="url(#clip-lu)">
+      <!-- Top: Red -->
+      <rect x="0" y="0" width="12000" height="2000" fill="#ED2939"/>
+
+      <!-- Middle: White -->
+      <rect x="0" y="2000" width="12000" height="2000" fill="#FFFFFF"/>
+
+      <!-- Bottom: Light Blue -->
+      <rect x="0" y="4000" width="12000" height="2000" fill="#00A1DE"/>
+    </g>
+  </svg>
+</div>
+
+
+
+
+          <nav class="nav">
+  <a href="index.html"  data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="reference.html"  class="sub active" data-i18n="nav_reference_texts"></a>
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="my-list.html" data-i18n="nav_my_list"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+    <div class="spacer"></div>
+
+    <div class="profile">
+
+
+    <!-- LANGUAGE SWITCHER -->
+<div class="lang-switch">
+  <button data-lang="fr">FR</button>
+  <button data-lang="de">DE</button>
+  <button data-lang="en">EN</button>
+</div>
+
+ <div class="profile-info">
+
+    <!-- READING TOGGLE -->
+    <div class="reading-inline">
+      <span data-i18n="reading_label"></span>
+      <button id="readingToggle"
+              class="reading-btn inline"
+              data-i18n="reading_tooltip"
+              data-i18n-attr="title">🔇</button>
+    </div>
+
+  </div>
+</div>
+
+  </aside>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+  <main>
+
+<header class="ce-header ce-header-top">
+  <div class="reference-toolbar">
+    <div class="reference-filters">
+      <button class="ref-filter active" data-filter="all">All</button>
+      <button class="ref-filter" data-filter="history">History</button>
+      <button class="ref-filter" data-filter="institutions">Institutions</button>
+      <button class="ref-filter" data-filter="rights">Rights</button>
+      <button class="ref-filter" data-filter="culture">Culture</button>
+    </div>
+
+    <input
+      type="text"
+      id="referenceSearch"
+      placeholder="Search a document…"
+    />
+  </div>
+
+  <h1 data-i18n="title_reference_texts"></h1>
+  <div class="muted" data-i18n="reference_texts_subtitle"></div>
+</header><br><br>
+
+
+     <div class="dashboard-container">
+
+<div class="reference-grid" id="referenceGrid"></div>
+<div style="height:96px;"></div>
+
+
+  </div>
+
+  </main>
+
+</div>
+
+<!-- CONFIG + I18N -->
+<script src="/assets/js/lang-bootstrap-lu.js"></script>
+<script src="/assets/js/config-lu.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>
+  CivicLearnI18n.init();
+</script>
+
+<!-- ENGINE -->
+<script src="/assets/js/engine-lu.js"></script>
+
+<script>
+
+const REFERENCE_TEXTS_EN = [
+  {
+    title: "About the History of Luxembourg",
+    description: "An essential overview of Luxembourg's history, its key events, and its development.",
+    file: "about-the-history-of-luxembourg-en-1.pdf",
+    category: "history",
+    badge: "Official"
+  },
+  {
+    title: "About Political Institutions in Luxembourg",
+    description: "A guide to Luxembourg's political institutions and how they function.",
+    file: "A_propos_Institutions_politiques-EN-1.pdf",
+    category: "institutions",
+    badge: "Official"
+  },
+  {
+    title: "About Luxembourg and the European Union",
+    description: "An introduction to the relations between Luxembourg and the European Union.",
+    file: "about-luxembourg-and-the-european-union-en.pdf",
+    category: "institutions",
+    badge: "Official"
+  },
+  {
+    title: "Everything You Need to Know About the Grand Duchy of Luxembourg",
+    description: "A comprehensive presentation of the Grand Duchy of Luxembourg, its identity, and its unique characteristics.",
+    file: "tout-savoir-sur-le-grand-duche-de-luxembourg-en.pdf",
+    category: "history",
+    badge: "Official"
+  },
+  {
+    title: "10 Fact Sheets About the Grand Duchy of Luxembourg",
+    description: "A brochure in 10 chapters offering a visual and engaging presentation of Luxembourg: history, culture, population, politics, economy, and more.",
+    file: "10-fact-sheets-grand-duchy-luxembourg-en.pdf",
+    category: "history",
+    badge: "Official"
+  },
+  {
+    title: "Constitution of the Grand Duchy of Luxembourg",
+    description: "The fundamental text establishing the organization and functioning of the Grand Duchy of Luxembourg.",
+    file: "constitution.pdf",
+    category: "institutions",
+    badge: "Official"
+  },
+  {
+    title: "The Universal Declaration of Human Rights",
+    description: "The key text proclaiming the fundamental rights and freedoms of every human being.",
+    file: "universal-declaration-of-human-rights-en.pdf",
+    category: "rights",
+    badge: "Official"
+  },
+  {
+    title: "About Languages in Luxembourg",
+    description: "An introduction to multilingualism and the use of languages in Luxembourg.",
+    file: "a-propos-des-langues-en.pdf",
+    category: "culture",
+    badge: "Official"
+  },
+  {
+    title: "Symbols of the State and of the Nation",
+    description: "A presentation of the official symbols of the State and the Luxembourgish nation.",
+    file: "symbols-of-the-state-and-of-the-nation-en.pdf",
+    category: "culture",
+    badge: "Official"
+  },
+  {
+    title: "About Festivals and Traditions in Luxembourg",
+    description: "An exploration of the festivals and traditions that enrich Luxembourgish culture.",
+    file: "a-propos-des-fetes-et-traditions-au-luxembourg-en.pdf",
+    category: "culture",
+    badge: "Official"
+  },
+  {
+    title: "About Theatre in Luxembourg",
+    description: "A look at the history and significance of theatre in Luxembourg’s cultural life.",
+    file: "a-propos-du-theatre-au-luxembourg-en.pdf",
+    category: "culture",
+    badge: "Official"
+  },
+  {
+    title: "About Literature in Luxembourg",
+    description: "An introduction to the richness and diversity of Luxembourgish literature.",
+    file: "a-propos-de-la-litterature-au-luxembourg-en.pdf",
+    category: "culture",
+    badge: "Official"
+  }
+];
+
+const grid = document.getElementById("referenceGrid");
+
+REFERENCE_TEXTS_EN.forEach(f => {
+  const card = document.createElement("div");
+  card.className = "reference-card";
+  card.dataset.category = f.category || "other";
+
+  card.innerHTML = `
+    <div class="ref-badge">PDF</div>
+    <h3>${f.title}</h3>
+    <p>${f.description}</p>
+    <a href="https://media.civiclearn.com/lux/en/${f.file}" target="_blank" rel="noopener">
+      Download →
+    </a>
+  `;
+
+  grid.appendChild(card);
+});
+</script>
+<script>
+const filterButtons = document.querySelectorAll(".ref-filter");
+const searchInput = document.getElementById("referenceSearch");
+const cards = Array.from(document.querySelectorAll(".reference-card"));
+
+function applyFilters() {
+  const activeFilter =
+    document.querySelector(".ref-filter.active")?.dataset.filter || "all";
+  const query = searchInput.value.toLowerCase();
+
+  cards.forEach(card => {
+    const matchesFilter =
+      activeFilter === "all" || card.dataset.category === activeFilter;
+
+    const text = card.innerText.toLowerCase();
+    const matchesSearch = text.includes(query);
+
+    card.style.display = matchesFilter && matchesSearch ? "" : "none";
+  });
+}
+
+filterButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    filterButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    applyFilters();
+  });
+});
+
+searchInput.addEventListener("input", applyFilters);
+</script>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* MOBILE MENU */
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+
+  /* THEME */
+  try {
+    const s = JSON.parse(localStorage.getItem("civicedge_settings") || "{}");
+    if (s.theme) document.documentElement.dataset.theme = s.theme;
+  } catch {}
+});
+</script>
+<script>
+  (function () {
+    const current = window.CIVICEDGE_LANG;
+
+    document.querySelectorAll(".lang-switch button").forEach(btn => {
+      const lang = btn.dataset.lang;
+
+      // Highlight active language
+      if (lang === current) {
+        btn.classList.add("active");
+      }
+
+      btn.addEventListener("click", () => {
+        if (lang === current) return;
+        localStorage.setItem("civicedge_lang", lang);
+        location.reload();
+      });
+    });
+  })();
+</script>
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>

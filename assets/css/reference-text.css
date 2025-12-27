@@ -1,0 +1,269 @@
+.reference-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  
+}
+
+.reference-card {
+  background: var(--card-bg, #fff);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reference-card h3 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.reference-card p {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.reference-card a {
+  margin-top: auto;
+  font-weight: 600;
+  text-decoration: none;
+  color: #5b5bf0;
+}
+
+.ref-bottom-spacer {
+  height: 96px;
+}
+.dashboard-container::after {
+  content: "";
+  display: block;
+  height: 96px;
+}
+/* reference-texts.css */
+
+/* Toolbar */
+.reference-toolbar{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin:18px 0 22px;
+}
+
+.reference-filters{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.ref-filter{
+  padding:7px 12px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.12);
+  background:#fff;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.ref-filter.active{
+  border-color:transparent;
+  background:rgba(91,91,240,.14);
+}
+
+/* Search */
+#referenceSearch{
+  flex:1;
+  max-width:520px;
+  padding:9px 12px;
+  border-radius:10px;
+  border:1px solid rgba(0,0,0,.12);
+  background:#fff;
+  font-size:14px;
+}
+
+/* Grid */
+.reference-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:18px;
+}
+
+/* Card */
+.reference-card{
+  position:relative;
+  border-radius:16px;
+  padding:18px 18px 16px;
+  background:var(--card-bg,#fff);
+  box-shadow:0 10px 28px rgba(0,0,0,.06);
+  border:1px solid rgba(0,0,0,.06);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+
+.reference-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 14px 40px rgba(0,0,0,.10);
+}
+
+/* PDF badge */
+.ref-badge{
+  position:absolute;
+  top:14px;
+  right:14px;
+  font-size:10px;
+  font-weight:700;
+  padding:3px 7px;
+  border-radius:999px;
+  background:rgba(0,0,0,.06);
+  color:rgba(0,0,0,.55);
+}
+
+/* Title + description */
+.reference-card h3{
+  margin:0;
+  padding-right:48px; /* room for badge */
+  font-size:16px;
+  line-height:1.25;
+}
+
+.reference-card p{
+  margin:0;
+  font-size:13px;
+  line-height:1.45;
+  color:rgba(0,0,0,.68);
+}
+
+/* Meta line */
+.ref-meta{
+  font-size:12px;
+  color:rgba(0,0,0,.55);
+}
+
+/* Download link */
+.reference-card a{
+  margin-top:auto;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-weight:700;
+  text-decoration:none;
+}
+.dashboard-container {
+  padding-right: 32px;
+}
+.reference-toolbar,
+.reference-toolbar button,
+#referenceSearch {
+  font-family: "Lexend", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.reference-card:hover h3 {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.reference-card[data-category="history"] { --accent:#8b5cf6; }
+.reference-card[data-category="institutions"] { --accent:#3b82f6; }
+.reference-card[data-category="rights"] { --accent:#ef4444; }
+.reference-card[data-category="culture"] { --accent:#10b981; }
+
+.reference-card {
+  border-left:4px solid transparent;
+}
+
+.reference-card:hover {
+  border-left-color: var(--accent, #5b5bf0);
+}
+/* =========================
+   MOBILE FIXES – Reference
+   ========================= */
+@media (max-width: 768px) {
+
+  /* Page horizontal padding */
+  .dashboard-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  /* Header: avoid subtitle being squashed */
+  .ce-header {
+    padding-right: 0;
+  }
+
+  .ce-header h1 {
+    font-size: 22px;
+    line-height: 1.25;
+  }
+
+  .ce-header .muted {
+    max-width: 100%;
+    white-space: normal;
+    display: none;
+  
+  }
+
+  /* Toolbar: stack cleanly */
+  .reference-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  /* Filters: wrap neatly */
+  .reference-filters {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .ref-filter {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  /* Search: full width */
+  #referenceSearch {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* Grid: force single column */
+  .reference-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  /* Cards: reduce visual bulk */
+  .reference-card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .reference-card h3 {
+    font-size: 15px;
+  }
+
+  .reference-card p {
+    font-size: 13px;
+  }
+
+  /* PDF badge: smaller, quieter */
+  .ref-badge {
+    top: 10px;
+    right: 10px;
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+
+  /* Download link: more tappable */
+  .reference-card a {
+    padding-top: 6px;
+    font-size: 14px;
+  }
+}
+
+
+/* Spacer handled in HTML (your <div style="height:96px"></div>) */

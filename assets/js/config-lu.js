@@ -1,67 +1,46 @@
-/* =========================================================
-   CivicLearn Country Config — Luxembourg (LU)
-   ========================================================= */
+/* CivicLearn Country Config — Luxembourg */
 
 window.CIVICEDGE_CONFIG = {
-
-  /* --------------------------------
-     IDENTITY
-     -------------------------------- */
   country: "lu",
-  countryKey: "lux",
 
-  /* --------------------------------
-     LANGUAGES (INSTITUTIONAL)
-     -------------------------------- */
-  languages: {
-    available: ["fr", "de", "en"],
-    default: "fr",
-    strict: true   // no silent fallback between languages
-  },
-
-  /* --------------------------------
-     TEXT-TO-SPEECH
-     -------------------------------- */
   voiceLang: (function () {
-    const lang = window.CIVICEDGE_LANG || "fr";
+    const lang = window.CIVICEDGE_LANG || "en";
     if (lang === "fr") return "fr-FR";
     if (lang === "de") return "de-DE";
-    return "en-US";
+    return "en-US"; // fallback
   })(),
 
-  /* --------------------------------
-     QUESTION BANKS
-     -------------------------------- */
   bank: {
     path: "/lux/banks/lux/questions.json",
     format: "multilingual"
   },
+  
+  factofday: {
+  path: "/lux/banks/lux/factofday-lu.json"
+},
 
-  essentialTest: {
-    enabled: true,
-    bank: "/lux/banks/lux/essential.json",
-    questionCount: 20,
-    timeLimitMin: 20,
-    randomize: true
+  manual: {
+    chapters: []
+  },
+
+  flashcards: {
+    mode: "topics-only",
+    placeholder: "/assets/images/icons/flag-watermark-lu.jpg"
   },
 
   /* --------------------------------
-     SUBTOPICS (STRUCTURAL ONLY)
-     -------------------------------- */
-  subtopics: {
-    enabled: true,
-    ui: false,              // never shown as filters
-    showOnQuestion: true    // label shown on question card
-  },
-
-  /* --------------------------------
-     SIMULATION — OFFICIAL EXAM RULES
+     OFFICIAL SIMULATION — LUXEMBOURG
      -------------------------------- */
   simulation: {
     questionCount: 40,
     timeLimitMin: 60,
-    passScore: 28,
+    passScore: 28,   // 28 / 40
 
+    // Quotas per main category (must sum to questionCount)
+    topicQuotas: {
+     "History": 10,
+     "Institutions": 20,
+     "Fundamental Rights": 10
     }
   },
 
@@ -70,38 +49,18 @@ window.CIVICEDGE_CONFIG = {
      -------------------------------- */
   quicktest: {
     questionCount: 5
-  },
+  },   
 
-  /* --------------------------------
-     FLASHCARDS
-     -------------------------------- */
-  flashcards: {
-    mode: "topics-only",
-    placeholder: "/assets/images/icons/flag-watermark-lu.jpg"
-  },
-
-  /* --------------------------------
-     MANUAL (RESERVED)
-     -------------------------------- */
-  manual: {
-    chapters: []
+  topics: {
+    mode: "microtopics"
   }
-
 };
 
-
-/* =========================================================
-   LEGACY COMPATIBILITY
-   ========================================================= */
-
+/* Legacy compatibility */
 window.CivicLearnConfig = {
   country: "lu",
   bankBase: "/lux/banks/lux"
 };
 
-
-/* =========================================================
-   ENGINE BRIDGE — REQUIRED
-   ========================================================= */
-
+/* ENGINE BRIDGE — REQUIRED */
 window.CIVIC_CONFIG = window.CIVICEDGE_CONFIG;
