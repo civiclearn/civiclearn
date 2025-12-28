@@ -57,10 +57,23 @@
         titleEl.textContent = window.CivicLearnI18n?.t?.("dashboard_fact_title") || "Question du jour";
       }
 
-      const currentOptions =
-        (q.options && (q.options[lang] || q.options.en || q.options.fr || q.options.de)) || [];
+const rawOptions =
+  (q.options && (q.options[lang] || q.options.en || q.options.fr || q.options.de)) || [];
 
-      const correctIdx = q.correctIndex;
+let optionsWithIndex = rawOptions.map((text, idx) => ({
+  text,
+  idx
+}));
+
+// Fisher–Yates shuffle
+for (let i = optionsWithIndex.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [optionsWithIndex[i], optionsWithIndex[j]] = [optionsWithIndex[j], optionsWithIndex[i]];
+}
+
+const correctIdx = optionsWithIndex.findIndex(o => o.idx === q.correctIndex);
+const currentOptions = optionsWithIndex.map(o => o.text);
+
 
       currentOptions.forEach((optText, i) => {
         const btn = document.createElement("button");
