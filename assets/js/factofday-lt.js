@@ -68,27 +68,50 @@ const lang = window.CIVICEDGE_LANG || "lt";
     }
 
     // Get options for current language
-    const currentOptions = q.options[lang] || q.options["en"];
-    const correctIdx = q.correctIndex;
+// Get options for current language
+const rawOptions = q.options[lang] || q.options["en"];
 
-    currentOptions.forEach((optText, i) => {
-      const btn = document.createElement("button");
-      btn.className = "fact-option-btn";
-      btn.textContent = optText;
-      
-      btn.addEventListener("click", () => {
-        const allBtns = optionsEl.querySelectorAll("button");
-        allBtns.forEach(b => b.disabled = true);
+// Pair options with original index
+let optionsWithIndex = rawOptions.map((text, idx) => ({
+  text,
+  idx
+}));
 
-        if (i === correctIdx) {
-          btn.classList.add("fact-correct");
-        } else {
-          btn.classList.add("fact-wrong");
-          allBtns[correctIdx].classList.add("fact-correct");
-        }
-      });
-      optionsEl.appendChild(btn);
-    });
+// Shuffle (Fisher–Yates)
+for (let i = optionsWithIndex.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [optionsWithIndex[i], optionsWithIndex[j]] =
+    [optionsWithIndex[j], optionsWithIndex[i]];
+}
+
+// Resolve new correct index
+const correctIdx = optionsWithIndex.findIndex(
+  o => o.idx === q.correctIndex
+);
+
+// Render
+optionsWithIndex.forEach((opt, i) => {
+  const btn = document.createElement("button");
+  btn.className = "fact-option-btn";
+  btn.textContent = opt.text;
+
+  btn.addEventListener("click", () => {
+    const allBtns = optionsEl.querySelectorAll("button");
+    allBtns.forEach(b => (b.disabled = true));
+
+    if (i === correctIdx) {
+      btn.classList.add("fact-correct");
+    } else {
+      btn.classList.add("fact-wrong");
+      if (allBtns[correctIdx]) {
+        allBtns[correctIdx].classList.add("fact-correct");
+      }
+    }
+  });
+
+  optionsEl.appendChild(btn);
+});
+
   }
 
   // 4. Navigation
