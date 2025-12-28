@@ -163,18 +163,29 @@ tech_error:"Technical error. Please try again."
 </script>
 
 <script>
-let lang = localStorage.getItem("lang") || "fr";
-function applyLang(l){
-  lang=l; localStorage.setItem("lang",l);
-  document.documentElement.lang=l;
-  document.querySelectorAll(".lang-switch button").forEach(b=>b.classList.toggle("active",b.dataset.lang===l));
-  document.querySelectorAll("[data-t]").forEach(e=>{
-    const k=e.dataset.t; if(I18N[l][k]) e.textContent=I18N[l][k];
+let currentLang = "fr"; // use "fr" for Luxembourg
+
+function applyLang(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.lang === lang);
+  });
+
+  document.querySelectorAll("[data-t]").forEach(el => {
+    const key = el.getAttribute("data-t");
+    if (I18N[lang][key]) el.textContent = I18N[lang][key];
   });
 }
-document.querySelectorAll(".lang-switch button").forEach(b=>b.onclick=()=>applyLang(b.dataset.lang));
-applyLang(lang);
+
+document.querySelectorAll(".lang-switch button").forEach(btn => {
+  btn.addEventListener("click", () => applyLang(btn.dataset.lang));
+});
+
+applyLang(currentLang);
 </script>
+
 
 <script>
 (function(){
