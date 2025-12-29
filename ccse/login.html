@@ -56,30 +56,41 @@
 
 
 <div class="login-wrapper">
-  <div class="card">
-    <h1>Acceso</h1>
-    <p class="subtitle">
-      Introduce tu dirección de correo electrónico para acceder a tu panel.
-    </p>
+  <main class="login-container">
+    <div class="card">
+      <h1 style="font-family: 'Lexend', sans-serif;">Iniciar sesión</h1>
+      <p class="subtitle" style="font-family: 'Lexend', sans-serif;">
+        Introduce tu email para recibir tu código de acceso de 8 dígitos.
+      </p>
 
-    <label for="email">Correo electrónico</label>
-    <input id="email" type="email" placeholder="tu@email.com" />
+      <div id="emailSection">
+        <label for="email" style="font-family: 'Lexend', sans-serif;">Dirección de email</label>
+        <input id="email" type="email" placeholder="nombre@ejemplo.com" 
+               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px; font-family: 'Lexend', sans-serif;" />
+        <button type="button" class="login-btn" id="sendMagicLink" style="font-family: 'Lexend', sans-serif; font-weight:600;">
+          Enviar código de acceso
+        </button>
+      </div>
 
-    <button type="button" class="login-btn" id="sendMagicLink">
-      Enviar enlace de acceso
-    </button>
+      <div id="otpSection" style="display:none; margin-top: 10px;">
+        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">Código de 8 dígitos</label>
+        <input id="otpCode" type="text" placeholder="00000000" maxlength="8" 
+               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
+        <button type="button" class="login-btn" id="verifyOtp" 
+                style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;">
+          Verificar e iniciar sesión
+        </button>
+      </div>
 
-    <div id="loginMessage" class="login-message" style="display:none;"></div>
+      <div id="loginMessage" class="login-message" style="display:none; margin-top: 15px; font-family: 'Lexend', sans-serif;"></div>
 
-    <div class="hint">
-      ¿Todavía no tienes acceso?
-      <a href="/ccse/checkout.html">Crear acceso</a>
+      <div class="login-footer" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #666; text-align: center; font-family: 'Lexend', sans-serif;">
+        ¿Aún no tienes acceso? <a href="/ccse/checkout" style="color: #7c3aed; text-decoration: none; font-weight: 500;">Crear acceso</a>
+      </div>
     </div>
-  </div>
+  </main>
 </div>
 
-
-<!-- MESSAGE for first login -->
 <script>
 (function () {
   const params = new URLSearchParams(window.location.search);
@@ -87,15 +98,14 @@
     const box = document.getElementById("loginMessage");
     box.className = "login-message success";
     box.textContent =
-      "Tu cuenta ha sido activada. Introduce el correo electrónico usado en la compra para acceder a la plataforma.";
+      "Tu cuenta ha sido activada. Introduce el email utilizado durante la compra para acceder a tu formación.";
     box.style.display = "block";
   }
 })();
 </script>
 
-
-<!-- MAGIC LINK LOGIC -->
 <script>
+// --- AYUDAS ---
 function showMessage(type, text) {
   const box = document.getElementById("loginMessage");
   box.className = "login-message " + type;
@@ -113,52 +123,73 @@ function handleLoginFeedback(email) {
     attemptCount = 1;
     lastEmailAttempt = email;
   }
-
   if (attemptCount >= 2) {
-    showMessage(
-      "success",
-      "Si ya has pagado pero no recibes el enlace, revisa Spam/Promociones o contáctanos."
-    );
+    showMessage("success", "Si aún no has recibido el código, por favor revisa tu carpeta de correo no deseado o contáctanos.");
   } else {
-    showMessage(
-      "success",
-      "El enlace de acceso ha sido enviado. Revisa tu correo."
-    );
+    showMessage("success", "Tu código de acceso de 8 dígitos ha sido enviado. Por favor, comprueba tu email.");
   }
 }
 
+// --- PASO 1: SOLICITAR EL CÓDIGO ---
 document.getElementById("sendMagicLink").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const msg = document.getElementById("loginMessage");
   msg.style.display = "none";
 
   if (!email) {
-    showMessage("error", "Introduce tu dirección de correo electrónico.");
+    showMessage("error", "Por favor, introduce tu email.");
     return;
   }
 
   if (!window.supabase) {
-    showMessage("error", "Error técnico. Recarga la página e inténtalo de nuevo.");
+    showMessage("error", "Error técnico. Por favor, actualiza la página e inténtalo de nuevo.");
     return;
   }
-
-  const redirectTo =
-    `${window.location.origin}/ccse/dashboard/index.html`;
 
   const { error } = await window.supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: redirectTo,
       shouldCreateUser: false
     }
   });
 
   if (error) {
-    showMessage("error", error.message);
+    // INTERCEPTAR ERROR DE SUPABASE
+    if (error.message.includes("Signups not allowed for otp") || error.status === 422) {
+      showMessage("error", "Este email no está registrado — por favor, introduce el email exacto que utilizaste durante la compra.");
+    } else {
+      showMessage("error", "Ha ocurrido un error: " + error.message);
+    }
     return;
   }
 
+  document.getElementById("sendMagicLink").style.display = "none";
+  document.getElementById("otpSection").style.display = "block";
+  
   handleLoginFeedback(email);
+});
+
+// --- PASO 2: VERIFICAR EL CÓDIGO ---
+document.getElementById("verifyOtp").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const token = document.getElementById("otpCode").value.trim();
+
+  if (token.length < 6 || token.length > 8) {
+    showMessage("error", "Por favor, introduce el código válido enviado por email.");
+    return;
+  }
+
+  const { data, error } = await window.supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'magiclink'
+  });
+
+  if (error) {
+    showMessage("error", error.message);
+  } else if (data.session) {
+    window.location.href = "/ccse/dashboard/index.html";
+  }
 });
 </script>
 
