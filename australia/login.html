@@ -8,7 +8,71 @@
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/login.css">
 
-  <!-- Supabase config + loader -->
+  <style>
+    /* Force Lexend on all interactive elements */
+    body, input, button, select, textarea {
+      font-family: 'Lexend', sans-serif;
+    }
+
+    .card {
+      max-width: 400px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    #otpCode {
+      /* Monospace helps with digit alignment, Lexend for general style */
+      font-family: 'Courier New', Courier, monospace; 
+      letter-spacing: 4px;
+      font-size: 24px;
+      font-weight: 600;
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5dfd2;
+      border-radius: 8px;
+      box-sizing: border-box; /* Ensures padding doesn't increase width */
+      text-align: center;
+      margin-top: 10px;
+      background: #fafafa;
+    }
+
+    #otpCode:focus {
+      border-color: #7c3aed;
+      outline: none;
+      background: #fff;
+    }
+
+    .login-footer {
+      margin-top: 25px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+      font-size: 13px;
+      color: #666;
+      text-align: center;
+    }
+
+    .login-footer a {
+      color: #7c3aed;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .login-btn {
+        width: 100%;
+        font-family: 'Lexend', sans-serif;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    #verifyOtp {
+        background-color: #28a745;
+        margin-top: 15px;
+    }
+  </style>
+
   <script>
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
@@ -28,75 +92,36 @@
 
 <body>
 
-<header class="site-header">
-  <div class="header-inner">
-
-    <div class="header-left">
-      <div class="brand-main">
-        <img src="/assets/images/au.svg" alt="Australia">
-        <div class="brand-title">CivicLearn Australia</div>
-      </div>
-      <div class="brand-powered">
-        powered by <span>CivicLearn</span>
-      </div>
+<main class="login-container">
+  <div class="card">
+    <div style="text-align:center; margin-bottom: 20px;">
+        <img src="/assets/img/logo.png" alt="CivicLearn" style="width: 120px;">
     </div>
-
-    <nav class="header-nav">
-      <a href="/australia/">Home</a>
-      <a href="/australia/#presentation">Overview</a>
-      <a href="/australia/#pricing">Pricing</a>
-    </nav>
-
-    <a href="/australia/checkout.html" class="btn-small-purple">Sign up</a>
-  </div>
-</header>
-
-<div class="login-wrapper">
-<div class="card">
+    
     <h1>Login</h1>
-    <p class="subtitle">Enter your email address to access your dashboard.</p>
+    <p class="subtitle">Enter your email to receive your 8-digit access code.</p>
 
-    <label for="email">Email</label>
-    <input id="email" type="email" placeholder="you@example.com" />
-
-    <button type="button" class="login-btn" id="sendMagicLink">
-      Send login code
-    </button>
-
-    <div id="otpSection" style="display:none; margin-top: 20px;">
-      <label for="otpCode">8-Digit Code</label>
-      <input id="otpCode" type="text" placeholder="12345678" maxlength="8" style="text-align:center; letter-spacing: 5px; font-size: 20px;" />
-      <button type="button" class="login-btn" id="verifyOtp" style="margin-top:10px; background-color: #28a745;">
-        Verify & Login
-      </button>
+    <div id="emailSection">
+        <label for="email">Email Address</label>
+        <input id="email" type="email" placeholder="you@example.com" style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px;" />
+        <button type="button" class="login-btn" id="sendMagicLink">Send login code</button>
     </div>
 
-    <div id="loginMessage" class="login-message" style="display:none;"></div>
-</div>
+    <div id="otpSection" style="display:none; margin-top: 10px;">
+      <label for="otpCode">8-Digit Code</label>
+      <input id="otpCode" type="text" placeholder="00000000" maxlength="8" />
+      <button type="button" class="login-btn" id="verifyOtp">Verify & Login</button>
+    </div>
 
-    <div class="hint">
-      Don’t have access yet?
-      <a href="/australia/checkout.html">Create access</a>
+    <div id="loginMessage" class="login-message" style="display:none; margin-top: 15px;"></div>
+
+    <div class="login-footer">
+      Don't have access yet? <a href="/australia/pricing.html">Create access</a>
     </div>
   </div>
-</div>
-
-<!-- MESSAGE for first login -->
-<script>
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("first") === "1") {
-    const box = document.getElementById("loginMessage");
-    box.className = "login-message success";
-    box.textContent =
-      "Your account has been activated. Enter the email address used during purchase to access your training.";
-    box.style.display = "block";
-  }
-})();
-</script>
+</main>
 
 <script>
-// --- HELPERS ---
 function showMessage(type, text) {
   const box = document.getElementById("loginMessage");
   box.className = "login-message " + type;
@@ -104,46 +129,16 @@ function showMessage(type, text) {
   box.style.display = "block";
 }
 
-let lastEmailAttempt = "";
-let attemptCount = 0;
-
-function handleLoginFeedback(email) {
-  if (email === lastEmailAttempt) {
-    attemptCount++;
-  } else {
-    attemptCount = 1;
-    lastEmailAttempt = email;
-  }
-  if (attemptCount >= 2) {
-    showMessage("success", "If you still haven't received the code, please check Spam or contact us.");
-  } else {
-    showMessage("success", "Your 8-digit login code has been sent. Please check your email.");
-  }
-}
-
-// --- STEP 1: REQUEST THE CODE ---
 document.getElementById("sendMagicLink").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
-  const msg = document.getElementById("loginMessage");
-  msg.style.display = "none";
-
   if (!email) {
     showMessage("error", "Please enter your email address.");
     return;
   }
 
-  if (!window.supabase) {
-    showMessage("error", "Technical error. Please refresh and try again.");
-    return;
-  }
-
-  // signInWithOtp without redirectTo will trigger the 8-digit code flow 
-  // if you updated your Supabase template to {{ .Token }}
   const { error } = await window.supabase.auth.signInWithOtp({
     email,
-    options: {
-      shouldCreateUser: false
-    }
+    options: { shouldCreateUser: false }
   });
 
   if (error) {
@@ -151,34 +146,29 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
     return;
   }
 
-  // UI Change: Hide email button, show the code input section
-  document.getElementById("sendMagicLink").style.display = "none";
+  document.getElementById("emailSection").style.display = "none";
   document.getElementById("otpSection").style.display = "block";
-  
-  handleLoginFeedback(email);
+  showMessage("success", "Code sent! Please check your inbox.");
 });
 
-// --- STEP 2: VERIFY THE CODE ---
 document.getElementById("verifyOtp").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const token = document.getElementById("otpCode").value.trim();
 
   if (token.length !== 8) {
-    showMessage("error", "Please enter the 8-digit code.");
+    showMessage("error", "Please enter exactly 8 digits.");
     return;
   }
 
   const { data, error } = await window.supabase.auth.verifyOtp({
     email,
     token,
-    type: 'magiclink' // This type works for Magic Link/OTP flows
+    type: 'magiclink'
   });
 
   if (error) {
     showMessage("error", error.message);
   } else if (data.session) {
-    // SUCCESS: The session is now saved in local storage.
-    // We can now safely go to the dashboard.
     window.location.href = "/australia/dashboard/index.html";
   }
 });
