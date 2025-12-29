@@ -52,20 +52,27 @@
 </header>
 
 <div class="login-wrapper">
-  <div class="card">
+<div class="card">
     <h1>Login</h1>
-    <p class="subtitle">
-      Enter your email address to access your dashboard.
-    </p>
+    <p class="subtitle">Enter your email address to access your dashboard.</p>
 
     <label for="email">Email</label>
     <input id="email" type="email" placeholder="you@example.com" />
 
     <button type="button" class="login-btn" id="sendMagicLink">
-      Send login link
+      Send login code
     </button>
 
+    <div id="otpSection" style="display:none; margin-top: 20px;">
+      <label for="otpCode">6-Digit Code</label>
+      <input id="otpCode" type="text" placeholder="123456" maxlength="6" style="text-align:center; letter-spacing: 5px; font-size: 20px;" />
+      <button type="button" class="login-btn" id="verifyOtp" style="margin-top:10px; background-color: #28a745;">
+        Verify & Login
+      </button>
+    </div>
+
     <div id="loginMessage" class="login-message" style="display:none;"></div>
+</div>
 
     <div class="hint">
       Don’t have access yet?
@@ -88,8 +95,8 @@
 })();
 </script>
 
-<!-- MAGIC LINK LOGIC -->
 <script>
+// --- HELPERS ---
 function showMessage(type, text) {
   const box = document.getElementById("loginMessage");
   box.className = "login-message " + type;
@@ -107,17 +114,14 @@ function handleLoginFeedback(email) {
     attemptCount = 1;
     lastEmailAttempt = email;
   }
-
   if (attemptCount >= 2) {
-    showMessage(
-      "success",
-      "If you have already paid but do not receive the link, please check Spam/Promotions or contact us."
-    );
+    showMessage("success", "If you still haven't received the code, please check Spam or contact us.");
   } else {
-    showMessage("success", "Your login link has been sent. Please check your email.");
+    showMessage("success", "Your 6-digit login code has been sent. Please check your email.");
   }
 }
 
+// --- STEP 1: REQUEST THE CODE ---
 document.getElementById("sendMagicLink").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const msg = document.getElementById("loginMessage");
@@ -129,16 +133,15 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
   }
 
   if (!window.supabase) {
-    showMessage("error", "Technical error. Please refresh the page and try again.");
+    showMessage("error", "Technical error. Please refresh and try again.");
     return;
   }
 
-  const redirectTo = `${window.location.origin}/australia/dashboard/index.html`;
-
+  // signInWithOtp without redirectTo will trigger the 6-digit code flow 
+  // if you updated your Supabase template to {{ .Token }}
   const { error } = await window.supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: redirectTo,
       shouldCreateUser: false
     }
   });
@@ -148,7 +151,36 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
     return;
   }
 
+  // UI Change: Hide email button, show the code input section
+  document.getElementById("sendMagicLink").style.display = "none";
+  document.getElementById("otpSection").style.display = "block";
+  
   handleLoginFeedback(email);
+});
+
+// --- STEP 2: VERIFY THE CODE ---
+document.getElementById("verifyOtp").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const token = document.getElementById("otpCode").value.trim();
+
+  if (!token || token.length < 6) {
+    showMessage("error", "Please enter the 6-digit code.");
+    return;
+  }
+
+  const { data, error } = await window.supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'magiclink' // This type works for Magic Link/OTP flows
+  });
+
+  if (error) {
+    showMessage("error", error.message);
+  } else if (data.session) {
+    // SUCCESS: The session is now saved in local storage.
+    // We can now safely go to the dashboard.
+    window.location.href = "/australia/dashboard/index.html";
+  }
 });
 </script>
 
