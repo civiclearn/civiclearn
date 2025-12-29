@@ -14,19 +14,9 @@
         console.warn("Supabase sign-out failed:", err);
       }
 
-      // 1. Get the current path (e.g., /australia/dashboard/index.html)
       const path = window.location.pathname;
-      
-      // 2. Extract the country part (the first folder name)
-      // This splits "/australia/dashboard/" into ["australia", "dashboard"]
       const parts = path.split("/").filter(Boolean);
-      
-      // 3. Determine the redirect base
-      // If we are in a subfolder like /australia/, redirect there. 
-      // If we are at the root, redirect to /
       const countryBase = parts.length > 0 ? `/${parts[0]}/` : "/";
-
-      // 4. Perform the redirect
       window.location.href = countryBase;
     });
   }
