@@ -55,26 +55,39 @@
 </header>
 
 <div class="login-wrapper">
-  <div class="card">
-    <h1>Login</h1>
-    <p class="subtitle">
-      Enter your email address to access your Life in the UK Test dashboard.
-    </p>
+  <main class="login-container">
+    <div class="card">
+      <h1>Login</h1>
+      <p class="subtitle" style="font-family: 'Lexend', sans-serif;">
+        Enter your email to receive your 8-digit access code.
+      </p>
 
-    <label for="email">Email</label>
-    <input id="email" type="email" placeholder="you@example.com" />
+      <div id="emailSection">
+        <label for="email" style="font-family: 'Lexend', sans-serif;">Email Address</label>
+        <input id="email" type="email" placeholder="you@example.com" 
+               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px; font-family: 'Lexend', sans-serif;" />
+        <button type="button" class="login-btn" id="sendMagicLink" style="font-family: 'Lexend', sans-serif; font-weight:600;">
+          Send login code
+        </button>
+      </div>
 
-    <button type="button" class="login-btn" id="sendMagicLink">
-      Send login link
-    </button>
+      <div id="otpSection" style="display:none; margin-top: 10px;">
+        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">8-Digit Code</label>
+        <input id="otpCode" type="text" placeholder="00000000" maxlength="8" 
+               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
+        <button type="button" class="login-btn" id="verifyOtp" 
+                style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;">
+          Verify & Login
+        </button>
+      </div>
 
-    <div id="loginMessage" class="login-message" style="display:none;"></div>
+      <div id="loginMessage" class="login-message" style="display:none; margin-top: 15px; font-family: 'Lexend', sans-serif;"></div>
 
-    <div class="hint">
-      Don’t have access yet?
-      <a href="/uk/checkout.html">Create access</a>
+      <div class="login-footer" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #666; text-align: center; font-family: 'Lexend', sans-serif;">
+        Don't have access yet? <a href="/uk/checkout" style="color: #7c3aed; text-decoration: none; font-weight: 500;">Create access</a>
+      </div>
     </div>
-  </div>
+  </main>
 </div>
 
 <!-- MESSAGE for first login -->
@@ -85,14 +98,14 @@
     const box = document.getElementById("loginMessage");
     box.className = "login-message success";
     box.textContent =
-      "Your access has been activated. Enter the email address used during purchase to continue.";
+      "Your account has been activated. Enter the email address used during purchase to access your training.";
     box.style.display = "block";
   }
 })();
 </script>
 
-<!-- MAGIC LINK LOGIC -->
 <script>
+// --- HELPERS ---
 function showMessage(type, text) {
   const box = document.getElementById("loginMessage");
   box.className = "login-message " + type;
@@ -110,17 +123,14 @@ function handleLoginFeedback(email) {
     attemptCount = 1;
     lastEmailAttempt = email;
   }
-
   if (attemptCount >= 2) {
-    showMessage(
-      "success",
-      "If you have already paid but do not receive the link, please check Spam or Promotions, or contact us."
-    );
+    showMessage("success", "If you still haven't received the code, please check Spam or contact us.");
   } else {
-    showMessage("success", "Your login link has been sent. Please check your email.");
+    showMessage("success", "Your 8-digit login code has been sent. Please check your email.");
   }
 }
 
+// --- STEP 1: REQUEST THE CODE ---
 document.getElementById("sendMagicLink").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const msg = document.getElementById("loginMessage");
@@ -132,16 +142,15 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
   }
 
   if (!window.supabase) {
-    showMessage("error", "Technical error. Please refresh the page and try again.");
+    showMessage("error", "Technical error. Please refresh and try again.");
     return;
   }
 
-  const redirectTo = `${window.location.origin}/uk/dashboard/index.html`;
-
+  // signInWithOtp without redirectTo will trigger the 8-digit code flow 
+  // if you updated your Supabase template to {{ .Token }}
   const { error } = await window.supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: redirectTo,
       shouldCreateUser: false
     }
   });
@@ -151,7 +160,35 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
     return;
   }
 
+  // UI Change: Hide email button, show the code input section
+  document.getElementById("sendMagicLink").style.display = "none";
+  document.getElementById("otpSection").style.display = "block";
+  
   handleLoginFeedback(email);
+});
+
+// --- STEP 2: VERIFY THE CODE ---
+document.getElementById("verifyOtp").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const token = document.getElementById("otpCode").value.trim();
+
+  // FLEXIBLE CHECK: Allows 6, 7, or 8 digits.
+  if (token.length < 6 || token.length > 8) {
+    showMessage("error", "Please enter the valid code sent to your email.");
+    return;
+  }
+
+  const { data, error } = await window.supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'magiclink'
+  });
+
+  if (error) {
+    showMessage("error", error.message);
+  } else if (data.session) {
+    window.location.href = "/uk/dashboard/index.html";
+  }
 });
 </script>
 
