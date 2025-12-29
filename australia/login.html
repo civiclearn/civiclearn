@@ -64,8 +64,8 @@
     </button>
 
     <div id="otpSection" style="display:none; margin-top: 20px;">
-      <label for="otpCode">6-Digit Code</label>
-      <input id="otpCode" type="text" placeholder="123456" maxlength="6" style="text-align:center; letter-spacing: 5px; font-size: 20px;" />
+      <label for="otpCode">8-Digit Code</label>
+      <input id="otpCode" type="text" placeholder="12345678" maxlength="8" style="text-align:center; letter-spacing: 5px; font-size: 20px;" />
       <button type="button" class="login-btn" id="verifyOtp" style="margin-top:10px; background-color: #28a745;">
         Verify & Login
       </button>
@@ -117,7 +117,7 @@ function handleLoginFeedback(email) {
   if (attemptCount >= 2) {
     showMessage("success", "If you still haven't received the code, please check Spam or contact us.");
   } else {
-    showMessage("success", "Your 6-digit login code has been sent. Please check your email.");
+    showMessage("success", "Your 8-digit login code has been sent. Please check your email.");
   }
 }
 
@@ -137,7 +137,7 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
     return;
   }
 
-  // signInWithOtp without redirectTo will trigger the 6-digit code flow 
+  // signInWithOtp without redirectTo will trigger the 8-digit code flow 
   // if you updated your Supabase template to {{ .Token }}
   const { error } = await window.supabase.auth.signInWithOtp({
     email,
@@ -163,8 +163,8 @@ document.getElementById("verifyOtp").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const token = document.getElementById("otpCode").value.trim();
 
-  if (!token || token.length < 6) {
-    showMessage("error", "Please enter the 6-digit code.");
+  if (token.length !== 8) {
+    showMessage("error", "Please enter the 8-digit code.");
     return;
   }
 
