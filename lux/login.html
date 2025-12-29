@@ -82,100 +82,100 @@
 
 <div class="login-wrapper">
   <div class="card">
-
-    <div class="lang-switch" style="justify-content:flex-end;">
-      <button data-lang="fr">FR</button>
-      <button data-lang="de">DE</button>
+    <div class="lang-switch">
       <button data-lang="en">EN</button>
+      <button data-lang="de">DE</button>
+      <button data-lang="fr">FR</button>
     </div>
 
     <h1 data-t="title"></h1>
     <p class="subtitle" data-t="subtitle"></p>
 
-    <label for="email" data-t="email_label"></label>
-    <input id="email" type="email" placeholder="you@example.com" />
+    <div id="emailSection">
+      <label for="email" data-t="email_label"></label>
+      <input id="email" type="email" placeholder="name@example.lu" style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px; font-family: 'Lexend', sans-serif;" />
+      <button type="button" class="login-btn" id="sendMagicLink" data-t="send_code"></button>
+    </div>
 
-    <button class="login-btn" id="sendMagicLink" data-t="send_link"></button>
+    <div id="otpSection" style="display:none; margin-top: 10px;">
+      <label for="otpCode" data-t="otp_label"></label>
+      <input id="otpCode" type="text" placeholder="00000000" maxlength="8" 
+             style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
+      <button type="button" class="login-btn" id="verifyOtp" 
+              style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;" data-t="verify_btn"></button>
+    </div>
 
-    <div id="loginMessage" class="login-message" style="display:none;"></div>
+    <div id="loginMessage" class="login-message" style="display:none; margin-top:15px; font-family: 'Lexend', sans-serif;"></div>
 
-    <div class="hint">
+    <div class="login-footer" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #666; text-align: center; font-family: 'Lexend', sans-serif;">
       <span data-t="no_access"></span>
-      <a href="/lux/checkout.html" data-t="create_access"></a>
+      <a href="/lux/checkout" data-t="create_access" style="color: #7c3aed; text-decoration: none; font-weight: 500;"></a>
     </div>
   </div>
 </div>
 
 <script>
 const I18N = {
-fr:{
-title:"Connexion",
-subtitle:"Entrez votre adresse e-mail pour accéder à votre espace.",
-email_label:"Adresse e-mail",
-send_link:"Envoyer le lien de connexion",
-no_access:"Vous n’avez pas encore d’accès ?",
-create_access:"Créer l’accès",
-nav_home:"Accueil",
-nav_overview:"Présentation",
-nav_pricing:"Tarifs",
-nav_signup:"Activer l’accès",
-first_login:"Votre accès est activé. Utilisez l’adresse e-mail du paiement.",
-sent_once:"Lien de connexion envoyé. Vérifiez votre e-mail.",
-sent_twice:"Si vous ne recevez rien, vérifiez les spams ou contactez-nous.",
-email_error:"Adresse e-mail requise.",
-tech_error:"Erreur technique. Veuillez réessayer."
-},
-de:{
-title:"Anmeldung",
-subtitle:"Geben Sie Ihre E-Mail-Adresse ein, um fortzufahren.",
-email_label:"E-Mail",
-send_link:"Login-Link senden",
-no_access:"Noch kein Zugang?",
-create_access:"Zugang erstellen",
-nav_home:"Start",
-nav_overview:"Überblick",
-nav_pricing:"Preise",
-nav_signup:"Zugang aktivieren",
-first_login:"Ihr Zugang ist aktiviert. Verwenden Sie die Kauf-E-Mail.",
-sent_once:"Login-Link gesendet. Bitte prüfen Sie Ihr Postfach.",
-sent_twice:"Falls nichts ankommt, Spam prüfen oder uns kontaktieren.",
-email_error:"E-Mail erforderlich.",
-tech_error:"Technischer Fehler. Bitte erneut versuchen."
-},
-en:{
-title:"Login",
-subtitle:"Enter your email address to access your dashboard.",
-email_label:"Email",
-send_link:"Send login link",
-no_access:"Don’t have access yet?",
-create_access:"Create access",
-nav_home:"Home",
-nav_overview:"Overview",
-nav_pricing:"Pricing",
-nav_signup:"Activate access",
-first_login:"Your access is active. Use the purchase email.",
-sent_once:"Login link sent. Check your email.",
-sent_twice:"If nothing arrives, check spam or contact us.",
-email_error:"Email required.",
-tech_error:"Technical error. Please try again."
-}
+  en: {
+    title: "Login",
+    subtitle: "Enter your email to receive your 8-digit access code.",
+    email_label: "Email Address",
+    send_code: "Send login code",
+    otp_label: "8-Digit Code",
+    verify_btn: "Verify & Login",
+    no_access: "Don't have access yet?",
+    create_access: "Create access",
+    first_login: "Your access has been activated. Enter the email address used during purchase.",
+    sent_once: "Your 8-digit login code has been sent. Please check your email.",
+    sent_twice: "If you still haven't received the code, please check Spam or contact us.",
+    email_error: "Please enter your email address.",
+    user_not_found: "This email is not on file — please enter the exact email used during purchase.",
+    otp_error: "Please enter the valid code sent to your email."
+  },
+  de: {
+    title: "Anmelden",
+    subtitle: "Geben Sie Ihre E-Mail ein, um Ihren 8-stelligen Zugangscode zu erhalten.",
+    email_label: "E-Mail-Adresse",
+    send_code: "Anmeldecode senden",
+    otp_label: "8-stelliger Code",
+    verify_btn: "Bestätigen & Anmelden",
+    no_access: "Noch keinen Zugang?",
+    create_access: "Zugang erstellen",
+    first_login: "Ihr Zugang wurde aktiviert. Geben Sie die beim Kauf verwendete E-Mail-Adresse ein.",
+    sent_once: "Ihr 8-stelliger Anmeldecode wurde gesendet. Bitte prüfen Sie Ihre E-Mails.",
+    sent_twice: "Wenn Sie den Code noch nicht erhalten haben, prüfen Sie den Spam-Ordner oder kontaktieren Sie uns.",
+    email_error: "Bitte geben Sie Ihre E-Mail-Adresse ein.",
+    user_not_found: "Diese E-Mail ist nicht registriert – bitte geben Sie die E-Mail-Adresse ein, die Sie beim Kauf verwendet haben.",
+    otp_error: "Bitte geben Sie den gültigen Code ein, der an Ihre E-Mail gesendet wurde."
+  },
+  fr: {
+    title: "Connexion",
+    subtitle: "Saisissez votre e-mail pour recevoir votre code d'accès à 8 chiffres.",
+    email_label: "Adresse e-mail",
+    send_code: "Envoyer le code",
+    otp_label: "Code à 8 chiffres",
+    verify_btn: "Vérifier et se connecter",
+    no_access: "Pas encore d'accès ?",
+    create_access: "Créer un accès",
+    first_login: "Votre accès a été activé. Entrez l'e-mail utilisé lors de l'achat.",
+    sent_once: "Votre code à 8 chiffres a été envoyé. Veuillez vérifier vos e-mails.",
+    sent_twice: "Si vous n'avez toujours pas reçu le code, vérifiez vos spams ou contactez-nous.",
+    email_error: "Veuillez entrer votre adresse e-mail.",
+    user_not_found: "Cet e-mail n'est pas répertorié — veuillez saisir l'e-mail exact utilisé lors de l'achat.",
+    otp_error: "Veuillez entrer le code valide envoyé par e-mail."
+  }
 };
-</script>
 
-<script>
-let currentLang = "fr"; // use "fr" for Luxembourg
+let currentLang = "en";
 
 function applyLang(lang) {
   currentLang = lang;
-  document.documentElement.lang = lang;
-
-  document.querySelectorAll(".lang-switch button").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.lang === lang);
-  });
-
   document.querySelectorAll("[data-t]").forEach(el => {
     const key = el.getAttribute("data-t");
     if (I18N[lang][key]) el.textContent = I18N[lang][key];
+  });
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.lang === lang);
   });
 }
 
@@ -183,48 +183,69 @@ document.querySelectorAll(".lang-switch button").forEach(btn => {
   btn.addEventListener("click", () => applyLang(btn.dataset.lang));
 });
 
-applyLang(currentLang);
-</script>
+// Default to EN for Luxembourg universal
+applyLang("en");
 
-
-<script>
-(function(){
-const params=new URLSearchParams(location.search);
-if(params.get("first")==="1"){
- const box=document.getElementById("loginMessage");
- box.className="login-message success";
- box.textContent=I18N[lang].first_login;
- box.style.display="block";
+function showMessage(type, text) {
+  const box = document.getElementById("loginMessage");
+  box.className = "login-message " + type;
+  box.textContent = text;
+  box.style.display = "block";
 }
-})();
+
+let lastEmailAttempt = "";
+let attemptCount = 0;
+
+document.getElementById("sendMagicLink").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  if (!email) { showMessage("error", I18N[currentLang].email_error); return; }
+  
+  const { error } = await window.supabase.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: false }
+  });
+
+  if (error) {
+    if (error.message.includes("Signups not allowed for otp")) {
+      showMessage("error", I18N[currentLang].user_not_found);
+    } else {
+      showMessage("error", error.message);
+    }
+    return;
+  }
+
+  document.getElementById("emailSection").style.display = "none";
+  document.getElementById("otpSection").style.display = "block";
+
+  if (email === lastEmailAttempt) attemptCount++;
+  else { attemptCount = 1; lastEmailAttempt = email; }
+
+  showMessage("success", attemptCount >= 2 ? I18N[currentLang].sent_twice : I18N[currentLang].sent_once);
+});
+
+document.getElementById("verifyOtp").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const token = document.getElementById("otpCode").value.trim();
+
+  if (token.length < 6 || token.length > 8) {
+    showMessage("error", I18N[currentLang].otp_error);
+    return;
+  }
+
+  const { data, error } = await window.supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'magiclink'
+  });
+
+  if (error) {
+    showMessage("error", error.message);
+  } else if (data.session) {
+    window.location.href = "/lux/dashboard/index.html";
+  }
+});
 </script>
 
-<script>
-function showMessage(type,text){
- const box=document.getElementById("loginMessage");
- box.className="login-message "+type;
- box.textContent=text;
- box.style.display="block";
-}
-let lastEmail="",count=0;
-
-document.getElementById("sendMagicLink").onclick=async()=>{
- const email=document.getElementById("email").value.trim();
- if(!email) return showMessage("error",I18N[lang].email_error);
- if(!window.supabase) return showMessage("error",I18N[lang].tech_error);
-
- const redirectTo=`${location.origin}/lux/dashboard/index.html`;
- const {error}=await supabase.auth.signInWithOtp({
-  email,
-  options:{emailRedirectTo:redirectTo,shouldCreateUser:false}
- });
- if(error) return showMessage("error",error.message);
-
- count = email===lastEmail ? count+1 : 1;
- lastEmail=email;
- showMessage("success", count>1 ? I18N[lang].sent_twice : I18N[lang].sent_once);
-};
-</script>
 
 </body>
 </html>

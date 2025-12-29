@@ -97,133 +97,98 @@
 
 <div class="login-wrapper">
   <div class="card">
-
-    <!-- language switch -->
-    <div class="lang-switch" style="justify-content:flex-end;margin-bottom:10px;">
+    <div class="lang-switch">
       <button data-lang="lt">LT</button>
       <button data-lang="en">EN</button>
       <button data-lang="ru">RU</button>
     </div>
 
     <h1 data-t="title"></h1>
-
     <p class="subtitle" data-t="subtitle"></p>
 
-    <label for="email" data-t="email_label"></label>
-    <input id="email" type="email" placeholder="you@example.com" />
+    <div id="emailSection">
+      <label for="email" data-t="email_label"></label>
+      <input id="email" type="email" placeholder="you@example.com" style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px;" />
+      <button type="button" class="login-btn" id="sendMagicLink" data-t="send_code"></button>
+    </div>
 
-    <button type="button" class="login-btn" id="sendMagicLink" data-t="send_link"></button>
+    <div id="otpSection" style="display:none; margin-top: 10px;">
+      <label for="otpCode" data-t="otp_label"></label>
+      <input id="otpCode" type="text" placeholder="00000000" maxlength="8" />
+      <button type="button" class="login-btn" id="verifyOtp" style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-weight:600; cursor:pointer;" data-t="verify_btn"></button>
+    </div>
 
-    <div id="loginMessage" class="login-message" style="display:none;"></div>
+    <div id="loginMessage" class="login-message" style="display:none; margin-top:15px;"></div>
 
-    <div class="hint">
+    <div class="login-footer">
       <span data-t="no_access"></span>
-      <a href="/lt/checkout.html" data-t="create_access"></a>
+      <a href="/lt/checkout.html" data-t="create_access" style="color: #7c3aed; text-decoration: none; font-weight: 500;"></a>
     </div>
   </div>
 </div>
 
-<!-- =========================
-     I18N DICTIONARY
-========================= -->
 <script>
 const I18N = {
   lt: {
     title: "Prisijungimas",
-    subtitle: "Įveskite el. pašto adresą, kad galėtumėte prisijungti.",
-    email_label: "El. paštas",
-    send_link: "Siųsti prisijungimo nuorodą",
+    subtitle: "Įveskite el. paštą, kad gautumėte 8 skaitmenų prisijungimo kodą.",
+    email_label: "El. pašto adresas",
+    send_code: "Siųsti kodą",
+    otp_label: "8 skaitmenų kodas",
+    verify_btn: "Patvirtinti ir prisijungti",
     no_access: "Dar neturite prieigos?",
     create_access: "Sukurti prieigą",
-
-    nav_home: "Pradžia",
-    nav_overview: "Apžvalga",
-    nav_pricing: "Kaina",
-    nav_signup: "Gauti prieigą",
-
-    first_login:
-      "Jūsų prieiga aktyvuota. Įveskite el. pašto adresą, naudotą pirkimo metu.",
-    sent_once:
-      "Prisijungimo nuoroda išsiųsta. Patikrinkite savo el. paštą.",
-    sent_twice:
-      "Jei jau apmokėjote, bet negaunate laiško, patikrinkite Šlamštą arba susisiekite su mumis.",
-    email_error:
-      "Įveskite el. pašto adresą.",
-    tech_error:
-      "Techninė klaida. Atnaujinkite puslapį ir bandykite dar kartą."
+    first_login: "Jūsų prieiga aktyvuota. Įveskite el. pašto adresą, naudotą pirkimo metu.",
+    sent_once: "Jūsų 8 skaitmenų kodas išsiųstas. Patikrinkite el. paštą.",
+    sent_twice: "Jei vis dar negavote kodo, patikrinkite Šlamštą arba susisiekite su mumis.",
+    email_error: "Įveskite el. pašto adresą.",
+    user_not_found: "Šis el. paštas nerastas — įveskite tikslų adresą, kurį naudojote pirkimo metu.",
+    otp_error: "Įveskite galiojantį kodą iš savo el. pašto."
   },
-
   en: {
     title: "Login",
-    subtitle: "Enter your email address to access your dashboard.",
-    email_label: "Email",
-    send_link: "Send login link",
-    no_access: "Don’t have access yet?",
+    subtitle: "Enter your email to receive your 8-digit access code.",
+    email_label: "Email Address",
+    send_code: "Send login code",
+    otp_label: "8-Digit Code",
+    verify_btn: "Verify & Login",
+    no_access: "Don't have access yet?",
     create_access: "Create access",
-
-    nav_home: "Home",
-    nav_overview: "Overview",
-    nav_pricing: "Pricing",
-    nav_signup: "Sign up",
-
-    first_login:
-      "Your access has been activated. Enter the email address used during purchase.",
-    sent_once:
-      "Your login link has been sent. Please check your email.",
-    sent_twice:
-      "If you have already paid but do not receive the link, please check Spam or contact us.",
-    email_error:
-      "Please enter your email address.",
-    tech_error:
-      "Technical error. Please refresh the page and try again."
+    first_login: "Your access has been activated. Enter the email address used during purchase.",
+    sent_once: "Your 8-digit login code has been sent. Please check your email.",
+    sent_twice: "If you still haven't received the code, please check Spam or contact us.",
+    email_error: "Please enter your email address.",
+    user_not_found: "This email is not on file — please enter the exact email used during purchase.",
+    otp_error: "Please enter the valid code sent to your email."
   },
-
   ru: {
     title: "Вход",
-    subtitle: "Введите адрес электронной почты для входа.",
+    subtitle: "Введите эл. почту, чтобы получить 8-значный код доступа.",
     email_label: "Эл. почта",
-    send_link: "Отправить ссылку для входа",
+    send_code: "Отправить код",
+    otp_label: "8-значный код",
+    verify_btn: "Подтвердить и войти",
     no_access: "Ещё нет доступа?",
     create_access: "Получить доступ",
-
-    nav_home: "Главная",
-    nav_overview: "Обзор",
-    nav_pricing: "Цена",
-    nav_signup: "Получить доступ",
-
-    first_login:
-      "Ваш доступ активирован. Введите адрес электронной почты, использованный при оплате.",
-    sent_once:
-      "Ссылка для входа отправлена. Проверьте электронную почту.",
-    sent_twice:
-      "Если вы оплатили, но не получили письмо, проверьте Спам или свяжитесь с нами.",
-    email_error:
-      "Введите адрес электронной почты.",
-    tech_error:
-      "Техническая ошибка. Обновите страницу и попробуйте снова."
+    first_login: "Доступ активирован. Введите эл. почту, использованную при оплате.",
+    sent_once: "8-значный код отправлен. Проверьте почту.",
+    sent_twice: "Если вы не получили код, проверьте Спам или свяжитесь с нами.",
+    email_error: "Введите адрес эл. почты.",
+    user_not_found: "Этот адрес не найден — введите тот, что использовали при покупке.",
+    otp_error: "Введите действующий код из письма."
   }
 };
-</script>
 
-<!-- =========================
-     I18N ENGINE
-========================= -->
-<script>
 let currentLang = "lt";
 
 function applyLang(lang) {
   currentLang = lang;
-  document.documentElement.lang = lang;
-
-  /* ACTIVE BUTTON STATE */
-  document.querySelectorAll(".lang-switch button").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.lang === lang);
-  });
-
-  /* APPLY TEXT */
   document.querySelectorAll("[data-t]").forEach(el => {
     const key = el.getAttribute("data-t");
     if (I18N[lang][key]) el.textContent = I18N[lang][key];
+  });
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.lang === lang);
   });
 }
 
@@ -231,28 +196,8 @@ document.querySelectorAll(".lang-switch button").forEach(btn => {
   btn.addEventListener("click", () => applyLang(btn.dataset.lang));
 });
 
-applyLang(currentLang);
-</script>
+applyLang("lt");
 
-<!-- =========================
-     FIRST LOGIN MESSAGE
-========================= -->
-<script>
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("first") === "1") {
-    const box = document.getElementById("loginMessage");
-    box.className = "login-message success";
-    box.textContent = I18N[currentLang].first_login;
-    box.style.display = "block";
-  }
-})();
-</script>
-
-<!-- =========================
-     MAGIC LINK LOGIC
-========================= -->
-<script>
 function showMessage(type, text) {
   const box = document.getElementById("loginMessage");
   box.className = "login-message " + type;
@@ -263,53 +208,54 @@ function showMessage(type, text) {
 let lastEmailAttempt = "";
 let attemptCount = 0;
 
-function handleLoginFeedback(email) {
-  if (email === lastEmailAttempt) {
-    attemptCount++;
-  } else {
-    attemptCount = 1;
-    lastEmailAttempt = email;
-  }
-
-  showMessage(
-    "success",
-    attemptCount >= 2
-      ? I18N[currentLang].sent_twice
-      : I18N[currentLang].sent_once
-  );
-}
-
 document.getElementById("sendMagicLink").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
-
-  if (!email) {
-    showMessage("error", I18N[currentLang].email_error);
-    return;
-  }
-
-  if (!window.supabase) {
-    showMessage("error", I18N[currentLang].tech_error);
-    return;
-  }
-
-  const redirectTo = `${window.location.origin}/lt/dashboard/index.html`;
-
+  if (!email) { showMessage("error", I18N[currentLang].email_error); return; }
+  
   const { error } = await window.supabase.auth.signInWithOtp({
     email,
-    options: {
-      emailRedirectTo: redirectTo,
-      shouldCreateUser: false
+    options: { shouldCreateUser: false }
+  });
+
+  if (error) {
+    if (error.message.includes("Signups not allowed for otp")) {
+      showMessage("error", I18N[currentLang].user_not_found);
+    } else {
+      showMessage("error", error.message);
     }
+    return;
+  }
+
+  document.getElementById("emailSection").style.display = "none";
+  document.getElementById("otpSection").style.display = "block";
+
+  if (email === lastEmailAttempt) attemptCount++;
+  else { attemptCount = 1; lastEmailAttempt = email; }
+
+  showMessage("success", attemptCount >= 2 ? I18N[currentLang].sent_twice : I18N[currentLang].sent_once);
+});
+
+document.getElementById("verifyOtp").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const token = document.getElementById("otpCode").value.trim();
+
+  if (token.length < 6 || token.length > 8) {
+    showMessage("error", I18N[currentLang].otp_error);
+    return;
+  }
+
+  const { data, error } = await window.supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'magiclink'
   });
 
   if (error) {
     showMessage("error", error.message);
-    return;
+  } else if (data.session) {
+    window.location.href = "/lt/dashboard/index.html";
   }
-
-  handleLoginFeedback(email);
 });
 </script>
-
 </body>
 </html>
