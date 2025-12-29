@@ -150,10 +150,16 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
     }
   });
 
-  if (error) {
-    showMessage("error", error.message);
-    return;
+if (error) {
+  // Check if the error is the "user not found" message
+  if (error.message.includes("Signups not allowed for otp") || error.status === 422) {
+    showMessage("error", "Cet e-mail n'est pas répertorié — veuillez saisir l'adresse e-mail exacte utilisée lors de l'achat.");
+  } else {
+    // Fallback for other technical errors
+    showMessage("error", "Une erreur est survenue : " + error.message);
   }
+  return;
+}
 
   document.getElementById("sendMagicLink").style.display = "none";
   document.getElementById("otpSection").style.display = "block";
