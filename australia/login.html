@@ -169,22 +169,21 @@ document.getElementById("verifyOtp").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const token = document.getElementById("otpCode").value.trim();
 
-  if (token.length !== 8) {
-    showMessage("error", "Please enter the 8-digit code.");
+  // FLEXIBLE CHECK: Allows 6, 7, or 8 digits.
+  if (token.length < 6 || token.length > 8) {
+    showMessage("error", "Please enter the valid code sent to your email.");
     return;
   }
 
   const { data, error } = await window.supabase.auth.verifyOtp({
     email,
     token,
-    type: 'magiclink' // This type works for Magic Link/OTP flows
+    type: 'magiclink'
   });
 
   if (error) {
     showMessage("error", error.message);
   } else if (data.session) {
-    // SUCCESS: The session is now saved in local storage.
-    // We can now safely go to the dashboard.
     window.location.href = "/australia/dashboard/index.html";
   }
 });
