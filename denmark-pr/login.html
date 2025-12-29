@@ -47,25 +47,39 @@
 </header>
 
 <div class="login-wrapper">
-  <div class="card">
+  <main class="login-container">
+    <div class="card">
+      <h1 style="font-family: 'Lexend', sans-serif;">Log ind</h1>
+      <p class="subtitle" style="font-family: 'Lexend', sans-serif;">
+        Indtast din e-mail for at modtage din 8-cifrede adgangskode.
+      </p>
 
-    <h1>Login</h1>
-    <p class="subtitle">Indtast din e-mailadresse for at få adgang til dit dashboard.</p>
+      <div id="emailSection">
+        <label for="email" style="font-family: 'Lexend', sans-serif;">E-mailadresse</label>
+        <input id="email" type="email" placeholder="navn@eksempel.dk" 
+               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px; font-family: 'Lexend', sans-serif;" />
+        <button type="button" class="login-btn" id="sendMagicLink" style="font-family: 'Lexend', sans-serif; font-weight:600;">
+          Send log ind-kode
+        </button>
+      </div>
 
-    <label for="email">E-mail</label>
-    <input id="email" type="email" placeholder="navn@example.com" />
+      <div id="otpSection" style="display:none; margin-top: 10px;">
+        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">8-cifret kode</label>
+        <input id="otpCode" type="text" placeholder="00000000" maxlength="8" 
+               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
+        <button type="button" class="login-btn" id="verifyOtp" 
+                style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;">
+          Bekræft og log ind
+        </button>
+      </div>
 
-    <button type="button" class="login-btn" id="sendMagicLink">Modtag login-link</button>
+      <div id="loginMessage" class="login-message" style="display:none; margin-top: 15px; font-family: 'Lexend', sans-serif;"></div>
 
-    <!-- Inline message box -->
-    <div id="loginMessage" class="login-message"></div>
-
-    <div class="hint">
-      Ikke oprettet endnu?
-      <a href="/denmark-pr/checkout.html">Opret en adgang</a>
+      <div class="login-footer" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #666; text-align: center; font-family: 'Lexend', sans-serif;">
+        Har du ikke adgang endnu? <a href="/denmark-pr/checkout" style="color: #7c3aed; text-decoration: none; font-weight: 500;">Opret adgang</a>
+      </div>
     </div>
-
-  </div>
+  </main>
 </div>
 
 <script>
@@ -80,8 +94,9 @@
   }
 })();
 </script>
-<!-- MAGIC-LINK LOGIN (UMD VERSION – DANISH) -->
+
 <script>
+// --- HJÆLPERE ---
 function showMessage(type, text) {
   const box = document.getElementById("loginMessage");
   box.className = "login-message " + type;
@@ -99,51 +114,73 @@ function handleLoginFeedback(email) {
     attemptCount = 1;
     lastEmailAttempt = email;
   }
-
   if (attemptCount >= 2) {
-    showMessage(
-      "success",
-      "Hvis du har gennemført en betaling men ikke modtager login-linket, kan der være en fejl i emailadressen, eller beskeden kan være endt i Spam/Promo. Tjek venligst, og kontakt os hvis du har brug for hjælp."
-    );
+    showMessage("success", "Hvis du stadig ikke har modtaget koden, skal du tjekke din spam-mappe eller kontakte os.");
   } else {
-    showMessage(
-      "success",
-      "Login-linket er sendt. Tjek venligst din email."
-    );
+    showMessage("success", "Din 8-cifrede log ind-kode er blevet sendt. Tjek venligst din e-mail.");
   }
 }
 
+// --- TRIN 1: ANMOD OM KODE ---
 document.getElementById("sendMagicLink").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const msg = document.getElementById("loginMessage");
   msg.style.display = "none";
 
   if (!email) {
-    showMessage("error", "Indtast venligst din emailadresse.");
+    showMessage("error", "Indtast venligst din e-mailadresse.");
     return;
   }
 
   if (!window.supabase) {
-    showMessage("error", "Teknisk fejl. Genindlæs siden og prøv igen.");
+    showMessage("error", "Teknisk fejl. Opdater venligst siden og prøv igen.");
     return;
   }
 
-  const redirectTo = `${window.location.origin}/denmark-pr/dashboard/index.html`;
-
-  const { data, error } = await window.supabase.auth.signInWithOtp({
+  const { error } = await window.supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: redirectTo,
       shouldCreateUser: false
     }
   });
 
   if (error) {
-    showMessage("error", error.message);
+    // OPSNAP SUPABASE FEJL (Bruger ikke fundet)
+    if (error.message.includes("Signups not allowed for otp") || error.status === 422) {
+      showMessage("error", "Denne e-mail er ikke registreret – indtast venligst den nøjagtige e-mailadresse, du brugte ved købet.");
+    } else {
+      showMessage("error", "Der opstod en fejl: " + error.message);
+    }
     return;
   }
 
+  document.getElementById("sendMagicLink").style.display = "none";
+  document.getElementById("otpSection").style.display = "block";
+  
   handleLoginFeedback(email);
+});
+
+// --- TRIN 2: BEKRÆFT KODE ---
+document.getElementById("verifyOtp").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const token = document.getElementById("otpCode").value.trim();
+
+  if (token.length < 6 || token.length > 8) {
+    showMessage("error", "Indtast venligst den gyldige kode sendt til din e-mail.");
+    return;
+  }
+
+  const { data, error } = await window.supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'magiclink'
+  });
+
+  if (error) {
+    showMessage("error", error.message);
+  } else if (data.session) {
+    window.location.href = "/denmark-pr/dashboard/index.html";
+  }
 });
 </script>
 

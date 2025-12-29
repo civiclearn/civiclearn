@@ -48,26 +48,41 @@
 </header>
 
 <div class="login-wrapper">
-  <div class="card">
+  <main class="login-container">
+    <div class="card">
+      <h1 style="font-family: 'Lexend', sans-serif;">Autentificare</h1>
+      <p class="subtitle" style="font-family: 'Lexend', sans-serif;">
+        Introdu adresa de email pentru a primi codul de acces de 8 cifre.
+      </p>
 
-    <h1>Autentificare</h1>
-    <p class="subtitle">Introduceți adresa de email pentru a accesa tabloul de bord.</p>
+      <div id="emailSection">
+        <label for="email" style="font-family: 'Lexend', sans-serif;">Adresă email</label>
+        <input id="email" type="email" placeholder="nume@exemplu.com" 
+               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px; font-family: 'Lexend', sans-serif;" />
+        <button type="button" class="login-btn" id="sendMagicLink" style="font-family: 'Lexend', sans-serif; font-weight:600;">
+          Trimite codul de autentificare
+        </button>
+      </div>
 
-    <label for="email">Email</label>
-    <input id="email" type="email" placeholder="exemplu@domeniu.com" />
+      <div id="otpSection" style="display:none; margin-top: 10px;">
+        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">Cod de 8 cifre</label>
+        <input id="otpCode" type="text" placeholder="00000000" maxlength="8" 
+               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
+        <button type="button" class="login-btn" id="verifyOtp" 
+                style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;">
+          Verifică și autentifică-te
+        </button>
+      </div>
 
-    <button type="button" class="login-btn" id="sendMagicLink">Trimite linkul de autentificare</button>
+      <div id="loginMessage" class="login-message" style="display:none; margin-top: 15px; font-family: 'Lexend', sans-serif;"></div>
 
-    <div id="loginMessage" class="login-message"></div>
-
-    <div class="hint">
-      Nu aveți încă acces?
-      <a href="/romania/checkout.html">Creați un cont</a>
+      <div class="login-footer" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #666; text-align: center; font-family: 'Lexend', sans-serif;">
+        Nu ai încă acces? <a href="/romania/checkout" style="color: #7c3aed; text-decoration: none; font-weight: 500;">Creează cont</a>
+      </div>
     </div>
-  </div>
+  </main>
 </div>
 
-<!-- FIRST-TIME ACTIVATION MESSAGE -->
 <script>
 (function () {
   const params = new URLSearchParams(window.location.search);
@@ -75,13 +90,14 @@
     const box = document.getElementById("loginMessage");
     box.className = "login-message success";
     box.textContent =
-      "Contul dumneavoastră a fost activat. Introduceți adresa de e-mail folosită la achiziție pentru a accesa pregătirea.";
+      "Contul tău a fost activat. Introdu adresa de email folosită la achiziție pentru a accesa cursul.";
     box.style.display = "block";
   }
 })();
 </script>
-<!-- SUPABASE AUTH + DOUBLE-ATTEMPT LOGIC (UMD VERSION) -->
+
 <script>
+// --- AJUTOR ---
 function showMessage(type, text) {
   const box = document.getElementById("loginMessage");
   box.className = "login-message " + type;
@@ -99,51 +115,73 @@ function handleLoginFeedback(email) {
     attemptCount = 1;
     lastEmailAttempt = email;
   }
-
   if (attemptCount >= 2) {
-    showMessage(
-      "success",
-      "Dacă ați efectuat o plată, dar nu primiți emailul cu linkul de autentificare, este posibil să existe o greșeală în adresa introdusă sau mesajul să fi ajuns în Spam/Promoții. Verificați și contactați-ne dacă aveți nevoie de ajutor."
-    );
+    showMessage("success", "Dacă tot nu ai primit codul, te rugăm să verifici folderul Spam sau să ne contactezi.");
   } else {
-    showMessage(
-      "success",
-      "Linkul de autentificare a fost trimis. Verificați emailul."
-    );
+    showMessage("success", "Codul tău de 8 cifre a fost trimis. Te rugăm să verifici email-ul.");
   }
 }
 
+// --- PASUL 1: SOLICITĂ CODUL ---
 document.getElementById("sendMagicLink").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const msg = document.getElementById("loginMessage");
   msg.style.display = "none";
 
   if (!email) {
-    showMessage("error", "Vă rugăm să introduceți adresa de email.");
+    showMessage("error", "Te rugăm să introduci adresa de email.");
     return;
   }
 
   if (!window.supabase) {
-    showMessage("error", "Eroare tehnică. Reîncărcați pagina și încercați din nou.");
+    showMessage("error", "Eroare tehnică. Te rugăm să reîncarci pagina și să încerci din nou.");
     return;
   }
 
-  const redirectTo = `${window.location.origin}/romania/dashboard/index.html`;
-
-  const { data, error } = await window.supabase.auth.signInWithOtp({
+  const { error } = await window.supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: redirectTo,
       shouldCreateUser: false
     }
   });
 
   if (error) {
-    showMessage("error", error.message);
+    // INTERCEPTARE EROARE SUPABASE
+    if (error.message.includes("Signups not allowed for otp") || error.status === 422) {
+      showMessage("error", "Acest email nu figurează în baza noastră — te rugăm să introduci exact adresa de email folosită la achiziție.");
+    } else {
+      showMessage("error", "A apărut o eroare: " + error.message);
+    }
     return;
   }
 
+  document.getElementById("sendMagicLink").style.display = "none";
+  document.getElementById("otpSection").style.display = "block";
+  
   handleLoginFeedback(email);
+});
+
+// --- PASUL 2: VERIFICĂ CODUL ---
+document.getElementById("verifyOtp").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const token = document.getElementById("otpCode").value.trim();
+
+  if (token.length < 6 || token.length > 8) {
+    showMessage("error", "Te rugăm să introduci codul valid primit prin email.");
+    return;
+  }
+
+  const { data, error } = await window.supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'magiclink'
+  });
+
+  if (error) {
+    showMessage("error", error.message);
+  } else if (data.session) {
+    window.location.href = "/romania/dashboard/index.html";
+  }
 });
 </script>
 
