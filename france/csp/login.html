@@ -50,30 +50,41 @@
 </header>
 
 <div class="login-wrapper">
-  <div class="card">
-    <h1>Connexion</h1>
-    <p class="subtitle">
-      Entrez votre adresse email pour accéder à votre espace
-      <strong>Carte de séjour pluriannuelle</strong>.
-    </p>
+  <main class="login-container">
+    <div class="card">
+      <h1 style="font-family: 'Lexend', sans-serif;">Connexion</h1>
+      <p class="subtitle" style="font-family: 'Lexend', sans-serif;">
+        Saisissez votre email pour recevoir votre code d'accès à 8 chiffres.
+      </p>
 
-    <label for="email">Email</label>
-    <input id="email" type="email" placeholder="vous@example.com" />
+      <div id="emailSection">
+        <label for="email" style="font-family: 'Lexend', sans-serif;">Adresse email</label>
+        <input id="email" type="email" placeholder="nom@exemple.com" 
+               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px; font-family: 'Lexend', sans-serif;" />
+        <button type="button" class="login-btn" id="sendMagicLink" style="font-family: 'Lexend', sans-serif; font-weight:600;">
+          Envoyer le code de connexion
+        </button>
+      </div>
 
-    <button type="button" class="login-btn" id="sendMagicLink">
-      Recevoir le lien de connexion
-    </button>
+      <div id="otpSection" style="display:none; margin-top: 10px;">
+        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">Code à 8 chiffres</label>
+        <input id="otpCode" type="text" placeholder="00000000" maxlength="8" 
+               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
+        <button type="button" class="login-btn" id="verifyOtp" 
+                style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;">
+          Vérifier et se connecter
+        </button>
+      </div>
 
-    <div id="loginMessage" class="login-message" style="display:none;"></div>
+      <div id="loginMessage" class="login-message" style="display:none; margin-top: 15px; font-family: 'Lexend', sans-serif;"></div>
 
-    <div class="hint">
-      Pas encore inscrit(e)&nbsp;?
-      <a href="/france/checkout.html">Créer un accès</a>
+      <div class="login-footer" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #666; text-align: center; font-family: 'Lexend', sans-serif;">
+        Pas encore d'accès? <a href="/france/csp/checkout" style="color: #7c3aed; text-decoration: none; font-weight: 500;">Créer un accès</a>
+      </div>
     </div>
-  </div>
+  </main>
 </div>
 
-<!-- First-login message -->
 <script>
 (function () {
   const params = new URLSearchParams(window.location.search);
@@ -81,14 +92,14 @@
     const box = document.getElementById("loginMessage");
     box.className = "login-message success";
     box.textContent =
-      "Votre compte a été activé. Utilisez l’adresse email de votre achat pour accéder à votre formation.";
+      "Votre compte a été activé. Entrez l'adresse e-mail utilisée lors de l'achat pour accéder à votre formation.";
     box.style.display = "block";
   }
 })();
 </script>
 
-<!-- MAGIC LINK (CSP FIXED DESTINATION) -->
 <script>
+// --- HELPERS ---
 function showMessage(type, text) {
   const box = document.getElementById("loginMessage");
   box.className = "login-message " + type;
@@ -106,50 +117,74 @@ function handleLoginFeedback(email) {
     attemptCount = 1;
     lastEmailAttempt = email;
   }
-
   if (attemptCount >= 2) {
-    showMessage(
-      "success",
-      "Si vous avez effectué un paiement mais ne recevez pas le lien, vérifiez l’adresse saisie ainsi que votre dossier Spam."
-    );
+    showMessage("success", "Si vous n'avez toujours pas reçu le code, veuillez vérifier vos courriers indésirables ou nous contacter.");
   } else {
-    showMessage(
-      "success",
-      "Le lien de connexion a été envoyé. Vérifiez votre email."
-    );
+    showMessage("success", "Votre code de connexion à 8 chiffres a été envoyé. Veuillez vérifier votre boîte e-mail.");
   }
 }
 
+// --- STEP 1: REQUEST THE CODE ---
 document.getElementById("sendMagicLink").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
+  const msg = document.getElementById("loginMessage");
+  msg.style.display = "none";
 
   if (!email) {
-    showMessage("error", "Veuillez entrer votre adresse email.");
+    showMessage("error", "Veuillez entrer votre adresse e-mail.");
     return;
   }
 
   if (!window.supabase) {
-    showMessage("error", "Erreur technique. Actualisez la page.");
+    showMessage("error", "Erreur technique. Veuillez rafraîchir la page et réessayer.");
     return;
   }
-
-  const redirectTo =
-    `${window.location.origin}/france/csp/dashboard/index.html`;
 
   const { error } = await window.supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: redirectTo,
       shouldCreateUser: false
     }
   });
 
-  if (error) {
-    showMessage("error", error.message);
+if (error) {
+  // Check if the error is the "user not found" message
+  if (error.message.includes("Signups not allowed for otp") || error.status === 422) {
+    showMessage("error", "Cet e-mail n'est pas répertorié — veuillez saisir l'adresse e-mail exacte utilisée lors de l'achat.");
+  } else {
+    // Fallback for other technical errors
+    showMessage("error", "Une erreur est survenue : " + error.message);
+  }
+  return;
+}
+
+  document.getElementById("sendMagicLink").style.display = "none";
+  document.getElementById("otpSection").style.display = "block";
+  
+  handleLoginFeedback(email);
+});
+
+// --- STEP 2: VERIFY THE CODE ---
+document.getElementById("verifyOtp").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const token = document.getElementById("otpCode").value.trim();
+
+  if (token.length < 6 || token.length > 8) {
+    showMessage("error", "Veuillez entrer le code valide envoyé par e-mail.");
     return;
   }
 
-  handleLoginFeedback(email);
+  const { data, error } = await window.supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'magiclink'
+  });
+
+  if (error) {
+    showMessage("error", error.message);
+  } else if (data.session) {
+    window.location.href = "/france/csp/dashboard/index.html";
+  }
 });
 </script>
 
