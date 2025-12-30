@@ -386,6 +386,67 @@ if (!saved) {
       });
     }
 
+// ------------------------------------------
+// Official exam dates hint (read-only)
+// ------------------------------------------
+
+(async function renderOfficialDatesHint() {
+  const hintEl = document.getElementById("officialDatesHint");
+  if (!hintEl) return;
+
+  try {
+    const res = await fetch("/assets/data/official-exams.json");
+    if (!res.ok) return;
+
+    const data = await res.json();
+    const today = new Date();
+
+    function nextUpcoming(entries) {
+      return entries
+        .map(e => new Date(`${e.date}T${e.time || "00:00"}`))
+        .filter(d => d >= today)
+        .sort((a, b) => a - b)[0];
+    }
+
+    function fmt(d, locale) {
+      return d.toLocaleDateString(locale, {
+        day: "numeric",
+        month: "short"
+      });
+    }
+
+    const fr = nextUpcoming(data.languages?.fr || []);
+    const en = nextUpcoming(data.languages?.en || []);
+    const de = nextUpcoming(data.languages?.de || []);
+
+    if (!fr && !en && !de) return;
+
+    const updated = data.updated
+      ? new Date(data.updated).toLocaleDateString("fr-FR")
+      : null;
+
+    hintEl.innerHTML = `
+  <div class="exam-hint-title">
+    Prochaines sessions officielles
+  </div>
+
+  <div class="exam-hint-dates">
+    ${fr ? `FR ${fmt(fr, "fr-FR")}` : ""}
+    ${en ? ` · EN ${fmt(en, "en-GB")}` : ""}
+    ${de ? ` · DE ${fmt(de, "de-DE")}` : ""}
+  </div>
+
+  <div class="exam-hint-source">
+    ${updated ? `Mise à jour : ${updated} · ` : ""}Source : ${data.source || "lux.men.lu"}
+  </div>
+`;
+
+  } catch (e) {
+    // silent fail — informational only
+  }
+})();
+
+
     renderCountdown();
   }
 
