@@ -102,7 +102,12 @@
       writeInt(KEY_INDEX, currentIndex);
 
       qBlock.style.display = "block";
-      qTextEl.textContent = q.q;
+      const lang = window.CIVICEDGE_LANG || "fr";
+qTextEl.textContent =
+  typeof q.q === "string"
+    ? q.q
+    : (q.q?.[lang] || q.q?.fr || "");
+
 
       // Reset UI
       optionsEl.innerHTML = "";
@@ -111,8 +116,15 @@
 
       // Build option objects (2–3 options supported)
       const optionObjects = q.options
-        .filter(opt => opt && typeof opt.t === "string" && opt.t.trim() !== "")
-        .map(opt => ({ text: opt.t.trim(), correct: !!opt.correct }));
+  .filter(opt => opt && opt.t)
+  .map(opt => ({
+    text:
+      typeof opt.t === "string"
+        ? opt.t.trim()
+        : (opt.t?.[lang] || opt.t?.fr || "").trim(),
+    correct: !!opt.correct
+  }));
+
 
       if (optionObjects.length === 0) {
         card.style.display = "none";
