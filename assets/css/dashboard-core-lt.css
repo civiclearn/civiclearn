@@ -187,40 +187,6 @@ body{
 .hello{font-weight:600;}
 .tip{color:var(--muted);font-size:14px;}
 
-/* Language switch — sidebar grade */
-.lang-switch {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-  color: #cbd5e1;
-}
-
-.lang-switch button {
-  font-size: 0.75rem;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.18);
-  color: inherit;
-  cursor: pointer;
-  opacity: 0.65;
-  transition:
-    opacity 0.15s ease,
-    background 0.15s ease,
-    border-color 0.15s ease;
-}
-
-.lang-switch button:hover {
-  opacity: 1;
-  background: rgba(255,255,255,0.10);
-}
-
-.lang-switch button.active {
-  opacity: 1;
-  background: rgba(255,255,255,0.18);
-  border-color: rgba(255,255,255,0.45);
-  font-weight: 600;
-}
 
 
 
@@ -1561,3 +1527,182 @@ body.no-date #countdownValueWrapper{
     -webkit-tap-highlight-color: transparent;
   }
 }
+/* =========================================================
+   GLOBAL CONTROLS — single source of truth (no duplicates)
+   ========================================================= */
+
+.global-controls{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+/* the FR/DE/EN group inside the sidebar */
+.global-controls .lang-switch{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0;
+}
+
+/* unified pill geometry (text + icon) */
+.global-controls .lang-switch button,
+.global-controls .reading-btn.tool{
+  height:36px;
+  min-width:48px;
+  padding:0 14px;
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.22);
+  background:rgba(255,255,255,0.08);
+  color:#e5e7eb;
+
+  font-family:"Space Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+  font-size:12px;
+  font-weight:700;
+  line-height:1;           /* remove baseline centering */
+  letter-spacing:0.2px;
+
+  cursor:pointer;
+  user-select:none;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* icon pill fixed width */
+.global-controls .reading-btn.tool{
+  width:48px;
+  padding:0;
+}
+
+.global-controls .reading-icon{
+  width:18px;
+  height:18px;
+  display:block;           /* prevents SVG baseline drift */
+  fill:currentColor;
+}
+
+/* states */
+.global-controls .lang-switch button:hover,
+.global-controls .reading-btn.tool:hover{
+  background:rgba(255,255,255,0.14);
+  border-color:rgba(255,255,255,0.32);
+}
+
+.global-controls .lang-switch button.active,
+.global-controls .reading-btn.tool.active{
+  background:rgba(79,70,229,0.55);
+  border-color:rgba(79,70,229,0.75);
+  color:#fff;
+}
+<style>
+
+  #factText {
+    flex-grow: 0 !important;
+    margin-bottom: 16px; /* space before the question */
+  }
+</style>
+<style>
+
+.db-metric-card:has(#topicsChart) {
+    min-width: 500px !important; 
+    width: 500px;
+}
+
+</style>
+<style>
+/* LU – Fact of the Day compact override */
+#db-metrics-row .fact-card {
+  padding: 22px 20px !important;
+  max-height: none !important;
+}
+
+#factQuestion {
+  font-size: 0.85rem !important;
+  line-height: 1.4 !important;
+  margin-bottom: 14px !important;
+}
+
+.fact-options {
+  gap: 8px !important;
+}
+
+.fact-option-btn {
+  min-height: 42px !important;
+  font-size: 0.8rem !important;
+  padding: 8px 14px !important;
+}
+
+.fact-footer {
+  padding-top: 16px !important;
+  gap: 32px !important;
+}
+
+.fact-side-btn {
+  width: 38px !important;
+  height: 38px !important;
+  font-size: 16px !important;
+}
+.exam-dates-hint {
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: #6b676b;
+  text-align: center;
+}
+
+.exam-dates-hint strong {
+  font-weight: 600;
+}
+
+.exam-dates-hint .source {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  color: #9a96a3;
+}
+/* === Date picker bottom sheet layout fix === */
+.sheet {
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.sheet-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+}
+
+.sheet-body input[type="date"] {
+  width: 100%;
+  max-width: 260px;
+  align-self: center;
+}
+
+.exam-dates-hint {
+  max-width: 100%;
+  padding: 10px 12px;
+  background: #f7f6fb;
+  border-radius: 10px;
+}
+.exam-hint-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.exam-hint-dates {
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.exam-hint-source {
+  font-size: 0.72rem;
+  color: #9a96a3;
+}
+
+
+</style>
