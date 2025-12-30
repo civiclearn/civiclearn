@@ -569,6 +569,28 @@ function computeTrendPointsFromFirstAttempts(history) {
       const stats = getStats();
       const progress = getProgress();
       const progressRaw = progress.raw || {};
+	  
+	  // ====================================================
+// MERGE LUX SEQUENTIAL STATS (CCSE-style architecture)
+// ====================================================
+
+let seqAnswered = 0;
+let seqCorrect = 0;
+let seqByTopic = {};
+
+try {
+  const seqRaw = localStorage.getItem("civiclearn:lu:progress");
+  if (seqRaw) {
+    const seq = JSON.parse(seqRaw);
+
+    seqAnswered = Number(seq.answered || 0);
+    seqCorrect  = Number(seq.correct  || 0);
+    seqByTopic  = seq.byTopic || {};
+  }
+} catch (e) {
+  // silent fail – sequential is optional
+}
+
 
       await loadBankSize();
 	  
@@ -584,7 +606,10 @@ const topicLabelMap = buildTopicLabelMap(window.__ceBank || [], lang);
 
       // 2. Metrics
       const entries = Object.values(progressRaw);
-      const masteredQuestions = entries.filter((e) => Number(e.rights || 0) > 0).length;
+      const masteredQuestions = entries.filter(
+  (e) => Number(e.rights || 0) > 0
+).length + seqCorrect;
+
       const mastery = bankSize > 0 ? masteredQuestions / bankSize : 0;
 
       // Global mastery percentage (donut + label)
@@ -611,14 +636,19 @@ safeText(document.getElementById("globalAnswered"), `${masteredQuestions} ${word
       }
 
       // Total distinct questions seen
-      const seenCount = Object.keys(progressRaw).length;
-      safeText(document.getElementById("tmAnswered"), seenCount);
+      const seenCount = Object.keys(progressRaw).length + seqAnswered;
+safeText(document.getElementById("tmAnswered"), seenCount);
+
 
       // Global accuracy across all sessions
-      const avgAcc =
-        stats.totalQuestions > 0
-          ? Math.round((stats.totalCorrect / stats.totalQuestions) * 100)
-          : 0;
+      const totalQ = stats.totalQuestions + seqAnswered;
+const totalC = stats.totalCorrect + seqCorrect;
+
+const avgAcc =
+  totalQ > 0
+    ? Math.round((totalC / totalQ) * 100)
+    : 0;
+
       safeText(document.getElementById("tmAccuracy"), avgAcc + "%");
 
       // Total study time
@@ -670,6 +700,45 @@ if (
 
       // 3. Charts
       const perTopic = computePerTopicProgressFromHistory(stats.history || []);
+	  // --- MERGE SEQUENTIAL PER-TOPIC (LU) INTO TOPIC CHART DATA ---
+try {
+  const bank = window.__ceBank || [];
+  const reverseTopic = {};
+
+  // Build reverse map: "Histoire" -> "History", "Institutions" -> "Institutions", etc.
+  bank.forEach(q => {
+    const t = q && q.topic;
+    if (!t) return;
+
+    // If topic is multilingual object, canonical key = .en
+    if (typeof t === "object" && t.en) {
+      const canon = t.en;
+
+      // Map all known language labels back to canonical
+      ["fr", "de", "en", "lb", "lu"].forEach(lg => {
+        if (t[lg] && typeof t[lg] === "string") reverseTopic[t[lg]] = canon;
+      });
+
+      // Also map canonical to itself
+      reverseTopic[canon] = canon;
+      return;
+    }
+
+    // If topic is a plain string, map to itself
+    if (typeof t === "string") reverseTopic[t] = t;
+  });
+
+  // seqByTopic comes from your earlier merge block
+  Object.entries(seqByTopic || {}).forEach(([rawTopic, entry]) => {
+    const canon = reverseTopic[rawTopic] || rawTopic;
+
+    if (!perTopic[canon]) return; // only merge into topics that exist in the bank chart
+    const c = Number(entry && entry.correct || 0);
+    perTopic[canon].correct += c;
+  });
+} catch {}
+
+	  
       const trendPoints = computeTrendPointsFromFirstAttempts(stats.history || []);
 
       const globalMetrics = computeGlobalMetrics(stats, bankSize, progress);
@@ -718,11 +787,16 @@ function computePerTopicProgressFromProgressRaw(progressRaw) {
 
   // start
     if (window.CivicLearnI18n && typeof window.CivicLearnI18n.onReady === "function") {
-    window.CivicLearnI18n.onReady(initDashboard);
-  } else {
+  window.CivicLearnI18n.onReady(() => {
     initDashboard();
-  }
+    window.addEventListener("civiclearn:progress-updated", initDashboard);
+  });
+} else {
+  initDashboard();
+  window.addEventListener("civiclearn:progress-updated", initDashboard);
+}
+
 
   })();
 
-  
+  window.addEventListener("civiclearn:progress-updated", initDashboard);
