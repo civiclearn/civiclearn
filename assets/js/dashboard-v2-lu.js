@@ -859,5 +859,3 @@ function computePerTopicProgressFromProgressRaw(progressRaw) {
 
 
   })();
-
-  window.addEventListener("civiclearn:progress-updated", initDashboard);
