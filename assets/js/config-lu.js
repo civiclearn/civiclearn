@@ -40,7 +40,7 @@ window.CIVICEDGE_CONFIG = {
     topicQuotas: {
      "History": 10,
      "Institutions": 20,
-     "Fundamental Rights": 10
+     "Rights": 10
     }
   },
 
