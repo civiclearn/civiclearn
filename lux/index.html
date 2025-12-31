@@ -329,31 +329,107 @@
 <script>
 const MINI_QUESTIONS = [
   {
-    q: "Quelle est la langue officielle administrative du Luxembourg ?",
-    a: ["Le luxembourgeois, le français et l’allemand", "Uniquement le luxembourgeois", "Le français uniquement", "L’allemand uniquement"],
+    q: "Quel est l’objectif principal de l’UEBL ?",
+    a: [
+      "L’union économique et douanière",
+      "La défense militaire",
+      "L’unification politique",
+      "L’intégration européenne"
+    ],
     correct: 0
   },
   {
-    q: "Quel est le régime politique du Luxembourg ?",
-    a: ["Une monarchie constitutionnelle", "Une république fédérale", "Une monarchie absolue", "Une république parlementaire"],
+    q: "Quel plan international contribue à la reconstruction du Luxembourg après 1945 ?",
+    a: [
+      "Le plan Marshall",
+      "Le plan Schuman",
+      "Le plan Dawes",
+      "Le plan Monnet"
+    ],
     correct: 0
   },
   {
-    q: "Quel est le rôle principal de la Chambre des députés ?",
-    a: ["Voter les lois", "Nommer le Grand-Duc", "Contrôler les communes", "Rendre la justice"],
+    q: "Quel événement européen redéfinit le statut du Luxembourg en 1815 ?",
+    a: [
+      "Le Congrès de Vienne",
+      "Le traité de Maastricht",
+      "La chute de Napoléon III",
+      "La révolution de 1848"
+    ],
     correct: 0
   },
   {
-    q: "Quel droit fondamental est garanti au Luxembourg ?",
-    a: ["L’égalité devant la loi", "L’obligation de voter", "Le service militaire obligatoire", "L’adhésion à un parti politique"],
+    q: "Quel traité renforce les compétences de l’Union européenne en 1997 ?",
+    a: [
+      "Le traité d’Amsterdam",
+      "Le traité de Rome",
+      "Le traité de Maastricht",
+      "Le traité de Nice"
+    ],
     correct: 0
   },
   {
-    q: "Quelle valeur est essentielle à la société luxembourgeoise ?",
-    a: ["Le respect des lois et des autres", "La pratique religieuse obligatoire", "La neutralité politique forcée", "La priorité nationale dans l’emploi"],
+    q: "La peine de mort est-elle autorisée au Luxembourg ?",
+    a: [
+      "Non, elle est interdite",
+      "Oui, pour les crimes graves",
+      "Oui, en temps de guerre",
+      "Oui, avec autorisation judiciaire"
+    ],
+    correct: 0
+  },
+  {
+    q: "Quel droit est directement lié à la nationalité au Luxembourg ?",
+    a: [
+      "Le droit de vote aux élections nationales",
+      "La liberté d’expression",
+      "Le droit à un procès équitable",
+      "Le droit à la vie privée"
+    ],
+    correct: 0
+  },
+  {
+    q: "Quelle catégorie de droits vise à garantir des prestations de la collectivité ?",
+    a: [
+      "Les droits-créance",
+      "Les droits-libertés",
+      "Les droits du justiciable",
+      "Les droits de participation"
+    ],
+    correct: 0
+  },
+  {
+    q: "Qui élit le président de la Chambre des députés ?",
+    a: [
+      "Les députés eux-mêmes",
+      "Le Grand-Duc",
+      "Le Premier ministre",
+      "Le Conseil d’État"
+    ],
+    correct: 0
+  },
+  {
+    q: "Quelle juridiction administrative statue en première instance ?",
+    a: [
+      "Le Tribunal administratif",
+      "La Cour administrative",
+      "La Cour constitutionnelle",
+      "Le Conseil d’État"
+    ],
+    correct: 0
+  },
+  {
+    q: "À quelle dynastie appartient la famille grand-ducale actuelle ?",
+    a: [
+      "La maison de Nassau-Weilburg",
+      "La maison de Bourbon",
+      "La maison de Habsbourg",
+      "La maison de Saxe-Cobourg"
+    ],
     correct: 0
   }
 ];
+
 
 
 
@@ -429,7 +505,7 @@ function miniPick(idx) {
 
   const area = miniContainer.querySelector(".mini-next-area");
   area.innerHTML = `
-    <button class="mini-next-btn" onclick="miniNext()">Next →</button>
+    <button class="mini-next-btn" onclick="miniNext()">Suivant →</button>
   `;
 }
 
@@ -461,8 +537,8 @@ function finishMiniTest() {
   const wrong = total - score;
 
   miniResultText.textContent =
-    `You answered correctly ${score} out of ${total} questions. ` +
-    `Correct : ${score}. Wrong : ${wrong}.`;
+  `Vous avez répondu correctement à ${score} questions sur ${total}. ` +
+  `Correctes : ${score}. Incorrectes : ${wrong}.`;
 
   renderMiniChart(score, wrong);
 }
@@ -472,7 +548,7 @@ function renderMiniChart(correct, wrong) {
   new Chart(document.getElementById("mini-test-chart"), {
     type: "pie",
     data: {
-      labels: ["Correct", "Incorrect"],
+      labels: ["Correctes", "Incorrectes"],
       datasets: [{ data: [correct, wrong] }]
     },
     options: {
@@ -485,7 +561,7 @@ function renderMiniChart(correct, wrong) {
 /* ---- Start ---- */
 renderMiniQuestion();
 </script>
-</script>
+
 
 </body>
 </html>
