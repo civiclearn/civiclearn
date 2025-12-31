@@ -249,3 +249,76 @@
         max-width: 100%;
       }
     }
+ 
+ .card {
+  position: relative;
+}
+
+.lang-switch {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  justify-content: flex-end;
+  margin: 0;
+}
+
+/* ============================================================
+   LOGIN NOTE – PEEK TAB (ROLodex style)
+   ============================================================ */
+
+.login-note-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.login-note-tab {
+  position: absolute;
+  top: -18px;
+  left: 1.6rem;   /* aligns with card inner padding */
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: 12px 12px 0 0;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 3;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.12);
+}
+
+
+/* Hidden panel behind the card */
+.login-note-panel {
+  position: absolute;
+  font-family: "Lexend", system-ui, sans-serif;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--brand);
+  color: #fff;
+  border-radius: 1.4rem;
+  padding: 1.2rem 1.4rem 1.4rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  transform: translateY(20px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.35s ease, opacity 0.25s ease;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+}
+
+/* When open, lift panel from behind card */
+.login-note-wrapper.open .login-note-panel {
+  transform: translateY(-110%);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Ensure card stays visually above when closed */
+.card {
+  position: relative;
+  z-index: 2;
+}

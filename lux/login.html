@@ -76,20 +76,44 @@
       <a href="/lux/#pricing" data-t="nav_pricing"></a>
     </nav>
 
-    <a href="/lux/checkout.html" class="btn-small-purple" data-t="nav_signup"></a>
+ <a href="/lux/checkout.html"
+   class="btn-small-purple"
+   data-t="nav_signup">
+  Je m’inscris
+</a>
   </div>
 </header>
 
 <div class="login-wrapper">
-  <div class="card">
-    <div class="lang-switch">
-      <button data-lang="en">EN</button>
-      <button data-lang="de">DE</button>
-      <button data-lang="fr">FR</button>
+
+  <div class="login-note-wrapper">
+
+    <!-- PEEK TAB -->
+    <button class="login-note-tab" id="noteToggle">
+      Inscrit en 2025&nbsp;?
+    </button>
+
+    <!-- HIDDEN NOTE PANEL -->
+    <div class="login-note-panel" id="loginNote">
+      <p>
+        <strong>Vous aviez déjà un compte Vivre-Ensemble.lu&nbsp;?</strong><br><br>
+        Votre accès a été automatiquement transféré vers la nouvelle plateforme.<br>
+        Entrez simplement l’adresse e-mail utilisée lors de votre inscription&nbsp;:
+        vous recevrez immédiatement votre code d’accès par e-mail.
+      </p>
     </div>
 
-    <h1 data-t="title"></h1>
-    <p class="subtitle" data-t="subtitle"></p>
+    <!-- LOGIN CARD -->
+    <div class="card">
+
+      <div class="lang-switch">
+        <button data-lang="en">EN</button>
+        <button data-lang="de">DE</button>
+        <button data-lang="fr">FR</button>
+      </div>
+
+      <h1 data-t="title"></h1>
+      <p class="subtitle" data-t="subtitle"></p>
 
     <div id="emailSection">
       <label for="email" data-t="email_label"></label>
@@ -109,7 +133,7 @@
 
     <div class="login-footer" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #666; text-align: center; font-family: 'Lexend', sans-serif;">
       <span data-t="no_access"></span>
-      <a href="/lux/checkout" data-t="create_access" style="color: #7c3aed; text-decoration: none; font-weight: 500;"></a>
+      <a href="/lux/checkout.html" data-t="create_access" style="color: #7c3aed; text-decoration: none; font-weight: 500;"></a>
     </div>
   </div>
 </div>
@@ -244,6 +268,14 @@ document.getElementById("verifyOtp").addEventListener("click", async () => {
     window.location.href = "/lux/dashboard/index.html";
   }
 });
+</script>
+<script>
+  const noteToggle = document.getElementById("noteToggle");
+  const noteWrapper = document.querySelector(".login-note-wrapper");
+
+  noteToggle.addEventListener("click", () => {
+    noteWrapper.classList.toggle("open");
+  });
 </script>
 
 
