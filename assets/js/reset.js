@@ -22,6 +22,7 @@
     localStorage.removeItem("civicedge_stats");
     localStorage.removeItem("civicedge_testDate");
 
+
     // Optional but recommended:
     // localStorage.removeItem("civicedge_fontSize");
     // localStorage.removeItem("civicedge_theme");

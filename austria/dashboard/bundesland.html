@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bundesland wählen</title>
+</head>
+<body>
+
+<h2>Bitte wählen Sie Ihr Bundesland</h2>
+
+<select id="bundesland">
+  <option value="">– auswählen –</option>
+  <option value="Wien">Wien</option>
+  <option value="Niederösterreich">Niederösterreich</option>
+  <option value="Oberösterreich">Oberösterreich</option>
+  <option value="Steiermark">Steiermark</option>
+  <option value="Tirol">Tirol</option>
+  <option value="Salzburg">Salzburg</option>
+  <option value="Kärnten">Kärnten</option>
+  <option value="Vorarlberg">Vorarlberg</option>
+  <option value="Burgenland">Burgenland</option>
+</select>
+
+<br><br>
+
+<button id="save">Weiter</button>
+
+<script>
+document.getElementById("save").onclick = () => {
+  const v = document.getElementById("bundesland").value;
+  if (!v) return;
+
+  localStorage.setItem("civiclearn_bundesland", v);
+  const back = localStorage.getItem("civiclearn_return_to") || "/austria/dashboard/";
+localStorage.removeItem("civiclearn_return_to");
+window.location.href = back;
+
+};
+</script>
+
+</body>
+</html>
