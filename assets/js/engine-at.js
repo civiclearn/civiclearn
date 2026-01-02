@@ -85,6 +85,23 @@
     return el;
   }
 
+  function renderResultBar(label, value, min) {
+  const pct = Math.min(100, Math.round((value / min) * 100));
+  const ok = value >= 3;
+
+  return `
+    <div class="ce-result-bar">
+      <div class="ce-result-bar-label">
+        ${label} — ${value} / ${min}
+      </div>
+      <div class="ce-result-bar-track">
+        <div class="ce-result-bar-fill ${ok ? "ok" : "fail"}" style="width:${pct}%"></div>
+      </div>
+    </div>
+  `;
+}
+
+
   // Normalize label to compare topic names across accents and variants
   function normalizeLabel(str) {
     return (str || "")
@@ -637,7 +654,7 @@ if (
   const nextBtn = createEl(
     "button",
     "btn ce-next-btn",
-    t("test_next", "Suivant")
+    t("test_next", "Next")
   );
   nextBtn.disabled = true;
   nextBtn.addEventListener("click", () => goNext());
@@ -838,7 +855,7 @@ function updateProgressBar() {
     const key = `${q.topicLabel || q.topicKey}:${q.text}`;
     const entry = progress[key];
 
-    if (!(entry && entry.correct === 1)) {
+    if (!(entry && Number(entry.rights || 0) > 0)) {
       remaining += 1;
     }
   });
@@ -927,7 +944,7 @@ function updateProgressBar() {
       "ce-topics-ring-caption",
       t(
         "topics_ring_caption",
-        "{n} questions restantes dans les sujets sélectionnés"
+        "{n} verbleibende Fragen in den ausgewählten Themen"
       ).replace("{n}", String(safeRemaining))
     );
 
@@ -1015,7 +1032,7 @@ if (state.mode === "topics") {
   h2.setAttribute("data-i18n", "topics_mastered_title");
   h2.textContent = t(
     "topics_mastered_title",
-    "Ensemble maîtrisé 🎉"
+    "Themenblock abgeschlossen"
   );
 
   launchConfetti();
@@ -1024,7 +1041,7 @@ if (state.mode === "topics") {
   sub.setAttribute("data-i18n", "topics_mastered_sub");
   sub.textContent = t(
     "topics_mastered_sub",
-    "Vous avez répondu correctement à toutes les questions de ce lot."
+    "Sie haben alle Fragen dieses Sets korrekt beantwortet."
   );
 
   const list = createEl("ul", "ce-result-list");
@@ -1052,7 +1069,7 @@ if (state.mode === "topics") {
   const backBtn = createEl(
     "button",
     "btn secondary",
-    t("topics_back_to_select", "Retour aux sujets")
+    t("topics_back_to_select", "Zurück zu den Themen")
   );
   backBtn.addEventListener("click", () => {
     window.location.href = "topics.html";
@@ -1106,11 +1123,11 @@ if (state.mode === "topics") {
     // ===== DEFAULT ENDING (SIMULATION / QUICK / TRAPS) =====
     const h2 = createEl("h2");
     h2.setAttribute("data-i18n", "result_title");
-    h2.textContent = t("result_title", "Résultats");
+    h2.textContent = t("result_title", "Results");
 
     const sub = createEl("p", "muted");
     sub.setAttribute("data-i18n", "result_subtitle");
-    sub.textContent = t("result_subtitle", "Résumé de vos performances");
+    sub.textContent = t("result_subtitle", "Your performance details");
 
     const scoreBlock = createEl("div", "ce-result-score");
     scoreBlock.textContent = `${correct} / ${total} (${percent}%)`;
@@ -1138,41 +1155,7 @@ if (state.mode === "topics") {
     list.appendChild(liWrong);
     list.appendChild(liTime);
 	
-	    // --- Traps-specific summary: how many traps cleaned / remaining ---
-    if (state.mode === "traps") {
-      const progress = readJsonLS("civicedge_progress", {});
-      let remaining = 0;
-      let cleaned = 0;
-
-      Object.values(progress).forEach(p => {
-        const attempts = p.attempts || 0;
-        const correctFlag = p.correct || 0;
-        if (attempts >= 3) {
-          if (correctFlag === 0) remaining += 1;
-          else cleaned += 1;
-        }
-      });
-
-      const trapsTitle = createEl("h3", "ce-result-traps-title");
-      trapsTitle.setAttribute("data-i18n", "traps_fixed_title");
-      trapsTitle.textContent = t(
-        "traps_fixed_title",
-        "Pièges corrigés"
-      );
-
-      const trapsLine = createEl("p", "ce-result-traps-line");
-      const tmpl = t(
-        "traps_fixed_line",
-        "Vous avez corrigé {fixed}. Il en reste {remaining}."
-      );
-      trapsLine.textContent = tmpl
-        .replace("{fixed}", String(cleaned))
-        .replace("{remaining}", String(remaining));
-
-      card.appendChild(trapsTitle);
-      card.appendChild(trapsLine);
-    }
-
+	  
     if (timeUp) {
       const timeNote = createEl("p", "muted");
       timeNote.setAttribute("data-i18n", "test_time_up");
@@ -1185,7 +1168,7 @@ if (state.mode === "topics") {
     const reviewBtn = createEl(
       "button",
       "btn secondary",
-      t("test_review_errors", "Revoir les erreurs")
+      t("test_review_errors", "Review the mistakes")
     );
     reviewBtn.id = "reviewErrorsBtn";
 
@@ -1210,6 +1193,42 @@ if (state.mode === "simulation") {
   card.appendChild(gradeEl);
 
   if (passed) launchConfetti();
+}
+
+if (state.mode === "simulation" && cfg.simulation?.scoring?.type === "austria") {
+
+  const scoring = cfg.simulation.scoring;
+
+  const perSection = {
+    history: 0,
+    institutions: 0,
+    bundesland: 0
+  };
+
+  state.allQuestions.forEach(q => {
+    if (q._userCorrect && perSection.hasOwnProperty(q.topicKey)) {
+      perSection[q.topicKey] += 1;
+    }
+  });
+
+  const breakdown = createEl("div", "ce-result-breakdown");
+
+  breakdown.innerHTML = `
+    <h3>${t("result_breakdown_title", "Ergebnis nach Themen")}</h3>
+
+  ${renderResultBar("Geschichte", perSection.history, 6)}
+  ${renderResultBar("Institutionen", perSection.institutions, 6)}
+  ${renderResultBar("Bundesland", perSection.bundesland, 6)}
+
+    <p class="ce-result-rule">
+      ${t(
+        "result_rule_at",
+        "Bestanden mit mindestens 12 richtigen Antworten ODER mindestens 3 richtigen Antworten in jedem Themenbereich."
+      )}
+    </p>
+  `;
+
+  card.appendChild(breakdown);
 }
 
 
@@ -1239,6 +1258,7 @@ function updateProgress(question, correct) {
 
   // Entry structure (compatible with dashboard)
   const entry = progress[key] || {
+	id: question.id, 
     attempts: 0,
     rights: 0,
     wrongs: 0,
@@ -1400,7 +1420,7 @@ function startReviewMode() {
 
         <div class="ce-q-header">
   <span class="ce-q-main">${q.topicLabel || ""}</span>
-  <span class="ce-q-meta">Question ${i + 1} sur ${wrong.length}</span>
+  <span class="ce-q-meta">Frage ${i + 1} von ${wrong.length}</span>
 </div>
         <div class="ce-question">${q.text}</div>
 

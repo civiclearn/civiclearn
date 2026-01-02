@@ -8,6 +8,7 @@
   <!-- Fonts + Core CivicEdge Styles -->
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+  <link rel="stylesheet" href="/assets/css/guidance.css">
   <!-- Flag size override -->
   <style>
     .brand svg {
@@ -301,6 +302,18 @@
 
 
 </section>
+<!-- GUIDANCE / TIPS -->
+<section id="guidance-row" class="guidance-row">
+  <div class="guidance-cards"></div>
+
+  <div id="guidance-collapsed" class="guidance-collapsed" hidden>
+    <button id="guidance-toggle" class="guidance-collapsed-btn">
+      <span id="guidance-toggle-label"></span>
+      <span class="arrow">▸</span>
+    </button>
+  </div>
+</section>
+
 
 
      <footer class="db-footer">
@@ -315,7 +328,7 @@
 
 <div id="dateSheet" class="sheet">
   <div class="sheet-header">
-    <h3 data-i18n="Choose your test date"</h3>
+    <h3 data-i18n="Testdatum auswählen"</h3>
   </div>
 
   <div class="sheet-body">
@@ -366,8 +379,16 @@ function loadFactOfDay() {
 
 CivicLearnI18n.onReady(() => {
   const s1 = document.createElement("script");
-  s1.src = "/assets/js/dashboard-v2.js";
+  s1.src = "/assets/js/dashboard-v2-at.js";
   document.body.appendChild(s1);
+  
+  
+// Set language for guidance BEFORE it loads
+window.CIVICEDGE_LANG = "de";
+  
+  const g = document.createElement("script");
+g.src = "/assets/js/guidance.js";
+document.body.appendChild(g);
 
 
 

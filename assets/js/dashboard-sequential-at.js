@@ -53,8 +53,11 @@
 
     // Storage keys (namespaced)
     const KEY_INDEX = `civiclearn:${COUNTRY}:dashseq:index`;
-    const KEY_LOG = `civiclearn:${COUNTRY}:answers`;          // append-only log
-    const KEY_STATS = `civiclearn:${COUNTRY}:stats`;          // aggregated stats
+
+// Austria canonical keys (USED by dashboard + engine)
+const KEY_PROGRESS = "civicedge_progress";
+const KEY_STATS    = "civicedge_stats";
+
 
     // Ensure bank base is available
 // Hard bind CCSE question bank (dashboard module must be autonomous)
@@ -146,7 +149,7 @@ questions = questions.filter(q => q.scope === "federal");
             id: q.id,
             topic: q.topic,
             correct: isCorrect,
-            mode: "dashboard"
+      
           });
 
           // Paint UI feedback
@@ -192,44 +195,68 @@ questions = questions.filter(q => q.scope === "federal");
     // Recording + Aggregation
     // ------------------------------
 
-    function recordAnswer({ id, topic, correct, mode }) {
-      const ts = Date.now();
+    function recordAnswer({ id, topic, correct }) {
+  const now = Date.now();
 
-      // 1) Append-only log
-      try {
-        const raw = localStorage.getItem(KEY_LOG);
-        const arr = raw ? JSON.parse(raw) : [];
-        arr.push({ id, topic, correct: !!correct, mode: mode || "dashboard", ts });
-        localStorage.setItem(KEY_LOG, JSON.stringify(arr));
-      } catch (e) {
-        console.warn("Dashboard sequential: failed to write answer log:", e);
-      }
+  // ------------------------------------------------
+  // 1) Update civicedge_progress (MASTER source)
+  // ------------------------------------------------
+  try {
+    const progress = JSON.parse(localStorage.getItem(KEY_PROGRESS) || "{}");
 
-      // 2) Aggregated stats (fast for dashboard bars)
-      try {
-        const rawS = localStorage.getItem(KEY_STATS);
-        const stats = rawS ? JSON.parse(rawS) : {
-          answered: 0,
-          correct: 0,
-          wrong: 0,
-          byTopic: {} // topic -> { answered, correct, wrong }
-        };
+    // MUST match engine key format exactly
+    const key = `${topic}:${questions[currentIndex].q}`;
 
-        stats.answered = (stats.answered || 0) + 1;
-        if (correct) stats.correct = (stats.correct || 0) + 1;
-        else stats.wrong = (stats.wrong || 0) + 1;
+    const entry = progress[key] || {
+      attempts: 0,
+      rights: 0,
+      wrongs: 0,
+      correct: 0,
+      topic: topic,
+      topicKey: topic
+    };
 
-        const t = String(topic || "unknown");
-        if (!stats.byTopic[t]) stats.byTopic[t] = { answered: 0, correct: 0, wrong: 0 };
-        stats.byTopic[t].answered += 1;
-        if (correct) stats.byTopic[t].correct += 1;
-        else stats.byTopic[t].wrong += 1;
-
-        localStorage.setItem(KEY_STATS, JSON.stringify(stats));
-      } catch (e) {
-        console.warn("Dashboard sequential: failed to write aggregated stats:", e);
-      }
+    entry.attempts += 1;
+    if (correct) {
+      entry.rights += 1;
+      entry.correct = 1; // mastered on first correct (same as quick/sim)
+    } else {
+      entry.wrongs += 1;
     }
+    entry.lastSeen = now;
+
+    progress[key] = entry;
+    localStorage.setItem(KEY_PROGRESS, JSON.stringify(progress));
+  } catch (e) {
+    console.warn("Dashboard sequential: failed to write civicedge_progress", e);
+  }
+
+  // ------------------------------------------------
+  // 2) Update civicedge_stats (answered / accuracy)
+  // ------------------------------------------------
+  try {
+    const stats = JSON.parse(localStorage.getItem(KEY_STATS) || "{}");
+    const history = Array.isArray(stats.history) ? stats.history : [];
+
+    history.push({
+      id: `dashseq-${now}`,
+      mode: "dashboard",
+      correct: correct ? 1 : 0,
+      total: 1,
+      percent: correct ? 100 : 0,
+      startedAt: now,
+      finishedAt: now,
+      durationSec: 0,
+      topics: [topic]
+    });
+
+    stats.history = history;
+    localStorage.setItem(KEY_STATS, JSON.stringify(stats));
+  } catch (e) {
+    console.warn("Dashboard sequential: failed to write civicedge_stats", e);
+  }
+}
+
   }
 
   // ------------------------------

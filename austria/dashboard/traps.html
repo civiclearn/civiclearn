@@ -158,33 +158,16 @@ if (!userBundesland) {
       progress = JSON.parse(localStorage.getItem("civicedge_progress") || "{}");
     } catch {}
 
-    const trickyKeys = Object.keys(progress)
-      .filter(id => (progress[id].wrongs || 0) >= 3 && (progress[id].rights || 0) < 2);
 
-    function normalizeLabel(str) {
-      return (str || "")
-        .normalize("NFD")
-        .replace(/\p{Diacritic}/gu, "")
-        .replace(/^l['’]\s*/i, "")
-        .replace(/^(le|la|les)\s+/i, "")
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, " ");
-    }
+    const trickyIds = new Set(
+  Object.values(progress)
+    .filter(p => (p.wrongs || 0) >= 3 && (p.rights || 0) < 2)
+    .map(p => p.id)
+    .filter(Boolean)
+);
 
-    const normalizedTrickySet = new Set(
-      trickyKeys.map(k => {
-        const [topic, ...rest] = k.split(":");
-        const text = rest.join(":");
-        return `${normalizeLabel(topic)}:${text.trim()}`;
-      })
-    );
+const trickySet = fullBank.filter(q => trickyIds.has(q.id));
 
-    const trickySet = fullBank.filter(q => {
-      const topicRaw = q.topic || q.topicLabel || "";
-      const qKeyNormalized = `${normalizeLabel(topicRaw)}:${q.q.trim()}`;
-      return normalizedTrickySet.has(qKeyNormalized);
-    });
 
     const quizArea = document.getElementById("quizArea");
 
