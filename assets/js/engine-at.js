@@ -283,10 +283,23 @@ const filteredBank = fullBank.filter(q =>
       questions = sample(filteredBank, n);
 } else if (mode === "simulation") {
 
-  questions = sample(
-  filteredBank,
-  (cfg.simulation && cfg.simulation.questionCount) || 20
-);
+  const sections = cfg.simulation?.scoring?.sections;
+
+  if (!sections) {
+    console.error("Missing simulation.scoring.sections in config");
+    return;
+  }
+
+  let simQuestions = [];
+
+  Object.entries(sections).forEach(([topicKey, count]) => {
+    const pool = filteredBank.filter(q => q.topicKey === topicKey);
+    simQuestions = simQuestions.concat(sample(pool, count));
+  });
+
+  questions = simQuestions;
+
+
 
 
 } else if (mode === "topics") {
