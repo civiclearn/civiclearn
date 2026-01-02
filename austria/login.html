@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en-AU">
+<html lang="de-AT">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – CivicLearn Australia</title>
+  <title>Login – CivicLearn Österreich</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/login.css">
@@ -33,8 +33,8 @@
 
     <div class="header-left">
       <div class="brand-main">
-        <img src="/assets/images/au.svg" alt="Australia">
-        <div class="brand-title">CivicLearn Australia</div>
+        <img src="/assets/images/at.svg" alt="Österreich">
+        <div class="brand-title">CivicLearn Österreich</div>
       </div>
       <div class="brand-powered">
         powered by <span>CivicLearn</span>
@@ -42,12 +42,12 @@
     </div>
 
     <nav class="header-nav">
-      <a href="/australia/">Home</a>
-      <a href="/australia/#presentation">Overview</a>
-      <a href="/australia/#pricing">Pricing</a>
+      <a href="/austria/">Startseite</a>
+      <a href="/austria/#presentation">Überblick</a>
+      <a href="/austria/#pricing">Preise</a>
     </nav>
 
-    <a href="/australia/checkout.html" class="btn-small-purple">Sign up</a>
+    <a href="/austria/checkout.html" class="btn-small-purple">Zugang kaufen</a>
   </div>
 </header>
 
@@ -56,32 +56,32 @@
     <div class="card">
       <h1>Login</h1>
       <p class="subtitle" style="font-family: 'Lexend', sans-serif;">
-        Enter your email to receive your 8-digit access code.
+        Geben Sie Ihre E-Mail-Adresse ein, um Ihren 8-stelligen Zugangscode zu erhalten.
       </p>
 
       <div id="emailSection">
-        <label for="email" style="font-family: 'Lexend', sans-serif;">Email Address</label>
-        <input id="email" type="email" placeholder="you@example.com" 
+        <label for="email" style="font-family: 'Lexend', sans-serif;">E-Mail-Adresse</label>
+        <input id="email" type="email" placeholder="sie@beispiel.at" 
                style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px; font-family: 'Lexend', sans-serif;" />
         <button type="button" class="login-btn" id="sendMagicLink" style="font-family: 'Lexend', sans-serif; font-weight:600;">
-          Send login code
+          Zugangscode senden
         </button>
       </div>
 
       <div id="otpSection" style="display:none; margin-top: 10px;">
-        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">8-Digit Code</label>
+        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">8-stelliger Code</label>
         <input id="otpCode" type="text" placeholder="00000000" maxlength="8" 
                style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
         <button type="button" class="login-btn" id="verifyOtp" 
                 style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;">
-          Verify & Login
+          Code bestätigen & einloggen
         </button>
       </div>
 
       <div id="loginMessage" class="login-message" style="display:none; margin-top: 15px; font-family: 'Lexend', sans-serif;"></div>
 
       <div class="login-footer" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #666; text-align: center; font-family: 'Lexend', sans-serif;">
-        Don't have access yet? <a href="/australia/checkout" style="color: #7c3aed; text-decoration: none; font-weight: 500;">Create access</a>
+        Noch keinen Zugang? <a href="/austria/checkout.html" style="color: #7c3aed; text-decoration: none; font-weight: 500;">Zugang erstellen</a>
       </div>
     </div>
   </main>
@@ -95,7 +95,7 @@
     const box = document.getElementById("loginMessage");
     box.className = "login-message success";
     box.textContent =
-      "Your account has been activated. Enter the email address used during purchase to access your training.";
+      "Ihr Zugang wurde aktiviert. Geben Sie die beim Kauf verwendete E-Mail-Adresse ein, um Ihr Training zu starten.";
     box.style.display = "block";
   }
 })();
@@ -120,11 +120,12 @@ function handleLoginFeedback(email) {
     attemptCount = 1;
     lastEmailAttempt = email;
   }
-  if (attemptCount >= 2) {
-    showMessage("success", "If you still haven't received the code, please check Spam or contact us.");
-  } else {
-    showMessage("success", "Your 8-digit login code has been sent. Please check your email.");
-  }
+
+  
+  showMessage(
+    "success",
+    "Ihr 8-stelliger Code wurde gesendet. Nur der zuletzt erhaltene Code ist gültig. Fordern Sie keinen neuen Code an, während Sie ihn eingeben."
+  );
 }
 
 // --- STEP 1: REQUEST THE CODE ---
@@ -134,17 +135,15 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
   msg.style.display = "none";
 
   if (!email) {
-    showMessage("error", "Please enter your email address.");
+    showMessage("error", "Bitte geben Sie Ihre E-Mail-Adresse ein.");
     return;
   }
 
   if (!window.supabase) {
-    showMessage("error", "Technical error. Please refresh and try again.");
+    showMessage("error", "Technischer Fehler. Bitte laden Sie die Seite neu.");
     return;
   }
 
-  // signInWithOtp without redirectTo will trigger the 8-digit code flow 
-  // if you updated your Supabase template to {{ .Token }}
   const { error } = await window.supabase.auth.signInWithOtp({
     email,
     options: {
@@ -157,10 +156,9 @@ document.getElementById("sendMagicLink").addEventListener("click", async () => {
     return;
   }
 
-  // UI Change: Hide email button, show the code input section
   document.getElementById("sendMagicLink").style.display = "none";
   document.getElementById("otpSection").style.display = "block";
-  
+
   handleLoginFeedback(email);
 });
 
@@ -169,9 +167,8 @@ document.getElementById("verifyOtp").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const token = document.getElementById("otpCode").value.trim();
 
-  // FLEXIBLE CHECK: Allows 6, 7, or 8 digits.
   if (token.length < 6 || token.length > 8) {
-    showMessage("error", "Please enter the valid code sent to your email.");
+    showMessage("error", "Bitte geben Sie den gültigen Code aus der E-Mail ein.");
     return;
   }
 
@@ -184,7 +181,7 @@ document.getElementById("verifyOtp").addEventListener("click", async () => {
   if (error) {
     showMessage("error", error.message);
   } else if (data.session) {
-    window.location.href = "/australia/dashboard/index.html";
+    window.location.href = "/austria/dashboard/index.html";
   }
 });
 </script>
