@@ -330,61 +330,56 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-/* QUESTIONS LEFT UNCHANGED ON PURPOSE */
+/* FRAGEN – ÖSTERREICH (bewusst anspruchsvoller) */
 const MINI_QUESTIONS = [
   {
-    q: "What is the capital city of Australia?",
-    a: ["Canberra", "Sydney", "Melbourne", "Brisbane"],
+    q: "Für wie viele Jahre wird der Bundespräsident in Österreich gewählt?",
+    a: ["6 Jahre", "5 Jahre", "4 Jahre", "7 Jahre"],
     correct: 0
   },
   {
-    q: "What is Australia’s national anthem?",
-    a: ["Advance Australia Fair", "Waltzing Matilda", "God Save the King", "Song of Australia"],
+    q: "Wie oft kann dieselbe Person maximal zum Bundespräsidenten gewählt werden?",
+    a: ["Zweimal", "Einmal", "Dreimal", "Ohne Begrenzung"],
     correct: 0
   },
   {
-    q: "What is the name of the Australian Parliament’s lower house?",
-    a: ["House of Representatives", "The Senate", "The Cabinet", "High Court"],
+    q: "Wer übt in Österreich die Gesetzgebung auf Bundesebene aus?",
+    a: ["Nationalrat und Bundesrat", "Bundesregierung", "Bundespräsident", "Verfassungsgerichtshof"],
     correct: 0
   },
   {
-    q: "Which of the following is a responsibility of Australian citizens?",
-    a: ["Voting in elections", "Owning property", "Serving in the military", "Holding a passport"],
+    q: "Welche Institution ist für die Kontrolle der Verfassungsmäßigkeit von Gesetzen zuständig?",
+    a: ["Verfassungsgerichtshof", "Oberster Gerichtshof", "Nationalrat", "Bundeskanzleramt"],
     correct: 0
   },
   {
-    q: "Who is Australia’s Head of State?",
-    a: ["The King of Australia", "The Prime Minister", "The Governor-General", "The Chief Justice"],
+    q: "Welches Prinzip beschreibt die Unabhängigkeit der Gerichte von Politik und Verwaltung?",
+    a: ["Gewaltentrennung", "Föderalismus", "Subsidiarität", "Direkte Demokratie"],
     correct: 0
   },
   {
-    q: "What is the minimum age to vote in Australia?",
-    a: ["18 years", "16 years", "21 years", "25 years"],
+    q: "Wann wurde die Republik Österreich erstmals ausgerufen?",
+    a: ["1918", "1919", "1938", "1945"],
     correct: 0
   },
   {
-    q: "Which document is the highest law in Australia?",
-    a: ["The Australian Constitution", "Acts of Parliament", "Common law", "State laws"],
+    q: "Welches Ereignis führte 1938 zum Verlust der staatlichen Souveränität Österreichs?",
+    a: ["Der Anschluss an das Deutsche Reich", "Der Staatsvertrag", "Der Bürgerkrieg", "Die Februarverfassung"],
     correct: 0
   },
   {
-    q: "What does the rule of law mean?",
-    a: [
-      "Everyone must obey the law",
-      "Only citizens must obey the law",
-      "Only politicians must obey the law",
-      "The government is above the law"
-    ],
+    q: "Welches Organ kann den Bundespräsidenten vor dem Verfassungsgerichtshof anklagen?",
+    a: ["Die Bundesversammlung", "Der Nationalrat allein", "Der Bundesrat allein", "Die Bundesregierung"],
     correct: 0
   },
   {
-    q: "Which day commemorates Australians who served in wars and conflicts?",
-    a: ["ANZAC Day", "Australia Day", "Remembrance Day", "Federation Day"],
+    q: "Wer ernennt die Richterinnen und Richter des Verfassungsgerichtshofs?",
+    a: ["Der Bundespräsident auf Vorschlag", "Der Nationalrat", "Der Bundeskanzler allein", "Das Volk"],
     correct: 0
   },
   {
-    q: "What number should you call for police, fire or ambulance in an emergency?",
-    a: ["000", "911", "111", "999"],
+    q: "Welches Jahr markiert den Beitritt Österreichs zur Europäischen Union?",
+    a: ["1995", "1989", "2000", "2004"],
     correct: 0
   }
 ];
@@ -395,7 +390,7 @@ function shuffle(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]]; // correct swap
+    [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
 }
@@ -424,7 +419,7 @@ const miniContainer   = document.getElementById("mini-test-container");
 const miniResultPanel = document.getElementById("mini-test-result");
 const miniResultText  = document.getElementById("mini-test-text");
 
-/* ---- Render question ---- */
+/* ---- Frage anzeigen ---- */
 function renderMiniQuestion() {
   const q = miniModel[qi];
 
@@ -447,7 +442,7 @@ function renderMiniQuestion() {
   });
 }
 
-/* ---- Handle answer ---- */
+/* ---- Antwort wählen ---- */
 function miniPick(idx) {
   const q = miniModel[qi];
   if (q.answered) return;
@@ -461,11 +456,11 @@ function miniPick(idx) {
 
   const area = miniContainer.querySelector(".mini-next-area");
   area.innerHTML = `
-    <button class="mini-next-btn" onclick="miniNext()">Next →</button>
+    <button class="mini-next-btn" onclick="miniNext()">Weiter →</button>
   `;
 }
 
-/* ---- Reveal ---- */
+/* ---- Auflösung anzeigen ---- */
 function applyMiniReveal() {
   const q = miniModel[qi];
   const buttons = miniContainer.querySelectorAll(".choice");
@@ -478,14 +473,14 @@ function applyMiniReveal() {
   });
 }
 
-/* ---- Next ---- */
+/* ---- Nächste Frage ---- */
 function miniNext() {
   qi++;
   if (qi < total) renderMiniQuestion();
   else finishMiniTest();
 }
 
-/* ---- Finish ---- */
+/* ---- Ergebnis ---- */
 function finishMiniTest() {
   miniContainer.style.display = "none";
   miniResultPanel.style.display = "block";
@@ -493,18 +488,18 @@ function finishMiniTest() {
   const wrong = total - score;
 
   miniResultText.textContent =
-    `You answered correctly ${score} out of ${total} questions. ` +
-    `Correct : ${score}. Wrong : ${wrong}.`;
+    `Sie haben ${score} von ${total} Fragen richtig beantwortet. ` +
+    `Richtig: ${score}. Falsch: ${wrong}.`;
 
   renderMiniChart(score, wrong);
 }
 
-/* ---- Result chart ---- */
+/* ---- Ergebnisdiagramm ---- */
 function renderMiniChart(correct, wrong) {
   new Chart(document.getElementById("mini-test-chart"), {
     type: "pie",
     data: {
-      labels: ["Correct", "Incorrect"],
+      labels: ["Richtig", "Falsch"],
       datasets: [{ data: [correct, wrong] }]
     },
     options: {
@@ -517,6 +512,7 @@ function renderMiniChart(correct, wrong) {
 /* ---- Start ---- */
 renderMiniQuestion();
 </script>
+
 
 
 </body>
