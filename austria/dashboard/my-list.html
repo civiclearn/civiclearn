@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+ <title data-i18n="title_my_list">My List</title>
+
+  <!-- Core Styles -->
+  <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+ 
+
+  <!-- Flag size override -->
+  <style>
+    .brand svg {
+      width: 30px !important;
+      height: 30px !important;
+    }
+/* ===============================
+   MY LIST — REVISION BOARD STYLE
+   =============================== */
+
+/* Card */
+.mylist-card {
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  background: #fff;
+}
+
+/* Question row (question + badge + remove) */
+.mylist-question-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* Question text */
+.mylist-question {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.35;
+  flex: 1;
+}
+
+/* Microtopic badge */
+.mylist-badge {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.12);
+  color: #4338ca;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+/* Remove button (top-right, discreet) */
+.mylist-actions {
+  display: flex;
+  align-items: center;
+}
+
+.mylist-remove {
+  font-size: 0.75rem;
+  font-family: "Space Grotesk", sans-serif;
+  color: #9ca3af;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.mylist-remove:hover {
+  color: #ef4444;
+}
+
+/* Answers container */
+.mylist-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+/* Answer pill */
+.mylist-option {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.9rem;
+  text-align: left;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.mylist-option:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+/* Correct / wrong states */
+.mylist-option.correct {
+  background: #dcfce7;
+  border-color: #22c55e;
+}
+
+.mylist-option.wrong {
+  background: #fee2e2;
+  border-color: #ef4444;
+}
+
+/* Lock visual (optional but nice) */
+.mylist-option:disabled {
+  cursor: default;
+  opacity: 0.95;
+}
+.mylist-wrapper {
+  max-width: 820px;
+  margin-left: 0;
+  margin-right: auto;
+  padding-left: 8px;
+}
+
+/* Slightly tighter on very large screens */
+@media (min-width: 1200px) {
+  .mylist-wrapper {
+    max-width: 780px;
+  }
+}
+.mylist-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.mylist-count {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 6px;
+}
+  </style>
+
+  <script>
+    document.documentElement.classList.add("i18n-hidden");
+  </script>
+  <script type="module" src="/assets/js/auth-guard.js"></script>
+</head>
+
+
+<body>
+
+<!-- MOBILE MENU -->
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+<div class="brand">
+  CivicLearn®
+  <svg viewBox="0 0 3 2"
+       width="30"
+       height="30"
+       style="margin-left:6px;vertical-align:middle;border-radius:3px;overflow:hidden">
+    <!-- Austria flag: red–white–red -->
+    <rect x="0" y="0" width="3" height="2" fill="#ED2939"/>
+    <rect x="0" y="0.6667" width="3" height="0.6667" fill="#ffffff"/>
+  </svg>
+</div>
+
+
+
+
+
+          <nav class="nav">
+  <a href="index.html"  data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="my-list.html" class="sub active" data-i18n="nav_my_list"></a>
+  <a href="reference.html" data-i18n="nav_reference_texts"></a>
+  <a href="history.html" data-i18n="nav_history"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+    <div class="spacer"></div>
+<div class="profile">
+
+  <div class="global-controls">
+
+  
+
+
+  </div>
+
+</div>
+
+</aside>
+<!-- MOBILE OVERLAY -->
+<div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+<main>
+
+  <!-- REQUIRED by engine (do not remove) -->
+  <div id="quiz" style="display:none"></div>
+
+  <div class="dashboard-container">
+    <div class="mylist-wrapper">
+
+      <header class="ce-header ce-header-top mylist-header">
+        <div>
+          <h1 data-i18n="title_my_list"></h1>
+          <div class="muted" data-i18n="my_list_subtitle"></div><br><br>
+        </div>
+
+        <div id="myListCount" class="mylist-count"></div>
+      </header>
+
+      <div id="myList" class="mylist-list"></div>
+
+    </div>
+  </div>
+
+</main>
+
+
+</div>
+
+<!-- CONFIG + I18N -->
+
+<script src="/assets/js/config-at.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>
+  CivicLearnI18n.init();
+</script>
+
+<!-- ENGINE -->
+<script src="/assets/js/engine-at.js"></script>
+
+<script>
+  CivicLearnI18n.onReady(() => {
+    const s = document.createElement("script");
+    s.src = "/assets/js/my-list.js";
+    document.body.appendChild(s);
+  });
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* MOBILE MENU */
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+
+  /* THEME */
+  try {
+    const s = JSON.parse(localStorage.getItem("civicedge_settings") || "{}");
+    if (s.theme) document.documentElement.dataset.theme = s.theme;
+  } catch {}
+});
+</script>
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>

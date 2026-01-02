@@ -65,7 +65,7 @@ simulation: {
 
     topicLabels: {
       history: "Geschichte Österreichs",
-      institutions: "Institutionen Österreichs",
+      institutions: "Demokratische Ordnung",
       bundesland: "Ihr Bundesland"
     },
 

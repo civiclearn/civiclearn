@@ -5,6 +5,56 @@
 
   const Engine = {};
    window.CivicEdgeEngine = Engine;
+   
+     // ===============================
+  // Saved questions (My List) — COPIED FROM LU
+  // ===============================
+
+  const SAVED_KEY = "civicedge_saved";
+
+  function getSavedMap() {
+    try {
+      return JSON.parse(localStorage.getItem(SAVED_KEY)) || {};
+    } catch {
+      return {};
+    }
+  }
+
+  function setSavedMap(map) {
+    localStorage.setItem(SAVED_KEY, JSON.stringify(map));
+  }
+
+  function isQuestionSaved(questionId) {
+    const map = getSavedMap();
+    return !!map[questionId];
+  }
+
+  function toggleSavedQuestion(questionId) {
+    const map = getSavedMap();
+
+    if (map[questionId]) {
+      delete map[questionId];
+    } else {
+      map[questionId] = true;
+    }
+
+    setSavedMap(map);
+    return !!map[questionId];
+  }
+
+  function getSavedQuestionIds() {
+    return Object.keys(getSavedMap());
+  }
+
+  // Expose to pages (my-list.js expects these exact names)
+  Engine.isQuestionSaved = isQuestionSaved;
+  Engine.toggleSavedQuestion = toggleSavedQuestion;
+  Engine.getSavedQuestionIds = getSavedQuestionIds;
+
+  // My List also needs access to the loaded bank:
+  let __normalizedBank = null;
+  Engine.getBank = () => __normalizedBank || [];
+
 
   // ------------- Helpers -------------
 
@@ -191,6 +241,7 @@ Engine.start = async function start(mode, options = {}) {
 
     const cfg = getConfig();
     const fullBank = await loadBankIfNeeded(options);
+	__normalizedBank = fullBank;
 	
 	const userBundesland = localStorage.getItem("civiclearn_bundesland");
 if (!userBundesland) {
@@ -433,29 +484,49 @@ function renderQuestion() {
 
   // Card wrapper
   const card = createEl("div", "ce-card");
+  // ===== Question header (LU structure, AT implementation) =====
+const header = createEl("div", "ce-q-header");
 
-  // ---- Meta: "Question X of Y" ----
-  const meta = createEl("div", "ce-q-meta");
-  const idxText = t("question_x_of_y", "Question {x} sur {y}")
-    .replace("{x}", String(state.currentIndex + 1))
-    .replace("{y}", String(state.questions.length));
-  meta.textContent = idxText;
-  card.appendChild(meta);
+// Topic pill
+const main = createEl(
+  "span",
+  "ce-q-main",
+  q.topicLabel || q.topicKey || ""
+);
+header.appendChild(main);
 
-  // ---- Topic label ----
-  let topicLabel = "";
-  const cfg = getConfig();
-  const topicsCfg = cfg.topics || {};
-  const topicLabels = topicsCfg.topicLabels || {};
+// Counter pill
+const meta = createEl(
+  "span",
+  "ce-q-meta",
+  `Frage ${state.currentIndex + 1} von ${state.questions.length}`
+);
+header.appendChild(meta);
 
-  if (q.topicKey && topicLabels[q.topicKey]) {
-    topicLabel = topicLabels[q.topicKey];
-  } else if (q.topicLabel) {
-    topicLabel = q.topicLabel;
-  }
+// Right side container
+const right = createEl("span", "ce-q-subtopic-wrap");
 
-  const topicEl = createEl("div", "ce-q-topic", topicLabel || "");
-  if (topicLabel) card.appendChild(topicEl);
+// Star (My List)
+const saveBtn = createEl("button", "ce-save-btn");
+saveBtn.type = "button";
+
+if (CivicEdgeEngine.isQuestionSaved(q.id)) {
+  saveBtn.classList.add("active");
+}
+
+saveBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const saved = CivicEdgeEngine.toggleSavedQuestion(q.id);
+  saveBtn.classList.toggle("active", saved);
+});
+
+right.appendChild(saveBtn);
+header.appendChild(right);
+
+card.appendChild(header);
+
+
+
 
 // ---- Subtopic label (for Denmark PR only; safe for Canada) ----
 if (q.subtopic) {
@@ -497,6 +568,9 @@ if (
 }
 
 card.appendChild(questionWrap);
+
+
+
 
 
   // ---- Options ----
@@ -1169,7 +1243,8 @@ function updateProgress(question, correct) {
     rights: 0,
     wrongs: 0,
     correct: 0,     // mastered = 1
-    topic: question.topicLabel || question.topicKey || null
+    topic: question.topicLabel || question.topicKey || null,
+	topicKey: question.topicKey || null
   };
 
   // Count attempts
@@ -1315,7 +1390,7 @@ function startReviewMode() {
   }
 
   let html = `
-    <div class="ce-card" style="padding:24px;">
+    <div class="ce-card">
       <h2 style="margin-bottom:20px;">${t("review_title", "Revoir les erreurs")}</h2>
   `;
 
@@ -1323,8 +1398,10 @@ function startReviewMode() {
     html += `
       <div class="ce-review-item" style="margin-bottom:32px;">
 
-        <div class="ce-q-meta">Question ${i + 1} sur ${wrong.length}</div>
-        <div class="ce-q-topic">${q.topicLabel || ""}</div>
+        <div class="ce-q-header">
+  <span class="ce-q-main">${q.topicLabel || ""}</span>
+  <span class="ce-q-meta">Question ${i + 1} sur ${wrong.length}</span>
+</div>
         <div class="ce-question">${q.text}</div>
 
         <div class="ce-options">

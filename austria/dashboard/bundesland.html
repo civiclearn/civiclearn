@@ -1,43 +1,221 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <title>Bundesland wählen</title>
+
+  <!-- Core Styles -->
+  <link rel="stylesheet" href="/assets/css/dashboard-core.css">
+  <link rel="stylesheet" href="/assets/css/history.css">
+
+  <!-- Page-specific styles -->
+  <style>
+    .bundesland-card {
+      max-width: 520px;
+      margin: 0 auto;
+      background: var(--card-bg, #fff);
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.06);
+    }
+
+    .bundesland-card h2 {
+      margin: 0 0 8px;
+      font-size: 1.4rem;
+    }
+
+    .bundesland-card p {
+      margin: 0 0 20px;
+      color: var(--muted, #666);
+    }
+
+    .bundesland-select {
+      width: 100%;
+      appearance: none;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      font-size: 1rem;
+      background:
+        linear-gradient(45deg, transparent 50%, #999 50%),
+        linear-gradient(135deg, #999 50%, transparent 50%),
+        linear-gradient(to right, #fff, #fff);
+      background-position:
+        calc(100% - 22px) calc(1em + 2px),
+        calc(100% - 16px) calc(1em + 2px),
+        0 0;
+      background-size: 6px 6px, 6px 6px, 100% 100%;
+      background-repeat: no-repeat;
+      cursor: pointer;
+    }
+
+    .bundesland-actions {
+      margin-top: 22px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .bundesland-actions button {
+      padding: 12px 22px;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent, #6b5cff);
+      color: #fff;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .bundesland-actions button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+  </style>
+
+  <script>
+    document.documentElement.classList.add("i18n-hidden");
+  </script>
+  <script type="module" src="/assets/js/auth-guard.js"></script>
 </head>
+
 <body>
 
-<h2>Bitte wählen Sie Ihr Bundesland</h2>
+<!-- MOBILE MENU -->
+<button class="menu-toggle" aria-label="Menu">☰</button>
 
-<select id="bundesland">
-  <option value="">– auswählen –</option>
-  <option value="Wien">Wien</option>
-  <option value="Niederösterreich">Niederösterreich</option>
-  <option value="Oberösterreich">Oberösterreich</option>
-  <option value="Steiermark">Steiermark</option>
-  <option value="Tirol">Tirol</option>
-  <option value="Salzburg">Salzburg</option>
-  <option value="Kärnten">Kärnten</option>
-  <option value="Vorarlberg">Vorarlberg</option>
-  <option value="Burgenland">Burgenland</option>
-</select>
+<div class="wrap">
 
-<br><br>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
 
-<button id="save">Weiter</button>
+    <div class="brand">
+      CivicLearn®
+      <svg viewBox="0 0 3 2"
+           width="30"
+           height="30"
+           style="margin-left:6px;vertical-align:middle;border-radius:3px;overflow:hidden">
+        <rect x="0" y="0" width="3" height="2" fill="#ED2939"/>
+        <rect x="0" y="0.6667" width="3" height="0.6667" fill="#ffffff"/>
+      </svg>
+    </div>
 
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav_dashboard"></a>
+      <a href="simulation.html" data-i18n="nav_simulation"></a>
+      <a href="quick.html" data-i18n="nav_quick"></a>
+      <a href="topics.html" data-i18n="nav_topics"></a>
+      <a href="traps.html" data-i18n="nav_traps"></a>
+      <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+	  <a href="my-list.html" data-i18n="nav_my_list"></a>
+	  <a href="reference.html" data-i18n="nav_reference_texts"></a>
+      <a href="history.html" data-i18n="nav_history"></a>
+      <a href="help.html" data-i18n="nav_help"></a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+    </nav>
+
+    <div class="spacer"></div>
+
+  </aside>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+  <main>
+
+    <header class="ce-header ce-header-top">
+      <h1>Bundesland auswählen</h1>
+      <div class="muted">
+        Diese Auswahl wird für bestimmte Fragen und Inhalte verwendet.
+      </div>
+    </header>
+
+    <div class="dashboard-container">
+
+      <div class="bundesland-card">
+        <h2>Ihr Bundesland</h2>
+        <p>Bitte wählen Sie das Bundesland, auf das Sie sich vorbereiten.</p>
+
+        <select id="bundeslandSelect" class="bundesland-select">
+          <option value="">– auswählen –</option>
+          <option value="Wien">Wien</option>
+          <option value="Niederösterreich">Niederösterreich</option>
+          <option value="Oberösterreich">Oberösterreich</option>
+          <option value="Steiermark">Steiermark</option>
+          <option value="Tirol">Tirol</option>
+          <option value="Salzburg">Salzburg</option>
+          <option value="Kärnten">Kärnten</option>
+          <option value="Vorarlberg">Vorarlberg</option>
+          <option value="Burgenland">Burgenland</option>
+        </select>
+
+        <div class="bundesland-actions">
+          <button id="saveBundesland" disabled>Weiter</button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<!-- CONFIG + I18N -->
+<script src="/assets/js/config-at.js"></script>
+<script src="/assets/js/i18n.js"></script>
 <script>
-document.getElementById("save").onclick = () => {
-  const v = document.getElementById("bundesland").value;
-  if (!v) return;
-
-  localStorage.setItem("civiclearn_bundesland", v);
-  const back = localStorage.getItem("civiclearn_return_to") || "/austria/dashboard/";
-localStorage.removeItem("civiclearn_return_to");
-window.location.href = back;
-
-};
+  CivicLearnI18n.init();
 </script>
 
+<!-- ENGINE -->
+<script src="/assets/js/engine-at.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* MOBILE MENU */
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+
+  /* THEME */
+  try {
+    const s = JSON.parse(localStorage.getItem("civicedge_settings") || "{}");
+    if (s.theme) document.documentElement.dataset.theme = s.theme;
+  } catch {}
+
+  /* BUNDESLAND LOGIC */
+  const select = document.getElementById("bundeslandSelect");
+  const btn = document.getElementById("saveBundesland");
+
+  const existing = localStorage.getItem("civiclearn_bundesland");
+  if (existing) {
+    select.value = existing;
+    btn.disabled = false;
+  }
+
+  select.addEventListener("change", () => {
+    btn.disabled = !select.value;
+  });
+
+  btn.addEventListener("click", () => {
+    const v = select.value;
+    if (!v) return;
+
+    localStorage.setItem("civiclearn_bundesland", v);
+
+    const back =
+      localStorage.getItem("civiclearn_return_to") ||
+      "index.html";
+
+    localStorage.removeItem("civiclearn_return_to");
+    window.location.href = back;
+  });
+});
+</script>
+
+<script src="/assets/js/signout.js"></script>
 </body>
 </html>
