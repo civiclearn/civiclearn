@@ -251,6 +251,9 @@
     const fullBank = await loadBankIfNeeded(options);
 
     let questions;
+	
+	let filtered = null;
+    let unmastered = null;
 
     if (mode === "quick") {
       const n =
@@ -273,15 +276,21 @@
       const selectedNorm = selectedKeys.map(k => normalizeLabel(k));
 
       // 1. Filter full bank by selected topics (CANONICAL LT)
-      const filtered = fullBank.filter(q =>
-        selectedNorm.includes(normalizeLabel(q.topicLabel))
-      );
+      filtered = fullBank.filter(q =>
+  selectedNorm.includes(normalizeLabel(q.topicLabel))
+);
+
 
       // 2. Load mastery progress
       const progress = readJsonLS("civicedge_progress", {});
 
       // 3. Remove already mastered questions
-const unmastered = filtered.filter(q => {
+const ignoreMastery = options.practice === true;
+
+unmastered = ignoreMastery
+  ? filtered.slice()
+  : filtered.filter(q => {
+
   const qTextLT =
     q._raw &&
     q._raw.q &&
@@ -318,10 +327,37 @@ const unmastered = filtered.filter(q => {
     }
 
     if (!questions.length) {
-      quizEl.innerHTML =
-        `<div class="ce-card"><p>${t("status_no_data", "Данные отсутствуют")}</p></div>`;
-      return;
-    }
+
+  if (
+    mode === "topics" &&
+    Array.isArray(filtered) &&
+    filtered.length > 0 &&
+    Array.isArray(unmastered) &&
+    unmastered.length === 0
+  ) {
+    state = {
+      mode: "topics",
+      cfg,
+      questions: [],
+      allQuestions: [],
+      initialQuestions: filtered.slice(),
+      selectedTopics: Array.isArray(options.topics) ? options.topics.slice() : [],
+      correct: 0,
+      incorrect: 0,
+      answered: 0,
+      startedAt: Date.now(),
+      finishedAt: Date.now(),
+      timed: false
+    };
+    finishQuiz(false);
+    return;
+  }
+
+  quizEl.innerHTML =
+    `<div class="ce-card"><p>${t("status_no_data", "Данные отсутствуют")}</p></div>`;
+  return;
+}
+
 
     state = {
       mode,
@@ -838,6 +874,24 @@ const entry = progress[key];
       list.appendChild(liTime);
 
       const btnBar = createEl("div", "ce-result-actions");
+	  const practiceBtn = createEl(
+  "button",
+  "btn",
+  t("topics_practice_again", "Pakartoti šią temą")
+);
+practiceBtn.style.display = "none";
+practiceBtn.addEventListener("click", () => {
+  CivicEdgeEngine.start("topics", {
+    topics: Array.isArray(state.selectedTopics)
+      ? state.selectedTopics.slice()
+      : [],
+    limit: 100000,   // FULL topic practice
+    practice: true
+  });
+});
+btnBar.appendChild(practiceBtn);
+
+	  
 
       const continueBtn = createEl("button", "btn", t("topics_continue", "Continuer"));
       continueBtn.id = "topicsContinueBtn";
@@ -866,17 +920,23 @@ const entry = progress[key];
       quizEl.appendChild(card);
 
       computeTopicsRemaining()
-        .then(({ total, remaining }) => {
-          if (continueBtn) {
-            continueBtn.style.display = remaining > 0 ? "inline-block" : "none";
-          }
-          if (total > 0 && ringCol) {
-            renderTopicsRing(ringCol, total, remaining);
-          }
-        })
-        .catch(() => {
-          if (continueBtn) continueBtn.style.display = "none";
-        });
+  .then(({ total, remaining }) => {
+    if (continueBtn) {
+      continueBtn.style.display = remaining > 0 ? "inline-block" : "none";
+    }
+
+    if (practiceBtn) {
+      practiceBtn.style.display = remaining === 0 ? "inline-block" : "none";
+    }
+
+    if (total > 0 && ringCol) {
+      renderTopicsRing(ringCol, total, remaining);
+    }
+  })
+  .catch(() => {
+    if (continueBtn) continueBtn.style.display = "none";
+  });
+
 
       const i18n = getI18n();
       if (i18n && typeof i18n.apply === "function") {

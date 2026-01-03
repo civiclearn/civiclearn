@@ -177,6 +177,9 @@ Engine.start = async function start(mode, options = {}) {
     const fullBank = await loadBankIfNeeded(options);
 
     let questions;
+	
+	let filtered = null;
+    let unmastered = null;
 
     if (mode === "quick") {
       const n =
@@ -228,17 +231,17 @@ Engine.start = async function start(mode, options = {}) {
         .filter(Boolean)
         .map(lbl => normalizeLabel(lbl));
 
-      const filtered = fullBank.filter(q =>
-        selectedLabels.includes(normalizeLabel(q.topicLabel))
-      );
+      filtered = fullBank.filter(q =>
+  selectedLabels.includes(normalizeLabel(q.topicLabel))
+);
 
       const progress = readJsonLS("civicedge_progress", {});
 
-      const unmastered = filtered.filter(q => {
-        const key = `${q.topicLabel || q.topicKey || "topic"}:${q.text}`;
-        const entry = progress[key];
-        return !(entry && entry.correct === 1);
-      });
+      unmastered = filtered.filter(q => {
+  const key = `${q.topicLabel || q.topicKey || "topic"}:${q.text}`;
+  const entry = progress[key];
+  return !(entry && entry.correct === 1);
+});
 
       const pool = unmastered;
       questions = sample(pool, Math.min(limit, pool.length));
@@ -262,10 +265,37 @@ Engine.start = async function start(mode, options = {}) {
 
 
     if (!questions.length) {
-      quizEl.innerHTML =
-        `<div class="ce-card"><p>${t("status_no_data", "Aucune donnée disponible.")}</p></div>`;
-      return;
-    }
+
+  if (
+    mode === "topics" &&
+    Array.isArray(filtered) &&
+    filtered.length > 0 &&
+    Array.isArray(unmastered) &&
+    unmastered.length === 0
+  ) {
+    state = {
+      mode: "topics",
+      cfg,
+      questions: [],
+      allQuestions: [],
+      initialQuestions: filtered.slice(),
+      selectedTopics: Array.isArray(options.topics) ? options.topics.slice() : [],
+      correct: 0,
+      incorrect: 0,
+      answered: 0,
+      startedAt: Date.now(),
+      finishedAt: Date.now(),
+      timed: false
+    };
+    finishQuiz(false);
+    return;
+  }
+
+  quizEl.innerHTML =
+    `<div class="ce-card"><p>${t("status_no_data", "No data available.")}</p></div>`;
+  return;
+}
+
 
     state = {
       mode,
@@ -912,7 +942,7 @@ if (state.mode === "topics") {
   h2.setAttribute("data-i18n", "topics_mastered_title");
   h2.textContent = t(
     "topics_mastered_title",
-    "Ensemble maîtrisé 🎉"
+    "Ensemble maîtrisé"
   );
 
   launchConfetti();
@@ -931,6 +961,24 @@ if (state.mode === "topics") {
   list.appendChild(liTime);
 
   const btnBar = createEl("div", "ce-result-actions");
+  
+  const practiceBtn = createEl(
+  "button",
+  "btn",
+  t("topics_practice_again", "Repetir este tema")
+);
+practiceBtn.style.display = "none";
+practiceBtn.addEventListener("click", () => {
+  CivicEdgeEngine.start("topics", {
+    topics: Array.isArray(state.selectedTopics)
+      ? state.selectedTopics.slice()
+      : [],
+    limit: 100000,   // full-topic practice
+    practice: true
+  });
+});
+btnBar.appendChild(practiceBtn);
+
 
   // Primary: Continue (hidden by default, shown only if remaining > 0)
   const continueBtn = createEl(
@@ -972,24 +1020,28 @@ if (state.mode === "topics") {
   quizEl.innerHTML = "";
   quizEl.appendChild(card);
 
-  // decide: show Continue? draw ring?
-  computeTopicsRemaining()
-    .then(({ total, remaining }) => {
-      if (continueBtn) {
-        if (remaining > 0) {
-          continueBtn.style.display = "inline-block";
-        } else {
-          continueBtn.style.display = "none";
-        }
+// decide: show Continue? draw ring?
+computeTopicsRemaining()
+  .then(({ total, remaining }) => {
+    if (continueBtn) {
+      if (remaining > 0) {
+        continueBtn.style.display = "inline-block";
+      } else {
+        continueBtn.style.display = "none";
       }
+    }
 
-      if (total > 0 && ringCol) {
-        renderTopicsRing(ringCol, total, remaining);
-      }
-    })
-    .catch(() => {
-      if (continueBtn) continueBtn.style.display = "none";
-    });
+    if (practiceBtn) {
+      practiceBtn.style.display = remaining === 0 ? "inline-block" : "none";
+    }
+
+    if (total > 0 && ringCol) {
+      renderTopicsRing(ringCol, total, remaining);
+    }
+  })
+  .catch(() => {
+    if (continueBtn) continueBtn.style.display = "none";
+  });
 
   const i18n = getI18n();
   if (i18n && typeof i18n.apply === "function") {
