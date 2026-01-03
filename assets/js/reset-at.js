@@ -4,9 +4,6 @@
 
   resetBtn.addEventListener("click", () => {
 
-    // ------------------------------------------------------------------
-    // 1. i18n-friendly confirmation text (UNCHANGED)
-    // ------------------------------------------------------------------
     const confirmMessage =
       (window.i18n && typeof window.i18n.t === "function"
         ? window.i18n.t("reset_confirm_message")
@@ -15,15 +12,19 @@
 
     if (!window.confirm(confirmMessage)) return;
 
-    // ------------------------------------------------------------------
-    // 2. AUSTRIA: HARD RESET (local + session)
-    // ------------------------------------------------------------------
-    localStorage.clear();
-    sessionStorage.clear();
+    // Training state
+    localStorage.removeItem("civicedge_progress");
+    localStorage.removeItem("civicedge_stats");
+    localStorage.removeItem("civicedge_testDate");
 
-    // ------------------------------------------------------------------
-    // 3. AUSTRIA: FORCE Bundesland selection
-    // ------------------------------------------------------------------
+    // Austria-specific dashboard / Bundesland flow
+    localStorage.removeItem("civiclearn:at:answer-log");
+    localStorage.removeItem("civiclearn:at:progress");
+    localStorage.removeItem("civiclearn:at:dashseq:index");
+    localStorage.removeItem("civiclearn_bundesland");
+    localStorage.removeItem("civiclearn_return_to");
+
+    // Force Bundesland selection
     window.location.href = "/austria/dashboard/bundesland.html";
   });
 })();
