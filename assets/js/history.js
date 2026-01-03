@@ -57,10 +57,32 @@
   // ===============================================================
 
   function localizedDate(d, opts) {
-    const htmlLang = document.documentElement.lang || "en";
-    const locale = htmlLang.replace("_", "-");
-    return d.toLocaleDateString(locale, opts);
-  }
+  const htmlLang = document.documentElement.lang || "en";
+
+const localeMap = {
+  // Switzerland (custom UI codes)
+  ch: "fr-CH",
+
+  // Standard languages
+  fr: "fr-FR",
+  en: "en-GB",
+  de: "de-DE",
+  it: "it-IT",
+  es: "es-ES",
+  pt: "pt-PT",
+  nl: "nl-NL",
+  ro: "ro-RO",
+  da: "da-DK",
+  sv: "sv-SE",
+  fi: "fi-FI",
+  lt: "lt-LT",
+  ru: "ru-RU"
+};
+
+  const locale = localeMap[htmlLang] || htmlLang;
+  return d.toLocaleDateString(locale, opts);
+}
+
 
   function formatDayHeader(dateKey, count) {
     const countLabel =

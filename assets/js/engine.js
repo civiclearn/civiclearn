@@ -177,6 +177,9 @@ Engine.start = async function start(mode, options = {}) {
     const fullBank = await loadBankIfNeeded(options);
 
     let questions;
+	
+	let filtered = null;
+    let unmastered = null;
 
     if (mode === "quick") {
       const n =
@@ -204,19 +207,24 @@ Engine.start = async function start(mode, options = {}) {
     .map(lbl => normalizeLabel(lbl));
 
   // 1. Filter full bank by selected topics
-  const filtered = fullBank.filter(q =>
-    selectedLabels.includes(normalizeLabel(q.topicLabel))
-  );
+  filtered = fullBank.filter(q =>
+  selectedLabels.includes(normalizeLabel(q.topicLabel))
+);
 
   // 2. Load mastery progress
   const progress = readJsonLS("civicedge_progress", {});
 
-  // 3. Remove already mastered questions
-  const unmastered = filtered.filter(q => {
-    const key = `${q.topicLabel || q.topicKey || "topic"}:${q.text}`;
-    const entry = progress[key];
-    return !(entry && entry.correct === 1);
-  });
+ // 3. Remove already mastered questions (unless practice mode)
+const ignoreMastery = options && options.practice === true;
+
+ unmastered = ignoreMastery
+  ? filtered.slice()
+  : filtered.filter(q => {
+      const key = `${q.topicLabel || q.topicKey || "topic"}:${q.text}`;
+      const entry = progress[key];
+      return !(entry && entry.correct === 1);
+    });
+
 
   // 4. Pool is ONLY unmastered questions
   const pool = unmastered;
@@ -247,10 +255,41 @@ Engine.start = async function start(mode, options = {}) {
 
 
     if (!questions.length) {
-      quizEl.innerHTML =
-        `<div class="ce-card"><p>${t("status_no_data", "Aucune donnée disponible.")}</p></div>`;
-      return;
-    }
+
+  // ===== COMPLETED TOPICS (all mastered) =====
+  if (
+    mode === "topics" &&
+    Array.isArray(filtered) &&
+    filtered.length > 0 &&
+    Array.isArray(unmastered) &&
+    unmastered.length === 0
+  ) {
+    // Fake a minimal finished state and reuse the normal Topics ending
+    state = {
+      mode: "topics",
+      cfg,
+      questions: [],
+      allQuestions: [],
+      initialQuestions: filtered.slice(),
+      selectedTopics: Array.isArray(options.topics) ? options.topics.slice() : [],
+      correct: 0,
+      incorrect: 0,
+      answered: 0,
+      startedAt: Date.now(),
+      finishedAt: Date.now(),
+      timed: false
+    };
+
+    finishQuiz(false);
+    return;
+  }
+
+  // ===== REAL no-data (misconfig / empty bank) =====
+  quizEl.innerHTML =
+    `<div class="ce-card"><p>${t("status_no_data", "Aucune donnée disponible.")}</p></div>`;
+  return;
+}
+
 
     state = {
       mode,
@@ -912,6 +951,24 @@ if (state.mode === "topics") {
   list.appendChild(liTime);
 
   const btnBar = createEl("div", "ce-result-actions");
+  
+const practiceBtn = createEl(
+  "button",
+  "btn",
+  t("topics_practice_again", "Practice this topic again")
+);
+practiceBtn.style.display = "none";
+practiceBtn.addEventListener("click", () => {
+  CivicEdgeEngine.start("topics", {
+  topics: Array.isArray(state.selectedTopics)
+    ? state.selectedTopics.slice()
+    : [],
+  limit: 100000,   // load FULL topic in practice (no batching)
+  practice: true
+});
+
+});
+btnBar.appendChild(practiceBtn);
 
   // Primary: Continue (hidden by default, shown only if remaining > 0)
   const continueBtn = createEl(
@@ -955,22 +1012,27 @@ if (state.mode === "topics") {
 
   // decide: show Continue? draw ring?
   computeTopicsRemaining()
-    .then(({ total, remaining }) => {
-      if (continueBtn) {
-        if (remaining > 0) {
-          continueBtn.style.display = "inline-block";
-        } else {
-          continueBtn.style.display = "none";
-        }
-      }
+  .then(({ total, remaining }) => {
 
-      if (total > 0 && ringCol) {
-        renderTopicsRing(ringCol, total, remaining);
-      }
-    })
-    .catch(() => {
-      if (continueBtn) continueBtn.style.display = "none";
-    });
+    // Show Continue only if more questions exist
+    if (continueBtn) {
+      continueBtn.style.display = remaining > 0 ? "inline-block" : "none";
+    }
+
+// Show Practice AGAIN ONLY when fully mastered
+if (practiceBtn) {
+  practiceBtn.style.display = remaining === 0 ? "inline-block" : "none";
+}
+
+
+    if (total > 0 && ringCol) {
+      renderTopicsRing(ringCol, total, remaining);
+    }
+  })
+  .catch(() => {
+    if (continueBtn) continueBtn.style.display = "none";
+  });
+
 
   const i18n = getI18n();
   if (i18n && typeof i18n.apply === "function") {
@@ -1016,40 +1078,6 @@ if (state.mode === "topics") {
     list.appendChild(liWrong);
     list.appendChild(liTime);
 	
-	    // --- Traps-specific summary: how many traps cleaned / remaining ---
-    if (state.mode === "traps") {
-      const progress = readJsonLS("civicedge_progress", {});
-      let remaining = 0;
-      let cleaned = 0;
-
-      Object.values(progress).forEach(p => {
-        const attempts = p.attempts || 0;
-        const correctFlag = p.correct || 0;
-        if (attempts >= 3) {
-          if (correctFlag === 0) remaining += 1;
-          else cleaned += 1;
-        }
-      });
-
-      const trapsTitle = createEl("h3", "ce-result-traps-title");
-      trapsTitle.setAttribute("data-i18n", "traps_fixed_title");
-      trapsTitle.textContent = t(
-        "traps_fixed_title",
-        "Pièges corrigés"
-      );
-
-      const trapsLine = createEl("p", "ce-result-traps-line");
-      const tmpl = t(
-        "traps_fixed_line",
-        "Vous avez corrigé {fixed}. Il en reste {remaining}."
-      );
-      trapsLine.textContent = tmpl
-        .replace("{fixed}", String(cleaned))
-        .replace("{remaining}", String(remaining));
-
-      card.appendChild(trapsTitle);
-      card.appendChild(trapsLine);
-    }
 
     if (timeUp) {
       const timeNote = createEl("p", "muted");
@@ -1059,7 +1087,7 @@ if (state.mode === "topics") {
     }
 
     const btnBar = createEl("div", "ce-result-actions");
-
+	
     const reviewBtn = createEl(
       "button",
       "btn secondary",
