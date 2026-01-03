@@ -343,6 +343,9 @@ function getTopicDisplay(rawQ) {
 	__normalizedBank = fullBank;
 
     let questions;
+	let filtered = null;
+    let unmastered = null;
+
 
     if (mode === "quick") {
       const n =
@@ -434,7 +437,7 @@ function getTopicDisplay(rawQ) {
 
       // 1. Filter full bank by selected topics (CANONICAL LT)
 // 1. Filter full bank by selected topics (canonical OR display, language-safe)
-const filtered = fullBank.filter(q => {
+  filtered = fullBank.filter(q => {
   const canon = normalizeLabel(q.topicLabel);
   return selectedNorm.includes(canon);
 });
@@ -443,7 +446,11 @@ const filtered = fullBank.filter(q => {
       const progress = readJsonLS("civicedge_progress", {});
 
       // 3. Remove already mastered questions
-const unmastered = filtered.filter(q => {
+const ignoreMastery = options.practice === true;
+
+unmastered = ignoreMastery
+  ? filtered.slice()
+  : filtered.filter(q => {
   const key = `${q.topicLabel}:${q.id}`;
   const entry = progress[key];
   return !(entry && entry.correct === 1);
@@ -473,26 +480,38 @@ const unmastered = filtered.filter(q => {
       return;
     }
 
-   if (!questions.length) {
-  // Silent reset for Topics: all selected topics mastered
-  if (mode === "topics") {
-    // clear ONLY topic-related progress
-    const progress = readJsonLS("civicedge_progress", {});
-    Object.keys(progress).forEach(k => {
-      if (k.includes(":")) delete progress[k];
-    });
-    writeJsonLS("civicedge_progress", progress);
+if (!questions.length) {
 
-    // restart immediately with same selection
-    Engine.start("topics", options);
+  if (
+    mode === "topics" &&
+    Array.isArray(filtered) &&
+    filtered.length > 0 &&
+    Array.isArray(unmastered) &&
+    unmastered.length === 0
+  ) {
+    state = {
+      mode: "topics",
+      cfg,
+      questions: [],
+      allQuestions: [],
+      initialQuestions: filtered.slice(),
+      selectedTopics: Array.isArray(options.topics) ? options.topics.slice() : [],
+      correct: 0,
+      incorrect: 0,
+      answered: 0,
+      startedAt: Date.now(),
+      finishedAt: Date.now(),
+      timed: false
+    };
+    finishQuiz(false);
     return;
   }
 
-  // fallback for other modes
   quizEl.innerHTML =
     `<div class="ce-card"><p>${t("status_no_data", "No data available")}</p></div>`;
   return;
 }
+
 
 
     state = {
@@ -1072,6 +1091,23 @@ if (!(entry && entry.correct === 1)) {
       list.appendChild(liTime);
 
       const btnBar = createEl("div", "ce-result-actions");
+	  const practiceBtn = createEl(
+  "button",
+  "btn",
+  t("topics_practice_again", "Refaire ce sujet")
+);
+practiceBtn.style.display = "none";
+practiceBtn.addEventListener("click", () => {
+  CivicEdgeEngine.start("topics", {
+    topics: Array.isArray(state.selectedTopics)
+      ? state.selectedTopics.slice()
+      : [],
+    limit: 100000,
+    practice: true
+  });
+});
+btnBar.appendChild(practiceBtn);
+
 
       const continueBtn = createEl("button", "btn", t("topics_continue", "Continuer"));
       continueBtn.id = "topicsContinueBtn";
@@ -1099,15 +1135,21 @@ if (!(entry && entry.correct === 1)) {
       quizEl.innerHTML = "";
       quizEl.appendChild(card);
 
-      computeTopicsRemaining()
-        .then(({ total, remaining }) => {
-          if (continueBtn) {
-            continueBtn.style.display = remaining > 0 ? "inline-block" : "none";
-          }
-          if (total > 0 && ringCol) {
-            renderTopicsRing(ringCol, total, remaining);
-          }
-        })
+     computeTopicsRemaining()
+  .then(({ total, remaining }) => {
+    if (continueBtn) {
+      continueBtn.style.display = remaining > 0 ? "inline-block" : "none";
+    }
+
+    if (practiceBtn) {
+      practiceBtn.style.display = remaining === 0 ? "inline-block" : "none";
+    }
+
+    if (total > 0 && ringCol) {
+      renderTopicsRing(ringCol, total, remaining);
+    }
+  })
+
         .catch(() => {
           if (continueBtn) continueBtn.style.display = "none";
         });
