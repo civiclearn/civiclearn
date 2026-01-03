@@ -20,43 +20,28 @@
   }
 
   function getStreakFromHistory(history) {
-    if (!Array.isArray(history)) return 0;
+  if (!Array.isArray(history) || history.length === 0) return 0;
 
-    let streak = 0;
-    let lastDate = null;
+  const days = new Set();
 
-    for (let i = history.length - 1; i >= 0; i--) {
-      const session = history[i];
+  history.forEach(session => {
+    const d = session.startedAt || session.date;
+    if (!d) return;
 
-      // SUPPORT BOTH SCHEMES:
-      const d =
-        session.startedAt ||
-        session.date || // old format
-        null;
+    const date = new Date(d);
+    if (isNaN(date)) return;
 
-      if (!d) break;
+    const dayKey =
+      date.getFullYear() + "-" +
+      String(date.getMonth() + 1).padStart(2, "0") + "-" +
+      String(date.getDate()).padStart(2, "0");
 
-      const sessionDate = new Date(d).toDateString();
+    days.add(dayKey);
+  });
 
-      if (!lastDate) {
-        lastDate = sessionDate;
-        streak = 1;
-        continue;
-      }
+  return days.size;
+}
 
-      const yesterday = new Date(lastDate);
-      yesterday.setDate(yesterday.getDate() - 1);
-
-      if (new Date(sessionDate).toDateString() === yesterday.toDateString()) {
-        streak++;
-        lastDate = sessionDate;
-      } else {
-        break;
-      }
-    }
-
-    return streak;
-  }
 
   // ------------------------------------------
   // Stats + Progress
