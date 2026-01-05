@@ -1,14 +1,14 @@
-// DEV BYPASS — localhost only
-if (
-  location.hostname === "localhost" ||
-  location.hostname === "127.0.0.1"
-) {
-  console.warn("[auth-guard] bypassed on localhost");
-  // Do NOT attach any listeners, do NOT redirect
-  // Just let the page load
-  document.addEventListener("DOMContentLoaded", () => {});
-  return;
-}
+(function () {
+
+  // DEV BYPASS — localhost only
+  if (
+    location.hostname === "localhost" ||
+    location.hostname === "127.0.0.1"
+  ) {
+    console.warn("[auth-guard] bypassed on localhost");
+    return;
+  }
+
 
 // Ensures Supabase is ready before anything runs
 function waitForSupabase() {
@@ -62,3 +62,4 @@ window.location.replace(`${base}/login.html${window.location.search}`);
     return;
   }
 });
+})();
