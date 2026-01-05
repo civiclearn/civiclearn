@@ -305,7 +305,7 @@ function getTopicDisplay(rawQ) {
   let __normalizedBank = null;
   // ------------- State -------------
  
-  let state = null;
+  let state = { lang: window.CIVICEDGE_LANG || "en" };
   let timerHandle = null;
   let initialQuestions = null; // Holds the full set for Topics history
   let attemptLog = [];         // Records every single answer attempt
