@@ -54,6 +54,14 @@
   // My List also needs access to the loaded bank:
   let __normalizedBank = null;
   Engine.getBank = () => __normalizedBank || [];
+  
+  Engine.ensureBankLoaded = async function () {
+  if (__normalizedBank && __normalizedBank.length) return;
+
+  const fullBank = await loadBankIfNeeded({});
+  __normalizedBank = fullBank;
+};
+
 
 
   // ------------- Helpers -------------

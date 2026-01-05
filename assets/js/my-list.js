@@ -252,9 +252,10 @@ ids.slice(start, end).forEach((id) => {
 
 
 (async () => {
-  await CivicEdgeEngine.start("quick", { limit: 0 });
+  await CivicEdgeEngine.ensureBankLoaded();
   render();
 })();
+
 
 
 })();
