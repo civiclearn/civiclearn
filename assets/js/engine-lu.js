@@ -170,8 +170,8 @@ if (seenIdSet && seenIdSet.has(qid)) {
   // ------------- Multilingual helpers (NEW, minimal) -------------
 
   function getLang() {
-    return window.CIVICEDGE_LANG || "en";
-  }
+  return (state && state.lang) || window.CIVICEDGE_LANG || "en";
+}
 
   // canonical LT topic key (stable for filtering/progress)
 function getMicrotopicCanonical(rawQ) {
@@ -263,14 +263,11 @@ function getTopicDisplay(rawQ) {
       // Canonical LT label for keys/progress/filtering
       const topicLabel = getMicrotopicCanonical(rawQ);
 
-      // Display label (RU/EN/LT) for UI
-      const topicDisplay = getTopicDisplay(rawQ);
+  
+      const topicDisplay = null; // resolved at render time
+      const text = null;         // resolved at render time
+      const optList = null;      // resolved at render time
 
-      // Question text (RU/EN/LT)
-      const text = getTextForLang(rawQ.text || rawQ.q);
-
-      // Options (RU/EN/LT)
-      const optList = getOptionsForLang(rawQ);
 
       let options = [];
 
@@ -325,10 +322,14 @@ function getTopicDisplay(rawQ) {
 
   Engine.start = async function start(mode, options = {}) {
     resetState();
+	__normalizedBank = null;
     document.body.classList.remove("review-mode");
 
-    // mode MUST be stored BEFORE state is rebuilt
-    state = { mode: mode };
+// mode MUST be stored BEFORE state is rebuilt
+state = {
+  mode: mode,
+  lang: window.CIVICEDGE_LANG || "en"
+};
 
     const quizEl = document.getElementById("quiz");
     if (!quizEl) {
@@ -641,6 +642,13 @@ if (!questions.length) {
     if (!quizEl) return;
 
     const q = state.questions[state.currentIndex];
+	console.log("RENDER LANG CHECK", {
+  stateLang: state.lang,
+  globalLang: window.CIVICEDGE_LANG,
+  qId: q.id,
+  qEn: q._raw?.q?.en
+});
+
 
     const card = createEl("div", "ce-card");
 	
@@ -672,7 +680,7 @@ meta.textContent = t("question_x_of_y", "Question {x} sur {y}")
 header.appendChild(meta);
 
 // RIGHT: microtopic badge + save star (same line)
-const micro = q.topicDisplay || q.topicLabel || "";
+const micro = getTopicDisplay(q._raw) || q.topicLabel || "";
 if (micro) {
   const wrap = createEl("div", "ce-q-subtopic-wrap");
 
@@ -712,8 +720,10 @@ card.appendChild(header);
     const questionWrap = createEl("div", "ce-question-wrap");
 
     const questionEl = createEl("div", "ce-question");
-    questionEl.textContent = q.text;
-    questionWrap.appendChild(questionEl);
+q.text = getTextForLang(q._raw.text || q._raw.q);
+questionEl.textContent = q.text;
+questionWrap.appendChild(questionEl);
+
 
     if (
       window.CivicReading &&
@@ -732,15 +742,30 @@ card.appendChild(header);
     card.appendChild(questionWrap);
 
     // Options
-    const optionsWrap = createEl("div", "ce-options");
-    const shuffledOptions = shuffle(q.options.slice());
+    // Options
+const optionsWrap = createEl("div", "ce-options");
 
-    shuffledOptions.forEach((opt) => {
-      const btn = createEl("button", "ce-option");
-      btn.dataset.index = String(opt.idx);
+// resolve options language NOW (using frozen state.lang)
+const rawOpts = getOptionsForLang(q._raw);
+const correctIndex = Number.isFinite(q._raw.correctIndex)
+  ? q._raw.correctIndex
+  : 0;
 
-      const labelSpan = createEl("span", "ce-option-label", opt.text);
-      btn.appendChild(labelSpan);
+const options = rawOpts.map((s, i) => ({
+  text: String(s),
+  correct: i === correctIndex,
+  idx: i
+}));
+q.options = options;
+const shuffledOptions = shuffle(options.slice());
+
+shuffledOptions.forEach((opt) => {
+  const btn = createEl("button", "ce-option");
+  btn.dataset.index = String(opt.idx);
+
+  const labelSpan = createEl("span", "ce-option-label", opt.text);
+  btn.appendChild(labelSpan);
+
 
       if (
         window.CivicReading &&
