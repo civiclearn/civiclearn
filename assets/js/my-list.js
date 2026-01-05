@@ -119,7 +119,7 @@ resolvedOptions.forEach(opt => {
         btn.classList.add("wrong");
         // also highlight correct one
         [...optionsWrap.children].forEach(b => {
-          const o = q.options.find(x => x.text === b.textContent);
+          const o = resolvedOptions.find(x => x.text === b.textContent);
           if (o && o.correct) b.classList.add("correct");
         });
       }
