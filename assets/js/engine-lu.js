@@ -11,6 +11,13 @@ Engine.toggleSavedQuestion = toggleSavedQuestion;
 Engine.getSavedQuestionIds = getSavedQuestionIds;
 Engine.getBank = () => __normalizedBank || [];
 
+Engine.ensureBankLoaded = async function () {
+  if (__normalizedBank && __normalizedBank.length) return;
+
+  const fullBank = await loadBankIfNeeded({});
+  __normalizedBank = fullBank;
+};
+
 
   // ------------- Helpers -------------
 
