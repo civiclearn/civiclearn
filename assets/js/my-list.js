@@ -10,6 +10,9 @@
     console.error("#myList container not found");
     return;
   }
+  
+  const MY_LIST_RENDER_LIMIT = 25;
+  let myListPage = 0;
 
   // -------- helpers --------
 
@@ -56,13 +59,9 @@ removeBtn.className = "mylist-remove";
 removeBtn.textContent = CivicLearnI18n.t("my_list_remove", "Remove");
 removeBtn.onclick = () => {
   CivicEdgeEngine.toggleSavedQuestion(q.id);
-  card.remove();
-    updateCount(listEl.children.length);
-
-  if (!listEl.children.length) {
-    emptyState();
-  }
+  render();
 };
+
 
 
 
@@ -138,6 +137,14 @@ function render() {
   clear();
 
   const ids = CivicEdgeEngine.getSavedQuestionIds();
+  const maxPage = Math.max(0, Math.ceil(ids.length / MY_LIST_RENDER_LIMIT) - 1);
+
+if (myListPage < 0) {
+  myListPage = 0;
+} else if (myListPage > maxPage) {
+  myListPage = maxPage;
+}
+
 
   // bank is already loaded by dashboard pages
   const bank = CivicEdgeEngine.getBank?.() || [];
@@ -145,22 +152,79 @@ function render() {
 
   let rendered = 0;
 
-  ids.forEach((id) => {
-    const q = map.get(id);
-    if (q) {
-      listEl.appendChild(renderItem(q));
-      rendered++;
-    }
-  });
+  const start = myListPage * MY_LIST_RENDER_LIMIT;
+const end = start + MY_LIST_RENDER_LIMIT;
 
-  updateCount(rendered);
-
-  if (!rendered) {
-    emptyState();
+ids.slice(start, end).forEach((id) => {
+  const q = map.get(id);
+  if (q) {
+    listEl.appendChild(renderItem(q));
+    rendered++;
   }
+});
+
+
+  updateCount(ids.length);
+
+  if (!ids.length) {
+  emptyState();
+}
+
+  
+ if (ids.length > MY_LIST_RENDER_LIMIT) {
+  const footer = document.createElement("div");
+  footer.className = "mylist-footer";
+
+  const startNum = start + 1;
+  const endNum = Math.min(end, ids.length);
+
+  const status = document.createElement("div");
+  status.className = "mylist-status";
+  status.textContent = CivicLearnI18n.t(
+    "my_list_showing_range",
+    "Showing {from}–{to} of {total} saved questions"
+  )
+    .replace("{from}", startNum)
+    .replace("{to}", endNum)
+    .replace("{total}", ids.length);
+
+  const controls = document.createElement("div");
+  controls.className = "mylist-controls";
+
+  const prevBtn = document.createElement("button");
+  prevBtn.className = "mylist-page-btn";
+  prevBtn.textContent = CivicLearnI18n.t("my_list_prev", "Previous");
+  prevBtn.disabled = myListPage === 0;
+  prevBtn.onclick = () => {
+  if (myListPage > 0) {
+    myListPage--;
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+};
+
+
+  const nextBtn = document.createElement("button");
+  nextBtn.className = "mylist-page-btn";
+  nextBtn.textContent = CivicLearnI18n.t("my_list_next", "Next");
+  nextBtn.disabled = end >= ids.length;
+  nextBtn.onclick = () => {
+    myListPage++;
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  controls.appendChild(prevBtn);
+  controls.appendChild(nextBtn);
+
+  footer.appendChild(status);
+  footer.appendChild(controls);
+
+  listEl.appendChild(footer);
 }
 
 
+}
   // -------- init --------
 
 
