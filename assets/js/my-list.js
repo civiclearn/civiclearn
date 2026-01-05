@@ -43,12 +43,18 @@ header.className = "mylist-question-row";
 /* Question */
 const title = document.createElement("div");
 title.className = "mylist-question";
-title.textContent = q.text || "";
+title.textContent = q.text || (
+  q._raw && (q._raw.q?.[window.CIVICEDGE_LANG] || q._raw.q?.en)
+) || "";
 
 /* Microtopic badge */
 const badge = document.createElement("div");
 badge.className = "mylist-badge";
-badge.textContent = q.topicDisplay || q.topicLabel || "";
+badge.textContent =
+  q.topicDisplay ||
+  (q._raw?.microtopic?.[window.CIVICEDGE_LANG] || q._raw?.microtopic?.en) ||
+  q.topicLabel ||
+  "";
 
 /* Remove button */
 const actions = document.createElement("div");
@@ -80,7 +86,24 @@ card.appendChild(header);
 
   let locked = false;
 
-  q.options.forEach(opt => {
+  const resolvedOptions =
+  q.options && q.options.length
+    ? q.options
+    : (() => {
+        const lang = window.CIVICEDGE_LANG || "en";
+        const rawOpts = q._raw?.options?.[lang] || q._raw?.options?.en || [];
+        const correctIndex = Number.isFinite(q._raw?.correctIndex)
+          ? q._raw.correctIndex
+          : 0;
+
+        return rawOpts.map((text, i) => ({
+          text,
+          correct: i === correctIndex
+        }));
+      })();
+
+resolvedOptions.forEach(opt => {
+
     const btn = document.createElement("button");
     btn.className = "mylist-option";
     btn.textContent = opt.text;
