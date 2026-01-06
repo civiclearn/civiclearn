@@ -3,7 +3,7 @@
   const NOTICE_ID = "maintenance_2026_01";
   const STORAGE_KEY = "civiclearn_notice_dismissed_" + NOTICE_ID;
 
-  const ENABLED = false; // set to false to disable everywhere
+  const ENABLED = true; // set to false to disable everywhere
 
   if (!ENABLED) return;
   if (localStorage.getItem(STORAGE_KEY)) return;
