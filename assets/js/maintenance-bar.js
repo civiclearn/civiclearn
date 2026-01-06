@@ -1,4 +1,5 @@
 (function () {
+  if (document.getElementById("maintenance-bar")) return;
   const NOTICE_ID = "maintenance_2026_01";
   const STORAGE_KEY = "civiclearn_notice_dismissed_" + NOTICE_ID;
 
