@@ -271,7 +271,11 @@ function getTopicDisplay(rawQ) {
       const topicLabel = getMicrotopicCanonical(rawQ);
 
   
-      const topicDisplay = null; // resolved at render time
+      const topicDisplay =
+  (rawQ.topic && rawQ.topic[getLang()]) ||
+  (rawQ.topic && rawQ.topic.en) ||
+  topicLabel;
+
       const text = null;         // resolved at render time
       const optList = null;      // resolved at render time
 
@@ -1353,8 +1357,18 @@ const key = `${topicLT}:${question.id}`;
         : state.questions;
 
     sourceQuestions.forEach(q => {
-      if (q.topicLabel) topicsSet.add(q.topicLabel);
-    });
+  const localizedTopic =
+  (q._raw &&
+    q._raw.topic &&
+    q._raw.topic[window.CIVICEDGE_LANG]) ||
+  (q._raw &&
+    q._raw.topic &&
+    q._raw.topic.en) ||
+  q.topicLabel;
+
+  if (localizedTopic) topicsSet.add(localizedTopic);
+});
+
 
     const answeredQuestions = sourceQuestions.map(q => {
       const userOption = q.options.find(o => o.idx === q.userAnswer);
@@ -1447,7 +1461,7 @@ if (i18n && typeof i18n.apply === "function") {
     .replace("{y}", wrong.length)
 }</div>
 
-          <div class="ce-q-topic">${q.topicDisplay || q.topicLabel || ""}</div>
+          <div class="ce-q-topic">${getTopicDisplay(q._raw) || q.topicLabel || ""}</div>
           <div class="ce-question">${q.text}</div>
           <div class="ce-options">
       `;

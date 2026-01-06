@@ -13,13 +13,24 @@
     return window.CivicLearnI18n || null;
   }
 
-  function t(key, fallback) {
-    const i18n = getI18n();
-    if (i18n && typeof i18n.t === "function") {
-      return i18n.t(key, fallback);
-    }
-    return fallback || key;
+function t(key, fallback) {
+  const i18n = getI18n();
+  if (i18n && typeof i18n.t === "function") {
+    return i18n.t(key, fallback);
   }
+  return fallback || key;
+}
+
+function getTopicDisplayFromRaw(raw) {
+  if (!raw) return "";
+  const lang = (document.documentElement.lang || "en").split("-")[0];
+
+  if (raw.topic_i18n && raw.topic_i18n[lang]) return raw.topic_i18n[lang];
+  if (raw.topic_i18n && raw.topic_i18n.en) return raw.topic_i18n.en;
+
+  return raw.topicLabel || raw.topic || "";
+}
+
 
   function readStats() {
     try {
@@ -367,11 +378,7 @@
         qIndex++;
 
         // ✅ multilingual-safe topic display (prefer stored topicDisplay)
-        const topic =
-          canonicalQ.topicDisplay ||
-          canonicalQ.topicLabel ||
-          canonicalQ.topic ||
-          "—";
+        const topic = getTopicDisplayFromRaw(canonicalQ) || "—";
 
         html += `
           <div class="question-row history-full-detail">
@@ -414,12 +421,8 @@
     // --------------------------
     else {
       qList.forEach((q, i) => {
-        // ✅ multilingual-safe topic display (prefer stored topicDisplay)
-        const topic =
-          q.topicDisplay ||
-          q.topicLabel ||
-          q.topic ||
-          "";
+       const topic = q.topicDisplay || getTopicDisplayFromRaw(q) || "—";
+
 
         let questionText = q.qText || q.id || "";
         questionText = questionText.replace(/Sujet\s*:\s*/i, "").trim();
