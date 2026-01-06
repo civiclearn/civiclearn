@@ -179,7 +179,10 @@ if (myListPage < 0) {
 const end = start + MY_LIST_RENDER_LIMIT;
 
 ids.slice(start, end).forEach((id) => {
-  const q = map.get(id);
+  const q =
+  map.get(id) ||
+  map.get(String(id)) ||
+  [...map.values()].find(x => String(x.id) === String(id));
   if (q) {
     listEl.appendChild(renderItem(q));
     rendered++;
