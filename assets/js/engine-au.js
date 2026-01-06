@@ -1309,7 +1309,7 @@ const session = {
   correct,
   total,
   percent,
-  startedAt: state.startedAt,
+  startedAt: state.startedAt || Date.now(),
   finishedAt: state.finishedAt,
   durationSec,
   topics: Array.from(topicsSet),

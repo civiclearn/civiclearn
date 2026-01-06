@@ -531,20 +531,36 @@ safeText(document.getElementById("globalAnswered"), masteredQuestions + " " + la
       safeText(document.getElementById("tmTime"), minutesToLabel(stats.totalMinutes));
 
       // Study streak
-      const streakDays = getStreakFromHistory(stats.history || []);
-      const streakKey =
-        streakDays <= 1
-          ? "dashboard_streak_day_singular"
-          : "dashboard_streak_day_plural";
+const streakDays = getStreakFromHistory(stats.history || []);
 
-      const applyStreak = () => {
-        let label = t(streakKey, "{n} jour").replace("{n}", String(streakDays));
-        // avoid raw key if i18n not ready
-        if (label.includes("dashboard_streak_day_")) {
-          label = `${streakDays} jour`;
-        }
-        safeText(document.getElementById("tmStreak"), label);
-      };
+const applyStreak = () => {
+  const n = String(streakDays);
+
+  // Always include the number in the UI, even for singular.
+  // Prefer i18n keys that contain {n}; otherwise fall back.
+  let label =
+    (streakDays === 1
+      ? t("dashboard_streak_day_singular", "{n} jour")
+      : t("dashboard_streak_day_plural", "{n} jours")
+    ).replace("{n}", n);
+
+  // If i18n isn't ready and we got a raw key back, fall back safely.
+  if (
+    label.includes("dashboard_streak_day_singular") ||
+    label.includes("dashboard_streak_day_plural")
+  ) {
+    label = streakDays === 1 ? `${n} jour` : `${n} jours`;
+  }
+
+  // If the translation was just "jour"/"jours" (no {n}), force the number.
+// If the translation contains no digit at all, force numeric prefix
+if (!/\d/.test(label)) {
+  label = `${n} ${label}`;
+}
+
+  safeText(document.getElementById("tmStreak"), label);
+};
+
 
       if (
         window.CivicLearnI18n &&
