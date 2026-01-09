@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="title_topics"></title>
+
+  <!-- Core -->
+  <link rel="stylesheet" href="/assets/css/dashboard-core-dk.css">
+  <link rel="stylesheet" href="/assets/css/test-core-dk.css">
+<style>
+/* ======================================================
+   TOPICS — FLAT GRID (DK)
+   ====================================================== */
+
+.topic-flat-grid {
+  display: flex;
+  background: #fafafa;
+  padding: 18px 20px;
+  border-radius: 16px;
+  flex-wrap: wrap;
+  column-gap: 32px;
+  row-gap: 34px;
+  max-width: 1200px;
+  margin-top: 16px;
+}
+
+/* ======================================================
+   TOPIC & SUBTOPIC PILLS (BASE)
+   ====================================================== */
+
+.topic-flat-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 18px;
+  font-size: 14.5px;
+  gap: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  cursor: pointer;
+  font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+  margin: 0 10px 22px 0;
+}
+
+.topic-flat-btn:hover {
+  border-color: var(--brand);
+  background: rgba(99, 102, 241, 0.06);
+}
+
+.topic-flat-btn .count {
+  background: rgba(99, 102, 241, 0.12);
+  color: rgba(55, 48, 163, 0.9);
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* ======================================================
+   COMPLETED / MASTERED STATE
+   ====================================================== */
+
+.topic-flat-btn.mastered {
+  background: #e7f7ee;
+  border-color: #34c27a;
+  color: #0a7a2a;
+}
+
+.topic-flat-btn.mastered .count {
+  background: #34c27a;
+  color: #ffffff;
+}
+
+/* ======================================================
+   SUBTOPIC VARIANT (SECONDARY WEIGHT)
+   ====================================================== */
+
+.topic-flat-btn.subtopic {
+  padding: 8px 14px;
+  font-size: 13px;
+  gap: 6px;
+  opacity: 0.9;
+}
+
+.topic-flat-btn.subtopic .count {
+  font-size: 12px;
+  padding: 2px 8px;
+}
+
+/* ======================================================
+   PHASE 2 — EXPANDED PANEL
+   ====================================================== */
+
+.topic-phase2-panel {
+  margin-top: 18px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: #f7f6f3;
+  font-family: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* ======================================================
+   SUBTOPICS CONTAINER
+   ====================================================== */
+
+.subtopics-container {
+  margin-top: 12px;
+  padding: 14px 14px 10px;
+  background: rgba(99, 102, 241, 0.06);
+  border-radius: 14px;
+  overflow: visible;
+}
+
+.subtopics-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+/* Ensure topics are above hidden layers */
+#topicContainer {
+  position: relative;
+  z-index: 2;
+}
+
+/* Overlay must not block clicks unless menu is open */
+.overlay {
+  pointer-events: none;
+}
+
+body.menu-open .overlay {
+  pointer-events: auto;
+}
+.topic-flat-btn:not(.subtopic) {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+.topic-flat-btn:not(.subtopic):hover {
+  background: #f9fafb;
+}
+@media (max-width: 640px) {
+
+  .topic-flat-grid {
+    flex-direction: column;
+    row-gap: 8px;
+  }
+
+  .topic-flat-btn {
+    width: 100%;
+    justify-content: space-between;
+    padding: 12px 14px;
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .topic-flat-btn .count {
+    font-size: 12px;
+  }
+
+}
+
+</style>
+        <script>
+  document.documentElement.classList.add("i18n-hidden");
+</script>
+<script type="module" src="/assets/js/auth-guard.js"></script>
+</head>
+
+<body class="test-page">
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+<div class="brand">
+  CivicLearn®
+  <svg viewBox="0 0 28 21"
+       width="22"
+       height="16"
+       style="margin-left:8px;
+              vertical-align:middle;
+              border-radius:2px;">
+    <rect width="28" height="21" fill="#c8102e"></rect>
+    <rect x="0" y="8.4" width="28" height="4.2" fill="#ffffff"></rect>
+    <rect x="8.4" y="0" width="4.2" height="21" fill="#ffffff"></rect>
+  </svg>
+</div>
+
+<nav class="nav">
+  <a href="index.html" data-i18n="nav_dashboard"></a>
+  <a href="simulation.html" data-i18n="nav_simulation"></a>
+  <a href="quick.html" data-i18n="nav_quick"></a>
+  <a href="topics.html" class="sub active" data-i18n="nav_topics"></a>
+  <a href="traps.html" data-i18n="nav_traps"></a>
+  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+  <a href="audio.html">Lyd</a>
+  <a href="advanced.html" >Avancerede spørgsmål</a>
+  <a href="history.html" class="sub" data-i18n="nav_history"></a>
+  <a href="my-list.html" data-i18n="nav_my_list"></a>
+  <a href="help.html" data-i18n="nav_help"></a>
+  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+</nav>
+
+    <div class="spacer"></div>
+
+<div class="profile">
+  <div class="profile-info">
+    <div class="reading-inline">
+      <span data-i18n="reading_label"></span>
+      <button id="readingToggle"
+              class="reading-btn inline"
+              data-i18n="reading_tooltip"
+              data-i18n-attr="title">🔇</button>
+    </div>
+  </div>
+</div>
+  </aside>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <header class="ce-header ce-header-top">
+      <h1 data-i18n="title_topics"></h1>
+      <p class="muted" data-i18n="topics_select_topics"></p>
+    </header>
+
+<div class="quiz-container" id="quizArea" style="display:none;">
+	<div class="ce-progress-global">
+  <div class="ce-progress-global-bar" id="topicsProgress"></div>
+</div>
+  <div id="quiz"></div>
+</div>
+
+<section>
+  <div id="topicContainer"></div>
+  <div id="topicSubpanel"></div>
+</section>
+
+
+  </main>
+</div>
+
+<!-- CONFIG + I18N -->
+<script src="/assets/js/config-dk.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>
+  CivicLearnI18n.init();
+</script>
+
+<!-- READING (must come BEFORE engine.js) -->
+<script src="/assets/js/reading.js"></script>
+
+<!-- ENGINE -->
+<script src="/assets/js/engine-dk.js"></script>
+
+<!-- MAIN TOPICS LOGIC -->
+<script>
+(async function () {
+
+  /* ======================================================
+     BASIC SETUP
+     ====================================================== */
+
+  const container = document.getElementById("topicContainer");
+  if (!container) return;
+
+  function readJsonLS(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function normalizeLabel(str) {
+    return (str || "")
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, " ");
+  }
+
+  /* ======================================================
+     LOAD BANK
+     ====================================================== */
+
+  const cfg = window.CIVICEDGE_CONFIG || {};
+  if (!cfg.bank || !cfg.bank.path) {
+    container.innerHTML = "<p class='muted'>Ingen spørgsmål fundet.</p>";
+    return;
+  }
+
+  const res = await fetch(cfg.bank.path);
+  const raw = await res.json();
+  const fullBank = Array.isArray(raw) ? raw : (raw.questions || []);
+
+  /* ======================================================
+     PHASE LOGIC (MATCH ENGINE)
+     ====================================================== */
+
+  const PHASE_EXAM_ONLY = "exam_only";
+  const PHASE_FULL_PREP = "full_prep";
+
+  function getActivePhase() {
+    return localStorage.getItem("dk_active_phase") || PHASE_EXAM_ONLY;
+  }
+
+  function isPhaseUnlocked() {
+    return readJsonLS("dk_phase2_unlocked", false) === true;
+  }
+
+  function getEffectivePhase() {
+    const p = getActivePhase();
+    if (p === PHASE_FULL_PREP && isPhaseUnlocked()) return PHASE_FULL_PREP;
+    return PHASE_EXAM_ONLY;
+  }
+
+  const isPhase2 = getEffectivePhase() === PHASE_FULL_PREP;
+
+  /* ======================================================
+     FILTER BANK FOR PHASE 1 VISIBILITY
+     ====================================================== */
+
+  function filterBankByPhase(bank) {
+    if (isPhase2) return bank;
+    return bank.filter(q =>
+      q.source === "exam" ||
+      q.source === "values" ||
+      q.source === "begivenheder"
+    );
+  }
+
+  const bank = filterBankByPhase(fullBank);
+
+  /* ======================================================
+     PROGRESS / MASTERY
+     ====================================================== */
+
+  const progress = readJsonLS("civicedge_progress", {});
+
+  function isQuestionMastered(q) {
+  const label = q.topicLabel || q.topic || "";
+  const text = q.q || q.text || "";
+  const key = label + ":" + text;
+  return !!(progress[key] && progress[key].correct === 1);
+}
+
+
+  function isGroupMastered(questions) {
+    return questions.length > 0 && questions.every(isQuestionMastered);
+  }
+
+function countEligibleUnmastered(topic, questions) {
+  if (!isPhase2) {
+    // PHASE 1: only phase-1 visible, unmastered
+    return questions.filter(q => {
+      return (
+        !isQuestionMastered(q) &&
+        (
+          q.source === "exam" ||
+          q.source === "values" ||
+          q.source === "begivenheder"
+        )
+      );
+    }).length;
+  }
+
+  // PHASE 2: unmastered phase-1 + unmastered core (never deep)
+  return questions.filter(q => {
+    if (q.depth === "deep") return false;
+    return !isQuestionMastered(q);
+  }).length;
+}
+
+
+ /* ======================================================
+   GROUP QUESTIONS BY TOPIC + SUBTOPIC (PHASE 2 NEEDS THIS)
+   ====================================================== */
+
+const topicToAll = {};
+const topicToSubs = {}; // topic -> subtopic -> questions[]
+
+bank.forEach(q => {
+  const topic = q.topicLabel || q.topic;
+  if (!topic) return;
+
+  (topicToAll[topic] ??= []).push(q);
+
+  const sub = q.subtopic || "Øvrige";
+  (topicToSubs[topic] ??= {});
+  (topicToSubs[topic][sub] ??= []).push(q);
+});
+
+
+function startWithQuestions(questions, practice, meta = {}) {
+  // Hide ALL topic UI
+  const topicContainer = document.getElementById("topicContainer");
+  if (topicContainer) topicContainer.style.display = "none";
+
+  const subpanel = document.getElementById("topicSubpanel");
+  if (subpanel) subpanel.style.display = "none";
+
+  // Show quiz
+  const qa = document.getElementById("quizArea");
+  if (qa) qa.style.display = "block";
+
+CivicEdgeEngine.start("topics", {
+  topics: [],              // IMPORTANT: empty topics
+  subtopic: (meta.label || "").trim(),// THIS is what the engine understands
+  questions,               // explicit queue
+  practice: !!practice
+});
+}
+
+
+  function startWholeTopic(topic, practice) {
+    container.style.display = "none";
+    const qa = document.getElementById("quizArea");
+    if (qa) qa.style.display = "block";
+
+    window.CivicEdgeEngine.start("topics", {
+      topics: [topic],
+      practice: !!practice
+    });
+  }
+
+  /* ======================================================
+     RENDER — FLAT TOPIC BUTTONS
+     ====================================================== */
+
+  container.innerHTML = "";
+  container.className = "topic-flat-grid";
+
+  Object.entries(topicToAll).forEach(([topic, questions]) => {
+
+    const mastered = isGroupMastered(questions);
+    let panel = null;
+
+    const btn = document.createElement("button");
+    btn.className = "topic-flat-btn" + (mastered ? " mastered" : "");
+  const remainingCount = countEligibleUnmastered(topic, questions);
+
+btn.className = "topic-flat-btn";
+if (remainingCount === 0) btn.classList.add("mastered");
+
+btn.innerHTML =
+  '<span class="label">' + topic + '</span>' +
+  '<span class="count">' + remainingCount + '</span>';
+
+
+    btn.addEventListener("click", () => {
+
+      /* ---------- PHASE 1 ---------- */
+      if (!isPhase2) {
+        startWholeTopic(topic, mastered);
+        return;
+      }
+
+/* ---------- PHASE 2 ---------- */
+
+/* Close ANY other open phase-2 panels */
+document.querySelectorAll(".topic-phase2-panel").forEach(p => p.remove());
+
+/* Toggle current */
+if (panel) {
+  panel = null;
+  return;
+}
+
+panel = document.createElement("div");
+panel.className = "topic-phase2-panel";
+
+// Container that visually groups subtopic pills
+const subWrap = document.createElement("div");
+subWrap.className = "subtopics-container";
+
+const subLabel = document.createElement("div");
+subLabel.className = "subtopics-label";
+
+subWrap.appendChild(subLabel);
+
+// Render SUBTOPICS (Phase 2 only)
+const subs = topicToSubs[topic] || {};
+const subNames = Object.keys(subs).sort((a, b) => a.localeCompare(b, "da"));
+
+subNames.forEach(sub => {
+  const remaining = subs[sub].filter(q => !isQuestionMastered(q) && q.depth !== "deep").length;
+
+  const pill = document.createElement("button");
+  pill.className = "topic-flat-btn subtopic";
+  if (remaining === 0) pill.classList.add("mastered");
+
+ pill.innerHTML =
+  '<span class="label">' + sub + '</span>' +
+  '<span class="count">' + remaining + '</span>';
+
+  pill.onclick = () => {
+    const remainingQuestions = subs[sub].filter(q => !isQuestionMastered(q) && q.depth !== "deep");
+
+    // finished → redo FULL subtopic in one batch
+    if (remainingQuestions.length === 0) {
+      startWithQuestions(subs[sub], true, { label: sub });
+      return;
+    }
+
+    // normal Phase 2: subtopic-scoped batch
+    startWithQuestions(remainingQuestions, false, { label: sub });
+  };
+
+  subWrap.appendChild(pill);
+});
+
+panel.appendChild(subWrap);
+document.getElementById("topicSubpanel").appendChild(panel);
+
+
+    });
+
+    container.appendChild(btn);
+  });
+
+})();
+</script>
+
+
+
+<!-- Menu -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+
+  toggle.addEventListener("click", () => {
+    document.body.classList.toggle("menu-open");
+  });
+  overlay.addEventListener("click", () => {
+    document.body.classList.remove("menu-open");
+  });
+});
+</script>
+
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>

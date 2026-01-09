@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login – Medborgerskabsprove</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/login.css">
+     <!-- Supabase config + UMD loader -->
+  <script>
+    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+  </script>
+
+  <script>
+    (function () {
+      const supabaseLoader = document.createElement("script");
+      supabaseLoader.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
+      supabaseLoader.onload = () => {
+        window.supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+      };
+      document.head.appendChild(supabaseLoader);
+    })();
+  </script>
+
+
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="brand-main">
+        <img src="/assets/images/icons/dk.svg" alt="">
+        <div class="brand-title">Medborgerskabsprove.com</div>
+      </div>
+      <div class="brand-powered">
+        drevet af<span> CivicLearn</span>
+      </div>
+    </div>
+
+
+    <a href="/denmark-pr/checkout.html" class="btn-small-purple">Opret en adgang</a>
+  </div>
+</header>
+
+<div class="login-wrapper">
+  <main class="login-container">
+    <div class="card">
+      <h1 style="font-family: 'Lexend', sans-serif;">Log ind</h1>
+      <p class="subtitle" style="font-family: 'Lexend', sans-serif;">
+        Indtast din e-mail for at modtage din 8-cifrede adgangskode.
+      </p>
+
+      <div id="emailSection">
+        <label for="email" style="font-family: 'Lexend', sans-serif;">E-mailadresse</label>
+        <input id="email" type="email" placeholder="navn@eksempel.dk" 
+               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px; font-family: 'Lexend', sans-serif;" />
+        <button type="button" class="login-btn" id="sendMagicLink" style="font-family: 'Lexend', sans-serif; font-weight:600;">
+          Send log ind-kode
+        </button>
+      </div>
+
+      <div id="otpSection" style="display:none; margin-top: 10px;">
+        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">8-cifret kode</label>
+        <input id="otpCode" type="text" placeholder="00000000" maxlength="8" 
+               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
+        <button type="button" class="login-btn" id="verifyOtp" 
+                style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;">
+          Bekræft og log ind
+        </button>
+      </div>
+
+      <div id="loginMessage" class="login-message" style="display:none; margin-top: 15px; font-family: 'Lexend', sans-serif;"></div>
+
+      <div class="login-footer" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #666; text-align: center; font-family: 'Lexend', sans-serif;">
+        Har du ikke adgang endnu? <a href="/denmark-pr/checkout" style="color: #7c3aed; text-decoration: none; font-weight: 500;">Opret adgang</a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("first") === "1") {
+    const box = document.getElementById("loginMessage");
+    box.className = "login-message success";
+    box.textContent =
+      "Din konto er blevet aktiveret. Indtast den e-mailadresse, du brugte ved købet, for at få adgang til din træning.";
+    box.style.display = "block";
+  }
+})();
+</script>
+
+<script>
+// --- HJÆLPERE ---
+function showMessage(type, text) {
+  const box = document.getElementById("loginMessage");
+  box.className = "login-message " + type;
+  box.textContent = text;
+  box.style.display = "block";
+}
+
+let lastEmailAttempt = "";
+let attemptCount = 0;
+
+function handleLoginFeedback(email) {
+  if (email === lastEmailAttempt) {
+    attemptCount++;
+  } else {
+    attemptCount = 1;
+    lastEmailAttempt = email;
+  }
+  if (attemptCount >= 2) {
+    showMessage("success", "Hvis du stadig ikke har modtaget koden, skal du tjekke din spam-mappe eller kontakte os.");
+  } else {
+    showMessage("success", "Din 8-cifrede log ind-kode er blevet sendt. Tjek venligst din e-mail.");
+  }
+}
+
+// --- TRIN 1: ANMOD OM KODE ---
+document.getElementById("sendMagicLink").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const msg = document.getElementById("loginMessage");
+  msg.style.display = "none";
+
+  if (!email) {
+    showMessage("error", "Indtast venligst din e-mailadresse.");
+    return;
+  }
+
+  if (!window.supabase) {
+    showMessage("error", "Teknisk fejl. Opdater venligst siden og prøv igen.");
+    return;
+  }
+
+  const { error } = await window.supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: false
+    }
+  });
+
+  if (error) {
+    // OPSNAP SUPABASE FEJL (Bruger ikke fundet)
+    if (error.message.includes("Signups not allowed for otp") || error.status === 422) {
+      showMessage("error", "Denne e-mail er ikke registreret – indtast venligst den nøjagtige e-mailadresse, du brugte ved købet.");
+    } else {
+      showMessage("error", "Der opstod en fejl: " + error.message);
+    }
+    return;
+  }
+
+  document.getElementById("sendMagicLink").style.display = "none";
+  document.getElementById("otpSection").style.display = "block";
+  
+  handleLoginFeedback(email);
+});
+
+// --- TRIN 2: BEKRÆFT KODE ---
+document.getElementById("verifyOtp").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const token = document.getElementById("otpCode").value.trim();
+
+  if (token.length < 6 || token.length > 8) {
+    showMessage("error", "Indtast venligst den gyldige kode sendt til din e-mail.");
+    return;
+  }
+
+  const { data, error } = await window.supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'magiclink'
+  });
+
+  if (error) {
+    showMessage("error", error.message);
+  } else if (data.session) {
+    window.location.href = "/denmark-pr/dashboard/index.html";
+  }
+});
+</script>
+
+
+
+</body>
+</html>

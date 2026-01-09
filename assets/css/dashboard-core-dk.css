@@ -207,70 +207,71 @@ body{
   border-color: currentColor;
 }
 /* ================================
-   PHASE SWITCH — COMPACT (as before)
+   PHASE SWITCH — SLEEK / FLAT
    ================================ */
 
 .phase-switch-bar{
   width:100%;
   display:flex;
   justify-content:flex-end;
-  margin: 0 0 14px 0;
+  margin: 0 0 8px 0; /* ↓ less vertical push */
 }
 
 .phase-switch-inner{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:14px;
+  gap:12px;
 
-  background:#ffffff;
-  border-radius:14px;
-  padding:10px 12px;
+  background:transparent;      /* 🔑 remove card feel */
+  border-radius:0;
+  padding:4px 0;               /* 🔑 minimal vertical padding */
 
-  box-shadow: 0 6px 18px rgba(0,0,0,.05);
+  box-shadow:none;             /* 🔑 remove visual weight */
 }
 
+/* LABEL — make it subtle, not a header */
 .phase-switch-label{
   display:flex;
   flex-direction:column;
-  gap:2px;
-  max-width: 320px;
+  gap:1px;
+  max-width: 300px;
 }
 
 .phase-switch-label strong{
-  font-size:13px;
-  font-weight:600;
-  color:#1f2937;
+  font-size:12px;              /* ↓ smaller */
+  font-weight:500;             /* ↓ lighter */
+  color:#374151;
 }
 
 .phase-switch-sub{
   font-size:11px;
-  color:#6b7280;
-  line-height:1.25;
+  color:#9ca3af;
+  line-height:1.2;
 }
 
-/* pill */
+/* PILL — unchanged logic, slightly slimmer */
 .phase-switch-control{
   display:flex;
   align-items:center;
-  padding:4px;
+  padding:3px;                 /* ↓ */
   background:#f1f3f6;
   border-radius:999px;
 }
 
 .phase-divider{
   width:1px;
-  height:18px;
+  height:16px;                 /* ↓ */
   background:#d1d5db;
-  margin:0 4px;
+  margin:0 3px;
 }
 
 .phase-option{
   display:inline-flex;
   align-items:center;
-  gap:6px;
+  gap:5px;
 
-  padding:6px 12px;
+  padding:5px 11px;            /* ↓ */
   border-radius:999px;
 
   font-size:12px;
@@ -285,40 +286,38 @@ body{
 }
 
 .phase-option small{
-  font-size:11px;
+  font-size:10.5px;            /* ↓ */
   font-weight:500;
-  opacity:.85;
+  opacity:.8;
 }
 
-/* active = purple left side */
+/* active = purple */
 .phase-option.active{
   background:#6b4eff;
   color:#ffffff;
 }
 
-/* locked right side */
+/* locked */
 .phase-option.disabled{
   opacity:.45;
   cursor:not-allowed;
   pointer-events:none;
 }
 
-/* show (låst) + lock when locked */
+/* lock indicator */
 .phase-switch-control.locked
 .phase-option[data-phase="full_prep"]::after{
-  content:" (låst) 🔒";
+  content:" 🔒";
   font-size:11px;
-  font-weight:600;
-  opacity:.95;
+  opacity:.9;
 }
 
-/* keep it compact on smaller screens */
+/* responsive */
 @media (max-width: 900px){
   .phase-switch-bar{ justify-content:flex-start; }
   .phase-switch-inner{ width:100%; }
-  .phase-switch-label{ max-width: none; }
+  .phase-switch-label{ max-width:none; }
 }
-
 
 
 /* GENERIC CARDS ------------------------------------------------------------ */
@@ -860,6 +859,89 @@ body.chapter-page *{
     padding-bottom: 28px;
   }
 }
+
+<style>
+/* --- Light chip UI --- */
+#topicContainer{
+  display:flex;
+  font-family: inherit;
+  flex-direction:column;
+  gap:18px;
+  margin:20px 0;
+}
+
+.topic-chip {
+  padding: 10px 16px;
+  font-family: inherit;
+  font-weight: 400;
+  font-size: 14px;
+  border-radius: 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  user-select: none;
+  transition: 0.15s ease;
+}
+
+.topic-chip:hover {
+  background: rgba(0,0,0,0.04);
+}
+
+.topic-chip.active {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+}
+
+.topic-chip.mastered {
+  background: #e0ffe4;
+  border-color: #34c759;
+  color: #0a7a2a;
+}
+
+/* --- Grouped layout (topic → chips) --- */
+.topic-group{
+  display:block;
+  font-family: inherit;
+}
+
+.topic-group-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:0 0 10px 0;
+  font-size:15px;
+  font-weight:600;
+  color:var(--ink);
+}
+
+.topic-group-badge{
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:500;
+  background:rgba(99,102,241,.10);
+  color:rgba(55,48,163,.85);
+}
+
+.topic-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.topic-chip .chip-count{
+  margin-left:10px;
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:500;
+  background:rgba(99,102,241,.08);
+  color:rgba(55,48,163,.85);
+}
+</style>
+
+
 /* ============================================
    COUNTDOWN GRADIENT EFFECT (Space Grotesk too)
    ============================================ */
