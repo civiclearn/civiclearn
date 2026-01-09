@@ -1792,7 +1792,7 @@ function startReviewMode() {
     html += `
       <div class="ce-review-item" style="margin-bottom:32px;">
 
-        <div class="ce-q-meta">Question ${i + 1} sur ${wrong.length}</div>
+        <div class="ce-q-meta">Spørgsmål ${i + 1} af ${wrong.length}</div>
         <div class="ce-q-topic">${q.topicLabel || ""}</div>
         <div class="ce-question">${q.text}</div>
 
