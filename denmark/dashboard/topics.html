@@ -164,6 +164,20 @@ body.menu-open .overlay {
   }
 
 }
+/* ======================================================
+   ACTIVE TOPIC (PHASE 2)
+   ====================================================== */
+.topic-flat-btn.active:not(.subtopic) {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: var(--brand);
+  color: #3730a3;
+}
+
+.topic-flat-btn.active:not(.subtopic) .count {
+  background: var(--brand);
+  color: #ffffff;
+}
+
 
 </style>
         <script>
@@ -469,6 +483,13 @@ btn.innerHTML =
         return;
       }
 
+// Clear active state from all topic pills
+document.querySelectorAll(".topic-flat-btn:not(.subtopic)")
+  .forEach(b => b.classList.remove("active"));
+
+// Mark this topic as active
+btn.classList.add("active");
+
 /* ---------- PHASE 2 ---------- */
 
 /* Close ANY other open phase-2 panels */
@@ -476,9 +497,11 @@ document.querySelectorAll(".topic-phase2-panel").forEach(p => p.remove());
 
 /* Toggle current */
 if (panel) {
+  btn.classList.remove("active");
   panel = null;
   return;
 }
+
 
 panel = document.createElement("div");
 panel.className = "topic-phase2-panel";

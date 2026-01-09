@@ -59,6 +59,62 @@ textarea,
   border: 1px solid rgba(213, 43, 30, 0.12);
 }
 
+/* =========================================
+   ADVANCED TOGGLE (FAQ)
+   ========================================= */
+
+.advanced-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 10px;
+}
+
+.advanced-toggle input {
+  display: none;
+}
+
+/* custom checkbox */
+.advanced-toggle-box {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid #c7c9d9;
+  background: #fff;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.advanced-toggle input:checked + .advanced-toggle-box {
+  border-color: var(--brand);
+  background: rgba(99, 102, 241, 0.12);
+}
+
+.advanced-toggle input:checked + .advanced-toggle-box::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--brand);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.advanced-toggle-text {
+  font-size: 15px;
+  line-height: 1.4;
+  color: #111827;
+}
+
+.advanced-toggle-text .muted {
+  color: #6b7280;
+  font-size: 14px;
+}
+
   </style>
       <script>
   document.documentElement.classList.add("i18n-hidden");
@@ -282,6 +338,45 @@ textarea,
     </div>
   </div>
 
+<div class="faq-item">
+
+  <div class="faq-question">
+    Kan jeg få adgang til fuld forberedelse før jeg har gennemført 70 %?
+  </div>
+
+  <div class="faq-answer">
+    Vi anbefaler, at du først gennemfører størstedelen af
+    eksamensspørgsmålene. Det giver den bedste eksamenssikkerhed og sikrer,
+    at du fokuserer på de spørgsmål, der med størst sandsynlighed vil blive
+    stillet til prøven.
+
+    <br><br>
+
+    Hvis du er en erfaren bruger og bevidst ønsker adgang til alle spørgsmål
+    tidligere, kan du åbne fuld forberedelse manuelt nedenfor. Denne
+    indstilling er beregnet til avancerede brugere og påvirker ikke dine
+    fremskridt eller resultater.
+
+    <br><br>
+
+<label class="advanced-toggle">
+  <input type="checkbox" id="phase2OverrideToggle">
+  <span class="advanced-toggle-box"></span>
+  <span class="advanced-toggle-text">
+    Tillad fuld forberedelse før 70 % <span class="muted">(avanceret)</span>
+  </span>
+</label>
+
+
+    <div id="phase2OverrideNote"
+         style="margin-top:8px; font-size:13px; color:#6b7280; display:none;">
+      Fuld forberedelse er nu låst op. Du kan til enhver tid slå dette fra igen.
+    </div>
+  </div>
+
+</div>
+
+
   <div class="faq-item">
     <div class="faq-question">Kan jeg bruge min konto på flere enheder?</div>
     <div class="faq-answer">
@@ -389,6 +484,47 @@ textarea,
     toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
     overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
   });
+</script>
+
+<script>
+(function () {
+  const toggle = document.getElementById("phase2OverrideToggle");
+  const note = document.getElementById("phase2OverrideNote");
+
+  if (!toggle) return;
+
+  const FORCE_KEY = "dk_phase2_force_unlocked";
+
+  // Init state
+  const isForced = localStorage.getItem(FORCE_KEY) === "true";
+  toggle.checked = isForced;
+  if (isForced && note) note.style.display = "block";
+
+  toggle.addEventListener("change", () => {
+
+    if (toggle.checked) {
+      const ok = window.confirm(
+        "Denne indstilling er beregnet til erfarne brugere.\n\n" +
+        "Vi anbefaler stadig, at du først gennemfører eksamensspørgsmålene.\n\n" +
+        "Vil du fortsætte?"
+      );
+      if (!ok) {
+        toggle.checked = false;
+        return;
+      }
+
+      localStorage.setItem(FORCE_KEY, "true");
+      if (note) note.style.display = "block";
+
+    } else {
+      localStorage.removeItem(FORCE_KEY);
+      if (note) note.style.display = "none";
+    }
+
+    // Reload to re-evaluate phase logic
+    location.reload();
+  });
+})();
 </script>
 
 

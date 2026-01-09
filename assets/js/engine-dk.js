@@ -1425,7 +1425,13 @@ function finishQuiz(timeUp) {
       t("topics_back_to_select", "Retour aux sujets")
     );
     backBtn.addEventListener("click", () => {
-      window.location.href = "topics.html";
+      // If this run was started with explicit questions (Advanced),
+// return to Advanced page instead of Topics
+if (Array.isArray(state.initialQuestions) && state.selectedTopics.length === 0) {
+  window.location.href = "advanced.html";
+} else {
+  window.location.href = "topics.html";
+}
     });
     btnBar.appendChild(backBtn);
 
@@ -1498,34 +1504,6 @@ function finishQuiz(timeUp) {
   list.appendChild(liWrong);
   list.appendChild(liTime);
 
-  // --- Traps-specific summary: how many traps cleaned / remaining ---
-  if (state.mode === "traps") {
-    const progress = readJsonLS("civicedge_progress", {});
-    let remaining = 0;
-    let cleaned = 0;
-
-    Object.values(progress).forEach(p => {
-      const attempts = p.attempts || 0;
-      const correctFlag = p.correct || 0;
-      if (attempts >= 3) {
-        if (correctFlag === 0) remaining += 1;
-        else cleaned += 1;
-      }
-    });
-
-    const trapsTitle = createEl("h3", "ce-result-traps-title");
-    trapsTitle.setAttribute("data-i18n", "traps_fixed_title");
-    trapsTitle.textContent = t("traps_fixed_title", "Pièges corrigés");
-
-    const trapsLine = createEl("p", "ce-result-traps-line");
-    const tmpl = t("traps_fixed_line", "Vous avez corrigé {fixed}. Il en reste {remaining}.");
-    trapsLine.textContent = tmpl
-      .replace("{fixed}", String(cleaned))
-      .replace("{remaining}", String(remaining));
-
-    card.appendChild(trapsTitle);
-    card.appendChild(trapsLine);
-  }
 
   if (timeUp) {
     const timeNote = createEl("p", "muted");
