@@ -773,44 +773,12 @@ if (state.mode === "simulation" && !readJsonLS("dk_sim_info_dismissed", false)) 
 }
 
   
-// ===== DK EXAM QUESTION MARKER =====
-if (q.source === "exam") {
-  const examBadge = createEl("div", "ce-exam-badge");
-  examBadge.textContent = "🇩🇰 Officiel eksamensspørgsmål";
-  card.appendChild(examBadge);
-}
+// ===== QUESTION HEADER (DK, LU-style) =====
+const header = createEl("div", "ce-q-header");
 
-// ---- Meta row (Question X of Y + Save) ----
-const metaRow = createEl("div", "ce-q-meta-row");
+// LEFT: topic + question index (+ exam)
+const left = createEl("div", "ce-q-header-left");
 
-// "Question X of Y"
-const meta = createEl("div", "ce-q-meta");
-const idxText = t("question_x_of_y", "Question {x} sur {y}")
-  .replace("{x}", String(state.currentIndex + 1))
-  .replace("{y}", String(state.questions.length));
-meta.textContent = idxText;
-metaRow.appendChild(meta);
-
-// ---- ⭐ Save (My List) ----
-const saveBtn = createEl("button", "ce-save-btn");
-const qid = q.id;
-
-function updateSaveBtn() {
-  saveBtn.textContent = Engine.isQuestionSaved(qid) ? "★" : "☆";
-}
-
-updateSaveBtn();
-
-saveBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  Engine.toggleSavedQuestion(qid);
-  updateSaveBtn();
-});
-
-metaRow.appendChild(saveBtn);
-card.appendChild(metaRow);
-
-// ---- Topic label ----
 let topicLabel = "";
 const cfg = getConfig();
 const topicsCfg = cfg.topics || {};
@@ -823,15 +791,57 @@ if (q.topicKey && topicLabels[q.topicKey]) {
 }
 
 if (topicLabel) {
-  const topicEl = createEl("div", "ce-q-topic", topicLabel);
-  card.appendChild(topicEl);
+  left.appendChild(createEl("span", "ce-pill ce-pill-topic", topicLabel));
 }
 
-// ---- Subtopic label (Denmark) ----
-if (q.subtopic) {
-  const subEl = createEl("div", "ce-q-subtopic", q.subtopic);
-  card.appendChild(subEl);
+const idxText = t("question_x_of_y", "Spørgsmål {x} af {y}")
+  .replace("{x}", String(state.currentIndex + 1))
+  .replace("{y}", String(state.questions.length));
+
+left.appendChild(createEl("span", "ce-pill ce-pill-meta", idxText));
+
+if (q.source === "exam") {
+  left.appendChild(
+    createEl("span", "ce-pill ce-pill-exam", "Officiel")
+  );
 }
+
+header.appendChild(left);
+
+// RIGHT: subtopic + star
+const right = createEl("div", "ce-q-header-right");
+
+if (q.subtopic) {
+  right.appendChild(
+    createEl("span", "ce-pill ce-pill-subtopic", q.subtopic)
+  );
+}
+
+if (q.id) {
+  right.appendChild(
+    createEl("span", "ce-pill ce-pill-id", `ID: ${q.id}`)
+  );
+}
+
+const saveBtn = createEl("button", "ce-save-btn");
+const qid = q.id;
+
+function updateSaveBtn() {
+  saveBtn.textContent = Engine.isQuestionSaved(qid) ? "★" : "☆";
+}
+updateSaveBtn();
+
+saveBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  Engine.toggleSavedQuestion(qid);
+  updateSaveBtn();
+});
+
+right.appendChild(saveBtn);
+
+header.appendChild(right);
+card.appendChild(header);
+
 
 
   // ---- Question text ----
