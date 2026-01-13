@@ -1,133 +1,119 @@
 (function () {
   const STORAGE_KEY = "civiclearn:guidance:dismissed";
 
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("da-DK", {
-    day: "numeric",
-    month: "long",
-    year: "numeric"
-  });
-}
-
-function daysBetween(a, b) {
-  return Math.ceil((b - a) / (1000 * 60 * 60 * 24));
-}
-
-const DK_EXAM_SCHEDULE = {
-  testDate: "2026-06-03",
-  registrationDeadline: "2026-01-12"
-};
-
-
-function getDynamicTips() {
-  const out = [];
-
-  const now = new Date();
-
-  const testDate = new Date(DK_EXAM_SCHEDULE.testDate);
-  const registrationDeadline = new Date(DK_EXAM_SCHEDULE.registrationDeadline);
-
-  const daysToTest = daysBetween(now, testDate);
-  const daysToRegistrationEnd = daysBetween(now, registrationDeadline);
-
-  // ===============================
-  // MAIN DK INFO CARD (always shown before test)
-  // ===============================
-
-  if (daysToTest >= 0) {
-    out.push({
-      id: "dk-exam-info",
-      title: "Næste officielle indfødsretsprøve",
-      text:
-        `Den næste indfødsretsprøve afholdes den ${formatDate(DK_EXAM_SCHEDULE.testDate)} ` +
-        `(${daysToTest} dage tilbage).\n\n` +
-        `Tilmeldingsfristen er den ${formatDate(DK_EXAM_SCHEDULE.registrationDeadline)} ` +
-        `(${daysToRegistrationEnd} dage tilbage).\n\n` +
-        `Husk at tilmelde dig i tide og finde dit teststed via ` +
-`<a href="https://civiclearn.com" target="_blank" rel="noopener">testcenter-oversigten</a>.`
+  function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("da-DK", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
     });
   }
 
-  // ===============================
-  // URGENCY CARDS
-  // ===============================
-
-  if (daysToRegistrationEnd > 0 && daysToRegistrationEnd <= 7) {
-    out.push({
-      id: "dk-registration-closing",
-      title: "Tilmelding lukker snart",
-      text:
-        "Tilmeldingen til den kommende indfødsretsprøve lukker om få dage. Sørg for at være tilmeldt i tide."
-    });
+  function daysBetween(a, b) {
+    return Math.ceil((b - a) / (1000 * 60 * 60 * 24));
   }
 
-  if (daysToRegistrationEnd <= 0 && daysToTest > 0) {
-    out.push({
-      id: "dk-registration-closed",
-      title: "Tilmelding er lukket",
-      text:
-        "Tilmeldingen til den kommende indfødsretsprøve er lukket. Du kan stadig forberede dig til næste prøve."
-    });
+  const DK_EXAM_SCHEDULE = {
+    testDate: "2026-06-03",
+    registrationDeadline: "2026-04-29"
+  };
+
+  function getDynamicTips() {
+    const out = [];
+    const now = new Date();
+
+    const testDate = new Date(DK_EXAM_SCHEDULE.testDate);
+    const registrationDeadline = new Date(DK_EXAM_SCHEDULE.registrationDeadline);
+
+    const daysToTest = daysBetween(now, testDate);
+    const daysToRegistrationEnd = daysBetween(now, registrationDeadline);
+
+    if (daysToTest >= 0) {
+      out.push({
+        id: "dk-exam-info",
+        title: 'Næste officielle indfødsretsprøve <span class="gc-pill info">Officiel</span>',
+        text: `
+Den næste indfødsretsprøve afholdes den ${formatDate(DK_EXAM_SCHEDULE.testDate)}
+(${daysToTest} dage tilbage).
+
+Tilmeldingsfristen er den ${formatDate(DK_EXAM_SCHEDULE.registrationDeadline)}
+(${daysToRegistrationEnd} dage tilbage).
+
+Husk at tilmelde dig i tide og finde dit teststed via
+<a href="https://indfodsretsprove.dk/find-dit-testcenter/" target="_blank" rel="noopener">
+testcenter-oversigten
+</a>.
+`.trim()
+      });
+    }
+
+    return out;
   }
 
-  if (daysToTest > 0 && daysToTest <= 3) {
-    out.push({
-      id: "dk-test-soon",
-      title: "Prøven er lige om hjørnet",
-      text:
-        "Indfødsretsprøven afholdes meget snart. Fokusér på repetition og overvej at tage en simulation."
-    });
-  }
+  const tips = [
+    ...getDynamicTips(),
 
-  if (daysToTest === 0) {
-    out.push({
-      id: "dk-test-today",
-      title: "Prøven er i dag",
-      text:
-        "Held og lykke med indfødsretsprøven i dag."
-    });
-  }
+    {
+      id: "start-with-topics",
+      title: 'Start med tests efter emne <span class="gc-pill primary">Anbefalet</span>',
+      text: `
+Spørgsmålene præsenteres i små overskuelige batches, og de spørgsmål,
+du svarer forkert på, vender automatisk tilbage, indtil du har dem helt på plads.
 
-  return out;
-}
+Dette er den mest effektive træningsform og den bedste måde at opbygge
+sikker viden på.
+`.trim()
+    },
 
+    {
+      id: "phase-1-kernetest",
+      title: 'Fase 1: Kernetesten <span class="gc-pill neutral">Fase 1</span>',
+      text: `
+Den første fase af din træning er Kernetesten, som udelukkende består
+af tidligere officielle spørgsmål fra indfødsretsprøven.
 
+Alle kendte prøvespørgsmål siden 2009 er samlet her.
+Når du har opnået 70 %, låses Fase 2 (Fuld forberedelse) automatisk op.
+`.trim()
+    },
 
-const tips = [
-  ...getDynamicTips(),
+    {
+      id: "my-list",
+      title: "Brug “Min liste” til svære spørgsmål",
+      text: `
+Ved at klikke på den lille ⭐ i øverste højre hjørne kan du gemme ethvert
+spørgsmål på din egen liste.
 
-  {
-    id: "start-core",
-    title: "Start med kernetesten",
-    text:
-      "Kernetesten indeholder spørgsmål fra tidligere officielle prøver. Arbejd dig systematisk gennem dem, før du går videre til fuld forberedelse."
-  },
-  {
-    id: "use-topics-smart",
-    title: "Brug emnetests strategisk",
-    text:
-      "Emnetests er opdelt i serier på 10 spørgsmål. Forkerte spørgsmål kommer igen, indtil de er mestret – det er helt bevidst."
-  },
+Her kan du senere gennemgå netop de spørgsmål, du har haft svært ved,
+og gentage dem, når det passer dig.
+`.trim()
+    },
 
-{
-    id: "use-topics-smart",
-    title: "Brug emnetests strategisk",
-    text:
-      "Emnetests er opdelt i serier på 10 spørgsmål. Forkerte spørgsmål kommer igen, indtil de er mestret – det er helt bevidst."
-  },
-  {
-    id: "simulations-last",
-    title: "Gem simulationer til sidst",
-    text:
-      "Simulationer fungerer bedst som generalprøve tæt på testen – ikke som primært læringsværktøj."
-  }
-];
+    {
+      id: "reading-assist",
+      title: "Brug læsehjælp",
+      text: `
+Du kan aktivere læsehjælp direkte i nederste venstre hjørne af dit dashboard.
 
+Funktionen hjælper med oplæsning og støtte til forståelsen og kan være
+særligt nyttig, hvis du foretrækker at lytte eller har brug for ekstra
+hjælp under læsningen.
+`.trim()
+    },
 
-  // ===============================
-  // DOM HOOKS (UNCHANGED)
-  // ===============================
+    {
+      id: "simulations-last",
+      title: 'Gem simulationer til sidst <span class="gc-pill neutral">Avanceret</span>',
+      text: `
+Simulationer fungerer bedst som en generalprøve tæt på testen –
+ikke som primært læringsværktøj.
+
+Brug dem til at teste dit niveau og din tidsfornemmelse, når du allerede
+har gennemført den målrettede træning.
+`.trim()
+    }
+  ];
 
   const container = document.getElementById("guidance-row");
   if (!container) return;
@@ -141,10 +127,6 @@ const tips = [
     toggleLabel.textContent = "Tips til effektiv forberedelse";
   }
 
-  // ===============================
-  // STATE
-  // ===============================
-
   let dismissed = new Set(
     JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]")
   );
@@ -152,10 +134,6 @@ const tips = [
   function save() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify([...dismissed]));
   }
-
-  // ===============================
-  // RENDER (UNCHANGED LOGIC)
-  // ===============================
 
   function render() {
     cardsWrap.innerHTML = "";
@@ -190,10 +168,6 @@ const tips = [
       cardsWrap.appendChild(card);
     });
   }
-
-  // ===============================
-  // TOGGLE (UNCHANGED)
-  // ===============================
 
   toggleBtn.addEventListener("click", () => {
     dismissed.clear();

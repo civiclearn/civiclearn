@@ -1,46 +1,158 @@
+/* ======================================================
+   Guidance cards – redesigned
+   ====================================================== */
+
 .guidance-row {
-  margin-top: 24px;
+  margin-top: 28px;
 }
 
+/* Grid */
 .guidance-cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 18px;
 }
 
+/* Base card */
 .guidance-card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  box-shadow: var(--shadow);
   position: relative;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 18px 20px 20px;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.06);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
+.guidance-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.08);
+}
+
+/* Title */
 .guidance-card h4 {
-  margin: 0 0 6px;
+  margin: 0 28px 8px 0;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text);
 }
 
+/* Body text */
 .guidance-card p {
   margin: 0;
   font-size: 14px;
-  color: var(--muted);
+  line-height: 1.45;
+  color: rgba(0,0,0,0.68);
 }
 
+/* Dismiss button */
 .guidance-dismiss {
   position: absolute;
   top: 10px;
-  right: 10px;
+  right: 12px;
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--muted);
+  font-size: 16px;
+  color: rgba(0,0,0,0.35);
+  line-height: 1;
 }
+
+.guidance-dismiss:hover {
+  color: rgba(0,0,0,0.6);
+}
+
+/* ======================================================
+   Pills (used in titles)
+   ====================================================== */
+
+.gc-pill {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.gc-pill.primary {
+  background: #ede6ff;
+  color: #5b3df5;
+}
+
+.gc-pill.info {
+  background: #e0f2ff;
+  color: #0369a1;
+}
+
+.gc-pill.neutral {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* ======================================================
+   Card-specific enhancements
+   ====================================================== */
+
+/* Official exam info */
+.guidance-card[data-id="dk-exam-info"] {
+  background: linear-gradient(135deg, #f5f3ff, #ffffff);
+  border-left: 4px solid #6b4eff;
+}
+
+.guidance-card[data-id="dk-exam-info"] h4::before {
+  content: "📅";
+  margin-right: 6px;
+}
+
+/* Start with topics (recommended) */
+.guidance-card[data-id="start-with-topics"] h4::before {
+  content: "🎯";
+  margin-right: 6px;
+}
+
+/* Phase 1 */
+.guidance-card[data-id="phase-1-kernetest"] h4::before {
+  content: "📘";
+  margin-right: 6px;
+}
+
+/* My list */
+.guidance-card[data-id="my-list"] h4::before {
+  content: "⭐";
+  margin-right: 6px;
+}
+
+/* Reading assist */
+.guidance-card[data-id="reading-assist"] {
+  background: #f8fafc;
+}
+
+.guidance-card[data-id="reading-assist"] h4::before {
+  content: "🔊";
+  margin-right: 6px;
+}
+
+/* Simulations last (secondary emphasis) */
+.guidance-card[data-id="simulations-last"] {
+  opacity: 0.9;
+}
+
+.guidance-card[data-id="simulations-last"] h4::before {
+  content: "🧪";
+  margin-right: 6px;
+}
+
+/* ======================================================
+   Collapsed state
+   ====================================================== */
+
 .guidance-collapsed {
-  margin-top: 16px;
-  padding: 14px 18px;
+  margin-top: 18px;
+  padding: 16px 20px;
   border-radius: 14px;
   background: #f4f2ff;
   border: 1px dashed rgba(90, 70, 200, 0.25);
@@ -51,26 +163,37 @@
   background: none;
   border: none;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: #5a4fcf;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  font-family: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .guidance-collapsed-btn .arrow {
   font-size: 16px;
   transform: translateY(1px);
 }
-.guidance-collapsed-btn,
-.guidance-collapsed-btn span {
-  font-family: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+/* ======================================================
+   Mobile
+   ====================================================== */
+
+@media (max-width: 900px) {
+  .guidance-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-/* Mobile */
 @media (max-width: 680px) {
   .guidance-cards {
     grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .guidance-card {
+    padding: 16px 18px;
   }
 }

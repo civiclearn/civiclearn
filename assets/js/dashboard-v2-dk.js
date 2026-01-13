@@ -223,23 +223,29 @@ function computeRollingAccuracy(history) {
     const openDateSheet = document.getElementById("openDateSheet");
     const sheet = document.getElementById("dateSheet");
     const sheetOverlay = document.getElementById("dateSheetOverlay");
-    const sheetInput = document.getElementById("examDateInput");
     const sheetCancel = document.getElementById("sheetCancel");
     const sheetSave = document.getElementById("sheetSave");
 
     function renderCountdown() {
       const saved = localStorage.getItem("civicedge_testDate");
 
-     // No date set → auto-preset next official Danish test date
+// No date set → auto-preset next official Danish test date
 if (!saved) {
-  // Official next test date for Denmark
-  const preset = "2026-06-03";
+  const today = new Date();
+
+  const nextExam = new Date("2026-06-03");
+  const followingExam = new Date("2026-11-25");
+
+  const preset =
+    today <= nextExam
+      ? "2026-06-03"
+      : "2026-11-25";
 
   localStorage.setItem("civicedge_testDate", preset);
 
-  // Re-run with the preset date
   return renderCountdown();
 }
+
 
 
 
@@ -300,9 +306,12 @@ if (!saved) {
 
     if (sheetSave) {
       sheetSave.addEventListener("click", () => {
-        const v = sheetInput.value;
-        if (!v) return;
-        localStorage.setItem("civicedge_testDate", v);
+        const v = document.querySelector('input[name="examDate"]:checked')?.value;
+        if (!v) {
+  localStorage.removeItem("civicedge_testDate");
+} else {
+  localStorage.setItem("civicedge_testDate", v);
+}
         closeSheet();
         renderCountdown();
       });
