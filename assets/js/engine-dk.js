@@ -436,6 +436,7 @@ if (Array.isArray(options.questions) && options.questions.length > 0) {
     state = {
       mode: "topics",
       cfg,
+	  fromTopicsUI: options.fromTopicsUI === true,
       questions: [],
       scopeQuestions: normalizedAll.slice(),
       initialQuestions: normalizedAll.slice(),
@@ -466,6 +467,7 @@ if (Array.isArray(options.questions) && options.questions.length > 0) {
   state = {
     mode: "topics",
     cfg,
+	fromTopicsUI: options.fromTopicsUI === true,
 
     // current wave
     questions: picked,
@@ -583,6 +585,7 @@ if (options.subtopic && options.subtopic !== "Alle spørgsmål") {
 state = {
   mode,
   cfg,
+  fromTopicsUI: options.fromTopicsUI === true,
   questions,
 
   // SAFE FOR ALL MODES
@@ -1419,21 +1422,21 @@ function finishQuiz(timeUp) {
     });
     btnBar.appendChild(continueBtn);
 
-    const backBtn = createEl(
-      "button",
-      "btn secondary",
-      t("topics_back_to_select", "Retour aux sujets")
-    );
-    backBtn.addEventListener("click", () => {
-      // If this run was started with explicit questions (Advanced),
-// return to Advanced page instead of Topics
-if (Array.isArray(state.initialQuestions) && state.selectedTopics.length === 0) {
-  window.location.href = "advanced.html";
-} else {
-  window.location.href = "topics.html";
+    // Show "Back to topics" ONLY when the run originated from topics.html
+if (state.fromTopicsUI === true) {
+  const backBtn = createEl(
+    "button",
+    "btn secondary",
+    t("topics_back_to_select", "Retour aux sujets")
+  );
+
+  backBtn.addEventListener("click", () => {
+    window.location.href = "topics.html";
+  });
+
+  btnBar.appendChild(backBtn);
 }
-    });
-    btnBar.appendChild(backBtn);
+
 
     mainCol.appendChild(h2);
     mainCol.appendChild(sub);

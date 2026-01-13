@@ -432,11 +432,13 @@ function startWithQuestions(questions, practice, meta = {}) {
   if (qa) qa.style.display = "block";
 
 CivicEdgeEngine.start("topics", {
-  topics: [],              // IMPORTANT: empty topics
-  subtopic: (meta.label || "").trim(),// THIS is what the engine understands
-  questions,               // explicit queue
-  practice: !!practice
+  topics: [],
+  subtopic: (meta.label || "").trim(),
+  questions,
+  practice: !!practice,
+  fromTopicsUI: true
 });
+
 }
 
 
@@ -446,9 +448,11 @@ CivicEdgeEngine.start("topics", {
     if (qa) qa.style.display = "block";
 
     window.CivicEdgeEngine.start("topics", {
-      topics: [topic],
-      practice: !!practice
-    });
+  topics: [topic],
+  practice: !!practice,
+  fromTopicsUI: true
+});
+
   }
 
   /* ======================================================

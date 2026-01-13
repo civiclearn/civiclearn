@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Dataoverførsel</title>
+
+  <!-- Core Styles -->
+  <link rel="stylesheet" href="/assets/css/dashboard-core-dk.css">
+
+  <style>
+    .data-container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .data-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .data-card h2 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .data-card p {
+      color: #374151;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .data-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .data-warn {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #7c2d12;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    input[type="file"] {
+      margin-top: 8px;
+    }
+  </style>
+
+  <script>
+    document.documentElement.classList.add("i18n-hidden");
+  </script>
+  <script type="module" src="/assets/js/auth-guard.js"></script>
+</head>
+
+<body class="test-page">
+
+<!-- MOBILE MENU -->
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="brand">
+      CivicLearn®
+      <svg viewBox="0 0 28 21"
+           width="22"
+           height="16"
+           style="margin-left:8px;vertical-align:middle;border-radius:2px;">
+        <rect width="28" height="21" fill="#c8102e"></rect>
+        <rect x="0" y="8.4" width="28" height="4.2" fill="#ffffff"></rect>
+        <rect x="8.4" y="0" width="4.2" height="21" fill="#ffffff"></rect>
+      </svg>
+    </div>
+
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav_dashboard"></a>
+      <a href="simulation.html" data-i18n="nav_simulation"></a>
+      <a href="quick.html" data-i18n="nav_quick"></a>
+      <a href="topics.html" data-i18n="nav_topics"></a>
+      <a href="traps.html" data-i18n="nav_traps"></a>
+      <a href="flashcards.html" data-i18n="nav_flashcards"></a>
+      <a href="audio.html">Lyd</a>
+      <a href="advanced.html">Avancerede spørgsmål</a>
+      <a href="history.html" data-i18n="nav_history"></a>
+      <a href="my-list.html" data-i18n="nav_my_list"></a>
+      <a href="help.html" data-i18n="nav_help"></a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
+    </nav>
+
+    <div class="spacer"></div>
+  </aside>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- MAIN -->
+  <main>
+
+    <header class="ce-header ce-header-top">
+      <h1>Dataoverførsel</h1>
+    </header>
+
+    <div class="dashboard-container">
+      <div class="data-container">
+
+        <!-- INTRO -->
+        <div class="data-card">
+          <p>
+            <p>
+  Denne side bruges til manuel overførsel af din træningsprogress mellem enheder.
+</p>
+
+          </p>
+        </div>
+
+        <!-- EXPORT -->
+        <div class="data-card">
+          <h2>Eksportér din progress</h2>
+          <p>
+            Downloader en fil med din nuværende træningsstatus.
+            Filen kan gemmes eller sendes til dig selv (fx via e-mail).
+          </p>
+          <div class="data-actions">
+            <button class="btn" onclick="exportData()">Eksportér data</button>
+          </div>
+        </div>
+
+        <!-- IMPORT -->
+        <div class="data-card">
+          <h2>Importér din progress</h2>
+          <p>
+            Importér en tidligere eksporteret fil.
+            Dette vil erstatte al eksisterende træningsdata på denne enhed.
+          </p>
+          <input type="file" id="importFile" accept=".json,.txt" />
+          <div class="data-warn">
+            ⚠️ Import overskriver al lokal træningsprogress på denne enhed.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- CONFIG + I18N -->
+<script src="/assets/js/config-dk.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>
+  CivicLearnI18n.init();
+</script>
+
+<!-- ENGINE (not strictly required, but keeps environment consistent) -->
+<script src="/assets/js/engine-dk.js"></script>
+
+<!-- MOBILE MENU -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+
+  if (toggle && overlay) {
+    toggle.addEventListener("click", () =>
+      document.body.classList.toggle("menu-open")
+    );
+    overlay.addEventListener("click", () =>
+      document.body.classList.remove("menu-open")
+    );
+  }
+});
+</script>
+
+<!-- EXPORT / IMPORT LOGIC -->
+<script>
+  const EXPORT_KEYS = [
+    "civicedge_progress",
+    "civicedge_stats",
+    "civicedge_saved",
+
+    "dk_exam_index",
+    "dk_phase1_progress",
+    "dk_phase2_unlocked",
+    "dk_active_phase",
+
+    "dk_values_queue",
+    "dk_current_queue",
+
+    "dk_sim_info_dismissed"
+  ];
+
+  function exportData() {
+    const payload = {
+      version: 1,
+      product: "dk-indfodsretsprove",
+      exportedAt: new Date().toISOString(),
+      data: {}
+    };
+
+    EXPORT_KEYS.forEach(key => {
+      const raw = localStorage.getItem(key);
+      if (raw !== null) {
+        try {
+          payload.data[key] = JSON.parse(raw);
+        } catch {}
+      }
+    });
+
+    const blob = new Blob(
+      [JSON.stringify(payload, null, 2)],
+      { type: "application/json" }
+    );
+
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "civiclearn-progress.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  document.getElementById("importFile").addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (!parsed || !parsed.data) {
+          alert("Ugyldig fil.");
+          return;
+        }
+
+        EXPORT_KEYS.forEach(k => localStorage.removeItem(k));
+        Object.entries(parsed.data).forEach(([k, v]) =>
+          localStorage.setItem(k, JSON.stringify(v))
+        );
+
+        alert("Data importeret. Siden genindlæses nu.");
+        location.reload();
+      } catch {
+        alert("Kunne ikke læse filen.");
+      }
+    };
+
+    reader.readAsText(file);
+  });
+</script>
+
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>

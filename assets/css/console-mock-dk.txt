@@ -1,0 +1,97 @@
+/* ===============================
+   DASHBOARD SCREENSHOT MOCK
+   (visual only, no persistence)
+   =============================== */
+
+/* ---------- PIE CHART ---------- */
+(() => {
+  const pieCanvas = document.querySelector("canvas");
+  const pie = pieCanvas && Chart.getChart(pieCanvas);
+  if (!pie) return;
+
+  // Phase 1 ~75%, Phase 2 visible
+  pie.data.datasets[0].data = [75, 25];
+  if (pie.data.datasets[1]) {
+    pie.data.datasets[1].data = [60, 40];
+  }
+
+  pie.options.animation.duration = 0;
+  pie.update();
+})();
+
+/* ---------- TOPICS BAR CHART ---------- */
+(() => {
+  const topicsCanvas = document.getElementById("topicsChart");
+  const chart = topicsCanvas && Chart.getChart(topicsCanvas);
+  if (!chart) return;
+
+  const labels = chart.data.labels;
+
+  chart.data.datasets.forEach((ds, idx) => {
+    if (idx === 0) {
+      ds.data = labels.map((_, i) => 70 + (i % 5) * 5); // Phase 1
+    }
+    if (idx === 1) {
+      ds.data = labels.map((_, i) => 35 + (i % 4) * 5); // Phase 2
+    }
+  });
+
+  chart.options.animation.duration = 0;
+  chart.update();
+})();
+
+/* ---------- METRIC CARDS ---------- */
+document.querySelectorAll(".db-metric-label").forEach(label => {
+  const text = label.textContent.trim();
+  const container = label.closest(".db-metric") || label.parentElement;
+  if (!container) return;
+
+  const value =
+    container.querySelector(".db-metric-value") ||
+    container.querySelector("strong") ||
+    container.querySelector("span");
+
+  if (!value) return;
+
+  if (text === "Besvarede spørgsmål") {
+    value.textContent = "1.248";
+  }
+  if (text === "Samlet mestring") {
+    value.textContent = "78 %";
+  }
+  if (text === "Samlet studietid") {
+    value.textContent = "42 t 15 min";
+  }
+  if (text === "Streak") {
+    value.textContent = "12 dage";
+  }
+});
+
+/* ---------- FIX: GLOBAL MASTERY (x% Mestret) ---------- */
+
+// Percentage value (the number)
+const globalPct = document.getElementById("globalPct");
+if (globalPct) {
+  globalPct.textContent = "78%";
+}
+
+// Label ("Mestret") – leave intact, but ensure spacing is correct
+const masteredLabel = document.querySelector(
+  '[data-i18n="dashboard_mastered_label"]'
+);
+if (masteredLabel) {
+  masteredLabel.textContent = "Mestret";
+}
+/* ---------- FIX: ANSWERED + PHASE HINT UNDER PIE ---------- */
+
+const globalAnswered = document.getElementById("globalAnswered");
+if (globalAnswered) {
+  globalAnswered.textContent = "1.248 spørgsmål";
+}
+
+const phaseHint = document.getElementById("phaseUnlockHint");
+if (phaseHint) {
+  phaseHint.textContent = "Fuld forberedelse aktiveret";
+}
+
+
