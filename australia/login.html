@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – CivicLearn Australia</title>
+  <title>Access – CivicLearn Australia</title>
 
   <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -38,6 +38,7 @@
       --text: #111;
       --muted: #666;
       --radius: 18px;
+      --border: rgba(0,0,0,.08);
     }
 
     * { box-sizing: border-box; }
@@ -52,9 +53,9 @@
       flex-direction: column;
     }
 
-    /* HEADER */
+    /* HEADER (unchanged) */
     header {
-      border-bottom: 1px solid rgba(0,0,0,.06);
+      border-bottom: 1px solid var(--border);
       background: rgba(247,242,232,.95);
     }
 
@@ -108,16 +109,16 @@
 
     .card {
       width: 100%;
-      max-width: 420px;
+      max-width: 460px;
       background: var(--card);
       border-radius: var(--radius);
-      padding: 36px 32px 32px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.12);
-      border: 1px solid rgba(0,0,0,.06);
+      padding: 34px 32px 30px;
+      box-shadow: 0 12px 32px rgba(0,0,0,.12);
+      border: 1px solid var(--border);
     }
 
     h1 {
-      margin: 0 0 6px;
+      margin: 0 0 8px;
       text-align: center;
       font-size: 28px;
       font-weight: 600;
@@ -127,7 +128,31 @@
       text-align: center;
       color: var(--muted);
       font-size: 15px;
-      margin-bottom: 24px;
+      margin-bottom: 26px;
+    }
+
+    .section {
+      padding: 18px 18px 20px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .section.primary {
+      border-color: rgba(124,58,237,.35);
+      background: rgba(124,58,237,.04);
+    }
+
+    .section h2 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .section p {
+      margin: 0 0 14px;
+      font-size: 14px;
+      color: var(--muted);
     }
 
     label {
@@ -143,7 +168,7 @@
       border-radius: 12px;
       border: 1px solid rgba(0,0,0,.15);
       font-size: 15px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     input:focus {
@@ -165,36 +190,25 @@
     .btn-primary {
       background: var(--brand);
       color: #fff;
-      margin-top: 6px;
     }
 
     .btn-primary:hover {
       background: var(--brand-dark);
     }
 
-    .divider {
-      text-align: center;
-      margin: 18px 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .btn-google {
-      background: #fff;
-      border: 1px solid rgba(0,0,0,.2);
-    }
-
-    .links {
-      margin-top: 18px;
-      font-size: 13px;
-      text-align: center;
-      color: var(--muted);
-    }
-
-    .links a {
+    .btn-secondary {
+      background: #f4f1fb;
       color: var(--brand);
-      font-weight: 600;
+    }
+
+    .small-link {
+      display: block;
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--brand);
       text-decoration: none;
+      font-weight: 600;
+      text-align: right;
     }
 
     .error {
@@ -205,9 +219,7 @@
     }
 
     @media (max-width: 480px) {
-      .card {
-        padding: 30px 20px 26px;
-      }
+      .card { padding: 28px 20px 24px; }
       h1 { font-size: 24px; }
     }
   </style>
@@ -235,30 +247,52 @@
 <main>
   <div class="card">
 
-    <h1>Login</h1>
-    <div class="subtitle">Access your CivicLearn training</div>
+    <h1>Access your account</h1>
+    <div class="subtitle">Choose how you want to access CivicLearn</div>
+
+    <!-- FIRST ACCESS -->
+    <div class="section primary">
+      <h2>First time here?</h2>
+      <p>If you just purchased access, set your password to get started.</p>
+
+      <label>Email</label>
+      <input type="email" id="firstEmail" placeholder="you@example.com">
+
+      <button class="btn btn-primary" onclick="sendPasswordSetup()">
+        Set up my password
+      </button>
+    </div>
 
     <!-- PASSWORD LOGIN -->
-    <label>Email</label>
-    <input type="email" id="email" placeholder="you@example.com">
+    <div class="section">
+      <h2>I already have a password</h2>
 
-    <label>Password</label>
-    <input type="password" id="password" placeholder="••••••••">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="you@example.com">
 
-    <button class="btn btn-primary" onclick="loginWithPassword()">Log in</button>
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••">
 
-    <div class="divider">or</div>
+      <button class="btn btn-secondary" onclick="loginWithPassword()">
+        Log in
+      </button>
 
-    <!-- GOOGLE -->
-    <button class="btn btn-google" onclick="loginWithGoogle()">
-      Continue with Google
-    </button>
+      <a href="#" class="small-link" onclick="sendPasswordReset();return false;">
+        I forgot my password
+      </a>
+    </div>
 
-    <div class="links">
-      No password yet?
-      <a href="/australia/login-password.html">Set one via email</a><br>
-      Problems logging in?
-      <a href="/australia/login-otp.html">Use a one-time access code</a>
+    <!-- OTP -->
+    <div class="section">
+      <h2>Temporary access</h2>
+      <p>Use a one-time access code if you cannot log in.</p>
+
+      <label>Email</label>
+      <input type="email" id="otpEmail" placeholder="you@example.com">
+
+      <button class="btn btn-secondary" onclick="sendOtp()">
+        Send one-time code
+      </button>
     </div>
 
     <div id="loginError" class="error"></div>
@@ -268,30 +302,51 @@
 
 <script>
 async function loginWithPassword() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  const errorBox = document.getElementById("loginError");
-  errorBox.textContent = "";
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value;
+  loginError.textContent = "";
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email, password
-  });
-
-  if (error) {
-    errorBox.textContent = error.message;
-    return;
-  }
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) return loginError.textContent = error.message;
 
   window.location.href = "/australia/dashboard/";
 }
 
-async function loginWithGoogle() {
-  await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: window.location.origin + "/australia/dashboard/"
-    }
+async function sendPasswordSetup() {
+  const email = firstEmail.value.trim();
+  loginError.textContent = "";
+  if (!email) return loginError.textContent = "Please enter your email.";
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + "/australia/set-password.html"
   });
+
+  if (error) return loginError.textContent = error.message;
+  loginError.textContent = "Check your email to set your password.";
+}
+
+async function sendPasswordReset() {
+  const email = loginEmail.value.trim();
+  loginError.textContent = "";
+  if (!email) return loginError.textContent = "Please enter your email above.";
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + "/australia/set-password.html"
+  });
+
+  if (error) return loginError.textContent = error.message;
+  loginError.textContent = "Password reset email sent.";
+}
+
+async function sendOtp() {
+  const email = otpEmail.value.trim();
+  loginError.textContent = "";
+  if (!email) return loginError.textContent = "Please enter your email.";
+
+  const { error } = await supabase.auth.signInWithOtp({ email });
+  if (error) return loginError.textContent = error.message;
+
+  loginError.textContent = "One-time access code sent to your email.";
 }
 </script>
 
