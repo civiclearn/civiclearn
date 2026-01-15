@@ -438,7 +438,7 @@ async function sendPasswordReset() {
   const email = loginEmail.value.trim();
 
   if (!email) {
-    box.textContent = "Please enter your email above.";
+    box.textContent = "Please enter your email address to reset your password.";
     box.classList.add("error");
     return;
   }
@@ -486,21 +486,75 @@ async function verifyOtp() {
   clearMsgs();
   const box = otpMsg;
 
+  const email = otpEmail.value.trim();
+  const code = otpCode.value.trim();
+
+  // USER-FACING VALIDATION (critical)
+  if (code.length !== 6) {
+    box.textContent = "Please enter the 6-digit code sent to your email.";
+    box.classList.add("error");
+    return;
+  }
+
   const { error } = await supabase.auth.verifyOtp({
-    email: otpEmail.value.trim(),
-    token: otpCode.value.trim(),
+    email,
+    token: code,
     type: "email"
   });
 
   if (error) {
-    box.textContent = error.message;
+    box.textContent = "The code is invalid or has expired. Please try again.";
     box.classList.add("error");
     return;
   }
 
   window.location.href = "/australia/dashboard/";
 }
+
 </script>
+<script>
+(function setupOtpInputs() {
+  const box = document.getElementById("otpBox");
+  if (!box) return;
+
+  const inputs = Array.from(box.querySelectorAll("input"));
+  const hidden = document.getElementById("otpCode");
+
+  inputs.forEach((input, idx) => {
+    input.addEventListener("input", e => {
+      const v = e.target.value.replace(/\D/g, "");
+      e.target.value = v;
+
+      if (v && inputs[idx + 1]) {
+        inputs[idx + 1].focus();
+      }
+
+      hidden.value = inputs.map(i => i.value).join("");
+    });
+
+    input.addEventListener("keydown", e => {
+      if (e.key === "Backspace" && !input.value && inputs[idx - 1]) {
+        inputs[idx - 1].focus();
+      }
+    });
+
+    input.addEventListener("paste", e => {
+      e.preventDefault();
+      const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+
+      pasted.split("").forEach((char, i) => {
+        if (inputs[i]) inputs[i].value = char;
+      });
+
+      hidden.value = pasted;
+
+      const last = inputs[pasted.length - 1];
+      if (last) last.focus();
+    });
+  });
+})();
+</script>
+
 
 
 </body>
