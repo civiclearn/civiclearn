@@ -1,22 +1,29 @@
 <!DOCTYPE html>
-<html lang="en-AU">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Login – CivicLearn Australia</title>
 
-  <link rel="stylesheet" href="/assets/css/login.css" />
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Supabase config + loader -->
+  <!-- Existing styles -->
+  <link rel="stylesheet" href="/assets/css/login.css">
+
+  <!-- Supabase config -->
+  <script>
+    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+  </script>
+
+  <!-- Supabase loader -->
   <script>
     (function () {
-      window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
-      window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-
       const s = document.createElement("script");
       s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
       s.onload = () => {
-        window.supabase = window.supabase.createClient(
+        window.supabase = supabase.createClient(
           window.SUPABASE_URL,
           window.SUPABASE_KEY
         );
@@ -28,181 +35,119 @@
 
 <body>
 
-<!-- ===== HEADER (unchanged) ===== -->
+<!-- ================= HEADER (AU) ================= -->
 <header class="site-header">
   <div class="header-inner">
+
     <div class="header-left">
-      <a href="/australia/" class="brand-main">
-        <img src="/assets/images/au.svg" alt="">
+      <div class="brand-main">
+        <img src="/assets/images/au.svg" alt="Australia">
         <div class="brand-title">CivicLearn Australia</div>
-      </a>
+      </div>
       <div class="brand-powered">
         powered by <span>CivicLearn</span>
       </div>
     </div>
 
     <nav class="header-nav">
-      <a href="/australia/about.html">About</a>
-      <a href="/australia/practice.html">Practice</a>
-      <a href="/australia/contact.html">Contact</a>
+      <a href="/australia/">Home</a>
+      <a href="/australia/#presentation">Overview</a>
+      <a href="/australia/#pricing">Pricing</a>
     </nav>
 
     <a href="/australia/checkout.html" class="btn-small-purple">Get access</a>
   </div>
 </header>
 
-<!-- ===== OPTIONAL NOTICE (unchanged) ===== -->
-<div class="cl-notice">
-  <div class="cl-notice-title">Login help</div>
-  <div class="cl-notice-body">
+<!-- ================= PAGE ================= -->
+<main class="login-page">
+
+  <div class="login-help">
+    <h3>Login help</h3>
     <p>You can log in using a password, Google, or a one-time access code.</p>
-    <hr>
     <p>If you don’t receive emails, always check your spam folder.</p>
   </div>
-</div>
 
-<div class="spam-reminder">
-  Always check your spam folder
-</div>
+  <div class="login-card">
 
-<!-- ===== LOGIN CARD ===== -->
-<main class="login-wrapper">
-  <div class="login-note-wrapper">
+    <h1>Login</h1>
+    <p class="login-subtitle">Access your CivicLearn training</p>
 
-    <div class="card">
+    <!-- ===== PASSWORD LOGIN ===== -->
+    <div class="login-section">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="you@example.com">
 
-      <!-- language switch stays -->
-      <div class="lang-switch">
-        <button class="active">EN</button>
-      </div>
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••">
 
-      <h1>Login</h1>
-      <p class="subtitle">Access your CivicLearn training</p>
-
-      <!-- EMAIL -->
-      <label for="email">Email</label>
-      <input id="email" type="email" autocomplete="email" />
-
-      <!-- PASSWORD -->
-      <label for="password">Password</label>
-      <input id="password" type="password" autocomplete="current-password" />
-
-      <button class="login-btn" id="loginPassword">
-        Login
-      </button>
-
-      <!-- GOOGLE -->
-      <div class="hint">
-        <strong>Or</strong>
-      </div>
-
-      <button class="login-btn" id="loginGoogle" style="background:#fff;color:#333;border:1px solid #ddd;">
-        Continue with Google
-      </button>
-
-      <!-- SECONDARY OPTIONS -->
-      <div class="hint">
-        No password yet?
-        <a id="setPassword">Set one via email</a>
-      </div>
-
-      <div class="hint">
-        Problems logging in?
-        <a id="useOtp">Use a one-time access code</a>
-      </div>
-
-      <!-- OTP -->
-      <div id="otpBox" style="display:none;">
-        <label for="otp">Access code</label>
-        <input id="otp" inputmode="numeric" />
-        <button class="login-btn" id="verifyOtp">
-          Verify code
-        </button>
-      </div>
-
-      <!-- MESSAGE -->
-      <div class="login-message" id="loginMessage"></div>
-
+      <button class="btn-primary" onclick="loginWithPassword()">Login</button>
     </div>
+
+    <div class="login-divider">or</div>
+
+    <!-- ===== GOOGLE LOGIN ===== -->
+    <button class="btn-google" onclick="loginWithGoogle()">
+      Continue with Google
+    </button>
+
+    <!-- ===== LINKS ===== -->
+    <div class="login-links">
+      <div>
+        No password yet?
+        <a href="/australia/login-password.html">Set one via email</a>
+      </div>
+      <div>
+        Problems logging in?
+        <a href="/australia/login-otp.html">Use a one-time access code</a>
+      </div>
+    </div>
+
+    <div id="loginError" class="login-error"></div>
+
   </div>
 </main>
 
-<!-- ===== FOOTER (unchanged) ===== -->
+<!-- ================= FOOTER ================= -->
 <footer class="site-footer">
   <div class="footer-inner">
-    <p>© CivicLearn Australia</p>
+    <div>© CivicLearn</div>
+    <div>
+      <a href="/australia/contact.html">Contact</a>
+    </div>
   </div>
 </footer>
 
+<!-- ================= AUTH LOGIC ================= -->
 <script>
-  const msg = document.getElementById("loginMessage");
+async function loginWithPassword() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const errorBox = document.getElementById("loginError");
 
-  function show(type, text) {
-    msg.className = "login-message " + type;
-    msg.textContent = text;
-    msg.style.display = "block";
+  errorBox.textContent = "";
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    errorBox.textContent = error.message;
+    return;
   }
 
-  const emailEl = document.getElementById("email");
-  const passEl = document.getElementById("password");
+  window.location.href = "/australia/dashboard/";
+}
 
-  // PASSWORD LOGIN
-  document.getElementById("loginPassword").onclick = async () => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: emailEl.value.trim(),
-      password: passEl.value
-    });
-    if (error) return show("error", "Incorrect email or password.");
-    location.href = "/australia/dashboard/";
-  };
-
-  // GOOGLE LOGIN
-  document.getElementById("loginGoogle").onclick = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: location.origin + "/australia/dashboard/"
-      }
-    });
-  };
-
-  // PASSWORD SETUP
-  document.getElementById("setPassword").onclick = async () => {
-    const email = emailEl.value.trim();
-    if (!email) return show("error", "Enter your email first.");
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: location.origin + "/australia/login-password.html"
-    });
-
-    if (error) show("error", "Could not send email.");
-    else show("success", "Password setup email sent.");
-  };
-
-  // OTP
-  document.getElementById("useOtp").onclick = async () => {
-    const email = emailEl.value.trim();
-    if (!email) return show("error", "Enter your email first.");
-
-    await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: false }
-    });
-
-    document.getElementById("otpBox").style.display = "block";
-    show("success", "Access code sent. Check inbox and spam.");
-  };
-
-  document.getElementById("verifyOtp").onclick = async () => {
-    const { error } = await supabase.auth.verifyOtp({
-      email: emailEl.value.trim(),
-      token: document.getElementById("otp").value.trim(),
-      type: "magiclink"
-    });
-
-    if (error) show("error", "Invalid code.");
-    else location.href = "/australia/dashboard/";
-  };
+async function loginWithGoogle() {
+  await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: window.location.origin + "/australia/dashboard/"
+    }
+  });
+}
 </script>
 
 </body>
