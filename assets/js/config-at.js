@@ -4,6 +4,12 @@ window.CIVICEDGE_CONFIG = {
   country: "austria",
 
   voiceLang: "de-at",
+  
+  reviews: {
+  enabled: true,
+  threshold: 0.85,
+  submitUrl: "https://civiclearn.app.n8n.cloud/webhook/civiclearn-review"
+},
 
   bank: {
     path: "/austria/banks/austria/questions.json",

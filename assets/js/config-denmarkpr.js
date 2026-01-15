@@ -10,6 +10,12 @@ window.CIVICEDGE_CONFIG = {
   i18n: {
     locale: "da-DK"
   },
+  
+      reviews: {
+  enabled: true,
+  threshold: 0.85,
+  submitUrl: "https://civiclearn.app.n8n.cloud/webhook/civiclearn-review"
+},
 
   // Voice language for reading assist
   voiceLang: "da-DK",

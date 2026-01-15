@@ -9,6 +9,12 @@ window.CIVICEDGE_CONFIG = {
     if (lang === "de") return "de-DE";
     return "en-US"; // fallback
   })(),
+  
+    reviews: {
+  enabled: true,
+  threshold: 0.85,
+  submitUrl: "https://civiclearn.app.n8n.cloud/webhook/civiclearn-review"
+},
 
   bank: {
     path: "/lux/banks/lux/questions.json",

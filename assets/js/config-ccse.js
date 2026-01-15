@@ -8,7 +8,11 @@ window.CIVICEDGE_CONFIG = {
   
   voiceLang: "es-ES",
 
-
+  reviews: {
+  enabled: true,
+  threshold: 0.85,
+  submitUrl: "https://civiclearn.app.n8n.cloud/webhook/civiclearn-review"
+},
 
   bank: {
     path: "/ccse/banks/ccse/questions.json",

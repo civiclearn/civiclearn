@@ -8,6 +8,12 @@ window.CIVICEDGE_CONFIG = {
   
     // NEW: voice language for reading assist
   voiceLang: "fr-CA",
+  
+  reviews: {
+  enabled: true,
+  threshold: 0.85,
+  submitUrl: "https://civiclearn.app.n8n.cloud/webhook/civiclearn-review"
+},
 
   bank: {
     path: "/canadafr/banks/canada-fr/questions.json",

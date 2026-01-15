@@ -8,6 +8,13 @@ window.CIVICEDGE_CONFIG = {
   // Voice language for reading assist
   voiceLang: "ro-RO",
 
+reviews: {
+  enabled: true,
+  threshold: 0.85,
+  submitUrl: "https://civiclearn.app.n8n.cloud/webhook/civiclearn-review"
+},
+
+
   bank: {
     path: "/romania/banks/romania/questions.json",
     format: "flat"

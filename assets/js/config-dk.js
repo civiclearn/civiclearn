@@ -14,6 +14,12 @@ window.CIVICEDGE_CONFIG = {
   },
 
   voiceLang: "da-DK",
+  
+    reviews: {
+  enabled: true,
+  threshold: 0.85,
+  submitUrl: "https://civiclearn.app.n8n.cloud/webhook/civiclearn-review"
+},
 
   /* -------------------------------
      QUESTION BANK

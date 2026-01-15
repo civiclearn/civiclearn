@@ -4,6 +4,12 @@ window.CIVICEDGE_CONFIG = {
   country: "france-cr",
 
   voiceLang: "fr",
+  
+    reviews: {
+  enabled: true,
+  threshold: 0.85,
+  submitUrl: "https://civiclearn.app.n8n.cloud/webhook/civiclearn-review"
+},
 
   bank: {
     path: "/france/cr/banks/france-cr/questions.json",

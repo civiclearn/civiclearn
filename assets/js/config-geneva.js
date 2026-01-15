@@ -5,6 +5,12 @@ window.CIVICEDGE_CONFIG = {
 
   voiceLang: "ch",
   
+    reviews: {
+  enabled: true,
+  threshold: 0.85,
+  submitUrl: "https://civiclearn.app.n8n.cloud/webhook/civiclearn-review"
+},
+  
   bank: {
     path: "/geneva/banks/geneva/questions.json",
     format: "flat"
