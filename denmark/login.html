@@ -91,7 +91,7 @@
     <div class="card">
       <h1 style="font-family: 'Lexend', sans-serif;">Log ind</h1>
       <p class="subtitle" style="font-family: 'Lexend', sans-serif;">
-        Indtast din e-mail for at modtage din 8-cifrede adgangskode.
+        Indtast din e-mail for at modtage din 6-cifrede adgangskode.
       </p>
 
       <div id="emailSection">
@@ -104,8 +104,8 @@
       </div>
 
       <div id="otpSection" style="display:none; margin-top: 10px;">
-        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">8-cifret kode</label>
-        <input id="otpCode" type="text" placeholder="00000000" maxlength="8" 
+        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">6-cifret kode</label>
+        <input id="otpCode" type="text" placeholder="00000000" maxlength="6" 
                style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
         <button type="button" class="login-btn" id="verifyOtp" 
                 style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;">
@@ -157,7 +157,7 @@ function handleLoginFeedback(email) {
   if (attemptCount >= 2) {
     showMessage("success", "Hvis du stadig ikke har modtaget koden, skal du tjekke din spam-mappe eller kontakte os.");
   } else {
-    showMessage("success", "Din 8-cifrede log ind-kode er blevet sendt. Tjek venligst din e-mail.");
+    showMessage("success", "Din 6-cifrede log ind-kode er blevet sendt. Tjek venligst din e-mail.");
   }
 }
 
@@ -205,10 +205,10 @@ document.getElementById("verifyOtp").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const token = document.getElementById("otpCode").value.trim();
 
-  if (token.length < 6 || token.length > 8) {
-    showMessage("error", "Indtast venligst den gyldige kode sendt til din e-mail.");
-    return;
-  }
+  if (token.length !== 6) {
+  showMessage("error", "Indtast den 6-cifrede kode sendt til din e-mail.");
+  return;
+}
 
   const { data, error } = await window.supabase.auth.verifyOtp({
     email,
