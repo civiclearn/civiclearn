@@ -6,187 +6,241 @@
   <title>Login – CivicLearn Australia</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/login.css">
 
-  <!-- Supabase config + loader -->
+  <style>
+    body {
+      font-family: 'Lexend', system-ui, sans-serif;
+      background: #f7f7f9;
+      margin: 0;
+      color: #333;
+    }
+
+    .login-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      max-width: 420px;
+      width: 100%;
+      padding: 28px;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 26px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 22px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid #e5dfd2;
+      margin: 8px 0 14px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: #6b4eff;
+      color: #fff;
+    }
+
+    .btn-google {
+      background: #fff;
+      border: 2px solid #ddd;
+      margin-top: 12px;
+    }
+
+    .divider {
+      text-align: center;
+      margin: 22px 0;
+      font-size: 13px;
+      color: #999;
+    }
+
+    .alt-section {
+      margin-top: 18px;
+      font-size: 14px;
+    }
+
+    .alt-section a {
+      color: #6b4eff;
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .otp-section {
+      display: none;
+      margin-top: 16px;
+    }
+
+    .message {
+      margin-top: 14px;
+      font-size: 14px;
+    }
+
+    .message.error { color: #c0392b; }
+    .message.success { color: #1e8449; }
+  </style>
+
+  <!-- Supabase config -->
   <script>
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-  </script>
-
-  <script>
-    (function () {
-      const supabaseLoader = document.createElement("script");
-      supabaseLoader.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
-      supabaseLoader.onload = () => {
-        window.supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-      };
-      document.head.appendChild(supabaseLoader);
-    })();
   </script>
 </head>
 
 <body>
 
-<header class="site-header">
-  <div class="header-inner">
-
-    <div class="header-left">
-      <div class="brand-main">
-        <img src="/assets/images/au.svg" alt="Australia">
-        <div class="brand-title">CivicLearn Australia</div>
-      </div>
-      <div class="brand-powered">
-        powered by <span>CivicLearn</span>
-      </div>
-    </div>
-
-    <nav class="header-nav">
-      <a href="/australia/">Home</a>
-      <a href="/australia/#presentation">Overview</a>
-      <a href="/australia/#pricing">Pricing</a>
-    </nav>
-
-    <a href="/australia/checkout.html" class="btn-small-purple">Sign up</a>
-  </div>
-</header>
-
 <div class="login-wrapper">
-  <main class="login-container">
-    <div class="card">
-      <h1>Login</h1>
-      <p class="subtitle" style="font-family: 'Lexend', sans-serif;">
-        Enter your email to receive your 8-digit access code.
-      </p>
+  <div class="card">
 
-      <div id="emailSection">
-        <label for="email" style="font-family: 'Lexend', sans-serif;">Email Address</label>
-        <input id="email" type="email" placeholder="you@example.com" 
-               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px; font-family: 'Lexend', sans-serif;" />
-        <button type="button" class="login-btn" id="sendMagicLink" style="font-family: 'Lexend', sans-serif; font-weight:600;">
-          Send login code
-        </button>
-      </div>
+    <h1>Login</h1>
+    <p class="subtitle">Access your CivicLearn training</p>
 
-      <div id="otpSection" style="display:none; margin-top: 10px;">
-        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">8-Digit Code</label>
-        <input id="otpCode" type="text" placeholder="00000000" maxlength="8" 
-               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
-        <button type="button" class="login-btn" id="verifyOtp" 
-                style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;">
-          Verify & Login
-        </button>
-      </div>
+    <!-- PASSWORD LOGIN -->
+    <label>Email</label>
+    <input id="email" type="email" placeholder="you@example.com">
 
-      <div id="loginMessage" class="login-message" style="display:none; margin-top: 15px; font-family: 'Lexend', sans-serif;"></div>
+    <label>Password</label>
+    <input id="password" type="password" placeholder="Your password">
 
-      <div class="login-footer" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #666; text-align: center; font-family: 'Lexend', sans-serif;">
-        Don't have access yet? <a href="/australia/checkout" style="color: #7c3aed; text-decoration: none; font-weight: 500;">Create access</a>
-      </div>
+    <button class="btn-primary" id="passwordLogin">Login</button>
+
+    <!-- GOOGLE LOGIN -->
+    <button class="btn-google" id="googleLogin">Continue with Google</button>
+
+    <div class="divider">More options</div>
+
+    <!-- SET PASSWORD -->
+    <div class="alt-section">
+      <strong>No password yet?</strong><br>
+      <a id="sendPasswordLink">Set a password via email</a>
     </div>
-  </main>
+
+    <!-- OTP -->
+    <div class="alt-section">
+      <strong>Problems logging in?</strong><br>
+      <a id="showOtp">Use a one-time access code instead</a>
+    </div>
+
+    <div class="otp-section" id="otpSection">
+      <input id="otpCode" placeholder="8-digit code">
+      <button id="verifyOtp">Verify code</button>
+    </div>
+
+    <div class="message" id="message"></div>
+
+  </div>
 </div>
 
-<!-- MESSAGE for first login -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
 <script>
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("first") === "1") {
-    const box = document.getElementById("loginMessage");
-    box.className = "login-message success";
-    box.textContent =
-      "Your account has been activated. Enter the email address used during purchase to access your training.";
-    box.style.display = "block";
-  }
-})();
-</script>
+  const supabase = supabaseJs.createClient(
+    window.SUPABASE_URL,
+    window.SUPABASE_KEY
+  );
 
-<script>
-// --- HELPERS ---
-function showMessage(type, text) {
-  const box = document.getElementById("loginMessage");
-  box.className = "login-message " + type;
-  box.textContent = text;
-  box.style.display = "block";
-}
+  const msg = document.getElementById("message");
 
-let lastEmailAttempt = "";
-let attemptCount = 0;
-
-function handleLoginFeedback(email) {
-  if (email === lastEmailAttempt) {
-    attemptCount++;
-  } else {
-    attemptCount = 1;
-    lastEmailAttempt = email;
-  }
-  if (attemptCount >= 2) {
-    showMessage("success", "If you still haven't received the code, please check Spam or contact us.");
-  } else {
-    showMessage("success", "Your 8-digit login code has been sent. Please check your email.");
-  }
-}
-
-// --- STEP 1: REQUEST THE CODE ---
-document.getElementById("sendMagicLink").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const msg = document.getElementById("loginMessage");
-  msg.style.display = "none";
-
-  if (!email) {
-    showMessage("error", "Please enter your email address.");
-    return;
+  function show(type, text) {
+    msg.className = "message " + type;
+    msg.textContent = text;
   }
 
-  if (!window.supabase) {
-    showMessage("error", "Technical error. Please refresh and try again.");
-    return;
-  }
+  // PASSWORD LOGIN
+  document.getElementById("passwordLogin").onclick = async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
 
-  // signInWithOtp without redirectTo will trigger the 8-digit code flow 
-  // if you updated your Supabase template to {{ .Token }}
-  const { error } = await window.supabase.auth.signInWithOtp({
-    email,
-    options: {
-      shouldCreateUser: false
-    }
-  });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return show("error", "Invalid email or password.");
 
-  if (error) {
-    showMessage("error", error.message);
-    return;
-  }
+    window.location.href = "/australia/dashboard/";
+  };
 
-  // UI Change: Hide email button, show the code input section
-  document.getElementById("sendMagicLink").style.display = "none";
-  document.getElementById("otpSection").style.display = "block";
-  
-  handleLoginFeedback(email);
-});
+  // GOOGLE LOGIN
+  document.getElementById("googleLogin").onclick = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + "/australia/dashboard/"
+      }
+    });
+  };
 
-// --- STEP 2: VERIFY THE CODE ---
-document.getElementById("verifyOtp").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const token = document.getElementById("otpCode").value.trim();
+  // SEND PASSWORD SETUP
+  document.getElementById("sendPasswordLink").onclick = async () => {
+    const email = emailInput.value.trim();
+    if (!email) return show("error", "Enter your email first.");
 
-  // FLEXIBLE CHECK: Allows 6, 7, or 8 digits.
-  if (token.length < 6 || token.length > 8) {
-    showMessage("error", "Please enter the valid code sent to your email.");
-    return;
-  }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/australia/login-password.html"
+    });
 
-  const { data, error } = await window.supabase.auth.verifyOtp({
-    email,
-    token,
-    type: 'magiclink'
-  });
+    if (error) show("error", "Could not send email.");
+    else show("success", "Password setup email sent. Check inbox and spam.");
+  };
 
-  if (error) {
-    showMessage("error", error.message);
-  } else if (data.session) {
-    window.location.href = "/australia/dashboard/index.html";
-  }
-});
+  // OTP FLOW
+  document.getElementById("showOtp").onclick = async () => {
+    const email = emailInput.value.trim();
+    if (!email) return show("error", "Enter your email first.");
+
+    await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: false }
+    });
+
+    document.getElementById("otpSection").style.display = "block";
+    show("success", "Access code sent by email.");
+  };
+
+  document.getElementById("verifyOtp").onclick = async () => {
+    const email = emailInput.value.trim();
+    const token = otpCode.value.trim();
+
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: "magiclink"
+    });
+
+    if (error) show("error", "Invalid code.");
+    else window.location.href = "/australia/dashboard/";
+  };
+
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const otpCode = document.getElementById("otpCode");
 </script>
 
 </body>
