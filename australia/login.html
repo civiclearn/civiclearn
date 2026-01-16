@@ -188,9 +188,37 @@
   async function handleVerifyTelegram() {
     const email = document.getElementById("tgEmail").value.trim();
     const code = document.getElementById("tgToken").value.trim();
-    const { data: user, error } = await supabase.from('users').select('id').eq('email', email).eq('otp_code', code).single();
-    if (error || !user) notify("error", "Invalid code.");
-    else { notify("success", "Logging in..."); window.location.href = REDIRECT_PATH; }
+    
+    if(!code) return notify("error", "Please enter the code.");
+
+    notify("success", "Verifying...");
+
+    try {
+      const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
+        body: JSON.stringify({ 
+          action: 'verify', 
+          email: email, 
+          token: code 
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        notify("success", "Login successful!");
+        // We set a local session marker so the dashboard knows we are logged in
+        localStorage.setItem("tg_authenticated", "true");
+        localStorage.setItem("user_email", email);
+        window.location.href = REDIRECT_PATH; 
+      } else {
+        notify("error", "Invalid code. Please try again.");
+      }
+    } catch (e) {
+      notify("error", "Connection error.");
+      console.error(e);
+    }
   }
 
   async function handleSetup() {
