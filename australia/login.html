@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – CivicLearn Australia</title>3
+  <title>Login – CivicLearn Australia</title>4
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/login.css">
@@ -137,10 +137,11 @@
     } else { notify("error", result.error || "User not found."); }
   }
 
-  async function handleVerifyTelegram() {
+async function handleVerifyTelegram() {
     const email = document.getElementById("tgEmail").value.trim();
     const code = document.getElementById("tgToken").value.trim();
-    notify("success", "Logging in...");
+    
+    notify("success", "Verifying...");
     
     try {
       const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
@@ -150,20 +151,15 @@
       });
       const result = await response.json();
 
-      if (result.success && result.session) {
-        // MANUALLY SET THE SESSION (Avoids expired token errors)
-        const { error } = await supabase.auth.setSession({
-          access_token: result.session.access_token,
-          refresh_token: result.session.refresh_token
-        });
-
-        if (!error) {
-            window.location.href = REDIRECT_PATH;
-        } else {
-            notify("error", "Login failed: " + error.message);
-        }
+      if (result.success) {
+        // We set a simple marker in the browser so the dashboard knows you're okay
+        localStorage.setItem("is_logged_in", "true");
+        localStorage.setItem("user_email", email);
+        
+        notify("success", "Success! Redirecting...");
+        window.location.href = "/australia/dashboard/index.html";
       } else { 
-        notify("error", result.error || "Invalid Code."); 
+        notify("error", "Invalid Code."); 
       }
     } catch (e) { 
       notify("error", "Connection error."); 
