@@ -1,497 +1,179 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="da">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Access – CivicLearn Australia</title>
+  <title>Login – Indfodsretsprove.dk</title>
 
-  <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Supabase config -->
+  <link rel="stylesheet" href="/assets/css/login.css">
+  
   <script>
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
   </script>
 
-  <!-- Supabase loader -->
   <script>
     (function () {
-      const s = document.createElement("script");
-      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
-      s.onload = () => {
-        window.supabase = supabase.createClient(
-          window.SUPABASE_URL,
-          window.SUPABASE_KEY
-        );
+      const supabaseLoader = document.createElement("script");
+      supabaseLoader.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
+      supabaseLoader.onload = () => {
+        window.supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
       };
-      document.head.appendChild(s);
+      document.head.appendChild(supabaseLoader);
     })();
   </script>
 
   <style>
-    :root {
-      --brand: #7c3aed;
-      --brand-dark: #5b21b6;
-      --bg: #f7f2e8;
-      --card: #ffffff;
-      --text: #111;
-      --muted: #666;
-      --radius: 18px;
-      --border: rgba(0,0,0,.08);
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: "Lexend", system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* HEADER (unchanged) */
-    header {
-      border-bottom: 1px solid var(--border);
-      background: rgba(247,242,232,.95);
-    }
-
-    .header-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 14px 22px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .brand img { width: 24px; }
-
-    .brand-title {
-      font-weight: 600;
-      font-size: 15px;
-    }
-
-    nav a {
-      margin: 0 10px;
-      text-decoration: none;
-      color: #333;
-      font-size: 14px;
-    }
-
-    .cta {
-      background: var(--brand);
-      color: #fff;
-      padding: 6px 14px;
-      border-radius: 999px;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    /* PAGE */
-    main {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 16px;
-    }
-
-    .card {
-      width: 100%;
-      max-width: 460px;
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 34px 32px 30px;
-      box-shadow: 0 12px 32px rgba(0,0,0,.12);
-      border: 1px solid var(--border);
-    }
-
-    h1 {
-      margin: 0 0 8px;
-      text-align: center;
-      font-size: 28px;
-      font-weight: 600;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: var(--muted);
-      font-size: 15px;
-      margin-bottom: 26px;
-    }
-
-    .section {
-      padding: 18px 18px 20px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      margin-bottom: 16px;
-    }
-
-    .section.primary {
-      border-color: rgba(124,58,237,.35);
-      background: rgba(124,58,237,.04);
-    }
-
-    .section h2 {
-      margin: 0 0 6px;
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .section p {
-      margin: 0 0 14px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    label {
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 6px;
-      display: block;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 12px;
-      border: 1px solid rgba(0,0,0,.15);
-      font-size: 15px;
-      margin-bottom: 12px;
-    }
-
-    input:focus {
-      outline: none;
-      border-color: var(--brand);
-      box-shadow: 0 0 0 2px rgba(124,58,237,.15);
-    }
-
-    .btn {
-      width: 100%;
-      padding: 13px;
-      border-radius: 14px;
-      border: none;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn-primary {
-      background: var(--brand);
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background: var(--brand-dark);
-    }
-
-    .btn-secondary {
-      background: #f4f1fb;
-      color: var(--brand);
-    }
-
-    .small-link {
-      display: block;
-      margin-top: 10px;
-      font-size: 13px;
-      color: var(--brand);
-      text-decoration: none;
-      font-weight: 600;
-      text-align: right;
-    }
-
-    .error {
-      margin-top: 14px;
-      font-size: 14px;
-      color: #b91c1c;
-      text-align: center;
-    }
-
-    @media (max-width: 480px) {
-      .card { padding: 28px 20px 24px; }
-      h1 { font-size: 24px; }
-    }
-	.inline-msg {
-  margin-top: 10px;
-  font-size: 14px;
-}
-
-.inline-msg.success {
-  color: #15803d;
-}
-
-.inline-msg.error {
-  color: #b91c1c;
-}
-
-#otpCode {
-  letter-spacing: .12em;
-}
-/* Subtle contextual backgrounds */
-.section-yellow {
-  background: rgba(253, 230, 138, 0.25); /* soft yellow */
-  border-color: rgba(234, 179, 8, 0.35);
-}
-
-.section-green {
-  background: rgba(187, 247, 208, 0.25); /* soft green */
-  border-color: rgba(34, 197, 94, 0.35);
-}
-
-
-
+    .auth-section { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; border: 1px solid #e5dfd2; }
+    .setup-box { background-color: #f3ebff; border-color: #7c3aed; } /* Purple for first time */
+    .login-box { background-color: #fff; } /* Standard White */
+    .otp-box { background-color: #fffcf0; border-color: #f1c40f; } /* Soft Yellow for Emergency */
+    
+    .input-group { margin-bottom: 1rem; }
+    .input-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+    .input-field { width: 100%; box-sizing: border-box; padding: 12px; border: 2px solid #e5dfd2; border-radius: 8px; font-family: 'Lexend', sans-serif; }
+    
+    .btn-auth { width: 100%; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-family: 'Lexend', sans-serif; transition: opacity 0.2s; }
+    .btn-purple { background-color: #7c3aed; color: white; }
+    .btn-yellow { background-color: #f1c40f; color: #333; }
+    .btn-black { background-color: #333; color: white; }
+    
+    .status-msg { margin-top: 10px; font-size: 14px; display: none; padding: 10px; border-radius: 6px; }
+    .error { background: #fee2e2; color: #dc2626; display: block; }
+    .success { background: #dcfce7; color: #166534; display: block; }
   </style>
 </head>
 
 <body>
 
-<header>
+<header class="site-header">
   <div class="header-inner">
-    <div class="brand">
-      <img src="/assets/images/au.svg" alt="AU">
-      <div class="brand-title">CivicLearn Australia</div>
+    <div class="header-left">
+      <div class="brand-main">
+        <img src="/assets/images/icons/dk.svg" alt="DK">
+        <div class="brand-title">Indfodsretsprove.dk</div>
+      </div>
     </div>
-
-    <nav>
-      <a href="/australia/">Home</a>
-      <a href="/australia/#overview">Overview</a>
-      <a href="/australia/#pricing">Pricing</a>
-    </nav>
-
-    <a href="/australia/checkout.html" class="cta">Get access</a>
+    <a href="/denmark-pr/checkout.html" class="btn-small-purple">Opret en adgang</a>
   </div>
 </header>
 
-<main>
-  <div class="card">
+<div class="login-wrapper" style="max-width: 500px; margin: 40px auto; padding: 0 20px;">
+  
+  <div id="globalMessage" class="status-msg"></div>
 
-    <h1>Access your account</h1>
-    <div class="subtitle">Choose how you want to access CivicLearn</div>
-
-    <!-- FIRST ACCESS -->
- <!-- FIRST ACCESS -->
-<div class="section primary">
-  <h2>First time here?</h2>
-  <p>If you just purchased access, set your password to get started.</p>
-
-  <label>Email</label>
-  <input type="email" id="firstEmail" placeholder="you@example.com">
-
-  <button class="btn btn-primary" onclick="sendPasswordSetup()">
-    Set up my password
-  </button>
-
-  <!-- FIRST ACCESS MESSAGE -->
-  <div id="firstAccessMsg" class="inline-msg"></div>
-</div>
-
-
-<!-- PASSWORD LOGIN -->
-<div class="section section-yellow">
-  <h2>I already have a password</h2>
-
-  <label>Email</label>
-  <input type="email" id="loginEmail" placeholder="you@example.com">
-
-  <label>Password</label>
-  <input type="password" id="loginPassword" placeholder="••••••••">
-
-  <button class="btn btn-secondary" onclick="loginWithPassword()">
-    Log in
-  </button>
-
-  <a href="#" class="small-link" onclick="sendPasswordReset();return false;">
-    I forgot my password
-  </a>
-
-  <div id="loginMsg" class="inline-msg"></div>
-</div>
-
-    <!-- OTP -->
-<!-- TEMPORARY ACCESS -->
-<div class="section section-green">
-  <h2>Temporary access</h2>
-  <p>Use a one-time access code if you cannot log in.</p>
-
-  <label>Email</label>
-  <input type="email" id="otpEmail" placeholder="you@example.com">
-
-  <button class="btn btn-secondary" id="otpSendBtn" onclick="sendOtp()">
-    Send one-time code
-  </button>
-
-  <div id="otpVerifyWrap" style="display:none; margin-top:14px;">
- <label>One-time code</label>
-
-<input
-  id="otpCode"
-  type="text"
-  placeholder="000000"
-  maxlength="6"
-  inputmode="numeric"
-  autocomplete="one-time-code"
-  style="
-    text-align:center;
-    font-family: monospace;
-    font-size: 24px;
-    letter-spacing: 0.4em;
-  "
->
-
-
-    <button class="btn btn-secondary" onclick="verifyOtp()">
-      Verify & log in
-    </button>
+  <div class="auth-section setup-box">
+    <h2 style="font-size: 1.1rem; margin-top: 0; color: #7c3aed;">Første gang her?</h2>
+    <p style="font-size: 0.9rem; margin-bottom: 1rem;">Har du lige købt adgang? Indtast din e-mail for at oprette din adgangskode.</p>
+    <div class="input-group">
+      <input id="setupEmail" type="email" class="input-field" placeholder="navn@eksempel.dk">
+    </div>
+    <button onclick="handleInitialSetup()" class="btn-auth btn-purple">Send link til oprettelse</button>
   </div>
 
-  <div id="otpMsg" class="inline-msg"></div>
+  <div class="auth-section login-box">
+    <h1 style="font-size: 1.5rem; margin-top: 0;">Log ind</h1>
+    <div class="input-group">
+      <label>E-mailadresse</label>
+      <input id="loginEmail" type="email" class="input-field" placeholder="navn@eksempel.dk">
+    </div>
+    <div class="input-group">
+      <label>Adgangskode</label>
+      <input id="loginPassword" type="password" class="input-field" placeholder="••••••••">
+    </div>
+    <button onclick="handlePasswordLogin()" class="btn-auth btn-black">Log ind med kodeord</button>
+  </div>
+
+  <div class="auth-section otp-box">
+    <h2 style="font-size: 1.1rem; margin-top: 0; color: #856404;">Problemer med kodeord?</h2>
+    <p style="font-size: 0.9rem; margin-bottom: 1rem;">Modtag en engangskode (8 cifre) direkte i din indbakke.</p>
+    
+    <div id="otpInputGroup">
+      <input id="otpEmail" type="email" class="input-field" placeholder="navn@eksempel.dk">
+      <button onclick="handleSendOTP()" class="btn-auth btn-yellow" style="margin-top:10px;">Send engangskode</button>
+    </div>
+
+    <div id="otpVerifyGroup" style="display:none;">
+      <input id="otpCode" type="text" class="input-field" placeholder="00000000" maxlength="8" style="text-align:center; letter-spacing: 4px; font-size: 20px;">
+      <button onclick="handleVerifyOTP()" class="btn-auth btn-black" style="margin-top:10px;">Bekræft og log ind</button>
+    </div>
+  </div>
+
 </div>
-</main>
 
 <script>
-function clearMsgs() {
-  ["firstAccessMsg","loginMsg","otpMsg"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.textContent = "";
-      el.className = "inline-msg";
-    }
-  });
+// --- UTILS ---
+function showGlobalMsg(type, text) {
+  const box = document.getElementById("globalMessage");
+  box.textContent = text;
+  box.className = "status-msg " + type;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-async function sendPasswordSetup() {
-  clearMsgs();
-  const email = firstEmail.value.trim();
-  const box = firstAccessMsg;
+// --- 1. FIRST TIME SETUP (Password Invitation) ---
+async function handleInitialSetup() {
+  const email = document.getElementById("setupEmail").value.trim();
+  if(!email) return showGlobalMsg("error", "Indtast venligst din e-mail.");
 
-  if (!email) {
-    box.textContent = "Please enter your email.";
-    box.classList.add("error");
-    return;
-  }
-
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + "/australia/set-password.html"
+  const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + "/denmark-pr/set-password.html"
   });
 
   if (error) {
-    box.textContent = error.message;
-    box.classList.add("error");
-    return;
+    // Because "Allow Signups" is OFF, this will fail for non-users
+    showGlobalMsg("error", "E-mailen blev ikke fundet i vores system.");
+  } else {
+    showGlobalMsg("success", "Vi har sendt et link til din e-mail for at oprette dit kodeord.");
   }
-
-  box.textContent = "Check your email to set your password.";
-  box.classList.add("success");
 }
 
-async function loginWithPassword() {
-  clearMsgs();
-  const box = loginMsg;
+// --- 2. PASSWORD LOGIN ---
+async function handlePasswordLogin() {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email: loginEmail.value.trim(),
-    password: loginPassword.value
-  });
+  const { data, error } = await window.supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    box.textContent = error.message;
-    box.classList.add("error");
-    return;
+    showGlobalMsg("error", "Fejl ved login: " + error.message);
+  } else {
+    window.location.href = "/denmark/dashboard/index.html";
   }
-
-  window.location.href = "/australia/dashboard/";
 }
 
-async function sendPasswordReset() {
-  clearMsgs();
-  const box = loginMsg;
-  const email = loginEmail.value.trim();
-
-  if (!email) {
-    box.textContent = "Please enter your email address to reset your password.";
-    box.classList.add("error");
-    return;
-  }
-
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + "/australia/set-password.html"
-  });
-
-  if (error) {
-    box.textContent = error.message;
-    box.classList.add("error");
-    return;
-  }
-
-  box.textContent = "Password reset email sent.";
-  box.classList.add("success");
-}
-
-async function sendOtp() {
-  clearMsgs();
-  const box = otpMsg;
-  const email = otpEmail.value.trim();
-
-  if (!email) {
-    box.textContent = "Please enter your email.";
-    box.classList.add("error");
-    return;
-  }
-
-  const { error } = await supabase.auth.signInWithOtp({ email });
-
-  if (error) {
-    box.textContent = error.message;
-    box.classList.add("error");
-    return;
-  }
-
-  box.textContent = "Code sent. Enter it to continue.";
-  box.classList.add("success");
-  otpVerifyWrap.style.display = "block";
-  otpCode.focus();
-}
-
-async function verifyOtp() {
-  clearMsgs();
-  const box = otpMsg;
-
-  const email = otpEmail.value.trim();
-  const code = otpCode.value.trim();
-
-  // USER-FACING VALIDATION (critical)
-  if (code.length !== 6) {
-    box.textContent = "Please enter the 6-digit code sent to your email.";
-    box.classList.add("error");
-    return;
-  }
-
-  const { error } = await supabase.auth.verifyOtp({
+// --- 3. OTP FLOW ---
+async function handleSendOTP() {
+  const email = document.getElementById("otpEmail").value.trim();
+  
+  const { error } = await window.supabase.auth.signInWithOtp({
     email,
-    token: code,
-    type: "email"
+    options: { shouldCreateUser: false } // CRITICAL: Only users in the table get an email
   });
 
   if (error) {
-    box.textContent = "The code is invalid or has expired. Please try again.";
-    box.classList.add("error");
-    return;
+    showGlobalMsg("error", "E-mailen blev ikke fundet eller der skete en fejl.");
+  } else {
+    document.getElementById("otpInputGroup").style.display = "none";
+    document.getElementById("otpVerifyGroup").style.display = "block";
+    showGlobalMsg("success", "Engangskoden er sendt!");
   }
-
-  window.location.href = "/australia/dashboard/";
 }
 
+async function handleVerifyOTP() {
+  const email = document.getElementById("otpEmail").value.trim();
+  const token = document.getElementById("otpCode").value.trim();
+
+  const { data, error } = await window.supabase.auth.verifyOtp({
+    email, token, type: 'magiclink'
+  });
+
+  if (error) {
+    showGlobalMsg("error", "Koden er ugyldig eller udløbet.");
+  } else {
+    window.location.href = "/denmark/dashboard/index.html";
+  }
+}
 </script>
 
 </body>
