@@ -3,136 +3,220 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – CivicLearn</title>
+  <title>Login – CivicLearn Australia</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+  <link rel="stylesheet" href="/assets/css/login.css">
+
   <script>
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
   </script>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
 
   <style>
     :root { --purple: #7c3aed; --yellow: #f1c40f; --blue: #0288d1; --black: #333; --bg: #fdfaf5; }
-    body { margin: 0; font-family: 'Lexend', sans-serif; background-color: var(--bg); color: #111; }
-    .login-grid { display: flex; justify-content: center; align-items: stretch; gap: 0; max-width: 1400px; margin: 60px auto; padding: 20px; }
-    .auth-card { background: white; padding: 40px 25px; width: 260px; display: flex; flex-direction: column; border: 1px solid #eee; }
-    .card-left { border-radius: 20px 0 0 20px; background-color: #f3ebff; }
-    .card-center { border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.08); z-index: 10; margin: -20px 0; padding: 60px 30px; }
-    .card-right { background-color: #fffdf0; }
-    .card-telegram { border-radius: 0 20px 20px 0; background-color: #e3f2fd; border-color: #bbdefb; }
-    h2 { font-size: 18px; margin-bottom: 10px; }
-    p { font-size: 12px; color: #555; margin-bottom: 20px; }
-    input { width: 100%; padding: 12px; border: 2px solid #e5dfd2; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; }
-    .btn-action { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; }
+    body { font-family: 'Lexend', sans-serif; background-color: var(--bg); margin: 0; }
+    
+    .login-grid-4 {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      gap: 15px;
+      max-width: 1400px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    .auth-card {
+      background: white;
+      padding: 40px 25px;
+      width: 280px;
+      border: 1px solid #eee;
+      display: flex;
+      flex-direction: column;
+      border-radius: 20px;
+    }
+
+    .card-center { box-shadow: 0 15px 40px rgba(0,0,0,0.08); z-index: 10; margin-top: -20px; margin-bottom: -20px; padding-top: 60px; }
+    .card-telegram { background-color: #e3f2fd; border-color: #bbdefb; }
+    
+    h2 { font-size: 20px; margin-bottom: 15px; text-align: center; }
+    p.subtitle { font-size: 13px; color: #666; text-align: center; margin-bottom: 25px; line-height: 1.5; }
+    
+    label { font-size: 11px; font-weight: 700; margin-bottom: 8px; display: block; text-transform: uppercase; color: #888; }
+    input { width: 100%; padding: 12px; border: 2px solid #e5dfd2; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; font-family: inherit; }
+    
+    .btn-action { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; font-family: inherit; }
     .btn-purple { background: var(--purple); color: white; }
     .btn-black { background: var(--black); color: white; }
     .btn-yellow { background: var(--yellow); color: #111; }
     .btn-blue { background: var(--blue); color: white; }
-    .status-msg { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 30px; display: none; z-index: 100; }
-    .error { background: #fee2e2; color: #dc2626; display: block; }
-    .success { background: #dcfce7; color: #166534; display: block; }
+
+    .status-msg { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 30px; display: none; z-index: 100; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .error { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+    .success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
   </style>
 </head>
+
 <body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="brand-main">
+        <img src="/assets/images/au.svg" alt="Australia"> <div class="brand-title">CivicLearn Australia</div>
+      </div>
+      <div class="brand-powered">powered by <span>CivicLearn</span></div>
+    </div>
+    <nav class="header-nav">
+      <a href="/">Home</a>
+      <a href="/au/#presentation">Overview</a>
+      <a href="/au/#pricing">Pricing</a>
+    </nav>
+    <a href="/australia/checkout.html" class="btn-small-purple">Sign up</a>
+  </div>
+</header>
 
 <div id="status" class="status-msg"></div>
 
-<div class="login-grid">
-  <div class="auth-card card-left">
-    <h2 style="color: var(--purple);">First Time?</h2>
-    <p>Enter your email to set up your password for the first time.</p>
-    <input type="email" id="setupEmail" placeholder="Email address">
+<div class="login-grid-4">
+  
+  <div class="auth-card">
+    <h2 style="color: var(--purple);">New User?</h2>
+    <p class="subtitle">Set your password to begin your training.</p>
+    <label>Email Address</label>
+    <input type="email" id="setupEmail" placeholder="you@example.com">
     <button onclick="handleSetup()" class="btn-action btn-purple">Setup Account</button>
   </div>
 
   <div class="auth-card card-center">
     <h2>Login</h2>
-    <input type="email" id="loginEmail" placeholder="Email">
-    <input type="password" id="loginPwd" placeholder="Password">
-    <button onclick="handleLogin()" class="btn-action btn-black">Login</button>
+    <p class="subtitle">Sign in with your email and password.</p>
+    <label>Email Address</label>
+    <input type="email" id="loginEmail" placeholder="you@example.com">
+    <label>Password</label>
+    <input type="password" id="loginPwd" placeholder="••••••••">
+    <button onclick="handleLogin()" class="btn-action btn-black">Sign In</button>
   </div>
 
-  <div class="auth-card card-right">
+  <div class="auth-card">
     <h2 style="color: #856404;">Email Code</h2>
-    <p>Get a code via email instead of using a password.</p>
-    <input type="email" id="otpEmail" placeholder="Email">
-    <button onclick="handleSendOTP()" class="btn-action btn-yellow">Send Code</button>
+    <p class="subtitle">Receive a login code via email instead.</p>
+    <div id="emailOtpRow">
+      <label>Email Address</label>
+      <input type="email" id="otpEmail" placeholder="you@example.com">
+      <button onclick="handleSendOTP()" class="btn-action btn-yellow">Send Code</button>
+    </div>
+    <div id="emailVerifyRow" style="display:none;">
+      <label>Enter Code</label>
+      <input type="text" id="otpToken" placeholder="000000" maxlength="8">
+      <button onclick="handleVerifyOTP()" class="btn-action btn-black">Verify Code</button>
+    </div>
   </div>
 
   <div class="auth-card card-telegram">
     <h2 style="color: var(--blue);">Telegram</h2>
-    <p>Enter the email you use for this site to get a Telegram code.</p>
-    
+    <p class="subtitle">Fastest login via the Telegram app.</p>
     <div id="tgInputRow">
-      <input type="email" id="tgEmailSearch" placeholder="Registered Email">
-      <button onclick="handleTelegramRequest()" class="btn-action btn-blue">Get Code</button>
+      <label>Registered Email</label>
+      <input type="email" id="tgEmail" placeholder="you@example.com">
+      <label>Telegram Handle</label>
+      <input type="text" id="tgHandle" placeholder="@username">
+      <button onclick="handleTelegramRequest()" class="btn-action btn-blue">Get Telegram Code</button>
     </div>
-
     <div id="tgVerifyRow" style="display:none;">
-      <p>Enter the code sent to your Telegram account.</p>
+      <label>6-Digit Code</label>
       <input type="text" id="tgToken" placeholder="000000" maxlength="6" style="text-align:center;">
-      <button onclick="handleVerifyTelegram()" class="btn-action btn-black">Verify & Login</button>
+      <button onclick="handleVerifyTelegram()" class="btn-action btn-black">Login</button>
     </div>
-
     <div id="tgLinkRow" style="display:none;">
-      <p style="color:red;">Telegram not linked yet!</p>
-      <a id="botLink" href="#" target="_blank" class="btn-action btn-blue" style="text-decoration:none; text-align:center; display:block;">Click to Link Telegram</a>
-      <p style="font-size:10px; margin-top:10px;">After clicking 'Start' in Telegram, come back here and click 'Get Code' again.</p>
+      <p style="color:red; font-size: 11px; font-weight: bold; text-align:center;">Account not linked!</p>
+      <a id="botLink" href="#" target="_blank" class="btn-action btn-blue" style="text-decoration:none; text-align:center; display:block;">Link Telegram Now</a>
     </div>
   </div>
+
 </div>
 
 <script>
   const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+  // Correct redirect based on your UK example
+  const REDIRECT_PATH = "/australia/dashboard/index.html"; 
 
   function notify(type, text) {
     const el = document.getElementById("status");
-    el.textContent = text; el.className = "status-msg " + type; el.style.display = "block";
+    el.textContent = text;
+    el.className = "status-msg " + type;
+    el.style.display = "block";
     setTimeout(() => { el.style.display = "none"; }, 5000);
   }
 
+  // Telegram Logic
   async function handleTelegramRequest() {
-    const email = document.getElementById("tgEmailSearch").value.trim();
-    if(!email) return notify("error", "Please enter your email.");
+    const email = document.getElementById("tgEmail").value.trim();
+    const handle = document.getElementById("tgHandle").value.trim().replace('@','');
+    if(!email || !handle) return notify("error", "Fill in both fields.");
 
     const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
-      body: JSON.stringify({ email: email }) // We send EMAIL now, not username
+      body: JSON.stringify({ email, handle })
     });
 
     const result = await response.json();
-
     if (result.success) {
       document.getElementById("tgInputRow").style.display = "none";
-      document.getElementById("tgLinkRow").style.display = "none";
       document.getElementById("tgVerifyRow").style.display = "block";
       notify("success", "Code sent to Telegram!");
     } else if (result.needsLink) {
-      // User is in DB but hasn't linked Telegram. Show them the special link.
       document.getElementById("tgLinkRow").style.display = "block";
-      document.getElementById("botLink").href = `https://t.me/civiclearnloginbot?start=${btoa(email)}`; 
-      notify("error", "You need to link your Telegram first.");
-    } else {
-      notify("error", result.error || "Email not found in our system.");
-    }
+      document.getElementById("botLink").href = `https://t.me/civiclearnloginbot?start=${btoa(email + '|' + handle)}`; 
+    } else { notify("error", result.error || "User not found."); }
   }
 
   async function handleVerifyTelegram() {
-    const email = document.getElementById("tgEmailSearch").value.trim();
+    const email = document.getElementById("tgEmail").value.trim();
     const code = document.getElementById("tgToken").value.trim();
-
     const { data: user, error } = await supabase.from('users').select('id').eq('email', email).eq('otp_code', code).single();
-
     if (error || !user) notify("error", "Invalid code.");
-    else { notify("success", "Logged in!"); window.location.href = "/dashboard.html"; }
+    else { notify("success", "Logging in..."); window.location.href = REDIRECT_PATH; }
   }
 
-  // --- Rest of your existing functions (Setup, Login, etc.) ---
-  async function handleLogin() { /* Same as before */ }
-  async function handleSendOTP() { /* Same as before */ }
+  // Auth Logic
+  async function handleSetup() {
+    const email = document.getElementById("setupEmail").value.trim();
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    if(error) notify("error", error.message);
+    else notify("success", "Check your email for setup link.");
+  }
+
+  async function handleLogin() {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPwd").value.trim();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) notify("error", "Invalid login.");
+    else window.location.href = REDIRECT_PATH;
+  }
+
+  async function handleSendOTP() {
+    const email = document.getElementById("otpEmail").value.trim();
+    const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+    if (error) notify("error", error.message);
+    else {
+      document.getElementById("emailOtpRow").style.display = "none";
+      document.getElementById("emailVerifyRow").style.display = "block";
+      notify("success", "Check your email!");
+    }
+  }
+
+  async function handleVerifyOTP() {
+    const email = document.getElementById("otpEmail").value.trim();
+    const token = document.getElementById("otpToken").value.trim();
+    const { error, data } = await supabase.auth.verifyOtp({ email, token, type: 'magiclink' });
+    if (error) notify("error", "Invalid code.");
+    else if (data.session) window.location.href = REDIRECT_PATH;
+  }
 </script>
 </body>
 </html>
