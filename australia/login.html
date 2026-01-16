@@ -2,73 +2,77 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Login – CivicLearn Australia</title>7
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login – CivicLearn Australia</title>8
+
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/login.css">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
   <script>
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
     const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
   </script>
+
   <style>
     :root { --purple: #7c3aed; --blue: #0288d1; --black: #333; --bg: #fdfaf5; }
-    body { font-family: 'Lexend', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-    .login-container { max-width: 1000px; margin: 50px auto; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-    .auth-card { background: white; padding: 40px; border-radius: 20px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .card-highlight { border: 2px solid var(--blue); background: #f0f9ff; }
-    h2 { margin-top: 0; font-size: 22px; }
-    label { font-size: 11px; font-weight: 700; color: #888; display: block; margin-bottom: 8px; text-transform: uppercase; }
-    input { width: 100%; padding: 12px; border: 2px solid #e5dfd2; border-radius: 10px; margin-bottom: 20px; box-sizing: border-box; }
-    .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; }
-    .btn-black { background: var(--black); color: white; }
+    body { font-family: 'Lexend', sans-serif; background-color: var(--bg); margin: 0; padding: 0; }
+    .login-grid { display: flex; justify-content: center; align-items: flex-start; gap: 20px; max-width: 1000px; margin: 60px auto; padding: 0 20px; }
+    .auth-card { background: white; padding: 40px 30px; width: 320px; border: 1px solid #eee; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+    .card-featured { border: 2px solid var(--blue); background: #f0f9ff; position: relative; }
+    .badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--blue); color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    h2 { font-size: 22px; margin-bottom: 10px; text-align: center; color: var(--black); }
+    p.desc { font-size: 13px; color: #666; text-align: center; margin-bottom: 25px; line-height: 1.5; }
+    label { font-size: 10px; font-weight: 700; color: #999; text-transform: uppercase; margin-bottom: 8px; display: block; letter-spacing: 0.5px; }
+    input { width: 100%; padding: 14px; border: 2px solid #e5dfd2; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-family: inherit; font-size: 14px; }
+    .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 15px; }
     .btn-blue { background: var(--blue); color: white; }
-    .btn-outline { background: transparent; border: 2px solid var(--purple); color: var(--purple); }
-    .footer-link { text-align: center; margin-top: 15px; font-size: 13px; }
-    .status-msg { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 30px; display: none; z-index: 100; font-weight: 600; }
-    .error { background: #fee2e2; color: #dc2626; }
-    .success { background: #dcfce7; color: #166534; }
+    .btn-black { background: var(--black); color: white; }
+    .btn-outline { background: transparent; border: 2px solid #ddd; color: #666; margin-top: 10px; }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .status-msg { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 30px; display: none; z-index: 100; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-size: 14px; }
+    .error { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+    .success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
   </style>
 </head>
 <body>
 
 <div id="status" class="status-msg"></div>
 
-<div class="login-container">
+<div class="login-grid">
   
-  <div class="auth-card">
-    <h2>Welcome Back</h2>
-    <label>Email Address</label>
-    <input type="email" id="loginEmail" placeholder="you@example.com">
-    <label>Password</label>
-    <input type="password" id="loginPwd" placeholder="••••••••">
-    <button onclick="handleLogin()" class="btn btn-black">Sign In</button>
-    
-    <div style="margin-top: 40px; border-top: 1px solid #eee; pt-20px;">
-      <h3 style="font-size: 16px; margin-top: 20px;">First Time?</h3>
-      <p style="font-size: 13px; color: #666;">Set your password to activate your account.</p>
-      <input type="email" id="setupEmail" placeholder="you@example.com">
-      <button onclick="handleSetup()" class="btn btn-outline">Set Password / Reset</button>
-    </div>
-  </div>
-
-  <div class="auth-card card-highlight">
-    <h2 style="color: var(--blue);">Instant Access</h2>
-    <p style="font-size: 14px; color: #444; margin-bottom: 25px;">
-      Can't find your password or didn't receive the email? Use your **Permanent PIN** provided during checkout.
-    </p>
+  <div class="auth-card card-featured">
+    <div class="badge">Recommended</div>
+    <h2>Instant Access</h2>
+    <p class="desc">Enter your email and the 6-digit PIN from your receipt to log in immediately.</p>
     
     <label>Email Address</label>
     <input type="email" id="bypassEmail" placeholder="you@example.com">
     
-    <label>6-Digit PIN</label>
+    <label>Access PIN</label>
     <input type="text" id="bypassToken" placeholder="000000" maxlength="10">
     
-    <button onclick="handleBypass()" class="btn btn-blue">Verify & Enter Dashboard</button>
+    <button onclick="handleBypass()" class="btn btn-blue">Sign In with PIN</button>
+  </div>
+
+  <div class="auth-card">
+    <h2>Standard Login</h2>
+    <p class="desc">Log in with your email and chosen password.</p>
     
-    <p style="font-size: 11px; color: #777; margin-top: 20px; text-align: center;">
-      PINs are found on your original receipt.
-    </p>
+    <label>Email Address</label>
+    <input type="email" id="loginEmail" placeholder="you@example.com">
+    
+    <label>Password</label>
+    <input type="password" id="loginPwd" placeholder="••••••••">
+    
+    <button onclick="handleLogin()" class="btn btn-black">Sign In</button>
+    
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+    
+    <h3 style="font-size: 14px; text-align: center; margin-bottom: 10px;">First time or forgot password?</h3>
+    <input type="email" id="setupEmail" placeholder="Enter email for link">
+    <button onclick="handleSetup()" class="btn btn-outline">Send Setup Link</button>
   </div>
 
 </div>
@@ -80,40 +84,48 @@
     setTimeout(() => { el.style.display = "none"; }, 5000);
   }
 
-  async function handleLogin() {
-    const email = document.getElementById("loginEmail").value.trim();
-    const password = document.getElementById("loginPwd").value.trim();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) notify("error", "Invalid login credentials.");
-    else window.location.href = "/australia/dashboard/index.html";
-  }
-
-  async function handleSetup() {
-    const email = document.getElementById("setupEmail").value.trim();
-    if(!email) return notify("error", "Enter your email first.");
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
-    if(error) notify("error", error.message);
-    else notify("success", "Password setup link sent to your email.");
-  }
-
+  // PIN BYPASS LOGIC
   async function handleBypass() {
     const email = document.getElementById("bypassEmail").value.trim();
     const token = document.getElementById("bypassToken").value.trim();
     
-    const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
-      body: JSON.stringify({ action: 'verify_bypass', email, token })
-    });
-    const result = await response.json();
+    if(!email || !token) return notify("error", "Please enter both email and PIN.");
 
-    if (result.success) {
-      localStorage.setItem("cl_vip_pass", "true");
-      localStorage.setItem("user_email", email);
-      window.location.href = "/australia/dashboard/index.html";
-    } else {
-      notify("error", "Invalid PIN. Please check your receipt.");
-    }
+    try {
+      const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
+        body: JSON.stringify({ action: 'verify_bypass', email, token })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        localStorage.setItem("cl_vip_pass", "true");
+        localStorage.setItem("user_email", email);
+        window.location.href = "/australia/dashboard/index.html";
+      } else {
+        notify("error", "Invalid PIN. Check your receipt or contact support.");
+      }
+    } catch (e) { notify("error", "System error. Please try again."); }
+  }
+
+  // STANDARD LOGIN
+  async function handleLogin() {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPwd").value.trim();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) notify("error", "Login failed. Check your password.");
+    else window.location.href = "/australia/dashboard/index.html";
+  }
+
+  // PASSWORD SETUP/RESET
+  async function handleSetup() {
+    const email = document.getElementById("setupEmail").value.trim();
+    if(!email) return notify("error", "Enter your email first.");
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    if(error) notify("error", "Could not send link: " + error.message);
+    else notify("success", "Setup link sent! Check your inbox.");
   }
 </script>
 </body>
