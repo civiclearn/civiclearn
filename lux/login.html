@@ -1,256 +1,446 @@
 <!DOCTYPE html>
-<html lang="fr-LU">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CivicLearn – Connexion</title>
+  <title>Login – Vivre-Ensemble.lu</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/login.css">
-
-  <!-- Supabase config -->
+  
   <script>
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
   </script>
 
-  <!-- Supabase loader -->
-  <script>
-    (function () {
-      const s = document.createElement("script");
-      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
-      s.onload = () => {
-        window.supabase = supabase.createClient(
-          window.SUPABASE_URL,
-          window.SUPABASE_KEY
-        );
-      };
-      document.head.appendChild(s);
-    })();
-  </script>
-</head>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
 
+  <style>
+    :root {
+      --purple: #7c3aed;
+      --yellow: #f1c40f;
+      --black: #333;
+      --bg: #fdfaf5;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Lexend', sans-serif;
+      background-color: var(--bg);
+      color: #111;
+    }
+
+    .site-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 40px;
+      background: white;
+    }
+
+    .brand-main { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    
+    .lang-switch {
+      display: flex;
+      gap: 5px;
+      background: #f1f1f1;
+      padding: 4px;
+      border-radius: 20px;
+    }
+
+    .lang-switch button {
+      border: none;
+      background: none;
+      padding: 5px 12px;
+      border-radius: 15px;
+      cursor: pointer;
+      font-family: 'Lexend', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+    }
+
+    .lang-switch button.active {
+      background: white;
+      color: var(--purple);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .login-grid {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      gap: 0;
+      max-width: 1100px;
+      margin: 80px auto 40px;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: white;
+      padding: 40px 30px;
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-left {
+      border-radius: 20px 0 0 20px;
+      background-color: #f3ebff;
+      border: 1px solid #e0d0f9;
+      z-index: 1;
+    }
+
+    .card-center {
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+      z-index: 10;
+      margin: -20px 0;
+      padding: 60px 40px;
+      border: 1px solid #eee;
+    }
+
+    .card-right {
+      border-radius: 0 20px 20px 0;
+      background-color: #fffdf0;
+      border: 1px solid #f9edbc;
+      z-index: 1;
+    }
+
+    h2 { font-size: 19px; margin-top: 0; margin-bottom: 15px; }
+    p { font-size: 13px; color: #555; line-height: 1.5; margin-bottom: 20px; }
+
+    label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5dfd2;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+      font-family: 'Lexend', sans-serif;
+    }
+
+    .btn-action {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Lexend', sans-serif;
+      margin-top: auto;
+    }
+
+    .btn-purple { background: var(--purple); color: white; }
+    .btn-black { background: var(--black); color: white; }
+    .btn-yellow { background: var(--yellow); color: #111; }
+
+    .pwd-container { position: relative; width: 100%; }
+    .pwd-container input { padding-right: 60px; }
+    
+    .toggle-pwd {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      background: none;
+      border: none;
+      color: var(--purple);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .status-msg {
+      position: fixed;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 500;
+      display: none;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .error { background: #fee2e2; color: #dc2626; display: block; }
+    .success { background: #dcfce7; color: #166534; display: block; }
+
+    .info-section {
+      max-width: 1100px;
+      margin: 0 auto 80px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 0 20px;
+    }
+
+    .info-card {
+      background: white;
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+
+    @media (max-width: 900px) {
+      .login-grid { flex-direction: column; align-items: center; gap: 20px; }
+      .auth-card { border-radius: 20px; margin: 0; width: 100%; max-width: 400px; }
+      .info-section { grid-template-columns: 1fr; }
+    }
+	.btn-small-purple {
+  background: var(--purple);
+  color: white;
+  text-decoration: none;
+  padding: 8px 24px;
+  border-radius: 20px; /* Elegant rounded pill shape */
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-block;
+  transition: opacity 0.2s ease;
+}
+
+.btn-small-purple:hover {
+  opacity: 0.9;
+}
+
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background: white;
+  border-bottom: 1px solid rgba(0,0,0,0.05); /* Clean separation */
+}
+  </style>
+</head>
 <body>
 
 <header class="site-header">
-  <div class="header-inner">
-    <div class="header-left">
-      <div class="brand-main">
-        <img src="/assets/images/lu.svg" alt="Luxembourg">
-        <div class="brand-title">Vivre-Ensemble</div>
-      </div>
-      <div class="brand-powered">
-        powered by <span>CivicLearn</span>
-      </div>
-    </div>
-
-<nav class="header-nav">
-  <a href="https://vivre-ensemble.lu/">Accueil</a>
-  <a href="https://vivre-ensemble.lu/contact/">Contact</a>
-</nav>
-
- <a href="/lux/checkout.html"
-   class="btn-small-purple"
-   data-t="nav_signup">
-  Je m’inscris
-</a>
+  <div class="brand-main">
+    <img src="/assets/images/lu.svg" width="24" alt="Luxembourg">
+    Vivre-Ensemble.lu
   </div>
+  
+  <div class="lang-switch">
+    <button onclick="applyLang('en')" id="btn-en">EN</button>
+    <button onclick="applyLang('fr')" id="btn-fr">FR</button>
+    <button onclick="applyLang('de')" id="btn-de">DE</button>
+  </div>
+
+  <a href="/lux/checkout.html" class="btn-small-purple" data-t="nav_signup">Sign up</a>
 </header>
 
-<div class="login-wrapper">
+<div id="status" class="status-msg"></div>
 
-  <div class="login-note-wrapper">
+<div class="login-grid">
+  <div class="auth-card card-left">
+    <h2 style="color: var(--purple);" data-t="left_title"></h2>
+    <p data-t="left_desc"></p>
+    <input type="email" id="setupEmail" placeholder="name@example.lu">
+    <button onclick="handleSetup()" class="btn-action btn-purple" data-t="left_btn"></button>
+    <div style="font-size: 10px; color: var(--purple); font-weight: 600; margin-top: 15px; text-align: center; line-height: 1.4;" data-t="spam_note"></div>
+  </div>
 
-    <!-- PEEK TAB -->
-    <button class="login-note-tab" id="noteToggle">
-      Inscrit en 2025&nbsp;?
-    </button>
-
-    <!-- HIDDEN NOTE PANEL -->
-    <div class="login-note-panel" id="loginNote">
-      <p>
-        <strong>Vous aviez déjà un compte Vivre-Ensemble.lu&nbsp;?</strong><br><br>
-        Votre accès a été automatiquement transféré vers la nouvelle plateforme.<br>
-        Entrez simplement l’adresse e-mail utilisée lors de votre inscription&nbsp;:
-        vous recevrez immédiatement votre code d’accès par e-mail.
-      </p>
-    </div>
-
-    <!-- LOGIN CARD -->
-    <div class="card">
-
-      <div class="lang-switch">
-        <button data-lang="en">EN</button>
-        <button data-lang="de">DE</button>
-        <button data-lang="fr">FR</button>
+  <div class="auth-card card-center">
+    <h2 style="font-size: 28px; text-align: center;" data-t="center_title"></h2>
+    <div style="margin-top: 20px;">
+      <label data-t="email_label"></label>
+      <input type="email" id="loginEmail" placeholder="Email">
+      <label data-t="pwd_label"></label>
+      <div class="pwd-container">
+        <input type="password" id="loginPwd" placeholder="••••••••">
+        <button type="button" class="toggle-pwd" onclick="toggleMainPwd()" data-t="show_pwd"></button>
       </div>
-
-      <h1 data-t="title"></h1>
-      <p class="subtitle" data-t="subtitle"></p>
-
-    <div id="emailSection">
-      <label for="email" data-t="email_label"></label>
-      <input id="email" type="email" placeholder="name@example.lu" style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px; font-family: 'Lexend', sans-serif;" />
-      <button type="button" class="login-btn" id="sendMagicLink" data-t="send_code"></button>
+      <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top: 10px;" data-t="center_btn"></button>
     </div>
+  </div>
 
-    <div id="otpSection" style="display:none; margin-top: 10px;">
-      <label for="otpCode" data-t="otp_label"></label>
-      <input id="otpCode" type="text" placeholder="00000000" maxlength="8" 
-             style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
-      <button type="button" class="login-btn" id="verifyOtp" 
-              style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;" data-t="verify_btn"></button>
+  <div class="auth-card card-right">
+    <h2 style="color: #856404;" data-t="right_title"></h2>
+    <p data-t="right_desc"></p>
+    <div id="otpInputRow">
+      <input type="email" id="otpEmail" placeholder="name@example.lu">
+      <button onclick="handleSendOTP()" class="btn-action btn-yellow" data-t="right_btn"></button>
     </div>
-
-    <div id="loginMessage" class="login-message" style="display:none; margin-top:15px; font-family: 'Lexend', sans-serif;"></div>
-
-    <div class="login-footer" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #666; text-align: center; font-family: 'Lexend', sans-serif;">
-      <span data-t="no_access"></span>
-      <a href="/lux/checkout.html" data-t="create_access" style="color: #7c3aed; text-decoration: none; font-weight: 500;"></a>
+    <div id="otpVerifyRow" style="display:none;">
+      <input type="text" id="otpToken" placeholder="000000" maxlength="8" style="text-align:center; letter-spacing: 2px;">
+      <button onclick="handleVerifyOTP()" class="btn-action btn-black" data-t="verify_btn"></button>
     </div>
   </div>
 </div>
 
+<div class="info-section">
+  <div class="info-card">
+    <h3 style="margin-top: 0; font-size: 16px; color: #333;" data-t="info1_title"></h3>
+    <p style="font-size: 13px; line-height: 1.6; color: #444; margin-bottom: 0;" data-t="info1_body"></p>
+  </div>
+  <div class="info-card">
+    <h3 style="margin-top: 0; font-size: 16px; color: #333;" data-t="info2_title"></h3>
+    <p style="font-size: 13px; line-height: 1.6; color: #444; margin-bottom: 0;" data-t="info2_body"></p>
+  </div>
+</div>
+
 <script>
-const I18N = {
-  en: {
-    title: "Login",
-    subtitle: "Enter your email to receive your 8-digit access code.",
-    email_label: "Email Address",
-    send_code: "Send login code",
-    otp_label: "8-Digit Code",
-    verify_btn: "Verify & Login",
-    no_access: "Don't have access yet?",
-    create_access: "Create access",
-    first_login: "Your access has been activated. Enter the email address used during purchase.",
-    sent_once: "Your 8-digit code has been sent. Only the MOST RECENT code is valid. Do not request another one while entering it.",
-    sent_twice: "If you still haven't received the code, please check Spam or contact us.",
-    email_error: "Please enter your email address.",
-    user_not_found: "This email is not on file — please enter the exact email used during purchase.",
-    otp_error: "Please enter the valid code sent to your email."
-  },
-  de: {
-    title: "Anmelden",
-    subtitle: "Geben Sie Ihre E-Mail ein, um Ihren 8-stelligen Zugangscode zu erhalten.",
-    email_label: "E-Mail-Adresse",
-    send_code: "Anmeldecode senden",
-    otp_label: "8-stelliger Code",
-    verify_btn: "Bestätigen & Anmelden",
-    no_access: "Noch keinen Zugang?",
-    create_access: "Zugang erstellen",
-    first_login: "Ihr Zugang wurde aktiviert. Geben Sie die beim Kauf verwendete E-Mail-Adresse ein.",
-    sent_once: "Ihr 8-stelliger Code wurde gesendet. Nur der ZULETZT erhaltene Code ist gültig. Fordern Sie keinen neuen Code an, während Sie ihn eingeben.",
-    sent_twice: "Wenn Sie den Code noch nicht erhalten haben, prüfen Sie den Spam-Ordner oder kontaktieren Sie uns.",
-    email_error: "Bitte geben Sie Ihre E-Mail-Adresse ein.",
-    user_not_found: "Diese E-Mail ist nicht registriert – bitte geben Sie die E-Mail-Adresse ein, die Sie beim Kauf verwendet haben.",
-    otp_error: "Bitte geben Sie den gültigen Code ein, der an Ihre E-Mail gesendet wurde."
-  },
-  fr: {
-    title: "Connexion",
-    subtitle: "Saisissez votre e-mail pour recevoir votre code d'accès à 8 chiffres.",
-    email_label: "Adresse e-mail",
-    send_code: "Envoyer le code",
-    otp_label: "Code à 8 chiffres",
-    verify_btn: "Vérifier et se connecter",
-    no_access: "Pas encore d'accès ?",
-    create_access: "Créer un accès",
-    first_login: "Votre accès a été activé. Entrez l'e-mail utilisé lors de l'achat.",
-    sent_once: "Votre code à 8 chiffres a été envoyé. Seul le DERNIER code reçu est valable. Ne demandez pas un nouveau code pendant la saisie.",
-    sent_twice: "Si vous n'avez toujours pas reçu le code, vérifiez vos spams ou contactez-nous.",
-    email_error: "Veuillez entrer votre adresse e-mail.",
-    user_not_found: "Cet e-mail n'est pas répertorié — veuillez saisir l'e-mail exact utilisé lors de l'achat.",
-    otp_error: "Veuillez entrer le code valide envoyé par e-mail."
-  }
-};
-
-let currentLang = "en";
-
-function applyLang(lang) {
-  currentLang = lang;
-  document.querySelectorAll("[data-t]").forEach(el => {
-    const key = el.getAttribute("data-t");
-    if (I18N[lang][key]) el.textContent = I18N[lang][key];
-  });
-  document.querySelectorAll(".lang-switch button").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.lang === lang);
-  });
-}
-
-document.querySelectorAll(".lang-switch button").forEach(btn => {
-  btn.addEventListener("click", () => applyLang(btn.dataset.lang));
-});
-
-// Default to EN for Luxembourg universal
-applyLang("en");
-
-function showMessage(type, text) {
-  const box = document.getElementById("loginMessage");
-  box.className = "login-message " + type;
-  box.textContent = text;
-  box.style.display = "block";
-}
-
-let lastEmailAttempt = "";
-let attemptCount = 0;
-
-document.getElementById("sendMagicLink").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  if (!email) { showMessage("error", I18N[currentLang].email_error); return; }
-  
-  const { error } = await window.supabase.auth.signInWithOtp({
-    email,
-    options: { shouldCreateUser: false }
-  });
-
-  if (error) {
-    if (error.message.includes("Signups not allowed for otp")) {
-      showMessage("error", I18N[currentLang].user_not_found);
-    } else {
-      showMessage("error", error.message);
+  const I18N = {
+    en: {
+      nav_signup: "Sign up",
+      left_title: "First time or Migrated?",
+      left_desc: "Did you just buy access, or are you moving from the old platform? Enter your email to set your password.",
+      left_btn: "Send setup link",
+      spam_note: "ℹ️ Please check your spam folder if you don't receive the email within 2 minutes.",
+      center_title: "Login",
+      email_label: "Email Address",
+      pwd_label: "Password",
+      show_pwd: "Show",
+      hide_pwd: "Hide",
+      center_btn: "Login with password",
+      right_title: "Problems?",
+      right_desc: "Receive a one-time code (8 digits) directly in your inbox instead.",
+      right_btn: "Send code",
+      verify_btn: "Verify & Login",
+      info1_title: "ℹ️ Information for existing users",
+      info1_body: "Most existing users have been automatically transferred. In rare cases—especially for older purchases—it may be necessary to add your account manually. If your email is not recognized, please contact support.",
+      info2_title: "📊 About training progress",
+      info2_body: "Due to the move to a new platform, previous progress and statistics have not been transferred. All users start with a reset progression to ensure future data is accurate.",
+      err_no_email: "Please enter an email.",
+      err_not_found: "Email not found in our system.",
+      err_login: "Invalid email or password.",
+      msg_sent: "If your email is in our system, a link has been sent.",
+      msg_otp_sent: "Code sent!",
+      err_otp: "Invalid code."
+    },
+    fr: {
+      nav_signup: "Je m'inscris",
+      left_title: "Nouveau ou transféré ?",
+      left_desc: "Vous venez d'acheter un accès ou vous migrez de l'ancienne plateforme ? Entrez votre e-mail pour créer votre mot de passe.",
+      left_btn: "Envoyer le lien",
+      spam_note: "ℹ️ Veuillez vérifier vos spams si vous ne recevez pas l'e-mail d'ici 2 minutes.",
+      center_title: "Connexion",
+      email_label: "Adresse e-mail",
+      pwd_label: "Mot de passe",
+      show_pwd: "Voir",
+      hide_pwd: "Cacher",
+      center_btn: "Se connecter",
+      right_title: "Problèmes ?",
+      right_desc: "Recevez un code unique (8 chiffres) directement dans votre boîte de réception.",
+      right_btn: "Envoyer le code",
+      verify_btn: "Vérifier & Connexion",
+      info1_title: "ℹ️ Information aux utilisateurs",
+      info1_body: "La plupart des comptes ont été transférés. Dans certains cas, un ajout manuel est nécessaire. Si votre e-mail n'est pas reconnu, contactez le support.",
+      info2_title: "📊 Progression d'entraînement",
+      info2_body: "Suite au changement de plateforme, les anciennes statistiques n'ont pas été transférées. Tous les utilisateurs repartent de zéro pour garantir la précision des données.",
+      err_no_email: "Veuillez entrer un e-mail.",
+      err_not_found: "E-mail non trouvé dans notre système.",
+      err_login: "E-mail ou mot de passe invalide.",
+      msg_sent: "Si votre e-mail existe, un lien a été envoyé.",
+      msg_otp_sent: "Code envoyé !",
+      err_otp: "Code invalide."
+    },
+    de: {
+      nav_signup: "Registrieren",
+      left_title: "Neu oder migriert?",
+      left_desc: "Haben Sie gerade Zugang gekauft oder ziehen Sie von der alten Plattform um? E-Mail eingeben, um Passwort zu erstellen.",
+      left_btn: "Link senden",
+      spam_note: "ℹ️ Bitte prüfen Sie Ihren Spam-Ordner, falls Sie keine E-Mail erhalten.",
+      center_title: "Anmelden",
+      email_label: "E-Mail-Adresse",
+      pwd_label: "Passwort",
+      show_pwd: "Anzeigen",
+      hide_pwd: "Verbergen",
+      center_btn: "Mit Passwort anmelden",
+      right_title: "Probleme?",
+      right_desc: "Erhalten Sie stattdessen einen Einmalcode (8-stellig) direkt in Ihren Posteingang.",
+      right_btn: "Code senden",
+      verify_btn: "Bestätigen & Login",
+      info1_title: "ℹ️ Info für bestehende Nutzer",
+      info1_body: "Die meisten Nutzer wurden automatisch übertragen. In Einzelfällen ist eine manuelle Aktivierung nötig. Wenn Ihre E-Mail nicht erkannt wird, kontaktieren Sie den Support.",
+      info2_title: "📊 Trainingsfortschritt",
+      info2_body: "Aufgrund der neuen Plattform wurde der bisherige Fortschritt nicht übernommen. Alle Nutzer starten bei Null, um korrekte Statistiken zu gewährleisten.",
+      err_no_email: "E-Mail eingeben.",
+      err_not_found: "E-Mail nicht im System gefunden.",
+      err_login: "E-Mail oder Passwort ungültig.",
+      msg_sent: "Falls Ihre E-Mail registriert ist, wurde ein Link gesendet.",
+      msg_otp_sent: "Code gesendet!",
+      err_otp: "Ungültiger Code."
     }
-    return;
+  };
+
+  let currentLang = 'en';
+  const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+
+  function applyLang(lang) {
+    currentLang = lang;
+    document.querySelectorAll("[data-t]").forEach(el => {
+      const key = el.getAttribute("data-t");
+      if (I18N[lang][key]) el.innerHTML = I18N[lang][key];
+    });
+    document.querySelectorAll(".lang-switch button").forEach(btn => {
+      btn.classList.toggle("active", btn.id === `btn-${lang}`);
+    });
   }
 
-  document.getElementById("emailSection").style.display = "none";
-  document.getElementById("otpSection").style.display = "block";
-
-  if (email === lastEmailAttempt) attemptCount++;
-  else { attemptCount = 1; lastEmailAttempt = email; }
-
-  showMessage("success", attemptCount >= 2 ? I18N[currentLang].sent_twice : I18N[currentLang].sent_once);
-});
-
-document.getElementById("verifyOtp").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const token = document.getElementById("otpCode").value.trim();
-
-  if (token.length < 6 || token.length > 8) {
-    showMessage("error", I18N[currentLang].otp_error);
-    return;
+  function notify(type, text) {
+    const el = document.getElementById("status");
+    el.textContent = text;
+    el.className = "status-msg " + type;
+    el.style.display = "block";
+    setTimeout(() => { el.style.display = "none"; }, 6000);
   }
 
-  const { data, error } = await window.supabase.auth.verifyOtp({
-    email,
-    token,
-    type: 'magiclink'
-  });
-
-  if (error) {
-    showMessage("error", error.message);
-  } else if (data.session) {
-    window.location.href = "/lux/dashboard/index.html";
+  async function handleSetup() {
+    const email = document.getElementById("setupEmail").value.trim();
+    if(!email) return notify("error", I18N[currentLang].err_no_email);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/lux/login-password.html"
+    });
+    notify("success", I18N[currentLang].msg_sent);
   }
-});
+
+  async function handleLogin() {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPwd").value.trim();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) notify("error", I18N[currentLang].err_login);
+    else window.location.href = "/lux/dashboard/index.html";
+  }
+
+  async function handleSendOTP() {
+    const email = document.getElementById("otpEmail").value.trim();
+    if(!email) return notify("error", I18N[currentLang].err_no_email);
+    const { error } = await supabase.auth.signInWithOtp({
+      email, options: { shouldCreateUser: false }
+    });
+    if (error) notify("error", I18N[currentLang].err_not_found);
+    else {
+      document.getElementById("otpInputRow").style.display = "none";
+      document.getElementById("otpVerifyRow").style.display = "block";
+      notify("success", I18N[currentLang].msg_otp_sent);
+    }
+  }
+
+  async function handleVerifyOTP() {
+    const email = document.getElementById("otpEmail").value.trim();
+    const token = document.getElementById("otpToken").value.trim();
+    const { error } = await supabase.auth.verifyOtp({ email, token, type: 'magiclink' });
+    if (error) notify("error", I18N[currentLang].err_otp);
+    else window.location.href = "/lux/dashboard/index.html";
+  }
+
+  function toggleMainPwd() {
+    const pwdInput = document.getElementById("loginPwd");
+    const btn = document.querySelector(".toggle-pwd");
+    if (pwdInput.type === "password") {
+      pwdInput.type = "text";
+      btn.textContent = I18N[currentLang].hide_pwd;
+    } else {
+      pwdInput.type = "password";
+      btn.textContent = I18N[currentLang].show_pwd;
+    }
+  }
+
+  // Init
+  applyLang('en');
 </script>
-<script>
-  const noteToggle = document.getElementById("noteToggle");
-  const noteWrapper = document.querySelector(".login-note-wrapper");
-
-  noteToggle.addEventListener("click", () => {
-    noteWrapper.classList.toggle("open");
-  });
-</script>
-
-
 </body>
 </html>
