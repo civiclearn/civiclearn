@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – CivicLearn Australia</title>LAST1
+  <title>Login – CivicLearn Australia</title>2
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/login.css">
@@ -25,7 +25,7 @@
     h2 { font-size: 20px; margin-bottom: 15px; text-align: center; }
     p.subtitle { font-size: 13px; color: #666; text-align: center; margin-bottom: 25px; line-height: 1.5; }
     label { font-size: 11px; font-weight: 700; margin-bottom: 8px; display: block; text-transform: uppercase; color: #888; }
-    input { width: 100%; padding: 12px; border: 2px solid #e5dfd2; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; font-family: inherit; }
+    input { width: 100%; padding: 12px; border: 2px solid #e5dfd2; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; }
     .btn-action { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; }
     .btn-purple { background: var(--purple); color: white; }
     .btn-black { background: var(--black); color: white; }
@@ -127,57 +127,56 @@
   async function handleTelegramRequest() {
     const email = document.getElementById("tgEmail").value.trim();
     const handle = document.getElementById("tgHandle").value.trim().replace('@','');
-    if(!email || !handle) return notify("error", "Fill both fields.");
-    notify("success", "Connecting...");
-    try {
-      const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
-        body: JSON.stringify({ email, handle })
-      });
-      const result = await response.json();
-      if (result.success) {
-        document.getElementById("tgInputRow").style.display = "none";
-        document.getElementById("tgVerifyRow").style.display = "block";
-        notify("success", "Code sent!");
-      } else if (result.needsLink) {
-        document.getElementById("tgLinkRow").style.display = "block";
-        document.getElementById("botLink").href = `https://t.me/civiclearnloginbot?start=${btoa(email + '|' + handle)}`; 
-      } else { notify("error", result.error || "User not found."); }
-    } catch (e) { notify("error", "System error."); }
+    if(!email || !handle) return notify("error", "Fill in both fields.");
+    
+    const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
+      body: JSON.stringify({ email, handle })
+    });
+    const result = await response.json();
+    if (result.success) {
+      document.getElementById("tgInputRow").style.display = "none";
+      document.getElementById("tgVerifyRow").style.display = "block";
+      notify("success", "Code sent!");
+    } else if (result.needsLink) {
+      document.getElementById("tgLinkRow").style.display = "block";
+      document.getElementById("botLink").href = `https://t.me/civiclearnloginbot?start=${btoa(email + '|' + handle)}`; 
+    } else { notify("error", result.error || "User not found."); }
   }
 
   async function handleVerifyTelegram() {
     const email = document.getElementById("tgEmail").value.trim();
     const code = document.getElementById("tgToken").value.trim();
-    notify("success", "Finalising login...");
+    notify("success", "Connecting session...");
     
     try {
       const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
-        body: JSON.stringify({ action: 'verify', email: email, token: code })
+        body: JSON.stringify({ action: 'verify', email, token: code })
       });
       const result = await response.json();
 
-      if (result.success && result.token) {
-        // Exchange the hashed token for a real session
+      if (result.success && result.hashed_token) {
+        // USE RECOVERY TYPE HERE
         const { error } = await supabase.auth.verifyOtp({
           email: email,
-          token: result.token,
-          type: 'magiclink'
+          token: result.hashed_token,
+          type: 'recovery'
         });
         if (!error) {
-            notify("success", "Success!");
+            notify("success", "Authenticated!");
             window.location.href = REDIRECT_PATH;
         } else { 
+            notify("error", "Expired/Invalid Token. Try again."); 
             console.error(error);
-            notify("error", "Auth Failed: " + error.message); 
         }
       } else { notify("error", "Invalid Telegram code."); }
-    } catch (e) { notify("error", "Network error."); }
+    } catch (e) { notify("error", "System error."); }
   }
 
+  // --- STANDARD AUTH ---
   async function handleLogin() {
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPwd").value.trim();
