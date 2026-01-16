@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – CivicLearn Australia</title>5
+  <title>Login – CivicLearn Australia</title>6
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/login.css">
@@ -21,16 +21,11 @@
     .login-grid-4 { display: flex; justify-content: center; align-items: stretch; gap: 15px; max-width: 1400px; margin: 60px auto; padding: 0 20px; }
     .auth-card { background: white; padding: 40px 25px; width: 280px; border: 1px solid #eee; display: flex; flex-direction: column; border-radius: 20px; }
     .card-center { box-shadow: 0 15px 40px rgba(0,0,0,0.08); z-index: 10; margin-top: -20px; margin-bottom: -20px; padding-top: 60px; }
-    .card-telegram { background-color: #e3f2fd; border-color: #bbdefb; }
     h2 { font-size: 20px; margin-bottom: 15px; text-align: center; }
     p.subtitle { font-size: 13px; color: #666; text-align: center; margin-bottom: 25px; line-height: 1.5; }
     label { font-size: 11px; font-weight: 700; margin-bottom: 8px; display: block; text-transform: uppercase; color: #888; }
     input { width: 100%; padding: 12px; border: 2px solid #e5dfd2; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; }
     .btn-action { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; }
-    .btn-purple { background: var(--purple); color: white; }
-    .btn-black { background: var(--black); color: white; }
-    .btn-yellow { background: var(--yellow); color: #111; }
-    .btn-blue { background: var(--blue); color: white; }
     .status-msg { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 30px; display: none; z-index: 100; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     .error { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
     .success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
@@ -40,72 +35,33 @@
 
 <div id="status" class="status-msg"></div>
 
-<header class="site-header">
-  <div class="header-inner">
-    <div class="header-left">
-      <div class="brand-main">
-        <img src="/assets/images/au.svg" alt="Australia"> 
-        <div class="brand-title">CivicLearn Australia</div> 
-      </div>
-      <div class="brand-powered">powered by <span>CivicLearn</span></div>
-    </div>
-    <nav class="header-nav">
-      <a href="/">Home</a>
-      <a href="/au/#presentation">Overview</a>
-      <a href="/au/#pricing">Pricing</a>
-    </nav>
-    <a href="/australia/checkout.html" class="btn-small-purple">Sign up</a>
-  </div>
-</header>
-
 <div class="login-grid-4">
-  <div class="auth-card">
-    <h2 style="color: var(--purple);">New User?</h2>
-    <p class="subtitle">Set your password to begin training.</p>
-    <input type="email" id="setupEmail" placeholder="you@example.com">
-    <button onclick="handleSetup()" class="btn-action btn-purple">Setup Account</button>
-  </div>
   <div class="auth-card card-center">
     <h2>Login</h2>
-    <p class="subtitle">Sign in with email/password.</p>
+    <p class="subtitle">Sign in with email and password.</p>
+    <label>Email Address</label>
     <input type="email" id="loginEmail" placeholder="you@example.com">
+    <label>Password</label>
     <input type="password" id="loginPwd" placeholder="••••••••">
-    <button onclick="handleLogin()" class="btn-action btn-black">Sign In</button>
+    <button onclick="handleLogin()" class="btn-action" style="background:var(--black); color:white;">Sign In</button>
   </div>
-  <div class="auth-card">
-    <h2 style="color: #856404;">Email Code</h2>
-    <p class="subtitle">Login via email code.</p>
-    <div id="emailOtpRow">
-      <input type="email" id="otpEmail" placeholder="you@example.com">
-      <button onclick="handleSendOTP()" class="btn-action btn-yellow">Send Code</button>
-    </div>
-    <div id="emailVerifyRow" style="display:none;">
-      <input type="text" id="otpToken" placeholder="000000">
-      <button onclick="handleVerifyOTP()" class="btn-action btn-black">Verify Code</button>
-    </div>
-  </div>
-  <div class="auth-card card-telegram">
-    <h2 style="color: var(--blue);">Telegram</h2>
-    <p class="subtitle">Login via Telegram code.</p>
-    <div id="tgInputRow">
-      <input type="email" id="tgEmail" placeholder="you@example.com">
-      <input type="text" id="tgHandle" placeholder="@username">
-      <button onclick="handleTelegramRequest()" class="btn-action btn-blue">Get Code</button>
-    </div>
-    <div id="tgVerifyRow" style="display:none;">
-      <input type="text" id="tgToken" placeholder="000000" maxlength="6" style="text-align:center;">
-      <button onclick="handleVerifyTelegram()" class="btn-action btn-black">Login</button>
-    </div>
-    <div id="tgLinkRow" style="display:none;">
-      <p style="color:red; font-size: 11px; font-weight: bold; text-align:center;">Not linked!</p>
-      <a id="botLink" href="#" target="_blank" class="btn-action btn-blue" style="text-decoration:none; text-align:center; display:block;">Link Telegram Now</a>
-    </div>
+
+  <div class="auth-card" style="border: 2px dashed #0288d1; background: #f0f9ff;">
+    <h2 style="color: #0288d1;">Support Access</h2>
+    <p class="subtitle">Use the bypass code provided by support.</p>
+    
+    <label>Email Address</label>
+    <input type="email" id="bypassEmail" placeholder="you@example.com">
+    
+    <label>Bypass Code</label>
+    <input type="text" id="bypassToken" placeholder="Enter code here">
+    
+    <button onclick="handleBypass()" class="btn-action" style="background: #0288d1; color: white;">Verify & Enter</button>
   </div>
 </div>
 
 <script>
   const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-  const REDIRECT_PATH = "/australia/dashboard/index.html"; 
 
   function notify(type, text) {
     const el = document.getElementById("status");
@@ -113,92 +69,39 @@
     setTimeout(() => { el.style.display = "none"; }, 5000);
   }
 
-  async function handleTelegramRequest() {
-    const email = document.getElementById("tgEmail").value.trim();
-    const handle = document.getElementById("tgHandle").value.trim().replace('@','');
-    if(!email || !handle) return notify("error", "Fill both fields.");
-    const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
-      body: JSON.stringify({ email, handle })
-    });
-    const result = await response.json();
-    if (result.success) {
-      document.getElementById("tgInputRow").style.display = "none";
-      document.getElementById("tgVerifyRow").style.display = "block";
-      notify("success", "Code sent!");
-    } else if (result.needsLink) {
-      document.getElementById("tgLinkRow").style.display = "block";
-      document.getElementById("botLink").href = `https://t.me/civiclearnloginbot?start=${btoa(email + '|' + handle)}`; 
-    } else { notify("error", result.error || "User not found."); }
-  }
-
-  async function handleVerifyTelegram() {
-    const email = document.getElementById("tgEmail").value.trim();
-    const code = document.getElementById("tgToken").value.trim();
-    notify("success", "Authenticating...");
-    
-    try {
-      const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
-        body: JSON.stringify({ action: 'verify', email, token: code })
-      });
-      const result = await response.json();
-
-      if (result.success && result.hashed_token) {
-        // This is the part that creates the official session for auth-guard.js
-        const { error } = await supabase.auth.verifyOtp({
-          email: email,
-          token: result.hashed_token,
-          type: 'recovery'
-        });
-
-        if (!error) {
-            window.location.href = REDIRECT_PATH;
-        } else {
-            notify("error", "Auth Failed: " + error.message);
-        }
-      } else { 
-        notify("error", result.error || "Invalid Code."); 
-      }
-    } catch (e) { 
-      notify("error", "Connection error."); 
-    }
-  }
-
   async function handleLogin() {
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPwd").value.trim();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) notify("error", "Invalid login.");
-    else window.location.href = REDIRECT_PATH;
+    else window.location.href = "/australia/dashboard/index.html";
   }
 
-  async function handleSendOTP() {
-    const email = document.getElementById("otpEmail").value.trim();
-    const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
-    if (error) notify("error", error.message);
-    else {
-      document.getElementById("emailOtpRow").style.display = "none";
-      document.getElementById("emailVerifyRow").style.display = "block";
-      notify("success", "Code sent!");
+  async function handleBypass() {
+    const email = document.getElementById("bypassEmail").value.trim();
+    const token = document.getElementById("bypassToken").value.trim();
+    
+    if(!email || !token) {
+      notify("error", "Enter both email and code.");
+      return;
     }
-  }
 
-  async function handleVerifyOTP() {
-    const email = document.getElementById("otpEmail").value.trim();
-    const token = document.getElementById("otpToken").value.trim();
-    const { error, data } = await supabase.auth.verifyOtp({ email, token, type: 'magiclink' });
-    if (error) notify("error", "Invalid code.");
-    else if (data.session) window.location.href = REDIRECT_PATH;
-  }
+    const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
+      body: JSON.stringify({ action: 'verify_bypass', email, token })
+    });
 
-  async function handleSetup() {
-    const email = document.getElementById("setupEmail").value.trim();
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
-    if(error) notify("error", error.message);
-    else notify("success", "Link sent!");
+    const result = await response.json();
+
+    if (result.success) {
+      localStorage.setItem("cl_vip_pass", "true");
+      localStorage.setItem("user_email", email);
+      notify("success", "Access Granted.");
+      window.location.href = "/australia/dashboard/index.html";
+    } else {
+      notify("error", "Invalid bypass code.");
+    }
   }
 </script>
 </body>
