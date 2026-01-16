@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Support Login – CivicLearn Australia</title>
+  <title>Login – CivicLearn Australia</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -13,18 +13,28 @@
       background: #fdfaf5;
       padding: 40px 20px;
     }
-    .box {
-      max-width: 420px;
+    .wrap {
+      max-width: 820px;
       margin: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+    .card {
       background: white;
-      padding: 30px;
+      padding: 28px;
       border-radius: 22px;
-      border: 2px solid #0288d1;
       box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    }
+    .card.primary {
+      border: 2px solid #c084fc;
+      background: #faf5ff;
+    }
+    .card.secondary {
+      border: 2px solid #0288d1;
     }
     h2 {
       margin-top: 0;
-      text-align: center;
     }
     input {
       width: 100%;
@@ -40,74 +50,162 @@
       padding: 15px;
       border-radius: 14px;
       border: none;
-      background: #0288d1;
-      color: white;
       font-weight: 700;
       cursor: pointer;
       font-size: 15px;
     }
+    .btn-primary {
+      background: #c084fc;
+      color: #3b0764;
+    }
+    .btn-secondary {
+      background: #0288d1;
+      color: white;
+    }
     .msg {
       margin-top: 14px;
-      text-align: center;
-      color: #c62828;
-      font-weight: 600;
       font-size: 14px;
+      font-weight: 600;
+    }
+    .error {
+      color: #c62828;
+    }
+    .success {
+      color: #2e7d32;
+    }
+    .password-box {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 14px;
+      background: #fff;
+      border: 2px dashed #c084fc;
+      font-size: 18px;
+      text-align: center;
+      letter-spacing: 1px;
+      display: none;
+    }
+    @media (max-width: 720px) {
+      .wrap {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="box">
-    <h2>Support Access</h2>
 
-    <input
-      id="email"
-      type="email"
-      placeholder="Email address"
-      autocomplete="email"
-    />
+<div class="wrap">
 
-    <input
-      id="code"
-      type="password"
-      placeholder="Access code"
-      autocomplete="one-time-code"
-    />
+  <!-- FIRST ACCESS -->
+  <div class="card primary">
+    <h2>First access</h2>
+    <p>Enter your email to get your password (shown once).</p>
 
-    <button onclick="login()">Enter</button>
+    <input id="fa-email" type="email" placeholder="Email address">
 
-    <div id="msg" class="msg"></div>
+    <button class="btn-primary" onclick="firstAccess()">Get password</button>
+
+    <div id="fa-msg" class="msg"></div>
+
+    <div id="passwordBox" class="password-box"></div>
   </div>
 
+  <!-- LOGIN -->
+  <div class="card secondary">
+    <h2>Login</h2>
+
+    <input id="login-email" type="email" placeholder="Email address">
+    <input id="login-password" type="password" placeholder="Password">
+
+    <button class="btn-secondary" onclick="login()">Enter</button>
+
+    <div id="login-msg" class="msg"></div>
+  </div>
+
+</div>
+
 <script>
-async function login() {
-  const email = document.getElementById("email").value.trim().toLowerCase();
-  const code  = document.getElementById("code").value.trim();
-  const msg   = document.getElementById("msg");
+const SUPABASE_FN = "https://htgliokekeaovdiafrgs.supabase.co/functions/v1";
+
+/* -------------------------
+   FIRST ACCESS
+-------------------------- */
+async function firstAccess() {
+  const email = document.getElementById("fa-email").value.trim().toLowerCase();
+  const msg = document.getElementById("fa-msg");
+  const box = document.getElementById("passwordBox");
 
   msg.textContent = "";
+  box.style.display = "none";
 
-  if (!email || !code) {
-    msg.textContent = "Please enter email and access code.";
+  if (!email) {
+    msg.textContent = "Please enter your email.";
+    msg.className = "msg error";
     return;
   }
 
-  const res = await fetch("/functions/v1/bypass-login", {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email: email,
-      bypass_code: code
-    })
-  });
+  try {
+    const res = await fetch(SUPABASE_FN + "/password-first-access", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
 
-  if (res.ok) {
-    window.location.replace("/australia/dashboard/index.html");
-  } else {
-    msg.textContent = "Invalid email or access code.";
+    if (res.status === 200) {
+      const data = await res.json();
+      box.textContent = data.password;
+      box.style.display = "block";
+      msg.textContent = "Save this password. It will not be shown again.";
+      msg.className = "msg success";
+    } else if (res.status === 409) {
+      msg.textContent = "Password already created. Please use the login form.";
+      msg.className = "msg error";
+    } else {
+      msg.textContent = "Email not recognized.";
+      msg.className = "msg error";
+    }
+  } catch {
+    msg.textContent = "Network error. Try again.";
+    msg.className = "msg error";
+  }
+}
+
+/* -------------------------
+   LOGIN
+-------------------------- */
+async function login() {
+  const email = document.getElementById("login-email").value.trim().toLowerCase();
+  const password = document.getElementById("login-password").value;
+  const msg = document.getElementById("login-msg");
+
+  msg.textContent = "";
+
+  if (!email || !password) {
+    msg.textContent = "Enter email and password.";
+    msg.className = "msg error";
+    return;
+  }
+
+  try {
+    const res = await fetch(SUPABASE_FN + "/password-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, password })
+    });
+
+    if (res.ok) {
+      window.location.replace("/australia/dashboard/index.html");
+    } else {
+      msg.textContent = "Invalid email or password.";
+      msg.className = "msg error";
+    }
+  } catch {
+    msg.textContent = "Network error. Try again.";
+    msg.className = "msg error";
   }
 }
 </script>
+
 </body>
 </html>
