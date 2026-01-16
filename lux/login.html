@@ -13,222 +13,42 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
-
-  <style>
-    :root {
-      --purple: #7c3aed;
-      --yellow: #f1c40f;
-      --black: #333;
-      --bg: #fdfaf5;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Lexend', sans-serif;
-      background-color: var(--bg);
-      color: #111;
-    }
-
-    .site-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 40px;
-      background: white;
-    }
-
-    .brand-main { display: flex; align-items: center; gap: 10px; font-weight: 700; }
-    
-    .lang-switch {
-      display: flex;
-      gap: 5px;
-      background: #f1f1f1;
-      padding: 4px;
-      border-radius: 20px;
-    }
-
-    .lang-switch button {
-      border: none;
-      background: none;
-      padding: 5px 12px;
-      border-radius: 15px;
-      cursor: pointer;
-      font-family: 'Lexend', sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      color: #666;
-    }
-
-    .lang-switch button.active {
-      background: white;
-      color: var(--purple);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    .login-grid {
-      display: flex;
-      justify-content: center;
-      align-items: stretch;
-      gap: 0;
-      max-width: 1100px;
-      margin: 80px auto 40px;
-      padding: 20px;
-    }
-
-    .auth-card {
-      background: white;
-      padding: 40px 30px;
-      width: 320px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .card-left {
-      border-radius: 20px 0 0 20px;
-      background-color: #f3ebff;
-      border: 1px solid #e0d0f9;
-      z-index: 1;
-    }
-
-    .card-center {
-      border-radius: 20px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.08);
-      z-index: 10;
-      margin: -20px 0;
-      padding: 60px 40px;
-      border: 1px solid #eee;
-    }
-
-    .card-right {
-      border-radius: 0 20px 20px 0;
-      background-color: #fffdf0;
-      border: 1px solid #f9edbc;
-      z-index: 1;
-    }
-
-    h2 { font-size: 19px; margin-top: 0; margin-bottom: 15px; }
-    p { font-size: 13px; color: #555; line-height: 1.5; margin-bottom: 20px; }
-
-    label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 8px; }
-    input {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #e5dfd2;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      box-sizing: border-box;
-      font-family: 'Lexend', sans-serif;
-    }
-
-    .btn-action {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: none;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: 'Lexend', sans-serif;
-      margin-top: auto;
-    }
-
-    .btn-purple { background: var(--purple); color: white; }
-    .btn-black { background: var(--black); color: white; }
-    .btn-yellow { background: var(--yellow); color: #111; }
-
-    .pwd-container { position: relative; width: 100%; }
-    .pwd-container input { padding-right: 60px; }
-    
-    .toggle-pwd {
-      position: absolute;
-      right: 12px;
-      top: 12px;
-      background: none;
-      border: none;
-      color: var(--purple);
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .status-msg {
-      position: fixed;
-      top: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 24px;
-      border-radius: 30px;
-      font-size: 14px;
-      font-weight: 500;
-      display: none;
-      z-index: 100;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .error { background: #fee2e2; color: #dc2626; display: block; }
-    .success { background: #dcfce7; color: #166534; display: block; }
-
-    .info-section {
-      max-width: 1100px;
-      margin: 0 auto 80px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      padding: 0 20px;
-    }
-
-    .info-card {
-      background: white;
-      border: 1px solid rgba(0,0,0,.08);
-      border-radius: 18px;
-      padding: 24px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-    }
-
-    @media (max-width: 900px) {
-      .login-grid { flex-direction: column; align-items: center; gap: 20px; }
-      .auth-card { border-radius: 20px; margin: 0; width: 100%; max-width: 400px; }
-      .info-section { grid-template-columns: 1fr; }
-    }
-	.btn-small-purple {
-  background: var(--purple);
-  color: white;
-  text-decoration: none;
-  padding: 8px 24px;
-  border-radius: 20px; /* Elegant rounded pill shape */
-  font-size: 14px;
-  font-weight: 600;
-  display: inline-block;
-  transition: opacity 0.2s ease;
-}
-
-.btn-small-purple:hover {
-  opacity: 0.9;
-}
-
-.site-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 40px;
-  background: white;
-  border-bottom: 1px solid rgba(0,0,0,0.05); /* Clean separation */
-}
-  </style>
+<link rel="stylesheet" href="/assets/css/newlogin.css">
+  
 </head>
 <body>
 
 <header class="site-header">
-  <div class="brand-main">
-    <img src="/assets/images/lu.svg" width="24" alt="Luxembourg">
-    Vivre-Ensemble.lu
-  </div>
-  
-  <div class="lang-switch">
-    <button onclick="applyLang('en')" id="btn-en">EN</button>
-    <button onclick="applyLang('fr')" id="btn-fr">FR</button>
-    <button onclick="applyLang('de')" id="btn-de">DE</button>
-  </div>
+  <div class="header-inner">
 
-  <a href="/lux/checkout.html" class="btn-small-purple" data-t="nav_signup">Sign up</a>
+    <!-- LEFT -->
+    <div class="header-left">
+      <a href="/" class="brand-link">
+        <img src="/assets/images/lu.svg" alt="LU">
+        <div class="brand-title">Vivre-Ensemble.lu</div>
+      </a>
+    </div>
+
+    <!-- CENTER -->
+    <div class="header-center">
+      <div class="lang-switch">
+        <button onclick="applyLang('en')" id="btn-en">EN</button>
+        <button onclick="applyLang('fr')" id="btn-fr">FR</button>
+        <button onclick="applyLang('de')" id="btn-de">DE</button>
+      </div>
+
+      <nav class="header-nav">
+        <a href="https://vivre-ensemble.lu/contact/">Contact</a>
+      </nav>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="header-right">
+      <div class="brand-powered">powered by <span>CivicLearn</span></div>
+      <a href="/lux/checkout.html" class="btn-small-purple">Sign up</a>
+    </div>
+
+  </div>
 </header>
 
 <div id="status" class="status-msg"></div>
