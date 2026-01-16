@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – CivicLearn Australia</title>2
+  <title>Login – CivicLearn Australia</title>3
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/login.css">
@@ -62,48 +62,40 @@
   <div class="auth-card">
     <h2 style="color: var(--purple);">New User?</h2>
     <p class="subtitle">Set your password to begin training.</p>
-    <label>Email Address</label>
     <input type="email" id="setupEmail" placeholder="you@example.com">
     <button onclick="handleSetup()" class="btn-action btn-purple">Setup Account</button>
   </div>
 
   <div class="auth-card card-center">
     <h2>Login</h2>
-    <p class="subtitle">Sign in with email and password.</p>
-    <label>Email Address</label>
+    <p class="subtitle">Sign in with email/password.</p>
     <input type="email" id="loginEmail" placeholder="you@example.com">
-    <label>Password</label>
     <input type="password" id="loginPwd" placeholder="••••••••">
     <button onclick="handleLogin()" class="btn-action btn-black">Sign In</button>
   </div>
 
   <div class="auth-card">
     <h2 style="color: #856404;">Email Code</h2>
-    <p class="subtitle">Get a code via email instead.</p>
+    <p class="subtitle">Get a login code via email.</p>
     <div id="emailOtpRow">
-      <label>Email Address</label>
       <input type="email" id="otpEmail" placeholder="you@example.com">
       <button onclick="handleSendOTP()" class="btn-action btn-yellow">Send Code</button>
     </div>
     <div id="emailVerifyRow" style="display:none;">
-      <label>Enter Code</label>
-      <input type="text" id="otpToken" placeholder="000000" maxlength="8">
+      <input type="text" id="otpToken" placeholder="000000">
       <button onclick="handleVerifyOTP()" class="btn-action btn-black">Verify Code</button>
     </div>
   </div>
 
   <div class="auth-card card-telegram">
     <h2 style="color: var(--blue);">Telegram</h2>
-    <p class="subtitle">Instant login via Telegram app.</p>
+    <p class="subtitle">Instant login via Telegram.</p>
     <div id="tgInputRow">
-      <label>Email</label>
       <input type="email" id="tgEmail" placeholder="you@example.com">
-      <label>Telegram Handle</label>
       <input type="text" id="tgHandle" placeholder="@username">
       <button onclick="handleTelegramRequest()" class="btn-action btn-blue">Get Code</button>
     </div>
     <div id="tgVerifyRow" style="display:none;">
-      <label>6-Digit Code</label>
       <input type="text" id="tgToken" placeholder="000000" maxlength="6" style="text-align:center;">
       <button onclick="handleVerifyTelegram()" class="btn-action btn-black">Login</button>
     </div>
@@ -148,7 +140,7 @@
   async function handleVerifyTelegram() {
     const email = document.getElementById("tgEmail").value.trim();
     const code = document.getElementById("tgToken").value.trim();
-    notify("success", "Connecting session...");
+    notify("success", "Logging in...");
     
     try {
       const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
@@ -158,25 +150,26 @@
       });
       const result = await response.json();
 
-      if (result.success && result.hashed_token) {
-        // USE RECOVERY TYPE HERE
-        const { error } = await supabase.auth.verifyOtp({
-          email: email,
-          token: result.hashed_token,
-          type: 'recovery'
+      if (result.success && result.session) {
+        // MANUALLY SET THE SESSION (Avoids expired token errors)
+        const { error } = await supabase.auth.setSession({
+          access_token: result.session.access_token,
+          refresh_token: result.session.refresh_token
         });
+
         if (!error) {
-            notify("success", "Authenticated!");
             window.location.href = REDIRECT_PATH;
-        } else { 
-            notify("error", "Expired/Invalid Token. Try again."); 
-            console.error(error);
+        } else {
+            notify("error", "Login failed: " + error.message);
         }
-      } else { notify("error", "Invalid Telegram code."); }
-    } catch (e) { notify("error", "System error."); }
+      } else { 
+        notify("error", result.error || "Invalid Code."); 
+      }
+    } catch (e) { 
+      notify("error", "Connection error."); 
+    }
   }
 
-  // --- STANDARD AUTH ---
   async function handleLogin() {
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPwd").value.trim();
