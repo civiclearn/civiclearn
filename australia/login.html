@@ -66,8 +66,8 @@
   <div class="header-inner">
     <div class="header-left">
       <div class="brand-main">
-        <img src="/assets/images/au.svg" alt="Australia"> <div class="brand-title">CivicLearn Australia</div>
-      </div>
+        <img src="/assets/images/au.svg" alt="Australia"> 
+        <div class="brand-title">CivicLearn Australia</div> </div>
       <div class="brand-powered">powered by <span>CivicLearn</span></div>
     </div>
     <nav class="header-nav">
@@ -141,7 +141,6 @@
 
 <script>
   const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-  // Correct redirect based on your UK example
   const REDIRECT_PATH = "/australia/dashboard/index.html"; 
 
   function notify(type, text) {
@@ -152,27 +151,38 @@
     setTimeout(() => { el.style.display = "none"; }, 5000);
   }
 
-  // Telegram Logic
   async function handleTelegramRequest() {
     const email = document.getElementById("tgEmail").value.trim();
     const handle = document.getElementById("tgHandle").value.trim().replace('@','');
     if(!email || !handle) return notify("error", "Fill in both fields.");
 
-    const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
-      body: JSON.stringify({ email, handle })
-    });
+    notify("success", "Checking...");
 
-    const result = await response.json();
-    if (result.success) {
-      document.getElementById("tgInputRow").style.display = "none";
-      document.getElementById("tgVerifyRow").style.display = "block";
-      notify("success", "Code sent to Telegram!");
-    } else if (result.needsLink) {
-      document.getElementById("tgLinkRow").style.display = "block";
-      document.getElementById("botLink").href = `https://t.me/civiclearnloginbot?start=${btoa(email + '|' + handle)}`; 
-    } else { notify("error", result.error || "User not found."); }
+    try {
+      const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
+        body: JSON.stringify({ email: email, handle: handle })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        document.getElementById("tgInputRow").style.display = "none";
+        document.getElementById("tgVerifyRow").style.display = "block";
+        notify("success", "Code sent to Telegram!");
+      } else if (result.needsLink) {
+        document.getElementById("tgLinkRow").style.display = "block";
+        const payload = btoa(email + '|' + handle);
+        document.getElementById("botLink").href = `https://t.me/civiclearnloginbot?start=${payload}`; 
+        notify("error", "Account must be linked.");
+      } else {
+        notify("error", result.error || "User not found.");
+      }
+    } catch (e) {
+      notify("error", "Connection failed. Check console.");
+      console.error(e);
+    }
   }
 
   async function handleVerifyTelegram() {
@@ -183,9 +193,9 @@
     else { notify("success", "Logging in..."); window.location.href = REDIRECT_PATH; }
   }
 
-  // Auth Logic
   async function handleSetup() {
     const email = document.getElementById("setupEmail").value.trim();
+    if(!email) return notify("error", "Enter email.");
     const { error } = await supabase.auth.resetPasswordForEmail(email);
     if(error) notify("error", error.message);
     else notify("success", "Check your email for setup link.");
@@ -194,6 +204,7 @@
   async function handleLogin() {
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPwd").value.trim();
+    if(!email || !password) return notify("error", "Fill both fields.");
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) notify("error", "Invalid login.");
     else window.location.href = REDIRECT_PATH;
@@ -201,6 +212,7 @@
 
   async function handleSendOTP() {
     const email = document.getElementById("otpEmail").value.trim();
+    if(!email) return notify("error", "Enter email.");
     const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
     if (error) notify("error", error.message);
     else {
