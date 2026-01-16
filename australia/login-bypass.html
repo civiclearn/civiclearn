@@ -21,7 +21,7 @@
       border-radius: 22px;
       border: 2px solid #0288d1;
       box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-      display: none; /* shown only if not logged in */
+      display: none;
     }
     h2 {
       margin-top: 0;
@@ -81,19 +81,38 @@
   </div>
 
 <script>
-(async function () {
-  // If already authenticated, go straight in
-  const res = await fetch("/functions/v1/bypass-verify", {
-    credentials: "include"
-  });
+/* ===============================
+   CONFIG — CHANGE ONLY THIS
+================================ */
+const SUPABASE_PROJECT_ID = "htgliokekeaovdiafrgs";
+const SUPABASE_BASE =
+  "https://" + SUPABASE_PROJECT_ID + ".supabase.co/functions/v1";
 
-  if (res.ok) {
-    window.location.replace("/australia/dashboard/index.html");
-  } else {
-    document.getElementById("loginBox").style.display = "block";
+/* ===============================
+   AUTO-REDIRECT IF LOGGED IN
+================================ */
+(async function () {
+  try {
+    const res = await fetch(
+      SUPABASE_BASE + "/bypass-verify",
+      { credentials: "include" }
+    );
+
+    if (res.ok) {
+      window.location.replace("/australia/dashboard/index.html");
+      return;
+    }
+  } catch (e) {
+    // ignore network errors
   }
+
+  // Not logged in → show form
+  document.getElementById("loginBox").style.display = "block";
 })();
 
+/* ===============================
+   LOGIN ACTION
+================================ */
 async function login() {
   const email = document.getElementById("email").value.trim().toLowerCase();
   const code  = document.getElementById("code").value.trim();
@@ -106,20 +125,27 @@ async function login() {
     return;
   }
 
-  const res = await fetch("/functions/v1/bypass-login", {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email: email,
-      bypass_code: code
-    })
-  });
+  try {
+    const res = await fetch(
+      SUPABASE_BASE + "/bypass-login",
+      {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email,
+          bypass_code: code
+        })
+      }
+    );
 
-  if (res.ok) {
-    window.location.replace("/australia/dashboard/index.html");
-  } else {
-    msg.textContent = "Invalid email or access code.";
+    if (res.ok) {
+      window.location.replace("/australia/dashboard/index.html");
+    } else {
+      msg.textContent = "Invalid email or access code.";
+    }
+  } catch (e) {
+    msg.textContent = "Network error. Please try again.";
   }
 }
 </script>
