@@ -4,7 +4,7 @@
 
   try {
     const res = await fetch(
-      "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/password-verify",
+      "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/session-verify",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
