@@ -1,76 +1,45 @@
 (function () {
-
-  // DEV BYPASS — localhost only
-  if (
-    location.hostname === "localhost" ||
-    location.hostname === "127.0.0.1"
-  ) {
+  // 1. DEV BYPASS — Localhost only
+  if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
     console.warn("[auth-guard] bypassed on localhost");
     return;
   }
 
+  // 2. THE WOODEN HANDSHAKE ENGINE
+  function checkWoodenAccess() {
+    const hasVipPass = localStorage.getItem("cl_vip_pass") === "true";
+    const lastPin = localStorage.getItem("last_used_pin");
+    const userEmail = localStorage.getItem("user_email");
 
-// Ensures Supabase is ready before anything runs
-function waitForSupabase() {
-  return new Promise(resolve => {
-    const check = () => {
-      if (window.supabase) resolve(window.supabase);
-      else setTimeout(check, 20);
-    };
-    check();
-  });
-}
+    // Calculate what the PIN MUST be today (Day + 42)
+    const today = new Date().getDate();
+    const correctPinForToday = today + 42;
 
-// Session fetch that works even under slow refresh or mid-transition
-async function waitForSession(supabase) {
-  let { data: { session } } = await supabase.auth.getSession();
-  if (session) return session;
+    // VALIDATION: Does the stored PIN match today's math?
+    if (hasVipPass && userEmail && parseInt(lastPin) === correctPinForToday) {
+      console.log("[Auth-Guard-AU] Daily Handshake confirmed for: " + userEmail);
+      return true; // Access Granted
+    }
 
-  return new Promise(resolve => {
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
-        if (newSession) {
-          listener.subscription.unsubscribe();
-          resolve(newSession);
-        }
-      }
-    );
-
-    // Safety fallback — avoids ghost refresh issues
-    setTimeout(async () => {
-      let { data: { session } } = await supabase.auth.getSession();
-      resolve(session || null);
-    }, 2000);
-  });
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-  const supabase = await waitForSupabase();
-  const session = await waitForSession(supabase);
-
-
-// =========================================================
-  // AUSTRALIA MANUAL BYPASS BLOCK (UNDO: Delete or Comment Out)
-  // =========================================================
-  const hasVipPass = localStorage.getItem("cl_vip_pass") === "true";
-  if (hasVipPass) {
-    console.log("[Auth-Guard-AU] VIP Pass detected. Access granted.");
-    return; // This stops the guard and allows entry
+    return false; // Access Denied
   }
-  // =========================================================
 
-  if (!session) {
-const parts = window.location.pathname.split("/").filter(Boolean);
+  // 3. EXECUTION
+  document.addEventListener("DOMContentLoaded", () => {
+    if (!checkWoodenAccess()) {
+      console.warn("[Auth-Guard-AU] No valid daily PIN found. Redirecting to login...");
 
-// supports /france/cr/, /france/csp/, /denmark-pr/, /canadafr/, etc.
-const base =
-  parts.length >= 2 && parts[1].length <= 3
-    ? `/${parts[0]}/${parts[1]}`
-    : `/${parts[0]}`;
+      // Wipe old/expired credentials
+      localStorage.removeItem("cl_vip_pass");
+      localStorage.removeItem("last_used_pin");
 
-window.location.replace(`${base}/login.html${window.location.search}`);
+      // Build redirect path to Australia login
+      const parts = window.location.pathname.split("/").filter(Boolean);
+      const base = parts.length >= 2 && parts[1].length <= 3 
+                   ? `/${parts[0]}/${parts[1]}` 
+                   : `/${parts[0]}`;
 
-    return;
-  }
-});
+      window.location.replace(`${base}/login.html${window.location.search}`);
+    }
+  });
 })();
