@@ -3,177 +3,268 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – Indfodsretsprove.dk</title>
+  <title>Login – Medborgerskabsprøve</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/login.css">
   
   <script>
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
   </script>
 
-  <script>
-    (function () {
-      const supabaseLoader = document.createElement("script");
-      supabaseLoader.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
-      supabaseLoader.onload = () => {
-        window.supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-      };
-      document.head.appendChild(supabaseLoader);
-    })();
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
 
   <style>
-    .auth-section { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; border: 1px solid #e5dfd2; }
-    .setup-box { background-color: #f3ebff; border-color: #7c3aed; } /* Purple for first time */
-    .login-box { background-color: #fff; } /* Standard White */
-    .otp-box { background-color: #fffcf0; border-color: #f1c40f; } /* Soft Yellow for Emergency */
-    
-    .input-group { margin-bottom: 1rem; }
-    .input-group label { display: block; margin-bottom: 5px; font-weight: 500; }
-    .input-field { width: 100%; box-sizing: border-box; padding: 12px; border: 2px solid #e5dfd2; border-radius: 8px; font-family: 'Lexend', sans-serif; }
-    
-    .btn-auth { width: 100%; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-family: 'Lexend', sans-serif; transition: opacity 0.2s; }
-    .btn-purple { background-color: #7c3aed; color: white; }
-    .btn-yellow { background-color: #f1c40f; color: #333; }
-    .btn-black { background-color: #333; color: white; }
-    
-    .status-msg { margin-top: 10px; font-size: 14px; display: none; padding: 10px; border-radius: 6px; }
+    :root {
+      --purple: #7c3aed;
+      --yellow: #f1c40f;
+      --black: #333;
+      --bg: #fdfaf5;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Lexend', sans-serif;
+      background-color: var(--bg);
+      color: #111;
+    }
+
+    /* Header matching your brand */
+    .site-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 40px;
+      background: white;
+    }
+
+    .brand-main { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .btn-small-purple {
+      background: var(--purple);
+      color: white;
+      text-decoration: none;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* The 3-Column Layout */
+    .login-grid {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      gap: 0;
+      max-width: 1100px;
+      margin: 80px auto;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: white;
+      padding: 40px 30px;
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s;
+    }
+
+    /* Left: First Time (Purple) */
+    .card-left {
+      border-radius: 20px 0 0 20px;
+      background-color: #f3ebff;
+      border: 1px solid #e0d0f9;
+      z-index: 1;
+    }
+
+    /* Middle: Classic Login (White/Hero) */
+    .card-center {
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+      z-index: 10;
+      margin: -20px 0; /* Makes it stand out taller */
+      padding: 60px 40px;
+      border: 1px solid #eee;
+    }
+
+    /* Right: OTP (Yellow) */
+    .card-right {
+      border-radius: 0 20px 20px 0;
+      background-color: #fffdf0;
+      border: 1px solid #f9edbc;
+      z-index: 1;
+    }
+
+    h2 { font-size: 20px; margin-top: 0; margin-bottom: 15px; }
+    p { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 20px; }
+
+    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5dfd2;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+      font-family: 'Lexend', sans-serif;
+    }
+
+    .btn-action {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Lexend', sans-serif;
+      margin-top: auto;
+    }
+
+    .btn-purple { background: var(--purple); color: white; }
+    .btn-black { background: var(--black); color: white; }
+    .btn-yellow { background: var(--yellow); color: #111; }
+
+    .status-msg {
+      position: fixed;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 500;
+      display: none;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
     .error { background: #fee2e2; color: #dc2626; display: block; }
     .success { background: #dcfce7; color: #166534; display: block; }
+
+    @media (max-width: 900px) {
+      .login-grid { flex-direction: column; align-items: center; gap: 20px; }
+      .auth-card { border-radius: 20px; margin: 0; width: 100%; max-width: 400px; }
+    }
   </style>
 </head>
-
 <body>
 
 <header class="site-header">
-  <div class="header-inner">
-    <div class="header-left">
-      <div class="brand-main">
-        <img src="/assets/images/icons/dk.svg" alt="DK">
-        <div class="brand-title">Indfodsretsprove.dk</div>
-      </div>
-    </div>
-    <a href="/denmark-pr/checkout.html" class="btn-small-purple">Opret en adgang</a>
+  <div class="brand-main">
+    <img src="/assets/images/icons/dk.svg" width="24" alt="">
+    Medborgerskabsprove.dk
   </div>
+  <a href="/denmark-pr/checkout.html" class="btn-small-purple">Opret en adgang</a>
 </header>
 
-<div class="login-wrapper" style="max-width: 500px; margin: 40px auto; padding: 0 20px;">
+<div id="status" class="status-msg"></div>
+
+<div class="login-grid">
   
-  <div id="globalMessage" class="status-msg"></div>
-
-  <div class="auth-section setup-box">
-    <h2 style="font-size: 1.1rem; margin-top: 0; color: #7c3aed;">Første gang her?</h2>
-    <p style="font-size: 0.9rem; margin-bottom: 1rem;">Har du lige købt adgang? Indtast din e-mail for at oprette din adgangskode.</p>
-    <div class="input-group">
-      <input id="setupEmail" type="email" class="input-field" placeholder="navn@eksempel.dk">
-    </div>
-    <button onclick="handleInitialSetup()" class="btn-auth btn-purple">Send link til oprettelse</button>
+  <div class="auth-card card-left">
+    <h2 style="color: var(--purple);">Første gang her?</h2>
+    <p>Har du lige købt adgang? Indtast din e-mail for at oprette din adgangskode.</p>
+    <input type="email" id="setupEmail" placeholder="navn@eksempel.dk">
+    <button onclick="handleSetup()" class="btn-action btn-purple">Send link til oprettelse</button>
   </div>
 
-  <div class="auth-section login-box">
-    <h1 style="font-size: 1.5rem; margin-top: 0;">Log ind</h1>
-    <div class="input-group">
+  <div class="auth-card card-center">
+    <h2 style="font-size: 28px; text-align: center;">Log ind</h2>
+    <div style="margin-top: 20px;">
       <label>E-mailadresse</label>
-      <input id="loginEmail" type="email" class="input-field" placeholder="navn@eksempel.dk">
-    </div>
-    <div class="input-group">
+      <input type="email" id="loginEmail" placeholder="Din e-mail">
+      
       <label>Adgangskode</label>
-      <input id="loginPassword" type="password" class="input-field" placeholder="••••••••">
+      <input type="password" id="loginPwd" placeholder="••••••••">
+      
+      <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top: 10px;">Log ind med kodeord</button>
     </div>
-    <button onclick="handlePasswordLogin()" class="btn-auth btn-black">Log ind med kodeord</button>
   </div>
 
-  <div class="auth-section otp-box">
-    <h2 style="font-size: 1.1rem; margin-top: 0; color: #856404;">Problemer med kodeord?</h2>
-    <p style="font-size: 0.9rem; margin-bottom: 1rem;">Modtag en engangskode (8 cifre) direkte i din indbakke.</p>
+  <div class="auth-card card-right">
+    <h2 style="color: #856404;">Glemt kodeord?</h2>
+    <p>Modtag en engangskode (8 cifre) direkte i din indbakke i stedet.</p>
     
-    <div id="otpInputGroup">
-      <input id="otpEmail" type="email" class="input-field" placeholder="navn@eksempel.dk">
-      <button onclick="handleSendOTP()" class="btn-auth btn-yellow" style="margin-top:10px;">Send engangskode</button>
+    <div id="otpInputRow">
+      <input type="email" id="otpEmail" placeholder="navn@eksempel.dk">
+      <button onclick="handleSendOTP()" class="btn-action btn-yellow">Send engangskode</button>
     </div>
 
-    <div id="otpVerifyGroup" style="display:none;">
-      <input id="otpCode" type="text" class="input-field" placeholder="00000000" maxlength="8" style="text-align:center; letter-spacing: 4px; font-size: 20px;">
-      <button onclick="handleVerifyOTP()" class="btn-auth btn-black" style="margin-top:10px;">Bekræft og log ind</button>
+    <div id="otpVerifyRow" style="display:none;">
+      <input type="text" id="otpToken" placeholder="00000000" maxlength="8" style="text-align:center; letter-spacing: 2px;">
+      <button onclick="handleVerifyOTP()" class="btn-action btn-black">Bekræft kode</button>
     </div>
   </div>
 
 </div>
 
 <script>
-// --- UTILS ---
-function showGlobalMsg(type, text) {
-  const box = document.getElementById("globalMessage");
-  box.textContent = text;
-  box.className = "status-msg " + type;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+  // Initialize Supabase
+  const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
 
-// --- 1. FIRST TIME SETUP (Password Invitation) ---
-async function handleInitialSetup() {
-  const email = document.getElementById("setupEmail").value.trim();
-  if(!email) return showGlobalMsg("error", "Indtast venligst din e-mail.");
-
-  const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + "/denmark-pr/set-password.html"
-  });
-
-  if (error) {
-    // Because "Allow Signups" is OFF, this will fail for non-users
-    showGlobalMsg("error", "E-mailen blev ikke fundet i vores system.");
-  } else {
-    showGlobalMsg("success", "Vi har sendt et link til din e-mail for at oprette dit kodeord.");
+  function notify(type, text) {
+    const el = document.getElementById("status");
+    el.textContent = text;
+    el.className = "status-msg " + type;
+    el.style.display = "block";
+    setTimeout(() => { el.style.display = "none"; }, 6000);
   }
-}
 
-// --- 2. PASSWORD LOGIN ---
-async function handlePasswordLogin() {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
+  // 1. Password Setup (Purple)
+  async function handleSetup() {
+    const email = document.getElementById("setupEmail").value.trim();
+    if(!email) return notify("error", "Indtast venligst din e-mail.");
 
-  const { data, error } = await window.supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/denmark-pr/set-password.html"
+    });
 
-  if (error) {
-    showGlobalMsg("error", "Fejl ved login: " + error.message);
-  } else {
-    window.location.href = "/denmark/dashboard/index.html";
+    // If "Allow Signups" is OFF, this won't send anything to strangers
+    notify("success", "Hvis din e-mail findes i vores system, har vi sendt et link.");
   }
-}
 
-// --- 3. OTP FLOW ---
-async function handleSendOTP() {
-  const email = document.getElementById("otpEmail").value.trim();
-  
-  const { error } = await window.supabase.auth.signInWithOtp({
-    email,
-    options: { shouldCreateUser: false } // CRITICAL: Only users in the table get an email
-  });
+  // 2. Main Login (Center)
+  async function handleLogin() {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPwd").value.trim();
 
-  if (error) {
-    showGlobalMsg("error", "E-mailen blev ikke fundet eller der skete en fejl.");
-  } else {
-    document.getElementById("otpInputGroup").style.display = "none";
-    document.getElementById("otpVerifyGroup").style.display = "block";
-    showGlobalMsg("success", "Engangskoden er sendt!");
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      notify("error", "Forkert e-mail eller adgangskode.");
+    } else {
+      window.location.href = "/denmark-pr/dashboard/index.html";
+    }
   }
-}
 
-async function handleVerifyOTP() {
-  const email = document.getElementById("otpEmail").value.trim();
-  const token = document.getElementById("otpCode").value.trim();
+  // 3. OTP Flow (Yellow)
+  async function handleSendOTP() {
+    const email = document.getElementById("otpEmail").value.trim();
+    if(!email) return notify("error", "Indtast e-mail.");
 
-  const { data, error } = await window.supabase.auth.verifyOtp({
-    email, token, type: 'magiclink'
-  });
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: false } // Only sends to existing users
+    });
 
-  if (error) {
-    showGlobalMsg("error", "Koden er ugyldig eller udløbet.");
-  } else {
-    window.location.href = "/denmark/dashboard/index.html";
+    if (error) {
+      notify("error", "E-mailen blev ikke fundet.");
+    } else {
+      document.getElementById("otpInputRow").style.display = "none";
+      document.getElementById("otpVerifyRow").style.display = "block";
+      notify("success", "Koden er sendt!");
+    }
   }
-}
+
+  async function handleVerifyOTP() {
+    const email = document.getElementById("otpEmail").value.trim();
+    const token = document.getElementById("otpToken").value.trim();
+
+    const { data, error } = await supabase.auth.verifyOtp({
+      email, token, type: 'magiclink'
+    });
+
+    if (error) notify("error", "Ugyldig kode.");
+    else window.location.href = "/denmark-pr/dashboard/index.html";
+  }
 </script>
 
 </body>
