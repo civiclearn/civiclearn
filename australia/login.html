@@ -2,69 +2,112 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>Support Login – CivicLearn Australia</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – CivicLearn Australia</title>
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
-  <script>
-    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
-    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-    const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    :root { --blue: #0288d1; --bg: #fdfaf5; --pink: #d44270; }
-    body { font-family: 'Lexend', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 40px 20px; }
-    .container { width: 100%; max-width: 450px; text-align: center; }
-    .pink-box { background: #fff0f6; border: 2px dashed #ff85c0; padding: 30px; border-radius: 20px; margin-bottom: 25px; }
-    .auth-card { background: white; padding: 35px; border-radius: 24px; border: 2px solid var(--blue); box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-    input { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; }
-    .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; color: white; }
-    #the-number { font-size: 50px; font-weight: 800; color: var(--pink); letter-spacing: 5px; margin: 10px 0; display: block; }
-    .status { display: none; padding: 10px; margin-bottom: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; }
-    .error { background: #fee2e2; color: #dc2626; }
+    body {
+      font-family: Lexend, sans-serif;
+      background: #fdfaf5;
+      padding: 40px 20px;
+    }
+    .box {
+      max-width: 420px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 22px;
+      border: 2px solid #0288d1;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    }
+    h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-top: 14px;
+      border-radius: 12px;
+      border: 2px solid #eee;
+      font-size: 15px;
+    }
+    button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 15px;
+      border-radius: 14px;
+      border: none;
+      background: #0288d1;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .msg {
+      margin-top: 14px;
+      text-align: center;
+      color: #c62828;
+      font-weight: 600;
+      font-size: 14px;
+    }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <div id="msg" class="status error"></div>
-    <div class="pink-box">
-      <h3 style="color:var(--pink);margin-top:0;">1. Get Your Access PIN</h3>
-      <input type="email" id="lookupEmail" placeholder="Enter registered email">
-      <button onclick="getPIN()" class="btn" style="background:var(--pink)">Reveal Daily PIN</button>
-      <div id="pinArea" style="display:none;margin-top:20px;border-top:1px solid #ffdaeb;padding-top:15px;">
-        <span style="font-size:11px;color:#999;text-transform:uppercase;">Today's PIN is:</span>
-        <span id="the-number">00</span>
-      </div>
-    </div>
-    <div class="auth-card">
-      <h3 style="margin-top:0;">2. Enter Dashboard</h3>
-      <input type="email" id="finalEmail" placeholder="Confirm Email">
-      <input type="text" id="finalPIN" placeholder="Enter PIN from above">
-      <button onclick="enter()" class="btn" style="background:var(--blue)">Enter Library</button>
-    </div>
+  <div class="box">
+    <h2>Support Access</h2>
+
+    <input
+      id="email"
+      type="email"
+      placeholder="Email address"
+      autocomplete="email"
+    />
+
+    <input
+      id="code"
+      type="password"
+      placeholder="Access code"
+      autocomplete="one-time-code"
+    />
+
+    <button onclick="login()">Enter</button>
+
+    <div id="msg" class="msg"></div>
   </div>
-  <script>
-    const getEl = (id) => document.getElementById(id);
-    async function getPIN() {
-      const email = getEl('lookupEmail').value.trim().toLowerCase();
-      if(!email) return alert("Email required");
-      const { data, error } = await supabase.from('users').select('email').ilike('email', email).maybeSingle();
-      if(error || !data) return alert("Email not found in our database.");
-      const pin = new Date().getDate() + 42;
-      getEl('the-number').innerText = pin;
-      getEl('pinArea').style.display = 'block';
-      getEl('finalEmail').value = email;
-      getEl('finalPIN').value = pin;
-    }
-    function enter() {
-      const pin = getEl('finalPIN').value;
-      if(parseInt(pin) === (new Date().getDate() + 42)) {
-        localStorage.setItem("cl_vip_pass", "true");
-        localStorage.setItem("last_used_pin", pin);
-        localStorage.setItem("user_email", getEl('finalEmail').value);
-        window.location.href = "/australia/dashboard/index.html";
-      } else { alert("Invalid PIN for today."); }
-    }
-  </script>
+
+<script>
+async function login() {
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const code  = document.getElementById("code").value.trim();
+  const msg   = document.getElementById("msg");
+
+  msg.textContent = "";
+
+  if (!email || !code) {
+    msg.textContent = "Please enter email and access code.";
+    return;
+  }
+
+  const res = await fetch("/functions/v1/bypass-login", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: email,
+      bypass_code: code
+    })
+  });
+
+  if (res.ok) {
+    window.location.replace("/australia/dashboard/index.html");
+  } else {
+    msg.textContent = "Invalid email or access code.";
+  }
+}
+</script>
 </body>
 </html>
