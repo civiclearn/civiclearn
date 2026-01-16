@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – CivicLearn Australia</title>
+  <title>Login – CivicLearn Australia</title>LAST1
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/login.css">
@@ -127,45 +127,55 @@
   async function handleTelegramRequest() {
     const email = document.getElementById("tgEmail").value.trim();
     const handle = document.getElementById("tgHandle").value.trim().replace('@','');
-    if(!email || !handle) return notify("error", "Fill in both fields.");
-    
-    const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
-      body: JSON.stringify({ email, handle })
-    });
-    const result = await response.json();
-    if (result.success) {
-      document.getElementById("tgInputRow").style.display = "none";
-      document.getElementById("tgVerifyRow").style.display = "block";
-      notify("success", "Code sent!");
-    } else if (result.needsLink) {
-      document.getElementById("tgLinkRow").style.display = "block";
-      document.getElementById("botLink").href = `https://t.me/civiclearnloginbot?start=${btoa(email + '|' + handle)}`; 
-    } else { notify("error", result.error || "User not found."); }
+    if(!email || !handle) return notify("error", "Fill both fields.");
+    notify("success", "Connecting...");
+    try {
+      const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
+        body: JSON.stringify({ email, handle })
+      });
+      const result = await response.json();
+      if (result.success) {
+        document.getElementById("tgInputRow").style.display = "none";
+        document.getElementById("tgVerifyRow").style.display = "block";
+        notify("success", "Code sent!");
+      } else if (result.needsLink) {
+        document.getElementById("tgLinkRow").style.display = "block";
+        document.getElementById("botLink").href = `https://t.me/civiclearnloginbot?start=${btoa(email + '|' + handle)}`; 
+      } else { notify("error", result.error || "User not found."); }
+    } catch (e) { notify("error", "System error."); }
   }
 
   async function handleVerifyTelegram() {
     const email = document.getElementById("tgEmail").value.trim();
     const code = document.getElementById("tgToken").value.trim();
+    notify("success", "Finalising login...");
     
-    const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
-      body: JSON.stringify({ action: 'verify', email, token: code })
-    });
-    const result = await response.json();
-
-    if (result.success && result.hashed_token) {
-      // THIS IS THE FIX: Using verifyOtp with the hashed_token from the brain
-      const { error } = await supabase.auth.verifyOtp({
-        email: email,
-        token: result.hashed_token,
-        type: 'magiclink'
+    try {
+      const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
+        body: JSON.stringify({ action: 'verify', email: email, token: code })
       });
-      if (!error) window.location.href = REDIRECT_PATH;
-      else notify("error", "Auth Failed: Session could not be created.");
-    } else { notify("error", "Invalid Telegram code."); }
+      const result = await response.json();
+
+      if (result.success && result.token) {
+        // Exchange the hashed token for a real session
+        const { error } = await supabase.auth.verifyOtp({
+          email: email,
+          token: result.token,
+          type: 'magiclink'
+        });
+        if (!error) {
+            notify("success", "Success!");
+            window.location.href = REDIRECT_PATH;
+        } else { 
+            console.error(error);
+            notify("error", "Auth Failed: " + error.message); 
+        }
+      } else { notify("error", "Invalid Telegram code."); }
+    } catch (e) { notify("error", "Network error."); }
   }
 
   async function handleLogin() {
