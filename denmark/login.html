@@ -399,6 +399,7 @@ async function sendPasswordReset() {
   box.classList.add("success");
 }
 
+<script>
 async function sendOtp() {
   clearMsgs();
   const box = otpMsg;
@@ -410,9 +411,32 @@ async function sendOtp() {
     return;
   }
 
-  const { error } = await supabase.auth.signInWithOtp({ email });
+  // IMPORTANT: do NOT create users via OTP
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: false
+    }
+  });
 
   if (error) {
+    // Supabase commonly returns 422 or “signups not allowed…” when user doesn't exist
+    const msg = (error.message || "").toLowerCase();
+    const status = error.status;
+
+    const looksLikeUnknownEmail =
+      status === 422 ||
+      msg.includes("signups not allowed") ||
+      msg.includes("signup") ||
+      msg.includes("not allowed");
+
+    if (looksLikeUnknownEmail) {
+      box.textContent =
+        "Denne e-mail er ikke registreret. Brug den e-mailadresse, du brugte ved købet, eller opret adgang ovenfor.";
+      box.classList.add("error");
+      return;
+    }
+
     box.textContent = "Der opstod en fejl. Prøv igen om lidt.";
     box.classList.add("error");
     return;
@@ -424,6 +448,8 @@ async function sendOtp() {
   otpVerifyWrap.style.display = "block";
   otpCode.focus();
 }
+</script>
+
 
 async function verifyOtp() {
   clearMsgs();
