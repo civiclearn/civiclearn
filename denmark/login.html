@@ -3,227 +3,456 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – Indfødsretsprøve</title>
+  <title>Log ind – CivicLearn Danmark</title>
 
+  <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/login.css">
-     <!-- Supabase config + UMD loader -->
+
+  <!-- Supabase config -->
   <script>
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
   </script>
 
+  <!-- Supabase loader -->
   <script>
     (function () {
-      const supabaseLoader = document.createElement("script");
-      supabaseLoader.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
-      supabaseLoader.onload = () => {
-        window.supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
+      s.onload = () => {
+        window.supabase = supabase.createClient(
+          window.SUPABASE_URL,
+          window.SUPABASE_KEY
+        );
       };
-      document.head.appendChild(supabaseLoader);
+      document.head.appendChild(s);
     })();
   </script>
 
+  <style>
+    :root {
+      --brand: #7c3aed;
+      --brand-dark: #5b21b6;
+      --bg: #f7f2e8;
+      --card: #ffffff;
+      --text: #111;
+      --muted: #666;
+      --radius: 18px;
+      --border: rgba(0,0,0,.08);
+    }
 
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Lexend", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(247,242,232,.95);
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand img { width: 24px; }
+
+    .brand-title {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    nav a {
+      margin: 0 10px;
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .cta {
+      background: var(--brand);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 34px 32px 30px;
+      box-shadow: 0 12px 32px rgba(0,0,0,.12);
+      border: 1px solid var(--border);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      text-align: center;
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 26px;
+    }
+
+    .section {
+      padding: 18px 18px 20px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .section.primary {
+      border-color: rgba(124,58,237,.35);
+      background: rgba(124,58,237,.04);
+    }
+
+    .section-yellow {
+      background: rgba(253, 230, 138, 0.25);
+      border-color: rgba(234, 179, 8, 0.35);
+    }
+
+    .section-green {
+      background: rgba(187, 247, 208, 0.25);
+      border-color: rgba(34, 197, 94, 0.35);
+    }
+
+    .section h2 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .section p {
+      margin: 0 0 14px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,.15);
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: 14px;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--brand);
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #f4f1fb;
+      color: var(--brand);
+    }
+
+    .small-link {
+      display: block;
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--brand);
+      text-decoration: none;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .inline-msg {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .inline-msg.success { color: #15803d; }
+    .inline-msg.error { color: #b91c1c; }
+
+    #otpCode {
+      text-align: center;
+      font-family: monospace;
+      font-size: 24px;
+      letter-spacing: 0.4em;
+    }
+  </style>
 </head>
 
 <body>
 
-<header class="site-header">
+<header>
   <div class="header-inner">
-    <div class="header-left">
-      <div class="brand-main">
-        <img src="/assets/images/icons/dk.svg" alt="">
-        <div class="brand-title">Indfødsretsprøve.dk</div>
-      </div>
-      <div class="brand-powered">
-        drevet af<span> CivicLearn</span>
-      </div>
+    <div class="brand">
+      <img src="/assets/images/dk.svg" alt="DK">
+      <div class="brand-title">CivicLearn Danmark</div>
     </div>
 
+    <nav>
+      <a href="/denmark/">Forside</a>
+      <a href="/denmark/#overview">Overblik</a>
+      <a href="/denmark/#pricing">Pris</a>
+    </nav>
 
-    <a href="/denmark/checkout.html" class="btn-small-purple">Opret en adgang</a>
+    <a href="/denmark/checkout.html" class="cta">Få adgang</a>
   </div>
 </header>
 
-<!-- ===============================
-     INFORMATION TIL EKSISTERENDE BRUGERE
-================================== -->
-<div class="cl-notice cl-notice-info">
-  <div class="cl-notice-title">ℹ️ Information til eksisterende brugere</div>
+<main>
+  <div class="card">
 
-  <div class="cl-notice-body">
-    <p>
-      De fleste eksisterende brugere er automatisk overført til den nye platform.
-    </p>
+    <h1>Log ind på din konto</h1>
+    <div class="subtitle">Vælg, hvordan du vil få adgang til CivicLearn</div>
 
-    <p>
-      I enkelte tilfælde – især hvis dit køb blev foretaget <em>før 2022</em> –
-      kan det være nødvendigt at tilføje din konto manuelt.
-      Hvis du er eksisterende bruger, men systemet ikke genkender din e-mailadresse ved login,
-      bedes du <a href="https://indfodsretsprove.dk/kontakt">kontakte support</a>,
-      så hjælper vi dig videre.
-    </p>
+    <!-- FIRST ACCESS -->
+    <div class="section primary">
+      <h2>Første gang her?</h2>
+      <p>Hvis du ikke har oprettet en adgangskode endnu, kan du gøre det her.</p>
 
-    <hr>
+      <label>E-mail</label>
+      <input type="email" id="firstEmail" placeholder="dig@eksempel.dk">
 
-    <p>
-      <strong>Om tidligere træningsprogress</strong><br>
-      På grund af overgangen til en ny platform er træningsprogress og statistik
-      fra den tidligere løsning ikke overført.
-    </p>
+      <button class="btn btn-primary" onclick="sendPasswordSetup()">
+        Opret adgangskode
+      </button>
 
-    <p>
-      Alle brugere starter derfor med en nulstillet progression.
-      Det sikrer, at din træning, statistik og prøvesimulationer fremover
-      er korrekte og afspejler din aktuelle forberedelse.
-    </p>
-  </div>
-</div>
+      <div id="firstAccessMsg" class="inline-msg"></div>
+    </div>
 
-<div class="spam-reminder">
-  Husk at tjekke din spam-mappe
-</div>
+    <!-- PASSWORD LOGIN -->
+    <div class="section section-yellow">
+      <h2>Jeg har allerede en adgangskode</h2>
 
-<div class="login-wrapper">
+<p style="font-size:13px;color:#555;">
+  <strong>Bemærk:</strong> Hvis du kommer fra den tidligere version af indfodsretsprove.dk,
+  gælder din gamle adgangskode ikke her.
+  Du skal i stedet oprette en ny adgangskode ovenfor.
+</p>
 
-  <main class="login-container">
-    <div class="card">
-      <h1 style="font-family: 'Lexend', sans-serif;">Log ind</h1>
-      <p class="subtitle" style="font-family: 'Lexend', sans-serif;">
-        Indtast din e-mail for at modtage din 6-cifrede adgangskode.
-      </p>
+      <label>E-mail</label>
+      <input type="email" id="loginEmail" placeholder="dig@eksempel.dk">
 
-      <div id="emailSection">
-        <label for="email" style="font-family: 'Lexend', sans-serif;">E-mailadresse</label>
-        <input id="email" type="email" placeholder="navn@eksempel.dk" 
-               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px; font-family: 'Lexend', sans-serif;" />
-        <button type="button" class="login-btn" id="sendMagicLink" style="font-family: 'Lexend', sans-serif; font-weight:600;">
-          Send log ind-kode
-        </button>
-      </div>
+      <label>Adgangskode</label>
+      <input type="password" id="loginPassword" placeholder="••••••••">
 
-      <div id="otpSection" style="display:none; margin-top: 10px;">
-        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">6-cifret kode</label>
-        <input id="otpCode" type="text" placeholder="000000" maxlength="6" 
-               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
-        <button type="button" class="login-btn" id="verifyOtp" 
-                style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;">
+      <button class="btn btn-secondary" onclick="loginWithPassword()">
+        Log ind
+      </button>
+
+      <a href="#" class="small-link" onclick="sendPasswordReset();return false;">
+        Jeg har glemt min adgangskode
+      </a>
+
+      <div id="loginMsg" class="inline-msg"></div>
+    </div>
+
+    <!-- OTP -->
+    <div class="section section-green">
+      <h2>Midlertidig adgang</h2>
+      <p>Brug en engangskode, hvis du ikke kan logge ind.</p>
+
+      <label>E-mail</label>
+      <input type="email" id="otpEmail" placeholder="dig@eksempel.dk">
+
+      <button class="btn btn-secondary" id="otpSendBtn" onclick="sendOtp()">
+        Send engangskode
+      </button>
+
+      <div id="otpVerifyWrap" style="display:none; margin-top:14px;">
+        <label>Engangskode</label>
+        <input id="otpCode" type="text" placeholder="000000" maxlength="6"
+               inputmode="numeric" autocomplete="one-time-code">
+        <button class="btn btn-secondary" onclick="verifyOtp()">
           Bekræft og log ind
         </button>
       </div>
 
-      <div id="loginMessage" class="login-message" style="display:none; margin-top: 15px; font-family: 'Lexend', sans-serif;"></div>
-
-      <div class="login-footer" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #666; text-align: center; font-family: 'Lexend', sans-serif;">
-        Har du ikke adgang endnu? <a href="/denmark/checkout" style="color: #7c3aed; text-decoration: none; font-weight: 500;">Opret adgang</a>
-      </div>
+      <div id="otpMsg" class="inline-msg"></div>
     </div>
-  </main>
-</div>
+
+  </div>
+</main>
 
 <script>
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("first") === "1") {
-    const box = document.getElementById("loginMessage");
-    box.className = "login-message success";
-    box.textContent =
-      "Din konto er blevet aktiveret. Indtast den e-mailadresse, du brugte ved købet, for at få adgang til din træning.";
-    box.style.display = "block";
-  }
-})();
-</script>
-
-<script>
-// --- HJÆLPERE ---
-function showMessage(type, text) {
-  const box = document.getElementById("loginMessage");
-  box.className = "login-message " + type;
-  box.textContent = text;
-  box.style.display = "block";
+function clearMsgs() {
+  ["firstAccessMsg", "loginMsg", "otpMsg"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = "";
+      el.className = "inline-msg";
+    }
+  });
 }
 
-let lastEmailAttempt = "";
-let attemptCount = 0;
-
-function handleLoginFeedback(email) {
-  if (email === lastEmailAttempt) {
-    attemptCount++;
-  } else {
-    attemptCount = 1;
-    lastEmailAttempt = email;
-  }
-  if (attemptCount >= 2) {
-    showMessage("success", "Hvis du stadig ikke har modtaget koden, skal du tjekke din spam-mappe eller kontakte os.");
-  } else {
-    showMessage("success", "Din 6-cifrede log ind-kode er blevet sendt. Tjek venligst din e-mail.");
-  }
-}
-
-// --- TRIN 1: ANMOD OM KODE ---
-document.getElementById("sendMagicLink").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const msg = document.getElementById("loginMessage");
-  msg.style.display = "none";
+async function sendPasswordSetup() {
+  clearMsgs();
+  const email = firstEmail.value.trim();
+  const box = firstAccessMsg;
 
   if (!email) {
-    showMessage("error", "Indtast venligst din e-mailadresse.");
+    box.textContent = "Indtast venligst din e-mailadresse.";
+    box.classList.add("error");
     return;
   }
 
-  if (!window.supabase) {
-    showMessage("error", "Teknisk fejl. Opdater venligst siden og prøv igen.");
-    return;
-  }
-
-  const { error } = await window.supabase.auth.signInWithOtp({
-    email,
-    options: {
-      shouldCreateUser: false
-    }
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + "/denmark/login-password.html"
   });
 
   if (error) {
-    // OPSNAP SUPABASE FEJL (Bruger ikke fundet)
-    if (error.message.includes("Signups not allowed for otp") || error.status === 422) {
-      showMessage("error", "Denne e-mail er ikke registreret – indtast venligst den nøjagtige e-mailadresse, du brugte ved købet.");
-    } else {
-      showMessage("error", "Der opstod en fejl: " + error.message);
-    }
+    box.textContent = "Der opstod en fejl. Kontroller din e-mailadresse og prøv igen.";
+    box.classList.add("error");
     return;
   }
 
-  document.getElementById("sendMagicLink").style.display = "none";
-  document.getElementById("otpSection").style.display = "block";
-  
-  handleLoginFeedback(email);
-});
-
-// --- TRIN 2: BEKRÆFT KODE ---
-document.getElementById("verifyOtp").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const token = document.getElementById("otpCode").value.trim();
-
-  if (token.length !== 6) {
-  showMessage("error", "Indtast den 6-cifrede kode sendt til din e-mail.");
-  return;
+  box.textContent = "Tjek din e-mail for at oprette en adgangskode.";
+  box.classList.add("success");
 }
 
-  const { data, error } = await window.supabase.auth.verifyOtp({
-    email,
-    token,
-    type: 'magiclink'
+async function loginWithPassword() {
+  clearMsgs();
+  const box = loginMsg;
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email: loginEmail.value.trim(),
+    password: loginPassword.value
   });
 
   if (error) {
-    showMessage("error", error.message);
-  } else if (data.session) {
-    window.location.href = "/denmark/dashboard/index.html";
+    box.textContent = "Forkert e-mail eller adgangskode.";
+    box.classList.add("error");
+    return;
   }
-});
-</script>
 
+  window.location.href = "/denmark/dashboard/";
+}
+
+async function sendPasswordReset() {
+  clearMsgs();
+  const box = loginMsg;
+  const email = loginEmail.value.trim();
+
+  if (!email) {
+    box.textContent = "Indtast din e-mailadresse for at nulstille din adgangskode.";
+    box.classList.add("error");
+    return;
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + "/denmark/login-password.html"
+  });
+
+  if (error) {
+    box.textContent = "Der opstod en fejl. Kontroller din e-mailadresse og prøv igen.";
+    box.classList.add("error");
+    return;
+  }
+
+  box.textContent = "E-mail til nulstilling af adgangskode er sendt.";
+  box.classList.add("success");
+}
+
+async function sendOtp() {
+  clearMsgs();
+  const box = otpMsg;
+  const email = otpEmail.value.trim();
+
+  if (!email) {
+    box.textContent = "Indtast venligst din e-mailadresse.";
+    box.classList.add("error");
+    return;
+  }
+
+  const { error } = await supabase.auth.signInWithOtp({ email });
+
+  if (error) {
+    box.textContent = "Der opstod en fejl. Prøv igen om lidt.";
+    box.classList.add("error");
+    return;
+  }
+
+  box.textContent = "Engangskode sendt. Indtast den for at fortsætte.";
+  box.classList.add("success");
+
+  otpVerifyWrap.style.display = "block";
+  otpCode.focus();
+}
+
+async function verifyOtp() {
+  clearMsgs();
+  const box = otpMsg;
+
+  const email = otpEmail.value.trim();
+  const code = otpCode.value.trim();
+
+  if (code.length !== 6) {
+    box.textContent = "Indtast den 6-cifrede kode, der er sendt til din e-mail.";
+    box.classList.add("error");
+    return;
+  }
+
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token: code,
+    type: "email"
+  });
+
+  if (error) {
+    box.textContent = "Koden er ugyldig eller udløbet. Prøv igen.";
+    box.classList.add("error");
+    return;
+  }
+
+  window.location.href = "/denmark/dashboard/";
+}
+</script>
 
 
 </body>
