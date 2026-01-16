@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – Medborgerskabsprøve</title>
+  <title>Login – Indfodsretsprove.dk</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
@@ -144,16 +144,36 @@
       .login-grid { flex-direction: column; align-items: center; gap: 20px; }
       .auth-card { border-radius: 20px; margin: 0; width: 100%; max-width: 400px; }
     }
-  </style>
+	.pwd-container {
+    position: relative;
+    width: 100%;
+  }
+  .pwd-container input {
+    padding-right: 60px; /* Space for the button */
+  }
+  .toggle-pwd {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    background: none;
+    border: none;
+    color: var(--purple);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Lexend', sans-serif;
+  }
+</style>
+
 </head>
 <body>
 
 <header class="site-header">
   <div class="brand-main">
     <img src="/assets/images/icons/dk.svg" width="24" alt="">
-    Medborgerskabsprove.dk
+    Indfodsretsprove.dk - CivicLearn
   </div>
-  <a href="/denmark-pr/checkout.html" class="btn-small-purple">Opret en adgang</a>
+  <a href="/denmark/checkout.html" class="btn-small-purple">Opret en adgang</a>
 </header>
 
 <div id="status" class="status-msg"></div>
@@ -167,22 +187,25 @@
     <button onclick="handleSetup()" class="btn-action btn-purple">Send link til oprettelse</button>
   </div>
 
-  <div class="auth-card card-center">
-    <h2 style="font-size: 28px; text-align: center;">Log ind</h2>
-    <div style="margin-top: 20px;">
-      <label>E-mailadresse</label>
-      <input type="email" id="loginEmail" placeholder="Din e-mail">
-      
-      <label>Adgangskode</label>
+<div class="auth-card card-center">
+  <h2 style="font-size: 28px; text-align: center;">Log ind</h2>
+  <div style="margin-top: 20px;">
+    <label>E-mailadresse</label>
+    <input type="email" id="loginEmail" placeholder="Din e-mail">
+    
+    <label>Adgangskode</label>
+    <div class="pwd-container">
       <input type="password" id="loginPwd" placeholder="••••••••">
-      
-      <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top: 10px;">Log ind med kodeord</button>
+      <button type="button" class="toggle-pwd" onclick="toggleMainPwd()">Vis</button>
     </div>
+    
+    <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top: 10px;">Log ind med kodeord</button>
   </div>
+</div>
 
   <div class="auth-card card-right">
     <h2 style="color: #856404;">Glemt kodeord?</h2>
-    <p>Modtag en engangskode (8 cifre) direkte i din indbakke i stedet.</p>
+    <p>Modtag en engangskode (6 cifre) direkte i din indbakke i stedet.</p>
     
     <div id="otpInputRow">
       <input type="email" id="otpEmail" placeholder="navn@eksempel.dk">
@@ -190,7 +213,7 @@
     </div>
 
     <div id="otpVerifyRow" style="display:none;">
-      <input type="text" id="otpToken" placeholder="00000000" maxlength="8" style="text-align:center; letter-spacing: 2px;">
+      <input type="text" id="otpToken" placeholder="000000" maxlength="6" style="text-align:center; letter-spacing: 2px;">
       <button onclick="handleVerifyOTP()" class="btn-action btn-black">Bekræft kode</button>
     </div>
   </div>
@@ -215,7 +238,7 @@
     if(!email) return notify("error", "Indtast venligst din e-mail.");
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + "/denmark-pr/set-password.html"
+      redirectTo: window.location.origin + "/denmark/login-password.html"
     });
 
     // If "Allow Signups" is OFF, this won't send anything to strangers
@@ -231,7 +254,7 @@
     if (error) {
       notify("error", "Forkert e-mail eller adgangskode.");
     } else {
-      window.location.href = "/denmark-pr/dashboard/index.html";
+      window.location.href = "/denmark/dashboard/index.html";
     }
   }
 
@@ -263,8 +286,33 @@
     });
 
     if (error) notify("error", "Ugyldig kode.");
-    else window.location.href = "/denmark-pr/dashboard/index.html";
+    else window.location.href = "/denmark/dashboard/index.html";
   }
+  
+  function toggleMainPwd() {
+    const pwdInput = document.getElementById("loginPwd");
+    const btn = event.target;
+    if (pwdInput.type === "password") {
+      pwdInput.type = "text";
+      btn.textContent = "Skjul";
+    } else {
+      pwdInput.type = "password";
+      btn.textContent = "Vis";
+    }
+  }
+  
+  // Verify your handleSetup redirect matches your file name:
+  async function handleSetup() {
+    const email = document.getElementById("setupEmail").value.trim();
+    if(!email) return notify("error", "Indtast venligst din e-mail.");
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/denmark/login-password.html" // Matches your uploaded filename
+    });
+
+    notify("success", "Hvis din e-mail findes i vores system, har vi sendt et link.");
+  }
+
 </script>
 
 </body>
