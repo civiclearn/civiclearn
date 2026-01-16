@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="da">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – Indfodsretsprove.dk</title>
+  <title>Login – CivicLearn</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <script>
+    // These keys are public and safe for localhost testing
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
   </script>
@@ -18,6 +19,7 @@
     :root {
       --purple: #7c3aed;
       --yellow: #f1c40f;
+      --blue: #0288d1;
       --black: #333;
       --bg: #fdfaf5;
     }
@@ -29,7 +31,6 @@
       color: #111;
     }
 
-    /* Header matching your brand */
     .site-header {
       display: flex;
       justify-content: space-between;
@@ -39,66 +40,35 @@
     }
 
     .brand-main { display: flex; align-items: center; gap: 10px; font-weight: 700; }
-    .btn-small-purple {
-      background: var(--purple);
-      color: white;
-      text-decoration: none;
-      padding: 8px 20px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 600;
-    }
 
-    /* The 3-Column Layout */
     .login-grid {
       display: flex;
       justify-content: center;
       align-items: stretch;
       gap: 0;
-      max-width: 1100px;
-      margin: 80px auto;
+      max-width: 1300px;
+      margin: 60px auto;
       padding: 20px;
     }
 
     .auth-card {
       background: white;
-      padding: 40px 30px;
-      width: 320px;
+      padding: 40px 25px;
+      width: 280px;
       display: flex;
       flex-direction: column;
-      transition: transform 0.2s;
-    }
-
-    /* Left: First Time (Purple) */
-    .card-left {
-      border-radius: 20px 0 0 20px;
-      background-color: #f3ebff;
-      border: 1px solid #e0d0f9;
-      z-index: 1;
-    }
-
-    /* Middle: Classic Login (White/Hero) */
-    .card-center {
-      border-radius: 20px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.08);
-      z-index: 10;
-      margin: -20px 0; /* Makes it stand out taller */
-      padding: 60px 40px;
       border: 1px solid #eee;
     }
 
-    /* Right: OTP (Yellow) */
-    .card-right {
-      border-radius: 0 20px 20px 0;
-      background-color: #fffdf0;
-      border: 1px solid #f9edbc;
-      z-index: 1;
-    }
+    .card-left { border-radius: 20px 0 0 20px; background-color: #f3ebff; border-color: #e0d0f9; }
+    .card-center { border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.08); z-index: 10; margin: -20px 0; padding: 60px 35px; }
+    .card-right { background-color: #fffdf0; border-color: #f9edbc; }
+    .card-telegram { border-radius: 0 20px 20px 0; background-color: #e3f2fd; border-color: #bbdefb; }
 
     h2 { font-size: 20px; margin-top: 0; margin-bottom: 15px; }
-    p { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 20px; }
+    p { font-size: 13px; color: #555; line-height: 1.5; margin-bottom: 20px; }
+    label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 8px; }
 
-    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
     input {
       width: 100%;
       padding: 12px;
@@ -106,7 +76,6 @@
       border-radius: 10px;
       margin-bottom: 15px;
       box-sizing: border-box;
-      font-family: 'Lexend', sans-serif;
     }
 
     .btn-action {
@@ -116,112 +85,84 @@
       border: none;
       font-weight: 700;
       cursor: pointer;
-      font-family: 'Lexend', sans-serif;
       margin-top: auto;
     }
 
     .btn-purple { background: var(--purple); color: white; }
     .btn-black { background: var(--black); color: white; }
     .btn-yellow { background: var(--yellow); color: #111; }
+    .btn-blue { background: var(--blue); color: white; }
 
     .status-msg {
       position: fixed;
-      top: 100px;
+      top: 20px;
       left: 50%;
       transform: translateX(-50%);
       padding: 12px 24px;
       border-radius: 30px;
-      font-size: 14px;
-      font-weight: 500;
       display: none;
       z-index: 100;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     .error { background: #fee2e2; color: #dc2626; display: block; }
     .success { background: #dcfce7; color: #166534; display: block; }
-
-    @media (max-width: 900px) {
-      .login-grid { flex-direction: column; align-items: center; gap: 20px; }
-      .auth-card { border-radius: 20px; margin: 0; width: 100%; max-width: 400px; }
-    }
-	.pwd-container {
-    position: relative;
-    width: 100%;
-  }
-  .pwd-container input {
-    padding-right: 60px; /* Space for the button */
-  }
-  .toggle-pwd {
-    position: absolute;
-    right: 12px;
-    top: 12px;
-    background: none;
-    border: none;
-    color: var(--purple);
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Lexend', sans-serif;
-  }
-</style>
-
+  </style>
 </head>
 <body>
-
-<header class="site-header">
-  <div class="brand-main">
-    <img src="/assets/images/icons/dk.svg" width="24" alt="">
-    Indfodsretsprove.dk - CivicLearn
-  </div>
-  <a href="/denmark/checkout.html" class="btn-small-purple">Opret en adgang</a>
-</header>
 
 <div id="status" class="status-msg"></div>
 
 <div class="login-grid">
   
   <div class="auth-card card-left">
-    <h2 style="color: var(--purple);">Første gang her?</h2>
-    <p>Har du lige købt adgang? Indtast din e-mail for at oprette din adgangskode.</p>
-    <input type="email" id="setupEmail" placeholder="navn@eksempel.dk">
-    <button onclick="handleSetup()" class="btn-action btn-purple">Send link til oprettelse</button>
+    <h2 style="color: var(--purple);">New User?</h2>
+    <p>Just purchased access? Enter your email to set your password.</p>
+    <input type="email" id="setupEmail" placeholder="name@example.com">
+    <button onclick="handleSetup()" class="btn-action btn-purple">Send Setup Link</button>
   </div>
 
-<div class="auth-card card-center">
-  <h2 style="font-size: 28px; text-align: center;">Log ind</h2>
-  <div style="margin-top: 20px;">
-    <label>E-mailadresse</label>
-    <input type="email" id="loginEmail" placeholder="Din e-mail">
-    
-    <label>Adgangskode</label>
-    <div class="pwd-container">
-      <input type="password" id="loginPwd" placeholder="••••••••">
-      <button type="button" class="toggle-pwd" onclick="toggleMainPwd()">Vis</button>
-    </div>
-    
-    <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top: 10px;">Log ind med kodeord</button>
+  <div class="auth-card card-center">
+    <h2 style="font-size: 24px; text-align: center;">Login</h2>
+    <label>Email Address</label>
+    <input type="email" id="loginEmail" placeholder="Your email">
+    <label>Password</label>
+    <input type="password" id="loginPwd" placeholder="••••••••">
+    <button onclick="handleLogin()" class="btn-action btn-black">Login</button>
   </div>
-</div>
 
   <div class="auth-card card-right">
-    <h2 style="color: #856404;">Glemt kodeord?</h2>
-    <p>Modtag en engangskode (6 cifre) direkte i din indbakke i stedet.</p>
-    
+    <h2 style="color: #856404;">Email Code</h2>
+    <p>Receive a one-time login code via email instead.</p>
     <div id="otpInputRow">
-      <input type="email" id="otpEmail" placeholder="navn@eksempel.dk">
-      <button onclick="handleSendOTP()" class="btn-action btn-yellow">Send engangskode</button>
+      <input type="email" id="otpEmail" placeholder="name@example.com">
+      <button onclick="handleSendOTP()" class="btn-action btn-yellow">Send Email Code</button>
     </div>
-
     <div id="otpVerifyRow" style="display:none;">
-      <input type="text" id="otpToken" placeholder="000000" maxlength="6" style="text-align:center; letter-spacing: 2px;">
-      <button onclick="handleVerifyOTP()" class="btn-action btn-black">Bekræft kode</button>
+      <input type="text" id="otpToken" placeholder="000000" maxlength="6">
+      <button onclick="handleVerifyOTP()" class="btn-action btn-black">Verify Email Code</button>
     </div>
+  </div>
+
+  <div class="auth-card card-telegram">
+    <h2 style="color: var(--blue);">Telegram</h2>
+    <p>Get your code instantly via Telegram message.</p>
+    <div id="tgInputRow">
+      <label>Telegram Username</label>
+      <input type="text" id="telegramHandle" placeholder="@username">
+      <button onclick="handleSendTelegramOTP()" class="btn-action btn-blue">Send Telegram Code</button>
+    </div>
+    <div id="tgVerifyRow" style="display:none;">
+      <input type="text" id="tgToken" placeholder="000000" maxlength="6">
+      <button onclick="handleVerifyTelegramOTP()" class="btn-action btn-black">Login with Telegram</button>
+    </div>
+    <p style="font-size: 10px; margin-top: 15px;">
+      First time? Message <a href="https://t.me/civiclearnloginbot" target="_blank" style="color: var(--blue);">@civiclearnloginbot</a> and press 'Start'.
+    </p>
   </div>
 
 </div>
 
 <script>
-  // Initialize Supabase
   const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
 
   function notify(type, text) {
@@ -232,88 +173,66 @@
     setTimeout(() => { el.style.display = "none"; }, 6000);
   }
 
-  // 1. Password Setup (Purple)
-  async function handleSetup() {
-    const email = document.getElementById("setupEmail").value.trim();
-    if(!email) return notify("error", "Indtast venligst din e-mail.");
+  // Telegram Logic
+  async function handleSendTelegramOTP() {
+    const handle = document.getElementById("telegramHandle").value.trim();
+    if(!handle) return notify("error", "Please enter your username.");
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + "/denmark/login-password.html"
+    notify("success", "Connecting to bot...");
+    const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
+      body: JSON.stringify({ username: handle })
     });
 
-    // If "Allow Signups" is OFF, this won't send anything to strangers
-    notify("success", "Hvis din e-mail findes i vores system, har vi sendt et link.");
+    const result = await response.json();
+    if (result.success) {
+      document.getElementById("tgInputRow").style.display = "none";
+      document.getElementById("tgVerifyRow").style.display = "block";
+      notify("success", "Code sent to Telegram!");
+    } else {
+      notify("error", "Error: Make sure you have started the bot.");
+    }
   }
 
-  // 2. Main Login (Center)
+  async function handleVerifyTelegramOTP() {
+    const handle = document.getElementById("telegramHandle").value.trim();
+    const typedCode = document.getElementById("tgToken").value.trim();
+
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id')
+      .ilike('telegram_handle', `%${handle.replace('@','')}%`)
+      .eq('otp_code', typedCode)
+      .single();
+
+    if (error || !user) notify("error", "Invalid code.");
+    else {
+      notify("success", "Logged in!");
+      window.location.href = "/dashboard.html";
+    }
+  }
+
+  // Classic Password Logic
   async function handleLogin() {
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPwd").value.trim();
-
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      notify("error", "Forkert e-mail eller adgangskode.");
-    } else {
-      window.location.href = "/denmark/dashboard/index.html";
-    }
+    if (error) notify("error", "Invalid email or password.");
+    else window.location.href = "/dashboard.html";
   }
 
-  // 3. OTP Flow (Yellow)
+  // Email OTP Logic
   async function handleSendOTP() {
     const email = document.getElementById("otpEmail").value.trim();
-    if(!email) return notify("error", "Indtast e-mail.");
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: false } // Only sends to existing users
-    });
-
-    if (error) {
-      notify("error", "E-mailen blev ikke fundet.");
-    } else {
+    const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+    if (error) notify("error", "Email not found.");
+    else {
       document.getElementById("otpInputRow").style.display = "none";
       document.getElementById("otpVerifyRow").style.display = "block";
-      notify("success", "Koden er sendt!");
+      notify("success", "Email code sent!");
     }
   }
-
-  async function handleVerifyOTP() {
-    const email = document.getElementById("otpEmail").value.trim();
-    const token = document.getElementById("otpToken").value.trim();
-
-    const { data, error } = await supabase.auth.verifyOtp({
-      email, token, type: 'magiclink'
-    });
-
-    if (error) notify("error", "Ugyldig kode.");
-    else window.location.href = "/denmark/dashboard/index.html";
-  }
-  
-  function toggleMainPwd() {
-    const pwdInput = document.getElementById("loginPwd");
-    const btn = event.target;
-    if (pwdInput.type === "password") {
-      pwdInput.type = "text";
-      btn.textContent = "Skjul";
-    } else {
-      pwdInput.type = "password";
-      btn.textContent = "Vis";
-    }
-  }
-  
-  // Verify your handleSetup redirect matches your file name:
-  async function handleSetup() {
-    const email = document.getElementById("setupEmail").value.trim();
-    if(!email) return notify("error", "Indtast venligst din e-mail.");
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + "/denmark/login-password.html" // Matches your uploaded filename
-    });
-
-    notify("success", "Hvis din e-mail findes i vores system, har vi sendt et link.");
-  }
-
 </script>
-
 </body>
 </html>
