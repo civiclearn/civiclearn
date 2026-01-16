@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – CivicLearn Australia</title>4
+  <title>Login – CivicLearn Australia</title>5
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/login.css">
@@ -65,7 +65,6 @@
     <input type="email" id="setupEmail" placeholder="you@example.com">
     <button onclick="handleSetup()" class="btn-action btn-purple">Setup Account</button>
   </div>
-
   <div class="auth-card card-center">
     <h2>Login</h2>
     <p class="subtitle">Sign in with email/password.</p>
@@ -73,10 +72,9 @@
     <input type="password" id="loginPwd" placeholder="••••••••">
     <button onclick="handleLogin()" class="btn-action btn-black">Sign In</button>
   </div>
-
   <div class="auth-card">
     <h2 style="color: #856404;">Email Code</h2>
-    <p class="subtitle">Get a login code via email.</p>
+    <p class="subtitle">Login via email code.</p>
     <div id="emailOtpRow">
       <input type="email" id="otpEmail" placeholder="you@example.com">
       <button onclick="handleSendOTP()" class="btn-action btn-yellow">Send Code</button>
@@ -86,10 +84,9 @@
       <button onclick="handleVerifyOTP()" class="btn-action btn-black">Verify Code</button>
     </div>
   </div>
-
   <div class="auth-card card-telegram">
     <h2 style="color: var(--blue);">Telegram</h2>
-    <p class="subtitle">Instant login via Telegram.</p>
+    <p class="subtitle">Login via Telegram code.</p>
     <div id="tgInputRow">
       <input type="email" id="tgEmail" placeholder="you@example.com">
       <input type="text" id="tgHandle" placeholder="@username">
@@ -119,8 +116,7 @@
   async function handleTelegramRequest() {
     const email = document.getElementById("tgEmail").value.trim();
     const handle = document.getElementById("tgHandle").value.trim().replace('@','');
-    if(!email || !handle) return notify("error", "Fill in both fields.");
-    
+    if(!email || !handle) return notify("error", "Fill both fields.");
     const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_KEY}` },
@@ -137,11 +133,10 @@
     } else { notify("error", result.error || "User not found."); }
   }
 
-async function handleVerifyTelegram() {
+  async function handleVerifyTelegram() {
     const email = document.getElementById("tgEmail").value.trim();
     const code = document.getElementById("tgToken").value.trim();
-    
-    notify("success", "Verifying...");
+    notify("success", "Authenticating...");
     
     try {
       const response = await fetch(`${window.SUPABASE_URL}/functions/v1/bright-action`, {
@@ -151,15 +146,21 @@ async function handleVerifyTelegram() {
       });
       const result = await response.json();
 
-      if (result.success) {
-        // We set a simple marker in the browser so the dashboard knows you're okay
-        localStorage.setItem("is_logged_in", "true");
-        localStorage.setItem("user_email", email);
-        
-        notify("success", "Success! Redirecting...");
-        window.location.href = "/australia/dashboard/index.html";
+      if (result.success && result.hashed_token) {
+        // This is the part that creates the official session for auth-guard.js
+        const { error } = await supabase.auth.verifyOtp({
+          email: email,
+          token: result.hashed_token,
+          type: 'recovery'
+        });
+
+        if (!error) {
+            window.location.href = REDIRECT_PATH;
+        } else {
+            notify("error", "Auth Failed: " + error.message);
+        }
       } else { 
-        notify("error", "Invalid Code."); 
+        notify("error", result.error || "Invalid Code."); 
       }
     } catch (e) { 
       notify("error", "Connection error."); 
