@@ -3,60 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – CivicLearn Australia</title>
+  <title>Login – CivicLearn Australia</title>77
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/login.css">
-
+  
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
   <script>
+    // Your Supabase Config
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
     const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
   </script>
 
   <style>
-    :root { --purple: #7c3aed; --blue: #0288d1; --black: #333; --bg: #fdfaf5; --pink-glow: rgba(212, 66, 112, 0.1); }
-    body { font-family: 'Lexend', sans-serif; background-color: var(--bg); margin: 0; padding: 0; }
-    .login-grid { display: flex; flex-direction: column; align-items: center; max-width: 1000px; margin: 40px auto; padding: 0 20px; }
-    .cards-container { display: flex; justify-content: center; align-items: flex-start; gap: 20px; width: 100%; }
-    .auth-card { background: white; padding: 40px 30px; width: 320px; border: 1px solid #eee; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-    .card-featured { border: 2px solid var(--blue); background: #f0f9ff; position: relative; }
+    :root { --blue: #0288d1; --black: #333; --bg: #fdfaf5; --pink-border: #ff85c0; --pink-bg: rgba(255, 240, 246, 0.9); }
+    body { font-family: 'Lexend', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: var(--black); }
     
-    /* THE PINK BLOCK STYLES */
+    .login-grid { display: flex; flex-direction: column; align-items: center; max-width: 800px; margin: 40px auto; }
+    
+    /* THE PINK BLOCK */
     #pink-access-block {
-        background: rgba(255, 240, 246, 0.8);
+        background: var(--pink-bg);
         backdrop-filter: blur(10px);
-        border: 2px dashed #ff85c0;
+        border: 2px dashed var(--pink-border);
         padding: 30px;
-        border-radius: 20px;
+        border-radius: 24px;
         margin-bottom: 30px;
         width: 100%;
-        max-width: 680px;
-        box-shadow: 0 10px 30px var(--pink-glow);
+        box-sizing: border-box;
         text-align: center;
+        box-shadow: 0 10px 30px rgba(212, 66, 112, 0.1);
     }
 
     #the-number {
         font-family: 'Courier New', Courier, monospace;
-        font-size: 54px;
-        font-weight: bold;
+        font-size: 64px;
+        font-weight: 700;
         color: #d44270;
-        letter-spacing: 8px;
-        margin: 10px 0;
-        animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        letter-spacing: 10px;
+        margin: 15px 0;
+        display: block;
     }
 
-    @keyframes popIn {
-        0% { transform: scale(0.8); opacity: 0; }
-        100% { transform: scale(1); opacity: 1; }
-    }
-
-    input { width: 100%; padding: 14px; border: 2px solid #e5dfd2; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-family: inherit; }
-    .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    /* CARDS */
+    .auth-card { background: white; padding: 40px; border-radius: 24px; border: 2px solid var(--blue); width: 100%; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; }
+    
+    input { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; font-family: inherit; }
+    label { display: block; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #999; margin-bottom: 5px; }
+    
+    .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.2s; }
+    .btn-pink { background: #d44270; color: white; }
     .btn-blue { background: var(--blue); color: white; }
-    .status-msg { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 30px; display: none; z-index: 100; font-weight: 600; }
-    .error { background: #fee2e2; color: #dc2626; }
+    
+    .status-msg { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 15px 30px; border-radius: 50px; display: none; z-index: 1000; font-weight: 600; }
+    .error { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
   </style>
 </head>
 <body>
@@ -66,34 +66,32 @@
 <div class="login-grid">
   
   <div id="pink-access-block">
-    <h3 style="color: #d44270; margin-top: 0;">Instant Access PIN</h3>
-    <p style="font-size: 14px; color: #666;">Enter your email to reveal your daily security PIN.</p>
+    <h2 style="color: #d44270; margin: 0 0 10px 0;">Instant Access PIN</h2>
+    <p style="font-size: 14px; color: #666; margin-bottom: 20px;">Enter your email to reveal your unique daily security code.</p>
     
-    <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
-        <input type="email" id="lookup-email" placeholder="your@email.com" style="width: 60%; margin-bottom: 0;">
-        <button onclick="getWoodenPIN()" class="btn btn-blue" style="width: auto; padding: 0 30px; background: #d44270;">Get PIN</button>
+    <div style="display: flex; gap: 10px; max-width: 500px; margin: 0 auto;">
+        <input type="email" id="lookup-email" placeholder="your@email.com" style="margin-bottom: 0;">
+        <button onclick="getWoodenPIN()" class="btn btn-pink" style="width: auto;">Get PIN</button>
     </div>
 
-    <div id="pin-display" style="display: none; padding-top: 20px; border-top: 1px solid rgba(212, 66, 112, 0.1);">
-        <div style="font-size: 12px; text-transform: uppercase; color: #999;">Your PIN for today is:</div>
-        <div id="the-number">0000</div>
-        <div style="font-size: 11px; color: #d44270;">Valid until midnight • <span id="expiry-timer">Calculating...</span> remaining</div>
+    <div id="pin-display" style="display: none; margin-top: 25px; padding-top: 25px; border-top: 1px solid rgba(212, 66, 112, 0.1);">
+        <span style="font-size: 12px; text-transform: uppercase; color: #999; letter-spacing: 1px;">Your PIN for today is:</span>
+        <span id="the-number">0000</span>
+        <p style="font-size: 11px; color: #d44270; margin: 0;">Code changes at midnight. Use it in the box below to log in.</p>
     </div>
   </div>
 
-  <div class="cards-container">
-    <div class="auth-card card-featured">
-      <h2>Enter Dashboard</h2>
-      <p style="font-size: 13px; color: #666; text-align: center; margin-bottom: 25px;">Use the PIN generated above to enter.</p>
-      
-      <label style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #999;">Email</label>
-      <input type="email" id="bypassEmail" placeholder="you@example.com">
-      
-      <label style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #999;">PIN Code</label>
-      <input type="text" id="bypassToken" placeholder="0000" maxlength="6">
-      
-      <button onclick="handleBypass()" class="btn btn-blue">Enter Now</button>
-    </div>
+  <div class="auth-card">
+    <h2 style="margin-top: 0;">Dashboard Login</h2>
+    <p style="font-size: 13px; color: #666; margin-bottom: 30px;">Enter your details to enter the library.</p>
+    
+    <label>Email Address</label>
+    <input type="email" id="bypassEmail" placeholder="you@example.com">
+    
+    <label>Daily PIN</label>
+    <input type="text" id="bypassToken" placeholder="Enter PIN from pink box" maxlength="6">
+    
+    <button onclick="handleBypass()" class="btn btn-blue">Enter Now</button>
   </div>
 
 </div>
@@ -102,7 +100,7 @@
   function notify(type, text) {
     const el = document.getElementById("status");
     el.textContent = text; el.className = "status-msg " + type; el.style.display = "block";
-    setTimeout(() => { el.style.display = "none"; }, 5000);
+    setTimeout(() => { el.style.display = "none"; }, 4000);
   }
 
   async function getWoodenPIN() {
@@ -112,46 +110,48 @@
 
     if (!email) return notify("error", "Please enter your email.");
 
-    // 1. Check White List in Supabase
+    // 1. Search the "White List"
+    // We use .eq() for an exact match or .ilike() for case-insensitive
     const { data, error } = await supabase
         .from('users')
         .select('email')
         .ilike('email', email)
-        .single();
+        .maybeSingle();
 
-    if (error || !data) {
-        notify("error", "Email not found. If you just purchased, wait 60 seconds.");
-        return;
+    if (error) {
+        console.error(error);
+        return notify("error", "Database error. Check console.");
     }
 
-    // 2. THE WOODEN MATH
+    if (!data) {
+        return notify("error", "Email not found. Are you a registered user?");
+    }
+
+    // 2. THE WOODEN MATH (Day + 42)
     const today = new Date().getDate(); 
     const woodenPIN = today + 42; 
 
-    // 3. Reveal and Auto-Fill
+    // 3. Show and Auto-fill
     theNumber.innerText = woodenPIN;
     pinDisplay.style.display = 'block';
     
-    // Fixed: Using correct IDs from the HTML
     document.getElementById('bypassEmail').value = email;
     document.getElementById('bypassToken').value = woodenPIN;
-
-    // 4. Update the "Expiry" countdown
-    const now = new Date();
-    const hoursRemaining = 23 - now.getHours();
-    const minsRemaining = 59 - now.getMinutes();
-    document.getElementById('expiry-timer').innerText = `${hoursRemaining}h ${minsRemaining}m`;
   }
 
-  async function handleBypass() {
+  function handleBypass() {
     const email = document.getElementById("bypassEmail").value.trim();
     const token = document.getElementById("bypassToken").value.trim();
     
-    // Verification: Does Math Match?
+    if(!email || !token) return notify("error", "Please enter your email and PIN.");
+
+    // The Wooden Guard Check
     const today = new Date().getDate();
-    if (parseInt(token) === (today + 42)) {
+    const correctPIN = today + 42;
+
+    if (parseInt(token) === correctPIN) {
         localStorage.setItem("cl_vip_pass", "true");
-        localStorage.setItem("user_email", email);
+        localStorage.setItem("user_email", email.toLowerCase());
         window.location.href = "/australia/dashboard/index.html";
     } else {
         notify("error", "Invalid PIN for today. Please use the Get PIN button.");
