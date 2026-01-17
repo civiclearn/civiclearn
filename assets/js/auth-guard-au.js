@@ -1,15 +1,12 @@
 (async () => {
-  // Allow local dev
   if (location.hostname === "localhost") return;
 
   try {
     const res = await fetch(
-      "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/session-verify",
+      "https://auth.civiclearn.com/api/session-verify",
       {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ probe: true }) // body required by CSP; ignored server-side
+        method: "GET",
+        credentials: "include"
       }
     );
 
