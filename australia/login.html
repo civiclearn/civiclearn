@@ -103,7 +103,20 @@ button {
   <!-- STEP 2 -->
   <div id="pinCard" class="card secondary">
     <h2>Enter your PIN</h2>
-    <p>This 4-digit PIN changes regularly and is not sent by email.</p>
+    <p>
+  Your access PIN is shown below.  
+  <strong>Write it down.</strong> You will need to enter it manually.
+</p>
+
+<div id="shownPin" style="
+  font-size: 28px;
+  letter-spacing: 6px;
+  font-weight: 600;
+  margin: 12px 0 16px;
+  text-align: center;
+  color: #6c5ce7;
+"></div>
+
 
     <input id="email2" type="email" disabled>
     <input id="pin" type="text" inputmode="numeric" maxlength="4" placeholder="4-digit PIN">
@@ -141,9 +154,14 @@ function requestPIN() {
 
   localStorage.setItem("cl_email", email);
 
+  const pin = getExpectedPIN(email);
+
   document.getElementById("email2").value = email;
+  document.getElementById("shownPin").textContent = pin;
+
   document.getElementById("pinCard").classList.add("visible");
 }
+
 
 function login() {
   const email = localStorage.getItem("cl_email");
