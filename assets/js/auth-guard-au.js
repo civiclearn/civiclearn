@@ -8,15 +8,11 @@
   }
 
   try {
-    const res = await fetch(
-      "https://auth.civiclearn.com/api/session-verify",
-      {
-        method: "GET",
-        headers: {
-          "Authorization": "Bearer " + token
-        }
+    const res = await fetch("/api/session-verify", {
+      headers: {
+        Authorization: "Bearer " + token
       }
-    );
+    });
 
     if (!res.ok) {
       localStorage.removeItem("cl_token");
@@ -27,4 +23,3 @@
     location.replace("/australia/login.html");
   }
 })();
-
