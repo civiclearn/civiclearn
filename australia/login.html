@@ -1,228 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – CivicLearn Australia</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login – CivicLearn Australia</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Supabase (for normal login / OTP / password reset) -->
-  <script>
-    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
-    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
+<script>
+  window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+  window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
 
-  <style>
-    :root{
-      --purple:#7c3aed;
-      --yellow:#f1c40f;
-      --black:#333;
-      --bg:#fdfaf5;
-      --card-shadow: 0 15px 40px rgba(0,0,0,0.08);
-    }
-    body{ margin:0; font-family:'Lexend',sans-serif; background:var(--bg); color:#111; }
-    .site-header{
-      display:flex; justify-content:space-between; align-items:center;
-      padding:15px 40px; background:#fff;
-    }
-    .brand-main{ display:flex; align-items:center; gap:10px; font-weight:700; }
-    .btn-small-purple{
-      background:var(--purple); color:#fff; text-decoration:none;
-      padding:8px 20px; border-radius:20px; font-size:14px; font-weight:600;
-    }
-
-    #status{
-      position:fixed; top:100px; left:50%; transform:translateX(-50%);
-      padding:12px 24px; border-radius:30px; font-size:14px; font-weight:500;
-      display:none; z-index:100; box-shadow:0 4px 12px rgba(0,0,0,0.1);
-    }
-    .error{ background:#fee2e2; color:#dc2626; display:block; }
-    .success{ background:#dcfce7; color:#166534; display:block; }
-
-    .login-grid{
-      display:flex; justify-content:center; align-items:stretch; gap:0;
-      max-width:1100px; margin:80px auto 40px; padding:20px;
-    }
-    .auth-card{
-      background:#fff; padding:40px 30px; width:320px;
-      display:flex; flex-direction:column;
-    }
-    .card-left{
-      border-radius:20px 0 0 20px;
-      background:#f3ebff; border:1px solid #e0d0f9; z-index:1;
-    }
-    .card-center{
-      border-radius:20px; box-shadow:var(--card-shadow); z-index:10;
-      margin:-20px 0; padding:60px 40px; border:1px solid #eee;
-    }
-    .card-right{
-      border-radius:0 20px 20px 0;
-      background:#fffdf0; border:1px solid #f9edbc; z-index:1;
-    }
-
-    h2{ font-size:20px; margin:0 0 15px; }
-    p{ font-size:14px; color:#555; line-height:1.5; margin:0 0 20px; }
-    label{ display:block; font-size:13px; font-weight:600; margin-bottom:8px; }
-    input{
-      width:100%; padding:12px; border:2px solid #e5dfd2; border-radius:10px;
-      margin-bottom:15px; box-sizing:border-box; font-family:'Lexend',sans-serif;
-    }
-
-    .btn-action{
-      width:100%; padding:14px; border-radius:10px; border:none;
-      font-weight:700; cursor:pointer; font-family:'Lexend',sans-serif;
-      margin-top:auto;
-    }
-    .btn-purple{ background:var(--purple); color:#fff; }
-    .btn-black{ background:var(--black); color:#fff; }
-    .btn-yellow{ background:var(--yellow); color:#111; }
-
-    .pwd-container{ position:relative; width:100%; }
-    .pwd-container input{ padding-right:60px; }
-    .toggle-pwd{
-      position:absolute; right:12px; top:12px; background:none; border:none;
-      color:var(--purple); font-size:12px; font-weight:700; cursor:pointer;
-    }
-
-    .pin-reveal{
-      display:none;
-      border-top:1px solid rgba(124,58,237,.18);
-      margin-top:6px;
-      padding-top:14px;
-      animation: slideIn .25s ease-out;
-    }
-    .pin-reveal.visible{ display:block; }
-
-    @keyframes slideIn{
-      from{ opacity:0; transform:translateY(-8px); }
-      to{ opacity:1; transform:translateY(0); }
-    }
-
-    .pin-box{
-      text-align:center;
-      font-size:28px;
-      letter-spacing:8px;
-      font-weight:800;
-      color:var(--purple);
-      padding:10px 0 4px;
-      user-select:text;
-    }
-    .pin-sub{
-      font-size:12px;
-      color:#6b21a8;
-      font-weight:600;
-      text-align:center;
-      line-height:1.4;
-      margin:6px 0 10px;
-    }
-    .pin-row{
-      display:flex; gap:10px;
-    }
-    .pin-row input{
-      text-align:center; letter-spacing:4px; font-weight:700;
-    }
-    .pin-row button{
-      width:160px;
-      margin:0;
-      padding:12px;
-      border-radius:10px;
-      border:none;
-      background:var(--black);
-      color:#fff;
-      font-weight:800;
-      cursor:pointer;
-      font-family:'Lexend',sans-serif;
-    }
-
-    .info-section{
-      max-width:1100px; margin:0 auto 80px;
-      display:grid; grid-template-columns:1fr 1fr; gap:20px; padding:0 20px;
-    }
-    .info-card{
-      background:#fff; border:1px solid rgba(0,0,0,.08);
-      border-radius:18px; padding:24px; box-shadow:0 4px 12px rgba(0,0,0,0.03);
-    }
-
-    @media (max-width: 900px){
-      .login-grid{ flex-direction:column; align-items:center; gap:20px; }
-      .auth-card{ border-radius:20px; margin:0; width:100%; max-width:420px; }
-      .info-section{ grid-template-columns:1fr; }
-    }
-  </style>
+<style>
+body{margin:0;font-family:Lexend,sans-serif;background:#fdfaf5;color:#111}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 40px;background:#fff}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700}
+.login-grid{max-width:1000px;margin:80px auto 40px;display:flex;gap:20px;padding:0 20px}
+.card{background:#fff;border-radius:20px;padding:36px;box-shadow:0 12px 30px rgba(0,0,0,.08);flex:1}
+.card.primary{border-top:6px solid #6c5ce7}
+.card.secondary{background:#f3ebff;border:1px solid #e0d0f9}
+h2{margin:0 0 10px;font-size:22px}
+p{margin:0 0 20px;font-size:14px;color:#555;line-height:1.5}
+label{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;margin-bottom:14px;font-family:Lexend}
+button{width:100%;padding:14px;border-radius:10px;border:none;font-weight:600;cursor:pointer;font-family:Lexend}
+.btn-main{background:#333;color:#fff}
+.btn-pin{background:#6c5ce7;color:#fff}
+.pin-box{font-size:28px;letter-spacing:6px;text-align:center;font-weight:700;color:#6c5ce7;margin:10px 0}
+.hidden{display:none}
+.info-section{max-width:1000px;margin:0 auto 80px;display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:0 20px}
+.info-card{background:#fff;border-radius:18px;padding:24px;border:1px solid rgba(0,0,0,.08)}
+@media(max-width:900px){.login-grid{flex-direction:column}}
+</style>
 </head>
 
 <body>
-<header class="site-header">
-  <div class="brand-main">
-    <img src="/assets/images/icons/au.svg" width="24" alt="">
+
+<header>
+  <div class="brand">
+    <img src="/assets/images/icons/au.svg" width="24">
     CivicLearn Australia
   </div>
-  <a href="/australia/checkout.html" class="btn-small-purple">Get access</a>
+  <a href="/australia/checkout.html" style="text-decoration:none;background:#6c5ce7;color:#fff;padding:8px 18px;border-radius:20px;font-size:14px">Get access</a>
 </header>
-
-<div id="status"></div>
 
 <div class="login-grid">
 
-  <!-- PIN ACCESS (primary) -->
-  <div class="auth-card card-left">
-    <h2 style="color: var(--purple);">Quick PIN access</h2>
-    <p>Enter your email. We’ll show a short access PIN that changes regularly. You’ll type it manually to enter.</p>
+  <!-- PRIMARY LOGIN -->
+  <div class="card primary">
+    <h2>Log in</h2>
+    <p>Use your password. Your browser will usually remember it.</p>
 
-    <input type="email" id="pinEmail" placeholder="name@example.com">
-    <button class="btn-action btn-purple" onclick="showPin()">Show PIN</button>
+    <label>Email</label>
+    <input id="loginEmail" type="email">
 
-    <div id="pinReveal" class="pin-reveal">
+    <label>Password</label>
+    <input id="loginPwd" type="password">
+
+    <button class="btn-main" onclick="passwordLogin()">Log in</button>
+
+    <p style="margin-top:14px;font-size:13px">
+      Trouble logging in? Use the <strong>access PIN</strong> instead.
+    </p>
+  </div>
+
+  <!-- BACKUP PIN LOGIN -->
+  <div class="card secondary">
+    <h2>Access PIN</h2>
+    <p>
+      Use this if email delivery or password login doesn’t work.
+      The PIN changes regularly and is not sent by email.
+    </p>
+
+    <label>Email</label>
+    <input id="pinEmail" type="email">
+
+    <button class="btn-pin" onclick="showPin()">Show access PIN</button>
+
+    <div id="pinArea" class="hidden">
       <div class="pin-box" id="pinShown">0000</div>
-      <div class="pin-sub">
-        Write it down. This PIN expires soon and is not emailed.
-      </div>
+      <p style="font-size:12px;color:#6b21a8;text-align:center">
+        Write it down and enter it manually.
+      </p>
 
-      <label style="margin-top:10px;">Enter PIN manually</label>
-      <div class="pin-row">
-        <input id="pinEnter" type="text" inputmode="numeric" maxlength="4" placeholder="0000">
-        <button type="button" onclick="pinLogin()">ENTER</button>
-      </div>
-    </div>
+      <label>Enter PIN</label>
+      <input id="pinEnter" maxlength="4" inputmode="numeric">
 
-    <div style="font-size:11px; color: var(--purple); font-weight:600; margin-top:15px; text-align:center; line-height:1.4;">
-      If email is not recognized, use the normal login or contact support.
-    </div>
-  </div>
-
-  <!-- NORMAL LOGIN -->
-  <div class="auth-card card-center">
-    <h2 style="font-size: 28px; text-align: center;">Log in</h2>
-    <div style="margin-top: 20px;">
-      <label>Email</label>
-      <input type="email" id="loginEmail" placeholder="Your email">
-      <label>Password</label>
-      <div class="pwd-container">
-        <input type="password" id="loginPwd" placeholder="••••••••">
-        <button type="button" class="toggle-pwd" onclick="toggleMainPwd(event)">Show</button>
-      </div>
-      <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top: 10px;">
-        Log in with password
-      </button>
-    </div>
-  </div>
-
-  <!-- OTP -->
-  <div class="auth-card card-right">
-    <h2 style="color:#856404;">One-time code</h2>
-    <p>Get a 6-digit code in your inbox instead.</p>
-
-    <div id="otpInputRow">
-      <input type="email" id="otpEmail" placeholder="name@example.com">
-      <button onclick="handleSendOTP()" class="btn-action btn-yellow">Send code</button>
-    </div>
-
-    <div id="otpVerifyRow" style="display:none;">
-      <input type="text" id="otpToken" placeholder="000000" maxlength="6"
-             style="text-align:center; letter-spacing:2px;">
-      <button onclick="handleVerifyOTP()" class="btn-action btn-black">Verify</button>
+      <button class="btn-main" onclick="pinLogin()">Enter</button>
     </div>
   </div>
 
@@ -230,145 +96,61 @@
 
 <div class="info-section">
   <div class="info-card">
-    <h3 style="margin-top:0; font-size:16px; color:#333;">ℹ️ About PIN access</h3>
-    <p style="font-size:13.5px; line-height:1.6; color:#444; margin-bottom:0;">
-      PIN access is designed as a reliable way to enter when email delivery is slow or passwords are forgotten.
-      The PIN changes regularly and must be entered manually.
+    <h3>ℹ️ Why access PIN?</h3>
+    <p>
+      The access PIN is a reliable backup when email delivery is slow or passwords
+      can’t be retrieved. It’s designed to work even in difficult situations.
     </p>
   </div>
   <div class="info-card">
-    <h3 style="margin-top:0; font-size:16px; color:#333;">Need help?</h3>
-    <p style="font-size:13.5px; line-height:1.6; color:#444; margin-bottom:0;">
-      If your email is not recognized, contact support and we’ll add/verify your access.
+    <h3>Need help?</h3>
+    <p>
+      If you can’t access your account using either method, contact support and
+      we’ll help immediately.
     </p>
   </div>
 </div>
 
 <script>
-  const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
 
-  function notify(type, text) {
-    const el = document.getElementById("status");
-    el.textContent = text;
-    el.className = type;
-    el.style.display = "block";
-    setTimeout(() => { el.style.display = "none"; }, 6000);
-  }
+function utcDayOfYear(d){
+  const s=new Date(Date.UTC(d.getUTCFullYear(),0,0));
+  return Math.floor((d-s)/86400000);
+}
+function computePin(email){
+  const n=new Date();
+  const v=(utcDayOfYear(n)*37)+(n.getUTCHours()*91)+(email.length*17);
+  return String(v%10000).padStart(4,"0");
+}
 
-  // ---------- PIN SYSTEM ----------
-  // 4-digit PIN derived from: (UTC day-of-year, UTC hour, email length)
-  function utcDayOfYear(d) {
-    const start = new Date(Date.UTC(d.getUTCFullYear(), 0, 0));
-    return Math.floor((d.getTime() - start.getTime()) / 86400000);
-  }
+async function passwordLogin(){
+  const email=loginEmail.value.trim().toLowerCase();
+  const password=loginPwd.value;
+  const { error } = await supabase.auth.signInWithPassword({email,password});
+  if(error) return alert("Invalid email or password.");
+  localStorage.setItem("cl_auth","ok");
+  localStorage.setItem("cl_email",email);
+  location.href="/australia/dashboard/";
+}
 
-  function pinWindowKey(now) {
-    return `${now.getUTCFullYear()}-${utcDayOfYear(now)}-${now.getUTCHours()}`;
-  }
+function showPin(){
+  const email=pinEmail.value.trim().toLowerCase();
+  if(!email) return alert("Enter your email.");
+  const pin=computePin(email);
+  pinShown.textContent=pin;
+  pinArea.classList.remove("hidden");
+  localStorage.setItem("cl_email",email);
+}
 
-  function computePin(email, now = new Date()) {
-    const day = utcDayOfYear(now);
-    const hour = now.getUTCHours();
-    const base = (day * 37) + (hour * 91) + (email.length * 17);
-    return String(base % 10000).padStart(4, "0");
-  }
-
-  async function emailRecognized(email) {
-    // Optional: if you want "recognized user" gating without Supabase Auth,
-    // replace this with your own lightweight endpoint later.
-    // For now: treat as recognized (no backend dependency).
-    return true;
-  }
-
-  async function showPin() {
-    const email = (document.getElementById("pinEmail").value || "").trim().toLowerCase();
-    if (!email) return notify("error", "Enter your email first.");
-
-    const ok = await emailRecognized(email);
-    if (!ok) return notify("error", "Email not recognized.");
-
-    const now = new Date();
-    const pin = computePin(email, now);
-
-    localStorage.setItem("cl_email", email);
-    localStorage.setItem("cl_pin_window", pinWindowKey(now)); // so guard can validate expiry window
-
-    document.getElementById("pinShown").textContent = pin;
-    document.getElementById("pinEnter").value = "";
-    document.getElementById("pinReveal").classList.add("visible");
-  }
-
-  function pinLogin() {
-    const email = localStorage.getItem("cl_email") || "";
-    const pin = (document.getElementById("pinEnter").value || "").trim();
-
-    if (!email) return notify("error", "Enter your email first.");
-    if (!/^\d{4}$/.test(pin)) return notify("error", "Enter the 4-digit PIN.");
-
-    const now = new Date();
-    const expected = computePin(email, now);
-
-    if (pin !== expected) return notify("error", "Invalid PIN.");
-
-    localStorage.setItem("cl_auth", "ok");
-    localStorage.setItem("cl_pin_window", pinWindowKey(now)); // refresh the window key at login time
-    window.location.href = "/australia/dashboard/";
-  }
-
-  // ---------- NORMAL SUPABASE LOGIN ----------
-  async function handleLogin() {
-    const email = (document.getElementById("loginEmail").value || "").trim().toLowerCase();
-    const password = (document.getElementById("loginPwd").value || "").trim();
-    if(!email || !password) return notify("error", "Enter email and password.");
-
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return notify("error", "Invalid email or password.");
-
-    // if they logged in via real auth, also allow guard
-    localStorage.setItem("cl_auth", "ok");
-    localStorage.setItem("cl_email", email);
-    window.location.href = "/australia/dashboard/";
-  }
-
-  async function handleSendOTP() {
-    const email = (document.getElementById("otpEmail").value || "").trim().toLowerCase();
-    if(!email) return notify("error", "Enter email.");
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: false }
-    });
-
-    if (error) return notify("error", "Email not found or OTP disabled.");
-
-    document.getElementById("otpInputRow").style.display = "none";
-    document.getElementById("otpVerifyRow").style.display = "block";
-    notify("success", "Code sent.");
-  }
-
-  async function handleVerifyOTP() {
-    const email = (document.getElementById("otpEmail").value || "").trim().toLowerCase();
-    const token = (document.getElementById("otpToken").value || "").trim();
-
-    const { error } = await supabase.auth.verifyOtp({ email, token, type: "magiclink" });
-    if (error) return notify("error", "Invalid code.");
-
-    localStorage.setItem("cl_auth", "ok");
-    localStorage.setItem("cl_email", email);
-    window.location.href = "/australia/dashboard/";
-  }
-
-  function toggleMainPwd(evt) {
-    const pwdInput = document.getElementById("loginPwd");
-    const btn = evt.target;
-    if (pwdInput.type === "password") {
-      pwdInput.type = "text";
-      btn.textContent = "Hide";
-    } else {
-      pwdInput.type = "password";
-      btn.textContent = "Show";
-    }
-  }
+function pinLogin(){
+  const email=localStorage.getItem("cl_email");
+  const entered=pinEnter.value.trim();
+  if(entered!==computePin(email)) return alert("Invalid PIN.");
+  localStorage.setItem("cl_auth","ok");
+  location.href="/australia/dashboard/";
+}
 </script>
+
 </body>
 </html>
