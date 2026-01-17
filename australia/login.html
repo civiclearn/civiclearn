@@ -1,69 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Secure Access | CivicLearn Australia N#</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
-    <script>
-        const supabase = window.supabase.createClient("https://htgliokekeaovdiafrgs.supabase.co", "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp");
-    </script>
-    <style>
-        :root { --primary: #0288d1; --accent: #d44270; --bg: #f4f7f9; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
-        .card-container { position: relative; width: 380px; height: 460px; }
-        .card { position: absolute; width: 100%; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); transition: all 0.5s ease; box-sizing: border-box; }
-        .hidden { opacity: 0; transform: translateX(50px); pointer-events: none; }
-        .active { opacity: 1; transform: translateX(0); pointer-events: all; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
-        #pinDisplay { display: none; margin: 20px 0; padding: 15px; background: #fff0f5; border: 1px dashed var(--accent); border-radius: 10px; text-align: center; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Login – CivicLearn</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  background: #f5f6fb;
+  font-family: Lexend, system-ui, sans-serif;
+}
+
+.wrap {
+  max-width: 420px;
+  margin: 80px auto;
+  padding: 0 16px;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.08);
+  margin-bottom: 20px;
+  transition: all .4s ease;
+}
+
+.card.primary {
+  border-top: 6px solid #6c5ce7;
+}
+
+.card.secondary {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+
+.card.secondary.visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+p {
+  margin: 0 0 16px;
+  color: #555;
+  font-size: 14px;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 15px;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: #6c5ce7;
+  color: white;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.msg {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #d63031;
+}
+</style>
 </head>
+
 <body>
-<div class="card-container">
-    <div id="step1" class="card active">
-        <h2 style="margin:0;">Identity Access</h2>
-        <p style="font-size:13px; color:#666;">Enter your email to receive your secure PIN.</p>
-        <input type="email" id="email1" placeholder="Registered email">
-        <button onclick="requestPIN()" style="background:var(--accent);">Generate PIN</button>
-        <div id="pinDisplay">
-            <span style="font-size:11px; color:#999;">YOUR 4-DIGIT PIN:</span><br>
-            <span id="theNumber" style="font-size:32px; font-weight:800; color:var(--accent); letter-spacing:4px;">0000</span>
-            <button onclick="toStep2()" style="margin-top:15px; background:#333; font-size:12px; padding:8px;">I have my PIN →</button>
-        </div>
-    </div>
-    <div id="step2" class="card hidden">
-        <h2 style="margin:0;">Security Entry</h2>
-        <p style="font-size:13px; color:#666;">Confirm credentials to unlock the dashboard.</p>
-        <input type="email" id="email2" placeholder="Confirm email">
-        <input type="text" id="pinInput" placeholder="4-Digit PIN">
-        <button onclick="validate()" style="background:var(--primary);">Unlock Library</button>
-    </div>
+
+<div class="wrap">
+
+  <!-- STEP 1 -->
+  <div class="card primary">
+    <h2>Secure access</h2>
+    <p>Enter your email to continue. You’ll be asked for a short access PIN.</p>
+
+    <input id="email" type="email" placeholder="Email address">
+    <button onclick="requestPIN()">Continue</button>
+
+    <div id="msg1" class="msg"></div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div id="pinCard" class="card secondary">
+    <h2>Enter your PIN</h2>
+    <p>This 4-digit PIN changes regularly and is not sent by email.</p>
+
+    <input id="email2" type="email" disabled>
+    <input id="pin" type="text" inputmode="numeric" maxlength="4" placeholder="4-digit PIN">
+
+    <button onclick="login()">Enter</button>
+
+    <div id="msg2" class="msg"></div>
+  </div>
+
 </div>
+
 <script>
-    const getTargetPin = () => (new Date().getDate() * 123) + 1000;
-    async function requestPIN() {
-        const email = document.getElementById('email1').value.trim().toLowerCase();
-        const { data } = await supabase.from('users').select('email').ilike('email', email).maybeSingle();
-        if (data) {
-            document.getElementById('theNumber').innerText = getTargetPin();
-            document.getElementById('pinDisplay').style.display = 'block';
-            document.getElementById('email2').value = email;
-        } else { alert("Email not found."); }
-    }
-    function toStep2() {
-        document.getElementById('step1').classList.replace('active', 'hidden');
-        document.getElementById('step2').classList.replace('hidden', 'active');
-    }
-    function validate() {
-        const pin = document.getElementById('pinInput').value;
-        if (parseInt(pin) === getTargetPin()) {
-            localStorage.setItem("cl_vip_pass", "true");
-            localStorage.setItem("last_used_pin", pin);
-            localStorage.setItem("user_email", document.getElementById('email2').value);
-            window.location.href = "https://civiclearn.com/australia/dashboard/index.html";
-        } else { alert("Invalid PIN."); }
-    }
+function getExpectedPIN(email) {
+  const now = new Date();
+  const start = new Date(Date.UTC(now.getUTCFullYear(), 0, 0));
+  const day = Math.floor((now - start) / 86400000);
+  const hour = now.getUTCHours();
+
+  const base =
+    (day * 37) +
+    (hour * 91) +
+    (email.length * 17);
+
+  return String(base % 10000).padStart(4, "0");
+}
+
+function requestPIN() {
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const msg = document.getElementById("msg1");
+
+  if (!email) {
+    msg.textContent = "Please enter your email.";
+    return;
+  }
+
+  localStorage.setItem("cl_email", email);
+
+  document.getElementById("email2").value = email;
+  document.getElementById("pinCard").classList.add("visible");
+}
+
+function login() {
+  const email = localStorage.getItem("cl_email");
+  const pin = document.getElementById("pin").value.trim();
+  const msg = document.getElementById("msg2");
+
+  if (!pin || pin.length !== 4) {
+    msg.textContent = "Enter the 4-digit PIN.";
+    return;
+  }
+
+  const expected = getExpectedPIN(email);
+
+  if (pin !== expected) {
+    msg.textContent = "Invalid PIN. Please try again.";
+    return;
+  }
+
+  localStorage.setItem("cl_auth", "ok");
+  window.location.replace("/australia/dashboard/");
+}
 </script>
+
 </body>
 </html>
