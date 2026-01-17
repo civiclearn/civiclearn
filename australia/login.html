@@ -194,9 +194,13 @@ async function login() {
       body: JSON.stringify({ email, password })
     });
 
-    if (res.ok) {
-      window.location.replace("/australia/dashboard/index.html");
-    } else {
+   if (res.ok) {
+  const data = await res.json();
+  localStorage.setItem("cl_token", data.token);
+  window.location.replace("/australia/dashboard/index.html");
+}
+
+	else {
       msg.textContent = "Invalid email or password.";
       msg.className = "msg error";
     }
