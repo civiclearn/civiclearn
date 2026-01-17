@@ -3,73 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Australia Login – CivicLearn N</title>
+    <title>Secure Access – CivicLearn Australia</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
     <script>
         const supabase = window.supabase.createClient("https://htgliokekeaovdiafrgs.supabase.co", "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp");
     </script>
     <style>
-        body { font-family: sans-serif; background: #fdfaf5; display: flex; justify-content: center; padding-top: 60px; margin: 0; }
-        .login-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 360px; text-align: center; border: 1px solid #eee; }
-        input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 15px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; color: white; font-size: 16px; margin-top: 5px; }
-        .btn-pink { background: #d44270; }
-        .btn-blue { background: #0288d1; }
-        #pinDisplay { display: none; color: #d44270; font-size: 54px; margin: 20px 0; font-weight: 800; letter-spacing: 5px; }
+        :root { --primary: #0288d1; --accent: #d44270; --bg: #f4f7f9; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
+        
+        .container { position: relative; width: 400px; height: 480px; }
+        .card { 
+            position: absolute; width: 100%; background: white; padding: 40px; border-radius: 24px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); box-sizing: border-box;
+        }
+
+        /* Step Transitions */
+        .step-hidden { opacity: 0; transform: translateX(50px) scale(0.95); pointer-events: none; }
+        .step-active { opacity: 1; transform: translateX(0) scale(1); pointer-events: all; }
+        .step-exit { opacity: 0; transform: translateX(-50px) scale(0.95); pointer-events: none; }
+
+        .header { margin-bottom: 30px; }
+        .step-indicator { display: flex; gap: 8px; margin-bottom: 20px; }
+        .dot { width: 30px; height: 4px; background: #eee; border-radius: 2px; transition: 0.3s; }
+        .dot.active { background: var(--primary); }
+
+        h2 { margin: 0; font-size: 24px; color: #333; }
+        p { color: #666; font-size: 14px; margin: 8px 0 24px 0; }
+
+        input { 
+            width: 100%; padding: 14px; margin-bottom: 16px; border: 2px solid #f0f0f0; 
+            border-radius: 12px; box-sizing: border-box; font-size: 16px; transition: 0.3s;
+        }
+        input:focus { border-color: var(--primary); outline: none; background: #fafafa; }
+
+        button { 
+            width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: 700; 
+            font-size: 16px; cursor: pointer; color: white; transition: 0.3s;
+        }
+        .btn-pink { background: var(--accent); box-shadow: 0 4px 14px rgba(212, 66, 112, 0.3); }
+        .btn-blue { background: var(--primary); box-shadow: 0 4px 14px rgba(2, 136, 209, 0.3); }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+
+        #pinBox { 
+            background: #fff0f5; border: 1px dashed var(--accent); padding: 15px; 
+            border-radius: 12px; margin-top: 20px; display: none; animation: fadeIn 0.5s;
+        }
+        .big-pin { font-size: 32px; font-weight: 800; color: var(--accent); letter-spacing: 4px; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <h2 style="margin-top:0; color:#333;">1. Get PIN</h2>
-        <input type="email" id="emailBox" placeholder="Enter your email">
-        <button onclick="getPIN()" class="btn-pink">Show Daily PIN</button>
+<div class="container">
+    <div id="step1" class="card step-active">
+        <div class="step-indicator"><div class="dot active"></div><div class="dot"></div></div>
+        <div class="header">
+            <h2>Identity Access</h2>
+            <p>Verify your registration email to generate a secure PIN.</p>
+        </div>
+        <input type="email" id="email1" placeholder="Enter registered email">
+        <button onclick="requestPIN()" class="btn-pink">Request Access PIN</button>
         
-        <div id="pinDisplay">00</div>
-
-        <hr style="margin:30px 0; border:0; border-top:1px solid #eee;">
-
-        <h2 style="color:#333;">2. Enter Dashboard</h2>
-        <input type="text" id="pinInput" placeholder="Paste PIN here">
-        <button onclick="login()" class="btn-blue">Enter Library</button>
+        <div id="pinBox">
+            <span style="font-size: 12px; color: #999; text-transform: uppercase;">Your Daily PIN:</span><br>
+            <span class="big-pin" id="generatedPin">----</span>
+            <p style="margin: 10px 0 0 0; font-size: 12px;">Memorize or copy this PIN to continue.</p>
+            <button onclick="goToStep2()" style="margin-top: 15px; background: #333; padding: 10px;">I have my PIN →</button>
+        </div>
     </div>
 
-    <script>
-        async function getPIN() {
-            const email = document.getElementById('emailBox').value.trim().toLowerCase();
-            if(!email) return alert("Please enter your email.");
+    <div id="step2" class="card step-hidden">
+        <div class="step-indicator"><div class="dot active"></div><div class="dot active"></div></div>
+        <div class="header">
+            <h2>Final Validation</h2>
+            <p>Confirm your credentials to unlock the dashboard.</p>
+        </div>
+        <input type="email" id="email2" placeholder="Confirm your email">
+        <input type="text" id="pinInput" placeholder="Enter 4-digit PIN" maxlength="4">
+        <button onclick="validateAndEnter()" class="btn-blue">Unlock Dashboard</button>
+        <p style="text-align: center; margin-top: 20px;"><a href="#" onclick="resetView()" style="color: var(--primary); text-decoration: none; font-size: 12px;">← Back to Step 1</a></p>
+    </div>
+</div>
 
-            // Check Supabase (Assumes RLS is DISABLED or Policy is set)
-            const { data, error } = await supabase.from('users').select('email').ilike('email', email).maybeSingle();
-            
-            if (data) {
-                const pin = new Date().getDate() + 42;
-                const display = document.getElementById('pinDisplay');
-                display.innerText = pin;
-                display.style.display = 'block';
-                // Save email for later
-                localStorage.setItem("user_email", email);
-            } else {
-                alert("Email not found. Please check your spelling or contact support.");
-            }
+<script>
+    const calcPin = () => (new Date().getDate() * 123) + 1000;
+
+    async function requestPIN() {
+        const email = document.getElementById('email1').value.trim().toLowerCase();
+        if(!email) return alert("Email required.");
+
+        const { data, error } = await supabase.from('users').select('email').ilike('email', email).maybeSingle();
+        
+        if (data) {
+            document.getElementById('generatedPin').innerText = calcPin();
+            document.getElementById('pinBox').style.display = 'block';
+            document.getElementById('email2').value = email;
+        } else {
+            alert("This email is not registered for Australia access.");
         }
+    }
 
-        function login() {
-            const entered = document.getElementById('pinInput').value.trim();
-            const today = new Date().getDate();
-            const correct = today + 42;
+    function goToStep2() {
+        document.getElementById('step1').className = 'card step-exit';
+        document.getElementById('step2').className = 'card step-active';
+    }
 
-            if (parseInt(entered) === correct) {
-                // Set the VIP Pass before moving
-                localStorage.setItem("cl_vip_pass", "true");
-                localStorage.setItem("last_used_pin", entered);
-                
-                console.log("PIN correct. Moving to dashboard...");
-                window.location.assign("/australia/dashboard/index.html");
-            } else {
-                alert("Incorrect PIN for today.");
-            }
+    function resetView() {
+        document.getElementById('step2').className = 'card step-hidden';
+        document.getElementById('step1').className = 'card step-active';
+    }
+
+    function validateAndEnter() {
+        const pin = document.getElementById('pinInput').value;
+        const email = document.getElementById('email2').value;
+
+        if (parseInt(pin) === calcPin()) {
+            localStorage.setItem("cl_vip_pass", "true");
+            localStorage.setItem("last_used_pin", pin);
+            localStorage.setItem("user_email", email);
+            window.location.href = "/australia/dashboard/index.html";
+        } else {
+            alert("Security Handshake Failed. Incorrect PIN.");
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
