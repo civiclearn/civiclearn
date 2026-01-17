@@ -1,31 +1,39 @@
-(() => {
+(async () => {
+  // Allow local dev
   if (location.hostname === "localhost") return;
 
-  // Never guard the login page
+  // Never guard the login page itself
   if (location.pathname.includes("/login")) return;
 
-  const ok = localStorage.getItem("cl_auth");
-  const email = localStorage.getItem("cl_email");
-  if (ok !== "ok" || !email) {
-    location.replace("/australia/login.html");
+  /* ---------------------------------
+     1. PIN-based access (backup path)
+     --------------------------------- */
+  const pinAuth = localStorage.getItem("cl_auth");
+  const pinEmail = localStorage.getItem("cl_email");
+
+  if (pinAuth === "ok" && pinEmail) {
+    // PIN login is valid → allow access
     return;
   }
 
-  // Optional expiry window check (UTC hour-based)
-  // If you don't want expiry, delete this block.
-  const pinWindow = localStorage.getItem("cl_pin_window");
-  if (!pinWindow) return;
+  /* ---------------------------------
+     2. Supabase session (primary path)
+     --------------------------------- */
+  try {
+    if (window.supabase) {
+      const { data } = await window.supabase.auth.getSession();
 
-  function utcDayOfYear(d) {
-    const start = new Date(Date.UTC(d.getUTCFullYear(), 0, 0));
-    return Math.floor((d.getTime() - start.getTime()) / 86400000);
+      if (data && data.session) {
+        // Normal auth session exists → allow access
+        return;
+      }
+    }
+  } catch (e) {
+    // Ignore and fall through to redirect
   }
 
-  const now = new Date();
-  const currentWindow = `${now.getUTCFullYear()}-${utcDayOfYear(now)}-${now.getUTCHours()}`;
-
-  if (pinWindow !== currentWindow) {
-    localStorage.removeItem("cl_auth");
-    location.replace("/australia/login.html");
-  }
+  /* ---------------------------------
+     3. Nothing worked → redirect
+     --------------------------------- */
+  location.replace("/australia/login.html");
 })();
