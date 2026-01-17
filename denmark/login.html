@@ -162,11 +162,25 @@ async function handleLogin() {
   const password = loginPwd.value;
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return notify("error","Forkert e-mail eller adgangskode.");
 
-  localStorage.setItem("cl_auth","ok");
-  localStorage.setItem("cl_email",email);
-  location.href="/denmark/dashboard/";
+  if (error) {
+    // 📝 Track failed password attempt in your history table
+    await supabase.from("login_history").insert({
+      email: email,
+      status: "pwd_fail"
+    });
+    return notify("error", "Forkert e-mail eller adgangskode.");
+  }
+
+  // 📝 Track successful password login in your history table
+  await supabase.from("login_history").insert({
+    email: email,
+    status: "pwd_success"
+  });
+
+  localStorage.setItem("cl_auth", "ok");
+  localStorage.setItem("cl_email", email);
+  location.href = "/denmark/dashboard/";
 }
 
 /* ---------- PIN LOGIC (FROM AU) ---------- */
