@@ -1,25 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>CivicLearn Australia Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Australia Login – CivicLearn N</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
     <script>
         const supabase = window.supabase.createClient("https://htgliokekeaovdiafrgs.supabase.co", "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp");
     </script>
+    <style>
+        body { font-family: sans-serif; background: #fdfaf5; display: flex; justify-content: center; padding-top: 60px; margin: 0; }
+        .login-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 360px; text-align: center; border: 1px solid #eee; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 15px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; color: white; font-size: 16px; margin-top: 5px; }
+        .btn-pink { background: #d44270; }
+        .btn-blue { background: #0288d1; }
+        #pinDisplay { display: none; color: #d44270; font-size: 54px; margin: 20px 0; font-weight: 800; letter-spacing: 5px; }
+    </style>
 </head>
-<body style="font-family:sans-serif; background:#fdfaf5; text-align:center; padding-top:50px;">
-    <div style="max-width:350px; margin:auto; background:white; padding:30px; border-radius:20px; border:2px solid #0288d1; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
-        <h2 style="color:#d44270;">Step 1: Get PIN</h2>
-        <input type="email" id="emailBox" placeholder="Your Email" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-        <button onclick="getPIN()" style="width:100%; padding:12px; background:#d44270; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Show My PIN</button>
+<body>
+
+    <div class="login-card">
+        <h2 style="margin-top:0; color:#333;">1. Get PIN</h2>
+        <input type="email" id="emailBox" placeholder="Enter your email">
+        <button onclick="getPIN()" class="btn-pink">Show Daily PIN</button>
         
-        <h1 id="pinDisplay" style="display:none; color:#333; font-size:50px; margin:20px 0;">00</h1>
+        <div id="pinDisplay">00</div>
 
-        <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
+        <hr style="margin:30px 0; border:0; border-top:1px solid #eee;">
 
-        <h2>Step 2: Enter</h2>
-        <input type="text" id="pinInput" placeholder="Enter PIN here" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-        <button onclick="login()" style="width:100%; padding:12px; background:#0288d1; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Go to Dashboard</button>
+        <h2 style="color:#333;">2. Enter Dashboard</h2>
+        <input type="text" id="pinInput" placeholder="Paste PIN here">
+        <button onclick="login()" class="btn-blue">Enter Library</button>
     </div>
 
     <script>
@@ -27,27 +39,35 @@
             const email = document.getElementById('emailBox').value.trim().toLowerCase();
             if(!email) return alert("Please enter your email.");
 
+            // Check Supabase (Assumes RLS is DISABLED or Policy is set)
             const { data, error } = await supabase.from('users').select('email').ilike('email', email).maybeSingle();
             
             if (data) {
                 const pin = new Date().getDate() + 42;
-                document.getElementById('pinDisplay').innerText = pin;
-                document.getElementById('pinDisplay').style.display = 'block';
+                const display = document.getElementById('pinDisplay');
+                display.innerText = pin;
+                display.style.display = 'block';
+                // Save email for later
+                localStorage.setItem("user_email", email);
             } else {
-                alert("Email not recognized. If you just purchased, please wait a moment and try again.");
+                alert("Email not found. Please check your spelling or contact support.");
             }
         }
 
         function login() {
-            const entered = document.getElementById('pinInput').value;
-            const correct = new Date().getDate() + 42;
+            const entered = document.getElementById('pinInput').value.trim();
+            const today = new Date().getDate();
+            const correct = today + 42;
 
             if (parseInt(entered) === correct) {
+                // Set the VIP Pass before moving
                 localStorage.setItem("cl_vip_pass", "true");
                 localStorage.setItem("last_used_pin", entered);
-                window.location.href = "/australia/dashboard/index.html";
+                
+                console.log("PIN correct. Moving to dashboard...");
+                window.location.assign("/australia/dashboard/index.html");
             } else {
-                alert("That PIN doesn't match today's code. Please try again.");
+                alert("Incorrect PIN for today.");
             }
         }
     </script>
