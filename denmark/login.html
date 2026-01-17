@@ -184,16 +184,38 @@ function computePin(email){
   return String(v % 10000).padStart(4,"0");
 }
 
-function showPin(){
+async function showPin(){
   const email = pinEmail.value.trim().toLowerCase();
   if (!email) return notify("error","Indtast din e-mail.");
 
+  // 🔐 SERVER CHECK: does this email exist?
+  let exists = false;
+
+  try {
+    const res = await fetch("/functions/v1/check-user-exists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+
+    const data = await res.json();
+    exists = data.exists === true;
+  } catch (e) {
+    return notify("error","Kunne ikke validere e-mailen. Prøv igen.");
+  }
+
+  if (!exists) {
+    return notify("error","Denne e-mail findes ikke i systemet.");
+  }
+
+  // ✅ EXACT SAME PIN LOGIC AS AU
   const pin = computePin(email);
   pinShown.textContent = pin;
   pinArea.style.display = "block";
 
   localStorage.setItem("cl_email", email);
 }
+
 
 function pinLogin(){
   const email = localStorage.getItem("cl_email");
