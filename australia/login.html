@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Secure Login | CivicLearn Australia</title>
+    <title>Secure Access | CivicLearn Australia N#</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
     <script>
         const supabase = window.supabase.createClient("https://htgliokekeaovdiafrgs.supabase.co", "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp");
@@ -10,79 +10,60 @@
     <style>
         :root { --primary: #0288d1; --accent: #d44270; --bg: #f4f7f9; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
-        .container { position: relative; width: 380px; height: 450px; }
-        .card { 
-            position: absolute; width: 100%; background: white; padding: 40px; border-radius: 24px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08); transition: all 0.5s ease; box-sizing: border-box;
-        }
-        .step-hidden { opacity: 0; transform: translateX(100px); pointer-events: none; }
-        .step-active { opacity: 1; transform: translateX(0); pointer-events: all; }
-        h2 { margin: 0 0 10px 0; font-size: 22px; color: #333; }
+        .card-container { position: relative; width: 380px; height: 460px; }
+        .card { position: absolute; width: 100%; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); transition: all 0.5s ease; box-sizing: border-box; }
+        .hidden { opacity: 0; transform: translateX(50px); pointer-events: none; }
+        .active { opacity: 1; transform: translateX(0); pointer-events: all; }
         input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
         button { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
-        .btn-pink { background: var(--accent); }
-        .btn-blue { background: var(--primary); }
-        #pinDisplay { display: none; margin-top: 20px; padding: 15px; background: #fff0f5; border: 1px dashed var(--accent); border-radius: 10px; }
+        #pinDisplay { display: none; margin: 20px 0; padding: 15px; background: #fff0f5; border: 1px dashed var(--accent); border-radius: 10px; text-align: center; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <div id="step1" class="card step-active">
-        <h2>Identity Access</h2>
-        <p style="font-size:13px; color:#666;">Verify your email to receive your access PIN.</p>
+<div class="card-container">
+    <div id="step1" class="card active">
+        <h2 style="margin:0;">Identity Access</h2>
+        <p style="font-size:13px; color:#666;">Enter your email to receive your secure PIN.</p>
         <input type="email" id="email1" placeholder="Registered email">
-        <button onclick="requestPIN()" class="btn-pink">Generate Secure PIN</button>
-        
+        <button onclick="requestPIN()" style="background:var(--accent);">Generate PIN</button>
         <div id="pinDisplay">
             <span style="font-size:11px; color:#999;">YOUR 4-DIGIT PIN:</span><br>
             <span id="theNumber" style="font-size:32px; font-weight:800; color:var(--accent); letter-spacing:4px;">0000</span>
             <button onclick="toStep2()" style="margin-top:15px; background:#333; font-size:12px; padding:8px;">I have my PIN →</button>
         </div>
     </div>
-
-    <div id="step2" class="card step-hidden">
-        <h2>Final Entry</h2>
-        <p style="font-size:13px; color:#666;">Enter your credentials to unlock the dashboard.</p>
+    <div id="step2" class="card hidden">
+        <h2 style="margin:0;">Security Entry</h2>
+        <p style="font-size:13px; color:#666;">Confirm credentials to unlock the dashboard.</p>
         <input type="email" id="email2" placeholder="Confirm email">
         <input type="text" id="pinInput" placeholder="4-Digit PIN">
-        <button onclick="validate()" class="btn-blue">Unlock Library</button>
+        <button onclick="validate()" style="background:var(--primary);">Unlock Library</button>
     </div>
 </div>
-
 <script>
     const getTargetPin = () => (new Date().getDate() * 123) + 1000;
-
     async function requestPIN() {
         const email = document.getElementById('email1').value.trim().toLowerCase();
         const { data } = await supabase.from('users').select('email').ilike('email', email).maybeSingle();
-        
         if (data) {
             document.getElementById('theNumber').innerText = getTargetPin();
             document.getElementById('pinDisplay').style.display = 'block';
             document.getElementById('email2').value = email;
-        } else {
-            alert("Email not found.");
-        }
+        } else { alert("Email not found."); }
     }
-
     function toStep2() {
-        document.getElementById('step1').classList.replace('step-active', 'step-hidden');
-        document.getElementById('step2').classList.replace('step-hidden', 'step-active');
+        document.getElementById('step1').classList.replace('active', 'hidden');
+        document.getElementById('step2').classList.replace('hidden', 'active');
     }
-
     function validate() {
         const pin = document.getElementById('pinInput').value;
         if (parseInt(pin) === getTargetPin()) {
             localStorage.setItem("cl_vip_pass", "true");
             localStorage.setItem("last_used_pin", pin);
             localStorage.setItem("user_email", document.getElementById('email2').value);
-            window.location.href = "/australia/dashboard/index.html";
-        } else {
-            alert("Invalid PIN.");
-        }
+            window.location.href = "https://civiclearn.com/australia/dashboard/index.html";
+        } else { alert("Invalid PIN."); }
     }
 </script>
-
 </body>
 </html>
