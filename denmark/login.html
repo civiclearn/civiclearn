@@ -164,26 +164,23 @@ async function handleLogin() {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    // We add 'await' to make sure the database registers it before showing the error
-    await supabase.from("login_history").insert({
-      email: email,
-      status: "pwd_fail"
-    });
     return notify("error", "Forkert e-mail eller adgangskode.");
   }
 
-  // 📝 IMPORTANT: We MUST await this so it finishes before the page changes
+  // ✅ Log successful password login
   await supabase.from("login_history").insert({
-    email: email,
-    status: "pwd_success"
+    email,
+    status: "success",
+    method: "password"
   });
 
   localStorage.setItem("cl_auth", "ok");
   localStorage.setItem("cl_email", email);
   
-  // Now we move to the dashboard
+  // Redirect to dashboard
   location.href = "/denmark/dashboard/";
 }
+
 
 /* ---------- PIN LOGIC (FROM AU) ---------- */
 function utcDayOfYear(d){
@@ -239,6 +236,13 @@ function pinLogin(){
 
   if (entered !== computePin(email))
     return notify("error","Forkert PIN.");
+
+  // ✅ Log successful PIN login
+  supabase.from("login_history").insert({
+    email,
+    status: "success",
+    method: "pin"
+  });
 
   localStorage.setItem("cl_auth","ok");
   location.href="/denmark/dashboard/";
