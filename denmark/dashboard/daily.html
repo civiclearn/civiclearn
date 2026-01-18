@@ -79,6 +79,7 @@
 
       <header class="ce-header ce-header-top">
         <h1 data-i18n="title_quick"></h1>
+		<p id="dailyDate" class="ce-subtitle"></p>
       </header>
 
 <div class="ce-progress-global">
@@ -133,6 +134,19 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+</script>
+<script>
+  const el = document.getElementById("dailyDate");
+  if (el) {
+    const today = new Date();
+    const formatted = today.toLocaleDateString("da-DK", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+    el.textContent = "Dagens daglige test – " + formatted;
+  }
 </script>
 <script src="/assets/js/signout.js"></script>
 </body>
