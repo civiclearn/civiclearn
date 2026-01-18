@@ -229,7 +229,6 @@ async function showPin(){
   localStorage.setItem("cl_email", email);
 }
 
-
 async function pinLogin() {
   const email = localStorage.getItem("cl_email");
   const enteredPin = pinEnter.value.trim();
@@ -238,7 +237,10 @@ async function pinLogin() {
     "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/verify-pin-and-log",
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": window.SUPABASE_KEY
+      },
       body: JSON.stringify({ email, enteredPin })
     }
   );
@@ -252,6 +254,8 @@ async function pinLogin() {
   localStorage.setItem("cl_auth","ok");
   location.href="/denmark/dashboard/";
 }
+
+
 
 
 function toggleMainPwd(){
