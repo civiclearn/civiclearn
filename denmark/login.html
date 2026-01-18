@@ -230,23 +230,29 @@ async function showPin(){
 }
 
 
-function pinLogin(){
+async function pinLogin() {
   const email = localStorage.getItem("cl_email");
-  const entered = pinEnter.value.trim();
+  const enteredPin = pinEnter.value.trim();
 
-  if (entered !== computePin(email))
-    return notify("error","Forkert PIN.");
+  const res = await fetch(
+    "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/verify-pin-and-log",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, enteredPin })
+    }
+  );
 
-  // ✅ Log successful PIN login
-  supabase.from("login_history").insert({
-    email,
-    status: "success",
-    method: "pin"
-  });
+  const data = await res.json();
+
+  if (!data.success) {
+    return notify("error", "Forkert PIN.");
+  }
 
   localStorage.setItem("cl_auth","ok");
   location.href="/denmark/dashboard/";
 }
+
 
 function toggleMainPwd(){
   const pwd = loginPwd;
