@@ -1,393 +1,195 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-au">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Login – CivicLearn Australia</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login – CivicLearn Australia</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/login.css">
 
-<!-- Supabase -->
-<script>
-  window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
-  window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
+  <!-- Supabase config + loader -->
+  <script>
+    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+  </script>
 
-<style>
-:root{
-  --purple:#6c5ce7;
-  --purple-soft:#f3ebff;
-  --yellow-soft:#fff8dc;
-  --dark:#2d2d2d;
-  --bg:#fdfaf5;
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:Lexend,sans-serif;
-  background:var(--bg);
-  color:#111;
-}
-
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:16px 40px;
-  background:#fff;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-weight:700;
-}
-
-.btn-top{
-  background:var(--purple);
-  color:#fff;
-  text-decoration:none;
-  padding:8px 18px;
-  border-radius:20px;
-  font-size:14px;
-  font-weight:600;
-}
-
-.intro{
-  max-width:900px;
-  margin:60px auto 30px;
-  padding:0 20px;
-  text-align:center;
-}
-
-.intro h1{
-  margin:0 0 10px;
-  font-size:28px;
-}
-
-.intro p{
-  margin:0;
-  font-size:15px;
-  color:#555;
-}
-
-.cards{
-  max-width:900px;
-  margin:30px auto 20px;
-  padding:0 20px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
-}
-
-.card{
-  background:#fff;
-  border-radius:20px;
-  padding:36px;
-  box-shadow:0 12px 30px rgba(0,0,0,.08);
-}
-
-.card.primary{
-  border-top:6px solid var(--purple);
-}
-
-.card.secondary{
-  border-top:6px solid #333;
-}
-
-h2{
-  margin:0 0 10px;
-  font-size:22px;
-}
-
-p{
-  margin:0 0 18px;
-  font-size:14px;
-  color:#555;
-  line-height:1.5;
-}
-
-label{
-  font-size:13px;
-  font-weight:600;
-  display:block;
-  margin-bottom:6px;
-}
-
-input{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid #ddd;
-  margin-bottom:14px;
-  font-family:Lexend;
-}
-
-button{
-  width:100%;
-  padding:14px;
-  border-radius:10px;
-  border:none;
-  font-family:Lexend;
-  font-weight:600;
-  cursor:pointer;
-}
-
-.btn-dark{background:var(--dark);color:#fff}
-.btn-purple{background:var(--purple);color:#fff}
-
-.small-note{
-  font-size:12px;
-  color:#666;
-  margin-top:12px;
-}
-
-.pin-trigger{
-  max-width:900px;
-  margin:30px auto 0;
-  padding:0 20px;
-  text-align:center;
-  cursor:pointer;
-}
-
-.pin-trigger-title{
-  font-weight:600;
-  color:var(--purple);
-  font-size:15px;
-}
-
-.pin-trigger-sub{
-  font-size:13px;
-  color:#666;
-}
-
-.pin-wrapper{
-  max-width:900px;
-  margin:0 auto;
-  padding:0 20px;
-  overflow:hidden;
-  max-height:0;
-  opacity:0;
-  transition:max-height .5s ease, opacity .4s ease;
-}
-
-.pin-wrapper.visible{
-  max-height:800px;
-  opacity:1;
-  margin-top:20px;
-}
-
-.pin-card{
-  background:var(--purple-soft);
-  border-radius:20px;
-  padding:36px;
-  border:1px solid #e0d0f9;
-}
-
-.pin-box{
-  text-align:center;
-  font-size:30px;
-  letter-spacing:8px;
-  font-weight:700;
-  color:var(--purple);
-  margin:10px 0;
-}
-
-.pin-hint{
-  text-align:center;
-  font-size:12px;
-  color:#6b21a8;
-  margin-bottom:16px;
-}
-
-.info{
-  max-width:900px;
-  margin:40px auto 80px;
-  padding:0 20px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
-}
-
-.info-card{
-  background:#fff;
-  border-radius:18px;
-  padding:24px;
-  border:1px solid rgba(0,0,0,.08);
-}
-
-@media(max-width:900px){
-  .cards{grid-template-columns:1fr}
-  .info{grid-template-columns:1fr}
-}
-</style>
+  <script>
+    (function () {
+      const supabaseLoader = document.createElement("script");
+      supabaseLoader.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
+      supabaseLoader.onload = () => {
+        window.supabase = supabase.createClient(
+          window.SUPABASE_URL,
+          window.SUPABASE_KEY
+        );
+      };
+      document.head.appendChild(supabaseLoader);
+    })();
+  </script>
 </head>
 
 <body>
 
-<header>
-  <div class="brand">
-    <img src="/assets/images/icons/au.svg" width="24">
-    CivicLearn Australia
+<header class="site-header">
+  <div class="header-inner">
+
+    <div class="header-left">
+      <div class="brand-main">
+        <img src="/assets/images/au.svg" alt="Australia">
+        <div class="brand-title">CivicLearn Australia</div>
+      </div>
+      <div class="brand-powered">
+        powered by <span>CivicLearn</span>
+      </div>
+    </div>
+
+    <nav class="header-nav">
+      <a href="/australia/">Home</a>
+      <a href="/australia/#presentation">Overview</a>
+      <a href="/australia/#pricing">Pricing</a>
+    </nav>
+
+    <a href="/australia/checkout.html" class="btn-small-purple">Sign up</a>
   </div>
-  <a href="/australia/checkout.html" class="btn-top">Get access</a>
 </header>
 
-<div class="intro">
-  <h1>Access your CivicLearn account</h1>
-  <p>Choose the option that matches your situation.</p>
-</div>
+<div class="login-wrapper">
+  <main class="login-container">
+    <div class="card">
+      <h1>Login</h1>
+      <p class="subtitle" style="font-family: 'Lexend', sans-serif;">
+        Enter your email to receive your 8-digit access code.
+      </p>
 
-<div class="cards">
+      <div id="emailSection">
+        <label for="email" style="font-family: 'Lexend', sans-serif;">Email Address</label>
+        <input id="email" type="email" placeholder="you@example.com" 
+               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px; font-family: 'Lexend', sans-serif;" />
+        <button type="button" class="login-btn" id="sendMagicLink" style="font-family: 'Lexend', sans-serif; font-weight:600;">
+          Send login code
+        </button>
+      </div>
 
-  <!-- FIRST ACCESS -->
-  <div class="card primary">
-    <h2>First access</h2>
-    <p>If this is your first time here, set your password to activate your account.</p>
+      <div id="otpSection" style="display:none; margin-top: 10px;">
+        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">8-Digit Code</label>
+        <input id="otpCode" type="text" placeholder="00000000" maxlength="8" 
+               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
+        <button type="button" class="login-btn" id="verifyOtp" 
+                style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;">
+          Verify & Login
+        </button>
+      </div>
 
-    <label>Email</label>
-    <input id="faEmail" type="email">
+      <div id="loginMessage" class="login-message" style="display:none; margin-top: 15px; font-family: 'Lexend', sans-serif;"></div>
 
-    <button class="btn-purple" onclick="firstAccess()">Set password</button>
-
-    <div class="small-note">
-      You’ll receive an email with a link to choose your password.
+      <div class="login-footer" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #666; text-align: center; font-family: 'Lexend', sans-serif;">
+        Don't have access yet? <a href="/australia/checkout" style="color: #7c3aed; text-decoration: none; font-weight: 500;">Create access</a>
+      </div>
     </div>
-  </div>
-
-  <!-- PASSWORD LOGIN -->
-  <div class="card secondary">
-    <h2>Log in</h2>
-    <p>Use your password. Your browser will usually remember it.</p>
-
-    <label>Email</label>
-    <input id="loginEmail" type="email">
-
-    <label>Password</label>
-    <input id="loginPwd" type="password">
-
-    <button class="btn-dark" onclick="passwordLogin()">Log in</button>
-  </div>
-
+  </main>
 </div>
 
-<div class="pin-trigger" onclick="togglePin()">
-  <span class="pin-trigger-title">Problems logging in?</span>
-  <span class="pin-trigger-sub">Use a short access PIN instead</span>
-</div>
-
-<div id="pinWrapper" class="pin-wrapper">
-  <div class="pin-card">
-    <h2>Access PIN</h2>
-    <p>
-      Use this backup method if password login or email delivery doesn’t work.
-      The PIN changes regularly and is not sent by email.
-    </p>
-
-    <label>Email</label>
-    <input id="pinEmail" type="email">
-
-    <button class="btn-purple" onclick="showPin()">Show access PIN</button>
-
-    <div id="pinArea" style="display:none">
-      <div class="pin-box" id="pinShown">0000</div>
-      <div class="pin-hint">Write it down and enter it manually.</div>
-
-      <label>Enter PIN</label>
-      <input id="pinEnter" maxlength="4" inputmode="numeric">
-
-      <button class="btn-dark" onclick="pinLogin()">Enter</button>
-    </div>
-  </div>
-</div>
-
-<div class="info">
-  <div class="info-card">
-    <h3>ℹ️ About access PIN</h3>
-    <p>
-      The access PIN is designed as a reliable fallback when normal login methods
-      don’t work. It avoids email delays and works immediately.
-    </p>
-  </div>
-  <div class="info-card">
-    <h3>Need help?</h3>
-    <p>
-      If you’re still blocked, contact support and we’ll help right away.
-    </p>
-  </div>
-</div>
+<!-- MESSAGE for first login -->
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("first") === "1") {
+    const box = document.getElementById("loginMessage");
+    box.className = "login-message success";
+    box.textContent =
+      "Your account has been activated. Enter the email address used during purchase to access your training.";
+    box.style.display = "block";
+  }
+})();
+</script>
 
 <script>
-const supabase = window.supabase.createClient(
-  window.SUPABASE_URL,
-  window.SUPABASE_KEY
-);
-
-// ---------- PIN LOGIC ----------
-function utcDayOfYear(d){
-  const s=new Date(Date.UTC(d.getUTCFullYear(),0,0));
-  return Math.floor((d-s)/86400000);
-}
-function computePin(email){
-  const n=new Date();
-  const v=(utcDayOfYear(n)*37)+(n.getUTCHours()*91)+(email.length*17);
-  return String(v%10000).padStart(4,"0");
+// --- HELPERS ---
+function showMessage(type, text) {
+  const box = document.getElementById("loginMessage");
+  box.className = "login-message " + type;
+  box.textContent = text;
+  box.style.display = "block";
 }
 
-// ---------- ACTIONS ----------
-async function firstAccess(){
-  const email=faEmail.value.trim().toLowerCase();
-  if(!email) return alert("Enter your email.");
+let lastEmailAttempt = "";
+let attemptCount = 0;
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email);
-  if(error) return alert("Email not recognized.");
-
-  alert("Check your email to set your password.");
-}
-
-async function passwordLogin(){
-  const email=loginEmail.value.trim().toLowerCase();
-  const password=loginPwd.value;
-  if(!email||!password) return alert("Enter email and password.");
-
-  const { error } = await supabase.auth.signInWithPassword({email,password});
-  if(error) return alert("Invalid email or password.");
-
-  localStorage.setItem("cl_auth","ok");
-  localStorage.setItem("cl_email",email);
-  location.href="/australia/dashboard/";
-}
-
-function togglePin(){
-  const w=document.getElementById("pinWrapper");
-  w.classList.toggle("visible");
-  if(w.classList.contains("visible")){
-    w.scrollIntoView({behavior:"smooth",block:"start"});
+function handleLoginFeedback(email) {
+  if (email === lastEmailAttempt) {
+    attemptCount++;
+  } else {
+    attemptCount = 1;
+    lastEmailAttempt = email;
+  }
+  if (attemptCount >= 2) {
+    showMessage("success", "If you still haven't received the code, please check Spam or contact us.");
+  } else {
+    showMessage("success", "Your 8-digit login code has been sent. Please check your email.");
   }
 }
 
-function showPin(){
-  const email=pinEmail.value.trim().toLowerCase();
-  if(!email) return alert("Enter your email.");
+// --- STEP 1: REQUEST THE CODE ---
+document.getElementById("sendMagicLink").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const msg = document.getElementById("loginMessage");
+  msg.style.display = "none";
 
-  const pin=computePin(email);
-  pinShown.textContent=pin;
-  pinArea.style.display="block";
-  localStorage.setItem("cl_email",email);
-}
+  if (!email) {
+    showMessage("error", "Please enter your email address.");
+    return;
+  }
 
-function pinLogin(){
-  const email=localStorage.getItem("cl_email");
-  const entered=pinEnter.value.trim();
-  if(entered!==computePin(email)) return alert("Invalid PIN.");
+  if (!window.supabase) {
+    showMessage("error", "Technical error. Please refresh and try again.");
+    return;
+  }
 
-  localStorage.setItem("cl_auth","ok");
-  location.href="/australia/dashboard/";
-}
+  // signInWithOtp without redirectTo will trigger the 8-digit code flow 
+  // if you updated your Supabase template to {{ .Token }}
+  const { error } = await window.supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: false
+    }
+  });
+
+  if (error) {
+    showMessage("error", error.message);
+    return;
+  }
+
+  // UI Change: Hide email button, show the code input section
+  document.getElementById("sendMagicLink").style.display = "none";
+  document.getElementById("otpSection").style.display = "block";
+  
+  handleLoginFeedback(email);
+});
+
+// --- STEP 2: VERIFY THE CODE ---
+document.getElementById("verifyOtp").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const token = document.getElementById("otpCode").value.trim();
+
+  // FLEXIBLE CHECK: Allows 6, 7, or 8 digits.
+  if (token.length < 6 || token.length > 8) {
+    showMessage("error", "Please enter the valid code sent to your email.");
+    return;
+  }
+
+  const { data, error } = await window.supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'magiclink'
+  });
+
+  if (error) {
+    showMessage("error", error.message);
+  } else if (data.session) {
+    window.location.href = "/australia/dashboard/index.html";
+  }
+});
 </script>
 
 </body>
