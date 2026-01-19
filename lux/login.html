@@ -269,12 +269,24 @@
   }
 
   async function handleLogin() {
-    const email = document.getElementById("loginEmail").value.trim();
-    const password = document.getElementById("loginPwd").value.trim();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) notify("error", I18N[currentLang].err_login);
-    else window.location.href = "/lux/dashboard/index.html";
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+  const password = document.getElementById("loginPwd").value.trim();
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    notify("error", I18N[currentLang].err_login);
+    return;
   }
+
+  await supabase.from("login_history").insert({
+    email,
+    status: "success",
+    method: "password"
+  });
+
+  window.location.href = "/lux/dashboard/index.html";
+}
 
   async function handleSendOTP() {
     const email = document.getElementById("otpEmail").value.trim();
@@ -291,12 +303,29 @@
   }
 
   async function handleVerifyOTP() {
-    const email = document.getElementById("otpEmail").value.trim();
-    const token = document.getElementById("otpToken").value.trim();
-    const { error } = await supabase.auth.verifyOtp({ email, token, type: 'magiclink' });
-    if (error) notify("error", I18N[currentLang].err_otp);
-    else window.location.href = "/lux/dashboard/index.html";
+  const email = document.getElementById("otpEmail").value.trim().toLowerCase();
+  const token = document.getElementById("otpToken").value.trim();
+
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: "magiclink"
+  });
+
+  if (error) {
+    notify("error", I18N[currentLang].err_otp);
+    return;
   }
+
+  await supabase.from("login_history").insert({
+    email,
+    status: "success",
+    method: "otp"
+  });
+
+  window.location.href = "/lux/dashboard/index.html";
+}
+
 
   function toggleMainPwd() {
     const pwdInput = document.getElementById("loginPwd");
