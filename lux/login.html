@@ -20,7 +20,7 @@
   /* MAIN HEADER CONTAINER */
   .site-header .header-inner {
     display: flex;
-    flex-wrap: wrap;          /* 🔴 THIS WAS MISSING */
+    flex-wrap: wrap;          
     row-gap: 10px;
   }
 
@@ -127,19 +127,61 @@
     </div>
   </div>
 
+
   <div class="auth-card card-right">
-    <h2 style="color: #856404;" data-t="right_title"></h2>
-    <p data-t="right_desc"></p>
-    <div id="otpInputRow">
-      <input type="email" id="otpEmail" placeholder="name@example.lu">
-      <button onclick="handleSendOTP()" class="btn-action btn-yellow" data-t="right_btn"></button>
-    </div>
-    <div id="otpVerifyRow" style="display:none;">
-      <input type="text" id="otpToken" placeholder="000000" maxlength="6" style="text-align:center; letter-spacing: 2px;">
-      <button onclick="handleVerifyOTP()" class="btn-action btn-black" data-t="verify_btn"></button>
-    </div>
+
+  <h2 style="color:#856404;" data-t="pin_title"></h2>
+
+  <p data-t="pin_desc"></p>
+
+  <label data-t="pin_email_label"></label>
+  <input
+    type="email"
+    id="pinEmail"
+    data-t-placeholder="pin_email_placeholder"
+  >
+
+  <button
+    class="btn-action btn-yellow"
+    onclick="showPin()"
+    data-t="pin_show_btn"
+  ></button>
+
+  <div id="pinArea" style="display:none;margin-top:15px;">
+
+    <div
+      id="pinShown"
+      style="
+        text-align:center;
+        font-size:28px;
+        letter-spacing:6px;
+        font-weight:700;
+        color:var(--purple);
+        margin-bottom:10px;
+      "
+    >0000</div>
+
+    <label data-t="pin_enter_label"></label>
+
+    <input
+      type="text"
+      id="pinEnter"
+      maxlength="4"
+      inputmode="numeric"
+      style="text-align:center;letter-spacing:2px;"
+    >
+
+    <button
+      class="btn-action btn-black"
+      onclick="pinLogin()"
+      data-t="pin_continue_btn"
+    ></button>
+
   </div>
+
 </div>
+</div> 
+
 
 <div class="info-section">
   <div class="info-card">
@@ -151,133 +193,163 @@
     <p style="font-size: 13px; line-height: 1.6; color: #444; margin-bottom: 0;" data-t="info2_body"></p>
   </div>
 </div>
-
 <script>
-  const I18N = {
-    en: {
-      nav_signup: "Sign up",
-      left_title: "First time or Migrated?",
-      left_desc: "Did you just buy access, or are you moving from the old platform? Enter your email to set your password.",
-      left_btn: "Send setup link",
-      spam_note: "ℹ️ Please check your spam folder if you don't receive the email within 2 minutes.",
-      center_title: "Login",
-      email_label: "Email Address",
-      pwd_label: "Password",
-      show_pwd: "Show",
-      hide_pwd: "Hide",
-      center_btn: "Login with password",
-      right_title: "Problems?",
-      right_desc: "Receive a one-time code (6 digits) directly in your inbox instead.",
-      right_btn: "Send code",
-      verify_btn: "Verify & Login",
-      info1_title: "ℹ️ Information for existing users",
-      info1_body: "Most existing users have been automatically transferred. In rare cases—especially for older purchases—it may be necessary to add your account manually. If your email is not recognized, please contact support.",
-      info2_title: "📊 About training progress",
-      info2_body: "Due to the move to a new platform, previous progress and statistics have not been transferred. All users start with a reset progression to ensure future data is accurate.",
-      err_no_email: "Please enter an email.",
-      err_not_found: "Email not found in our system.",
-      err_login: "Invalid email or password.",
-      msg_sent: "If your email is in our system, a link has been sent.",
-      msg_otp_sent: "Code sent!",
-      err_otp: "Invalid code."
-    },
-    fr: {
-      nav_signup: "Je m'inscris",
-      left_title: "Nouveau ou transféré ?",
-      left_desc: "Vous venez d'acheter un accès ou vous migrez de l'ancienne plateforme ? Entrez votre e-mail pour créer votre mot de passe.",
-      left_btn: "Envoyer le lien",
-      spam_note: "ℹ️ Veuillez vérifier vos spams si vous ne recevez pas l'e-mail d'ici 2 minutes.",
-      center_title: "Connexion",
-      email_label: "Adresse e-mail",
-      pwd_label: "Mot de passe",
-      show_pwd: "Voir",
-      hide_pwd: "Cacher",
-      center_btn: "Se connecter",
-      right_title: "Problèmes ?",
-      right_desc: "Recevez un code unique (6 chiffres) directement dans votre boîte de réception.",
-      right_btn: "Envoyer le code",
-      verify_btn: "Vérifier & Connexion",
-      info1_title: "ℹ️ Information aux utilisateurs",
-      info1_body: "La plupart des comptes ont été transférés. Dans certains cas, un ajout manuel est nécessaire. Si votre e-mail n'est pas reconnu, contactez le support.",
-      info2_title: "📊 Progression d'entraînement",
-      info2_body: "Suite au changement de plateforme, les anciennes statistiques n'ont pas été transférées. Tous les utilisateurs repartent de zéro pour garantir la précision des données.",
-      err_no_email: "Veuillez entrer un e-mail.",
-      err_not_found: "E-mail non trouvé dans notre système.",
-      err_login: "E-mail ou mot de passe invalide.",
-      msg_sent: "Si votre e-mail existe, un lien a été envoyé.",
-      msg_otp_sent: "Code envoyé !",
-      err_otp: "Code invalide."
-    },
-    de: {
-      nav_signup: "Registrieren",
-      left_title: "Neu oder migriert?",
-      left_desc: "Haben Sie gerade Zugang gekauft oder ziehen Sie von der alten Plattform um? E-Mail eingeben, um Passwort zu erstellen.",
-      left_btn: "Link senden",
-      spam_note: "ℹ️ Bitte prüfen Sie Ihren Spam-Ordner, falls Sie keine E-Mail erhalten.",
-      center_title: "Anmelden",
-      email_label: "E-Mail-Adresse",
-      pwd_label: "Passwort",
-      show_pwd: "Anzeigen",
-      hide_pwd: "Verbergen",
-      center_btn: "Mit Passwort anmelden",
-      right_title: "Probleme?",
-      right_desc: "Erhalten Sie stattdessen einen Einmalcode (6-stellig) direkt in Ihren Posteingang.",
-      right_btn: "Code senden",
-      verify_btn: "Bestätigen & Login",
-      info1_title: "ℹ️ Info für bestehende Nutzer",
-      info1_body: "Die meisten Nutzer wurden automatisch übertragen. In Einzelfällen ist eine manuelle Aktivierung nötig. Wenn Ihre E-Mail nicht erkannt wird, kontaktieren Sie den Support.",
-      info2_title: "📊 Trainingsfortschritt",
-      info2_body: "Aufgrund der neuen Plattform wurde der bisherige Fortschritt nicht übernommen. Alle Nutzer starten bei Null, um korrekte Statistiken zu gewährleisten.",
-      err_no_email: "E-Mail eingeben.",
-      err_not_found: "E-Mail nicht im System gefunden.",
-      err_login: "E-Mail oder Passwort ungültig.",
-      msg_sent: "Falls Ihre E-Mail registriert ist, wurde ein Link gesendet.",
-      msg_otp_sent: "Code gesendet!",
-      err_otp: "Ungültiger Code."
-    }
-  };
-
-  let currentLang = 'en';
-  const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-
-  function applyLang(lang) {
-    currentLang = lang;
-    document.querySelectorAll("[data-t]").forEach(el => {
-      const key = el.getAttribute("data-t");
-      if (I18N[lang][key]) el.innerHTML = I18N[lang][key];
-    });
-    document.querySelectorAll(".lang-switch button").forEach(btn => {
-      btn.classList.toggle("active", btn.id === `btn-${lang}`);
-    });
+/* =========================
+   I18N STRINGS
+========================= */
+const I18N = {
+  en: {
+    nav_signup: "Sign up",
+    left_title: "First time or Migrated?",
+    left_desc: "Did you just buy access, or are you moving from the old platform? Enter your email to set your password.",
+    left_btn: "Send setup link",
+    spam_note: "ℹ️ Please check your spam folder if you don't receive the email within 2 minutes.",
+    center_title: "Login",
+    email_label: "Email Address",
+    pwd_label: "Password",
+    show_pwd: "Show",
+    hide_pwd: "Hide",
+    center_btn: "Login with password",
+    info1_title: "ℹ️ Information for existing users",
+    info1_body: "Most existing users have been automatically transferred. In rare cases—especially for older purchases—it may be necessary to add your account manually.",
+    info2_title: "📊 About training progress",
+    info2_body: "Previous progress was not transferred to ensure accurate statistics.",
+    err_no_email: "Please enter an email.",
+    err_not_found: "Email not found in our system.",
+    err_login: "Invalid email or password.",
+    msg_sent: "If your email is in our system, a link has been sent.",
+    pin_title: "Problems?",
+    pin_desc: "Use a temporary PIN if password login does not work. The PIN is not sent by email.",
+    pin_email_label: "Email address",
+    pin_email_placeholder: "name@example.lu",
+    pin_show_btn: "Show PIN",
+    pin_enter_label: "Enter PIN",
+    pin_continue_btn: "Continue",
+    err_pin: "Invalid PIN. Please try again."
+  },
+  fr: {
+    nav_signup: "Je m'inscris",
+    left_title: "Nouveau ou transféré ?",
+    left_desc: "Vous venez d'acheter un accès ou vous migrez de l'ancienne plateforme ? Entrez votre e-mail pour créer votre mot de passe.",
+    left_btn: "Envoyer le lien",
+    spam_note: "ℹ️ Vérifiez vos spams si vous ne recevez pas l’e-mail.",
+    center_title: "Connexion",
+    email_label: "Adresse e-mail",
+    pwd_label: "Mot de passe",
+    show_pwd: "Voir",
+    hide_pwd: "Cacher",
+    center_btn: "Se connecter",
+    info1_title: "ℹ️ Information aux utilisateurs",
+    info1_body: "La plupart des comptes ont été transférés automatiquement.",
+    info2_title: "📊 Progression d'entraînement",
+    info2_body: "Les anciennes statistiques n'ont pas été conservées.",
+    err_no_email: "Veuillez entrer un e-mail.",
+    err_not_found: "E-mail non trouvé.",
+    err_login: "E-mail ou mot de passe invalide.",
+    msg_sent: "Si votre e-mail existe, un lien a été envoyé.",
+    pin_title: "Un problème ?",
+    pin_desc: "Utilisez un code PIN temporaire si la connexion échoue.",
+    pin_email_label: "Adresse e-mail",
+    pin_email_placeholder: "nom@exemple.lu",
+    pin_show_btn: "Afficher le PIN",
+    pin_enter_label: "Saisir le PIN",
+    pin_continue_btn: "Continuer",
+    err_pin: "PIN invalide."
+  },
+  de: {
+    nav_signup: "Registrieren",
+    left_title: "Neu oder migriert?",
+    left_desc: "Haben Sie gerade Zugang gekauft oder wechseln Sie von der alten Plattform?",
+    left_btn: "Link senden",
+    spam_note: "ℹ️ Bitte prüfen Sie Ihren Spam-Ordner.",
+    center_title: "Anmelden",
+    email_label: "E-Mail-Adresse",
+    pwd_label: "Passwort",
+    show_pwd: "Anzeigen",
+    hide_pwd: "Verbergen",
+    center_btn: "Mit Passwort anmelden",
+    info1_title: "ℹ️ Informationen",
+    info1_body: "Die meisten Nutzer wurden automatisch übertragen.",
+    info2_title: "📊 Trainingsfortschritt",
+    info2_body: "Alter Fortschritt wurde nicht übernommen.",
+    err_no_email: "E-Mail eingeben.",
+    err_not_found: "E-Mail nicht gefunden.",
+    err_login: "Ungültige Zugangsdaten.",
+    msg_sent: "Falls vorhanden, wurde ein Link gesendet.",
+    pin_title: "Probleme?",
+    pin_desc: "Temporäre PIN verwenden.",
+    pin_email_label: "E-Mail-Adresse",
+    pin_email_placeholder: "name@beispiel.lu",
+    pin_show_btn: "PIN anzeigen",
+    pin_enter_label: "PIN eingeben",
+    pin_continue_btn: "Weiter",
+    err_pin: "Ungültige PIN."
   }
+};
 
-  function notify(type, text) {
-    const el = document.getElementById("status");
-    el.textContent = text;
-    el.className = "status-msg " + type;
-    el.style.display = "block";
-    setTimeout(() => { el.style.display = "none"; }, 6000);
-  }
+let currentLang = "en";
 
-  async function handleSetup() {
-    const email = document.getElementById("setupEmail").value.trim();
-    if(!email) return notify("error", I18N[currentLang].err_no_email);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + "/lux/login-password.html"
-    });
-    notify("success", I18N[currentLang].msg_sent);
-  }
+/* =========================
+   LANGUAGE APPLY
+========================= */
+function applyLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll("[data-t]").forEach(el => {
+    const key = el.getAttribute("data-t");
+    if (I18N[lang][key]) el.innerHTML = I18N[lang][key];
+  });
+  document.querySelectorAll("[data-t-placeholder]").forEach(el => {
+    const key = el.getAttribute("data-t-placeholder");
+    if (I18N[lang][key]) el.placeholder = I18N[lang][key];
+  });
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    btn.classList.toggle("active", btn.id === `btn-${lang}`);
+  });
+}
 
-  async function handleLogin() {
-  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
-  const password = document.getElementById("loginPwd").value.trim();
+/* =========================
+   SUPABASE INIT
+========================= */
+const supabase = window.supabase.createClient(
+  window.SUPABASE_URL,
+  window.SUPABASE_KEY
+);
+
+/* =========================
+   NOTIFY
+========================= */
+function notify(type, text) {
+  const el = document.getElementById("status");
+  el.textContent = text;
+  el.className = "status-msg " + type;
+  el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 6000);
+}
+
+/* =========================
+   PASSWORD SETUP
+========================= */
+async function handleSetup() {
+  const email = setupEmail.value.trim().toLowerCase();
+  if (!email) return notify("error", I18N[currentLang].err_no_email);
+
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + "/lux/login-password.html"
+  });
+
+  notify("success", I18N[currentLang].msg_sent);
+}
+
+/* =========================
+   PASSWORD LOGIN
+========================= */
+async function handleLogin() {
+  const email = loginEmail.value.trim().toLowerCase();
+  const password = loginPwd.value.trim();
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (error) {
-    notify("error", I18N[currentLang].err_login);
-    return;
-  }
+  if (error) return notify("error", I18N[currentLang].err_login);
 
   await supabase.from("login_history").insert({
     email,
@@ -285,62 +357,90 @@
     method: "password"
   });
 
+  localStorage.setItem("cl_auth", "ok");
+  localStorage.setItem("cl_email", email);
   window.location.href = "/lux/dashboard/index.html";
 }
 
-  async function handleSendOTP() {
-    const email = document.getElementById("otpEmail").value.trim();
-    if(!email) return notify("error", I18N[currentLang].err_no_email);
-    const { error } = await supabase.auth.signInWithOtp({
-      email, options: { shouldCreateUser: false }
-    });
-    if (error) notify("error", I18N[currentLang].err_not_found);
-    else {
-      document.getElementById("otpInputRow").style.display = "none";
-      document.getElementById("otpVerifyRow").style.display = "block";
-      notify("success", I18N[currentLang].msg_otp_sent);
+/* =========================
+   PIN LOGIC
+========================= */
+function utcDayOfYear(d) {
+  const s = new Date(Date.UTC(d.getUTCFullYear(), 0, 0));
+  return Math.floor((d - s) / 86400000);
+}
+
+function computePin(email) {
+  const n = new Date();
+  const v = (utcDayOfYear(n) * 37) + (n.getUTCHours() * 91) + (email.length * 17);
+  return String(v % 10000).padStart(4, "0");
+}
+
+async function showPin() {
+  const email = pinEmail.value.trim().toLowerCase();
+  if (!email) return notify("error", I18N[currentLang].err_no_email);
+
+  const res = await fetch(
+    "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/check-user-exists",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
     }
-  }
+  );
 
-  async function handleVerifyOTP() {
-  const email = document.getElementById("otpEmail").value.trim().toLowerCase();
-  const token = document.getElementById("otpToken").value.trim();
+  const data = await res.json();
+  if (!data.exists) return notify("error", I18N[currentLang].err_not_found);
 
-  const { error } = await supabase.auth.verifyOtp({
-    email,
-    token,
-    type: "magiclink"
-  });
+  pinShown.textContent = computePin(email);
+  pinArea.style.display = "block";
+  localStorage.setItem("cl_email", email);
+}
 
-  if (error) {
-    notify("error", I18N[currentLang].err_otp);
-    return;
-  }
+async function pinLogin() {
+  const email = localStorage.getItem("cl_email");
+  const enteredPin = pinEnter.value.trim();
 
-  await supabase.from("login_history").insert({
-    email,
-    status: "success",
-    method: "otp"
-  });
+  const res = await fetch(
+    "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/verify-pin-and-log",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": window.SUPABASE_KEY
+      },
+      body: JSON.stringify({ email, enteredPin })
+    }
+  );
 
+  const data = await res.json();
+  if (!data.success) return notify("error", I18N[currentLang].err_pin);
+
+  localStorage.setItem("cl_auth", "ok");
   window.location.href = "/lux/dashboard/index.html";
 }
 
-
-  function toggleMainPwd() {
-    const pwdInput = document.getElementById("loginPwd");
-    const btn = document.querySelector(".toggle-pwd");
-    if (pwdInput.type === "password") {
-      pwdInput.type = "text";
-      btn.textContent = I18N[currentLang].hide_pwd;
-    } else {
-      pwdInput.type = "password";
-      btn.textContent = I18N[currentLang].show_pwd;
-    }
+/* =========================
+   PASSWORD VISIBILITY
+========================= */
+function toggleMainPwd() {
+  const pwd = loginPwd;
+  const btn = document.querySelector(".toggle-pwd");
+  if (pwd.type === "password") {
+    pwd.type = "text";
+    btn.textContent = I18N[currentLang].hide_pwd;
+  } else {
+    pwd.type = "password";
+    btn.textContent = I18N[currentLang].show_pwd;
   }
+}
 
-  // Init
-  applyLang('en');
+/* =========================
+   INIT
+========================= */
+applyLang(currentLang);
 </script>
+
+
 </body>
 </html>
