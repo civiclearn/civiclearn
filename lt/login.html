@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="lt">
 <head>
@@ -7,255 +6,344 @@
   <title>CivicLearn – Login</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/login.css">
-<style>
-/* =========================
-   Language switcher (login)
-========================= */
 
-.lang-switch {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.lang-switch button {
-  width: 44px;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid #d8d6e3;
-  background: #f6f5fb;
-  color: #2d2b38;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.lang-switch button:hover {
-  background: #edeafc;
-  border-color: #c8c3f5;
-}
-
-.lang-switch button.active {
-  background: #6b4eff;
-  color: #fff;
-  border-color: #6b4eff;
-  box-shadow: 0 4px 12px rgba(107, 78, 255, 0.25);
-}
-</style>
-
-
-  <!-- Supabase config -->
   <script>
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
 
-  <!-- Supabase loader -->
-  <script>
-    (function () {
-      const s = document.createElement("script");
-      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
-      s.onload = () => {
-        window.supabase = supabase.createClient(
-          window.SUPABASE_URL,
-          window.SUPABASE_KEY
-        );
-      };
-      document.head.appendChild(s);
-    })();
-  </script>
+  <style>
+    :root {
+      --purple:#7c3aed;
+      --yellow:#f1c40f;
+      --black:#333;
+      --bg:#fdfaf5;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:'Lexend',sans-serif;
+      background:var(--bg);
+      color:#111;
+    }
+
+    /* HEADER – DANISH WIDTH */
+    .site-header{
+      background:#fff;
+      padding:15px 0;
+      border-bottom:1px solid rgba(0,0,0,.04);
+    }
+    .header-inner{
+      max-width:1100px;
+      margin:0 auto;
+      padding:0 20px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .brand-main{
+      display:flex;
+      gap:10px;
+      font-weight:700;
+      align-items:center;
+    }
+    .btn-small-purple{
+      background:var(--purple);
+      color:#fff;
+      padding:8px 20px;
+      border-radius:20px;
+      font-size:14px;
+      font-weight:600;
+      text-decoration:none;
+    }
+
+    /* LANGUAGE SWITCH */
+    .lang-switch{
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      margin-bottom:20px;
+    }
+    .lang-switch button{
+      width:44px;height:34px;
+      border-radius:10px;
+      border:1px solid #d8d6e3;
+      background:#f6f5fb;
+      font-weight:600;
+      cursor:pointer;
+    }
+    .lang-switch button.active{
+      background:#6b4eff;
+      color:#fff;
+      border-color:#6b4eff;
+    }
+
+    /* GRID */
+    .login-grid{
+      display:flex;
+      justify-content:center;
+      align-items:stretch;
+      max-width:1100px;
+      margin:60px auto 40px;
+      padding:20px;
+    }
+    .auth-card{
+      width:320px;
+      background:#fff;
+      padding:40px 30px;
+      display:flex;
+      flex-direction:column;
+    }
+    .card-left{
+      background:#f3ebff;
+      border:1px solid #e0d0f9;
+      border-radius:20px 0 0 20px;
+    }
+    .card-center{
+      border-radius:20px;
+      margin:-20px 0;
+      padding:60px 40px;
+      border:1px solid #eee;
+      box-shadow:0 15px 40px rgba(0,0,0,.08);
+      z-index:10;
+    }
+    .card-right{
+      background:#fffdf0;
+      border:1px solid #f9edbc;
+      border-radius:0 20px 20px 0;
+    }
+
+    h2{font-size:20px;margin:0 0 15px}
+    p{font-size:14px;color:#555;margin:0 0 20px;line-height:1.5}
+    label{font-size:13px;font-weight:600;margin-bottom:8px;display:block}
+    input{
+      width:100%;
+      padding:12px;
+      border:2px solid #e5dfd2;
+      border-radius:10px;
+      margin-bottom:15px;
+      font-family:'Lexend',sans-serif;
+    }
+    .btn-action{
+      width:100%;
+      padding:14px;
+      border-radius:10px;
+      border:none;
+      font-weight:700;
+      cursor:pointer;
+      margin-top:auto;
+    }
+    .btn-purple{background:var(--purple);color:#fff}
+    .btn-black{background:var(--black);color:#fff}
+    .btn-yellow{background:var(--yellow);color:#111}
+
+    .pwd-container{position:relative}
+    .pwd-container input{padding-right:72px}
+    .toggle-pwd{
+      position:absolute;
+      right:14px;
+      top:50%;
+      transform:translateY(-50%);
+      background:none;
+      border:none;
+      color:var(--purple);
+      font-size:12px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .status-msg{
+      position:fixed;
+      top:100px;
+      left:50%;
+      transform:translateX(-50%);
+      padding:12px 24px;
+      border-radius:30px;
+      font-size:14px;
+      display:none;
+      z-index:100;
+    }
+    .success{background:#dcfce7;color:#166534;display:block}
+    .error{background:#fee2e2;color:#dc2626;display:block}
+
+    @media(max-width:900px){
+      .login-grid{flex-direction:column;gap:20px}
+      .auth-card{width:100%;max-width:420px;border-radius:20px}
+      .card-center{margin:0}
+    }
+  </style>
 </head>
 
 <body>
 
 <header class="site-header">
   <div class="header-inner">
-
-    <div class="header-left">
-      <div class="brand-main">
-        <img src="/assets/images/lt.svg" alt="Lithuania">
-        <div class="brand-title">CivicLearn Lietuva</div>
-      </div>
-      <div class="brand-powered">
-        powered by <span>CivicLearn</span>
-      </div>
+    <div class="brand-main">
+      <img src="/assets/images/lt.svg" width="24">
+      CivicLearn Lietuva
     </div>
-
-    <nav class="header-nav">
-      <a href="/lt/" data-t="nav_home"></a>
-      <a href="/lt/#presentation" data-t="nav_overview"></a>
-      <a href="/lt/#pricing" data-t="nav_pricing"></a>
-    </nav>
-
     <a href="/lt/checkout.html" class="btn-small-purple" data-t="nav_signup"></a>
   </div>
 </header>
 
-<div class="login-wrapper">
-  <div class="card">
+<div id="status" class="status-msg"></div>
+
+<div class="login-grid">
+
+  <!-- LEFT -->
+  <div class="auth-card card-left">
+    <h2 data-t="first_title"></h2>
+    <p data-t="first_text"></p>
+    <input type="email" id="setupEmail" placeholder="you@example.com">
+    <button class="btn-action btn-purple" onclick="handleSetup()" data-t="first_btn"></button>
+  </div>
+
+  <!-- CENTER -->
+  <div class="auth-card card-center">
     <div class="lang-switch">
       <button data-lang="lt">LT</button>
       <button data-lang="en">EN</button>
       <button data-lang="ru">RU</button>
     </div>
 
-    <h1 data-t="title"></h1>
-    <p class="subtitle" data-t="subtitle"></p>
+    <h2 style="font-size:28px;text-align:center;" data-t="login_title"></h2>
 
-    <div id="emailSection">
-      <label for="email" data-t="email_label"></label>
-      <input id="email" type="email" placeholder="you@example.com" style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px;" />
-      <button type="button" class="login-btn" id="sendMagicLink" data-t="send_code"></button>
+    <label data-t="email_label"></label>
+    <input type="email" id="loginEmail" placeholder="you@example.com">
+
+    <label data-t="password_label"></label>
+    <div class="pwd-container">
+      <input type="password" id="loginPwd">
+      <button type="button" class="toggle-pwd" onclick="togglePwd()" data-t="show"></button>
     </div>
 
-    <div id="otpSection" style="display:none; margin-top: 10px;">
-      <label for="otpCode" data-t="otp_label"></label>
-      <input id="otpCode" type="text" placeholder="00000000" maxlength="8" />
-      <button type="button" class="login-btn" id="verifyOtp" style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-weight:600; cursor:pointer;" data-t="verify_btn"></button>
-    </div>
+    <button class="btn-action btn-black" onclick="handleLogin()" data-t="login_btn"></button>
+  </div>
 
-    <div id="loginMessage" class="login-message" style="display:none; margin-top:15px;"></div>
+  <!-- RIGHT -->
+  <div class="auth-card card-right">
+    <h2 data-t="pin_title"></h2>
+    <p data-t="pin_text"></p>
 
-    <div class="login-footer">
-      <span data-t="no_access"></span>
-      <a href="/lt/checkout.html" data-t="create_access" style="color: #7c3aed; text-decoration: none; font-weight: 500;"></a>
+    <label data-t="email_label"></label>
+   <input type="email" id="pinEmail" placeholder="you@example.com">
+
+    <button class="btn-action btn-yellow" onclick="showPin()" data-t="pin_btn"></button>
+
+    <div id="pinArea" style="display:none;margin-top:15px;">
+      <div id="pinShown" style="text-align:center;font-size:28px;letter-spacing:6px;font-weight:700;color:var(--purple);margin-bottom:10px;">0000</div>
+      <input type="text" id="pinEnter" maxlength="4" inputmode="numeric" style="text-align:center;letter-spacing:2px;">
+      <button class="btn-action btn-black" onclick="pinLogin()" data-t="continue"></button>
     </div>
   </div>
+
 </div>
 
 <script>
-const I18N = {
-  lt: {
-    title: "Prisijungimas",
-    subtitle: "Įveskite el. paštą, kad gautumėte 8 skaitmenų prisijungimo kodą.",
-    email_label: "El. pašto adresas",
-    send_code: "Siųsti kodą",
-    otp_label: "8 skaitmenų kodas",
-    verify_btn: "Patvirtinti ir prisijungti",
-    no_access: "Dar neturite prieigos?",
-    create_access: "Sukurti prieigą",
-    first_login: "Jūsų prieiga aktyvuota. Įveskite el. pašto adresą, naudotą pirkimo metu.",
-    sent_once: "Jūsų 8 skaitmenų kodas išsiųstas. Patikrinkite el. paštą.",
-    sent_twice: "Jei vis dar negavote kodo, patikrinkite Šlamštą arba susisiekite su mumis.",
-    email_error: "Įveskite el. pašto adresą.",
-    user_not_found: "Šis el. paštas nerastas — įveskite tikslų adresą, kurį naudojote pirkimo metu.",
-    otp_error: "Įveskite galiojantį kodą iš savo el. pašto."
-  },
-  en: {
-    title: "Login",
-    subtitle: "Enter your email to receive your 8-digit access code.",
-    email_label: "Email Address",
-    send_code: "Send login code",
-    otp_label: "8-Digit Code",
-    verify_btn: "Verify & Login",
-    no_access: "Don't have access yet?",
-    create_access: "Create access",
-    first_login: "Your access has been activated. Enter the email address used during purchase.",
-    sent_once: "Your 8-digit login code has been sent. Please check your email.",
-    sent_twice: "If you still haven't received the code, please check Spam or contact us.",
-    email_error: "Please enter your email address.",
-    user_not_found: "This email is not on file — please enter the exact email used during purchase.",
-    otp_error: "Please enter the valid code sent to your email."
-  },
-  ru: {
-    title: "Вход",
-    subtitle: "Введите эл. почту, чтобы получить 8-значный код доступа.",
-    email_label: "Эл. почта",
-    send_code: "Отправить код",
-    otp_label: "8-значный код",
-    verify_btn: "Подтвердить и войти",
-    no_access: "Ещё нет доступа?",
-    create_access: "Получить доступ",
-    first_login: "Доступ активирован. Введите эл. почту, использованную при оплате.",
-    sent_once: "8-значный код отправлен. Проверьте почту.",
-    sent_twice: "Если вы не получили код, проверьте Спам или свяжитесь с нами.",
-    email_error: "Введите адрес эл. почты.",
-    user_not_found: "Этот адрес не найден — введите тот, что использовали при покупке.",
-    otp_error: "Введите действующий код из письма."
-  }
+/* ===== I18N ===== */
+const I18N={
+lt:{
+nav_signup:"Sukurti prieigą",
+first_title:"Pirmą kartą?",
+first_text:"Neseniai įsigijote prieigą? Sukurkite slaptažodį čia.",
+first_btn:"Siųsti nustatymo nuorodą",
+login_title:"Prisijungimas",
+email_label:"El. paštas",
+password_label:"Slaptažodis",
+login_btn:"Prisijungti",
+show:"Rodyti",
+pin_title:"Problemos?",
+pin_text:"Naudokite laikiną PIN, jei slaptažodis neveikia.",
+pin_btn:"Rodyti PIN",
+continue:"Tęsti"
+},
+en:{
+nav_signup:"Create access",
+first_title:"First time?",
+first_text:"Just purchased access? Create your password here.",
+first_btn:"Send setup link",
+login_title:"Login",
+email_label:"Email address",
+password_label:"Password",
+login_btn:"Login",
+show:"Show",
+pin_title:"Problems?",
+pin_text:"Use a temporary PIN if password login fails.",
+pin_btn:"Show PIN",
+continue:"Continue"
+},
+ru:{
+nav_signup:"Получить доступ",
+first_title:"Впервые здесь?",
+first_text:"Вы только что купили доступ? Создайте пароль.",
+first_btn:"Отправить ссылку",
+login_title:"Вход",
+email_label:"Эл. почта",
+password_label:"Пароль",
+login_btn:"Войти",
+show:"Показать",
+pin_title:"Проблемы?",
+pin_text:"Используйте PIN, если пароль не работает.",
+pin_btn:"Показать PIN",
+continue:"Продолжить"
+}
 };
 
-let currentLang = "lt";
-
-function applyLang(lang) {
-  currentLang = lang;
-  document.querySelectorAll("[data-t]").forEach(el => {
-    const key = el.getAttribute("data-t");
-    if (I18N[lang][key]) el.textContent = I18N[lang][key];
+let currentLang="lt";
+function applyLang(l){
+  currentLang=l;
+  document.querySelectorAll("[data-t]").forEach(el=>{
+    el.textContent=I18N[l][el.dataset.t];
   });
-  document.querySelectorAll(".lang-switch button").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.lang === lang);
+  document.querySelectorAll(".lang-switch button").forEach(b=>{
+    b.classList.toggle("active",b.dataset.lang===l);
   });
 }
-
-document.querySelectorAll(".lang-switch button").forEach(btn => {
-  btn.addEventListener("click", () => applyLang(btn.dataset.lang));
+document.querySelectorAll(".lang-switch button").forEach(b=>{
+  b.onclick=()=>applyLang(b.dataset.lang);
 });
-
 applyLang("lt");
 
-function showMessage(type, text) {
-  const box = document.getElementById("loginMessage");
-  box.className = "login-message " + type;
-  box.textContent = text;
-  box.style.display = "block";
+/* ===== LOGIC ===== */
+const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+function notify(t,m){
+  const s=document.getElementById("status");
+  s.textContent=m;s.className="status-msg "+t;
 }
-
-let lastEmailAttempt = "";
-let attemptCount = 0;
-
-document.getElementById("sendMagicLink").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  if (!email) { showMessage("error", I18N[currentLang].email_error); return; }
-  
-  const { error } = await window.supabase.auth.signInWithOtp({
-    email,
-    options: { shouldCreateUser: false }
+function togglePwd(){
+  loginPwd.type=loginPwd.type==="password"?"text":"password";
+}
+async function handleSetup(){
+  await supabase.auth.resetPasswordForEmail(setupEmail.value.trim().toLowerCase(),{
+    redirectTo:location.origin+"/lt/login-password.html"
   });
-
-  if (error) {
-    if (error.message.includes("Signups not allowed for otp")) {
-      showMessage("error", I18N[currentLang].user_not_found);
-    } else {
-      showMessage("error", error.message);
-    }
-    return;
-  }
-
-  document.getElementById("emailSection").style.display = "none";
-  document.getElementById("otpSection").style.display = "block";
-
-  if (email === lastEmailAttempt) attemptCount++;
-  else { attemptCount = 1; lastEmailAttempt = email; }
-
-  showMessage("success", attemptCount >= 2 ? I18N[currentLang].sent_twice : I18N[currentLang].sent_once);
-});
-
-document.getElementById("verifyOtp").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const token = document.getElementById("otpCode").value.trim();
-
-  if (token.length < 6 || token.length > 8) {
-    showMessage("error", I18N[currentLang].otp_error);
-    return;
-  }
-
-  const { data, error } = await window.supabase.auth.verifyOtp({
-    email,
-    token,
-    type: 'magiclink'
+  notify("success","✓");
+}
+async function handleLogin(){
+  const {error}=await supabase.auth.signInWithPassword({
+    email:loginEmail.value.trim().toLowerCase(),
+    password:loginPwd.value
   });
-
-  if (error) {
-    showMessage("error", error.message);
-  } else if (data.session) {
-    window.location.href = "/lt/dashboard/index.html";
-  }
-});
+  if(error) return notify("error","✕");
+  location.href="/lt/dashboard/";
+}
+function utcDayOfYear(d){
+  const s=new Date(Date.UTC(d.getUTCFullYear(),0,0));
+  return Math.floor((d-s)/86400000);
+}
+function computePin(e){
+  const n=new Date();
+  return String(((utcDayOfYear(n)*37)+(n.getUTCHours()*91)+(e.length*17))%10000).padStart(4,"0");
+}
+async function showPin(){
+  pinShown.textContent=computePin(pinEmail.value.trim().toLowerCase());
+  pinArea.style.display="block";
+}
+async function pinLogin(){
+  location.href="/lt/dashboard/";
+}
 </script>
+
 </body>
 </html>
