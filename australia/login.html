@@ -6,189 +6,389 @@
   <title>Login – CivicLearn Australia</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/login.css">
 
-  <!-- Supabase config + loader -->
   <script>
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
 
-  <script>
-    (function () {
-      const supabaseLoader = document.createElement("script");
-      supabaseLoader.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
-      supabaseLoader.onload = () => {
-        window.supabase = supabase.createClient(
-          window.SUPABASE_URL,
-          window.SUPABASE_KEY
-        );
-      };
-      document.head.appendChild(supabaseLoader);
-    })();
-  </script>
+  <style>
+    :root {
+      --purple: #7c3aed;
+      --yellow: #f1c40f;
+      --black: #333;
+      --bg: #fdfaf5;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Lexend', sans-serif;
+      background-color: var(--bg);
+      color: #111;
+    }
+
+    /* ✅ Header width contained (same container as cards) */
+    .site-header {
+      background: #fff;
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .btn-small-purple {
+      background: var(--purple);
+      color: white;
+      text-decoration: none;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .login-grid {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      gap: 0;
+      max-width: 1100px;
+      margin: 80px auto 40px;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: white;
+      padding: 40px 30px;
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      min-height: 340px;
+    }
+
+    .card-left {
+      border-radius: 20px 0 0 20px;
+      background-color: #f3ebff;
+      border: 1px solid #e0d0f9;
+      z-index: 1;
+    }
+
+    .card-center {
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+      z-index: 10;
+      margin: -20px 0;
+      padding: 60px 40px;
+      border: 1px solid #eee;
+    }
+
+    .card-right {
+      border-radius: 0 20px 20px 0;
+      background-color: #fffdf0;
+      border: 1px solid #f9edbc;
+      z-index: 1;
+    }
+
+    h2 { font-size: 20px; margin: 0 0 15px; }
+    p { font-size: 14px; color: #555; line-height: 1.5; margin: 0 0 20px; }
+
+    label { display: block; font-size: 13px; font-weight: 600; margin: 0 0 8px; }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5dfd2;
+      border-radius: 10px;
+      margin: 0 0 15px;
+      font-family: 'Lexend', sans-serif;
+      outline: none;
+      background: #fff;
+    }
+    input:focus { border-color: #d4c7b3; }
+
+    .btn-action {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Lexend', sans-serif;
+      margin-top: auto;
+    }
+
+    .btn-purple { background: var(--purple); color: white; }
+    .btn-black { background: var(--black); color: white; }
+    .btn-yellow { background: var(--yellow); color: #111; }
+
+    /* ✅ Fix: toggle aligned + input not “weird” */
+    .pwd-container { position: relative; width: 100%; }
+    .pwd-container input { padding-right: 78px; }
+
+    .toggle-pwd {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--purple);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 4px 6px;
+      line-height: 1;
+    }
+
+    .status-msg {
+      position: fixed;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 500;
+      display: none;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 90vw;
+      text-align: center;
+    }
+    .error { background: #fee2e2; color: #dc2626; display: block; }
+    .success { background: #dcfce7; color: #166534; display: block; }
+
+    @media (max-width: 900px) {
+      .login-grid { flex-direction: column; align-items: center; gap: 20px; }
+      .auth-card { border-radius: 20px; margin: 0; width: 100%; max-width: 420px; }
+      .card-center { margin: 0; padding: 50px 30px; }
+    }
+  </style>
 </head>
 
 <body>
 
 <header class="site-header">
   <div class="header-inner">
-
-    <div class="header-left">
-      <div class="brand-main">
-        <img src="/assets/images/au.svg" alt="Australia">
-        <div class="brand-title">CivicLearn Australia</div>
-      </div>
-      <div class="brand-powered">
-        powered by <span>CivicLearn</span>
-      </div>
+    <div class="brand-main">
+      <img src="/assets/images/au.svg" width="24" alt="">
+      CivicLearn Australia
     </div>
-
-    <nav class="header-nav">
-      <a href="/australia/">Home</a>
-      <a href="/australia/#presentation">Overview</a>
-      <a href="/australia/#pricing">Pricing</a>
-    </nav>
-
-    <a href="/australia/checkout.html" class="btn-small-purple">Sign up</a>
+    <a href="/australia/checkout.html" class="btn-small-purple">Create access</a>
   </div>
 </header>
 
-<div class="login-wrapper">
-  <main class="login-container">
-    <div class="card">
-      <h1>Login</h1>
-      <p class="subtitle" style="font-family: 'Lexend', sans-serif;">
-        Enter your email to receive your 6-digit access code.
-      </p>
+<div id="status" class="status-msg"></div>
 
-      <div id="emailSection">
-        <label for="email" style="font-family: 'Lexend', sans-serif;">Email Address</label>
-        <input id="email" type="email" placeholder="you@example.com" 
-               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px; font-family: 'Lexend', sans-serif;" />
-        <button type="button" class="login-btn" id="sendMagicLink" style="font-family: 'Lexend', sans-serif; font-weight:600;">
-          Send login code
-        </button>
-      </div>
+<div class="login-grid">
 
-      <div id="otpSection" style="display:none; margin-top: 10px;">
-        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">6-Digit Code</label>
-        <input id="otpCode" type="text" placeholder="000000" maxlength="6" 
-               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
-        <button type="button" class="login-btn" id="verifyOtp" 
-                style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;">
-          Verify & Login
-        </button>
-      </div>
+  <!-- LEFT CARD -->
+  <div class="auth-card card-left">
+    <h2 style="color: var(--purple);">First time here?</h2>
+    <p>
+      Just purchased access? Set your password here.
+    </p>
 
-      <div id="loginMessage" class="login-message" style="display:none; margin-top: 15px; font-family: 'Lexend', sans-serif;"></div>
+    <input type="email" id="setupEmail" placeholder="you@example.com">
+    <button onclick="handleSetup()" class="btn-action btn-purple">
+      Send setup link
+    </button>
 
-      <div class="login-footer" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #666; text-align: center; font-family: 'Lexend', sans-serif;">
-        Don't have access yet? <a href="/australia/checkout" style="color: #7c3aed; text-decoration: none; font-weight: 500;">Create access</a>
-      </div>
+    <div style="font-size:10px;color:var(--purple);font-weight:600;margin-top:15px;text-align:center;line-height:1.4;">
+      ℹ️ Check your spam folder if needed.
     </div>
-  </main>
+  </div>
+
+  <!-- CENTER CARD -->
+  <div class="auth-card card-center">
+    <h2 style="font-size:28px;text-align:center;">Login</h2>
+
+    <div style="margin-top:20px;">
+      <label>Email address</label>
+      <input type="email" id="loginEmail">
+
+      <label>Password</label>
+      <div class="pwd-container">
+        <input type="password" id="loginPwd">
+        <button type="button" class="toggle-pwd" onclick="toggleMainPwd()">Show</button>
+      </div>
+
+      <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top:10px;">
+        Login with password
+      </button>
+    </div>
+  </div>
+
+  <!-- RIGHT CARD — PIN -->
+  <div class="auth-card card-right">
+    <h2 style="color:#856404;">Problems?</h2>
+    <p>
+      Use a temporary access PIN if password login does not work.
+      The PIN is not sent by email.
+    </p>
+
+    <label>Email address</label>
+    <input type="email" id="pinEmail" placeholder="you@example.com">
+
+    <button class="btn-action btn-yellow" onclick="showPin()">
+      Show access PIN
+    </button>
+
+    <div id="pinArea" style="display:none;margin-top:15px;">
+      <div style="text-align:center;font-size:28px;letter-spacing:6px;font-weight:700;color:var(--purple);margin-bottom:10px;"
+           id="pinShown">0000</div>
+
+      <label>Enter PIN</label>
+      <input type="text" id="pinEnter" maxlength="4" inputmode="numeric"
+             style="text-align:center;letter-spacing:2px;">
+
+      <button class="btn-action btn-black" onclick="pinLogin()">
+        Continue
+      </button>
+    </div>
+  </div>
+
 </div>
 
-<!-- MESSAGE for first login -->
 <script>
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("first") === "1") {
-    const box = document.getElementById("loginMessage");
-    box.className = "login-message success";
-    box.textContent =
-      "Your account has been activated. Enter the email address used during purchase to access your training.";
-    box.style.display = "block";
-  }
-})();
-</script>
+const supabase = window.supabase.createClient(
+  window.SUPABASE_URL,
+  window.SUPABASE_KEY
+);
 
-<script>
-// --- HELPERS ---
-function showMessage(type, text) {
-  const box = document.getElementById("loginMessage");
-  box.className = "login-message " + type;
-  box.textContent = text;
-  box.style.display = "block";
+function notify(type, text) {
+  const el = document.getElementById("status");
+  el.textContent = text;
+  el.className = "status-msg " + type;
+  el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 6000);
 }
 
-let lastEmailAttempt = "";
-let attemptCount = 0;
+/* ---------- PASSWORD SETUP ---------- */
+async function handleSetup() {
+  const email = setupEmail.value.trim().toLowerCase();
+  if (!email) return notify("error","Enter your email.");
 
-function handleLoginFeedback(email) {
-  if (email === lastEmailAttempt) {
-    attemptCount++;
-  } else {
-    attemptCount = 1;
-    lastEmailAttempt = email;
-  }
-  if (attemptCount >= 2) {
-    showMessage("success", "If you still haven't received the code, please check Spam or contact us.");
-  } else {
-    showMessage("success", "Your 6-digit login code has been sent. Please check your email.");
-  }
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + "/australia/login-password.html"
+  });
+
+  notify("success","If the email exists, a setup link has been sent.");
 }
 
-// --- STEP 1: REQUEST THE CODE ---
-document.getElementById("sendMagicLink").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const msg = document.getElementById("loginMessage");
-  msg.style.display = "none";
+/* ---------- PASSWORD LOGIN ---------- */
+async function handleLogin() {
+  const email = loginEmail.value.trim().toLowerCase();
+  const password = loginPwd.value;
 
-  if (!email) {
-    showMessage("error", "Please enter your email address.");
-    return;
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) return notify("error", "Invalid email or password.");
+
+  localStorage.setItem("cl_auth", "ok");
+  localStorage.setItem("cl_email", email);
+  location.href = "/australia/dashboard/";
+}
+
+/* ---------- PIN LOGIC ---------- */
+function utcDayOfYear(d){
+  const s = new Date(Date.UTC(d.getUTCFullYear(),0,0));
+  return Math.floor((d - s) / 86400000);
+}
+
+function computePin(email){
+  const n = new Date();
+  const v =
+    (utcDayOfYear(n) * 37) +
+    (n.getUTCHours() * 91) +
+    (email.length * 17);
+  return String(v % 10000).padStart(4,"0");
+}
+
+async function showPin(){
+  const email = pinEmail.value.trim().toLowerCase();
+  if (!email) return notify("error","Enter your email.");
+
+  let exists = false;
+
+  try {
+    const res = await fetch("https://htgliokekeaovdiafrgs.supabase.co/functions/v1/check-user-exists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+
+    const data = await res.json();
+    exists = data.exists === true;
+  } catch (e) {
+    return notify("error","Could not validate the email. Please try again.");
   }
 
-  if (!window.supabase) {
-    showMessage("error", "Technical error. Please refresh and try again.");
-    return;
+  if (!exists) {
+    return notify("error","This email does not exist in the system.");
   }
 
-  // signInWithOtp without redirectTo will trigger the 8-digit code flow 
-  // if you updated your Supabase template to {{ .Token }}
-  const { error } = await window.supabase.auth.signInWithOtp({
-    email,
-    options: {
-      shouldCreateUser: false
+  const pin = computePin(email);
+  pinShown.textContent = pin;
+  pinArea.style.display = "block";
+
+  localStorage.setItem("cl_email", email);
+}
+
+async function pinLogin() {
+  const email = localStorage.getItem("cl_email");
+  const enteredPin = pinEnter.value.trim();
+
+  const res = await fetch(
+    "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/verify-pin-and-log",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": window.SUPABASE_KEY
+      },
+      body: JSON.stringify({ email, enteredPin })
     }
-  });
+  );
 
-  if (error) {
-    showMessage("error", error.message);
-    return;
+  const data = await res.json();
+
+  if (!data.success) {
+    return notify("error", "Incorrect PIN.");
   }
 
-  // UI Change: Hide email button, show the code input section
-  document.getElementById("sendMagicLink").style.display = "none";
-  document.getElementById("otpSection").style.display = "block";
-  
-  handleLoginFeedback(email);
-});
-
-// --- STEP 2: VERIFY THE CODE ---
-document.getElementById("verifyOtp").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const token = document.getElementById("otpCode").value.trim();
-
- if (!/^\d{6}$/.test(token)) {
-  showMessage("error", "Please enter the 6-digit code sent to your email.");
-  return;
+  localStorage.setItem("cl_auth","ok");
+  location.href="/australia/dashboard/";
 }
 
-  const { data, error } = await window.supabase.auth.verifyOtp({
-    email,
-    token,
-    type: 'email'
-  });
-
-  if (error) {
-    showMessage("error", error.message);
-  } else if (data.session) {
-    window.location.href = "/australia/dashboard/index.html";
+function toggleMainPwd(){
+  const pwd = loginPwd;
+  const btn = document.querySelector(".toggle-pwd");
+  if (pwd.type === "password") {
+    pwd.type = "text";
+    btn.textContent = "Hide";
+  } else {
+    pwd.type = "password";
+    btn.textContent = "Show";
   }
-});
+}
 </script>
 
 </body>
