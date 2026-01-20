@@ -187,154 +187,231 @@
 <div id="status" class="status-msg"></div>
 
 <div class="login-grid">
+
+  <!-- LEFT CARD -->
   <div class="auth-card card-left">
-    <h2 style="color: var(--purple);">Eksisterende eller ny bruger?</h2>
-    <p>Har du lige købt adgang, eller flytter du med fra testdk.com? Indtast din e-mail for at (gen)oprette din adgangskode.</p>
+    <h2 style="color: var(--purple);">Første gang her?</h2>
+    <p>
+      Har du netop købt adgang? Opret din adgangskode her.
+    </p>
+
     <input type="email" id="setupEmail" placeholder="navn@eksempel.dk">
-    <button onclick="handleSetup()" class="btn-action btn-purple">Send link til oprettelse</button>
-    <div style="font-size: 11px; color: var(--purple); font-weight: 600; margin-top: 15px; text-align: center; line-height: 1.4;">
-      ℹ️ Tjek venligst din spam-mappe, hvis du ikke modtager e-mailen inden for 2 minutter.
+    <button onclick="handleSetup()" class="btn-action btn-purple">
+      Send opsætningslink
+    </button>
+
+    <div style="font-size:10px;color:var(--purple);font-weight:600;margin-top:15px;text-align:center;line-height:1.4;">
+      ℹ️ Husk at tjekke spam-mappen.
     </div>
   </div>
 
+  <!-- CENTER CARD -->
   <div class="auth-card card-center">
-    <h2 style="font-size: 28px; text-align: center;">Log ind</h2>
-    <div style="margin-top: 20px;">
+    <h2 style="font-size:28px;text-align:center;">Login</h2>
+
+    <div style="margin-top:20px;">
       <label>E-mailadresse</label>
-      <input type="email" id="loginEmail" placeholder="Din e-mail">
+      <input type="email" id="loginEmail">
+
       <label>Adgangskode</label>
       <div class="pwd-container">
-        <input type="password" id="loginPwd" placeholder="••••••••">
+        <input type="password" id="loginPwd">
         <button type="button" class="toggle-pwd" onclick="toggleMainPwd()">Vis</button>
       </div>
-      <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top: 10px;">Log ind med kodeord</button>
+
+      <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top:10px;">
+        Log ind med adgangskode
+      </button>
     </div>
   </div>
 
+  <!-- RIGHT CARD — PIN -->
   <div class="auth-card card-right">
-    <h2 style="color: #856404;">Glemt kodeord?</h2>
-    <p>Modtag en engangskode (6 cifre) direkte i din indbakke i stedet.</p>
-    <div id="otpInputRow">
-      <input type="email" id="otpEmail" placeholder="navn@eksempel.dk">
-      <button onclick="handleSendOTP()" class="btn-action btn-yellow">Send engangskode</button>
-    </div>
-    <div id="otpVerifyRow" style="display:none;">
-      <input type="text" id="otpToken" placeholder="000000" maxlength="6" style="text-align:center; letter-spacing: 2px;">
-      <button onclick="handleVerifyOTP()" class="btn-action btn-black">Bekræft kode</button>
+    <h2 style="color:#856404;">Problemer?</h2>
+    <p>
+      Brug en midlertidig adgangs-PIN, hvis login med adgangskode ikke virker.
+      PIN’en sendes ikke på e-mail.
+    </p>
+
+    <label>E-mailadresse</label>
+    <input type="email" id="pinEmail" placeholder="navn@eksempel.dk">
+
+    <button class="btn-action btn-yellow" onclick="showPin()">
+      Vis adgangs-PIN
+    </button>
+
+    <div id="pinArea" style="display:none;margin-top:15px;">
+      <div style="text-align:center;font-size:28px;letter-spacing:6px;font-weight:700;color:var(--purple);margin-bottom:10px;"
+           id="pinShown">0000</div>
+
+      <label>Indtast PIN</label>
+      <input type="text" id="pinEnter" maxlength="4" inputmode="numeric"
+             style="text-align:center;letter-spacing:2px;">
+
+      <button class="btn-action btn-black" onclick="pinLogin()">
+        Fortsæt
+      </button>
     </div>
   </div>
+
 </div>
 
+<!--
 <div class="info-section">
   <div class="info-card">
-    <h3 style="margin-top: 0; font-size: 16px; color: #333;">ℹ️ Information til eksisterende brugere</h3>
-    <p style="font-size: 13.5px; line-height: 1.6; color: #444; margin-bottom: 0;">
-      De fleste eksisterende brugere er automatisk overført til den nye platform. 
-      I enkelte tilfælde – især hvis dit køb blev foretaget <strong>før 2024</strong> – kan det være nødvendigt at tilføje din konto manuelt. 
-      Hvis du er eksisterende bruger, men systemet ikke genkender din e-mailadresse, bedes du 
-      <a href="mailto:admin@civiclearn.com" style="color: var(--purple); font-weight: 600; text-decoration: none;">kontakte support</a>, så hjælper vi dig videre.
+    <h3>ℹ️ Information til eksisterende brugere</h3>
+    <p>
+     De fleste eksisterende brugere er automatisk overført til den nye platform. I enkelte tilfælde – især hvis dit køb blev foretaget før 2022 – kan det være nødvendigt at tilføje din konto manuelt. Hvis du er eksisterende bruger, men systemet ikke genkender din e-mailadresse, bedes du kontakte support, så hjælper vi dig videre.
     </p>
   </div>
   <div class="info-card">
-    <h3 style="margin-top: 0; font-size: 16px; color: #333;">📊 Om tidligere træningsprogress</h3>
-    <p style="font-size: 13.5px; line-height: 1.6; color: #444; margin-bottom: 0;">
-      På grund af overgangen til en ny platform er træningsprogress og statistik fra den tidligere løsning ikke overført. 
-      Alle brugere starter derfor med en nulstillet progression. Det sikrer, at din træning, statistik og prøvesimulationer fremover er korrekte.
+    <h3>📊 Om tidligere træningsprogress</h3>
+    <p>
+     På grund af overgangen til en ny platform er træningsprogress og statistik fra den tidligere løsning ikke overført. Alle brugere starter derfor med en nulstillet progression. Det sikrer, at din træning, statistik og prøvesimulationer fremover er korrekte.
     </p>
   </div>
-</div>
+</div> -->
 
 <script>
-  const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+const supabase = window.supabase.createClient(
+  window.SUPABASE_URL,
+  window.SUPABASE_KEY
+);
 
-  function notify(type, text) {
-    const el = document.getElementById("status");
-    el.textContent = text;
-    el.className = "status-msg " + type;
-    el.style.display = "block";
-    setTimeout(() => { el.style.display = "none"; }, 6000);
-  }
+function notify(type, text) {
+  const el = document.getElementById("status");
+  el.textContent = text;
+  el.className = "status-msg " + type;
+  el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 6000);
+}
 
-  async function handleSetup() {
-    const email = document.getElementById("setupEmail").value.trim();
-    if(!email) return notify("error", "Indtast venligst din e-mail.");
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + "/denmark-pr/login-password.html"
-    });
-    notify("success", "Hvis din e-mail findes i vores system, har vi sendt et link.");
-  }
+/* ---------- PASSWORD SETUP ---------- */
+async function handleSetup() {
+  const email = setupEmail.value.trim().toLowerCase();
+  if (!email) return notify("error","Indtast din e-mail.");
 
-  async function handleLogin() {
-  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
-  const password = document.getElementById("loginPwd").value.trim();
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + "/denmark-pr/login-password.html"
+  });
+
+  notify("success","Hvis e-mailen findes, er et link sendt.");
+}
+
+/* ---------- PASSWORD LOGIN ---------- */
+async function handleLogin() {
+  const email = loginEmail.value.trim().toLowerCase();
+  const password = loginPwd.value;
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    notify("error", "Forkert e-mail eller adgangskode.");
-    return;
+    return notify("error", "Forkert e-mail eller adgangskode.");
   }
 
+  // ✅ Log successful password login
   await supabase.from("login_history").insert({
     email,
     status: "success",
-    method: "password"   
+    method: "password"
   });
 
-  window.location.href = "/denmark-pr/dashboard/index.html";
+  localStorage.setItem("cl_auth", "ok");
+  localStorage.setItem("cl_email", email);
+  
+  // Redirect to dashboard
+  location.href = "/denmark-pr/dashboard/";
 }
 
 
-  async function handleSendOTP() {
-    const email = document.getElementById("otpEmail").value.trim();
-    if(!email) return notify("error", "Indtast e-mail.");
-    const { error } = await supabase.auth.signInWithOtp({
-      email, options: { shouldCreateUser: false }
+/* ---------- PIN LOGIC (FROM AU) ---------- */
+function utcDayOfYear(d){
+  const s = new Date(Date.UTC(d.getUTCFullYear(),0,0));
+  return Math.floor((d - s) / 86400000);
+}
+
+function computePin(email){
+  const n = new Date();
+  const v =
+    (utcDayOfYear(n) * 37) +
+    (n.getUTCHours() * 91) +
+    (email.length * 17);
+  return String(v % 10000).padStart(4,"0");
+}
+
+async function showPin(){
+  const email = pinEmail.value.trim().toLowerCase();
+  if (!email) return notify("error","Indtast din e-mail.");
+
+  // 🔐 SERVER CHECK: does this email exist?
+  let exists = false;
+
+  try {
+    const res = await fetch("https://htgliokekeaovdiafrgs.supabase.co/functions/v1/check-user-exists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
     });
-    if (error) notify("error", "E-mailen blev ikke fundet.");
-    else {
-      document.getElementById("otpInputRow").style.display = "none";
-      document.getElementById("otpVerifyRow").style.display = "block";
-      notify("success", "Koden er sendt!");
+
+    const data = await res.json();
+    exists = data.exists === true;
+  } catch (e) {
+    return notify("error","Kunne ikke validere e-mailen. Prøv igen.");
+  }
+
+  if (!exists) {
+    return notify("error","Denne e-mail findes ikke i systemet.");
+  }
+
+  // ✅ EXACT SAME PIN LOGIC AS AU
+  const pin = computePin(email);
+  pinShown.textContent = pin;
+  pinArea.style.display = "block";
+
+  localStorage.setItem("cl_email", email);
+}
+
+async function pinLogin() {
+  const email = localStorage.getItem("cl_email");
+  const enteredPin = pinEnter.value.trim();
+
+  const res = await fetch(
+    "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/verify-pin-and-log",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": window.SUPABASE_KEY
+      },
+      body: JSON.stringify({ email, enteredPin })
     }
+  );
+
+  const data = await res.json();
+
+  if (!data.success) {
+    return notify("error", "Forkert PIN.");
   }
 
-  async function handleVerifyOTP() {
-  const email = document.getElementById("otpEmail").value.trim().toLowerCase();
-  const token = document.getElementById("otpToken").value.trim();
-
-  const { error } = await supabase.auth.verifyOtp({
-    email,
-    token,
-    type: "email"
-  });
-
-  if (error) {
-    notify("error", "Ugyldig kode.");
-    return;
-  }
-
-  await supabase.from("login_history").insert({
-    email,
-    status: "success",
-    method: "otp"
-  });
-
-  window.location.href = "/denmark-pr/dashboard/index.html";
+  localStorage.setItem("cl_auth","ok");
+  location.href="/denmark-pr/dashboard/";
 }
 
 
-  function toggleMainPwd() {
-    const pwdInput = document.getElementById("loginPwd");
-    const btn = event.target;
-    if (pwdInput.type === "password") {
-      pwdInput.type = "text";
-      btn.textContent = "Skjul";
-    } else {
-      pwdInput.type = "password";
-      btn.textContent = "Vis";
-    }
+
+
+function toggleMainPwd(){
+  const pwd = loginPwd;
+  const btn = document.querySelector(".toggle-pwd");
+  if (pwd.type === "password") {
+    pwd.type = "text";
+    btn.textContent = "Skjul";
+  } else {
+    pwd.type = "password";
+    btn.textContent = "Vis";
   }
+}
 </script>
+
 </body>
 </html>
