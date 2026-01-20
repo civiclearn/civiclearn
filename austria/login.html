@@ -56,7 +56,7 @@
     <div class="card">
       <h1>Login</h1>
       <p class="subtitle" style="font-family: 'Lexend', sans-serif;">
-        Geben Sie Ihre E-Mail-Adresse ein, um Ihren 8-stelligen Zugangscode zu erhalten.
+        Geben Sie Ihre E-Mail-Adresse ein, um Ihren 6-stelligen Zugangscode zu erhalten.
       </p>
 
       <div id="emailSection">
@@ -69,8 +69,8 @@
       </div>
 
       <div id="otpSection" style="display:none; margin-top: 10px;">
-        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">8-stelliger Code</label>
-        <input id="otpCode" type="text" placeholder="00000000" maxlength="8" 
+        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">6-stelliger Code</label>
+        <input id="otpCode" type="text" placeholder="000000" maxlength="6" 
                style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
         <button type="button" class="login-btn" id="verifyOtp" 
                 style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;">
@@ -124,7 +124,7 @@ function handleLoginFeedback(email) {
   
   showMessage(
     "success",
-    "Ihr 8-stelliger Code wurde gesendet. Nur der zuletzt erhaltene Code ist gültig. Fordern Sie keinen neuen Code an, während Sie ihn eingeben."
+    "Ihr 6-stelliger Code wurde gesendet. Nur der zuletzt erhaltene Code ist gültig. Fordern Sie keinen neuen Code an, während Sie ihn eingeben."
   );
 }
 
@@ -167,10 +167,10 @@ document.getElementById("verifyOtp").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const token = document.getElementById("otpCode").value.trim();
 
-  if (token.length < 6 || token.length > 8) {
-    showMessage("error", "Bitte geben Sie den gültigen Code aus der E-Mail ein.");
-    return;
-  }
+  if (!/^\d{6}$/.test(token)) {
+  showMessage("error", "Bitte geben Sie den gültigen Code aus der E-Mail ein.");
+  return;
+}
 
   const { data, error } = await window.supabase.auth.verifyOtp({
     email,
