@@ -54,9 +54,13 @@
     </p>
 
     <input type="email" id="setupEmail" placeholder="navn@eksempel.dk">
-    <button onclick="handleSetup()" class="btn-action btn-purple">
-      Send opsætningslink
-    </button>
+    <button
+  type="button"
+  id="setupBtn"
+  onclick="handleSetup()"
+  class="btn-action btn-purple">
+  Send opsætningslink
+</button>
 
     <div style="font-size:10px;color:var(--purple);font-weight:600;margin-top:15px;text-align:center;line-height:1.4;">
       ℹ️ Husk at tjekke spam-mappen.
@@ -146,15 +150,36 @@ function notify(type, text) {
 
 /* ---------- PASSWORD SETUP ---------- */
 async function handleSetup() {
+  const btn = document.getElementById("setupBtn");
   const email = setupEmail.value.trim().toLowerCase();
-  if (!email) return notify("error","Indtast din e-mail.");
 
-  await supabase.auth.resetPasswordForEmail(email, {
+  if (!email) {
+    notify("error","Indtast din e-mail.");
+    return;
+  }
+
+  if (btn.disabled) return;
+
+  btn.disabled = true;
+  btn.textContent = "Vent…";
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.origin + "/denmark/login-password.html"
   });
 
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = "Send opsætningslink";
+    notify("error","Linket kunne ikke sendes.");
+    return;
+  }
+
+  btn.textContent = "Tjek din e-mail";
+  setTimeout(() => btn.remove(), 2500);
+
   notify("success","Hvis e-mailen findes, er et link sendt.");
 }
+
 
 /* ---------- PASSWORD LOGIN ---------- */
 async function handleLogin() {
