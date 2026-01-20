@@ -6,185 +6,369 @@
   <title>Autentificare – CivicLearn România</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/login.css">
-  
-    <!-- Supabase config + UMD loader -->
+
   <script>
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
 
-  <script>
-    (function () {
-      const supabaseLoader = document.createElement("script");
-      supabaseLoader.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js";
-      supabaseLoader.onload = () => {
-        window.supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-      };
-      document.head.appendChild(supabaseLoader);
-    })();
-  </script>
+  <style>
+    :root {
+      --purple: #7c3aed;
+      --yellow: #f1c40f;
+      --black: #333;
+      --bg: #fdfaf5;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Lexend', sans-serif;
+      background: var(--bg);
+      color: #111;
+    }
+
+    /* HEADER — EXACT DANISH WIDTH */
+    .site-header {
+      background: #fff;
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .btn-small-purple {
+      background: var(--purple);
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* GRID */
+    .login-grid {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      max-width: 1100px;
+      margin: 80px auto 40px;
+      padding: 20px;
+    }
+
+    .auth-card {
+      width: 320px;
+      background: #fff;
+      padding: 40px 30px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-left {
+      border-radius: 20px 0 0 20px;
+      background: #f3ebff;
+      border: 1px solid #e0d0f9;
+    }
+
+    .card-center {
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+      margin: -20px 0;
+      padding: 60px 40px;
+      border: 1px solid #eee;
+      z-index: 10;
+    }
+
+    .card-right {
+      border-radius: 0 20px 20px 0;
+      background: #fffdf0;
+      border: 1px solid #f9edbc;
+    }
+
+    h2 { font-size: 20px; margin: 0 0 15px; }
+    p { font-size: 14px; color: #555; line-height: 1.5; margin: 0 0 20px; }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5dfd2;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      font-family: 'Lexend', sans-serif;
+    }
+
+    .btn-action {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Lexend', sans-serif;
+      margin-top: auto;
+    }
+
+    .btn-purple { background: var(--purple); color: #fff; }
+    .btn-black { background: var(--black); color: #fff; }
+    .btn-yellow { background: var(--yellow); color: #111; }
+
+    .pwd-container { position: relative; }
+    .pwd-container input { padding-right: 70px; }
+
+    .toggle-pwd {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--purple);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .status-msg {
+      position: fixed;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 500;
+      display: none;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .error { background: #fee2e2; color: #dc2626; display: block; }
+    .success { background: #dcfce7; color: #166534; display: block; }
+
+    @media (max-width: 900px) {
+      .login-grid { flex-direction: column; gap: 20px; }
+      .auth-card { width: 100%; max-width: 420px; border-radius: 20px; }
+      .card-center { margin: 0; padding: 50px 30px; }
+    }
+  </style>
 </head>
-
 
 <body>
 
 <header class="site-header">
   <div class="header-inner">
-
-    <div class="header-left">
-      <a href="/romania/" class="brand-main" style="text-decoration:none; color:inherit;">
-        <img src="/assets/images/icons/ro.svg" alt="">
-        <div class="brand-title">CivicLearn România</div>
-      </a>
-
-      <div class="brand-powered">
-        propulsat de <span>CivicLearn</span>
-      </div>
-    </div>
-
+    <a href="/romania/" class="brand-main">
+      <img src="/assets/images/icons/ro.svg" width="24" alt="">
+      CivicLearn România
+    </a>
     <a href="/romania/checkout.html" class="btn-small-purple">Creez un cont</a>
   </div>
 </header>
 
-<div class="login-wrapper">
-  <main class="login-container">
-    <div class="card">
-      <h1 style="font-family: 'Lexend', sans-serif;">Autentificare</h1>
-      <p class="subtitle" style="font-family: 'Lexend', sans-serif;">
-        Introdu adresa de email pentru a primi codul de acces de 8 cifre.
-      </p>
+<div id="status" class="status-msg"></div>
 
-      <div id="emailSection">
-        <label for="email" style="font-family: 'Lexend', sans-serif;">Adresă email</label>
-        <input id="email" type="email" placeholder="nume@exemplu.com" 
-               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; margin-bottom:15px; font-family: 'Lexend', sans-serif;" />
-        <button type="button" class="login-btn" id="sendMagicLink" style="font-family: 'Lexend', sans-serif; font-weight:600;">
-          Trimite codul de autentificare
-        </button>
-      </div>
+<div class="login-grid">
 
-      <div id="otpSection" style="display:none; margin-top: 10px;">
-        <label for="otpCode" style="font-family: 'Lexend', sans-serif;">Cod de 8 cifre</label>
-        <input id="otpCode" type="text" placeholder="00000000" maxlength="8" 
-               style="width:100%; box-sizing:border-box; padding:12px; border:2px solid #e5dfd2; border-radius:8px; text-align:center; font-family: 'Courier New', Courier, monospace; font-size: 24px; letter-spacing: 4px; background:#fafafa;" />
-        <button type="button" class="login-btn" id="verifyOtp" 
-                style="width:100%; margin-top:15px; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Lexend', sans-serif; font-weight:600; cursor:pointer;">
-          Verifică și autentifică-te
-        </button>
-      </div>
+  <!-- FIRST TIME -->
+  <div class="auth-card card-left">
+    <h2 style="color:var(--purple);">Prima dată aici?</h2>
+    <p>
+      Ai achiziționat recent accesul? Creează parola aici.
+    </p>
 
-      <div id="loginMessage" class="login-message" style="display:none; margin-top: 15px; font-family: 'Lexend', sans-serif;"></div>
+    <input type="email" id="setupEmail" placeholder="nume@exemplu.com">
+    <button onclick="handleSetup()" class="btn-action btn-purple">
+      Trimite link de configurare
+    </button>
 
-      <div class="login-footer" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #666; text-align: center; font-family: 'Lexend', sans-serif;">
-        Nu ai încă acces? <a href="/romania/checkout" style="color: #7c3aed; text-decoration: none; font-weight: 500;">Creează cont</a>
-      </div>
+    <div style="font-size:10px;color:var(--purple);font-weight:600;margin-top:15px;text-align:center;">
+      ℹ️ Verifică și folderul Spam.
     </div>
-  </main>
+  </div>
+
+  <!-- PASSWORD LOGIN -->
+  <div class="auth-card card-center">
+    <h2 style="font-size:28px;text-align:center;">Autentificare</h2>
+
+    <label>Adresă email</label>
+    <input type="email" id="loginEmail">
+
+    <label>Parolă</label>
+    <div class="pwd-container">
+      <input type="password" id="loginPwd">
+      <button type="button" class="toggle-pwd" onclick="toggleMainPwd()">Afișează</button>
+    </div>
+
+    <button onclick="handleLogin()" class="btn-action btn-black">
+      Autentificare cu parolă
+    </button>
+  </div>
+
+  <!-- PIN -->
+  <div class="auth-card card-right">
+    <h2 style="color:#856404;">Probleme?</h2>
+    <p>
+      Folosește un PIN temporar dacă autentificarea cu parolă nu funcționează.
+      PIN-ul nu este trimis pe email.
+    </p>
+
+    <label>Adresă email</label>
+    <input type="email" id="pinEmail" placeholder="nume@exemplu.com">
+
+    <button class="btn-action btn-yellow" onclick="showPin()">
+      Afișează PIN
+    </button>
+
+    <div id="pinArea" style="display:none;margin-top:15px;">
+      <div id="pinShown"
+           style="text-align:center;font-size:28px;letter-spacing:6px;font-weight:700;color:var(--purple);margin-bottom:10px;">
+        0000
+      </div>
+
+      <label>Introdu PIN</label>
+      <input type="text" id="pinEnter" maxlength="4" inputmode="numeric"
+             style="text-align:center;letter-spacing:2px;">
+
+      <button class="btn-action btn-black" onclick="pinLogin()">
+        Continuă
+      </button>
+    </div>
+  </div>
+
 </div>
 
 <script>
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("first") === "1") {
-    const box = document.getElementById("loginMessage");
-    box.className = "login-message success";
-    box.textContent =
-      "Contul tău a fost activat. Introdu adresa de email folosită la achiziție pentru a accesa cursul.";
-    box.style.display = "block";
-  }
-})();
-</script>
+const supabase = window.supabase.createClient(
+  window.SUPABASE_URL,
+  window.SUPABASE_KEY
+);
 
-<script>
-// --- AJUTOR ---
-function showMessage(type, text) {
-  const box = document.getElementById("loginMessage");
-  box.className = "login-message " + type;
-  box.textContent = text;
-  box.style.display = "block";
+function notify(type, text) {
+  const el = document.getElementById("status");
+  el.textContent = text;
+  el.className = "status-msg " + type;
+  el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 6000);
 }
 
-let lastEmailAttempt = "";
-let attemptCount = 0;
+async function handleSetup() {
+  const email = setupEmail.value.trim().toLowerCase();
+  if (!email) return notify("error","Introdu adresa de email.");
 
-function handleLoginFeedback(email) {
-  if (email === lastEmailAttempt) {
-    attemptCount++;
-  } else {
-    attemptCount = 1;
-    lastEmailAttempt = email;
-  }
-  if (attemptCount >= 2) {
-    showMessage("success", "Dacă tot nu ai primit codul, te rugăm să verifici folderul Spam sau să ne contactezi.");
-  } else {
-    showMessage("success", "Codul tău de 8 cifre a fost trimis. Te rugăm să verifici email-ul.");
-  }
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + "/romania/login-password.html"
+  });
+
+  notify("success","Dacă emailul există, linkul a fost trimis.");
 }
 
-// --- PASUL 1: SOLICITĂ CODUL ---
-document.getElementById("sendMagicLink").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const msg = document.getElementById("loginMessage");
-  msg.style.display = "none";
+async function handleLogin() {
+  const email = loginEmail.value.trim().toLowerCase();
+  const password = loginPwd.value;
 
-  if (!email) {
-    showMessage("error", "Te rugăm să introduci adresa de email.");
-    return;
-  }
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) return notify("error","Email sau parolă incorecte.");
 
-  if (!window.supabase) {
-    showMessage("error", "Eroare tehnică. Te rugăm să reîncarci pagina și să încerci din nou.");
-    return;
-  }
+  localStorage.setItem("cl_auth","ok");
+  localStorage.setItem("cl_email",email);
+  location.href="/romania/dashboard/";
+}
 
-  const { error } = await window.supabase.auth.signInWithOtp({
-    email,
-    options: {
-      shouldCreateUser: false
+function utcDayOfYear(d){
+  const s = new Date(Date.UTC(d.getUTCFullYear(),0,0));
+  return Math.floor((d - s) / 86400000);
+}
+
+function computePin(email){
+  const n = new Date();
+  const v =
+    (utcDayOfYear(n) * 37) +
+    (n.getUTCHours() * 91) +
+    (email.length * 17);
+  return String(v % 10000).padStart(4,"0");
+}
+
+async function showPin(){
+  const email = pinEmail.value.trim().toLowerCase();
+  if (!email) return notify("error","Introdu adresa de email.");
+
+  const res = await fetch(
+    "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/check-user-exists",
+    {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ email })
     }
-  });
+  );
 
-  if (error) {
-    // INTERCEPTARE EROARE SUPABASE
-    if (error.message.includes("Signups not allowed for otp") || error.status === 422) {
-      showMessage("error", "Acest email nu figurează în baza noastră — te rugăm să introduci exact adresa de email folosită la achiziție.");
-    } else {
-      showMessage("error", "A apărut o eroare: " + error.message);
+  const data = await res.json();
+  if (!data.exists) return notify("error","Emailul nu există în sistem.");
+
+  pinShown.textContent = computePin(email);
+  pinArea.style.display="block";
+  localStorage.setItem("cl_email",email);
+}
+
+async function pinLogin(){
+  const email = localStorage.getItem("cl_email");
+  const enteredPin = pinEnter.value.trim();
+
+  const res = await fetch(
+    "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/verify-pin-and-log",
+    {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "apikey": window.SUPABASE_KEY
+      },
+      body:JSON.stringify({ email, enteredPin })
     }
-    return;
+  );
+
+  const data = await res.json();
+  if (!data.success) return notify("error","PIN incorect.");
+
+  localStorage.setItem("cl_auth","ok");
+  location.href="/romania/dashboard/";
+}
+
+function toggleMainPwd(){
+  const pwd = loginPwd;
+  const btn = document.querySelector(".toggle-pwd");
+  if (pwd.type === "password") {
+    pwd.type = "text";
+    btn.textContent = "Ascunde";
+  } else {
+    pwd.type = "password";
+    btn.textContent = "Afișează";
   }
-
-  document.getElementById("sendMagicLink").style.display = "none";
-  document.getElementById("otpSection").style.display = "block";
-  
-  handleLoginFeedback(email);
-});
-
-// --- PASUL 2: VERIFICĂ CODUL ---
-document.getElementById("verifyOtp").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const token = document.getElementById("otpCode").value.trim();
-
-  if (token.length < 6 || token.length > 8) {
-    showMessage("error", "Te rugăm să introduci codul valid primit prin email.");
-    return;
-  }
-
-  const { data, error } = await window.supabase.auth.verifyOtp({
-    email,
-    token,
-    type: 'magiclink'
-  });
-
-  if (error) {
-    showMessage("error", error.message);
-  } else if (data.session) {
-    window.location.href = "/romania/dashboard/index.html";
-  }
-});
+}
 </script>
-
 
 </body>
 </html>
