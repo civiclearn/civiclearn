@@ -278,15 +278,36 @@ function notify(type,text){
 }
 
 async function handleSetup(){
-  const email=setupEmail.value.trim().toLowerCase();
-  if(!email) return notify("error","Introduce tu correo electrónico.");
+  const btn = document.getElementById("setupBtn");
+  const email = setupEmail.value.trim().toLowerCase();
 
-  await supabase.auth.resetPasswordForEmail(email,{
-    redirectTo:window.location.origin+"/ccse/login-password.html"
+  if (!email) {
+    notify("error","Introduce tu correo electrónico.");
+    return;
+  }
+
+  if (btn.disabled) return;
+
+  btn.disabled = true;
+  btn.textContent = "Espera…";
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email,{
+    redirectTo: window.location.origin + "/ccse/login-password.html"
   });
+
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = "Enviar enlace de configuración";
+    notify("error","No se pudo enviar el enlace.");
+    return;
+  }
+
+  btn.textContent = "Revisa tu correo";
+  setTimeout(() => btn.remove(), 2500);
 
   notify("success","Si el email existe, el enlace ha sido enviado.");
 }
+
 
 async function handleLogin(){
   const email=loginEmail.value.trim().toLowerCase();
