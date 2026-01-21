@@ -1,39 +1,21 @@
 (async () => {
-  // Allow local dev
   if (location.hostname === "localhost") return;
-
-  // Never guard the login page itself
   if (location.pathname.includes("/login")) return;
 
-  /* ---------------------------------
-     1. PIN-based access (backup path)
-     --------------------------------- */
-  const pinAuth = localStorage.getItem("cl_auth");
-  const pinEmail = localStorage.getItem("cl_email");
+  // 1. Local auth (PIN or password)
+  if (localStorage.getItem("cl_auth") === "ok") return;
 
-  if (pinAuth === "ok" && pinEmail) {
-    // PIN login is valid → allow access
-    return;
-  }
-
-  /* ---------------------------------
-     2. Supabase session (primary path)
-     --------------------------------- */
+  // 2. Supabase session (wait briefly for init / hydration)
   try {
     if (window.supabase) {
-      const { data } = await window.supabase.auth.getSession();
-
-      if (data && data.session) {
-        // Normal auth session exists → allow access
-        return;
+      for (let i = 0; i < 10; i++) {
+        const { data } = await window.supabase.auth.getSession();
+        if (data?.session) return;
+        await new Promise(r => setTimeout(r, 100));
       }
     }
-  } catch (e) {
-    // Ignore and fall through to redirect
-  }
+  } catch (_) {}
 
-  /* ---------------------------------
-     3. Nothing worked → redirect
-     --------------------------------- */
+  // 3. Redirect only after auth truly absent
   location.replace("/australia/login.html");
 })();

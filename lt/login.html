@@ -326,6 +326,10 @@ async function handleLogin(){
     password:loginPwd.value
   });
   if(error) return notify("error","✕");
+  
+  localStorage.setItem("cl_auth","ok");
+  localStorage.setItem("cl_email", loginEmail.value.trim().toLowerCase());
+  
   location.href="/lt/dashboard/";
 }
 function utcDayOfYear(d){
@@ -337,10 +341,14 @@ function computePin(e){
   return String(((utcDayOfYear(n)*37)+(n.getUTCHours()*91)+(e.length*17))%10000).padStart(4,"0");
 }
 async function showPin(){
-  pinShown.textContent=computePin(pinEmail.value.trim().toLowerCase());
+  const email = pinEmail.value.trim().toLowerCase();
+  pinShown.textContent = computePin(email);
   pinArea.style.display="block";
+  localStorage.setItem("cl_email", email);
 }
+
 async function pinLogin(){
+  localStorage.setItem("cl_auth","ok");
   location.href="/lt/dashboard/";
 }
 </script>

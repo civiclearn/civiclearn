@@ -1,65 +1,30 @@
-(function () {
+(async () => {
+  if (location.hostname === "localhost") return;
+  if (location.pathname.includes("/login")) return;
 
-  // DEV BYPASS — localhost only
-  if (
-    location.hostname === "localhost" ||
-    location.hostname === "127.0.0.1"
-  ) {
-    console.warn("[auth-guard] bypassed on localhost");
-    return;
-  }
+  // 1. Local auth (PIN / password / reset)
+  if (localStorage.getItem("cl_auth") === "ok") return;
 
-
-// Ensures Supabase is ready before anything runs
-function waitForSupabase() {
-  return new Promise(resolve => {
-    const check = () => {
-      if (window.supabase) resolve(window.supabase);
-      else setTimeout(check, 20);
-    };
-    check();
-  });
-}
-
-// Session fetch that works even under slow refresh or mid-transition
-async function waitForSession(supabase) {
-  let { data: { session } } = await supabase.auth.getSession();
-  if (session) return session;
-
-  return new Promise(resolve => {
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
-        if (newSession) {
-          listener.subscription.unsubscribe();
-          resolve(newSession);
-        }
+  // 2. Supabase session (wait for hydration)
+  try {
+    if (window.supabase) {
+      for (let i = 0; i < 10; i++) {
+        const { data } = await window.supabase.auth.getSession();
+        if (data?.session) return;
+        await new Promise(r => setTimeout(r, 100));
       }
-    );
+    }
+  } catch (_) {}
 
-    // Safety fallback — avoids ghost refresh issues
-    setTimeout(async () => {
-      let { data: { session } } = await supabase.auth.getSession();
-      resolve(session || null);
-    }, 2000);
-  });
-}
+  // 3. Compute login URL dynamically
+  const base = location.origin;
+  let loginPath = "/login.html";
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const supabase = await waitForSupabase();
-  const session = await waitForSession(supabase);
-
-  if (!session) {
-const parts = window.location.pathname.split("/").filter(Boolean);
-
-// supports /france/cr/, /france/csp/, /denmark-pr/, /canadafr/, etc.
-const base =
-  parts.length >= 2 && parts[1].length <= 3
-    ? `/${parts[0]}/${parts[1]}`
-    : `/${parts[0]}`;
-
-window.location.replace(`${base}/login.html${window.location.search}`);
-
-    return;
+  // Handle subfolder sites (e.g. /denmark/, /lux/)
+  const parts = location.pathname.split("/").filter(Boolean);
+  if (parts.length > 0) {
+    loginPath = `/${parts[0]}/login.html`;
   }
-});
+
+  location.replace(base + loginPath);
 })();
