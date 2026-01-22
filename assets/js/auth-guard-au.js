@@ -17,6 +17,8 @@
     location.replace("/australia/login.html");
     return;
   }
+  
+  console.warn("AUTH OK", localStorage.getItem("cl_auth"));
 
   /* ===============================
      2. GET EMAIL (ONLY IF AVAILABLE)
@@ -31,7 +33,12 @@
   } catch (_) {}
 
   // No email → cannot enforce → ALLOW
-  if (!email) return;
+
+  if (!email) {
+  console.warn("NO EMAIL – supabase missing or no session");
+  return;
+}
+console.warn("EMAIL OK", email);
 
   /* ===============================
      3. SESSION TIME GUARD
@@ -43,6 +50,7 @@
   if (!loginAt || Number.isNaN(loginAt)) return;
 
   // Session newer than cutoff → ALLOW
+  console.warn("TIME CHECK", { loginAt, revokeAfter: REVOKE_AFTER });
   if (loginAt >= REVOKE_AFTER) return;
   
   console.warn("AU auth-guard: entitlement check reached", {
