@@ -2,14 +2,15 @@
   if (location.hostname === "localhost") return;
   if (location.pathname.includes("/login")) return;
   
-  // 🔒 Remote entitlement check (global, email-based)
+/*
+// 🔒 Remote entitlement check (global, email-based)
 (async () => {
   try {
     const email = localStorage.getItem("cl_email");
     if (!email) return;
 
     const res = await fetch(
-      "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/entitlement-check",
+      "https://YOUR_PROJECT_ID.supabase.co/functions/v1/entitlement-check",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -21,11 +22,11 @@
 
     if (!allowed) {
       localStorage.removeItem("cl_auth");
-      location.replace("https://civiclearn.com/access_ended.html");
+      location.replace("https://civiclearn.com/access-ended.html");
     }
   } catch (_) {}
 })();
-
+*/
 
   // 1. Local auth (PIN / password / reset)
   if (localStorage.getItem("cl_auth") === "ok") return;
