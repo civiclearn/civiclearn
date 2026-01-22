@@ -333,7 +333,7 @@ textarea,
     <!-- CONTACT FORM -->
     <section id="contactWrapper" class="hidden-section">
 
-      <form id="contactForm" action="https://formspree.io/f/xzznyjbp" method="POST">
+      <form id="contactForm">
 
         <h2 data-i18n="contact_title"></h2>
         <p class="muted" data-i18n="contact_subtitle"></p>
@@ -377,29 +377,46 @@ textarea,
     form.scrollIntoView({ behavior: "smooth" });
   });
 
-  // Contact submission
-  const contactForm = document.getElementById("contactForm");
-  if (contactForm) {
-    contactForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
+// Contact submission
+const contactForm = document.getElementById("contactForm");
+if (contactForm) {
+  contactForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      const res = await fetch(contactForm.action, {
-        method: contactForm.method,
-        body: new FormData(contactForm),
-        headers: { Accept: "application/json" }
+    const submitBtn = contactForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+
+    const payload = {
+      site: window.location.hostname,
+      page: window.location.pathname,
+      name: contactForm.querySelector('input[name="name"]').value,
+      email: contactForm.querySelector('input[name="_replyto"]').value,
+      message: contactForm.querySelector('textarea[name="message"]').value
+    };
+
+    try {
+      const res = await fetch("https://civiclearn.app.n8n.cloud/webhook/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
       });
 
-      if (res.ok) {
-        contactForm.innerHTML = `
-          <div style="text-align:center; padding:20px;">
-            <h3 data-i18n="contact_success_title"></h3>
-            <p data-i18n="contact_success_text"></p>
-          </div>
-        `;
-        CivicLearnI18n.apply();
-      }
-    });
-  }
+      if (!res.ok) throw new Error();
+
+      contactForm.innerHTML = `
+        <div style="text-align:center; padding:20px;">
+          <h3 data-i18n="contact_success_title"></h3>
+          <p data-i18n="contact_success_text"></p>
+        </div>
+      `;
+      CivicLearnI18n.apply();
+
+    } catch (err) {
+      submitBtn.disabled = false;
+      alert("Error sending message");
+    }
+  });
+}
 
   // Mobile menu
   document.addEventListener("DOMContentLoaded", () => {
