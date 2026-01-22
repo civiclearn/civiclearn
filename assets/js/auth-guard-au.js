@@ -2,13 +2,6 @@
   // Skip local dev and login pages
   if (location.hostname === "localhost") return;
   if (location.pathname.includes("/login")) return;
-  
-  console.warn("AU auth-guard running"); 
-
-  /* ===============================
-     0. REVOCATION CUTOFF (AU TEST)
-     =============================== */
-  const REVOKE_AFTER = Date.now(); // AU-only, testing enabled
 
   /* ===============================
      1. BASIC AUTH CHECK
@@ -17,53 +10,19 @@
     location.replace("/australia/login.html");
     return;
   }
-  
-  console.warn("AUTH OK", localStorage.getItem("cl_auth"));
 
   /* ===============================
-     2. GET EMAIL (ONLY IF AVAILABLE)
+     2. GET DECLARED EMAIL (BUSINESS IDENTITY)
      =============================== */
-  let email = null;
+  const email = localStorage.getItem("cl_email");
 
-  try {
-    if (window.supabase) {
-      const { data } = await window.supabase.auth.getSession();
-      email = data?.session?.user?.email || null;
-    }
-  } catch (_) {}
-
-  // No email → cannot enforce → ALLOW
-
-  if (!email) {
-  console.warn("NO EMAIL – supabase missing or no session");
-  return;
-}
-console.warn("EMAIL OK", email);
+  // No email → cannot evaluate → allow (fail-open)
+  if (!email) return;
 
   /* ===============================
-     3. SESSION TIME GUARD
-     =============================== */
-  const loginAtRaw = localStorage.getItem("cl_login_at");
-  const loginAt = loginAtRaw ? Number(loginAtRaw) : null;
-
-  // Missing / invalid timestamp → ALLOW
-  if (!loginAt || Number.isNaN(loginAt)) return;
-
-  // Session newer than cutoff → ALLOW
-  console.warn("TIME CHECK", { loginAt, revokeAfter: REVOKE_AFTER });
-  if (loginAt >= REVOKE_AFTER) return;
-  
-  console.warn("AU auth-guard: entitlement check reached", {
-  email,
-  loginAt,
-  revokeAfter: REVOKE_AFTER
-});
-
-  /* ===============================
-     4. ENTITLEMENT CHECK (FAIL-OPEN)
+     3. DENY-LIST CHECK (FAIL-OPEN)
      =============================== */
   try {
-    // SUPABASE_KEY may be undefined on some pages — intentional
     const res = await fetch(
       "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/entitlement-check",
       {
@@ -76,17 +35,24 @@ console.warn("EMAIL OK", email);
       }
     );
 
-    // Any non-200 → ALLOW
+    // Any error → allow
     if (!res.ok) return;
 
     const { allowed } = await res.json();
 
-    // 🔒 ONLY denial condition
+    /* ===============================
+       4. ONLY DENIAL CONDITION
+       =============================== */
     if (allowed === false) {
+      // Clear local auth completely
       localStorage.removeItem("cl_auth");
+      localStorage.removeItem("cl_login_at");
+      localStorage.removeItem("cl_email");
+
+      // Hard stop
       location.replace("https://civiclearn.com/access_ended.html");
     }
   } catch (_) {
-    // fail-open: do nothing
+    // fail-open
   }
 })();
