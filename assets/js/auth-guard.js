@@ -6,57 +6,90 @@
   // 2. Identify the user
   let email = localStorage.getItem("cl_email");
   
-  // If email is missing from localStorage, try to recover it from the Supabase session
+  // Fallback: Check Supabase session if localStorage is empty
   if (!email && window.supabase) {
-    try {
-      const { data } = await window.supabase.auth.getSession();
-      email = data?.session?.user?.email;
-      if (email) {
-        localStorage.setItem("cl_email", email);
-      }
-    } catch (_) {}
-  }
+    try (async () => {
+  if (location.hostname === "localhost" || location.pathname.includes("/login")) return;
 
-  // 3. 🔒 Remote entitlement check
-  // We MUST wait for this result before moving to the local auth checks
+  let email = localStorage.getItem("cl_email");
+
+  // Remote check
   if (email) {
     try {
       const res = await fetch(
         "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/entitlement-check",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "apikey": window.SUPABASE_KEY 
+          },
+          body: JSON.stringify({ email: email.toLowerCase() })
+        }
+      );
+
+      const { allowed } = await res.json();
+      if (allowed === false) {
+        localStorage.removeItem("cl_auth");
+        location.replace("https://civiclearn.com/access_ended.html");
+        return;
+      }
+    } catch (err) {
+      console.warn("Entitlement check skipped.");
+    }
+  }
+
+  // Standard Login Check
+  if (localStorage.getItem("cl_auth") !== "ok") {
+    const parts = location.pathname.split("/").filter(Boolean);
+    const loginPath = parts.length > 0 ? `/${parts[0]}/login.html` : "/login.html";
+    location.replace(location.origin + loginPath);
+  }
+})();
+      const { data } = await window.supabase.auth.getSession();
+      email = data?.session?.user?.email;
+      if (email) localStorage.setItem("cl_email", email);
+    } catch (_) {}
+  }
+
+  // 3. 🔒 Remote entitlement check
+  if (email) {
+    try {
+      const res = await fetch(
+        "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/entitlement-check",
+        {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "apikey": window.SUPABASE_KEY // Identified from login.html
+          },
           body: JSON.stringify({ email: email.toLowerCase() })
         }
       );
 
       if (res.ok) {
         const { allowed } = await res.json();
-        // ONLY redirect if the response explicitly tells us access is denied (allowed === false)
         if (allowed === false) {
           localStorage.removeItem("cl_auth");
           localStorage.removeItem("cl_email");
           location.replace("https://civiclearn.com/access_ended.html");
-          return; // Kill the script here
+          return; 
         }
       }
     } catch (err) {
-      // FAIL-OPEN: If the Edge Function is down or network fails, let the user stay in.
-      console.warn("Entitlement server unreachable. Defaulting to allow access.");
+      console.warn("Entitlement check unreachable. Defaulting to allow access.");
     }
   }
 
-  // 4. Local auth validation ('cl_auth' is set during successful login)
+  // 4. Local auth validation
   if (localStorage.getItem("cl_auth") === "ok") return;
 
   // 5. Supabase session hydration
-  // Give the Supabase client a moment to restore the session from cookies/storage
   try {
     if (window.supabase) {
       for (let i = 0; i < 10; i++) {
         const { data } = await window.supabase.auth.getSession();
         if (data?.session) {
-          // If a session exists, sync our local flags and stay on the page
           localStorage.setItem("cl_auth", "ok");
           if (data.session.user.email) {
             localStorage.setItem("cl_email", data.session.user.email);
@@ -68,11 +101,9 @@
     }
   } catch (_) {}
 
-  // 6. Final Redirect: If no valid session or auth flag is found, go to login
+  // 6. Final Redirect to Login
   const base = location.origin;
   let loginPath = "/login.html";
-  
-  // Dynamic path handling for subfolders (e.g., /geneva/ or /lux/)
   const parts = location.pathname.split("/").filter(Boolean);
   if (parts.length > 0) {
     loginPath = `/${parts[0]}/login.html`;
