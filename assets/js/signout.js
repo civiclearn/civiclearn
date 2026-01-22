@@ -14,10 +14,18 @@
         console.warn("Supabase sign-out failed:", err);
       }
 
+      // 🔒 Clear local auth state
+      localStorage.removeItem("cl_auth");
+      localStorage.removeItem("cl_login_at");
+      localStorage.removeItem("cl_email");
+
+      // Redirect to country login page
       const path = window.location.pathname;
       const parts = path.split("/").filter(Boolean);
-      const countryBase = parts.length > 0 ? `/${parts[0]}/` : "/";
-      window.location.href = countryBase;
+      const country = parts.length > 0 ? parts[0] : "";
+      const loginUrl = country ? `/${country}/login.html` : "/login.html";
+
+      window.location.href = loginUrl;
     });
   }
 
