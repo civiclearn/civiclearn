@@ -1,6 +1,31 @@
 (async () => {
   if (location.hostname === "localhost") return;
   if (location.pathname.includes("/login")) return;
+  
+  // 🔒 Remote entitlement check (global, email-based)
+(async () => {
+  try {
+    const email = localStorage.getItem("cl_email");
+    if (!email) return;
+
+    const res = await fetch(
+      "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/entitlement-check",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      }
+    );
+
+    const { allowed } = await res.json();
+
+    if (!allowed) {
+      localStorage.removeItem("cl_auth");
+      location.replace("/login.html");
+    }
+  } catch (_) {}
+})();
+
 
   // 1. Local auth (PIN / password / reset)
   if (localStorage.getItem("cl_auth") === "ok") return;
