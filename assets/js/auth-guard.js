@@ -21,7 +21,7 @@
 
     if (!allowed) {
       localStorage.removeItem("cl_auth");
-      location.replace("/login.html");
+      location.replace("https://civiclearn.com");
     }
   } catch (_) {}
 })();
