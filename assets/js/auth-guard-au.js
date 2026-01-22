@@ -2,6 +2,8 @@
   // Skip local dev and login pages
   if (location.hostname === "localhost") return;
   if (location.pathname.includes("/login")) return;
+  
+  console.warn("AU auth-guard running"); 
 
   /* ===============================
      0. REVOCATION CUTOFF (AU TEST)
@@ -42,6 +44,12 @@
 
   // Session newer than cutoff → ALLOW
   if (loginAt >= REVOKE_AFTER) return;
+  
+  console.warn("AU auth-guard: entitlement check reached", {
+  email,
+  loginAt,
+  revokeAfter: REVOKE_AFTER
+});
 
   /* ===============================
      4. ENTITLEMENT CHECK (FAIL-OPEN)
