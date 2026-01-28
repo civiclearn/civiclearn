@@ -270,7 +270,6 @@ questions = sample(pool, Math.min(limit, pool.length));
 initialQuestions = filtered.slice();
 attemptLog = [];
 
-  }
   
   } else if (mode === "essentiel") {
 
