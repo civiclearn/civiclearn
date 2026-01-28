@@ -1,24 +1,42 @@
 (async () => {
-  // Skip local dev and login pages
+	
   if (location.hostname === "localhost") return;
   if (location.pathname.includes("/login")) return;
 
-  // 1. Local auth (PIN or password)
-  if (localStorage.getItem("cl_auth") === "ok") return;
 
-  // 2. Supabase session (wait briefly for init / hydration)
-  try {
-    if (window.supabase) {
-      for (let i = 0; i < 10; i++) {
-        const { data } = await window.supabase.auth.getSession();
-        if (data?.session) return;
-        await new Promise(r => setTimeout(r, 100));
-      }
-    }
-  } catch (_) {}
-
-  // 3. Redirect only after auth truly absent
+if (localStorage.getItem("cl_auth") !== "ok") {
   const parts = location.pathname.split("/").filter(Boolean);
   const loginPath = parts.length > 0 ? `/${parts[0]}/login.html` : "/login.html";
   location.replace(loginPath);
-})();
+  return;
+}
+
+const email = localStorage.getItem("cl_email");
+if (!email) return; 
+
+try {
+  const res = await fetch(
+    "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/entitlement-check",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": window.SUPABASE_KEY
+      },
+      body: JSON.stringify({ email: email.toLowerCase() })
+    }
+  );
+
+  if (!res.ok) return;
+
+  const { allowed } = await res.json();
+
+  if (allowed === false) {
+    localStorage.removeItem("cl_auth");
+    localStorage.removeItem("cl_login_at");
+    localStorage.removeItem("cl_email");
+    location.replace("https://civiclearn.com/access_ended.html");
+  }
+} catch (_) {
+  
+}
