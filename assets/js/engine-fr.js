@@ -251,25 +251,25 @@ else if (mode === "topics") {
 
   // 2. Load mastery progress
   const progress = readJsonLS("civicedge_progress", {});
-
-  // 3. Remove already mastered questions
-  unmastered = filtered.filter(q => {
-  const key = `${q.topicLabel || q.topicKey || "topic"}:${q.text}`;
-  const entry = progress[key];
-  return !(entry && entry.correct === 1);
-});
-
-
-  // 4. Pool is ONLY unmastered questions
-  const pool = unmastered;
-
-// 5. Initial wave: if nothing left → finish immediately
-  questions = sample(pool, Math.min(limit, pool.length));
   
-  // --- FIX C: Save the initial, full set of questions for history logging ---
-  if (mode === "topics") {
-    initialQuestions = questions.slice();
-    attemptLog = []; // FIX: Ensure log is clear when a new test starts
+  // --- DK parity: allow full-topic repeat when practice=true ---
+if (options.practice === true) {
+  unmastered = filtered.slice();        // FULL TOPIC
+} else {
+  unmastered = filtered.filter(q => {
+    const key = `${q.topicLabel || q.topicKey || "topic"}:${q.text}`;
+    const entry = progress[key];
+    return !(entry && entry.correct === 1);
+  });
+}
+
+const pool = unmastered;
+questions = sample(pool, Math.min(limit, pool.length));
+
+// IMPORTANT: keep the FULL topic for stats & ring logic
+initialQuestions = filtered.slice();
+attemptLog = [];
+
   }
   
   } else if (mode === "essentiel") {
