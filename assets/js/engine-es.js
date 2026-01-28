@@ -237,17 +237,24 @@ Engine.start = async function start(mode, options = {}) {
 
       const progress = readJsonLS("civicedge_progress", {});
 
-      unmastered = filtered.filter(q => {
-  const key = `${q.topicLabel || q.topicKey || "topic"}:${q.text}`;
-  const entry = progress[key];
-  return !(entry && entry.correct === 1);
-});
+      // --- DK parity: allow full-topic repeat when practice=true ---
+if (options.practice === true) {
+  unmastered = filtered.slice();        // FULL TOPIC
+} else {
+  unmastered = filtered.filter(q => {
+    const key = `${q.topicLabel || q.topicKey || "topic"}:${q.text}`;
+    const entry = progress[key];
+    return !(entry && entry.correct === 1);
+  });
+}
 
-      const pool = unmastered;
-      questions = sample(pool, Math.min(limit, pool.length));
+const pool = unmastered;
+questions = sample(pool, Math.min(limit, pool.length));
 
-      initialQuestions = questions.slice();
-      attemptLog = [];
+// IMPORTANT: keep the FULL topic for stats & ring logic
+initialQuestions = filtered.slice();
+attemptLog = [];
+
 
     } else if (mode === "traps") {
       if (!options.bank || !Array.isArray(options.bank)) {
