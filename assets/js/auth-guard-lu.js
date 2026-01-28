@@ -2,20 +2,43 @@
   if (location.hostname === "localhost") return;
   if (location.pathname.includes("/login")) return;
 
-  // 1. Local auth (PIN or password)
-  if (localStorage.getItem("cl_auth") === "ok") return;
+  // 1. Must be locally authenticated
+  if (localStorage.getItem("cl_auth") !== "ok") {
+    location.replace("/lux/login.html");
+    return;
+  }
 
-  // 2. Supabase session (wait briefly for init / hydration)
+  // 2. Must have identity
+  const email = localStorage.getItem("cl_email");
+  if (!email) return; // fail-open
+
+  // 3. Entitlement check (refund enforcement)
   try {
-    if (window.supabase) {
-      for (let i = 0; i < 10; i++) {
-        const { data } = await window.supabase.auth.getSession();
-        if (data?.session) return;
-        await new Promise(r => setTimeout(r, 100));
+    const res = await fetch(
+      "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/entitlement-check",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": window.SUPABASE_KEY
+        },
+        body: JSON.stringify({ email: email.toLowerCase() })
       }
-    }
-  } catch (_) {}
+    );
 
-  // 3. Redirect only after auth truly absent
-  location.replace("/lux/login.html");
+    if (!res.ok) return;
+
+    const { allowed } = await res.json();
+
+    if (allowed === false) {
+      localStorage.removeItem("cl_auth");
+      localStorage.removeItem("cl_login_at");
+      localStorage.removeItem("cl_email");
+      location.replace("https://civiclearn.com/access_ended.html");
+    }
+  } catch (_) {
+    // fail-open
+  }
 })();
+
+  
