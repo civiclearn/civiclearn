@@ -338,31 +338,32 @@ if (!questions.length) {
 
 
     state = {
-      mode,
-      cfg,
-      questions,
-      initialQuestions: initialQuestions, // FIX: Reference the full initial set
-      // keep a fixed copy of the full set for stats + Autopilot logic
-      allQuestions: questions.slice(),
-      wave: 1, // NEW: Start wave counter at 1
-      currentIndex: 0,
-      answered: 0,
-	  attemptLog: [], // NEW: Array to record every single answer attempt
-      correct: 0,
-      incorrect: 0,
-      startedAt: Date.now(),
-      finishedAt: null,
-      timed:
-        mode === "simulation" && !!(cfg.simulation && cfg.simulation.timeLimitMin),
-      timeLimitSec:
-        mode === "simulation" && cfg.simulation && cfg.simulation.timeLimitMin
-          ? cfg.simulation.timeLimitMin * 60
-          : null,
-      remainingSec:
-        mode === "simulation" && cfg.simulation && cfg.simulation.timeLimitMin
-          ? cfg.simulation.timeLimitMin * 60
-          : null
-    };
+  mode,
+  cfg,
+  questions,
+  initialQuestions: initialQuestions,
+  allQuestions: questions.slice(),
+  wave: 1,
+  currentIndex: 0,
+  answered: 0,
+  attemptLog: [],
+  correct: 0,
+  incorrect: 0,
+  startedAt: Date.now(),
+  finishedAt: null,
+  timed:
+    mode === "simulation" &&
+    !!(cfg.simulation && cfg.simulation.timeLimitMin),
+  timeLimitSec:
+    mode === "simulation" && cfg.simulation && cfg.simulation.timeLimitMin
+      ? cfg.simulation.timeLimitMin * 60
+      : null,
+  remainingSec:
+    mode === "simulation" && cfg.simulation && cfg.simulation.timeLimitMin
+      ? cfg.simulation.timeLimitMin * 60
+      : null
+};
+
 	
 	    // Store selected topic keys (for Continue button)
     if (mode === "topics") {
