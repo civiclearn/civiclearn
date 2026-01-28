@@ -928,6 +928,8 @@ if (state.mode === "simulation") {
     const durationLabel = `${minutes}m ${seconds}s`;
 
     const card = createEl("div", "ce-card ce-result");
+	
+	
 
 // ===== SPECIAL ENDING FOR TOPICS (AUTOPILOT) =====
 if (state.mode === "topics") {
@@ -967,7 +969,7 @@ if (state.mode === "topics") {
   "btn",
   t("topics_practice_again", "Repetir este tema")
 );
-practiceBtn.style.display = "none";
+practiceBtn.style.display = "inline-block";
 practiceBtn.addEventListener("click", () => {
   CivicEdgeEngine.start("topics", {
     topics: Array.isArray(state.selectedTopics)
