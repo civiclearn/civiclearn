@@ -18,7 +18,7 @@
   const examId = url.searchParams.get("exam") || "ciple-01";
 
   // If you keep the JSON at a different path, change only this line.
-  const DATA_URL = `/ciple/assets/data/${examId}-reading.json`;
+  const DATA_URL = `../assets/data/${examId}-reading.json`;
 
   // Local persistence keys (per user + exam)
   const userKeyPrefix = () => {
