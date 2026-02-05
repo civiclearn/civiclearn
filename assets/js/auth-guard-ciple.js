@@ -44,10 +44,10 @@
       "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/entitlement-check",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": window.SUPABASE_KEY
-        },
+       headers: {
+  "Content-Type": "application/json",
+  "apikey": "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp"
+},
         body: JSON.stringify({ email: email.toLowerCase() })
       }
     );
