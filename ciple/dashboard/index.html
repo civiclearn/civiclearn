@@ -149,11 +149,7 @@
 <script src="/assets/js/signout.js"></script>
 <script>
 (async () => {
-  /**
-   * UNIFIED DASHBOARD ENGINE
-   * Handles both the Simulation Table and the Top Metrics
-   */
-  async function init() {
+  async function initDashboard() {
     // 1. Wait for Supabase
     const supabase = await new Promise(resolve => {
       if (window.supabase) return resolve(window.supabase);
@@ -171,7 +167,7 @@
 
     const userId = session.user.id;
 
-    // 3. Fetch Registry and Results
+    // 3. Data Fetch
     const [registryRes, resultsRes] = await Promise.all([
       fetch("/ciple/assets/data/ciple-registry.json"),
       supabase.from("exam_section_results").select("*").eq("user_id", userId)
@@ -181,9 +177,9 @@
     const results = resultsRes.data || [];
     const simulations = (registry.exams || []).map(e => e.id);
 
-    // 4. Render Table
+    // 4. Render & Calculate
     const tbody = document.querySelector("#simTable tbody");
-    tbody.innerHTML = ""; // Clear placeholders
+    tbody.innerHTML = "";
     
     let completedCount = 0;
     let lastPercent = null;
@@ -192,7 +188,6 @@
       const examRows = results.filter(r => r.exam_id === examId);
       const doneSections = examRows.map(r => r.section);
       
-      // Calculate State
       let state = "Não iniciada";
       if (doneSections.includes("reading") && doneSections.includes("writing") && doneSections.includes("listening")) {
         state = "Concluída";
@@ -201,9 +196,9 @@
         state = "Em progresso";
       }
 
-      // Get Score from Reading or Speaking
-      const readingData = examRows.find(r => r.section === "reading")?.result_json;
-      const pct = readingData?.score?.percent || 0;
+      // Extract result from Reading for the metric
+      const readingResult = examRows.find(r => r.section === "reading")?.result_json;
+      const pct = readingResult?.score?.percent || 0;
       if (state === "Concluída") lastPercent = pct;
 
       const nextUrl = !doneSections.includes("reading") ? `./reading.html?exam=${examId}` :
@@ -223,12 +218,12 @@
       tbody.appendChild(tr);
     });
 
-    // 5. Update Top Metrics
+    // 5. Update Metrics
     document.getElementById("doneSims").textContent = `${completedCount} / ${simulations.length}`;
-    document.getElementById("lastResult").textContent = lastPercent ? `${lastPercent}%` : "—";
+    document.getElementById("lastResult").textContent = lastPercent !== null ? `${lastPercent}%` : "—";
   }
 
-  // Countdown Logic
+  // Timer Logic
   const selector = document.getElementById("examDateSelector");
   const countdownEl = document.getElementById("examCountdown");
   function updateCountdown(val) {
@@ -239,7 +234,7 @@
   selector.addEventListener("change", (e) => updateCountdown(e.target.value));
   updateCountdown(localStorage.getItem("selected_exam_date") || selector.value);
 
-  init().catch(console.error);
+  initDashboard().catch(console.error);
 })();
 </script>
 
