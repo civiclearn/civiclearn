@@ -14,11 +14,13 @@ function waitForSupabase() {
 (async () => {
   const supabase = await waitForSupabase();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getSession();
+const user = data?.session?.user || null;
 
-  if (!user) {
-    throw new Error("Exam bootstrap failed: user not resolved");
-  }
+if (!user) {
+  return; // DO NOT BLOCK PAGE
+}
+
 
   window.CIPLE_EXAM_CONTEXT = {
     userId: user.id,
