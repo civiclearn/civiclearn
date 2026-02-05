@@ -1,31 +1,17 @@
 (async () => {
-  // Allow localhost and login page
   if (location.hostname === "localhost") return;
   if (location.pathname.includes("/login")) return;
 
-  // Wait for Supabase
-  function waitForSupabase() {
-    return new Promise(resolve => {
-      if (window.supabase) return resolve(window.supabase);
-      const iv = setInterval(() => {
-        if (window.supabase) {
-          clearInterval(iv);
-          resolve(window.supabase);
-        }
-      }, 0);
-    });
-  }
-
-  const supabase = await waitForSupabase();
-
-  const { data: { session } } = await supabase.auth.getSession();
-
-  if (!session || !session.user) {
-    location.replace("/ciple/login.html");
+  if (localStorage.getItem("cl_auth") !== "ok") {
+    const parts = location.pathname.split("/").filter(Boolean);
+    const loginPath = parts.length > 0 ? `/${parts[0]}/login.html` : "/login.html";
+    location.replace(loginPath);
     return;
   }
 
-  // Optional: entitlement check (KEEP fail-open)
+  const email = localStorage.getItem("cl_email");
+  if (!email) return;
+
   try {
     const res = await fetch(
       "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/entitlement-check",
@@ -33,18 +19,23 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "apikey": "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp"
+          "apikey": window.SUPABASE_KEY
         },
-        body: JSON.stringify({ email: session.user.email.toLowerCase() })
+        body: JSON.stringify({ email: email.toLowerCase() })
       }
     );
 
-    const data = await res.json();
-    if (data?.allowed === false) {
-      await supabase.auth.signOut();
+    if (!res.ok) return;
+
+    const { allowed } = await res.json();
+
+    if (allowed === false) {
+      localStorage.removeItem("cl_auth");
+      localStorage.removeItem("cl_login_at");
+      localStorage.removeItem("cl_email");
       location.replace("https://civiclearn.com/access_ended.html");
     }
-  } catch {
+  } catch (_) {
     // fail-open
   }
 })();
