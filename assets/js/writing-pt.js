@@ -1,5 +1,18 @@
 (function initWriting() {
 
+  // --- HARD REQUIREMENT: create Supabase client here ---
+  if (!window.supabase) {
+    if (!window.supabaseJs && !window.supabase) {
+      console.error("Supabase JS not loaded");
+      alert("Erro de sessão. Recarregue a página.");
+      return;
+    }
+
+    window.supabase = window.supabase.createClient
+      ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY)
+      : supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+  }
+
   // If DOM is not ready yet, wait once
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initWriting);
