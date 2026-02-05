@@ -1,57 +1,149 @@
+// /assets/js/reading-pt.js
+// PORTUGUESE — READING ADAPTER (SKIN PRESERVED, ENGINE ONLY)
+
+import { ExamEngine } from "/assets/js/exam-engine.js";
+
 (() => {
-  const Engine = {
-    config: { examId: new URLSearchParams(location.search).get("exam") || "ciple-01" },
-    state: { user: null, examData: null, taskIndex: 0, answers: {}, startTime: Date.now() },
-    el: { taskCard: document.querySelector("#taskCard"), timer: document.querySelector("#timer"), submitBtn: document.querySelector("#submitReading") },
+  const qs = (s) => document.querySelector(s);
 
-    async init() {
-        await window.waitForSupabase();
-        const { data: { session } } = await supabase.auth.getSession();
-        this.state.user = session.user;
-        const res = await fetch(`/ciple/assets/data/${this.config.examId}-reading.json`);
-        this.state.examData = await res.json();
-        this.render();
-        this.startTimer();
-    },
+  const pageTitle = qs("#pageTitle");
+  const pageSub   = qs("#pageSub");
+  const taskCard  = qs("#taskCard");
+  const taskCnt   = qs("#taskCounter");
+  const timerEl   = qs("#timer");
+  const prevBtn   = qs("#prevTask");
+  const nextBtn   = qs("#nextTask");
+  const submitBtn = qs("#submitReading");
+  const warnEl    = qs("#warn");
 
-    async doSubmit() {
-        const payload = {
-            user_id: this.state.user.id,
-            exam_id: this.config.examId,
-            section: "reading",
-            result_json: { score: this.calculateScore(), answers: this.state.answers, completed_at: new Date().toISOString() }
-        };
-        const { error } = await supabase.from("exam_section_results").upsert(payload, { onConflict: 'user_id,exam_id,section' });
-        if (!error) window.location.href = `writing.html?exam=${this.config.examId}`;
-        else alert("Erro: " + error.message);
-    },
+  const params = new URLSearchParams(location.search);
+  const examId = params.get("exam") || "ciple-01";
 
-    calculateScore() {
-        let correct = 0, total = 0;
-        this.state.examData.tasks.forEach(t => t.questions.forEach(q => {
-            total++;
-            if (this.state.answers[t.task_id]?.[q.id] === q.correct_option) correct++;
-        }));
-        return { percent: Math.round((correct/total)*100) };
-    },
+  let examData = null;
+  let taskIndex = 0;
 
-    render() {
-        const task = this.state.examData.tasks[this.state.taskIndex];
-        this.el.taskCard.innerHTML = `<h2>${task.title}</h2>` + task.questions.map(q => `
-            <div class="q"><p>${q.prompt}</p>
-            ${q.options.map(opt => `<button class="opt-btn ${this.state.answers[task.task_id]?.[q.id] === opt.id ? 'selected' : ''}" onclick="window.setAns('${task.task_id}','${q.id}','${opt.id}')">${opt.text}</button>`).join('')}
-            </div>`).join('');
-        this.el.submitBtn.onclick = () => this.doSubmit();
-    },
+  const engine = new ExamEngine({
+    examId,
+    section: "reading",
+    timeLimitMin: null,
+    onTimeUp: () => doSubmit()
+  });
 
-    startTimer() {
-        setInterval(() => {
-            const diff = (this.state.examData.time_limit_minutes * 60000) - (Date.now() - this.state.startTime);
-            const m = Math.floor(diff/60000), s = Math.floor((diff%60000)/1000);
-            this.el.timer.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
-        }, 1000);
-    }
-  };
-  window.setAns = (tid, qid, oid) => { if(!Engine.state.answers[tid]) Engine.state.answers[tid] = {}; Engine.state.answers[tid][qid] = oid; Engine.render(); };
-  Engine.init();
+  /* ---------- INIT ---------- */
+
+  async function init() {
+    await engine.init();
+
+    const res = await fetch(`/ciple/assets/data/${examId}-reading.json`);
+    examData = await res.json();
+
+    pageTitle.textContent = "Compreensão escrita";
+    pageSub.textContent = examData.subtitle || "";
+
+    renderTask();
+    bindNav();
+  }
+
+  /* ---------- RENDER ---------- */
+
+  function renderTask() {
+    const task = examData.tasks[taskIndex];
+    taskCnt.textContent = `${taskIndex + 1} / ${examData.tasks.length}`;
+
+    taskCard.innerHTML = `
+      <h2>${task.title}</h2>
+      ${task.questions.map(q => `
+        <div class="q">
+          <p>${q.prompt}</p>
+          <div class="opts">
+            ${q.options.map(opt => {
+              const sel = engine.getAnswer(task.task_id, q.id) === opt.id;
+              return `
+                <button
+                  type="button"
+                  class="opt-btn ${sel ? "selected" : ""}"
+                  data-task="${task.task_id}"
+                  data-q="${q.id}"
+                  data-opt="${opt.id}"
+                >${opt.text}</button>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `).join("")}
+    `;
+
+    taskCard.querySelectorAll(".opt-btn").forEach(btn => {
+      btn.addEventListener("click", onOptionClick);
+    });
+
+    prevBtn.style.display = taskIndex === 0 ? "none" : "";
+    nextBtn.style.display = taskIndex === examData.tasks.length - 1 ? "none" : "";
+    submitBtn.style.display = taskIndex === examData.tasks.length - 1 ? "" : "none";
+  }
+
+  /* ---------- EVENTS ---------- */
+
+  function onOptionClick(e) {
+    const b = e.currentTarget;
+    engine.setAnswer(b.dataset.task, b.dataset.q, b.dataset.opt);
+    renderTask();
+  }
+
+  function bindNav() {
+    prevBtn.onclick = () => {
+      if (taskIndex > 0) {
+        taskIndex--;
+        renderTask();
+      }
+    };
+
+    nextBtn.onclick = () => {
+      if (taskIndex < examData.tasks.length - 1) {
+        taskIndex++;
+        renderTask();
+      }
+    };
+
+    submitBtn.onclick = () => doSubmit();
+  }
+
+  /* ---------- SUBMIT ---------- */
+
+  async function doSubmit() {
+    if (!examData) return;
+
+    let correct = 0;
+    let total = 0;
+
+    examData.tasks.forEach(t =>
+      t.questions.forEach(q => {
+        total++;
+        if (engine.getAnswer(t.task_id, q.id) === q.correct_option) {
+          correct++;
+        }
+      })
+    );
+
+    const percent = Math.round((correct / total) * 100);
+
+    await engine.submit({
+      score: { percent },
+      total_questions: total,
+      correct_answers: correct
+    });
+
+    location.href = `writing.html?exam=${examId}`;
+  }
+
+  /* ---------- TIMER DISPLAY ---------- */
+
+  document.addEventListener("exam:tick", (e) => {
+    const ms = e.detail.remainingMs;
+    const m = Math.floor(ms / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    timerEl.textContent = `${m}:${s < 10 ? "0" : ""}${s}`;
+  });
+
+  init().catch(console.error);
 })();
