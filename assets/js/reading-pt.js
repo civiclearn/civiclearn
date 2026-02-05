@@ -318,24 +318,30 @@
   }
 
   async function storeResult(resultJson) {
-    if (!EXAM_USER_ID) throw new Error("No user");
+  const { data: { session }, error } = await window.supabase.auth.getSession();
+  if (error || !session || !session.user) throw new Error("No session");
 
-    await window.supabase
-      .from("exam_section_results")
-      .delete()
-      .eq("user_id", EXAM_USER_ID)
-      .eq("exam_id", examId)
-      .eq("section", "reading");
+  const userId = session.user.id;
 
-    const ins = await window.supabase.from("exam_section_results").insert({
-      user_id: EXAM_USER_ID,
+  await window.supabase
+    .from("exam_section_results")
+    .delete()
+    .eq("user_id", userId)
+    .eq("exam_id", examId)
+    .eq("section", "reading");
+
+  const ins = await window.supabase
+    .from("exam_section_results")
+    .insert({
+      user_id: userId,
       exam_id: examId,
       section: "reading",
-      result_json: resultJson,
+      result_json: resultJson
     });
 
-    if (ins.error) throw ins.error;
-  }
+  if (ins.error) throw ins.error;
+}
+
 
   // ---------- timer ----------
   function tickTimer() {
@@ -389,9 +395,9 @@
 
   // ---------- init ----------
   async function init() {
-    const ctx = await waitForExamContext();
-    EXAM_USER_ID = ctx && ctx.userId ? ctx.userId : null;
-    window.__cl_uid = EXAM_USER_ID || "anon";
+    const { data: { session } } = await window.supabase.auth.getSession();
+EXAM_USER_ID = session && session.user ? session.user.id : null;
+window.__cl_uid = EXAM_USER_ID || "anon";
 
     const params = new URLSearchParams(location.search);
     if (params.get("reset") === "1") {
@@ -401,25 +407,26 @@
       restoreLocal();
     }
 
-    // --- START shared Reading+Writing timer (only once) ---
-    if (EXAM_USER_ID) {
-      const { data: existing } = await window.supabase
-        .from("exam_section_results")
-        .select("section")
-        .eq("user_id", EXAM_USER_ID)
-        .eq("exam_id", examId)
-        .eq("section", "rw_started");
+// --- START shared Reading+Writing timer (only once) ---
+if (EXAM_USER_ID) {
+  const { data: existing } = await window.supabase
+    .from("exam_section_results")
+    .select("section")
+    .eq("user_id", EXAM_USER_ID)
+    .eq("exam_id", examId)
+    .eq("section", "rw_started");
 
-      if (!existing || existing.length === 0) {
-        await window.supabase.from("exam_section_results").insert({
-          user_id: EXAM_USER_ID,
-          exam_id: examId,
-          section: "rw_started",
-          started_at: new Date().toISOString(),
-        });
-      }
-    }
-    // --- END shared timer init ---
+  if (!existing || existing.length === 0) {
+    await window.supabase.from("exam_section_results").insert({
+      user_id: EXAM_USER_ID,
+      exam_id: examId,
+      section: "rw_started",
+      started_at: new Date().toISOString()
+    });
+  }
+}
+// --- END shared timer init ---
+
 
     const res = await fetch(DATA_URL, { cache: "no-store" });
     if (!res.ok) throw new Error(`Missing JSON: ${DATA_URL}`);
