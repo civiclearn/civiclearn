@@ -41,6 +41,19 @@
       );
     });
   }
+  
+  function waitForSupabase() {
+  return new Promise(resolve => {
+    if (window.supabase) return resolve(window.supabase);
+    const iv = setInterval(() => {
+      if (window.supabase) {
+        clearInterval(iv);
+        resolve(window.supabase);
+      }
+    }, 0);
+  });
+}
+
 
   // ---------- helpers ----------
   function countAnsweredForTask(task) {
@@ -394,10 +407,12 @@
   }
 
   // ---------- init ----------
-  async function init() {
-    const { data: { session } } = await window.supabase.auth.getSession();
-EXAM_USER_ID = session && session.user ? session.user.id : null;
-window.__cl_uid = EXAM_USER_ID || "anon";
+ async function init() {
+    const supabase = await waitForSupabase();
+    const { data: { session } } = await supabase.auth.getSession();
+    EXAM_USER_ID = session && session.user ? session.user.id : null;
+    window.__cl_uid = EXAM_USER_ID || "anon";
+
 
     const params = new URLSearchParams(location.search);
     if (params.get("reset") === "1") {
