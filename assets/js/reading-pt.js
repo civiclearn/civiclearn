@@ -1,4 +1,3 @@
-// /assets/js/ciple/reading.js
 (() => {
   const qs = (s) => document.querySelector(s);
 
@@ -22,30 +21,32 @@
 
   // Local persistence keys (per user + exam)
   const userKeyPrefix = () => {
-    const uid = window.__cl_uid || "anon"; // will be set after auth
+    const uid = window.__cl_uid || "anon"; // set after exam bootstrap
     return `ciple:${uid}:${examId}:reading`;
   };
 
   let exam = null;
   let taskIndex = 0;
-  let answers = {}; // { [questionId]: optionId }
-  let startTs = null;
-  let EXAM_USER_ID = null;  // timer start
-  
-  function waitForExamContext() {
-  return new Promise(resolve => {
-    if (window.CIPLE_EXAM_CONTEXT) return resolve(window.CIPLE_EXAM_CONTEXT);
-    window.addEventListener("exam:ready", () => resolve(window.CIPLE_EXAM_CONTEXT), { once: true });
-  });
-}
+  let answers = {}; // { [taskId]: { [questionId]: optionId } }
+  let startTs = null; // timer start
+  let EXAM_USER_ID = null;
 
+  function waitForExamContext() {
+    return new Promise((resolve) => {
+      if (window.CIPLE_EXAM_CONTEXT) return resolve(window.CIPLE_EXAM_CONTEXT);
+      window.addEventListener(
+        "exam:ready",
+        () => resolve(window.CIPLE_EXAM_CONTEXT),
+        { once: true }
+      );
+    });
+  }
 
   // ---------- helpers ----------
   function countAnsweredForTask(task) {
-    const qIds = task.questions.map(q => q.id);
+    const qIds = task.questions.map((q) => q.id);
     const taskAnswers = answers[task.task_id] || {};
-return qIds.filter(id => taskAnswers[id]).length;
-
+    return qIds.filter((id) => taskAnswers[id]).length;
   }
 
   function isTaskComplete(task) {
@@ -94,17 +95,17 @@ return qIds.filter(id => taskAnswers[id]).length;
 
   function setNavButtons() {
     if (taskIndex === 0) {
-  prevBtn.style.display = "none";
-} else {
-  prevBtn.style.display = "";
-  prevBtn.disabled = false;
-}
+      prevBtn.style.display = "none";
+    } else {
+      prevBtn.style.display = "";
+      prevBtn.disabled = false;
+    }
+
     const last = taskIndex === exam.tasks.length - 1;
 
     nextBtn.style.display = last ? "none" : "";
     submitBtn.style.display = last ? "" : "none";
 
-    // Require completion before moving on (matches exam feel)
     const task = exam.tasks[taskIndex];
     const complete = isTaskComplete(task);
 
@@ -120,46 +121,48 @@ return qIds.filter(id => taskAnswers[id]).length;
 
   // ---------- renderers ----------
   function renderMatchOne(task) {
-   
-   const optsHtml = (q) => {
-  return (q.options || []).map(opt => {
-    const selected =
-  answers[task.task_id]?.[q.id] === opt.id ? "selected" : "";
-    return `
+    const optsHtml = (q) => {
+      return (q.options || [])
+        .map((opt) => {
+          const selected =
+            answers[task.task_id]?.[q.id] === opt.id ? "selected" : "";
+          return `
       <button
-  type="button"
-  class="opt-btn ${selected}"
-  data-q="${q.id}"
-  data-opt="${opt.id}"
->
-
+        type="button"
+        class="opt-btn ${selected}"
+        data-q="${q.id}"
+        data-opt="${opt.id}"
+      >
         ${opt.text}
       </button>
     `;
-  }).join("");
-};
-
+        })
+        .join("");
+    };
 
     return `
       <h2 class="task-title">${task.title}</h2>
       <p class="task-instructions">${task.instructions || ""}</p>
 
-      ${task.questions.map((q, idx) => `
+      ${task.questions
+        .map(
+          (q, idx) => `
         <div class="q">
           <p class="q-prompt">${idx + 1}. ${q.prompt}</p>
           <div class="opt-grid">
             ${optsHtml(q)}
           </div>
         </div>
-      `).join("")}
+      `
+        )
+        .join("")}
     `;
   }
 
   function renderSingleTextMCQ(task) {
     const texts = task.content?.texts || [];
-    const byText = new Map(texts.map(t => [t.id, t.text]));
+    const byText = new Map(texts.map((t) => [t.id, t.text]));
 
-    // group questions by text_id (so the text prints once)
     const groups = {};
     for (const q of task.questions) {
       const tid = q.text_id || "no-text";
@@ -167,35 +170,42 @@ return qIds.filter(id => taskAnswers[id]).length;
       groups[tid].push(q);
     }
 
-    const groupHtml = Object.entries(groups).map(([tid, qsList]) => {
-      const txt = byText.get(tid) || "";
-      return `
+    const groupHtml = Object.entries(groups)
+      .map(([tid, qsList]) => {
+        const txt = byText.get(tid) || "";
+        return `
         ${txt ? `<div class="text-block"><pre>${txt}</pre></div>` : ""}
 
-        ${qsList.map((q, i) => `
+        ${qsList
+          .map(
+            (q) => `
           <div class="q">
             <p class="q-prompt">${q.question}</p>
             <div class="opt-grid">
-              ${q.options.map(opt => {
-                const selected =
-  answers[task.task_id]?.[q.id] === opt.id ? "selected" : "";
-                return `
+              ${q.options
+                .map((opt) => {
+                  const selected =
+                    answers[task.task_id]?.[q.id] === opt.id ? "selected" : "";
+                  return `
                   <button
-  type="button"
-  class="opt-btn ${selected}"
-  data-q="${q.id}"
-  data-opt="${opt.id}"
->
-
+                    type="button"
+                    class="opt-btn ${selected}"
+                    data-q="${q.id}"
+                    data-opt="${opt.id}"
+                  >
                     ${opt.text}
                   </button>
                 `;
-              }).join("")}
+                })
+                .join("")}
             </div>
           </div>
-        `).join("")}
+        `
+          )
+          .join("")}
       `;
-    }).join("");
+      })
+      .join("");
 
     return `
       <h2 class="task-title">${task.title}</h2>
@@ -212,29 +222,33 @@ return qIds.filter(id => taskAnswers[id]).length;
 
       ${text ? `<div class="text-block"><pre>${text}</pre></div>` : ""}
 
-      ${task.questions.map((q, idx) => `
+      ${task.questions
+        .map(
+          (q, idx) => `
         <div class="q">
           <p class="q-prompt">${idx + 1}. ${q.question}</p>
           <div class="opt-grid">
-            ${q.options.map(opt => {
-              const selected =
-  answers[task.task_id]?.[q.id] === opt.id ? "selected" : "";
-              return `
+            ${q.options
+              .map((opt) => {
+                const selected =
+                  answers[task.task_id]?.[q.id] === opt.id ? "selected" : "";
+                return `
                 <button
-  type="button"
-  class="opt-btn ${selected}"
-  data-q="${q.id}"
-  data-opt="${opt.id}"
->
-
-
+                  type="button"
+                  class="opt-btn ${selected}"
+                  data-q="${q.id}"
+                  data-opt="${opt.id}"
+                >
                   ${opt.text}
                 </button>
               `;
-            }).join("")}
+              })
+              .join("")}
           </div>
         </div>
-      `).join("")}
+      `
+        )
+        .join("")}
     `;
   }
 
@@ -253,28 +267,20 @@ return qIds.filter(id => taskAnswers[id]).length;
     else html = `<p>Tipo de tarefa não suportado: ${task.type}</p>`;
 
     taskCard.innerHTML = html;
-	
 
-    // click handler (event delegation)
-    taskCard.querySelectorAll(".opt-btn").forEach(btn => {
+    taskCard.querySelectorAll(".opt-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const qid = btn.getAttribute("data-q");
         const opt = btn.getAttribute("data-opt");
         const tid = task.task_id;
 
-        // Save data
-        if (!answers[tid]) { answers[tid] = {}; }
+        if (!answers[tid]) answers[tid] = {};
         answers[tid][qid] = opt;
 
-        // Update UI: Find the box containing ONLY this question's buttons
-        const box = btn.closest('.opt-grid');
-        
-        // Clear old selection in this box
-        box.querySelectorAll(".opt-btn").forEach(b => {
+        const box = btn.closest(".opt-grid");
+        box.querySelectorAll(".opt-btn").forEach((b) => {
           b.classList.remove("selected");
         });
-
-        // Highlight the one you just clicked
         btn.classList.add("selected");
 
         persistLocal();
@@ -290,64 +296,46 @@ return qIds.filter(id => taskAnswers[id]).length;
     let correct = 0;
     let total = 0;
 
-    const byTask = exam.tasks.map(t => {
+    const byTask = exam.tasks.map((t) => {
       let tCorrect = 0;
-      let tTotal = t.questions.length;
+      const tTotal = t.questions.length;
 
       for (const q of t.questions) {
         total += 1;
         const chosen = answers[t.task_id]?.[q.id] || null;
 
-        // match_one: correct_option
         if (q.correct_option && chosen === q.correct_option) {
           correct += 1;
           tCorrect += 1;
         }
-
-        // mcq: correct_option
-        if (!q.correct_option && q.correct_option !== "" && q.correct_option !== 0) {
-          // no-op (defensive)
-        }
       }
-
-      
-
-      // Fix double counting risk: We counted correct per question in the first loop,
-      // but only when q.correct_option exists. That is correct for our schema.
 
       return { task_id: t.task_id, correct: tCorrect, total: tTotal };
     });
 
-    // The loop above counts correct only once per question.
-    // total is correct; percent computed from total.
     const percent = total > 0 ? Math.round((correct / total) * 100) : 0;
-
     return { correct, total, percent, tasks: byTask };
   }
 
   async function storeResult(resultJson) {
-  if (!EXAM_USER_ID) throw new Error("No user");
+    if (!EXAM_USER_ID) throw new Error("No user");
 
-  await window.supabase
-    .from("exam_section_results")
-    .delete()
-    .eq("user_id", EXAM_USER_ID)
-    .eq("exam_id", examId)
-    .eq("section", "reading");
+    await window.supabase
+      .from("exam_section_results")
+      .delete()
+      .eq("user_id", EXAM_USER_ID)
+      .eq("exam_id", examId)
+      .eq("section", "reading");
 
-  const ins = await window.supabase
-    .from("exam_section_results")
-    .insert({
+    const ins = await window.supabase.from("exam_section_results").insert({
       user_id: EXAM_USER_ID,
       exam_id: examId,
       section: "reading",
-      result_json: resultJson
+      result_json: resultJson,
     });
 
-  if (ins.error) throw ins.error;
-}
-
-
+    if (ins.error) throw ins.error;
+  }
 
   // ---------- timer ----------
   function tickTimer() {
@@ -364,11 +352,9 @@ return qIds.filter(id => taskAnswers[id]).length;
     timerEl.textContent = formatTimeLeft(left);
 
     if (left <= 0) {
-      // Auto-submit once
       submitBtn.disabled = true;
       setWarn("Tempo terminado. A submeter…");
       doSubmit(true).catch(() => {
-        // if submit fails, leave a visible warning
         setWarn("Tempo terminado, mas ocorreu um erro ao submeter.");
       });
     }
@@ -390,67 +376,58 @@ return qIds.filter(id => taskAnswers[id]).length;
       started_at: startTs ? new Date(startTs).toISOString() : null,
       completed_at: new Date().toISOString(),
       score,
-      answers
+      answers,
     };
 
     await storeResult(payload);
 
     clearLocal();
-setWarn("");
+    setWarn("");
 
-// redirect directly to Writing (Reading + Writing = one block)
-location.href = "writing.html?exam=" + encodeURIComponent(examId);
-
+    location.href = "writing.html?exam=" + encodeURIComponent(examId);
   }
 
   // ---------- init ----------
   async function init() {
-   
-    const { userId } = await waitForExamContext();
-    window.__cl_uid = userId;
-	EXAM_USER_ID = userId;
+    const ctx = await waitForExamContext();
+    EXAM_USER_ID = ctx && ctx.userId ? ctx.userId : null;
+    window.__cl_uid = EXAM_USER_ID || "anon";
 
-const params = new URLSearchParams(location.search);
-if (params.get("reset") === "1") {
-  clearLocal();
-  answers = {};
-} else {
-  restoreLocal();
-}
+    const params = new URLSearchParams(location.search);
+    if (params.get("reset") === "1") {
+      clearLocal();
+      answers = {};
+    } else {
+      restoreLocal();
+    }
 
+    // --- START shared Reading+Writing timer (only once) ---
+    if (EXAM_USER_ID) {
+      const { data: existing } = await window.supabase
+        .from("exam_section_results")
+        .select("section")
+        .eq("user_id", EXAM_USER_ID)
+        .eq("exam_id", examId)
+        .eq("section", "rw_started");
 
-// --- START shared Reading+Writing timer (only once) ---
-const { userId } = window.CIPLE_EXAM_CONTEXT || {};
-if (userId) {
-  const { data: existing } = await window.supabase
-    .from("exam_section_results")
-    .select("section")
-    .eq("user_id", userId)
-    .eq("exam_id", examId)
-    .eq("section", "rw_started");
-
-  if (!existing || existing.length === 0) {
-    await window.supabase.from("exam_section_results").insert({
-      user_id: userId,
-      exam_id: examId,
-      section: "rw_started",
-      started_at: new Date().toISOString()
-    });
-  }
-}
-// --- END shared timer init ---
-
-
+      if (!existing || existing.length === 0) {
+        await window.supabase.from("exam_section_results").insert({
+          user_id: EXAM_USER_ID,
+          exam_id: examId,
+          section: "rw_started",
+          started_at: new Date().toISOString(),
+        });
+      }
+    }
+    // --- END shared timer init ---
 
     const res = await fetch(DATA_URL, { cache: "no-store" });
     if (!res.ok) throw new Error(`Missing JSON: ${DATA_URL}`);
     exam = await res.json();
 
-    // defensive normalisation
     if (!exam.tasks || !Array.isArray(exam.tasks)) exam.tasks = [];
     if (taskIndex >= exam.tasks.length) taskIndex = 0;
 
-    // Bind nav
     prevBtn.addEventListener("click", () => {
       if (taskIndex <= 0) return;
       taskIndex -= 1;
@@ -480,7 +457,6 @@ if (userId) {
 
     renderTask();
 
-    // start timer loop
     if (exam.time_limit_minutes && !startTs) startTs = Date.now();
     tickTimer();
     setInterval(tickTimer, 1000);
@@ -498,5 +474,4 @@ if (userId) {
     nextBtn.disabled = true;
     submitBtn.disabled = true;
   });
-
 })();
