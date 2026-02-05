@@ -1,7 +1,7 @@
 import {
   loadAttempt,
   markReading
-} from "/assets/js/ciple/attempt-store.js";
+} from "/assets/js/attempt-store.js";
 
 (function initReading() {
   if (document.readyState === "loading") {
