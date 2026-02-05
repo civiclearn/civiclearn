@@ -29,7 +29,8 @@
   let exam = null;
   let taskIndex = 0;
   let answers = {}; // { [questionId]: optionId }
-  let startTs = null; // timer start
+  let startTs = null;
+  let EXAM_USER_ID = null;  // timer start
   
   function waitForExamContext() {
   return new Promise(resolve => {
@@ -325,20 +326,19 @@ return qIds.filter(id => taskAnswers[id]).length;
   }
 
   async function storeResult(resultJson) {
-  const { userId } = window.CIPLE_EXAM_CONTEXT || {};
-  if (!userId) throw new Error("No user context");
+  if (!EXAM_USER_ID) throw new Error("No user");
 
   await window.supabase
     .from("exam_section_results")
     .delete()
-    .eq("user_id", userId)
+    .eq("user_id", EXAM_USER_ID)
     .eq("exam_id", examId)
     .eq("section", "reading");
 
   const ins = await window.supabase
     .from("exam_section_results")
     .insert({
-      user_id: userId,
+      user_id: EXAM_USER_ID,
       exam_id: examId,
       section: "reading",
       result_json: resultJson
@@ -346,6 +346,7 @@ return qIds.filter(id => taskAnswers[id]).length;
 
   if (ins.error) throw ins.error;
 }
+
 
 
   // ---------- timer ----------
@@ -406,7 +407,8 @@ location.href = "writing.html?exam=" + encodeURIComponent(examId);
   async function init() {
    
     const { userId } = await waitForExamContext();
-window.__cl_uid = userId;
+    window.__cl_uid = userId;
+	EXAM_USER_ID = userId;
 
 const params = new URLSearchParams(location.search);
 if (params.get("reset") === "1") {
