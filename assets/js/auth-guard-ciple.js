@@ -1,39 +1,50 @@
 (async () => {
-  // 1. Skip if local or already on login
+  // Allow localhost and login page
   if (location.hostname === "localhost") return;
-  if (location.pathname.includes("/login.html")) return;
+  if (location.pathname.includes("/login")) return;
 
-  // 2. Check login status FIRST (No dependencies)
-  const isLoggedIn = localStorage.getItem("cl_auth") === "ok";
-  if (!isLoggedIn) {
+  // Wait for Supabase
+  function waitForSupabase() {
+    return new Promise(resolve => {
+      if (window.supabase) return resolve(window.supabase);
+      const iv = setInterval(() => {
+        if (window.supabase) {
+          clearInterval(iv);
+          resolve(window.supabase);
+        }
+      }, 0);
+    });
+  }
+
+  const supabase = await waitForSupabase();
+
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session || !session.user) {
     location.replace("/ciple/login.html");
     return;
   }
 
-  const email = localStorage.getItem("cl_email");
-  if (!email) return;
-
-  // 3. Use the keys directly to avoid waiting for bootstrap
-  const G_URL = "https://htgliokekeaovdiafrgs.supabase.co";
-  const G_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-
+  // Optional: entitlement check (KEEP fail-open)
   try {
-    const res = await fetch(`${G_URL}/functions/v1/entitlement-check`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": G_KEY
-      },
-      body: JSON.stringify({ email: email.toLowerCase() })
-    });
+    const res = await fetch(
+      "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/entitlement-check",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp"
+        },
+        body: JSON.stringify({ email: session.user.email.toLowerCase() })
+      }
+    );
 
     const data = await res.json();
-    if (data && data.allowed === false) {
-      localStorage.clear();
+    if (data?.allowed === false) {
+      await supabase.auth.signOut();
       location.replace("https://civiclearn.com/access_ended.html");
     }
-  } catch (e) {
-    // Fail-open: if the network is slow, let the dashboard try to load
-    console.warn("Auth check deferred");
+  } catch {
+    // fail-open
   }
 })();
