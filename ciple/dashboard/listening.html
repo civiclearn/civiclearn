@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>CIPLE – Compreensão do Oral</title>
+
+  <!-- Unified exam stylesheet -->
+  <link rel="stylesheet" href="/assets/css/ciple-exam.css">
+
+  <script src="/assets/js/supabase-bootstrap.js"></script>
+
+  <!-- IMPORTANT: module imports AFTER supabase-bootstrap -->
+  <script type="module">
+    import "/assets/js/auth-guard-ciple.js";
+    import "/assets/js/exam-bootstrap.js";
+    import "/assets/js/listening-pt.js";
+  </script>
+</head>
+
+<body class="ciple-exam-page">
+
+<div class="ciple-exam-wrap single-column">
+
+  <!-- TOP BAR -->
+  <header class="ciple-exam-topbar">
+
+  <div class="exam-topbar-left">
+    <a href="/ciple/dashboard/index.html" class="back-dashboard">
+      ← Voltar ao painel
+    </a>
+
+    <div>
+      <h1 id="pageTitle">Compreensão do Oral</h1>
+      <p class="muted">
+        Ouça os áudios e responda. No final, a pontuação é calculada automaticamente.
+      </p>
+    </div>
+  </div>
+
+  <div class="ciple-exam-meta">
+    <div class="pill">
+      ⏱ <strong id="timerText">—</strong>
+    </div>
+  </div>
+</header>
+
+
+  <!-- MAIN CONTENT -->
+  <main class="ciple-exam-main">
+    <section class="ciple-exam-card task-card">
+
+      <!-- TASK HEADER -->
+      <div class="ciple-task-header">
+        <div class="muted" id="taskKicker">Tarefa</div>
+        <h2 id="taskTitle">—</h2>
+        <p class="muted" id="taskInstructions">—</p>
+      </div>
+
+      <!-- AUDIO -->
+      <div class="ciple-audio-box" id="audioBox" hidden>
+        <div class="ciple-audio-meta">
+          <span id="audioPlaysLeft">Reproduções restantes: —</span>
+          <span class="muted">
+            Dica: pode pausar e retomar sem gastar uma reprodução extra.
+          </span>
+        </div>
+
+        <audio id="audioEl" controls preload="metadata"></audio>
+      </div>
+
+      <!-- WARNINGS -->
+      <div id="warnBox" class="ciple-warn" hidden></div>
+
+      <!-- QUESTIONS -->
+      <div id="questionsMount"></div>
+
+      <!-- ACTIONS -->
+      <div class="ciple-exam-actions">
+        <button class="btn" id="submitBtn"></button>
+      </div>
+
+      <!-- STATUS -->
+      <div class="ciple-status-line" id="progressLine">—</div>
+
+    </section>
+
+    <!-- SUBMITTED -->
+    <div id="listening-submitted" class="ciple-exam-note" hidden>
+      <p><strong>Compreensão do oral enviada.</strong></p>
+      <p>
+        <a href="/ciple/dashboard/results.html">Ver resultados</a>
+      </p>
+    </div>
+
+  </main>
+
+</div>
+
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>

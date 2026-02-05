@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>CIPLE – Simulações</title>
+
+<link rel="stylesheet" href="/assets/css/ciple-dashboard.css">
+
+  <script src="/assets/js/supabase-bootstrap.js"></script>
+  <script type="module" src="/assets/js/auth-guard-ciple.js"></script>
+
+
+</head>
+
+<body class="dashboard-page">
+<div class="wrap">
+  <main>
+    <header class="ce-header ce-header-top">
+      </p>
+    </header>
+<div class="dashboard-wrap">
+  <div class="resume-card" id="resumeCard" hidden>
+    <strong>Continuar onde parou</strong>
+    <div id="resumeText"></div>
+    <a class="btn" id="resumeLink">Continuar</a>
+  </div>
+  <div class="dashboard-grid">
+<div class="stat-card">
+  <span>Simulações concluídas</span>
+  <strong id="doneSims">–</strong>
+</div>
+
+<div class="stat-card">
+  <span>Último resultado</span>
+  <strong id="lastResult">—</strong>
+</div>
+
+<div class="stat-card" id="examCountdownCard">
+  <span>Próximo exame CIPLE</span>
+  <strong id="examCountdown">—</strong>
+  <div style="margin-top:10px;">
+    <select id="examDateSelector" style="width:100%; padding:5px; border-radius:4px; border:1px solid #ddd; font-family:inherit; font-size:0.85rem;">
+      <option value="2026-03-14">14 de Março (2026)</option>
+      <option value="2026-04-18">18 de Abril (2026)</option>
+      <option value="2026-06-20">20 de Junho (2026)</option>
+      <option value="2026-07-20">20 de Julho (2026)</option>
+      <option value="2026-09-19">19 de Setembro (2026)</option>
+      <option value="2026-10-17">17 de Outubro (2026)</option>
+    </select>
+  </div>
+</div>
+<div class="stat-card welcome-card">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <img src="/assets/images/pt.svg" style="width:32px; height:auto; display:block;" alt="Portugal">
+    <strong style="font-size:1.2rem;">CivicLearn</strong>
+  </div>
+
+  <p style="margin:8px 0 12px;font-size:0.85rem;color:#4b5563;">
+    Preparação para o exame CIPLE
+  </p>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="https://cipleonline.pt/ajuda"
+       class="dash-pill dash-pill-outline">
+      Contacto
+    </a>
+
+    <a href="#" id="logoutLink"
+       class="dash-pill dash-pill-outline">
+      Sair
+    </a>
+  </div>
+</div>
+
+<div class="sim-table-wrap">
+    <table class="sim-table" id="simTable">
+      <colgroup>
+        <col style="width: 18%">
+        <col style="width: 10%">
+        <col style="width: 8%">
+        <col style="width: 8%">
+        <col style="width: 8%">
+        <col style="width: 8%">
+        <col style="width: 12%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Simulação</th>
+          <th>Resultado</th>
+          <th>Leitura</th>
+          <th>Escrita</th>
+          <th>Escuta</th>
+          <th>Oral</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+ 
+      </tbody>
+    </table>
+</div>
+
+<aside class="dashboard-side faq-side">
+
+      <div class="side-card">
+        <h3>Componentes e Pesos</h3>
+        <p>A classificação final reflete o desempenho em: Compreensão de Leitura e Produção Escrita (45%), Compreensão Oral (25%) e Produção e Interação Oral (30%).</p>
+      </div>
+
+      <div class="side-card">
+        <h3>Escala de Classificação</h3>
+        <p>O CIPLE utiliza três menções de aprovação: <b>Suficiente</b> (55-69%), <b>Bom</b> (70-84%) e <b>Muito Bom</b> (85-100%). Abaixo de 55% a menção é Reprovado.</p>
+      </div>
+
+      <div class="side-card">
+        <h3>Duração do Exame</h3>
+        <p>A componente escrita dura 75 min e a compreensão oral 30 min. A prova oral (interação) ocorre em pares e dura aproximadamente 15 min.</p>
+      </div>
+
+      <div class="side-card">
+        <h3>Local e Data da Prova</h3>
+        <p>As provas realizam-se apenas em Lapps (Locais para Aplicação e Promoção de Exames) autorizados, nas datas fixadas anualmente pelo CAPLE.</p>
+      </div>
+
+      <div class="side-card">
+        <h3>O que é o "Refazer"?</h3>
+        <p>Esta funcionalidade permite apagar todas as tentativas anteriores desta simulação para que possa praticar o gerenciamento de tempo novamente do zero.</p>
+      </div>
+
+      <div class="side-card">
+        <h3>Apoio ao Candidato</h3>
+        <p>As simulações visam familiarizar o candidato com a estrutura dos itens e o rigor do tempo, reduzindo a ansiedade para o dia oficial.</p>
+      </div>
+
+      <div class="side-card">
+        <h3>Resultados Oficiais</h3>
+        <p>Os resultados do exame oficial demoram cerca de 3 semanas a serem publicados. As notas aqui apresentadas são automáticas e apenas para fins de treino.</p>
+      </div>
+
+    </aside>
+
+  </div>
+</div>
+    </div>
+  </main>
+</div>
+<script src="/assets/js/signout.js"></script>
+<script>
+(function waitForSupabase() {
+  if (!window.supabase || !window.supabase.auth) {
+    requestAnimationFrame(waitForSupabase);
+    return;
+  }
+
+  (async () => {
+
+   const selector = document.getElementById("examDateSelector");
+    const countdownEl = document.getElementById("examCountdown");
+
+    function updateCountdown(targetString) {
+      const targetDate = new Date(targetString + "T09:00:00");
+      const now = new Date();
+      const diff = targetDate - now;
+      if (diff <= 0) {
+        countdownEl.textContent = "Hoje!";
+      } else {
+        const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+        countdownEl.textContent = `${days} dias`;
+      }
+      localStorage.setItem("selected_exam_date", targetString);
+    }
+
+    const savedDate = localStorage.getItem("selected_exam_date");
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    if (savedDate) {
+      selector.value = savedDate;
+    } else {
+      const options = Array.from(selector.options);
+      const nextBest = options.find(opt => opt.value >= todayStr) || options[0];
+      selector.value = nextBest.value;
+    }
+
+    selector.addEventListener("change", (e) => updateCountdown(e.target.value));
+    updateCountdown(selector.value);
+
+    const { data: { session } } = await window.supabase.auth.getSession();
+    const userId = session?.user?.id;
+
+    const registryRes = await fetch("/ciple/assets/data/ciple-registry.json");
+    if (!registryRes.ok) {
+      console.error("Registry not found at /ciple/assets/data/ciple-registry.json");
+      return;
+    }
+
+    const registry = await registryRes.json();
+    const simulations = (registry.exams || []).map(e => e.id);
+
+    let results = [];
+    if (userId) {
+      const resp = await window.supabase
+        .from("exam_section_results")
+        .select("exam_id, section, result_json")
+        .eq("user_id", userId);
+      results = resp.data || [];
+    }
+
+    const tbody = document.querySelector("#simTable tbody");
+
+    const renderedRows = [];
+
+    simulations.forEach(examId => {
+
+      const examRows = results.filter(r => r.exam_id === examId);
+
+      const bySection = {};
+      examRows.forEach(r => {
+  bySection[r.section] ??= [];
+  bySection[r.section].push(r.result_json);
+});
+
+     const finalPct =
+  Array.isArray(bySection.speaking)
+    ? bySection.speaking[0]?.final_score ?? null
+    : null;
+
+      const rows = results.filter(r => r.exam_id === examId);
+      const sections = ["reading", "writing", "listening", "speaking"];
+      const doneSections = sections.filter(s =>
+        rows.some(r => r.section === s)
+      );
+
+      let state = "Não iniciada";
+      if (doneSections.length === 4) {
+        state = "Concluída";
+      } else if (doneSections.length > 0) {
+        state = "Em progresso";
+      }
+
+      /* --------------------------------------------------
+         STRICT NEXT-SECTION RESOLUTION (DASHBOARD PATHS)
+         -------------------------------------------------- */
+      const nextUrl =
+        !doneSections.includes("reading")
+          ? `reading.html?exam=${examId}${state === "Não iniciada" ? "&reset=1" : ""}`
+          : !doneSections.includes("listening")
+            ? `listening.html?exam=${examId}`
+            : !doneSections.includes("speaking")
+              ? `speaking.html?exam=${examId}`
+              : `results.html?exam=${examId}`;
+
+      const tr = document.createElement("tr");
+      tr.classList.add(`row-${state.replace(" ", "-")}`);
+
+      tr.innerHTML = `
+        <td>
+		 <div class="cell-flex">
+          <a class="exam-link" href="${nextUrl}">
+            ${examId.toUpperCase()}
+          </a>
+
+          ${
+            state === "Concluída"
+              ? `
+                <a class="dash-pill dash-pill-secondary"
+                   href="/ciple/dashboard/results.html?exam=${examId}">
+                  Ver resultados
+                </a>
+              `
+              : `
+                <a class="dash-pill dash-pill-primary" href="${nextUrl}">
+                  ${state === "Em progresso" ? "Continuar" : "Iniciar"}
+                </a>
+              `
+          }
+		    </div>
+        </td>
+
+        <td>
+          ${
+            state === "Concluída"
+              ? `<div class="score-circle ${finalPct >= 55 ? "pass" : "fail"}">
+                   ${typeof finalPct === "number" ? `${finalPct}%` : "—"}
+                 </div>`
+              : `<span class="pending">—</span>`
+          }
+        </td>
+
+        ${sections.map(s =>
+          `<td class="${doneSections.includes(s) ? "done" : "pending"}">
+             <span class="status-dot"></span>
+           </td>`
+        ).join("")}
+
+        <td>
+          <span class="state-badge state-${state.replace(" ", "-")}">
+            ${state}
+          </span>
+
+          ${
+            state === "Concluída"
+              ? `
+                <div style="margin-top:6px;">
+                  <a class="dash-pill dash-pill-outline"
+                     href="reading.html?exam=${examId}&reset=1">
+                    Refazer
+                  </a>
+                </div>
+              `
+              : ""
+          }
+        </td>
+      `;
+
+      renderedRows.push({ state, tr });
+    });
+
+    const order = {
+      "Concluída": 0,
+      "Em progresso": 1,
+      "Não iniciada": 2
+    };
+
+    renderedRows
+      .sort((a, b) => order[a.state] - order[b.state])
+      .forEach(r => tbody.appendChild(r.tr));
+
+// -------- METRIC: SIMULAÇÕES CONCLUÍDAS --------
+const completedCount =
+  renderedRows.filter(r => r.state === "Concluída").length;
+
+document.getElementById("doneSims").textContent =
+  `${completedCount} / ${simulations.length}`;
+
+
+// -------- LAST RESULT METRIC --------
+
+// take latest speaking result (by exam order)
+const completedExams = renderedRows
+  .filter(r => r.state === "Concluída")
+  .map(r => r.tr)
+  .reverse();
+
+let lastPct = null;
+
+for (const tr of completedExams) {
+  const circle = tr.querySelector(".score-circle");
+  if (circle && circle.textContent.includes("%")) {
+    lastPct = circle.textContent.trim();
+    break;
+  }
+}
+
+document.getElementById("lastResult").textContent =
+  lastPct ?? "—";
+
+
+    
+
+  })();
+})();
+</script>
+
+
+
+</body>
+</html>

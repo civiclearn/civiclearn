@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>CIPLE – Resultado</title>
+
+  <!-- Results styles -->
+  <link rel="stylesheet" href="/assets/css/results.css">
+
+
+  <!-- Supabase + auth -->
+  <script src="/assets/js/supabase-bootstrap.js"></script>
+  <script type="module" src="/assets/js/auth-guard-ciple.js"></script>
+  
+
+
+</head>
+
+<body class="result-page">
+
+  <!-- Main content -->
+  <main class="app-main">
+
+<header class="page-header">
+  <div class="page-header-top">
+    <a href="/ciple/dashboard/index.html" class="back-dashboard">
+      ← Voltar ao painel
+    </a>
+  </div>
+
+  <h1 id="examTitle">Resultado da simulação</h1>
+  <p class="page-subtitle" id="examSubtitle"></p>
+</header>
+
+
+    <!-- ONE EXAM RESULT -->
+    <section class="ciple-result-card">
+      <ul class="ciple-result-list" id="cipleResults">
+        <!-- filled by JS -->
+      </ul>
+    </section>
+
+  </main>
+
+<script
+  id="reading-answers-adapter"
+  type="application/json">
+</script>
+<script>
+(function () {
+  // This runs BEFORE results.js
+  // It creates a flat Reading answers view, without touching results.js
+
+  window.__READING_ANSWERS_FLAT__ = null;
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    if (!window.supabase) return;
+
+    const EXAM_ID =
+      new URLSearchParams(location.search).get("exam") || "ciple-01";
+
+    const { data: { user } } = await window.supabase.auth.getUser();
+    if (!user) return;
+
+    const { data } = await window.supabase
+      .from("exam_section_results")
+      .select("result_json")
+      .eq("user_id", user.id)
+      .eq("exam_id", EXAM_ID)
+      .eq("section", "reading")
+      .maybeSingle();
+
+    const nested = data?.result_json?.answers;
+    if (!nested) return;
+
+    const flat = {};
+    Object.values(nested).forEach(task =>
+      Object.assign(flat, task)
+    );
+
+    document.getElementById("reading-answers-adapter").textContent =
+      JSON.stringify(flat);
+
+    window.__READING_ANSWERS_FLAT__ = flat;
+  });
+})();
+</script>
+
+ <script src="/assets/js/results.js" defer></script>
+
+</body>
+</html>

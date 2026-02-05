@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>CIPLE – Produção Oral</title>
+
+  <!-- Unified exam stylesheet -->
+  <link rel="stylesheet" href="/assets/css/ciple-exam.css">
+
+  <!-- Supabase (required) -->
+  <script src="/assets/js/supabase-bootstrap.js"></script>
+  <script type="module" src="/assets/js/auth-guard-ciple.js"></script>
+</head>
+
+<body class="ciple-exam-page">
+
+<div class="ciple-exam-wrap single-column">
+
+  <main class="ciple-exam-main">
+
+   <header class="ciple-exam-topbar">
+
+  <div class="exam-topbar-left">
+    <a href="/ciple/dashboard/index.html" class="back-dashboard">
+      ← Voltar ao painel
+    </a>
+
+    <div>
+      <h1 id="speakingTitle">Produção Oral</h1>
+      <p class="muted">
+        Grave as respostas conforme indicado. Cada resposta será avaliada em conjunto.
+      </p>
+    </div>
+  </div>
+
+</header>
+
+
+    <!-- TASK 1 — IMAGE DESCRIPTION -->
+    <section class="oral-task ciple-exam-card"
+      data-task-id="speaking_1"
+      data-task-type="image_description"
+      data-prompt="Descreva o que vê na imagem."
+      data-evaluation-context="">
+
+      <h3>Tarefa 1</h3>
+
+      <p>Descreva o que vê na imagem.</p>
+
+      <img
+        id="speakingImage"
+        alt="Imagem da tarefa de produção oral"
+        class="speaking-image"
+        src=""
+      />
+
+      <div class="record-controls">
+        <button class="btn start">Gravar</button>
+        <button class="btn stop" disabled>Parar</button>
+      </div>
+
+      <div class="status">Não gravado</div>
+
+      <div class="playback" hidden>
+        <audio controls></audio>
+      </div>
+    </section>
+
+    <!-- TASK 2 — FREE SPEECH -->
+    <section class="oral-task ciple-exam-card"
+      data-task-id="speaking_2"
+      data-task-type="free_speech"
+      data-prompt="">
+
+      <h3>Tarefa 2</h3>
+
+      <p></p>
+
+      <div class="record-controls">
+        <button class="btn start">Gravar</button>
+        <button class="btn stop" disabled>Parar</button>
+      </div>
+
+      <div class="status">Não gravado</div>
+
+      <div class="playback" hidden>
+        <audio controls></audio>
+      </div>
+    </section>
+
+    <div class="ciple-exam-actions">
+      <button id="submitSpeaking" class="btn">
+        Submeter Produção Oral
+      </button>
+    </div>
+
+  </main>
+</div>
+
+<script src="/assets/js/signout.js"></script>
+
+<!-- EXACT SAME JSON LOADER AS BEFORE -->
+<script>
+(async function loadSpeakingFromJson() {
+  const params = new URLSearchParams(location.search);
+  const examId = params.get("exam") || "ciple-01";
+
+  const h1 = document.getElementById("speakingTitle");
+  if (h1) h1.textContent = `Produção Oral — ${examId.toUpperCase()}`;
+
+  const JSON_URL = `/ciple/assets/data/${examId}-speaking.json`;
+
+  let data;
+  try {
+    const res = await fetch(JSON_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("JSON not found");
+    data = await res.json();
+  } catch (e) {
+    console.error("Failed to load speaking JSON", JSON_URL, e);
+    return;
+  }
+
+  const tasks =
+    data.tasks ||
+    data.speaking?.tasks ||
+    data.section?.tasks ||
+    [];
+
+  const t1 = tasks.find(t => t.task_id === "speaking_1") || tasks[0];
+  const t2 = tasks.find(t => t.task_id === "speaking_2") || tasks[1];
+
+  // ---- TASK 1 ----
+  const task1El = document.querySelector('.oral-task[data-task-id="speaking_1"]');
+  if (task1El && t1) {
+    const prompt = stripHtml(t1.prompt || t1.question || t1.question_html || "");
+    if (prompt) {
+      task1El.dataset.prompt = prompt;
+      const p = task1El.querySelector("p");
+      if (p) p.textContent = prompt;
+    }
+
+    const evalCtx = stripHtml(t1.evaluation_context || "");
+    if (evalCtx) task1El.dataset.evaluationContext = evalCtx;
+
+    const img = task1El.querySelector("img");
+    if (img) {
+      if (t1.image) {
+        img.src = t1.image;
+      } else {
+        const n = Number(examId.replace("ciple-", ""));
+        img.src = `/assets/images/ciple/speaking-${n}.jpg`;
+      }
+    }
+  }
+
+  // ---- TASK 2 ----
+  const task2El = document.querySelector('.oral-task[data-task-id="speaking_2"]');
+  if (task2El && t2) {
+    const prompt = stripHtml(t2.prompt || t2.question || t2.question_html || "");
+    if (prompt) {
+      task2El.dataset.prompt = prompt;
+      const p = task2El.querySelector("p");
+      if (p) p.textContent = prompt;
+    }
+  }
+
+  function stripHtml(s) {
+    return String(s || "")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/p>/gi, "\n")
+      .replace(/<[^>]*>/g, "")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }
+})();
+</script>
+
+<script src="/assets/js/speaking-pt.js"></script>
+
+</body>
+</html>
