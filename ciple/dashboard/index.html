@@ -150,11 +150,11 @@
 <script>
 (async () => {
   /**
-   * REWRITTEN DASHBOARD ENGINE
-   * This waits for Supabase and ensures the session is valid before rendering.
+   * UNIFIED DASHBOARD ENGINE
+   * Handles both the Simulation Table and the Top Metrics
    */
-  async function initDashboard() {
-    // 1. Wait for Supabase to be globally available
+  async function init() {
+    // 1. Wait for Supabase
     const supabase = await new Promise(resolve => {
       if (window.supabase) return resolve(window.supabase);
       const iv = setInterval(() => {
@@ -162,30 +162,31 @@
       }, 50);
     });
 
-    // 2. Robust Session Check
-    const { data: { session }, error: authError } = await supabase.auth.getSession();
-    if (authError || !session) {
-      console.warn("No active session. Redirecting...");
+    // 2. Auth Check
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
       window.location.href = "/login.html";
       return;
     }
 
     const userId = session.user.id;
 
-    // 3. Fetch Registry and Results in parallel
+    // 3. Fetch Registry and Results
     const [registryRes, resultsRes] = await Promise.all([
       fetch("/ciple/assets/data/ciple-registry.json"),
       supabase.from("exam_section_results").select("*").eq("user_id", userId)
     ]);
 
-    if (!registryRes.ok) throw new Error("Registry not found");
     const registry = await registryRes.json();
     const results = resultsRes.data || [];
     const simulations = (registry.exams || []).map(e => e.id);
 
-    // 4. UI Rendering Logic
+    // 4. Render Table
     const tbody = document.querySelector("#simTable tbody");
-    const renderedRows = [];
+    tbody.innerHTML = ""; // Clear placeholders
+    
+    let completedCount = 0;
+    let lastPercent = null;
 
     simulations.forEach(examId => {
       const examRows = results.filter(r => r.exam_id === examId);
@@ -193,71 +194,52 @@
       
       // Calculate State
       let state = "Não iniciada";
-      if (doneSections.includes("reading") && doneSections.includes("listening") && 
-          doneSections.includes("writing") && doneSections.includes("speaking")) {
+      if (doneSections.includes("reading") && doneSections.includes("writing") && doneSections.includes("listening")) {
         state = "Concluída";
+        completedCount++;
       } else if (doneSections.length > 0) {
         state = "Em progresso";
       }
 
-      // Determine Score (from Speaking section or cumulative)
-      const speakingData = examRows.find(r => r.section === "speaking")?.result_json;
-      const finalPct = speakingData?.final_score ?? null;
+      // Get Score from Reading or Speaking
+      const readingData = examRows.find(r => r.section === "reading")?.result_json;
+      const pct = readingData?.score?.percent || 0;
+      if (state === "Concluída") lastPercent = pct;
 
-      // Next Section Path Logic
-      const nextUrl = !doneSections.includes("reading") ? `./reading.html?exam=${examId}${state === "Não iniciada" ? "&reset=1" : ""}` :
-                      !doneSections.includes("listening") ? `./listening.html?exam=${examId}` :
-                      !doneSections.includes("speaking") ? `./speaking.html?exam=${examId}` : `./results.html?exam=${examId}`;
+      const nextUrl = !doneSections.includes("reading") ? `./reading.html?exam=${examId}` :
+                      !doneSections.includes("writing") ? `./writing.html?exam=${examId}` :
+                      !doneSections.includes("listening") ? `./listening.html?exam=${examId}` : `./results.html?exam=${examId}`;
 
       const tr = document.createElement("tr");
-      tr.className = `row-${state.replace(/\s+/g, '-')}`;
       tr.innerHTML = `
-        <td>
-          <div class="cell-flex">
-            <a class="exam-link" href="${nextUrl}">${examId.toUpperCase()}</a>
-            <a class="dash-pill ${state === "Concluída" ? "dash-pill-secondary" : "dash-pill-primary"}" href="${nextUrl}">
-              ${state === "Concluída" ? "Ver resultados" : (state === "Em progresso" ? "Continuar" : "Iniciar")}
-            </a>
-          </div>
-        </td>
-        <td>
-          ${state === "Concluída" ? `<div class="score-circle ${finalPct >= 55 ? 'pass' : 'fail'}">${finalPct}%</div>` : '<span class="pending">—</span>'}
-        </td>
-        ${["reading", "writing", "listening", "speaking"].map(s => 
-          `<td class="${doneSections.includes(s) ? 'done' : 'pending'}"><span class="status-dot"></span></td>`).join('')}
-        <td>
-          <span class="state-badge state-${state.replace(/\s+/g, '-')}">${state}</span>
-          ${state === "Concluída" ? `<div style="margin-top:6px;"><a class="dash-pill dash-pill-outline" href="reading.html?exam=${examId}&reset=1">Refazer</a></div>` : ""}
-        </td>
+        <td><a class="exam-link" href="${nextUrl}">${examId.toUpperCase()}</a></td>
+        <td>${state === "Concluída" ? `<div class="score-circle pass">${pct}%</div>` : "—"}</td>
+        <td class="${doneSections.includes('reading') ? 'done' : 'pending'}"><span class="status-dot"></span></td>
+        <td class="${doneSections.includes('writing') ? 'done' : 'pending'}"><span class="status-dot"></span></td>
+        <td class="${doneSections.includes('listening') ? 'done' : 'pending'}"><span class="status-dot"></span></td>
+        <td class="${doneSections.includes('speaking') ? 'done' : 'pending'}"><span class="status-dot"></span></td>
+        <td><span class="state-badge state-${state.replace(/\s+/g, '-')}">${state}</span></td>
       `;
-      renderedRows.push({ state, tr, finalPct });
+      tbody.appendChild(tr);
     });
 
-    // 5. Finalize UI (Sorting and Stats)
-    const order = { "Concluída": 0, "Em progresso": 1, "Não iniciada": 2 };
-    renderedRows.sort((a, b) => order[a.state] - order[b.state]).forEach(r => tbody.appendChild(r.tr));
-
-    document.getElementById("doneSims").textContent = `${renderedRows.filter(r => r.state === "Concluída").length} / ${simulations.length}`;
-    const lastResult = renderedRows.filter(r => r.state === "Concluída").pop();
-    document.getElementById("lastResult").textContent = lastResult ? `${lastResult.finalPct}%` : "—";
+    // 5. Update Top Metrics
+    document.getElementById("doneSims").textContent = `${completedCount} / ${simulations.length}`;
+    document.getElementById("lastResult").textContent = lastPercent ? `${lastPercent}%` : "—";
   }
 
-  // Countdown and Setup Logic
+  // Countdown Logic
   const selector = document.getElementById("examDateSelector");
   const countdownEl = document.getElementById("examCountdown");
-
-  function updateCountdown(targetString) {
-    const targetDate = new Date(targetString + "T09:00:00");
-    const diff = targetDate - new Date();
+  function updateCountdown(val) {
+    const diff = new Date(val) - new Date();
     countdownEl.textContent = diff <= 0 ? "Hoje!" : `${Math.ceil(diff / 86400000)} dias`;
-    localStorage.setItem("selected_exam_date", targetString);
+    localStorage.setItem("selected_exam_date", val);
   }
-
-  selector.value = localStorage.getItem("selected_exam_date") || selector.options[0].value;
   selector.addEventListener("change", (e) => updateCountdown(e.target.value));
-  updateCountdown(selector.value);
+  updateCountdown(localStorage.getItem("selected_exam_date") || selector.value);
 
-  initDashboard().catch(console.error);
+  init().catch(console.error);
 })();
 </script>
 

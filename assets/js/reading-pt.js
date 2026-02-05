@@ -1,158 +1,57 @@
-/**
- * CIVIC LEARN EXAM ENGINE v2
- * A robust, state-managed architecture for Portuguese Exams
- */
+(() => {
+  const Engine = {
+    config: { examId: new URLSearchParams(location.search).get("exam") || "ciple-01" },
+    state: { user: null, examData: null, taskIndex: 0, answers: {}, startTime: Date.now() },
+    el: { taskCard: document.querySelector("#taskCard"), timer: document.querySelector("#timer"), submitBtn: document.querySelector("#submitReading") },
 
-const CiviclearnExam = {
-    // --- 1. CONFIG & STATE ---
-    config: {
-        examId: new URLSearchParams(location.search).get("exam") || "ciple-01",
-        dataUrl: (id) => `/ciple/assets/data/${id}-reading.json`,
-    },
-    state: {
-        user: null,
-        examData: null,
-        taskIndex: 0,
-        answers: {},
-        startTime: null,
-        isSubmitting: false
-    },
-
-    // --- 2. CORE ORCHESTRATOR ---
     async init() {
-        try {
-            this.showLoading(true);
-            
-            // Step A: Ensure Supabase exists
-            await this.waitForSupabase();
-            
-            // Step B: Ensure User is logged in
-            await this.checkAuth();
-            
-            // Step C: Load Exam Content
-            await this.loadContent();
-            
-            // Step D: Restore Progress from LocalStorage or DB
-            this.restoreState();
-            
-            // Step E: Start UI
-            this.render();
-            this.setupListeners();
-            this.startTimer();
-            
-            this.showLoading(false);
-        } catch (error) {
-            this.handleFatalError(error);
-        }
-    },
-
-    // --- 3. AUTH & DATA ---
-    async waitForSupabase() {
-        return new Promise((resolve, reject) => {
-            let attempts = 0;
-            const check = setInterval(() => {
-                if (window.supabase) {
-                    clearInterval(check);
-                    resolve();
-                }
-                if (attempts++ > 50) reject("Supabase failed to load.");
-            }, 100);
-        });
-    },
-
-    async checkAuth() {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error || !session) {
-            // Redirect to login if session is invalid
-            window.location.href = "/login.html?reason=expired";
-            throw new Error("Unauthorized: Please log in.");
-        }
+        await window.waitForSupabase();
+        const { data: { session } } = await supabase.auth.getSession();
         this.state.user = session.user;
-    },
-
-    async loadContent() {
-        const url = this.config.dataUrl(this.config.examId);
-        const res = await fetch(url, { cache: "no-store" });
-        if (!res.ok) throw new Error("Could not load exam data.");
+        const res = await fetch(`/ciple/assets/data/${this.config.examId}-reading.json`);
         this.state.examData = await res.json();
+        this.render();
+        this.startTimer();
     },
 
-    // --- 4. PERSISTENCE ---
-    saveToLocal() {
-        const key = `exam_${this.state.user.id}_${this.config.examId}`;
-        const data = {
-            answers: this.state.answers,
-            taskIndex: this.state.taskIndex,
-            startTime: this.state.startTime
-        };
-        localStorage.setItem(key, JSON.stringify(data));
-    },
-
-    restoreState() {
-        const key = `exam_${this.state.user.id}_${this.config.examId}`;
-        const saved = JSON.parse(localStorage.getItem(key));
-        if (saved) {
-            this.state.answers = saved.answers || {};
-            this.state.taskIndex = saved.taskIndex || 0;
-            this.state.startTime = saved.startTime || Date.now();
-        } else {
-            this.state.startTime = Date.now();
-        }
-    },
-
-    // --- 5. SUBMISSION ---
     async doSubmit() {
-        if (this.state.isSubmitting) return;
-        this.state.isSubmitting = true;
-
-        try {
-            const payload = {
-                user_id: this.state.user.id,
-                exam_id: this.config.examId,
-                section: "reading",
-                result_json: {
-                    score: this.calculateScore(),
-                    answers: this.state.answers,
-                    completed_at: new Date().toISOString()
-                }
-            };
-
-            // UPSERT prevents the "Delete-then-fail" bug
-            const { error } = await supabase
-                .from("exam_section_results")
-                .upsert(payload, { onConflict: 'user_id,exam_id,section' });
-
-            if (error) throw error;
-
-            // Clear progress and move on
-            localStorage.removeItem(`exam_${this.state.user.id}_${this.config.examId}`);
-            window.location.href = `writing.html?exam=${this.config.examId}`;
-
-        } catch (err) {
-            this.state.isSubmitting = false;
-            alert("Erro ao submeter: " + err.message);
-        }
+        const payload = {
+            user_id: this.state.user.id,
+            exam_id: this.config.examId,
+            section: "reading",
+            result_json: { score: this.calculateScore(), answers: this.state.answers, completed_at: new Date().toISOString() }
+        };
+        const { error } = await supabase.from("exam_section_results").upsert(payload, { onConflict: 'user_id,exam_id,section' });
+        if (!error) window.location.href = `writing.html?exam=${this.config.examId}`;
+        else alert("Erro: " + error.message);
     },
 
-    // --- 6. HELPERS (UI & Scoring) ---
     calculateScore() {
-        // Logic for grading based on this.state.examData and this.state.answers
-        // ... (Transferred from your original grading logic)
+        let correct = 0, total = 0;
+        this.state.examData.tasks.forEach(t => t.questions.forEach(q => {
+            total++;
+            if (this.state.answers[t.task_id]?.[q.id] === q.correct_option) correct++;
+        }));
+        return { percent: Math.round((correct/total)*100) };
     },
 
     render() {
-        // Updated rendering logic using this.state
+        const task = this.state.examData.tasks[this.state.taskIndex];
+        this.el.taskCard.innerHTML = `<h2>${task.title}</h2>` + task.questions.map(q => `
+            <div class="q"><p>${q.prompt}</p>
+            ${q.options.map(opt => `<button class="opt-btn ${this.state.answers[task.task_id]?.[q.id] === opt.id ? 'selected' : ''}" onclick="window.setAns('${task.task_id}','${q.id}','${opt.id}')">${opt.text}</button>`).join('')}
+            </div>`).join('');
+        this.el.submitBtn.onclick = () => this.doSubmit();
     },
 
-    handleFatalError(err) {
-        console.error(err);
-        document.getElementById("taskCard").innerHTML = `<div class="error">${err}</div>`;
-    },
-    
-    showLoading(show) {
-        // Visual feedback for the user
+    startTimer() {
+        setInterval(() => {
+            const diff = (this.state.examData.time_limit_minutes * 60000) - (Date.now() - this.state.startTime);
+            const m = Math.floor(diff/60000), s = Math.floor((diff%60000)/1000);
+            this.el.timer.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+        }, 1000);
     }
-};
-
-// Start the engine
-CiviclearnExam.init();
+  };
+  window.setAns = (tid, qid, oid) => { if(!Engine.state.answers[tid]) Engine.state.answers[tid] = {}; Engine.state.answers[tid][qid] = oid; Engine.render(); };
+  Engine.init();
+})();
