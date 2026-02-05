@@ -1,4 +1,4 @@
-// /assets/js/ciple/reading.js
+// /assets/js/reading-pt.js
 (() => {
   const qs = (s) => document.querySelector(s);
 
@@ -12,271 +12,184 @@
   const nextBtn = qs("#nextTask");
   const submitBtn = qs("#submitReading");
   const warnEl = qs("#warn");
-  const sentNote = qs("#sentNote");
 
   const url = new URL(location.href);
   const examId = url.searchParams.get("exam") || "ciple-01";
 
-  // If you keep the JSON at a different path, change only this line.
   const DATA_URL = `/ciple/assets/data/${examId}-reading.json`;
 
-  // Local persistence keys (per user + exam)
-  const userKeyPrefix = () => {
-    const uid = window.__cl_uid || "anon"; // will be set after auth
-    return `ciple:${uid}:${examId}:reading`;
-  };
+  /* =========================================================
+     SUPABASE SESSION (AUTHORITATIVE, CACHED)
+     ========================================================= */
+
+  let __session = null;
+
+  async function requireSession() {
+    if (__session) return __session;
+
+    if (!window.supabase || !window.supabase.auth) {
+      throw new Error("Supabase not ready");
+    }
+
+    const { data, error } = await window.supabase.auth.getSession();
+    if (error || !data?.session) {
+      throw new Error("No session");
+    }
+
+    __session = data.session;
+    return __session;
+  }
+
+  /* =========================================================
+     STATE
+     ========================================================= */
 
   let exam = null;
   let taskIndex = 0;
-  let answers = {}; // { [questionId]: optionId }
-  let startTs = null; // timer start
-  
-  function waitForExamContext() {
-  return new Promise(resolve => {
-    if (window.CIPLE_EXAM_CONTEXT) return resolve(window.CIPLE_EXAM_CONTEXT);
-    window.addEventListener("exam:ready", () => resolve(window.CIPLE_EXAM_CONTEXT), { once: true });
-  });
-}
+  let answers = {}; // { [task_id]: { [question_id]: option_id } }
+  let startTs = null;
 
-
-  // ---------- helpers ----------
-  function countAnsweredForTask(task) {
-    const qIds = task.questions.map(q => q.id);
-    const taskAnswers = answers[task.task_id] || {};
-return qIds.filter(id => taskAnswers[id]).length;
-
+  function userKeyPrefix(userId) {
+    return `ciple:${userId}:${examId}:reading`;
   }
 
-  function isTaskComplete(task) {
-    return countAnsweredForTask(task) === task.questions.length;
-  }
+  /* =========================================================
+     LOCAL PERSISTENCE
+     ========================================================= */
 
-  function formatTimeLeft(ms) {
-    if (ms <= 0) return "00:00";
-    const totalSec = Math.floor(ms / 1000);
-    const m = Math.floor(totalSec / 60);
-    const s = totalSec % 60;
-    const mm = String(m).padStart(2, "0");
-    const ss = String(s).padStart(2, "0");
-    return `${mm}:${ss}`;
-  }
-
-  function persistLocal() {
-    const key = userKeyPrefix();
+  function persistLocal(userId) {
+    const key = userKeyPrefix(userId);
     localStorage.setItem(`${key}:answers`, JSON.stringify(answers));
     localStorage.setItem(`${key}:taskIndex`, String(taskIndex));
     if (startTs) localStorage.setItem(`${key}:startTs`, String(startTs));
   }
 
-  function restoreLocal() {
-    const key = userKeyPrefix();
+  function restoreLocal(userId) {
+    const key = userKeyPrefix(userId);
+
     try {
       const a = JSON.parse(localStorage.getItem(`${key}:answers`) || "{}");
       if (a && typeof a === "object") answers = a;
     } catch {}
+
     const ti = parseInt(localStorage.getItem(`${key}:taskIndex`) || "0", 10);
     taskIndex = Number.isFinite(ti) ? Math.max(0, ti) : 0;
+
     const st = parseInt(localStorage.getItem(`${key}:startTs`) || "0", 10);
     startTs = Number.isFinite(st) && st > 0 ? st : null;
   }
 
-  function clearLocal() {
-    const key = userKeyPrefix();
+  function clearLocal(userId) {
+    const key = userKeyPrefix(userId);
     localStorage.removeItem(`${key}:answers`);
     localStorage.removeItem(`${key}:taskIndex`);
     localStorage.removeItem(`${key}:startTs`);
   }
 
+  /* =========================================================
+     HELPERS
+     ========================================================= */
+
   function setWarn(msg) {
     warnEl.textContent = msg || "";
   }
 
-  function setNavButtons() {
-    if (taskIndex === 0) {
-  prevBtn.style.display = "none";
-} else {
-  prevBtn.style.display = "";
-  prevBtn.disabled = false;
-}
-    const last = taskIndex === exam.tasks.length - 1;
+  function countAnswered(task) {
+    const taskAnswers = answers[task.task_id] || {};
+    return task.questions.filter(q => taskAnswers[q.id]).length;
+  }
 
+  function isTaskComplete(task) {
+    return countAnswered(task) === task.questions.length;
+  }
+
+  function setNavButtons() {
+    const task = exam.tasks[taskIndex];
+    const last = taskIndex === exam.tasks.length - 1;
+    const complete = isTaskComplete(task);
+
+    prevBtn.style.display = taskIndex === 0 ? "none" : "";
     nextBtn.style.display = last ? "none" : "";
     submitBtn.style.display = last ? "" : "none";
-
-    // Require completion before moving on (matches exam feel)
-    const task = exam.tasks[taskIndex];
-    const complete = isTaskComplete(task);
 
     if (!last) nextBtn.disabled = !complete;
     if (last) submitBtn.disabled = !complete;
 
-    if (!complete) {
-      setWarn("Responda a todas as questões desta página para continuar.");
-    } else {
-      setWarn("");
-    }
+    setWarn(
+      complete
+        ? ""
+        : "Responda a todas as questões desta página para continuar."
+    );
   }
 
-  // ---------- renderers ----------
-  function renderMatchOne(task) {
-   
-   const optsHtml = (q) => {
-  return (q.options || []).map(opt => {
-    const selected =
-  answers[task.task_id]?.[q.id] === opt.id ? "selected" : "";
-    return `
-      <button
-  type="button"
-  class="opt-btn ${selected}"
-  data-q="${q.id}"
-  data-opt="${opt.id}"
->
-
-        ${opt.text}
-      </button>
-    `;
-  }).join("");
-};
-
-
-    return `
-      <h2 class="task-title">${task.title}</h2>
-      <p class="task-instructions">${task.instructions || ""}</p>
-
-      ${task.questions.map((q, idx) => `
-        <div class="q">
-          <p class="q-prompt">${idx + 1}. ${q.prompt}</p>
-          <div class="opt-grid">
-            ${optsHtml(q)}
-          </div>
-        </div>
-      `).join("")}
-    `;
+  function formatTimeLeft(ms) {
+    if (ms <= 0) return "00:00";
+    const t = Math.floor(ms / 1000);
+    return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
   }
 
-  function renderSingleTextMCQ(task) {
-    const texts = task.content?.texts || [];
-    const byText = new Map(texts.map(t => [t.id, t.text]));
+  /* =========================================================
+     RENDERING
+     ========================================================= */
 
-    // group questions by text_id (so the text prints once)
-    const groups = {};
-    for (const q of task.questions) {
-      const tid = q.text_id || "no-text";
-      groups[tid] = groups[tid] || [];
-      groups[tid].push(q);
-    }
-
-    const groupHtml = Object.entries(groups).map(([tid, qsList]) => {
-      const txt = byText.get(tid) || "";
+  function renderOptions(task, q) {
+    return q.options.map(opt => {
+      const selected =
+        answers[task.task_id]?.[q.id] === opt.id ? "selected" : "";
       return `
-        ${txt ? `<div class="text-block"><pre>${txt}</pre></div>` : ""}
-
-        ${qsList.map((q, i) => `
-          <div class="q">
-            <p class="q-prompt">${q.question}</p>
-            <div class="opt-grid">
-              ${q.options.map(opt => {
-                const selected =
-  answers[task.task_id]?.[q.id] === opt.id ? "selected" : "";
-                return `
-                  <button
-  type="button"
-  class="opt-btn ${selected}"
-  data-q="${q.id}"
-  data-opt="${opt.id}"
->
-
-                    ${opt.text}
-                  </button>
-                `;
-              }).join("")}
-            </div>
-          </div>
-        `).join("")}
-      `;
+        <button
+          type="button"
+          class="opt-btn ${selected}"
+          data-q="${q.id}"
+          data-opt="${opt.id}">
+          ${opt.text}
+        </button>`;
     }).join("");
-
-    return `
-      <h2 class="task-title">${task.title}</h2>
-      <p class="task-instructions">${task.instructions || ""}</p>
-      ${groupHtml}
-    `;
-  }
-
-  function renderLongTextMCQ(task) {
-    const text = task.content?.text || "";
-    return `
-      <h2 class="task-title">${task.title}</h2>
-      <p class="task-instructions">${task.instructions || ""}</p>
-
-      ${text ? `<div class="text-block"><pre>${text}</pre></div>` : ""}
-
-      ${task.questions.map((q, idx) => `
-        <div class="q">
-          <p class="q-prompt">${idx + 1}. ${q.question}</p>
-          <div class="opt-grid">
-            ${q.options.map(opt => {
-              const selected =
-  answers[task.task_id]?.[q.id] === opt.id ? "selected" : "";
-              return `
-                <button
-  type="button"
-  class="opt-btn ${selected}"
-  data-q="${q.id}"
-  data-opt="${opt.id}"
->
-
-
-                  ${opt.text}
-                </button>
-              `;
-            }).join("")}
-          </div>
-        </div>
-      `).join("")}
-    `;
   }
 
   function renderTask() {
     const task = exam.tasks[taskIndex];
-    const total = exam.tasks.length;
 
     pageTitle.textContent = "Compreensão escrita";
     pageSub.textContent = `${examId.toUpperCase()} • ${task.title}`;
-    taskCounter.textContent = `${taskIndex + 1} / ${total}`;
+    taskCounter.textContent = `${taskIndex + 1} / ${exam.tasks.length}`;
 
-    let html = "";
-    if (task.type === "match_one") html = renderMatchOne(task);
-    else if (task.type === "single_text_mcq") html = renderSingleTextMCQ(task);
-    else if (task.type === "long_text_mcq") html = renderLongTextMCQ(task);
-    else html = `<p>Tipo de tarefa não suportado: ${task.type}</p>`;
+    let html = `
+      <h2 class="task-title">${task.title}</h2>
+      <p class="task-instructions">${task.instructions || ""}</p>
+    `;
+
+    if (task.content?.text) {
+      html += `<div class="text-block"><pre>${task.content.text}</pre></div>`;
+    }
+
+    html += task.questions.map((q, i) => `
+      <div class="q">
+        <p class="q-prompt">${i + 1}. ${q.prompt || q.question}</p>
+        <div class="opt-grid">
+          ${renderOptions(task, q)}
+        </div>
+      </div>
+    `).join("");
 
     taskCard.innerHTML = html;
-	
 
-    // click handler (event delegation)
     taskCard.querySelectorAll(".opt-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const qid = btn.getAttribute("data-q");
-        const opt = btn.getAttribute("data-opt");
+      btn.addEventListener("click", async () => {
+        const qid = btn.dataset.q;
+        const opt = btn.dataset.opt;
         const tid = task.task_id;
 
-        // Save data
-        if (!answers[tid]) { answers[tid] = {}; }
+        answers[tid] ??= {};
         answers[tid][qid] = opt;
 
-        // Update UI: Find the box containing ONLY this question's buttons
-        const box = btn.closest('.opt-grid');
-        
-        // Clear old selection in this box
-        box.querySelectorAll(".opt-btn").forEach(b => {
-          b.classList.remove("selected");
-        });
-
-        // Highlight the one you just clicked
+        btn.closest(".opt-grid")
+          .querySelectorAll(".opt-btn")
+          .forEach(b => b.classList.remove("selected"));
         btn.classList.add("selected");
 
-        persistLocal();
+        const session = await requireSession();
+        persistLocal(session.user.id);
         setNavButtons();
       });
     });
@@ -284,73 +197,61 @@ return qIds.filter(id => taskAnswers[id]).length;
     setNavButtons();
   }
 
-  // ---------- scoring + storage ----------
+  /* =========================================================
+     SCORING + STORAGE
+     ========================================================= */
+
   function gradeReading() {
     let correct = 0;
     let total = 0;
 
-    const byTask = exam.tasks.map(t => {
-      let tCorrect = 0;
-      let tTotal = t.questions.length;
-
-      for (const q of t.questions) {
-        total += 1;
-        const chosen = answers[t.task_id]?.[q.id] || null;
-
-        // match_one: correct_option
-        if (q.correct_option && chosen === q.correct_option) {
-          correct += 1;
-          tCorrect += 1;
+    const tasks = exam.tasks.map(t => {
+      let tc = 0;
+      t.questions.forEach(q => {
+        total++;
+        if (answers[t.task_id]?.[q.id] === q.correct_option) {
+          correct++;
+          tc++;
         }
-
-        // mcq: correct_option
-        if (!q.correct_option && q.correct_option !== "" && q.correct_option !== 0) {
-          // no-op (defensive)
-        }
-      }
-
-      
-
-      // Fix double counting risk: We counted correct per question in the first loop,
-      // but only when q.correct_option exists. That is correct for our schema.
-
-      return { task_id: t.task_id, correct: tCorrect, total: tTotal };
+      });
+      return { task_id: t.task_id, correct: tc, total: t.questions.length };
     });
 
-    // The loop above counts correct only once per question.
-    // total is correct; percent computed from total.
-    const percent = total > 0 ? Math.round((correct / total) * 100) : 0;
-
-    return { correct, total, percent, tasks: byTask };
+    return {
+      correct,
+      total,
+      percent: total ? Math.round((correct / total) * 100) : 0,
+      tasks
+    };
   }
 
   async function storeResult(resultJson) {
-    // Store in same table as writing/speaking (consistent with what you already built)
-    const { data: { user } } = await window.supabase.auth.getUser();
-    if (!user) throw new Error("No user");
+    const session = await requireSession();
+    const userId = session.user.id;
 
-    // Upsert-like behavior: delete existing then insert, to avoid requiring unique constraints.
-    // If you already have a unique constraint on (user_id, exam_id, section), replace with upsert.
     await window.supabase
       .from("exam_section_results")
       .delete()
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .eq("exam_id", examId)
       .eq("section", "reading");
 
-    const ins = await window.supabase
+    const { error } = await window.supabase
       .from("exam_section_results")
       .insert({
-        user_id: user.id,
+        user_id: userId,
         exam_id: examId,
         section: "reading",
         result_json: resultJson
       });
 
-    if (ins.error) throw ins.error;
+    if (error) throw error;
   }
 
-  // ---------- timer ----------
+  /* =========================================================
+     TIMER
+     ========================================================= */
+
   function tickTimer() {
     if (!exam?.time_limit_minutes) {
       timerEl.textContent = "—";
@@ -358,145 +259,97 @@ return qIds.filter(id => taskAnswers[id]).length;
     }
     if (!startTs) startTs = Date.now();
 
-    const limitMs = exam.time_limit_minutes * 60 * 1000;
-    const elapsed = Date.now() - startTs;
-    const left = limitMs - elapsed;
+    const left =
+      exam.time_limit_minutes * 60 * 1000 - (Date.now() - startTs);
 
     timerEl.textContent = formatTimeLeft(left);
 
     if (left <= 0) {
-      // Auto-submit once
       submitBtn.disabled = true;
-      setWarn("Tempo terminado. A submeter…");
       doSubmit(true).catch(() => {
-        // if submit fails, leave a visible warning
-        setWarn("Tempo terminado, mas ocorreu um erro ao submeter.");
+        setWarn("Erro ao submeter automaticamente.");
       });
     }
   }
 
-  // ---------- submit ----------
-  async function doSubmit(isAuto = false) {
+  /* =========================================================
+     SUBMIT
+     ========================================================= */
+
+  async function doSubmit() {
     const task = exam.tasks[taskIndex];
     if (!isTaskComplete(task)) {
-      setWarn("Responda a todas as questões desta página antes de submeter.");
+      setWarn("Responda a todas as questões antes de submeter.");
       return;
     }
 
     const score = gradeReading();
-    const payload = {
+
+    await storeResult({
       section: "reading",
       exam_id: examId,
-      time_limit_minutes: exam.time_limit_minutes || null,
       started_at: startTs ? new Date(startTs).toISOString() : null,
       completed_at: new Date().toISOString(),
       score,
       answers
-    };
-
-    await storeResult(payload);
-
-    clearLocal();
-setWarn("");
-
-// redirect directly to Writing (Reading + Writing = one block)
-location.href = "writing.html?exam=" + encodeURIComponent(examId);
-
-  }
-
-  // ---------- init ----------
-  async function init() {
-   
-    const { userId } = await waitForExamContext();
-window.__cl_uid = userId;
-
-const params = new URLSearchParams(location.search);
-if (params.get("reset") === "1") {
-  clearLocal();
-  answers = {};
-} else {
-  restoreLocal();
-}
-
-
-
-// --- START shared Reading+Writing timer (only once) ---
-const { data: { user } } = await window.supabase.auth.getUser();
-if (user) {
-  const { data: existing } = await window.supabase
-    .from("exam_section_results")
-    .select("section")
-    .eq("user_id", user.id)
-    .eq("exam_id", examId)
-    .eq("section", "rw_started");
-
-  if (!existing || existing.length === 0) {
-    await window.supabase.from("exam_section_results").insert({
-      user_id: user.id,
-      exam_id: examId,
-      section: "rw_started",
-      started_at: new Date().toISOString()
     });
-  }
-}
-// --- END shared timer init ---
 
+    const session = await requireSession();
+    clearLocal(session.user.id);
+
+    location.href = `writing.html?exam=${encodeURIComponent(examId)}`;
+  }
+
+  /* =========================================================
+     INIT
+     ========================================================= */
+
+  async function init() {
+    const session = await requireSession();
+    const userId = session.user.id;
+
+    if (url.searchParams.get("reset") === "1") {
+      clearLocal(userId);
+      answers = {};
+    } else {
+      restoreLocal(userId);
+    }
 
     const res = await fetch(DATA_URL, { cache: "no-store" });
     if (!res.ok) throw new Error(`Missing JSON: ${DATA_URL}`);
     exam = await res.json();
 
-    // defensive normalisation
-    if (!exam.tasks || !Array.isArray(exam.tasks)) exam.tasks = [];
-    if (taskIndex >= exam.tasks.length) taskIndex = 0;
-
-    // Bind nav
-    prevBtn.addEventListener("click", () => {
-      if (taskIndex <= 0) return;
-      taskIndex -= 1;
-      persistLocal();
-      renderTask();
-    });
-
-    nextBtn.addEventListener("click", () => {
-      const task = exam.tasks[taskIndex];
-      if (!isTaskComplete(task)) return;
-      if (taskIndex >= exam.tasks.length - 1) return;
-      taskIndex += 1;
-      persistLocal();
-      renderTask();
-    });
-
-    submitBtn.addEventListener("click", async () => {
-      try {
-        submitBtn.disabled = true;
-        await doSubmit(false);
-      } catch (e) {
-        submitBtn.disabled = false;
-        alert("Erro ao submeter a leitura. Tente novamente.");
-        console.error(e);
+    prevBtn.onclick = () => {
+      if (taskIndex > 0) {
+        taskIndex--;
+        persistLocal(userId);
+        renderTask();
       }
-    });
+    };
+
+    nextBtn.onclick = () => {
+      if (taskIndex < exam.tasks.length - 1 && isTaskComplete(exam.tasks[taskIndex])) {
+        taskIndex++;
+        persistLocal(userId);
+        renderTask();
+      }
+    };
+
+    submitBtn.onclick = () => doSubmit();
 
     renderTask();
-
-    // start timer loop
     if (exam.time_limit_minutes && !startTs) startTs = Date.now();
     tickTimer();
     setInterval(tickTimer, 1000);
   }
 
-  init().catch((e) => {
+  init().catch(e => {
     console.error(e);
     taskCard.innerHTML = `
-      <h2 class="task-title">Erro</h2>
-      <p class="task-instructions">Não foi possível carregar a leitura.</p>
-      <div class="inline-warn">${String(e.message || e)}</div>
-      <div class="text-block"><pre>JSON esperado em: ${DATA_URL}</pre></div>
+      <h2>Erro</h2>
+      <p>${String(e.message || e)}</p>
     `;
-    timerEl.textContent = "—";
-    nextBtn.disabled = true;
     submitBtn.disabled = true;
+    nextBtn.disabled = true;
   });
-
 })();
