@@ -18,16 +18,16 @@ let rwStartedAt = null;
 
 (async () => {
   if (!window.supabase || !window.supabase.auth) return;
-const { data: { session } } = await window.supabase.auth.getSession();
+const ctx = window.CIPLE_EXAM_CONTEXT;
+if (!ctx || !ctx.userId) return;
 
-  if (!session) return;
+const { data } = await window.supabase
+  .from("exam_section_results")
+  .select("section, started_at")
+  .eq("user_id", ctx.userId)
+  .eq("exam_id", examId)
+  .eq("section", "rw_started");
 
-  const { data } = await window.supabase
-    .from("exam_section_results")
-    .select("section, started_at")
-    .eq("user_id", session.user.id)
-    .eq("exam_id", examId)
-    .eq("section", "rw_started");
 
   if (!data || !data[0] || !data[0].started_at) {
   const now = new Date().toISOString();
@@ -35,7 +35,7 @@ const { data: { session } } = await window.supabase.auth.getSession();
   await window.supabase
     .from("exam_section_results")
     .insert({
-      user_id: session.user.id,
+      user_id: ctx.userId,
       exam_id: examId,
       section: "rw_started",
       started_at: now
@@ -222,15 +222,24 @@ document.body.classList.add("is-submitting");
     submitBtn.disabled = true;
     submitBtn.textContent = "A avaliar… ⏳";
 
-    const { data: { session }, error: sessionError } =
-      await window.supabase.auth.getSession();
+    const ctx = window.CIPLE_EXAM_CONTEXT;
+if (!ctx || !ctx.userId) {
+  alert("Sessão não disponível. Atualize a página.");
+  submitBtn.disabled = false;
+  submitBtn.textContent = "Submeter Produção Escrita";
+  return;
+}
 
-    if (sessionError || !session) {
-      alert("No active session");
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Submeter Produção Escrita";
-      return;
-    }
+const { data: { session } } =
+  await window.supabase.auth.getSession();
+
+if (!session || !session.access_token) {
+  alert("Sessão expirada. Atualize a página.");
+  submitBtn.disabled = false;
+  submitBtn.textContent = "Submeter Produção Escrita";
+  return;
+}
+
 
     const payload = {
   exam_id: examId,

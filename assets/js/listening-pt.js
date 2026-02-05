@@ -34,12 +34,7 @@ function clamp01(n) {
   return n;
 }
 
-async function getUserOrThrow() {
-  const { data: { user }, error } = await window.supabase.auth.getUser();
-  if (error) throw new Error(error.message);
-  if (!user) throw new Error("No user");
-  return user;
-}
+
 
 async function replaceSectionRow({ userId, examId, section, resultJson }) {
   // Ensure single row per (user, exam, section) without relying on unique constraints
@@ -473,13 +468,17 @@ mount.addEventListener("click", (e) => {
       };
 
       // Store
-      const user = await getUserOrThrow();
-      await replaceSectionRow({
-        userId: user.id,
-        examId,
-        section: "listening",
-        resultJson
-      });
+     // Store
+const { userId } = window.CIPLE_EXAM_CONTEXT || {};
+if (!userId) throw new Error("No user context");
+
+await replaceSectionRow({
+  userId,
+  examId,
+  section: "listening",
+  resultJson
+});
+
 
       // UI: submitted
       clearInterval(timerHandle);

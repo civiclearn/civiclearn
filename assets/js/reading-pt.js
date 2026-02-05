@@ -325,30 +325,28 @@ return qIds.filter(id => taskAnswers[id]).length;
   }
 
   async function storeResult(resultJson) {
-    // Store in same table as writing/speaking (consistent with what you already built)
-    const { data: { user } } = await window.supabase.auth.getUser();
-    if (!user) throw new Error("No user");
+  const { userId } = window.CIPLE_EXAM_CONTEXT || {};
+  if (!userId) throw new Error("No user context");
 
-    // Upsert-like behavior: delete existing then insert, to avoid requiring unique constraints.
-    // If you already have a unique constraint on (user_id, exam_id, section), replace with upsert.
-    await window.supabase
-      .from("exam_section_results")
-      .delete()
-      .eq("user_id", user.id)
-      .eq("exam_id", examId)
-      .eq("section", "reading");
+  await window.supabase
+    .from("exam_section_results")
+    .delete()
+    .eq("user_id", userId)
+    .eq("exam_id", examId)
+    .eq("section", "reading");
 
-    const ins = await window.supabase
-      .from("exam_section_results")
-      .insert({
-        user_id: user.id,
-        exam_id: examId,
-        section: "reading",
-        result_json: resultJson
-      });
+  const ins = await window.supabase
+    .from("exam_section_results")
+    .insert({
+      user_id: userId,
+      exam_id: examId,
+      section: "reading",
+      result_json: resultJson
+    });
 
-    if (ins.error) throw ins.error;
-  }
+  if (ins.error) throw ins.error;
+}
+
 
   // ---------- timer ----------
   function tickTimer() {
@@ -419,20 +417,19 @@ if (params.get("reset") === "1") {
 }
 
 
-
 // --- START shared Reading+Writing timer (only once) ---
-const { data: { user } } = await window.supabase.auth.getUser();
-if (user) {
+const { userId } = window.CIPLE_EXAM_CONTEXT || {};
+if (userId) {
   const { data: existing } = await window.supabase
     .from("exam_section_results")
     .select("section")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("exam_id", examId)
     .eq("section", "rw_started");
 
   if (!existing || existing.length === 0) {
     await window.supabase.from("exam_section_results").insert({
-      user_id: user.id,
+      user_id: userId,
       exam_id: examId,
       section: "rw_started",
       started_at: new Date().toISOString()
@@ -440,6 +437,7 @@ if (user) {
   }
 }
 // --- END shared timer init ---
+
 
 
     const res = await fetch(DATA_URL, { cache: "no-store" });

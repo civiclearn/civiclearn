@@ -103,13 +103,22 @@ sessionStorage.setItem("speaking-exam", new URLSearchParams(location.search).get
     submitBtn.disabled = true;
     submitBtn.textContent = "A enviar…";
 
-    const { data: { session } } = await window.supabase.auth.getSession();
-    if (!session) {
-      alert("Sessão inválida");
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Submeter Produção Oral";
-      return;
-    }
+    const ctx = window.CIPLE_EXAM_CONTEXT;
+if (!ctx || !ctx.userId) {
+  alert("Sessão não disponível. Atualize a página.");
+  submitBtn.disabled = false;
+  submitBtn.textContent = "Submeter Produção Oral";
+  return;
+}
+
+const { data: { session } } = await window.supabase.auth.getSession();
+if (!session || !session.access_token) {
+  alert("Sessão expirada. Atualize a página.");
+  submitBtn.disabled = false;
+  submitBtn.textContent = "Submeter Produção Oral";
+  return;
+}
+
 
     const formData = new FormData();
     const examId = new URLSearchParams(location.search).get("exam") || "ciple-01";
