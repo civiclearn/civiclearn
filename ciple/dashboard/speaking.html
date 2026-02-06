@@ -160,16 +160,19 @@
         const promptDiv = document.createElement('div');
         promptDiv.className = 'speaking-prompt';
         
-        if (task.type === 'image_description' && task.media && task.media.image) {
-          promptDiv.innerHTML = `
-            <h3>Tarefa:</h3>
-            <p>${task.instructions}</p>
-            <div style="margin-top: 1rem; text-align: center;">
-              <img src="${task.media.image}" alt="Imagem para descrição" 
-                   style="max-width: 100%; border-radius: 8px; box-shadow: var(--shadow-lg);">
-            </div>
-          `;
-        } else if (task.type === 'free_speech') {
+       if (task.type === 'image_description' && task.media && task.media.image) {
+  // Try to load image with any common extension
+  const imagePath = task.media.image.replace(/\.(png|jpg|jpeg|gif|webp)$/i, '');
+  promptDiv.innerHTML = `
+    <h3>Tarefa:</h3>
+    <p>${task.instructions}</p>
+    <div style="margin-top: 1rem; text-align: center;">
+      <img src="${imagePath}.jpg" alt="Imagem para descrição" 
+           style="max-width: 100%; border-radius: 8px; box-shadow: var(--shadow-lg);"
+           onerror="this.onerror=null; this.src='${imagePath}.png';">
+    </div>
+  `;
+} else if (task.type === 'free_speech') {
           promptDiv.innerHTML = `
             <h3>Tarefa:</h3>
             <p style="font-size: 1.125rem; font-weight: 500;">${task.prompt}</p>
