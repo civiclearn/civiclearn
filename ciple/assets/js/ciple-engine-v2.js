@@ -226,10 +226,7 @@ async submitForEvaluation() {
     this.currentTest.result_id = result.attempt_id;
     this.saveTestState(this.currentExamId, this.currentTest);
     
-    // Trigger async evaluations (fire and forget)
-// Trigger async evaluations (fire and forget)
-// TODO: Build evaluation functions next
-// this.triggerAsyncEvaluations(result.attempt_id);
+this.triggerAsyncEvaluations(result.attempt_id);
 
 return result;
     

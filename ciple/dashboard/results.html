@@ -35,7 +35,7 @@
           --
         </div>
         <p style="font-size: 1.125rem; opacity: 0.9;" id="grade-label">
-          Carregando...
+          A calcular...
         </p>
       </div>
 
@@ -75,13 +75,15 @@
         <div class="question-block">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
             <h3 style="margin: 0;">✍️ Produção Escrita</h3>
-            <span style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);" id="writing-score">--%</span>
+            <span style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);" id="writing-score">
+              <span class="spinner" style="width: 20px; height: 20px;"></span>
+            </span>
           </div>
           <div style="font-size: 0.875rem; color: var(--text-gray);">
             Peso na nota final: <strong>22.5%</strong>
           </div>
           <div style="margin-top: 0.5rem; font-size: 0.875rem;" id="writing-detail">
-            <!-- Details will be inserted here -->
+            <span style="color: var(--warning-color);">⏳ A avaliar...</span>
           </div>
         </div>
 
@@ -89,13 +91,15 @@
         <div class="question-block">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
             <h3 style="margin: 0;">🗣️ Produção Oral</h3>
-            <span style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);" id="speaking-score">--%</span>
+            <span style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);" id="speaking-score">
+              <span class="spinner" style="width: 20px; height: 20px;"></span>
+            </span>
           </div>
           <div style="font-size: 0.875rem; color: var(--text-gray);">
             Peso na nota final: <strong>27.5%</strong>
           </div>
           <div style="margin-top: 0.5rem; font-size: 0.875rem;" id="speaking-detail">
-            <!-- Details will be inserted here -->
+            <span style="color: var(--warning-color);">⏳ A avaliar...</span>
           </div>
         </div>
       </div>
@@ -144,16 +148,11 @@
   <!-- Scripts -->
   <script src="/ciple/assets/js/ciple-engine-v2.js"></script>
   <script>
-    // ==========================================================================
-    // RESULTS PAGE LOGIC
-    // ==========================================================================
-    
     let attemptId = null;
     let examId = null;
+    let pollInterval = null;
     
-    // Initialize on page load
     window.addEventListener('DOMContentLoaded', async () => {
-      // Get attempt_id and exam from URL
       const urlParams = new URLSearchParams(window.location.search);
       attemptId = urlParams.get('attempt_id');
       examId = urlParams.get('exam') || 'ciple-04';
@@ -163,13 +162,9 @@
         return;
       }
       
-      // Fetch results from Supabase
       await fetchResults();
+      startPolling();
     });
-    
-    // ==========================================================================
-    // FETCH RESULTS FROM SUPABASE
-    // ==========================================================================
     
     async function fetchResults() {
       try {
@@ -190,13 +185,16 @@
         const data = await response.json();
         
         if (!data || data.length === 0) {
-          throw new Error('Nenhum resultado encontrado para este ID');
+          throw new Error('Nenhum resultado encontrado');
         }
         
         const result = data[0];
-        
-        // Display results
         displayResults(result);
+        
+        // Stop polling if both are complete
+        if (result.writing_status === 'complete' && result.speaking_status === 'complete') {
+          stopPolling();
+        }
         
       } catch (error) {
         console.error('Error fetching results:', error);
@@ -204,33 +202,9 @@
       }
     }
     
-    // ==========================================================================
-    // DISPLAY RESULTS
-    // ==========================================================================
-    
     function displayResults(result) {
-      // Hide loading, show results
       document.getElementById('loading-state').style.display = 'none';
       document.getElementById('results-container').style.display = 'block';
-      
-      // Overall Grade
-      const overallGrade = result.overall_grade || 0;
-      document.getElementById('overall-grade').textContent = overallGrade.toFixed(1);
-      
-      // Grade label
-      let gradeLabel = '';
-      if (overallGrade >= 85) {
-        gradeLabel = '🏆 Excelente';
-      } else if (overallGrade >= 70) {
-        gradeLabel = '✅ Muito Bom';
-      } else if (overallGrade >= 55) {
-        gradeLabel = '👍 Bom';
-      } else if (overallGrade >= 50) {
-        gradeLabel = '✓ Aprovado';
-      } else {
-        gradeLabel = '⚠️ Reprovado';
-      }
-      document.getElementById('grade-label').textContent = gradeLabel;
       
       // Reading
       const readingScore = result.reading_score || 0;
@@ -247,27 +221,53 @@
       `;
       
       // Writing
-      const writingScore = result.writing_score || 0;
-      document.getElementById('writing-score').textContent = writingScore.toFixed(0) + '%';
-      
-      if (result.writing_feedback) {
-        document.getElementById('writing-feedback-card').style.display = 'block';
-        document.getElementById('writing-feedback-content').innerHTML = formatFeedback(result.writing_feedback);
+      if (result.writing_status === 'complete' && result.writing_score !== null) {
+        document.getElementById('writing-score').textContent = result.writing_score.toFixed(0) + '%';
+        document.getElementById('writing-detail').innerHTML = `✅ Avaliação completa`;
+        
+        if (result.writing_feedback) {
+          document.getElementById('writing-feedback-card').style.display = 'block';
+          document.getElementById('writing-feedback-content').innerHTML = formatFeedback(result.writing_feedback);
+        }
+      } else if (result.writing_status === 'failed') {
+        document.getElementById('writing-score').textContent = '❌';
+        document.getElementById('writing-detail').innerHTML = `<span style="color: var(--error-color);">Erro na avaliação</span>`;
       }
       
       // Speaking
-      const speakingScore = result.speaking_score || 0;
-      document.getElementById('speaking-score').textContent = speakingScore.toFixed(0) + '%';
+      if (result.speaking_status === 'complete' && result.speaking_score !== null) {
+        document.getElementById('speaking-score').textContent = result.speaking_score.toFixed(0) + '%';
+        document.getElementById('speaking-detail').innerHTML = `✅ Avaliação completa`;
+        
+        if (result.speaking_feedback) {
+          document.getElementById('speaking-feedback-card').style.display = 'block';
+          document.getElementById('speaking-feedback-content').innerHTML = formatFeedback(result.speaking_feedback);
+        }
+      } else if (result.speaking_status === 'failed') {
+        document.getElementById('speaking-score').textContent = '❌';
+        document.getElementById('speaking-detail').innerHTML = `<span style="color: var(--error-color);">Erro na avaliação</span>`;
+      }
       
-      if (result.speaking_feedback) {
-        document.getElementById('speaking-feedback-card').style.display = 'block';
-        document.getElementById('speaking-feedback-content').innerHTML = formatFeedback(result.speaking_feedback);
+      // Overall Grade
+      if (result.overall_grade !== null) {
+        const overallGrade = result.overall_grade;
+        document.getElementById('overall-grade').textContent = overallGrade.toFixed(1);
+        
+        let gradeLabel = '';
+        if (overallGrade >= 85) {
+          gradeLabel = '🏆 Excelente';
+        } else if (overallGrade >= 70) {
+          gradeLabel = '✅ Muito Bom';
+        } else if (overallGrade >= 55) {
+          gradeLabel = '👍 Bom';
+        } else if (overallGrade >= 50) {
+          gradeLabel = '✓ Aprovado';
+        } else {
+          gradeLabel = '⚠️ Reprovado';
+        }
+        document.getElementById('grade-label').textContent = gradeLabel;
       }
     }
-    
-    // ==========================================================================
-    // FORMAT FEEDBACK
-    // ==========================================================================
     
     function formatFeedback(feedback) {
       if (typeof feedback === 'string') {
@@ -277,19 +277,17 @@
       if (typeof feedback === 'object') {
         let html = '';
         
-        // Handle writing feedback structure
         if (feedback.tasks && Array.isArray(feedback.tasks)) {
           feedback.tasks.forEach((task, index) => {
             html += `
               <div class="question-block">
                 <h4>Tarefa ${task.task_index || (index + 1)}</h4>
                 ${task.feedback ? `<p>${task.feedback}</p>` : ''}
-                ${task.score && task.score.raw ? `<p><strong>Pontuação:</strong> ${task.score.raw}/10</p>` : ''}
+                ${task.score?.raw ? `<p><strong>Pontuação:</strong> ${task.score.raw}/10</p>` : ''}
               </div>
             `;
           });
           
-          // Global feedback
           if (feedback.feedback) {
             html += `
               <div class="question-block">
@@ -298,33 +296,6 @@
               </div>
             `;
           }
-        }
-        // Handle speaking feedback structure
-        else if (feedback.tasks && Array.isArray(feedback.tasks)) {
-          feedback.tasks.forEach((task, index) => {
-            html += `
-              <div class="question-block">
-                <h4>Tarefa ${index + 1}</h4>
-                ${task.text ? `<p><strong>Transcrição:</strong> ${task.text}</p>` : ''}
-                ${task.feedback ? `<p>${task.feedback}</p>` : ''}
-                ${task.score && task.score.raw ? `<p><strong>Pontuação:</strong> ${task.score.raw}/10</p>` : ''}
-              </div>
-            `;
-          });
-          
-          // Global feedback
-          if (feedback.feedback) {
-            html += `
-              <div class="question-block">
-                <h4>Comentário Global</h4>
-                <p>${feedback.feedback}</p>
-              </div>
-            `;
-          }
-        }
-        else {
-          // Generic object display
-          html += `<pre style="white-space: pre-wrap; font-family: inherit;">${JSON.stringify(feedback, null, 2)}</pre>`;
         }
         
         return html;
@@ -333,23 +304,30 @@
       return '<p>Nenhum feedback disponível</p>';
     }
     
-    // ==========================================================================
-    // ERROR HANDLING
-    // ==========================================================================
+    function startPolling() {
+      pollInterval = setInterval(fetchResults, 5000); // Poll every 5 seconds
+    }
+    
+    function stopPolling() {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+    }
     
     function showError(message) {
       document.getElementById('loading-state').style.display = 'none';
       document.getElementById('error-state').style.display = 'block';
       document.getElementById('error-message').textContent = message;
+      stopPolling();
     }
-    
-    // ==========================================================================
-    // NAVIGATION
-    // ==========================================================================
     
     function goToDashboard() {
       window.location.href = 'index.html';
     }
+    
+    // Stop polling when user leaves page
+    window.addEventListener('beforeunload', stopPolling);
     
   </script>
 
