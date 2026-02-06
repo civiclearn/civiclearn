@@ -246,26 +246,37 @@
     // ==========================================================================
     
     function selectTest(examId) {
-      const testState = CIPLEEngine.getTestState(examId);
+  const testState = CIPLEEngine.getTestState(examId);
+  
+  if (testState && !testState.submitted) {
+    // Test in progress - ask what to do
+    const choice = confirm(
+      'Você já tem um teste em progresso.\n\n' +
+      'Clique OK para CONTINUAR de onde parou.\n' +
+      'Clique CANCELAR para RECOMEÇAR do início.'
+    );
+    
+    if (choice) {
+      // OK = Continue
+      continueTest();
+    } else {
+      // Cancel = Restart (but ask for confirmation first)
+      const confirmRestart = confirm(
+        'Tem a certeza que quer recomeçar?\n\n' +
+        'O progresso atual será PERDIDO.'
+      );
       
-      if (testState && !testState.submitted) {
-        // Test in progress
-        if (confirm(
-          'Você já tem um teste em progresso.\n\n' +
-          'Deseja continuar de onde parou ou começar um novo teste?'
-        )) {
-          continueTest();
-        } else {
-          if (confirm('Tem a certeza que quer recomeçar? O progresso atual será perdido.')) {
-            CIPLEEngine.clearTestData(examId);
-            startNewTest(examId);
-          }
-        }
-      } else {
-        // Start new test
+      if (confirmRestart) {
+        CIPLEEngine.clearTestData(examId);
         startNewTest(examId);
       }
+      // If they cancel the restart, do nothing (stay on dashboard)
     }
+  } else {
+    // No test in progress - start new test
+    startNewTest(examId);
+  }
+}
     
     function startNewTest(examId) {
       CIPLEEngine.init(examId);
