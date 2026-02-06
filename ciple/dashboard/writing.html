@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CIPLE - Produção Escrita</title>
-  <link rel="stylesheet" href="../assets/css/ciple-styles.css">
+  <link rel="stylesheet" href="/assets/css/ciple-styles.css">
 </head>
 <body>
 
@@ -60,14 +60,17 @@
   </div>
 
   <!-- Scripts -->
-  <script src="../assets/js/ciple-engine.js"></script>
+  <script src="/assets/js/ciple-engine.js"></script>
   <script>
     // ==========================================================================
     // WRITING TEST LOGIC
     // ==========================================================================
     
     let writingData = null;
-    const EXAM_ID = 'ciple-04';
+    
+    // Get exam ID from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const EXAM_ID = urlParams.get('exam') || 'ciple-04';
     
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', async () => {
@@ -75,8 +78,13 @@
         // Initialize engine
         CIPLEEngine.init(EXAM_ID);
         
-        // Load writing JSON
-        const response = await fetch('../data/ciple-04-writing.json');
+        // Load writing JSON (dynamic based on exam ID)
+        const response = await fetch(`/data/${EXAM_ID}-writing.json`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to load test data: ${response.status} ${response.statusText}`);
+        }
+        
         writingData = await response.json();
         
         // Render tasks
@@ -87,7 +95,7 @@
         
       } catch (error) {
         console.error('Error loading writing test:', error);
-        alert('Erro ao carregar o teste. Por favor, recarregue a página.');
+        alert('Erro ao carregar o teste. Por favor, recarregue a página.\n\nDetalhes: ' + error.message);
       }
     });
     
@@ -300,7 +308,7 @@
         'Agora vamos para a última secção: Produção Oral.'
       );
       
-      window.location.href = 'speaking.html';
+      window.location.href = `speaking.html?exam=${EXAM_ID}`;
     }
     
     // ==========================================================================
@@ -309,7 +317,7 @@
     
     function goBack() {
       if (confirm('Tem a certeza que quer voltar? O progresso está guardado.')) {
-        window.location.href = 'listening.html';
+        window.location.href = `listening.html?exam=${EXAM_ID}`;
       }
     }
     

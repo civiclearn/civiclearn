@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CIPLE - Painel de Testes</title>
-  <link rel="stylesheet" href="../assets/css/ciple-styles.css">
+  <link rel="stylesheet" href="/assets/css/ciple-styles.css">
 </head>
 <body>
 
@@ -113,18 +113,10 @@
       </div>
     </div>
 
-    <!-- Past Attempts -->
-    <div class="card" id="past-attempts-card" style="display: none;">
-      <h2 class="card-title">Tentativas Anteriores</h2>
-      <div id="past-attempts-list">
-        <!-- Past attempts will be listed here -->
-      </div>
-    </div>
-
   </div>
 
   <!-- Scripts -->
-  <script src="../assets/js/ciple-engine.js"></script>
+  <script src="/assets/js/ciple-engine.js"></script>
   <script>
     // ==========================================================================
     // DASHBOARD LOGIC
@@ -135,7 +127,6 @@
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', () => {
       checkTestProgress();
-      loadPastAttempts();
     });
     
     // ==========================================================================
@@ -278,7 +269,7 @@
     
     function startNewTest(examId) {
       CIPLEEngine.init(examId);
-      window.location.href = 'reading.html';
+      window.location.href = `reading.html?exam=${examId}`;
     }
     
     // ==========================================================================
@@ -294,16 +285,16 @@
       
       // Navigate to first incomplete section
       if (!sections.reading.completed) {
-        window.location.href = 'reading.html';
+        window.location.href = `reading.html?exam=${currentExamId}`;
       } else if (!sections.listening.completed) {
-        window.location.href = 'listening.html';
+        window.location.href = `listening.html?exam=${currentExamId}`;
       } else if (!sections.writing.completed) {
-        window.location.href = 'writing.html';
+        window.location.href = `writing.html?exam=${currentExamId}`;
       } else if (!sections.speaking.completed) {
-        window.location.href = 'speaking.html';
+        window.location.href = `speaking.html?exam=${currentExamId}`;
       } else {
         alert('Todas as secções estão completas! Por favor, submeta o teste.');
-        window.location.href = 'speaking.html';
+        window.location.href = `speaking.html?exam=${currentExamId}`;
       }
     }
     
@@ -320,21 +311,6 @@
       )) {
         CIPLEEngine.clearTestData(currentExamId);
         location.reload();
-      }
-    }
-    
-    // ==========================================================================
-    // LOAD PAST ATTEMPTS
-    // ==========================================================================
-    
-    async function loadPastAttempts() {
-      try {
-        // This would fetch from Supabase
-        // For now, we'll just hide it if there are no attempts
-        // TODO: Implement when backend is ready
-        
-      } catch (error) {
-        console.error('Error loading past attempts:', error);
       }
     }
     

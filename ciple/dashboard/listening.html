@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CIPLE - Compreensão do Oral</title>
-  <link rel="stylesheet" href="../assets/css/ciple-styles.css">
+  <link rel="stylesheet" href="/assets/css/ciple-styles.css">
 </head>
 <body>
 
@@ -60,14 +60,17 @@
   </div>
 
   <!-- Scripts -->
-  <script src="../assets/js/ciple-engine.js"></script>
+  <script src="/assets/js/ciple-engine.js"></script>
   <script>
     // ==========================================================================
     // LISTENING TEST LOGIC
     // ==========================================================================
     
     let listeningData = null;
-    const EXAM_ID = 'ciple-04';
+    
+    // Get exam ID from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const EXAM_ID = urlParams.get('exam') || 'ciple-04';
     
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', async () => {
@@ -75,8 +78,13 @@
         // Initialize engine
         CIPLEEngine.init(EXAM_ID);
         
-        // Load listening JSON
-        const response = await fetch('../data/ciple-04-listening.json');
+        // Load listening JSON (dynamic based on exam ID)
+        const response = await fetch(`/data/${EXAM_ID}-listening.json`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to load test data: ${response.status} ${response.statusText}`);
+        }
+        
         listeningData = await response.json();
         
         // Render tasks
@@ -87,7 +95,7 @@
         
       } catch (error) {
         console.error('Error loading listening test:', error);
-        alert('Erro ao carregar o teste. Por favor, recarregue a página.');
+        alert('Erro ao carregar o teste. Por favor, recarregue a página.\n\nDetalhes: ' + error.message);
       }
     });
     
@@ -156,7 +164,7 @@
                   type="radio" 
                   name="${question.id}" 
                   value="${option}"
-                  onchange="saveAnswer('${question.id}', '${option.replace(/'/g, "\\'")}')"
+                  onchange="saveAnswer('${question.id}', \`${option.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)"
                 >
                 <span>${option}</span>
               </label>
@@ -212,7 +220,7 @@
                   type="radio" 
                   name="${question.id}" 
                   value="${option}"
-                  onchange="saveAnswer('${question.id}', '${option.replace(/'/g, "\\'")}')"
+                  onchange="saveAnswer('${question.id}', \`${option.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)"
                 >
                 <span>${option}</span>
               </label>
@@ -299,8 +307,8 @@
           `Agora vamos para a Produção Escrita.`
         );
         
-        // Navigate to writing
-        window.location.href = 'writing.html';
+        // Navigate to writing (pass exam ID)
+        window.location.href = `writing.html?exam=${EXAM_ID}`;
       }, 500);
     }
     
@@ -310,7 +318,7 @@
     
     function goBack() {
       if (confirm('Tem a certeza que quer voltar? O progresso está guardado.')) {
-        window.location.href = 'reading.html';
+        window.location.href = `reading.html?exam=${EXAM_ID}`;
       }
     }
     

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CIPLE - Produção Oral</title>
-  <link rel="stylesheet" href="../assets/css/ciple-styles.css">
+  <link rel="stylesheet" href="/assets/css/ciple-styles.css">
 </head>
 <body>
 
@@ -64,14 +64,17 @@
   </div>
 
   <!-- Scripts -->
-  <script src="../assets/js/ciple-engine.js"></script>
+  <script src="/assets/js/ciple-engine.js"></script>
   <script>
     // ==========================================================================
     // SPEAKING TEST LOGIC
     // ==========================================================================
     
     let speakingData = null;
-    const EXAM_ID = 'ciple-04';
+    
+    // Get exam ID from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const EXAM_ID = urlParams.get('exam') || 'ciple-04';
     
     // Recording state
     let mediaRecorder = null;
@@ -86,8 +89,13 @@
         // Initialize engine
         CIPLEEngine.init(EXAM_ID);
         
-        // Load speaking JSON
-        const response = await fetch('../data/ciple-04-speaking.json');
+        // Load speaking JSON (dynamic based on exam ID)
+        const response = await fetch(`/data/${EXAM_ID}-speaking.json`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to load test data: ${response.status} ${response.statusText}`);
+        }
+        
         speakingData = await response.json();
         
         // Render tasks
@@ -101,7 +109,7 @@
         
       } catch (error) {
         console.error('Error loading speaking test:', error);
-        alert('Erro ao carregar o teste. Por favor, recarregue a página.');
+        alert('Erro ao carregar o teste. Por favor, recarregue a página.\n\nDetalhes: ' + error.message);
       }
     });
     
@@ -404,14 +412,14 @@
         
         hideLoading();
         
-        // Navigate to results
+        // Navigate to results (pass both attempt_id and exam_id)
         alert(
           'Teste Submetido com Sucesso!\n\n' +
           'O seu teste foi enviado para avaliação.\n' +
           'Agora vai ver os resultados.'
         );
         
-        window.location.href = `results.html?attempt_id=${result.attempt_id}`;
+        window.location.href = `results.html?attempt_id=${result.attempt_id}&exam=${EXAM_ID}`;
         
       } catch (error) {
         hideLoading();
@@ -430,7 +438,7 @@
     
     function goBack() {
       if (confirm('Tem a certeza que quer voltar? O progresso está guardado.')) {
-        window.location.href = 'writing.html';
+        window.location.href = `writing.html?exam=${EXAM_ID}`;
       }
     }
     

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CIPLE - Resultados</title>
-  <link rel="stylesheet" href="../assets/css/ciple-styles.css">
+  <link rel="stylesheet" href="/assets/css/ciple-styles.css">
 </head>
 <body>
 
@@ -142,19 +142,21 @@
   </div>
 
   <!-- Scripts -->
-  <script src="../assets/js/ciple-engine.js"></script>
+  <script src="/assets/js/ciple-engine.js"></script>
   <script>
     // ==========================================================================
     // RESULTS PAGE LOGIC
     // ==========================================================================
     
     let attemptId = null;
+    let examId = null;
     
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', async () => {
-      // Get attempt_id from URL
+      // Get attempt_id and exam from URL
       const urlParams = new URLSearchParams(window.location.search);
       attemptId = urlParams.get('attempt_id');
+      examId = urlParams.get('exam') || 'ciple-04';
       
       if (!attemptId) {
         showError('ID de tentativa não encontrado na URL');
@@ -275,18 +277,52 @@
       if (typeof feedback === 'object') {
         let html = '';
         
-        // Handle different feedback structures
-        if (feedback.tasks) {
+        // Handle writing feedback structure
+        if (feedback.tasks && Array.isArray(feedback.tasks)) {
+          feedback.tasks.forEach((task, index) => {
+            html += `
+              <div class="question-block">
+                <h4>Tarefa ${task.task_index || (index + 1)}</h4>
+                ${task.feedback ? `<p>${task.feedback}</p>` : ''}
+                ${task.score && task.score.raw ? `<p><strong>Pontuação:</strong> ${task.score.raw}/10</p>` : ''}
+              </div>
+            `;
+          });
+          
+          // Global feedback
+          if (feedback.feedback) {
+            html += `
+              <div class="question-block">
+                <h4>Comentário Global</h4>
+                <p>${feedback.feedback}</p>
+              </div>
+            `;
+          }
+        }
+        // Handle speaking feedback structure
+        else if (feedback.tasks && Array.isArray(feedback.tasks)) {
           feedback.tasks.forEach((task, index) => {
             html += `
               <div class="question-block">
                 <h4>Tarefa ${index + 1}</h4>
+                ${task.text ? `<p><strong>Transcrição:</strong> ${task.text}</p>` : ''}
                 ${task.feedback ? `<p>${task.feedback}</p>` : ''}
-                ${task.score ? `<p><strong>Pontuação:</strong> ${task.score}/100</p>` : ''}
+                ${task.score && task.score.raw ? `<p><strong>Pontuação:</strong> ${task.score.raw}/10</p>` : ''}
               </div>
             `;
           });
-        } else {
+          
+          // Global feedback
+          if (feedback.feedback) {
+            html += `
+              <div class="question-block">
+                <h4>Comentário Global</h4>
+                <p>${feedback.feedback}</p>
+              </div>
+            `;
+          }
+        }
+        else {
           // Generic object display
           html += `<pre style="white-space: pre-wrap; font-family: inherit;">${JSON.stringify(feedback, null, 2)}</pre>`;
         }
