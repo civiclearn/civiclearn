@@ -205,7 +205,7 @@ async submitForEvaluation() {
   
   try {
     // Call NEW submit-test function (fast, no AI)
-    const response = await fetch(`${this.SUPABASE_URL}/functions/v1/submit-test`, {
+    const response = await fetch(`https://htgliokekeaovdiafrgs.supabase.co/functions/v1/submit-test`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -227,9 +227,11 @@ async submitForEvaluation() {
     this.saveTestState(this.currentExamId, this.currentTest);
     
     // Trigger async evaluations (fire and forget)
-    this.triggerAsyncEvaluations(result.attempt_id);
-    
-    return result;
+// Trigger async evaluations (fire and forget)
+// TODO: Build evaluation functions next
+// this.triggerAsyncEvaluations(result.attempt_id);
+
+return result;
     
   } catch (error) {
     console.error('Submission error:', error);
@@ -242,7 +244,7 @@ triggerAsyncEvaluations(attemptId) {
   // These run in background, we don't wait for them
   
   // Trigger writing evaluation
-  fetch(`${this.SUPABASE_URL}/functions/v1/evaluate-writing`, {
+  fetch(`https://htgliokekeaovdiafrgs.supabase.co/functions/v1/evaluate-writing`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
