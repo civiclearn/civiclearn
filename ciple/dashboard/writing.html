@@ -1,90 +1,343 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <title>CIPLE – Produção escrita</title>
-
-  <!-- Unified exam stylesheet (same as Reading) -->
-  <link rel="stylesheet" href="/assets/css/ciple-exam.css">
-
-  <script>
-    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
-    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-  </script>
-  <script type="module" src="/assets/js/auth-guard-ciple.js"></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIPLE - Produção Escrita</title>
+  <link rel="stylesheet" href="../assets/css/ciple-styles.css">
 </head>
+<body>
 
-<body class="ciple-exam-page">
-
-<div class="ciple-exam-wrap single-column">
-
-  <!-- TOP BAR -->
-  <header class="ciple-exam-topbar">
-
-  <div class="exam-topbar-left">
-    <a href="/ciple/dashboard/index.html" class="back-dashboard">
-      ← Voltar ao painel
-    </a>
-
-    <div>
-      <h1 id="pageTitle">Produção escrita</h1>
-      <div class="muted" id="pageSub"></div>
+  <!-- Progress Header -->
+  <div class="test-header">
+    <div class="progress-container">
+      <div class="progress-info">
+        <span>Progresso do Teste</span>
+        <span id="progress-text">3/4 Secções</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 75%"></div>
+      </div>
     </div>
   </div>
 
-  <div class="ciple-exam-meta">
-    <!-- empty by design -->
+  <!-- Main Content -->
+  <div class="container">
+    
+    <!-- Instructions Card -->
+    <div class="card">
+      <h1 class="card-title">Produção Escrita</h1>
+      <p class="card-subtitle">
+        Complete as duas tarefas de escrita. 
+        Tempo sugerido: <strong>45 minutos</strong>
+      </p>
+      <div class="alert alert-info">
+        <strong>Instruções:</strong> Respeite os limites de palavras indicados. 
+        O seu texto será avaliado por IA segundo os critérios oficiais do CIPLE.
+      </div>
+    </div>
+
+    <!-- Tasks Container -->
+    <div id="tasks-container">
+      <!-- Tasks will be dynamically loaded here -->
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goBack()">
+        ← Voltar ao Oral
+      </button>
+      <button class="btn btn-primary btn-large" id="complete-btn" onclick="completeWriting()">
+        Completar Escrita →
+      </button>
+    </div>
+
   </div>
 
-</header>
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="spinner"></div>
+  </div>
 
+  <!-- Scripts -->
+  <script src="../assets/js/ciple-engine.js"></script>
+  <script>
+    // ==========================================================================
+    // WRITING TEST LOGIC
+    // ==========================================================================
+    
+    let writingData = null;
+    const EXAM_ID = 'ciple-04';
+    
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // Initialize engine
+        CIPLEEngine.init(EXAM_ID);
+        
+        // Load writing JSON
+        const response = await fetch('../data/ciple-04-writing.json');
+        writingData = await response.json();
+        
+        // Render tasks
+        renderTasks();
+        
+        // Update progress
+        updateProgress();
+        
+      } catch (error) {
+        console.error('Error loading writing test:', error);
+        alert('Erro ao carregar o teste. Por favor, recarregue a página.');
+      }
+    });
+    
+    // ==========================================================================
+    // RENDER TASKS
+    // ==========================================================================
+    
+    function renderTasks() {
+      const container = document.getElementById('tasks-container');
+      container.innerHTML = '';
+      
+      writingData.tasks.forEach((task, taskIndex) => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'card task-container';
+        
+        // Task Header
+        taskDiv.innerHTML = `
+          <div class="task-header">
+            <h2 class="task-title">${task.title}</h2>
+            <p class="task-instructions">${task.instructions}</p>
+          </div>
+        `;
+        
+        // Task Content
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'task-content';
+        
+        // Writing Prompt
+        const promptDiv = document.createElement('div');
+        promptDiv.className = 'writing-prompt';
+        
+        if (task.prompt.context) {
+          promptDiv.innerHTML += `
+            <div class="writing-context">${task.prompt.context}</div>
+          `;
+        }
+        
+        if (task.prompt.incoming_message) {
+          promptDiv.innerHTML += `
+            <div class="writing-message">${task.prompt.incoming_message}</div>
+          `;
+        }
+        
+        if (task.prompt.email_opening) {
+          promptDiv.innerHTML += `
+            <div class="writing-message">${task.prompt.email_opening}</div>
+          `;
+        }
+        
+        contentDiv.appendChild(promptDiv);
+        
+        // Word count constraints info
+        const constraintsDiv = document.createElement('div');
+        constraintsDiv.className = 'alert alert-warning';
+        constraintsDiv.innerHTML = `
+          <strong>Limites de palavras:</strong> 
+          Mínimo ${task.constraints.min_words} palavras, 
+          máximo ${task.constraints.max_words} palavras.
+        `;
+        contentDiv.appendChild(constraintsDiv);
+        
+        // Textarea
+        const textareaContainer = document.createElement('div');
+        textareaContainer.className = 'textarea-container';
+        
+        const textarea = document.createElement('textarea');
+        textarea.className = 'writing-textarea';
+        textarea.id = `textarea-${task.task_id}`;
+        textarea.placeholder = 'Escreva a sua resposta aqui...';
+        textarea.setAttribute('data-task-id', task.task_id);
+        textarea.setAttribute('data-min-words', task.constraints.min_words);
+        textarea.setAttribute('data-max-words', task.constraints.max_words);
+        
+        // Restore saved text
+        const savedText = CIPLEEngine.currentTest.sections.writing.responses[task.task_id];
+        if (savedText) {
+          textarea.value = savedText;
+        }
+        
+        // Word count tracking
+        textarea.addEventListener('input', (e) => {
+          updateWordCount(task.task_id);
+          saveText(task.task_id);
+        });
+        
+        textareaContainer.appendChild(textarea);
+        
+        // Word counter display
+        const wordCountDiv = document.createElement('div');
+        wordCountDiv.className = 'word-count';
+        wordCountDiv.id = `word-count-${task.task_id}`;
+        wordCountDiv.textContent = '0 palavras';
+        
+        textareaContainer.appendChild(wordCountDiv);
+        contentDiv.appendChild(textareaContainer);
+        
+        taskDiv.appendChild(contentDiv);
+        container.appendChild(taskDiv);
+        
+        // Initialize word count display
+        updateWordCount(task.task_id);
+      });
+    }
+    
+    // ==========================================================================
+    // WORD COUNT
+    // ==========================================================================
+    
+    function countWords(text) {
+      if (!text || text.trim() === '') return 0;
+      // Remove extra whitespace and count words
+      return text.trim().split(/\s+/).length;
+    }
+    
+    function updateWordCount(taskId) {
+      const textarea = document.getElementById(`textarea-${taskId}`);
+      const wordCountDiv = document.getElementById(`word-count-${taskId}`);
+      
+      if (!textarea || !wordCountDiv) return;
+      
+      const text = textarea.value;
+      const wordCount = countWords(text);
+      const minWords = parseInt(textarea.getAttribute('data-min-words'));
+      const maxWords = parseInt(textarea.getAttribute('data-max-words'));
+      
+      // Update display
+      wordCountDiv.textContent = `${wordCount} palavras`;
+      
+      // Update styling based on constraints
+      wordCountDiv.classList.remove('warning', 'error');
+      
+      if (wordCount < minWords) {
+        wordCountDiv.classList.add('warning');
+        wordCountDiv.textContent += ` (mínimo: ${minWords})`;
+      } else if (wordCount > maxWords) {
+        wordCountDiv.classList.add('error');
+        wordCountDiv.textContent += ` (máximo: ${maxWords})`;
+      }
+    }
+    
+    // ==========================================================================
+    // SAVE TEXT
+    // ==========================================================================
+    
+    function saveText(taskId) {
+      const textarea = document.getElementById(`textarea-${taskId}`);
+      if (!textarea) return;
+      
+      const text = textarea.value;
+      CIPLEEngine.saveWritingResponse(taskId, text);
+      
+      console.log('Writing saved:', taskId, `${countWords(text)} words`);
+    }
+    
+    // ==========================================================================
+    // COMPLETE WRITING SECTION
+    // ==========================================================================
+    
+    function completeWriting() {
+      // Validate all tasks
+      let allValid = true;
+      const validationErrors = [];
+      
+      writingData.tasks.forEach(task => {
+        const textarea = document.getElementById(`textarea-${task.task_id}`);
+        const text = textarea.value.trim();
+        const wordCount = countWords(text);
+        const minWords = task.constraints.min_words;
+        const maxWords = task.constraints.max_words;
+        
+        if (text === '') {
+          allValid = false;
+          validationErrors.push(`${task.title}: Nenhum texto foi escrito.`);
+        } else if (wordCount < minWords) {
+          allValid = false;
+          validationErrors.push(
+            `${task.title}: Texto muito curto (${wordCount} palavras, mínimo ${minWords}).`
+          );
+        } else if (wordCount > maxWords) {
+          allValid = false;
+          validationErrors.push(
+            `${task.title}: Texto muito longo (${wordCount} palavras, máximo ${maxWords}).`
+          );
+        }
+      });
+      
+      if (!allValid) {
+        alert(
+          'Por favor, corrija os seguintes problemas:\n\n' + 
+          validationErrors.join('\n')
+        );
+        return;
+      }
+      
+      // Confirm submission
+      if (!confirm(
+        'Tem a certeza que quer submeter as suas respostas?\n\n' +
+        'Os textos serão avaliados por IA segundo os critérios do CIPLE.'
+      )) {
+        return;
+      }
+      
+      // Mark as complete
+      CIPLEEngine.completeWritingSection();
+      
+      // Navigate to speaking
+      alert(
+        'Secção de Escrita Completa!\n\n' +
+        'Os seus textos foram guardados e serão avaliados no final.\n\n' +
+        'Agora vamos para a última secção: Produção Oral.'
+      );
+      
+      window.location.href = 'speaking.html';
+    }
+    
+    // ==========================================================================
+    // NAVIGATION
+    // ==========================================================================
+    
+    function goBack() {
+      if (confirm('Tem a certeza que quer voltar? O progresso está guardado.')) {
+        window.location.href = 'listening.html';
+      }
+    }
+    
+    // ==========================================================================
+    // PROGRESS UPDATE
+    // ==========================================================================
+    
+    function updateProgress() {
+      const progress = CIPLEEngine.getProgress();
+      document.getElementById('progress-text').textContent = 
+        `${progress.completed}/4 Secções`;
+      document.getElementById('progress-fill').style.width = 
+        `${progress.percentage}%`;
+    }
+    
+    // ==========================================================================
+    // LOADING OVERLAY
+    // ==========================================================================
+    
+    function showLoading() {
+      document.getElementById('loading-overlay').style.display = 'flex';
+    }
+    
+    function hideLoading() {
+      document.getElementById('loading-overlay').style.display = 'none';
+    }
+    
+  </script>
 
-  <!-- MAIN CONTENT -->
-  <main class="ciple-exam-main">
-    <section class="ciple-exam-card">
-
-      <!-- Writing section (JS-controlled) -->
-      <div class="ciple-section" data-section="writing">
-
-        <h2 id="writingTitle"></h2>
-
-        <div id="writingTasks"></div>
-
-        <div class="ciple-exam-actions" style="margin-top: 20px;">
-          <button id="submitWriting" class="btn">
-            Submeter Produção Escrita
-          </button>
-        </div>
-
-      </div>
-
-      <!-- Submitted state -->
-      <div id="ciple-writing-submitted" class="ciple-exam-note" hidden>
-        <h2>Produção escrita enviada</h2>
-
-        <p>
-          A sua produção escrita foi enviada para avaliação.
-        </p>
-
-        <p>
-          A avaliação pode demorar alguns minutos.
-          Os resultados estarão disponíveis na página de resultados.
-        </p>
-
-        <a href="/ciple/dashboard/results.html" class="btn" style="margin-top: 12px;">
-          Ver resultados
-        </a>
-      </div>
-
-    </section>
-  </main>
-
-</div>
-
-<script src="/assets/js/signout.js"></script>
-<script type="module" src="/assets/js/writing-pt.js"></script>
 </body>
 </html>

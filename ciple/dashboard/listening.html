@@ -1,103 +1,344 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <title>CIPLE – Compreensão do Oral</title>
-
-  <!-- Unified exam stylesheet -->
-  <link rel="stylesheet" href="/assets/css/ciple-exam.css">
-
-  <script src="/assets/js/supabase-bootstrap.js"></script>
-
-  <!-- IMPORTANT: module imports AFTER supabase-bootstrap -->
-  <script type="module">
-    import "/assets/js/auth-guard-ciple.js";
-    import "/assets/js/exam-bootstrap.js";
-    import "/assets/js/listening-pt.js";
-  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIPLE - Compreensão do Oral</title>
+  <link rel="stylesheet" href="../assets/css/ciple-styles.css">
 </head>
+<body>
 
-<body class="ciple-exam-page">
-
-<div class="ciple-exam-wrap single-column">
-
-  <!-- TOP BAR -->
-  <header class="ciple-exam-topbar">
-
-  <div class="exam-topbar-left">
-    <a href="/ciple/dashboard/index.html" class="back-dashboard">
-      ← Voltar ao painel
-    </a>
-
-    <div>
-      <h1 id="pageTitle">Compreensão do Oral</h1>
-      <p class="muted">
-        Ouça os áudios e responda. No final, a pontuação é calculada automaticamente.
-      </p>
+  <!-- Progress Header -->
+  <div class="test-header">
+    <div class="progress-container">
+      <div class="progress-info">
+        <span>Progresso do Teste</span>
+        <span id="progress-text">2/4 Secções</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 50%"></div>
+      </div>
     </div>
   </div>
 
-  <div class="ciple-exam-meta">
-    <div class="pill">
-      ⏱ <strong id="timerText">—</strong>
-    </div>
-  </div>
-</header>
-
-
-  <!-- MAIN CONTENT -->
-  <main class="ciple-exam-main">
-    <section class="ciple-exam-card task-card">
-
-      <!-- TASK HEADER -->
-      <div class="ciple-task-header">
-        <div class="muted" id="taskKicker">Tarefa</div>
-        <h2 id="taskTitle">—</h2>
-        <p class="muted" id="taskInstructions">—</p>
-      </div>
-
-      <!-- AUDIO -->
-      <div class="ciple-audio-box" id="audioBox" hidden>
-        <div class="ciple-audio-meta">
-          <span id="audioPlaysLeft">Reproduções restantes: —</span>
-          <span class="muted">
-            Dica: pode pausar e retomar sem gastar uma reprodução extra.
-          </span>
-        </div>
-
-        <audio id="audioEl" controls preload="metadata"></audio>
-      </div>
-
-      <!-- WARNINGS -->
-      <div id="warnBox" class="ciple-warn" hidden></div>
-
-      <!-- QUESTIONS -->
-      <div id="questionsMount"></div>
-
-      <!-- ACTIONS -->
-      <div class="ciple-exam-actions">
-        <button class="btn" id="submitBtn"></button>
-      </div>
-
-      <!-- STATUS -->
-      <div class="ciple-status-line" id="progressLine">—</div>
-
-    </section>
-
-    <!-- SUBMITTED -->
-    <div id="listening-submitted" class="ciple-exam-note" hidden>
-      <p><strong>Compreensão do oral enviada.</strong></p>
-      <p>
-        <a href="/ciple/dashboard/results.html">Ver resultados</a>
+  <!-- Main Content -->
+  <div class="container">
+    
+    <!-- Instructions Card -->
+    <div class="card">
+      <h1 class="card-title">Compreensão do Oral</h1>
+      <p class="card-subtitle">
+        Ouça atentamente os áudios e responda às questões. 
+        Tempo sugerido: <strong>35 minutos</strong>
       </p>
+      <div class="alert alert-info">
+        <strong>Instruções:</strong> Pode ouvir cada áudio quantas vezes quiser. 
+        As suas respostas são guardadas automaticamente.
+      </div>
     </div>
 
-  </main>
+    <!-- Tasks Container -->
+    <div id="tasks-container">
+      <!-- Tasks will be dynamically loaded here -->
+    </div>
 
-</div>
+    <!-- Navigation -->
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goBack()">
+        ← Voltar à Leitura
+      </button>
+      <button class="btn btn-primary btn-large" id="complete-btn" onclick="completeListening()">
+        Completar Oral →
+      </button>
+    </div>
 
-<script src="/assets/js/signout.js"></script>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../assets/js/ciple-engine.js"></script>
+  <script>
+    // ==========================================================================
+    // LISTENING TEST LOGIC
+    // ==========================================================================
+    
+    let listeningData = null;
+    const EXAM_ID = 'ciple-04';
+    
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // Initialize engine
+        CIPLEEngine.init(EXAM_ID);
+        
+        // Load listening JSON
+        const response = await fetch('../data/ciple-04-listening.json');
+        listeningData = await response.json();
+        
+        // Render tasks
+        renderTasks();
+        
+        // Update progress
+        updateProgress();
+        
+      } catch (error) {
+        console.error('Error loading listening test:', error);
+        alert('Erro ao carregar o teste. Por favor, recarregue a página.');
+      }
+    });
+    
+    // ==========================================================================
+    // RENDER TASKS
+    // ==========================================================================
+    
+    function renderTasks() {
+      const container = document.getElementById('tasks-container');
+      container.innerHTML = '';
+      
+      listeningData.tasks.forEach((task, taskIndex) => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'card task-container';
+        
+        // Task Header
+        taskDiv.innerHTML = `
+          <div class="task-header">
+            <h2 class="task-title">${task.title}</h2>
+            <p class="task-instructions">${task.instructions}</p>
+          </div>
+        `;
+        
+        // Audio Player
+        const audioDiv = document.createElement('div');
+        audioDiv.className = 'audio-container';
+        audioDiv.innerHTML = `
+          <audio controls class="audio-player" preload="metadata">
+            <source src="${task.content.audio}" type="audio/mpeg">
+            O seu navegador não suporta o elemento de áudio.
+          </audio>
+        `;
+        taskDiv.appendChild(audioDiv);
+        
+        // Render questions based on task type
+        if (task.type === 'single_audio_mcq') {
+          renderSingleAudioMCQ(taskDiv, task, taskIndex);
+        } else if (task.type === 'match_one') {
+          renderMatchOne(taskDiv, task, taskIndex);
+        }
+        
+        container.appendChild(taskDiv);
+      });
+    }
+    
+    // ==========================================================================
+    // RENDER: Single Audio MCQ (Tasks 1-10)
+    // ==========================================================================
+    
+    function renderSingleAudioMCQ(container, task, taskIndex) {
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'task-content';
+      
+      task.questions.forEach((question, qIndex) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-block';
+        
+        questionDiv.innerHTML = `
+          <div class="question-prompt">
+            ${question.prompt}
+          </div>
+          <div class="options-container">
+            ${question.options.map((option, optIndex) => `
+              <label class="option-button">
+                <input 
+                  type="radio" 
+                  name="${question.id}" 
+                  value="${option}"
+                  onchange="saveAnswer('${question.id}', '${option.replace(/'/g, "\\'")}')"
+                >
+                <span>${option}</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+        
+        contentDiv.appendChild(questionDiv);
+        
+        // Restore saved answer
+        const savedAnswer = CIPLEEngine.currentTest.sections.listening.answers[question.id];
+        if (savedAnswer) {
+          const radio = questionDiv.querySelector(`input[value="${savedAnswer}"]`);
+          if (radio) {
+            radio.checked = true;
+            radio.closest('.option-button').classList.add('selected');
+          }
+        }
+      });
+      
+      container.appendChild(contentDiv);
+    }
+    
+    // ==========================================================================
+    // RENDER: Match One (Task 11)
+    // ==========================================================================
+    
+    function renderMatchOne(container, task, taskIndex) {
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'task-content';
+      
+      // Instructions for matching task
+      const instructionDiv = document.createElement('div');
+      instructionDiv.className = 'alert alert-info';
+      instructionDiv.innerHTML = `
+        <strong>Instruções:</strong> Ouça o áudio e selecione o espaço de comunicação 
+        correspondente para cada situação.
+      `;
+      contentDiv.appendChild(instructionDiv);
+      
+      task.questions.forEach((question, qIndex) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-block';
+        
+        questionDiv.innerHTML = `
+          <div class="question-prompt">
+            ${question.prompt}
+          </div>
+          <div class="options-container">
+            ${task.content.options.map((option, optIndex) => `
+              <label class="option-button">
+                <input 
+                  type="radio" 
+                  name="${question.id}" 
+                  value="${option}"
+                  onchange="saveAnswer('${question.id}', '${option.replace(/'/g, "\\'")}')"
+                >
+                <span>${option}</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+        
+        contentDiv.appendChild(questionDiv);
+        
+        // Restore saved answer
+        const savedAnswer = CIPLEEngine.currentTest.sections.listening.answers[question.id];
+        if (savedAnswer) {
+          const radio = questionDiv.querySelector(`input[value="${savedAnswer}"]`);
+          if (radio) {
+            radio.checked = true;
+            radio.closest('.option-button').classList.add('selected');
+          }
+        }
+      });
+      
+      container.appendChild(contentDiv);
+    }
+    
+    // ==========================================================================
+    // SAVE ANSWER
+    // ==========================================================================
+    
+    function saveAnswer(questionId, selectedOption) {
+      // Update visual state
+      const radio = document.querySelector(`input[name="${questionId}"][value="${selectedOption}"]`);
+      if (radio) {
+        // Remove 'selected' class from all options in this question
+        document.querySelectorAll(`input[name="${questionId}"]`).forEach(r => {
+          r.closest('.option-button').classList.remove('selected');
+        });
+        
+        // Add 'selected' class to chosen option
+        radio.closest('.option-button').classList.add('selected');
+      }
+      
+      // Save to engine
+      CIPLEEngine.saveListeningAnswer(questionId, selectedOption);
+      
+      console.log('Answer saved:', questionId, selectedOption);
+    }
+    
+    // ==========================================================================
+    // COMPLETE LISTENING SECTION
+    // ==========================================================================
+    
+    function completeListening() {
+      // Count total questions
+      const totalQuestions = listeningData.tasks.reduce((sum, task) => 
+        sum + task.questions.length, 0
+      );
+      
+      const answeredCount = Object.keys(
+        CIPLEEngine.currentTest.sections.listening.answers
+      ).length;
+      
+      if (answeredCount < totalQuestions) {
+        const unanswered = totalQuestions - answeredCount;
+        if (!confirm(
+          `Ainda tem ${unanswered} pergunta(s) por responder.\n\n` +
+          `Tem a certeza que quer continuar?`
+        )) {
+          return;
+        }
+      }
+      
+      // Grade the section
+      showLoading();
+      
+      setTimeout(() => {
+        const result = CIPLEEngine.completeListeningSection(listeningData);
+        
+        hideLoading();
+        
+        // Show results
+        alert(
+          `Secção de Oral Completa!\n\n` +
+          `Pontuação: ${result.score}%\n` +
+          `Corretas: ${result.correctCount}/${result.totalQuestions}\n\n` +
+          `Agora vamos para a Produção Escrita.`
+        );
+        
+        // Navigate to writing
+        window.location.href = 'writing.html';
+      }, 500);
+    }
+    
+    // ==========================================================================
+    // NAVIGATION
+    // ==========================================================================
+    
+    function goBack() {
+      if (confirm('Tem a certeza que quer voltar? O progresso está guardado.')) {
+        window.location.href = 'reading.html';
+      }
+    }
+    
+    // ==========================================================================
+    // PROGRESS UPDATE
+    // ==========================================================================
+    
+    function updateProgress() {
+      const progress = CIPLEEngine.getProgress();
+      document.getElementById('progress-text').textContent = 
+        `${progress.completed}/4 Secções`;
+      document.getElementById('progress-fill').style.width = 
+        `${progress.percentage}%`;
+    }
+    
+    // ==========================================================================
+    // LOADING OVERLAY
+    // ==========================================================================
+    
+    function showLoading() {
+      document.getElementById('loading-overlay').style.display = 'flex';
+    }
+    
+    function hideLoading() {
+      document.getElementById('loading-overlay').style.display = 'none';
+    }
+    
+  </script>
+
 </body>
 </html>

@@ -1,74 +1,392 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CIPLE – Compreensão escrita</title>
-
-  <!-- Clean, dedicated exam stylesheet -->
-  <link rel="stylesheet" href="/assets/css/ciple-exam.css">
-
-  <script>
-    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
-    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-  </script>
-  <script type="module" src="/assets/js/auth-guard-ciple.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIPLE - Compreensão da Leitura</title>
+  <link rel="stylesheet" href="../assets/css/ciple-styles.css">
 </head>
-<body class="ciple-exam-page">
+<body>
 
-<div class="ciple-exam-wrap single-column">
-
-<header class="ciple-exam-topbar">
-
-  <div class="exam-topbar-left">
-    <a href="/ciple/dashboard/index.html" class="back-dashboard">
-      ← Voltar ao painel
-    </a>
-
-    <div>
-      <h1 id="pageTitle">Compreensão escrita</h1>
-      <div class="muted" id="pageSub"></div>
+  <!-- Progress Header -->
+  <div class="test-header">
+    <div class="progress-container">
+      <div class="progress-info">
+        <span>Progresso do Teste</span>
+        <span id="progress-text">1/4 Secções</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 25%"></div>
+      </div>
     </div>
   </div>
 
-
-    <div class="ciple-exam-meta">
-      <div class="pill">Tarefa: <strong id="taskCounter">–</strong></div>
-      <div class="pill">Tempo: <strong id="timer">—</strong></div>
+  <!-- Main Content -->
+  <div class="container">
+    
+    <!-- Instructions Card -->
+    <div class="card">
+      <h1 class="card-title">Compreensão da Leitura</h1>
+      <p class="card-subtitle">
+        Leia atentamente os textos e responda às questões. 
+        Tempo sugerido: <strong>45 minutos</strong>
+      </p>
+      <div class="alert alert-info">
+        <strong>Instruções:</strong> As suas respostas são guardadas automaticamente. 
+        Pode rever as suas respostas antes de submeter.
+      </div>
     </div>
-  </header>
 
-  <!-- MAIN CONTENT (SINGLE COLUMN) -->
-  <main class="ciple-exam-main">
-    <section class="ciple-exam-card" id="taskCard">
-      <!-- reading-pt.js renders EVERYTHING here -->
-    </section>
-  </main>
+    <!-- Tasks Container -->
+    <div id="tasks-container">
+      <!-- Tasks will be dynamically loaded here -->
+    </div>
 
-  <!-- NAVIGATION -->
-  <footer class="ciple-exam-nav">
-    <button class="btn" id="prevTask" style="display:none;">
-      Página anterior
-    </button>
-
-    <div class="nav-right">
-      <div class="inline-warn" id="warn"></div>
-      <button class="btn" id="nextTask">Próxima página</button>
-      <button class="btn" id="submitReading" style="display:none;">
-        Submeter Leitura
+    <!-- Navigation -->
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goToDashboard()">
+        ← Voltar ao Painel
+      </button>
+      <button class="btn btn-primary btn-large" id="complete-btn" onclick="completeReading()">
+        Completar Leitura →
       </button>
     </div>
-  </footer>
 
-  <!-- SENT NOTE -->
-  <div class="ciple-exam-note" id="sentNote" style="display:none;">
-    Enviado. Pode ver o resultado em
-    <a href="results.html">Resultados</a>.
   </div>
 
-</div>
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="spinner"></div>
+  </div>
 
-<script src="/assets/js/signout.js"></script>
-<script type="module" src="/assets/js/reading-pt.js"></script>
+  <!-- Scripts -->
+  <script src="../assets/js/ciple-engine.js"></script>
+  <script>
+    // ==========================================================================
+    // READING TEST LOGIC
+    // ==========================================================================
+    
+    let readingData = null;
+    const EXAM_ID = 'ciple-04';
+    
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // Initialize engine
+        CIPLEEngine.init(EXAM_ID);
+        
+        // Load reading JSON
+        const response = await fetch('../data/ciple-04-reading.json');
+        readingData = await response.json();
+        
+        // Render tasks
+        renderTasks();
+        
+        // Update progress
+        updateProgress();
+        
+      } catch (error) {
+        console.error('Error loading reading test:', error);
+        alert('Erro ao carregar o teste. Por favor, recarregue a página.');
+      }
+    });
+    
+    // ==========================================================================
+    // RENDER TASKS
+    // ==========================================================================
+    
+    function renderTasks() {
+      const container = document.getElementById('tasks-container');
+      container.innerHTML = '';
+      
+      readingData.tasks.forEach((task, taskIndex) => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'card task-container';
+        
+        // Task Header
+        taskDiv.innerHTML = `
+          <div class="task-header">
+            <h2 class="task-title">${task.title}</h2>
+            <p class="task-instructions">${task.instructions}</p>
+          </div>
+        `;
+        
+        // Render based on task type
+        if (task.type === 'match_one') {
+          renderMatchOneTask(taskDiv, task, taskIndex);
+        } else if (task.type === 'single_text_mcq') {
+          renderSingleTextMCQ(taskDiv, task, taskIndex);
+        } else if (task.type === 'long_text_mcq') {
+          renderLongTextMCQ(taskDiv, task, taskIndex);
+        }
+        
+        container.appendChild(taskDiv);
+      });
+    }
+    
+    // ==========================================================================
+    // RENDER: Match One (Reading Task 1)
+    // ==========================================================================
+    
+    function renderMatchOneTask(container, task, taskIndex) {
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'task-content';
+      
+      task.questions.forEach((question, qIndex) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-block';
+        
+        questionDiv.innerHTML = `
+          <div class="question-prompt">
+            ${qIndex + 1}. ${question.prompt}
+          </div>
+          <div class="options-container">
+            ${question.options.map(option => `
+              <label class="option-button">
+                <input 
+                  type="radio" 
+                  name="${question.id}" 
+                  value="${option.id}"
+                  onchange="saveAnswer('${question.id}', '${option.id}')"
+                >
+                <span>${option.text}</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+        
+        contentDiv.appendChild(questionDiv);
+        
+        // Restore saved answer
+        const savedAnswer = CIPLEEngine.currentTest.sections.reading.answers[question.id];
+        if (savedAnswer) {
+          const radio = questionDiv.querySelector(`input[value="${savedAnswer}"]`);
+          if (radio) {
+            radio.checked = true;
+            radio.closest('.option-button').classList.add('selected');
+          }
+        }
+      });
+      
+      container.appendChild(contentDiv);
+    }
+    
+    // ==========================================================================
+    // RENDER: Single Text MCQ (Reading Task 2)
+    // ==========================================================================
+    
+    function renderSingleTextMCQ(container, task, taskIndex) {
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'task-content';
+      
+      // Create a map of texts
+      const textsMap = {};
+      task.content.texts.forEach(t => {
+        textsMap[t.id] = t.text;
+      });
+      
+      task.questions.forEach((question, qIndex) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-block';
+        
+        // Show the text for this question
+        const textContent = textsMap[question.text_id];
+        
+        questionDiv.innerHTML = `
+          <div class="reading-text">
+            ${textContent.replace(/\n/g, '<br>')}
+          </div>
+          <div class="question-prompt">
+            ${qIndex + 1}. ${question.question}
+          </div>
+          <div class="options-container">
+            ${question.options.map(option => `
+              <label class="option-button">
+                <input 
+                  type="radio" 
+                  name="${question.id}" 
+                  value="${option.id}"
+                  onchange="saveAnswer('${question.id}', '${option.id}')"
+                >
+                <span>${option.text}</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+        
+        contentDiv.appendChild(questionDiv);
+        
+        // Restore saved answer
+        const savedAnswer = CIPLEEngine.currentTest.sections.reading.answers[question.id];
+        if (savedAnswer) {
+          const radio = questionDiv.querySelector(`input[value="${savedAnswer}"]`);
+          if (radio) {
+            radio.checked = true;
+            radio.closest('.option-button').classList.add('selected');
+          }
+        }
+      });
+      
+      container.appendChild(contentDiv);
+    }
+    
+    // ==========================================================================
+    // RENDER: Long Text MCQ (Reading Tasks 3 & 4)
+    // ==========================================================================
+    
+    function renderLongTextMCQ(container, task, taskIndex) {
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'task-content';
+      
+      // Show the main text once at the top
+      contentDiv.innerHTML = `
+        <div class="reading-text">
+          ${task.content.text.replace(/\n/g, '<br>')}
+        </div>
+      `;
+      
+      task.questions.forEach((question, qIndex) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-block';
+        
+        questionDiv.innerHTML = `
+          <div class="question-prompt">
+            ${qIndex + 1}. ${question.question}
+          </div>
+          <div class="options-container">
+            ${question.options.map(option => `
+              <label class="option-button">
+                <input 
+                  type="radio" 
+                  name="${question.id}" 
+                  value="${option.id}"
+                  onchange="saveAnswer('${question.id}', '${option.id}')"
+                >
+                <span>${option.text}</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+        
+        contentDiv.appendChild(questionDiv);
+        
+        // Restore saved answer
+        const savedAnswer = CIPLEEngine.currentTest.sections.reading.answers[question.id];
+        if (savedAnswer) {
+          const radio = questionDiv.querySelector(`input[value="${savedAnswer}"]`);
+          if (radio) {
+            radio.checked = true;
+            radio.closest('.option-button').classList.add('selected');
+          }
+        }
+      });
+      
+      container.appendChild(contentDiv);
+    }
+    
+    // ==========================================================================
+    // SAVE ANSWER
+    // ==========================================================================
+    
+    function saveAnswer(questionId, selectedOption) {
+      // Update visual state
+      const radio = document.querySelector(`input[name="${questionId}"][value="${selectedOption}"]`);
+      if (radio) {
+        // Remove 'selected' class from all options in this question
+        document.querySelectorAll(`input[name="${questionId}"]`).forEach(r => {
+          r.closest('.option-button').classList.remove('selected');
+        });
+        
+        // Add 'selected' class to chosen option
+        radio.closest('.option-button').classList.add('selected');
+      }
+      
+      // Save to engine
+      CIPLEEngine.saveReadingAnswer(questionId, selectedOption);
+      
+      console.log('Answer saved:', questionId, selectedOption);
+    }
+    
+    // ==========================================================================
+    // COMPLETE READING SECTION
+    // ==========================================================================
+    
+    function completeReading() {
+      // Check if all questions are answered
+      const totalQuestions = readingData.tasks.reduce((sum, task) => 
+        sum + task.questions.length, 0
+      );
+      
+      const answeredCount = Object.keys(
+        CIPLEEngine.currentTest.sections.reading.answers
+      ).length;
+      
+      if (answeredCount < totalQuestions) {
+        const unanswered = totalQuestions - answeredCount;
+        if (!confirm(
+          `Ainda tem ${unanswered} pergunta(s) por responder.\n\n` +
+          `Tem a certeza que quer continuar?`
+        )) {
+          return;
+        }
+      }
+      
+      // Grade the section
+      showLoading();
+      
+      setTimeout(() => {
+        const result = CIPLEEngine.completeReadingSection(readingData);
+        
+        hideLoading();
+        
+        // Show results
+        alert(
+          `Secção de Leitura Completa!\n\n` +
+          `Pontuação: ${result.score}%\n` +
+          `Corretas: ${result.correctCount}/${result.totalQuestions}\n\n` +
+          `Agora vamos para a Compreensão do Oral.`
+        );
+        
+        // Navigate to listening
+        window.location.href = 'listening.html';
+      }, 500);
+    }
+    
+    // ==========================================================================
+    // NAVIGATION
+    // ==========================================================================
+    
+    function goToDashboard() {
+      if (confirm('Tem a certeza que quer voltar? O progresso está guardado.')) {
+        window.location.href = 'index.html';
+      }
+    }
+    
+    // ==========================================================================
+    // PROGRESS UPDATE
+    // ==========================================================================
+    
+    function updateProgress() {
+      const progress = CIPLEEngine.getProgress();
+      document.getElementById('progress-text').textContent = 
+        `${progress.completed}/4 Secções`;
+      document.getElementById('progress-fill').style.width = 
+        `${progress.percentage}%`;
+    }
+    
+    // ==========================================================================
+    // LOADING OVERLAY
+    // ==========================================================================
+    
+    function showLoading() {
+      document.getElementById('loading-overlay').style.display = 'flex';
+    }
+    
+    function hideLoading() {
+      document.getElementById('loading-overlay').style.display = 'none';
+    }
+    
+  </script>
+
 </body>
 </html>

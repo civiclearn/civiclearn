@@ -1,94 +1,321 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <title>CIPLE – Resultado</title>
-
-  <!-- Results styles -->
-  <link rel="stylesheet" href="/assets/css/results.css">
-
-
-  <!-- Supabase + auth -->
-  <script src="/assets/js/supabase-bootstrap.js"></script>
-  <script type="module" src="/assets/js/auth-guard-ciple.js"></script>
-  
-
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIPLE - Resultados</title>
+  <link rel="stylesheet" href="../assets/css/ciple-styles.css">
 </head>
+<body>
 
-<body class="result-page">
+  <!-- Main Content -->
+  <div class="container">
+    
+    <!-- Header Card -->
+    <div class="card">
+      <h1 class="card-title">Resultados do Teste CIPLE</h1>
+      <p class="card-subtitle">
+        Avaliação completa do seu desempenho
+      </p>
+    </div>
 
-  <!-- Main content -->
-  <main class="app-main">
+    <!-- Loading State -->
+    <div id="loading-state" class="card" style="text-align: center; padding: 3rem;">
+      <div class="spinner" style="margin: 0 auto 1rem;"></div>
+      <p>A carregar os resultados...</p>
+    </div>
 
-<header class="page-header">
-  <div class="page-header-top">
-    <a href="/ciple/dashboard/index.html" class="back-dashboard">
-      ← Voltar ao painel
-    </a>
+    <!-- Results Container -->
+    <div id="results-container" style="display: none;">
+      
+      <!-- Overall Grade -->
+      <div class="card" style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+        <h2 style="margin-bottom: 0.5rem; color: white;">Classificação Final</h2>
+        <div style="font-size: 4rem; font-weight: 700; margin: 1rem 0;" id="overall-grade">
+          --
+        </div>
+        <p style="font-size: 1.125rem; opacity: 0.9;" id="grade-label">
+          Carregando...
+        </p>
+      </div>
+
+      <!-- Section Breakdown -->
+      <div class="card">
+        <h2 class="card-title">Desempenho por Secção</h2>
+        
+        <!-- Reading -->
+        <div class="question-block">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <h3 style="margin: 0;">📖 Compreensão da Leitura</h3>
+            <span style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);" id="reading-score">--%</span>
+          </div>
+          <div style="font-size: 0.875rem; color: var(--text-gray);">
+            Peso na nota final: <strong>22.5%</strong>
+          </div>
+          <div style="margin-top: 0.5rem; font-size: 0.875rem;" id="reading-detail">
+            <!-- Details will be inserted here -->
+          </div>
+        </div>
+
+        <!-- Listening -->
+        <div class="question-block">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <h3 style="margin: 0;">🎧 Compreensão do Oral</h3>
+            <span style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);" id="listening-score">--%</span>
+          </div>
+          <div style="font-size: 0.875rem; color: var(--text-gray);">
+            Peso na nota final: <strong>27.5%</strong>
+          </div>
+          <div style="margin-top: 0.5rem; font-size: 0.875rem;" id="listening-detail">
+            <!-- Details will be inserted here -->
+          </div>
+        </div>
+
+        <!-- Writing -->
+        <div class="question-block">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <h3 style="margin: 0;">✍️ Produção Escrita</h3>
+            <span style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);" id="writing-score">--%</span>
+          </div>
+          <div style="font-size: 0.875rem; color: var(--text-gray);">
+            Peso na nota final: <strong>22.5%</strong>
+          </div>
+          <div style="margin-top: 0.5rem; font-size: 0.875rem;" id="writing-detail">
+            <!-- Details will be inserted here -->
+          </div>
+        </div>
+
+        <!-- Speaking -->
+        <div class="question-block">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <h3 style="margin: 0;">🗣️ Produção Oral</h3>
+            <span style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);" id="speaking-score">--%</span>
+          </div>
+          <div style="font-size: 0.875rem; color: var(--text-gray);">
+            Peso na nota final: <strong>27.5%</strong>
+          </div>
+          <div style="margin-top: 0.5rem; font-size: 0.875rem;" id="speaking-detail">
+            <!-- Details will be inserted here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Writing Feedback -->
+      <div class="card" id="writing-feedback-card" style="display: none;">
+        <h2 class="card-title">Feedback da Escrita</h2>
+        <div id="writing-feedback-content">
+          <!-- Writing feedback will be inserted here -->
+        </div>
+      </div>
+
+      <!-- Speaking Feedback -->
+      <div class="card" id="speaking-feedback-card" style="display: none;">
+        <h2 class="card-title">Feedback da Produção Oral</h2>
+        <div id="speaking-feedback-content">
+          <!-- Speaking feedback will be inserted here -->
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" onclick="goToDashboard()">
+          ← Voltar ao Painel
+        </button>
+        <button class="btn btn-primary" onclick="window.print()">
+          🖨️ Imprimir Resultados
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Error State -->
+    <div id="error-state" class="card" style="display: none;">
+      <div class="alert alert-error">
+        <strong>Erro ao carregar resultados</strong>
+        <p id="error-message"></p>
+      </div>
+      <button class="btn btn-primary" onclick="location.reload()">
+        Tentar Novamente
+      </button>
+    </div>
+
   </div>
 
-  <h1 id="examTitle">Resultado da simulação</h1>
-  <p class="page-subtitle" id="examSubtitle"></p>
-</header>
-
-
-    <!-- ONE EXAM RESULT -->
-    <section class="ciple-result-card">
-      <ul class="ciple-result-list" id="cipleResults">
-        <!-- filled by JS -->
-      </ul>
-    </section>
-
-  </main>
-
-<script
-  id="reading-answers-adapter"
-  type="application/json">
-</script>
-<script>
-(function () {
-  // This runs BEFORE results.js
-  // It creates a flat Reading answers view, without touching results.js
-
-  window.__READING_ANSWERS_FLAT__ = null;
-
-  document.addEventListener("DOMContentLoaded", async () => {
-    if (!window.supabase) return;
-
-    const EXAM_ID =
-      new URLSearchParams(location.search).get("exam") || "ciple-01";
-
-    const { data: { user } } = await window.supabase.auth.getUser();
-    if (!user) return;
-
-    const { data } = await window.supabase
-      .from("exam_section_results")
-      .select("result_json")
-      .eq("user_id", user.id)
-      .eq("exam_id", EXAM_ID)
-      .eq("section", "reading")
-      .maybeSingle();
-
-    const nested = data?.result_json?.answers;
-    if (!nested) return;
-
-    const flat = {};
-    Object.values(nested).forEach(task =>
-      Object.assign(flat, task)
-    );
-
-    document.getElementById("reading-answers-adapter").textContent =
-      JSON.stringify(flat);
-
-    window.__READING_ANSWERS_FLAT__ = flat;
-  });
-})();
-</script>
-
- <script src="/assets/js/results.js" defer></script>
+  <!-- Scripts -->
+  <script src="../assets/js/ciple-engine.js"></script>
+  <script>
+    // ==========================================================================
+    // RESULTS PAGE LOGIC
+    // ==========================================================================
+    
+    let attemptId = null;
+    
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', async () => {
+      // Get attempt_id from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      attemptId = urlParams.get('attempt_id');
+      
+      if (!attemptId) {
+        showError('ID de tentativa não encontrado na URL');
+        return;
+      }
+      
+      // Fetch results from Supabase
+      await fetchResults();
+    });
+    
+    // ==========================================================================
+    // FETCH RESULTS FROM SUPABASE
+    // ==========================================================================
+    
+    async function fetchResults() {
+      try {
+        const response = await fetch(
+          `${CIPLEEngine.SUPABASE_URL}/rest/v1/ciple_attempts?id=eq.${attemptId}&select=*`,
+          {
+            headers: {
+              'apikey': CIPLEEngine.SUPABASE_KEY,
+              'Authorization': `Bearer ${CIPLEEngine.SUPABASE_KEY}`
+            }
+          }
+        );
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data || data.length === 0) {
+          throw new Error('Nenhum resultado encontrado para este ID');
+        }
+        
+        const result = data[0];
+        
+        // Display results
+        displayResults(result);
+        
+      } catch (error) {
+        console.error('Error fetching results:', error);
+        showError('Não foi possível carregar os resultados: ' + error.message);
+      }
+    }
+    
+    // ==========================================================================
+    // DISPLAY RESULTS
+    // ==========================================================================
+    
+    function displayResults(result) {
+      // Hide loading, show results
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('results-container').style.display = 'block';
+      
+      // Overall Grade
+      const overallGrade = result.overall_grade || 0;
+      document.getElementById('overall-grade').textContent = overallGrade.toFixed(1);
+      
+      // Grade label
+      let gradeLabel = '';
+      if (overallGrade >= 85) {
+        gradeLabel = '🏆 Excelente';
+      } else if (overallGrade >= 70) {
+        gradeLabel = '✅ Muito Bom';
+      } else if (overallGrade >= 55) {
+        gradeLabel = '👍 Bom';
+      } else if (overallGrade >= 50) {
+        gradeLabel = '✓ Aprovado';
+      } else {
+        gradeLabel = '⚠️ Reprovado';
+      }
+      document.getElementById('grade-label').textContent = gradeLabel;
+      
+      // Reading
+      const readingScore = result.reading_score || 0;
+      document.getElementById('reading-score').textContent = readingScore.toFixed(0) + '%';
+      document.getElementById('reading-detail').innerHTML = `
+        Corretas: ${result.reading_correct || 0} de ${result.reading_total || 0} questões
+      `;
+      
+      // Listening
+      const listeningScore = result.listening_score || 0;
+      document.getElementById('listening-score').textContent = listeningScore.toFixed(0) + '%';
+      document.getElementById('listening-detail').innerHTML = `
+        Corretas: ${result.listening_correct || 0} de ${result.listening_total || 0} questões
+      `;
+      
+      // Writing
+      const writingScore = result.writing_score || 0;
+      document.getElementById('writing-score').textContent = writingScore.toFixed(0) + '%';
+      
+      if (result.writing_feedback) {
+        document.getElementById('writing-feedback-card').style.display = 'block';
+        document.getElementById('writing-feedback-content').innerHTML = formatFeedback(result.writing_feedback);
+      }
+      
+      // Speaking
+      const speakingScore = result.speaking_score || 0;
+      document.getElementById('speaking-score').textContent = speakingScore.toFixed(0) + '%';
+      
+      if (result.speaking_feedback) {
+        document.getElementById('speaking-feedback-card').style.display = 'block';
+        document.getElementById('speaking-feedback-content').innerHTML = formatFeedback(result.speaking_feedback);
+      }
+    }
+    
+    // ==========================================================================
+    // FORMAT FEEDBACK
+    // ==========================================================================
+    
+    function formatFeedback(feedback) {
+      if (typeof feedback === 'string') {
+        return `<p>${feedback.replace(/\n/g, '<br>')}</p>`;
+      }
+      
+      if (typeof feedback === 'object') {
+        let html = '';
+        
+        // Handle different feedback structures
+        if (feedback.tasks) {
+          feedback.tasks.forEach((task, index) => {
+            html += `
+              <div class="question-block">
+                <h4>Tarefa ${index + 1}</h4>
+                ${task.feedback ? `<p>${task.feedback}</p>` : ''}
+                ${task.score ? `<p><strong>Pontuação:</strong> ${task.score}/100</p>` : ''}
+              </div>
+            `;
+          });
+        } else {
+          // Generic object display
+          html += `<pre style="white-space: pre-wrap; font-family: inherit;">${JSON.stringify(feedback, null, 2)}</pre>`;
+        }
+        
+        return html;
+      }
+      
+      return '<p>Nenhum feedback disponível</p>';
+    }
+    
+    // ==========================================================================
+    // ERROR HANDLING
+    // ==========================================================================
+    
+    function showError(message) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('error-state').style.display = 'block';
+      document.getElementById('error-message').textContent = message;
+    }
+    
+    // ==========================================================================
+    // NAVIGATION
+    // ==========================================================================
+    
+    function goToDashboard() {
+      window.location.href = 'index.html';
+    }
+    
+  </script>
 
 </body>
 </html>
