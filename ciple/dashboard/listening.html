@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CIPLE - Compreensão do Oral</title>
-  <link rel="stylesheet" href="/ciple/assets/css/ciple-styles.css">
+  <link rel="stylesheet" href="../assets/css/ciple-styles.css">
 </head>
 <body>
 
@@ -60,7 +60,7 @@
   </div>
 
   <!-- Scripts -->
-  <script src="/ciple/assets/js/ciple-engine.js"></script>
+  <script src="../assets/js/ciple-engine.js"></script>
   <script>
     // ==========================================================================
     // LISTENING TEST LOGIC
@@ -79,7 +79,7 @@
         CIPLEEngine.init(EXAM_ID);
         
         // Load listening JSON (dynamic based on exam ID)
-        const response = await fetch(`/ciple/data/${EXAM_ID}-listening.json`);
+        const response = await fetch(`../data/${EXAM_ID}-listening.json`);
         
         if (!response.ok) {
           throw new Error(`Failed to load test data: ${response.status} ${response.statusText}`);
@@ -153,22 +153,30 @@
         const questionDiv = document.createElement('div');
         questionDiv.className = 'question-block';
         
+        // FIXED: Use unique radio button name combining task_id and question_id
+        const uniqueName = `${task.task_id}-${question.id}`;
+        
         questionDiv.innerHTML = `
           <div class="question-prompt">
             ${question.prompt}
           </div>
           <div class="options-container">
-            ${question.options.map((option, optIndex) => `
-              <label class="option-button">
-                <input 
-                  type="radio" 
-                  name="${question.id}" 
-                  value="${option}"
-                  onchange="saveAnswer('${question.id}', \`${option.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)"
-                >
-                <span>${option}</span>
-              </label>
-            `).join('')}
+            ${question.options.map((option, optIndex) => {
+              // Escape special characters for HTML attributes
+              const escapedOption = option.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+              return `
+                <label class="option-button">
+                  <input 
+                    type="radio" 
+                    name="${uniqueName}" 
+                    value="${escapedOption}"
+                    data-question-id="${question.id}"
+                    onchange="saveAnswer('${question.id}', this.value)"
+                  >
+                  <span>${option}</span>
+                </label>
+              `;
+            }).join('')}
           </div>
         `;
         
@@ -177,11 +185,13 @@
         // Restore saved answer
         const savedAnswer = CIPLEEngine.currentTest.sections.listening.answers[question.id];
         if (savedAnswer) {
-          const radio = questionDiv.querySelector(`input[value="${savedAnswer}"]`);
-          if (radio) {
-            radio.checked = true;
-            radio.closest('.option-button').classList.add('selected');
-          }
+          const radios = questionDiv.querySelectorAll(`input[name="${uniqueName}"]`);
+          radios.forEach(radio => {
+            if (radio.value === savedAnswer) {
+              radio.checked = true;
+              radio.closest('.option-button').classList.add('selected');
+            }
+          });
         }
       });
       
@@ -209,22 +219,30 @@
         const questionDiv = document.createElement('div');
         questionDiv.className = 'question-block';
         
+        // FIXED: Use unique radio button name combining task_id and question_id
+        const uniqueName = `${task.task_id}-${question.id}`;
+        
         questionDiv.innerHTML = `
           <div class="question-prompt">
             ${question.prompt}
           </div>
           <div class="options-container">
-            ${task.content.options.map((option, optIndex) => `
-              <label class="option-button">
-                <input 
-                  type="radio" 
-                  name="${question.id}" 
-                  value="${option}"
-                  onchange="saveAnswer('${question.id}', \`${option.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)"
-                >
-                <span>${option}</span>
-              </label>
-            `).join('')}
+            ${task.content.options.map((option, optIndex) => {
+              // Escape special characters for HTML attributes
+              const escapedOption = option.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+              return `
+                <label class="option-button">
+                  <input 
+                    type="radio" 
+                    name="${uniqueName}" 
+                    value="${escapedOption}"
+                    data-question-id="${question.id}"
+                    onchange="saveAnswer('${question.id}', this.value)"
+                  >
+                  <span>${option}</span>
+                </label>
+              `;
+            }).join('')}
           </div>
         `;
         
@@ -233,11 +251,13 @@
         // Restore saved answer
         const savedAnswer = CIPLEEngine.currentTest.sections.listening.answers[question.id];
         if (savedAnswer) {
-          const radio = questionDiv.querySelector(`input[value="${savedAnswer}"]`);
-          if (radio) {
-            radio.checked = true;
-            radio.closest('.option-button').classList.add('selected');
-          }
+          const radios = questionDiv.querySelectorAll(`input[name="${uniqueName}"]`);
+          radios.forEach(radio => {
+            if (radio.value === savedAnswer) {
+              radio.checked = true;
+              radio.closest('.option-button').classList.add('selected');
+            }
+          });
         }
       });
       
@@ -245,23 +265,35 @@
     }
     
     // ==========================================================================
-    // SAVE ANSWER
+    // SAVE ANSWER - FIXED
     // ==========================================================================
     
     function saveAnswer(questionId, selectedOption) {
-      // Update visual state
-      const radio = document.querySelector(`input[name="${questionId}"][value="${selectedOption}"]`);
-      if (radio) {
-        // Remove 'selected' class from all options in this question
-        document.querySelectorAll(`input[name="${questionId}"]`).forEach(r => {
+      // Find the radio button that was just selected
+      const allRadios = document.querySelectorAll(`input[data-question-id="${questionId}"]`);
+      
+      // Find which one was selected
+      let selectedRadio = null;
+      allRadios.forEach(radio => {
+        if (radio.value === selectedOption && radio.checked) {
+          selectedRadio = radio;
+        }
+      });
+      
+      if (selectedRadio) {
+        // Get the unique name for this question's radio group
+        const uniqueName = selectedRadio.name;
+        
+        // Remove 'selected' class from all options in this question's group
+        document.querySelectorAll(`input[name="${uniqueName}"]`).forEach(r => {
           r.closest('.option-button').classList.remove('selected');
         });
         
         // Add 'selected' class to chosen option
-        radio.closest('.option-button').classList.add('selected');
+        selectedRadio.closest('.option-button').classList.add('selected');
       }
       
-      // Save to engine
+      // Save to engine (this stores by question.id, which is what we want)
       CIPLEEngine.saveListeningAnswer(questionId, selectedOption);
       
       console.log('Answer saved:', questionId, selectedOption);
