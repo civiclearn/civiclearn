@@ -205,7 +205,7 @@ async submitForEvaluation() {
   
   try {
     // Call NEW submit-test function (fast, no AI)
-    const response = await fetch(`https://htgliokekeaovdiafrgs.supabase.co/functions/v1/submit-test`, {
+    const response = await fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/submit-test', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -244,7 +244,7 @@ triggerAsyncEvaluations(attemptId) {
   // These run in background, we don't wait for them
   
   // Trigger writing evaluation
-  fetch(`https://htgliokekeaovdiafrgs.supabase.co/functions/v1/evaluate-writing`, {
+  fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/evaluate-writing', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -254,7 +254,7 @@ triggerAsyncEvaluations(attemptId) {
   }).catch(err => console.error('Writing evaluation trigger failed:', err));
   
   // Trigger speaking evaluation  
-  fetch(`${this.SUPABASE_URL}/functions/v1/evaluate-speaking`, {
+  fetch('${this.SUPABASE_URL}/functions/v1/evaluate-speaking', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
