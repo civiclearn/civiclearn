@@ -171,67 +171,96 @@ const CIPLEEngine = {
   // FINAL SUBMISSION TO SUPABASE
   // =============================================================================
   
-  async submitForEvaluation() {
-    if (this.currentTest.submitted) {
-      throw new Error('Test already submitted');
-    }
-    
-    // Prepare payload for Edge Function
-    const payload = {
-      exam_id: this.currentExamId,
-      user_id: this.getCurrentUserId(), // You'll need to implement this
-      sections: {
-        reading: {
-          answers: this.currentTest.sections.reading.answers,
-          score: this.currentTest.sections.reading.score,
-          correct_count: this.currentTest.sections.reading.correct_count,
-          total_questions: this.currentTest.sections.reading.total_questions
-        },
-        listening: {
-          answers: this.currentTest.sections.listening.answers,
-          score: this.currentTest.sections.listening.score,
-          correct_count: this.currentTest.sections.listening.correct_count,
-          total_questions: this.currentTest.sections.listening.total_questions
-        },
-        writing: {
-          responses: this.currentTest.sections.writing.responses
-        },
-        speaking: {
-          recordings: this.currentTest.sections.speaking.recordings
-        }
+async submitForEvaluation() {
+  if (this.currentTest.submitted) {
+    throw new Error('Test already submitted');
+  }
+  
+  // Prepare payload
+  const payload = {
+    exam_id: this.currentExamId,
+    user_id: this.getCurrentUserId(),
+    sections: {
+      reading: {
+        answers: this.currentTest.sections.reading.answers,
+        score: this.currentTest.sections.reading.score,
+        correct_count: this.currentTest.sections.reading.correct_count,
+        total_questions: this.currentTest.sections.reading.total_questions
       },
-      submitted_at: new Date().toISOString()
-    };
-    
-    try {
-      // Call Supabase Edge Function
-      const response = await fetch(`${this.SUPABASE_URL}/functions/v1/evaluate-ciple`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.SUPABASE_KEY}`
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Submission failed: ${response.statusText}`);
+      listening: {
+        answers: this.currentTest.sections.listening.answers,
+        score: this.currentTest.sections.listening.score,
+        correct_count: this.currentTest.sections.listening.correct_count,
+        total_questions: this.currentTest.sections.listening.total_questions
+      },
+      writing: {
+        responses: this.currentTest.sections.writing.responses
+      },
+      speaking: {
+        recordings: this.currentTest.sections.speaking.recordings
       }
-      
-      const result = await response.json();
-      
-      // Mark as submitted and store result ID
-      this.currentTest.submitted = true;
-      this.currentTest.result_id = result.attempt_id;
-      this.saveTestState(this.currentExamId, this.currentTest);
-      
-      return result;
-      
-    } catch (error) {
-      console.error('Submission error:', error);
-      throw error;
+    },
+    submitted_at: new Date().toISOString()
+  };
+  
+  try {
+    // Call NEW submit-test function (fast, no AI)
+    const response = await fetch(`${this.SUPABASE_URL}/functions/v1/submit-test`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.SUPABASE_KEY}`
+      },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Submission failed: ${errorData.error || response.statusText}`);
     }
-  },
+    
+    const result = await response.json();
+    
+    // Mark as submitted
+    this.currentTest.submitted = true;
+    this.currentTest.result_id = result.attempt_id;
+    this.saveTestState(this.currentExamId, this.currentTest);
+    
+    // Trigger async evaluations (fire and forget)
+    this.triggerAsyncEvaluations(result.attempt_id);
+    
+    return result;
+    
+  } catch (error) {
+    console.error('Submission error:', error);
+    throw error;
+  }
+},
+
+// Trigger background evaluations
+triggerAsyncEvaluations(attemptId) {
+  // These run in background, we don't wait for them
+  
+  // Trigger writing evaluation
+  fetch(`${this.SUPABASE_URL}/functions/v1/evaluate-writing`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.SUPABASE_KEY}`
+    },
+    body: JSON.stringify({ attempt_id: attemptId })
+  }).catch(err => console.error('Writing evaluation trigger failed:', err));
+  
+  // Trigger speaking evaluation  
+  fetch(`${this.SUPABASE_URL}/functions/v1/evaluate-speaking`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.SUPABASE_KEY}`
+    },
+    body: JSON.stringify({ attempt_id: attemptId })
+  }).catch(err => console.error('Speaking evaluation trigger failed:', err));
+},
   
   // =============================================================================
   // PROGRESS TRACKING
