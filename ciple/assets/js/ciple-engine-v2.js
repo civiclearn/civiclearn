@@ -251,7 +251,7 @@ triggerAsyncEvaluations(attemptId) {
   }).catch(err => console.error('Writing evaluation trigger failed:', err));
   
   // Trigger speaking evaluation  
-  fetch('${this.SUPABASE_URL}/functions/v1/evaluate-speaking', {
+  fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/evaluate-speaking', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
