@@ -25,44 +25,10 @@
         Escolha um teste para começar a praticar. Cada teste inclui as quatro componentes do exame oficial.
       </p>
 
-      <!-- Test Cards Grid -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
-        
-        <!-- Test 04 -->
-        <div class="card" style="background: var(--bg-light); cursor: pointer; transition: transform 0.2s;" 
-             onclick="selectTest('ciple-04')"
-             onmouseover="this.style.transform='translateY(-4px)'"
-             onmouseout="this.style.transform='translateY(0)'">
-          <h3 style="margin-bottom: 0.5rem; color: var(--primary-color);">Teste 04</h3>
-          <div style="font-size: 0.875rem; color: var(--text-gray); margin-bottom: 1rem;">
-            <div>📖 Compreensão da Leitura: 45 min</div>
-            <div>🎧 Compreensão do Oral: 35 min</div>
-            <div>✍️ Produção Escrita: 45 min</div>
-            <div>🗣️ Produção Oral: 15 min</div>
-          </div>
-          <div style="padding-top: 1rem; border-top: 1px solid var(--border-color);">
-            <span id="status-ciple-04" style="font-size: 0.875rem; color: var(--text-gray);">
-              Não iniciado
-            </span>
-          </div>
-        </div>
-
-        <!-- Placeholder for future tests -->
-        <div class="card" style="background: var(--bg-light); opacity: 0.5;">
-          <h3 style="margin-bottom: 0.5rem; color: var(--text-gray);">Teste 05</h3>
-          <div style="font-size: 0.875rem; color: var(--text-gray);">
-            Em breve...
-          </div>
-        </div>
-
-        <div class="card" style="background: var(--bg-light); opacity: 0.5;">
-          <h3 style="margin-bottom: 0.5rem; color: var(--text-gray);">Teste 06</h3>
-          <div style="font-size: 0.875rem; color: var(--text-gray);">
-            Em breve...
-          </div>
-        </div>
-
-      </div>
+  <!-- Test Cards Grid -->
+<div id="tests-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+  <!-- Test cards will be dynamically generated -->
+</div>
     </div>
 
     <!-- Test Progress (if test in progress) -->
@@ -126,9 +92,63 @@
     
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', () => {
-      checkTestProgress();
-    });
+  generateTestCards();
+  checkTestProgress();
+});
     
+	
+	// ==========================================================================
+// GENERATE TEST CARDS
+// ==========================================================================
+
+function generateTestCards() {
+  const grid = document.getElementById('tests-grid');
+  
+  // Generate cards for tests 01-20
+  for (let i = 1; i <= 20; i++) {
+    const testNum = String(i).padStart(2, '0');
+    const examId = `ciple-${testNum}`;
+    
+    // Check if test has JSON files (you'll need to update this)
+    const isAvailable = true; // All tests available
+    
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.cssText = `background: var(--bg-light); ${isAvailable ? 'cursor: pointer;' : 'opacity: 0.5;'} transition: transform 0.2s;`;
+    
+    if (isAvailable) {
+      card.onclick = () => selectTest(examId);
+      card.onmouseover = function() { this.style.transform = 'translateY(-4px)'; };
+      card.onmouseout = function() { this.style.transform = 'translateY(0)'; };
+    }
+    
+    card.innerHTML = `
+      <h3 style="margin-bottom: 0.5rem; color: ${isAvailable ? 'var(--primary-color)' : 'var(--text-gray)'};">
+        Teste ${testNum}
+      </h3>
+      ${isAvailable ? `
+      <div style="font-size: 0.875rem; color: var(--text-gray); margin-bottom: 1rem;">
+        <div>📖 Compreensão da Leitura: 45 min</div>
+        <div>🎧 Compreensão do Oral: 35 min</div>
+        <div>✍️ Produção Escrita: 45 min</div>
+        <div>🗣️ Produção Oral: 15 min</div>
+      </div>
+      <div style="padding-top: 1rem; border-top: 1px solid var(--border-color);">
+        <span id="status-${examId}" style="font-size: 0.875rem; color: var(--text-gray);">
+          Não iniciado
+        </span>
+      </div>
+      ` : `
+      <div style="font-size: 0.875rem; color: var(--text-gray);">
+        Em breve...
+      </div>
+      `}
+    `;
+    
+    grid.appendChild(card);
+  }
+}
+	
     // ==========================================================================
     // CHECK TEST PROGRESS
     // ==========================================================================
