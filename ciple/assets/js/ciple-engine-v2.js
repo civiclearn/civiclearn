@@ -63,34 +63,39 @@ const CIPLEEngine = {
     this.saveTestState(this.currentExamId, this.currentTest);
   },
   
-  completeReadingSection(readingData) {
-    // Auto-grade reading section
-    let correctCount = 0;
-    let totalQuestions = 0;
-    
-    readingData.tasks.forEach(task => {
-      task.questions.forEach(q => {
-        totalQuestions++;
-        const userAnswer = this.currentTest.sections.reading.answers[q.id];
-        const correctAnswer = q.correct_option;
-        
-        if (userAnswer === correctAnswer) {
-          correctCount++;
-        }
-      });
+ completeReadingSection(readingData) {
+  // Auto-grade reading section
+  let correctCount = 0;
+  let totalQuestions = 0;
+  
+  readingData.tasks.forEach(task => {
+    task.questions.forEach(q => {
+      totalQuestions++;
+      
+      // FIXED: Look for answer with task prefix
+      const answerKey = `${task.task_id}-${q.id}`;
+      const userAnswer = this.currentTest.sections.reading.answers[answerKey];
+      const correctAnswer = q.correct_option;
+      
+      console.log(`Checking ${answerKey}: user=${userAnswer}, correct=${correctAnswer}`);
+      
+      if (userAnswer === correctAnswer) {
+        correctCount++;
+      }
     });
-    
-    const score = Math.round((correctCount / totalQuestions) * 100);
-    
-    this.currentTest.sections.reading.completed = true;
-    this.currentTest.sections.reading.score = score;
-    this.currentTest.sections.reading.correct_count = correctCount;
-    this.currentTest.sections.reading.total_questions = totalQuestions;
-    
-    this.saveTestState(this.currentExamId, this.currentTest);
-    
-    return { score, correctCount, totalQuestions };
-  },
+  });
+  
+  const score = Math.round((correctCount / totalQuestions) * 100);
+  
+  this.currentTest.sections.reading.completed = true;
+  this.currentTest.sections.reading.score = score;
+  this.currentTest.sections.reading.correct_count = correctCount;
+  this.currentTest.sections.reading.total_questions = totalQuestions;
+  
+  this.saveTestState(this.currentExamId, this.currentTest);
+  
+  return { score, correctCount, totalQuestions };
+},
   
   // =============================================================================
   // LISTENING SECTION
