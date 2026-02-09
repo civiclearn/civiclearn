@@ -109,15 +109,14 @@ function generateTestCards() {
     const testNum = String(i).padStart(2, '0');
     const examId = `ciple-${testNum}`;
     
-    // Check if test has JSON files (you'll need to update this)
-    const isAvailable = true; // All tests available
+    // Check if test has JSON files
+    const isAvailable = (i === 4); // Update this when you add more tests
     
     const card = document.createElement('div');
     card.className = 'card';
-    card.style.cssText = `background: var(--bg-light); ${isAvailable ? 'cursor: pointer;' : 'opacity: 0.5;'} transition: transform 0.2s;`;
+    card.style.cssText = `background: var(--bg-light); transition: transform 0.2s; ${!isAvailable ? 'opacity: 0.5;' : ''}`;
     
     if (isAvailable) {
-      card.onclick = () => selectTest(examId);
       card.onmouseover = function() { this.style.transform = 'translateY(-4px)'; };
       card.onmouseout = function() { this.style.transform = 'translateY(0)'; };
     }
@@ -134,9 +133,14 @@ function generateTestCards() {
         <div>🗣️ Produção Oral: 15 min</div>
       </div>
       <div style="padding-top: 1rem; border-top: 1px solid var(--border-color);">
-        <span id="status-${examId}" style="font-size: 0.875rem; color: var(--text-gray);">
+        <div id="status-${examId}" style="font-size: 0.875rem; color: var(--text-gray); margin-bottom: 1rem;">
           Não iniciado
-        </span>
+        </div>
+        <div id="buttons-${examId}">
+          <button class="btn btn-primary" onclick="selectTest('${examId}')" style="width: 100%;">
+            Iniciar Teste ${testNum}
+          </button>
+        </div>
       </div>
       ` : `
       <div style="font-size: 0.875rem; color: var(--text-gray);">
@@ -149,118 +153,141 @@ function generateTestCards() {
   }
 }
 	
-    // ==========================================================================
-    // CHECK TEST PROGRESS
-    // ==========================================================================
+// ==========================================================================
+// CHECK TEST PROGRESS
+// ==========================================================================
+
+function checkTestProgress() {
+  const tests = ['ciple-04']; // Add more test IDs as you create them
+  
+  tests.forEach(examId => {
+    const testState = CIPLEEngine.getTestState(examId);
     
-    function checkTestProgress() {
-      // Check for test in progress
-      const tests = ['ciple-04'];
+    if (testState) {
+      const progress = calculateProgress(testState);
+      const statusEl = document.getElementById(`status-${examId}`);
+      const buttonsEl = document.getElementById(`buttons-${examId}`);
       
-      tests.forEach(examId => {
-        const testState = CIPLEEngine.getTestState(examId);
-        
-        if (testState) {
-          const progress = calculateProgress(testState);
+      if (statusEl && buttonsEl) {
+        if (testState.submitted && testState.result_id) {
+          // Test is complete - show results + redo buttons
+          statusEl.innerHTML = `
+            <div style="color: var(--success-color); font-weight: 600;">✅ Completo</div>
+          `;
           
-          // Update status badge
-          const statusEl = document.getElementById(`status-${examId}`);
-          if (statusEl) {
-            if (testState.submitted) {
-              statusEl.textContent = '✅ Completo';
-              statusEl.style.color = 'var(--success-color)';
-            } else if (progress.completed > 0) {
-              statusEl.textContent = `🔄 Em progresso (${progress.completed}/4 secções)`;
-              statusEl.style.color = 'var(--warning-color)';
-            }
-          }
+          buttonsEl.innerHTML = `
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button class="btn btn-primary" onclick="viewResults('${examId}', '${testState.result_id}')" style="flex: 1; min-width: 140px;">
+                📊 Ver Resultados
+              </button>
+              <button class="btn btn-secondary" onclick="redoTest('${examId}')" style="flex: 1; min-width: 140px;">
+                🔄 Refazer
+              </button>
+            </div>
+          `;
           
-          // Show progress card if test is in progress
-          if (!testState.submitted && progress.completed > 0) {
-            currentExamId = examId;
-            showProgressCard(examId, testState, progress);
-          }
+        } else if (progress.completed > 0) {
+          // Test in progress
+          statusEl.innerHTML = `
+            <div style="color: var(--warning-color); font-weight: 600;">🔄 Em progresso</div>
+            <div style="font-size: 0.875rem; color: var(--text-gray);">${progress.completed}/4 secções</div>
+          `;
+          
+          buttonsEl.innerHTML = `
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button class="btn btn-primary" onclick="continueTest()" style="flex: 1; min-width: 140px;">
+                Continuar →
+              </button>
+              <button class="btn btn-secondary" onclick="redoTest('${examId}')" style="flex: 1; min-width: 140px;">
+                ↻ Recomeçar
+              </button>
+            </div>
+          `;
+          
+          currentExamId = examId;
+          showProgressCard(examId, testState, progress);
         }
-      });
+      }
     }
-    
-    function calculateProgress(testState) {
-      const sections = testState.sections;
-      const completed = [
-        sections.reading.completed,
-        sections.listening.completed,
-        sections.writing.completed,
-        sections.speaking.completed
-      ].filter(Boolean).length;
-      
-      return {
-        completed: completed,
-        total: 4,
-        percentage: Math.round((completed / 4) * 100)
-      };
-    }
-    
-    function showProgressCard(examId, testState, progress) {
-      const card = document.getElementById('progress-card');
-      const info = document.getElementById('progress-info');
-      
-      const sections = testState.sections;
-      
-      info.innerHTML = `
-        <div class="alert alert-info">
-          <strong>Teste ${examId.replace('ciple-', '')}</strong> em progresso
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
-          <div class="question-block">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span style="font-size: 1.5rem;">${sections.reading.completed ? '✅' : '⏸️'}</span>
-              <div>
-                <div style="font-weight: 500;">Leitura</div>
-                <div style="font-size: 0.875rem; color: var(--text-gray);">
-                  ${sections.reading.completed ? `${sections.reading.score}%` : 'Não iniciado'}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="question-block">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span style="font-size: 1.5rem;">${sections.listening.completed ? '✅' : '⏸️'}</span>
-              <div>
-                <div style="font-weight: 500;">Oral</div>
-                <div style="font-size: 0.875rem; color: var(--text-gray);">
-                  ${sections.listening.completed ? `${sections.listening.score}%` : 'Não iniciado'}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="question-block">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span style="font-size: 1.5rem;">${sections.writing.completed ? '✅' : '⏸️'}</span>
-              <div>
-                <div style="font-weight: 500;">Escrita</div>
-                <div style="font-size: 0.875rem; color: var(--text-gray);">
-                  ${sections.writing.completed ? 'Completo' : 'Não iniciado'}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="question-block">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span style="font-size: 1.5rem;">${sections.speaking.completed ? '✅' : '⏸️'}</span>
-              <div>
-                <div style="font-weight: 500;">Produção Oral</div>
-                <div style="font-size: 0.875rem; color: var(--text-gray);">
-                  ${sections.speaking.completed ? 'Completo' : 'Não iniciado'}
-                </div>
-              </div>
+  });
+}
+
+function calculateProgress(testState) {
+  const sections = testState.sections;
+  const completed = [
+    sections.reading.completed,
+    sections.listening.completed,
+    sections.writing.completed,
+    sections.speaking.completed
+  ].filter(Boolean).length;
+  
+  return {
+    completed: completed,
+    total: 4,
+    percentage: Math.round((completed / 4) * 100)
+  };
+}
+
+function showProgressCard(examId, testState, progress) {
+  const card = document.getElementById('progress-card');
+  const info = document.getElementById('progress-info');
+  
+  const sections = testState.sections;
+  
+  info.innerHTML = `
+    <div class="alert alert-info">
+      <strong>Teste ${examId.replace('ciple-', '')}</strong> em progresso
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minimin(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+      <div class="question-block">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.5rem;">${sections.reading.completed ? '✅' : '⏸️'}</span>
+          <div>
+            <div style="font-weight: 500;">Leitura</div>
+            <div style="font-size: 0.875rem; color: var(--text-gray);">
+              ${sections.reading.completed ? `${sections.reading.score}%` : 'Não iniciado'}
             </div>
           </div>
         </div>
-      `;
-      
-      card.style.display = 'block';
-    }
-    
+      </div>
+      <div class="question-block">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.5rem;">${sections.listening.completed ? '✅' : '⏸️'}</span>
+          <div>
+            <div style="font-weight: 500;">Oral</div>
+            <div style="font-size: 0.875rem; color: var(--text-gray);">
+              ${sections.listening.completed ? `${sections.listening.score}%` : 'Não iniciado'}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="question-block">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.5rem;">${sections.writing.completed ? '✅' : '⏸️'}</span>
+          <div>
+            <div style="font-weight: 500;">Escrita</div>
+            <div style="font-size: 0.875rem; color: var(--text-gray);">
+              ${sections.writing.completed ? 'Completo' : 'Não iniciado'}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="question-block">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.5rem;">${sections.speaking.completed ? '✅' : '⏸️'}</span>
+          <div>
+            <div style="font-weight: 500;">Produção Oral</div>
+            <div style="font-size: 0.875rem; color: var(--text-gray);">
+              ${sections.speaking.completed ? 'Completo' : 'Não iniciado'}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  card.style.display = 'block';
+}
     // ==========================================================================
     // SELECT TEST
     // ==========================================================================
@@ -344,6 +371,22 @@ function generateTestCards() {
         location.reload();
       }
     }
+	
+	// View results for completed test
+function viewResults(examId, attemptId) {
+  window.location.href = `results.html?attempt_id=${attemptId}&exam=${examId}`;
+}
+
+// Redo a test (with confirmation)
+function redoTest(examId) {
+  if (confirm(
+    'Tem a certeza que quer refazer o teste?\n\n' +
+    'O teste anterior ficará guardado, mas será substituído pelo novo.'
+  )) {
+    CIPLEEngine.clearTestData(examId);
+    startNewTest(examId);
+  }
+}
     
   </script>
 
