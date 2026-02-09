@@ -248,25 +248,40 @@
         document.getElementById('speaking-detail').innerHTML = `<span style="color: var(--error-color);">Erro na avaliação</span>`;
       }
       
-      // Overall Grade
-      if (result.overall_grade !== null) {
-        const overallGrade = result.overall_grade;
-        document.getElementById('overall-grade').textContent = overallGrade.toFixed(1);
-        
-        let gradeLabel = '';
-        if (overallGrade >= 85) {
-          gradeLabel = '🏆 Excelente';
-        } else if (overallGrade >= 70) {
-          gradeLabel = '✅ Muito Bom';
-        } else if (overallGrade >= 55) {
-          gradeLabel = '👍 Bom';
-        } else if (overallGrade >= 50) {
-          gradeLabel = '✓ Aprovado';
-        } else {
-          gradeLabel = '⚠️ Reprovado';
-        }
-        document.getElementById('grade-label').textContent = gradeLabel;
-      }
+    // Overall Grade - Calculate client-side
+const reading = Number(result.reading_score) || 0;
+const listening = Number(result.listening_score) || 0;
+const writing = Number(result.writing_score) || 0;
+const speaking = Number(result.speaking_score) || 0;
+
+// Only calculate if we have all 4 scores (not null)
+if (result.reading_score !== null && result.listening_score !== null &&
+    result.writing_score !== null && result.speaking_score !== null) {
+  
+  const overallGrade = (reading * 0.225) + (writing * 0.225) + 
+                       (listening * 0.275) + (speaking * 0.275);
+  
+  document.getElementById('overall-grade').textContent = overallGrade.toFixed(1);
+  
+  let gradeLabel = '';
+  if (overallGrade >= 85) {
+    gradeLabel = '🏆 Excelente';
+  } else if (overallGrade >= 70) {
+    gradeLabel = '✅ Muito Bom';
+  } else if (overallGrade >= 55) {
+    gradeLabel = '👍 Bom';
+  } else if (overallGrade >= 50) {
+    gradeLabel = '✓ Aprovado';
+  } else {
+    gradeLabel = '⚠️ Reprovado';
+  }
+  document.getElementById('grade-label').textContent = gradeLabel;
+  
+} else {
+  // Still waiting for some scores
+  document.getElementById('overall-grade').textContent = '--';
+  document.getElementById('grade-label').textContent = 'A calcular...';
+}
     }
     
     function formatFeedback(feedback) {
