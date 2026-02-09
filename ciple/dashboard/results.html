@@ -205,6 +205,25 @@
     function displayResults(result) {
       document.getElementById('loading-state').style.display = 'none';
       document.getElementById('results-container').style.display = 'block';
+	  
+	    // ========================================================================
+  // UPDATE LOCALSTORAGE WITH COMPLETE RESULTS FROM SUPABASE
+  // ========================================================================
+  const testState = CIPLEEngine.getTestState(examId) || CIPLEEngine.createNewTestState(examId);
+  testState.sections.reading.score = Number(result.reading_score) || 0;
+  testState.sections.reading.correct_count = result.reading_correct || 0;
+  testState.sections.reading.total_questions = result.reading_total || 0;
+  testState.sections.listening.score = Number(result.listening_score) || 0;
+  testState.sections.listening.correct_count = result.listening_correct || 0;
+  testState.sections.listening.total_questions = result.listening_total || 0;
+  testState.sections.writing.score = Number(result.writing_score) || 0;
+  testState.sections.speaking.score = Number(result.speaking_score) || 0;
+  testState.submitted = true;
+  testState.result_id = result.id;
+  CIPLEEngine.saveTestState(examId, testState);
+  console.log('✅ LocalStorage updated with complete results');
+	  
+	  
       
       // Reading
       const readingScore = result.reading_score || 0;
