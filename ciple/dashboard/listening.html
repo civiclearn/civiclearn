@@ -202,67 +202,93 @@
     // RENDER: Match One (Task 11)
     // ==========================================================================
     
-    function renderMatchOne(container, task, taskIndex) {
-      const contentDiv = document.createElement('div');
-      contentDiv.className = 'task-content';
-      
-      // Instructions for matching task
-      const instructionDiv = document.createElement('div');
-      instructionDiv.className = 'alert alert-info';
-      instructionDiv.innerHTML = `
-        <strong>Instruções:</strong> Ouça o áudio e selecione o espaço de comunicação 
-        correspondente para cada situação.
-      `;
-      contentDiv.appendChild(instructionDiv);
-      
-      task.questions.forEach((question, qIndex) => {
-        const questionDiv = document.createElement('div');
-        questionDiv.className = 'question-block';
-        
-        // FIXED: Use unique radio button name combining task_id and question_id
-        const uniqueName = `${task.task_id}-${question.id}`;
-        
-        questionDiv.innerHTML = `
-          <div class="question-prompt">
-            ${question.prompt}
-          </div>
-          <div class="options-container">
-            ${task.content.options.map((option, optIndex) => {
-              // Escape special characters for HTML attributes
-              const escapedOption = option.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-              return `
-                <label class="option-button">
-                  <input 
-                    type="radio" 
-                    name="${uniqueName}" 
-                    value="${escapedOption}"
-                    data-question-id="${question.id}"
-                    onchange="saveAnswer('${question.id}', this.value)"
-                  >
-                  <span>${option}</span>
-                </label>
-              `;
-            }).join('')}
-          </div>
-        `;
-        
-        contentDiv.appendChild(questionDiv);
-        
-        // Restore saved answer
-        const savedAnswer = CIPLEEngine.currentTest.sections.listening.answers[question.id];
-        if (savedAnswer) {
-          const radios = questionDiv.querySelectorAll(`input[name="${uniqueName}"]`);
-          radios.forEach(radio => {
-            if (radio.value === savedAnswer) {
-              radio.checked = true;
-              radio.closest('.option-button').classList.add('selected');
-            }
-          });
-        }
-      });
-      
-      container.appendChild(contentDiv);
+   function renderMatchOne(container, task, taskIndex) {
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'task-content';
+  
+  // Instructions
+  const instructionDiv = document.createElement('div');
+  instructionDiv.className = 'alert alert-info';
+  instructionDiv.innerHTML = `
+    <strong>Instruções:</strong> Ouça o áudio e identifique onde se passa cada situação.
+    O áudio contém 10 conversas numeradas (1... 2... 3... etc).
+  `;
+  contentDiv.appendChild(instructionDiv);
+  
+  // Create a compact grid for all questions
+  const gridDiv = document.createElement('div');
+  gridDiv.style.cssText = 'display: grid; gap: 1rem; margin-top: 1.5rem;';
+  
+  task.questions.forEach((question, qIndex) => {
+    const questionRow = document.createElement('div');
+    questionRow.style.cssText = 'background: var(--bg-light); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--primary-color);';
+    
+    const uniqueName = `${task.task_id}-${question.id}`;
+    
+    questionRow.innerHTML = `
+      <div style="font-weight: 600; margin-bottom: 0.75rem; color: var(--primary-color);">
+        ${qIndex + 1}. ${question.prompt}
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem;">
+        ${task.content.options.map((option, optIndex) => {
+          const escapedOption = option.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+          return `
+            <label class="option-button" style="padding: 0.5rem 0.75rem; font-size: 0.875rem;">
+              <input 
+                type="radio" 
+                name="${uniqueName}" 
+                value="${escapedOption}"
+                data-question-id="${question.id}"
+                onchange="saveAnswer('${question.id}', this.value)"
+              >
+              <span>${option}</span>
+            </label>
+          `;
+        }).join('')}
+      </div>
+    `;
+    
+    gridDiv.appendChild(questionRow);
+    
+    // Restore saved answer
+    const savedAnswer = CIPLEEngine.currentTest.sections.listening.answers[question.id];
+    if (savedAnswer) {
+      setTimeout(() => {
+        const radios = questionRow.querySelectorAll(`input[name="${uniqueName}"]`);
+        radios.forEach(radio => {
+          if (radio.value === savedAnswer) {
+            radio.checked = true;
+            radio.closest('.option-button').classList.add('selected');
+          }
+        });
+      }, 0);
     }
+  });
+  
+  contentDiv.appendChild(gridDiv);
+  container.appendChild(contentDiv);
+}
+```
+
+---
+
+## ✅ This Creates:
+```
+┌─────────────────────────────────────────────────────────┐
+│ 🎧 [Audio player at top]                                │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│ 1. Situação 1                                           │
+│ ○ Consulado  ○ Bar  ○ Táxi  ○ Loja  ○ Correios ...     │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│ 2. Situação 2                                           │
+│ ○ Consulado  ○ Bar  ○ Táxi  ○ Loja  ○ Correios ...     │
+└─────────────────────────────────────────────────────────┘
+
+... (continues for all 10)
     
     // ==========================================================================
     // SAVE ANSWER - FIXED
