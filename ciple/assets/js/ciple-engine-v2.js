@@ -171,95 +171,120 @@ const CIPLEEngine = {
   // FINAL SUBMISSION TO SUPABASE
   // =============================================================================
   
-async submitForEvaluation() {
-  if (this.currentTest.submitted) {
-    throw new Error('Test already submitted');
-  }
-  
-  // Prepare payload
-  const payload = {
-    exam_id: this.currentExamId,
-    user_id: this.getCurrentUserId(),
-    sections: {
-      reading: {
-        answers: this.currentTest.sections.reading.answers,
-        score: this.currentTest.sections.reading.score,
-        correct_count: this.currentTest.sections.reading.correct_count,
-        total_questions: this.currentTest.sections.reading.total_questions
-      },
-      listening: {
-        answers: this.currentTest.sections.listening.answers,
-        score: this.currentTest.sections.listening.score,
-        correct_count: this.currentTest.sections.listening.correct_count,
-        total_questions: this.currentTest.sections.listening.total_questions
-      },
-      writing: {
-        responses: this.currentTest.sections.writing.responses
-      },
-      speaking: {
-        recordings: this.currentTest.sections.speaking.recordings
-      }
-    },
-    submitted_at: new Date().toISOString()
-  };
-  
-  try {
-    // Call NEW submit-test function (fast, no AI)
-    const response = await fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/submit-test', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.SUPABASE_KEY}`
-      },
-      body: JSON.stringify(payload)
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(`Submission failed: ${errorData.error || response.statusText}`);
+  async submitForEvaluation() {
+    if (this.currentTest.submitted) {
+      throw new Error('Test already submitted');
     }
     
-    const result = await response.json();
+    // Prepare payload
+    const payload = {
+      exam_id: this.currentExamId,
+      user_id: this.getCurrentUserId(),
+      sections: {
+        reading: {
+          answers: this.currentTest.sections.reading.answers,
+          score: this.currentTest.sections.reading.score,
+          correct_count: this.currentTest.sections.reading.correct_count,
+          total_questions: this.currentTest.sections.reading.total_questions
+        },
+        listening: {
+          answers: this.currentTest.sections.listening.answers,
+          score: this.currentTest.sections.listening.score,
+          correct_count: this.currentTest.sections.listening.correct_count,
+          total_questions: this.currentTest.sections.listening.total_questions
+        },
+        writing: {
+          responses: this.currentTest.sections.writing.responses
+        },
+        speaking: {
+          recordings: this.currentTest.sections.speaking.recordings
+        }
+      },
+      submitted_at: new Date().toISOString()
+    };
     
-    // Mark as submitted
-    this.currentTest.submitted = true;
-    this.currentTest.result_id = result.attempt_id;
-    this.saveTestState(this.currentExamId, this.currentTest);
-    
-this.triggerAsyncEvaluations(result.attempt_id);
-
-return result;
-    
-  } catch (error) {
-    console.error('Submission error:', error);
-    throw error;
-  }
-},
-
-// Trigger background evaluations
-triggerAsyncEvaluations(attemptId) {
-  // These run in background, we don't wait for them
+    try {
+      // Call submit-test function
+      const response = await fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/submit-test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.SUPABASE_KEY}`
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Submission failed: ${errorData.error || response.statusText}`);
+      }
+      
+      const result = await response.json();
+      
+      // Mark as submitted
+      this.currentTest.submitted = true;
+      this.currentTest.result_id = result.attempt_id;
+      this.saveTestState(this.currentExamId, this.currentTest);
+      
+      // Trigger background evaluations
+      this.triggerAsyncEvaluations(result.attempt_id);
+      
+      return result;
+      
+    } catch (error) {
+      console.error('Submission error:', error);
+      throw error;
+    }
+  },
   
-  // Trigger writing evaluation
-  fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/evaluate-writing', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.SUPABASE_KEY}`
-    },
-    body: JSON.stringify({ attempt_id: attemptId })
-  }).catch(err => console.error('Writing evaluation trigger failed:', err));
+  // =============================================================================
+  // TRIGGER ASYNC EVALUATIONS
+  // =============================================================================
   
-  // Trigger speaking evaluation  
-  fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/evaluate-speaking', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.SUPABASE_KEY}`
-    },
-    body: JSON.stringify({ attempt_id: attemptId })
-  }).catch(err => console.error('Speaking evaluation trigger failed:', err));
-},
+  triggerAsyncEvaluations(attemptId) {
+    console.log('🔥 TRIGGERING EVALUATIONS FOR:', attemptId);
+    console.log('⏳ Waiting 5 seconds to ensure database write completes...');
+    
+    // Generous 5-second delay to ensure database write completes
+    setTimeout(() => {
+      console.log('✨ Starting evaluations now...');
+      
+      // Trigger writing evaluation
+      console.log('📝 Triggering writing evaluation...');
+      fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/evaluate-writing', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.SUPABASE_KEY}`
+        },
+        body: JSON.stringify({ attempt_id: attemptId })
+      })
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(d => console.log('✅ Writing evaluation triggered successfully:', d))
+      .catch(err => console.error('❌ Writing evaluation trigger failed:', err));
+      
+      // Trigger speaking evaluation  
+      console.log('🗣️ Triggering speaking evaluation...');
+      fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/evaluate-speaking', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.SUPABASE_KEY}`
+        },
+        body: JSON.stringify({ attempt_id: attemptId })
+      })
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(d => console.log('✅ Speaking evaluation triggered successfully:', d))
+      .catch(err => console.error('❌ Speaking evaluation trigger failed:', err));
+      
+    }, 5000);
+  },
   
   // =============================================================================
   // PROGRESS TRACKING
