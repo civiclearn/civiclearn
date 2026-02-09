@@ -297,7 +297,7 @@
             Preparação para o exame CIPLE
           </p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <a href="mailto:contact@civiclearn.com" class="dash-pill dash-pill-outline">
+            <a href="/cdn-cgi/l/email-protection#7a1915140e1b190e3a19130c1319161f1b081454191517" class="dash-pill dash-pill-outline">
               Contacto
             </a>
             <a href="#" class="dash-pill dash-pill-outline" onclick="alert('Logout'); return false;">
@@ -378,7 +378,7 @@
   </main>
 </div>
 
-<script src="/ciple/assets/js/ciple-engine-v2.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="/ciple/assets/js/ciple-engine-v2.js"></script>
 <script>
   // ==========================================================================
   // DASHBOARD LOGIC
@@ -463,8 +463,9 @@
       writingScore = testState.sections.writing.score;
       speakingScore = testState.sections.speaking.score;
       
-      if (readingScore !== null && listeningScore !== null && 
-          writingScore !== null && speakingScore !== null) {
+      // Only calculate if ALL scores are actually numbers (not null, not undefined)
+      if (typeof readingScore === 'number' && typeof listeningScore === 'number' && 
+          typeof writingScore === 'number' && typeof speakingScore === 'number') {
         globalScore = Math.round(
           (readingScore * 0.225) + (listeningScore * 0.275) + 
           (writingScore * 0.225) + (speakingScore * 0.275)
@@ -478,6 +479,14 @@
     }
     
     const isPassed = globalScore !== null && globalScore >= 50;
+    
+    // Helper to format section score with dot
+    const formatSectionScore = (score) => {
+      if (typeof score === 'number') {
+        return `<span class="status-dot"></span> <span style="font-size:0.85rem;font-weight:500;">${Math.round(score)}%</span>`;
+      }
+      return `<span class="status-dot"></span> <span style="font-size:0.85rem;color:#9ca3af;">—</span>`;
+    };
     
     tr.innerHTML = `
       <td>
@@ -501,20 +510,20 @@
         }
       </td>
       
-      <td class="${readingScore !== null ? 'done' : 'pending'}">
-        <span class="status-dot"></span>
+      <td class="${typeof readingScore === 'number' ? 'done' : 'pending'}">
+        ${formatSectionScore(readingScore)}
       </td>
       
-      <td class="${writingScore !== null ? 'done' : 'pending'}">
-        <span class="status-dot"></span>
+      <td class="${typeof writingScore === 'number' ? 'done' : 'pending'}">
+        ${formatSectionScore(writingScore)}
       </td>
       
-      <td class="${listeningScore !== null ? 'done' : 'pending'}">
-        <span class="status-dot"></span>
+      <td class="${typeof listeningScore === 'number' ? 'done' : 'pending'}">
+        ${formatSectionScore(listeningScore)}
       </td>
       
-      <td class="${speakingScore !== null ? 'done' : 'pending'}">
-        <span class="status-dot"></span>
+      <td class="${typeof speakingScore === 'number' ? 'done' : 'pending'}">
+        ${formatSectionScore(speakingScore)}
       </td>
       
       <td>
@@ -561,12 +570,14 @@
       if (testState && testState.submitted) {
         completedCount++;
         
-        const r = testState.sections.reading.score || 0;
-        const l = testState.sections.listening.score || 0;
-        const w = testState.sections.writing.score || 0;
-        const s = testState.sections.speaking.score || 0;
+        const r = testState.sections.reading.score;
+        const l = testState.sections.listening.score;
+        const w = testState.sections.writing.score;
+        const s = testState.sections.speaking.score;
         
-        if (r !== null && l !== null && w !== null && s !== null) {
+        // Only calculate if ALL scores are actually numbers
+        if (typeof r === 'number' && typeof l === 'number' && 
+            typeof w === 'number' && typeof s === 'number') {
           const global = Math.round((r * 0.225) + (l * 0.275) + (w * 0.225) + (s * 0.275));
           
           const submittedDate = new Date(testState.submitted_at || testState.started_at);
