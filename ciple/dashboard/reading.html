@@ -557,6 +557,17 @@
     const TIMER_KEY = `ciple_timer_${EXAM_ID}_reading_writing`;
     
     function startTimer() {
+      // If this is a fresh test (no reading answers yet), clear any stale timer
+      const hasReadingAnswers = Object.keys(CIPLEEngine.currentTest.sections.reading.answers).length > 0;
+      const hasWritingData = CIPLEEngine.currentTest.sections.writing.completed || 
+                             Object.keys(CIPLEEngine.currentTest.sections.writing.responses).length > 0;
+      
+      if (!hasReadingAnswers && !hasWritingData) {
+        // Fresh test - remove any old timer
+        localStorage.removeItem(TIMER_KEY);
+        console.log('🔄 Cleared stale timer for fresh test');
+      }
+      
       // Check if timer already exists (returning to reading)
       const savedTimer = localStorage.getItem(TIMER_KEY);
       
