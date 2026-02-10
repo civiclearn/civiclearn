@@ -293,86 +293,53 @@
     }
     
     // ==========================================================================
-    // HELPER: Shuffle array
-    // ==========================================================================
-    
-    function shuffleArray(array) {
-      const shuffled = [...array];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-      return shuffled;
-    }
-    
-    // ==========================================================================
-    // RENDER: Match One (Reading Task 1 - Dropdown style like listening)
+    // RENDER: Match One (Reading Task 1 - radio buttons with individual options)
     // ==========================================================================
     
     function renderMatchOneTask(container, task, taskIndex) {
       const contentDiv = document.createElement('div');
       contentDiv.className = 'task-content';
       
-      // Get all unique options from first question (they're all the same)
-      const allOptions = task.questions[0].options.map(opt => opt.text);
-      
-      // SHUFFLE to prevent predictable order
-      const shuffledOptions = shuffleArray(allOptions);
-      
-      const tableDiv = document.createElement('div');
-      tableDiv.style.cssText = 'margin-top: 1rem;';
-      
       task.questions.forEach((question, qIndex) => {
-        const row = document.createElement('div');
-        row.style.cssText = 'display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem; border-bottom: 1px solid #e2e8f0;';
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-block';
         
-        // Question prompt
-        const promptDiv = document.createElement('div');
-        promptDiv.style.cssText = 'font-weight: 600; font-size: 1rem;';
-        promptDiv.innerHTML = `${qIndex + 1}. ${question.prompt}`;
-        
-        // Dropdown selector
-        const selectContainer = document.createElement('div');
+        // FIXED: Use unique radio button name combining task_id and question_id
         const uniqueName = `${task.task_id}-${question.id}`;
-        const selectId = `select-${task.task_id}-${question.id}`;
         
-        selectContainer.innerHTML = `
-          <select 
-            id="${selectId}"
-            name="${uniqueName}"
-            data-question-id="${task.task_id}-${question.id}"
-            onchange="saveAnswer('${task.task_id}-${question.id}', this.value)"
-            style="width: 100%; max-width: 500px; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; background: white; cursor: pointer; font-family: 'Space Grotesk', sans-serif;"
-          >
-            <option value="">Selecione a resposta...</option>
-            ${shuffledOptions.map((optText, idx) => {
-              // Find the original option ID for this text
-              const originalOpt = question.options.find(o => o.text === optText);
-              const optId = originalOpt ? originalOpt.id : String.fromCharCode(97 + idx);
-              return `<option value="${optId}">${optText}</option>`;
-            }).join('')}
-          </select>
+        questionDiv.innerHTML = `
+          <div class="question-prompt">
+            ${qIndex + 1}. ${question.prompt}
+          </div>
+          <div class="options-container">
+            ${question.options.map(option => `
+              <label class="option-button">
+                <input 
+                  type="radio" 
+                  name="${uniqueName}" 
+                  value="${option.id}"
+                  data-question-id="${question.id}"
+                  onchange="saveAnswer('${task.task_id}-${question.id}', '${option.id}')"
+                >
+                <span>${option.text}</span>
+              </label>
+            `).join('')}
+          </div>
         `;
         
-        row.appendChild(promptDiv);
-        row.appendChild(selectContainer);
-        tableDiv.appendChild(row);
+        contentDiv.appendChild(questionDiv);
         
         // Restore saved answer
         const savedAnswer = CIPLEEngine.currentTest.sections.reading.answers[`${task.task_id}-${question.id}`];
         if (savedAnswer) {
-          setTimeout(() => {
-            const select = document.getElementById(selectId);
-            if (select) {
-              select.value = savedAnswer;
-              select.style.borderColor = '#667eea';
-              select.style.background = '#f7fafc';
-            }
-          }, 0);
+          const radio = questionDiv.querySelector(`input[name="${uniqueName}"][value="${savedAnswer}"]`);
+          if (radio) {
+            radio.checked = true;
+            radio.closest('.option-button').classList.add('selected');
+          }
         }
       });
       
-      contentDiv.appendChild(tableDiv);
       container.appendChild(contentDiv);
     }
     
