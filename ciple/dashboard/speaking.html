@@ -263,9 +263,7 @@
             <p class="task-instructions">${task.instructions}</p>
           </div>
           <div class="task-content">
-            <div class="alert alert-info">
-              <strong>Tema:</strong> ${task.prompt}
-            </div>
+            ${renderTaskPrompt(task)}
             
             <div class="recording-controls">
               <button class="btn btn-danger" id="record-btn-${task.task_id}" 
@@ -293,6 +291,50 @@
       });
       
       updateSubmitButton();
+    }
+    
+    function renderTaskPrompt(task) {
+      // Image description task
+      if (task.media && task.media.image) {
+        // Handle both .jpg and .png extensions
+        const imagePath = task.media.image;
+        
+        return `
+          <div style="margin-bottom: 1.5rem;">
+            <img src="${imagePath}" 
+                 alt="Imagem para descrição" 
+                 onerror="this.onerror=null; this.src=this.src.replace(/\.(jpg|png)$/, this.src.endsWith('.jpg') ? '.png' : '.jpg');"
+                 style="width: 100%; max-width: 600px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+          </div>
+          ${task.guidance ? `
+            <div class="alert alert-info">
+              <strong>Dicas:</strong>
+              <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0;">
+                ${task.guidance.map(tip => `<li>${tip}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+        `;
+      }
+      
+      // Text prompt task
+      if (task.prompt) {
+        return `
+          <div class="alert alert-info">
+            <strong>Tema:</strong> ${task.prompt}
+          </div>
+          ${task.guidance ? `
+            <div class="alert alert-info" style="margin-top: 1rem;">
+              <strong>Dicas:</strong>
+              <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0;">
+                ${task.guidance.map(tip => `<li>${tip}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+        `;
+      }
+      
+      return '';
     }
     
     async function startRecording(taskId) {
