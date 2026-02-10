@@ -420,7 +420,8 @@
     
     // ==========================================================================
     // RENDER: Long Text MCQ (Reading Tasks 3 & 4)
-    // Task 7 uses same 5 options for all questions - shuffle to prevent predictable order
+    // Task 7 (Karim) uses same 5 options for all questions - shuffle once
+    // Task 8 (Tânia) uses different options per question - shuffle individually
     // ==========================================================================
     
     function renderLongTextMCQ(container, task, taskIndex) {
@@ -434,22 +435,30 @@
         </div>
       `;
       
-      // Shuffle options once (all questions share same options in this task type)
-      const shuffledOptions = shuffleArray([...task.questions[0].options]);
+      // Check if all questions share same options (like Task 7)
+      const firstOptions = task.questions[0].options.map(o => o.id).sort().join(',');
+      const allSameOptions = task.questions.every(q => 
+        q.options.map(o => o.id).sort().join(',') === firstOptions
+      );
+      
+      // If shared options, shuffle once; otherwise shuffle per question
+      const sharedShuffledOptions = allSameOptions ? shuffleArray([...task.questions[0].options]) : null;
       
       task.questions.forEach((question, qIndex) => {
         const questionDiv = document.createElement('div');
         questionDiv.className = 'question-block';
         
-        // FIXED: Use unique radio button name combining task_id and question_id
         const uniqueName = `${task.task_id}-${question.id}`;
+        
+        // Use shared shuffled options OR shuffle this question's options
+        const optionsToRender = sharedShuffledOptions || shuffleArray([...question.options]);
         
         questionDiv.innerHTML = `
           <div class="question-prompt">
             ${qIndex + 1}. ${question.question}
           </div>
           <div class="options-container">
-            ${shuffledOptions.map(option => `
+            ${optionsToRender.map(option => `
               <label class="option-button">
                 <input 
                   type="radio" 
