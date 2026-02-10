@@ -4,7 +4,75 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CIPLE - Compreensão da Leitura</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/ciple-styles.css">
+  <style>
+    /* Override font for modern look */
+    body {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    /* Test identifier badge */
+    .test-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Timer display */
+    .timer-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff5f5;
+      border: 2px solid #fc8181;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #c53030;
+      margin-top: 12px;
+    }
+    
+    .timer-icon {
+      font-size: 1.2rem;
+    }
+    
+    /* Compact card styling */
+    .card {
+      padding: 1.75rem;
+    }
+    
+    .card-title {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .card-subtitle {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    /* Progress header tweaks */
+    .test-header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 0;
+      margin-bottom: 1.5rem;
+    }
+    
+    .progress-info span {
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
 
@@ -26,12 +94,16 @@
     
     <!-- Instructions Card -->
     <div class="card">
+      <div class="test-badge" id="test-badge">CIPLE-XX</div>
       <h1 class="card-title">Compreensão da Leitura</h1>
       <p class="card-subtitle">
-        Leia atentamente os textos e responda às questões. 
-        Tempo sugerido: <strong>45 minutos</strong>
+        Leia atentamente os textos e responda às questões.
       </p>
-      <div class="alert alert-info">
+      <div class="timer-box">
+        <span class="timer-icon">⏱️</span>
+        <span>Tempo oficial: <strong>1h15m</strong> (Leitura + Escrita combinadas)</span>
+      </div>
+      <div class="alert alert-info" style="margin-top: 1rem;">
         <strong>Instruções:</strong> As suas respostas são guardadas automaticamente. 
         Pode rever as suas respostas antes de submeter.
       </div>
@@ -71,6 +143,9 @@
     // Get exam ID from URL parameter
     const urlParams = new URLSearchParams(window.location.search);
     const EXAM_ID = urlParams.get('exam') || 'ciple-04';
+    
+    // Update test badge
+    document.getElementById('test-badge').textContent = EXAM_ID.toUpperCase();
     
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', async () => {
@@ -204,7 +279,6 @@
         // Show the text for this question
         const textContent = textsMap[question.text_id];
         
-        // FIXED: Use unique radio button name combining task_id and question_id
         const uniqueName = `${task.task_id}-${question.id}`;
         
         questionDiv.innerHTML = `
@@ -305,89 +379,36 @@
     }
     
     // ==========================================================================
-    // SAVE ANSWER - FIXED
+    // SAVE ANSWER
     // ==========================================================================
     
     function saveAnswer(questionId, selectedOption) {
-      // Find the radio button that was just selected
-      // We search by data-question-id attribute since we can't rely on name alone
-      const allRadios = document.querySelectorAll(`input[data-question-id="${questionId}"]`);
+      CIPLEEngine.saveReadingAnswer(questionId, selectedOption);
       
-      // Find which one was selected
-      let selectedRadio = null;
-      allRadios.forEach(radio => {
-        if (radio.value === selectedOption && radio.checked) {
-          selectedRadio = radio;
-        }
+      // Visual feedback
+      document.querySelectorAll(`input[name="${questionId}"]`).forEach(radio => {
+        radio.closest('.option-button').classList.remove('selected');
       });
       
+      const selectedRadio = document.querySelector(`input[name="${questionId}"][value="${selectedOption}"]`);
       if (selectedRadio) {
-        // Get the unique name for this question's radio group
-        const uniqueName = selectedRadio.name;
-        
-        // Remove 'selected' class from all options in this question's group
-        document.querySelectorAll(`input[name="${uniqueName}"]`).forEach(r => {
-          r.closest('.option-button').classList.remove('selected');
-        });
-        
-        // Add 'selected' class to chosen option
         selectedRadio.closest('.option-button').classList.add('selected');
       }
       
-      // Save to engine (this stores by question.id, which is what we want)
-      CIPLEEngine.saveReadingAnswer(questionId, selectedOption);
-      
-      console.log('Answer saved:', questionId, selectedOption);
+      console.log(`Saved: ${questionId} = ${selectedOption}`);
     }
     
     // ==========================================================================
-    // COMPLETE READING SECTION
+    // COMPLETE READING
     // ==========================================================================
     
     function completeReading() {
-      // Check if all questions are answered
-      const totalQuestions = readingData.tasks.reduce((sum, task) => 
-        sum + task.questions.length, 0
-      );
+      const result = CIPLEEngine.completeReadingSection(readingData);
       
-      const answeredCount = Object.keys(
-        CIPLEEngine.currentTest.sections.reading.answers
-      ).length;
-	  
-	    // DEBUG: See what's saved
-  console.log('Total questions:', totalQuestions);
-  console.log('Answered count:', answeredCount);
-  console.log('Saved answers:', CIPLEEngine.currentTest.sections.reading.answers);
+      alert(`Secção de Leitura Completa!\n\nPontuação: ${result.score}%\nCorretas: ${result.correctCount} de ${result.totalQuestions}`);
       
-      if (answeredCount < totalQuestions) {
-        const unanswered = totalQuestions - answeredCount;
-        if (!confirm(
-          `Ainda tem ${unanswered} pergunta(s) por responder.\n\n` +
-          `Tem a certeza que quer continuar?`
-        )) {
-          return;
-        }
-      }
-      
-      // Grade the section
-      showLoading();
-      
-      setTimeout(() => {
-        const result = CIPLEEngine.completeReadingSection(readingData);
-        
-        hideLoading();
-        
-        // Show results
-        alert(
-          `Secção de Leitura Completa!\n\n` +
-          `Pontuação: ${result.score}%\n` +
-          `Corretas: ${result.correctCount}/${result.totalQuestions}\n\n` +
-          `Agora vamos para a Compreensão do Oral.`
-        );
-        
-        // Navigate to listening (pass exam ID)
-        window.location.href = `listening.html?exam=${EXAM_ID}`;
-      }, 500);
+      // Go to next section or dashboard
+      window.location.href = 'index.html';
     }
     
     // ==========================================================================
@@ -395,33 +416,17 @@
     // ==========================================================================
     
     function goToDashboard() {
-      if (confirm('Tem a certeza que quer voltar? O progresso está guardado.')) {
-        window.location.href = 'index.html';
-      }
+      window.location.href = 'index.html';
     }
     
     // ==========================================================================
-    // PROGRESS UPDATE
+    // PROGRESS
     // ==========================================================================
     
     function updateProgress() {
       const progress = CIPLEEngine.getProgress();
-      document.getElementById('progress-text').textContent = 
-        `${progress.completed}/4 Secções`;
-      document.getElementById('progress-fill').style.width = 
-        `${progress.percentage}%`;
-    }
-    
-    // ==========================================================================
-    // LOADING OVERLAY
-    // ==========================================================================
-    
-    function showLoading() {
-      document.getElementById('loading-overlay').style.display = 'flex';
-    }
-    
-    function hideLoading() {
-      document.getElementById('loading-overlay').style.display = 'none';
+      document.getElementById('progress-text').textContent = `${progress.completed}/4 Secções`;
+      document.getElementById('progress-fill').style.width = `${progress.percentage}%`;
     }
     
   </script>

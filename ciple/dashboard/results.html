@@ -64,7 +64,7 @@
             <span style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);" id="listening-score">--%</span>
           </div>
           <div style="font-size: 0.875rem; color: var(--text-gray);">
-            Peso na nota final: <strong>27.5%</strong>
+            Peso na nota final: <strong>30%</strong>
           </div>
           <div style="margin-top: 0.5rem; font-size: 0.875rem;" id="listening-detail">
             <!-- Details will be inserted here -->
@@ -96,7 +96,7 @@
             </span>
           </div>
           <div style="font-size: 0.875rem; color: var(--text-gray);">
-            Peso na nota final: <strong>27.5%</strong>
+            Peso na nota final: <strong>25%</strong>
           </div>
           <div style="margin-top: 0.5rem; font-size: 0.875rem;" id="speaking-detail">
             <span style="color: var(--warning-color);">⏳ A avaliar...</span>
@@ -267,7 +267,7 @@
         document.getElementById('speaking-detail').innerHTML = `<span style="color: var(--error-color);">Erro na avaliação</span>`;
       }
       
-    // Overall Grade - Calculate client-side
+    // Overall Grade - Calculate client-side with OFFICIAL CIPLE WEIGHTS
 const reading = Number(result.reading_score) || 0;
 const listening = Number(result.listening_score) || 0;
 const writing = Number(result.writing_score) || 0;
@@ -277,8 +277,12 @@ const speaking = Number(result.speaking_score) || 0;
 if (result.reading_score !== null && result.listening_score !== null &&
     result.writing_score !== null && result.speaking_score !== null) {
   
+  // OFFICIAL CIPLE WEIGHTS:
+  // Reading + Writing = 45% combined (22.5% each)
+  // Listening = 30%
+  // Speaking = 25%
   const overallGrade = (reading * 0.225) + (writing * 0.225) + 
-                       (listening * 0.275) + (speaking * 0.275);
+                       (listening * 0.30) + (speaking * 0.25);
   
   document.getElementById('overall-grade').textContent = overallGrade.toFixed(1);
   
