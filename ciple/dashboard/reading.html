@@ -204,6 +204,9 @@
       <button class="btn btn-secondary" onclick="goToDashboard()">
         ← Voltar ao Painel
       </button>
+      <button class="btn" onclick="restartTest()" style="background: #ed8936; color: white; border: 2px solid #dd6b20;">
+        🔄 Recomeçar Teste
+      </button>
       <button class="btn btn-primary btn-large" id="complete-btn" onclick="completeReading()">
         Completar Leitura →
       </button>
@@ -531,6 +534,26 @@
       window.location.href = 'index.html';
     }
     
+    function restartTest() {
+      if (!confirm(
+        'Recomeçar este teste?\n\n' +
+        'Todo o progresso atual será apagado e poderá começar de novo.\n\n' +
+        'Esta ação não pode ser revertida.'
+      )) {
+        return;
+      }
+      
+      // Clear all test data for this exam
+      localStorage.removeItem(`ciple_test_${EXAM_ID}`);
+      localStorage.removeItem(`ciple_timer_${EXAM_ID}_reading_writing`);
+      localStorage.removeItem(`ciple_timer_${EXAM_ID}_listening`);
+      localStorage.removeItem(`ciple_timer_${EXAM_ID}_speaking`);
+      
+      // Redirect to dashboard
+      alert('✅ Teste reiniciado com sucesso!\n\nPode começar de novo.');
+      window.location.href = 'index.html';
+    }
+    
     // ==========================================================================
     // PROGRESS
     // ==========================================================================
@@ -586,8 +609,14 @@
         
         if (timeRemaining <= 0) {
           clearInterval(timerInterval);
-          alert('⏰ Tempo esgotado!\n\nO tempo oficial para Leitura e Escrita terminou.');
           timeRemaining = 0;
+          updateTimerDisplay();
+          
+          // Enable the complete button even if unanswered
+          document.getElementById('complete-btn').disabled = false;
+          
+          alert('⏰ Tempo esgotado!\n\nO tempo oficial para Leitura e Escrita terminou.\n\nPode continuar a responder ou avançar para a próxima secção.');
+          return;
         }
         
         updateTimerDisplay();
