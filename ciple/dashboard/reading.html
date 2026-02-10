@@ -439,9 +439,10 @@
       `;
       
       // Check if all questions share same options (like Task 7)
-      const firstOptions = task.questions[0].options.map(o => o.id).sort().join(',');
+      // Compare option TEXT not just IDs (Task 8 reuses a,b,c but different text)
+      const firstOptions = task.questions[0].options.map(o => o.text).sort().join('|');
       const allSameOptions = task.questions.every(q => 
-        q.options.map(o => o.id).sort().join(',') === firstOptions
+        q.options.map(o => o.text).sort().join('|') === firstOptions
       );
       
       // If shared options, shuffle once; otherwise shuffle per question
