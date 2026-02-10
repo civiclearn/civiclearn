@@ -248,47 +248,43 @@ const CIPLEEngine = {
   
   triggerAsyncEvaluations(attemptId) {
     console.log('🔥 TRIGGERING EVALUATIONS FOR:', attemptId);
-    console.log('⏳ Waiting 5 seconds to ensure database write completes...');
     
-    // Generous 5-second delay to ensure database write completes
-    setTimeout(() => {
-      console.log('✨ Starting evaluations now...');
-      
-      // Trigger writing evaluation
-      console.log('📝 Triggering writing evaluation...');
-      fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/evaluate-writing', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.SUPABASE_KEY}`
-        },
-        body: JSON.stringify({ attempt_id: attemptId })
-      })
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then(d => console.log('✅ Writing evaluation triggered successfully:', d))
-      .catch(err => console.error('❌ Writing evaluation trigger failed:', err));
-      
-      // Trigger speaking evaluation  
-      console.log('🗣️ Triggering speaking evaluation...');
-      fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/evaluate-speaking', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.SUPABASE_KEY}`
-        },
-        body: JSON.stringify({ attempt_id: attemptId })
-      })
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then(d => console.log('✅ Speaking evaluation triggered successfully:', d))
-      .catch(err => console.error('❌ Speaking evaluation trigger failed:', err));
-      
-    }, 5000);
+    // NO setTimeout - page navigation would cancel it!
+    // Trigger immediately so fetches start before navigation
+    
+    // Trigger writing evaluation
+    console.log('📝 Triggering writing evaluation...');
+    fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/evaluate-writing', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.SUPABASE_KEY}`
+      },
+      body: JSON.stringify({ attempt_id: attemptId })
+    })
+    .then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    })
+    .then(d => console.log('✅ Writing evaluation triggered successfully:', d))
+    .catch(err => console.error('❌ Writing evaluation trigger failed:', err));
+    
+    // Trigger speaking evaluation  
+    console.log('🗣️ Triggering speaking evaluation...');
+    fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/evaluate-speaking', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.SUPABASE_KEY}`
+      },
+      body: JSON.stringify({ attempt_id: attemptId })
+    })
+    .then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    })
+    .then(d => console.log('✅ Speaking evaluation triggered successfully:', d))
+    .catch(err => console.error('❌ Speaking evaluation trigger failed:', err));
   },
   
   // =============================================================================
