@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset - CIPLE Platform</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .reset-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      width: 100%;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #718096;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .warning-box {
+      background: #fff5f5;
+      border: 2px solid #fc8181;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .warning-box h3 {
+      color: #c53030;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .warning-box ul {
+      color: #742a2a;
+      font-size: 14px;
+      line-height: 1.8;
+      margin-left: 20px;
+    }
+
+    .stats-box {
+      background: #f7fafc;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .stat:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      color: #4a5568;
+      font-size: 14px;
+    }
+
+    .stat-value {
+      color: #1a202c;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      flex-direction: column;
+    }
+
+    .btn {
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-danger {
+      background: #e53e3e;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c53030;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(229, 62, 62, 0.4);
+    }
+
+    .btn-danger:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: #edf2f7;
+      color: #4a5568;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .success-message {
+      display: none;
+      background: #f0fff4;
+      border: 2px solid #68d391;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .success-message.show {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    .success-message h3 {
+      color: #22543d;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .success-message p {
+      color: #276749;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .back-link {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #667eea;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .reset-container {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="reset-container">
+    <div class="icon">⚠️</div>
+    
+    <h1>Reset Completo</h1>
+    <p class="subtitle">Limpar todos os dados de testes e simulações</p>
+
+    <!-- Success Message (hidden by default) -->
+    <div id="success-message" class="success-message">
+      <h3>✅ Reset Concluído!</h3>
+      <p>Todos os dados foram eliminados com sucesso. Pode agora começar as simulações desde o início.</p>
+    </div>
+
+    <!-- Current Stats -->
+    <div id="stats-box" class="stats-box">
+      <div class="stat">
+        <span class="stat-label">Simulações guardadas</span>
+        <span class="stat-value" id="test-count">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Dados em localStorage</span>
+        <span class="stat-value" id="storage-size">0 KB</span>
+      </div>
+    </div>
+
+    <!-- Warning Box -->
+    <div class="warning-box">
+      <h3>⚠️ Atenção</h3>
+      <ul>
+        <li>Todos os testes em progresso serão perdidos</li>
+        <li>Todas as respostas guardadas serão eliminadas</li>
+        <li>Todos os resultados serão apagados</li>
+        <li><strong>Esta ação não pode ser revertida</strong></li>
+      </ul>
+    </div>
+
+    <!-- Buttons -->
+    <div class="button-group">
+      <button class="btn btn-danger" id="reset-btn" onclick="resetAllData()">
+        🗑️ Apagar Tudo e Recomeçar
+      </button>
+      <a href="../" class="btn btn-secondary">
+        ← Cancelar e Voltar
+      </a>
+    </div>
+
+    <a href="../" class="back-link">← Voltar ao Painel</a>
+  </div>
+
+  <script>
+    // ==========================================================================
+    // UPDATE STATS ON PAGE LOAD
+    // ==========================================================================
+    
+    function updateStats() {
+      // Count CIPLE tests in localStorage
+      let testCount = 0;
+      let totalSize = 0;
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('ciple_test_')) {
+          testCount++;
+        }
+        
+        // Calculate storage size
+        const value = localStorage.getItem(key);
+        totalSize += key.length + (value ? value.length : 0);
+      }
+
+      // Update UI
+      document.getElementById('test-count').textContent = testCount;
+      document.getElementById('storage-size').textContent = (totalSize / 1024).toFixed(2) + ' KB';
+    }
+
+    // ==========================================================================
+    // RESET FUNCTION
+    // ==========================================================================
+    
+    function resetAllData() {
+      // Confirm action
+      const confirmation = confirm(
+        "⚠️ TEM A CERTEZA?\n\n" +
+        "Esta ação irá:\n" +
+        "• Apagar TODOS os testes guardados\n" +
+        "• Eliminar TODAS as respostas\n" +
+        "• Remover TODOS os resultados\n\n" +
+        "Esta ação NÃO pode ser revertida!\n\n" +
+        "Escreva SIM para confirmar:"
+      );
+
+      if (!confirmation) {
+        return;
+      }
+
+      // Double confirmation
+      const userInput = prompt("Digite SIM (em maiúsculas) para confirmar:");
+      
+      if (userInput !== "SIM") {
+        alert("Reset cancelado.");
+        return;
+      }
+
+      // Perform reset
+      try {
+        // Method 1: Clear all localStorage
+        localStorage.clear();
+
+        // Method 2: Also clear sessionStorage (just in case)
+        sessionStorage.clear();
+
+        // Method 3: Clear any IndexedDB databases (if used in future)
+        if (window.indexedDB) {
+          indexedDB.databases().then(databases => {
+            databases.forEach(db => {
+              indexedDB.deleteDatabase(db.name);
+            });
+          }).catch(err => {
+            console.log("IndexedDB cleanup skipped:", err);
+          });
+        }
+
+        // Show success message
+        document.getElementById('success-message').classList.add('show');
+        document.getElementById('stats-box').style.display = 'none';
+        document.querySelector('.warning-box').style.display = 'none';
+        document.getElementById('reset-btn').style.display = 'none';
+
+        // Update stats
+        updateStats();
+
+        // Optional: Redirect to dashboard after 3 seconds
+        setTimeout(() => {
+          window.location.href = '../';
+        }, 3000);
+
+      } catch (error) {
+        console.error('Reset error:', error);
+        alert('Erro ao limpar dados: ' + error.message);
+      }
+    }
+
+    // ==========================================================================
+    // INITIALIZE
+    // ==========================================================================
+    
+    window.addEventListener('DOMContentLoaded', () => {
+      updateStats();
+    });
+  </script>
+
+</body>
+</html>
