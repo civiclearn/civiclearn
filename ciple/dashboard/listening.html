@@ -192,7 +192,7 @@
         </div>
       </div>
       <div class="alert alert-info" style="margin-top: 1rem;">
-        <strong>Instruções:</strong> Pode ouvir cada áudio quantas vezes quiser. 
+        <strong>Instruções:</strong> Pode ouvir cada áudio <strong>até 2 vezes</strong> (como no exame oficial). 
         As suas respostas são guardadas automaticamente.
       </div>
     </div>
@@ -288,13 +288,58 @@
         // Audio Player
         const audioDiv = document.createElement('div');
         audioDiv.className = 'audio-container';
+        const audioId = `audio-${task.task_id}`;
         audioDiv.innerHTML = `
-          <audio controls class="audio-player" preload="metadata">
-            <source src="${task.content.audio}" type="audio/mpeg">
-            O seu navegador não suporta o elemento de áudio.
-          </audio>
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+            <audio controls class="audio-player" preload="metadata" id="${audioId}">
+              <source src="${task.content.audio}" type="audio/mpeg">
+              O seu navegador não suporta o elemento de áudio.
+            </audio>
+            <div id="play-count-${task.task_id}" style="font-size: 0.875rem; color: #718096; font-weight: 600;">
+              🎧 0/2 reproduções
+            </div>
+          </div>
+          <div id="play-warning-${task.task_id}" style="display: none; margin-top: 0.5rem;">
+            <div class="alert alert-warning" style="font-size: 0.875rem;">
+              ⚠️ Última reprodução disponível!
+            </div>
+          </div>
+          <div id="play-limit-${task.task_id}" style="display: none; margin-top: 0.5rem;">
+            <div class="alert alert-error" style="font-size: 0.875rem; background: #fff5f5; border-color: #fc8181; color: #c53030;">
+              🔒 Limite de 2 reproduções atingido (condição oficial do exame)
+            </div>
+          </div>
         `;
         taskDiv.appendChild(audioDiv);
+        
+        // Enforce 2-listen limit
+        setTimeout(() => {
+          const audioElement = document.getElementById(audioId);
+          let playCount = 0;
+          
+          audioElement.addEventListener('play', () => {
+            if (playCount >= 2) {
+              audioElement.pause();
+              audioElement.currentTime = 0;
+              return;
+            }
+          });
+          
+          audioElement.addEventListener('ended', () => {
+            playCount++;
+            document.getElementById(`play-count-${task.task_id}`).textContent = 
+              `🎧 ${playCount}/2 reproduções`;
+            
+            if (playCount === 1) {
+              document.getElementById(`play-warning-${task.task_id}`).style.display = 'block';
+            } else if (playCount >= 2) {
+              audioElement.controls = false;
+              document.getElementById(`play-warning-${task.task_id}`).style.display = 'none';
+              document.getElementById(`play-limit-${task.task_id}`).style.display = 'block';
+              document.getElementById(`play-count-${task.task_id}`).style.color = '#e53e3e';
+            }
+          });
+        }, 100);
         
         // Render questions based on task type
         if (task.type === 'single_audio_mcq') {
