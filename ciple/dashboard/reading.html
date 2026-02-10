@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/ciple/assets/css/ciple-styles.css">
+  <link rel="stylesheet" href="../assets/css/ciple-styles.css">
   <style>
     /* Override font for modern look */
     body {
@@ -31,19 +31,45 @@
     .timer-box {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       background: #fff5f5;
       border: 2px solid #fc8181;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 0.9rem;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 1.1rem;
       font-weight: 600;
       color: #c53030;
       margin-top: 12px;
     }
     
     .timer-icon {
-      font-size: 1.2rem;
+      font-size: 1.5rem;
+    }
+    
+    #countdown-timer {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    
+    .timer-box.warning {
+      background: #fffaf0;
+      border-color: #ed8936;
+      color: #c05621;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    
+    .timer-box.critical {
+      background: #fff5f5;
+      border-color: #f56565;
+      color: #c53030;
+      animation: pulse 0.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
     }
     
     /* Compact card styling */
@@ -72,6 +98,62 @@
     .progress-info span {
       font-size: 0.9rem;
     }
+    
+    /* PROFESSIONAL BUTTON STYLES */
+    .btn {
+      font-family: 'Space Grotesk', sans-serif;
+      padding: 14px 28px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-secondary {
+      background: #f7fafc;
+      color: #2d3748;
+      border: 2px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+      background: #edf2f7;
+      border-color: #cbd5e0;
+      transform: translateY(-1px);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .btn-primary:active, .btn-secondary:active {
+      transform: translateY(0);
+    }
+    
+    .btn-large {
+      padding: 16px 32px;
+      font-size: 1.05rem;
+    }
+    
+    .nav-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid #e2e8f0;
+    }
   </style>
 </head>
 <body>
@@ -99,9 +181,12 @@
       <p class="card-subtitle">
         Leia atentamente os textos e responda às questões.
       </p>
-      <div class="timer-box">
+      <div class="timer-box" id="timer-display">
         <span class="timer-icon">⏱️</span>
-        <span>Tempo oficial: <strong>1h15m</strong> (Leitura + Escrita combinadas)</span>
+        <div>
+          <div style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 2px;">Tempo restante:</div>
+          <div id="countdown-timer">1:15:00</div>
+        </div>
       </div>
       <div class="alert alert-info" style="margin-top: 1rem;">
         <strong>Instruções:</strong> As suas respostas são guardadas automaticamente. 
@@ -428,6 +513,58 @@
       document.getElementById('progress-text').textContent = `${progress.completed}/4 Secções`;
       document.getElementById('progress-fill').style.width = `${progress.percentage}%`;
     }
+    
+    // ==========================================================================
+    // COUNTDOWN TIMER
+    // ==========================================================================
+    
+    let timeRemaining = 75 * 60; // 1h15m in seconds (Reading + Writing combined)
+    let timerInterval = null;
+    
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          alert('⏰ Tempo esgotado!\n\nO tempo oficial para Leitura e Escrita terminou.');
+          timeRemaining = 0;
+        }
+        
+        updateTimerDisplay();
+      }, 1000);
+    }
+    
+    function updateTimerDisplay() {
+      const hours = Math.floor(timeRemaining / 3600);
+      const minutes = Math.floor((timeRemaining % 3600) / 60);
+      const seconds = timeRemaining % 60;
+      
+      const display = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      document.getElementById('countdown-timer').textContent = display;
+      
+      const timerBox = document.getElementById('timer-display');
+      
+      // Visual warnings
+      if (timeRemaining <= 300) { // Last 5 minutes
+        timerBox.classList.add('critical');
+        timerBox.classList.remove('warning');
+      } else if (timeRemaining <= 600) { // Last 10 minutes
+        timerBox.classList.add('warning');
+      } else {
+        timerBox.classList.remove('warning', 'critical');
+      }
+    }
+    
+    // Start timer when page loads
+    window.addEventListener('DOMContentLoaded', () => {
+      startTimer();
+    });
+    
+    // Stop timer when leaving page
+    window.addEventListener('beforeunload', () => {
+      if (timerInterval) clearInterval(timerInterval);
+    });
     
   </script>
 
