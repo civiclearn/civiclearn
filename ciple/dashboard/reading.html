@@ -406,7 +406,21 @@
     }
     
     // ==========================================================================
+    // HELPER: Shuffle array
+    // ==========================================================================
+    
+    function shuffleArray(array) {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+    
+    // ==========================================================================
     // RENDER: Long Text MCQ (Reading Tasks 3 & 4)
+    // Task 7 uses same 5 options for all questions - shuffle to prevent predictable order
     // ==========================================================================
     
     function renderLongTextMCQ(container, task, taskIndex) {
@@ -420,6 +434,9 @@
         </div>
       `;
       
+      // Shuffle options once (all questions share same options in this task type)
+      const shuffledOptions = shuffleArray([...task.questions[0].options]);
+      
       task.questions.forEach((question, qIndex) => {
         const questionDiv = document.createElement('div');
         questionDiv.className = 'question-block';
@@ -432,7 +449,7 @@
             ${qIndex + 1}. ${question.question}
           </div>
           <div class="options-container">
-            ${question.options.map(option => `
+            ${shuffledOptions.map(option => `
               <label class="option-button">
                 <input 
                   type="radio" 
