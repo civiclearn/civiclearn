@@ -4,7 +4,160 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CIPLE - Compreensão do Oral</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/ciple-styles.css">
+  <style>
+    /* Modern font */
+    body {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    /* Test identifier badge */
+    .test-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Timer display */
+    .timer-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: #fff5f5;
+      border: 2px solid #fc8181;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #c53030;
+      margin-top: 12px;
+    }
+    
+    .timer-icon {
+      font-size: 1.5rem;
+    }
+    
+    #countdown-timer {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    
+    .timer-box.warning {
+      background: #fffaf0;
+      border-color: #ed8936;
+      color: #c05621;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    
+    .timer-box.critical {
+      background: #fff5f5;
+      border-color: #f56565;
+      color: #c53030;
+      animation: pulse 0.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    /* Compact card styling */
+    .card {
+      padding: 1.75rem;
+    }
+    
+    .card-title {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .card-subtitle {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    /* Professional button styles */
+    .btn {
+      font-family: 'Space Grotesk', sans-serif;
+      padding: 14px 28px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-secondary {
+      background: #f7fafc;
+      color: #2d3748;
+      border: 2px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+      background: #edf2f7;
+      border-color: #cbd5e0;
+      transform: translateY(-1px);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .btn-primary:active, .btn-secondary:active {
+      transform: translateY(0);
+    }
+    
+    .btn-large {
+      padding: 16px 32px;
+      font-size: 1.05rem;
+    }
+    
+    .nav-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid #e2e8f0;
+    }
+    
+    /* Audio player styling */
+    .audio-container {
+      margin: 1.5rem 0;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+    }
+    
+    .audio-player {
+      width: 100%;
+      height: 48px;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
 
@@ -26,12 +179,19 @@
     
     <!-- Instructions Card -->
     <div class="card">
+      <div class="test-badge" id="test-badge">CIPLE-XX</div>
       <h1 class="card-title">Compreensão do Oral</h1>
       <p class="card-subtitle">
-        Ouça atentamente os áudios e responda às questões. 
-        Tempo sugerido: <strong>35 minutos</strong>
+        Ouça atentamente os áudios e responda às questões.
       </p>
-      <div class="alert alert-info">
+      <div class="timer-box" id="timer-display">
+        <span class="timer-icon">⏱️</span>
+        <div>
+          <div style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 2px;">Tempo restante:</div>
+          <div id="countdown-timer">0:30:00</div>
+        </div>
+      </div>
+      <div class="alert alert-info" style="margin-top: 1rem;">
         <strong>Instruções:</strong> Pode ouvir cada áudio quantas vezes quiser. 
         As suas respostas são guardadas automaticamente.
       </div>
@@ -72,6 +232,9 @@
     const urlParams = new URLSearchParams(window.location.search);
     const EXAM_ID = urlParams.get('exam') || 'ciple-04';
     
+    // Update test badge
+    document.getElementById('test-badge').textContent = EXAM_ID.toUpperCase();
+    
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', async () => {
       try {
@@ -92,6 +255,9 @@
         
         // Update progress
         updateProgress();
+        
+        // Start timer
+        startTimer();
         
       } catch (error) {
         console.error('Error loading listening test:', error);
@@ -142,7 +308,7 @@
     }
     
     // ==========================================================================
-    // RENDER: Single Audio MCQ (Tasks 1-10)
+    // RENDER: Single Audio MCQ
     // ==========================================================================
     
     function renderSingleAudioMCQ(container, task, taskIndex) {
@@ -153,7 +319,6 @@
         const questionDiv = document.createElement('div');
         questionDiv.className = 'question-block';
         
-        // FIXED: Use unique radio button name combining task_id and question_id
         const uniqueName = `${task.task_id}-${question.id}`;
         
         questionDiv.innerHTML = `
@@ -162,7 +327,6 @@
           </div>
           <div class="options-container">
             ${question.options.map((option, optIndex) => {
-              // Escape special characters for HTML attributes
               const escapedOption = option.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
               return `
                 <label class="option-button">
@@ -198,85 +362,82 @@
       container.appendChild(contentDiv);
     }
     
-function renderMatchOne(container, task, taskIndex) {
-  const contentDiv = document.createElement('div');
-  contentDiv.className = 'task-content';
-  
-  // Instructions
-  const instructionDiv = document.createElement('div');
-  instructionDiv.className = 'alert alert-info';
-  instructionDiv.innerHTML = `
-    <strong>Instruções:</strong> Ouça o áudio. Contém 10 conversas numeradas (1, 2, 3...).
-    Para cada conversa, selecione onde se passa a situação.
-  `;
-  contentDiv.appendChild(instructionDiv);
-  
-  // Create table-style layout
-  const tableDiv = document.createElement('div');
-  tableDiv.style.cssText = 'margin-top: 1.5rem;';
-  
-  task.questions.forEach((question, qIndex) => {
-    const row = document.createElement('div');
-    row.style.cssText = 'display: grid; grid-template-columns: 60px 1fr; gap: 1rem; padding: 1rem; border-bottom: 1px solid var(--border-color); align-items: center;';
+    // ==========================================================================
+    // RENDER: Match One (Dropdown style)
+    // ==========================================================================
     
-    // Number column
-    const numberCol = document.createElement('div');
-    numberCol.style.cssText = 'font-weight: 700; font-size: 1.125rem; color: var(--primary-color); text-align: center;';
-    numberCol.textContent = `${qIndex + 1}.`;
-    
-    // Options column
-    const optionsCol = document.createElement('div');
-    const uniqueName = `${task.task_id}-${question.id}`;
-    
-    // Use SELECT dropdown instead of radio buttons
-    const selectId = `select-${question.id}`;
-    optionsCol.innerHTML = `
-      <select 
-        id="${selectId}"
-        name="${uniqueName}"
-        data-question-id="${question.id}"
-        onchange="saveAnswer('${question.id}', this.value)"
-        style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; background: white; cursor: pointer;"
-      >
-        <option value="">Selecione o local...</option>
-        ${task.content.options.map(option => {
-          const escapedOption = option.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-          return `<option value="${escapedOption}">${option}</option>`;
-        }).join('')}
-      </select>
-    `;
-    
-    row.appendChild(numberCol);
-    row.appendChild(optionsCol);
-    tableDiv.appendChild(row);
-    
-    // Restore saved answer
-    const savedAnswer = CIPLEEngine.currentTest.sections.listening.answers[question.id];
-    if (savedAnswer) {
-      setTimeout(() => {
-        const select = document.getElementById(selectId);
-        if (select) {
-          select.value = savedAnswer;
-          select.style.borderColor = 'var(--primary-color)';
-          select.style.background = 'var(--bg-light)';
+    function renderMatchOne(container, task, taskIndex) {
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'task-content';
+      
+      const instructionDiv = document.createElement('div');
+      instructionDiv.className = 'alert alert-info';
+      instructionDiv.innerHTML = `
+        <strong>Instruções:</strong> Ouça o áudio. Contém 10 conversas numeradas (1, 2, 3...).
+        Para cada conversa, selecione onde se passa a situação.
+      `;
+      contentDiv.appendChild(instructionDiv);
+      
+      const tableDiv = document.createElement('div');
+      tableDiv.style.cssText = 'margin-top: 1.5rem;';
+      
+      task.questions.forEach((question, qIndex) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display: grid; grid-template-columns: 60px 1fr; gap: 1rem; padding: 1rem; border-bottom: 1px solid var(--border-color); align-items: center;';
+        
+        const numberCol = document.createElement('div');
+        numberCol.style.cssText = 'font-weight: 700; font-size: 1.125rem; color: var(--primary-color); text-align: center;';
+        numberCol.textContent = `${qIndex + 1}.`;
+        
+        const optionsCol = document.createElement('div');
+        const uniqueName = `${task.task_id}-${question.id}`;
+        const selectId = `select-${question.id}`;
+        
+        optionsCol.innerHTML = `
+          <select 
+            id="${selectId}"
+            name="${uniqueName}"
+            data-question-id="${question.id}"
+            onchange="saveAnswer('${question.id}', this.value)"
+            style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; background: white; cursor: pointer; font-family: 'Space Grotesk', sans-serif;"
+          >
+            <option value="">Selecione o local...</option>
+            ${task.content.options.map(option => {
+              const escapedOption = option.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+              return `<option value="${escapedOption}">${option}</option>`;
+            }).join('')}
+          </select>
+        `;
+        
+        row.appendChild(numberCol);
+        row.appendChild(optionsCol);
+        tableDiv.appendChild(row);
+        
+        // Restore saved answer
+        const savedAnswer = CIPLEEngine.currentTest.sections.listening.answers[question.id];
+        if (savedAnswer) {
+          setTimeout(() => {
+            const select = document.getElementById(selectId);
+            if (select) {
+              select.value = savedAnswer;
+              select.style.borderColor = 'var(--primary-color)';
+              select.style.background = 'var(--bg-light)';
+            }
+          }, 0);
         }
-      }, 0);
+      });
+      
+      contentDiv.appendChild(tableDiv);
+      container.appendChild(contentDiv);
     }
-  });
-  
-  contentDiv.appendChild(tableDiv);
-  container.appendChild(contentDiv);
-}
     
     // ==========================================================================
-    // SAVE ANSWER - FIXED
+    // SAVE ANSWER
     // ==========================================================================
     
     function saveAnswer(questionId, selectedOption) {
-      // Find the radio button that was just selected
       const allRadios = document.querySelectorAll(`input[data-question-id="${questionId}"]`);
       
-      // Find which one was selected
       let selectedRadio = null;
       allRadios.forEach(radio => {
         if (radio.value === selectedOption && radio.checked) {
@@ -285,30 +446,85 @@ function renderMatchOne(container, task, taskIndex) {
       });
       
       if (selectedRadio) {
-        // Get the unique name for this question's radio group
         const uniqueName = selectedRadio.name;
-        
-        // Remove 'selected' class from all options in this question's group
         document.querySelectorAll(`input[name="${uniqueName}"]`).forEach(r => {
           r.closest('.option-button').classList.remove('selected');
         });
-        
-        // Add 'selected' class to chosen option
         selectedRadio.closest('.option-button').classList.add('selected');
       }
       
-      // Save to engine (this stores by question.id, which is what we want)
       CIPLEEngine.saveListeningAnswer(questionId, selectedOption);
-      
       console.log('Answer saved:', questionId, selectedOption);
     }
+    
+    // ==========================================================================
+    // COUNTDOWN TIMER (30 minutes for Listening)
+    // ==========================================================================
+    
+    let timeRemaining = 30 * 60; // 30 minutes in seconds
+    let timerInterval = null;
+    const TIMER_KEY = `ciple_timer_${EXAM_ID}_listening`;
+    
+    function startTimer() {
+      const savedTimer = localStorage.getItem(TIMER_KEY);
+      
+      if (savedTimer) {
+        const timerData = JSON.parse(savedTimer);
+        const elapsed = Math.floor((Date.now() - timerData.startTime) / 1000);
+        timeRemaining = Math.max(0, timerData.totalTime - elapsed);
+        console.log('⏱️ Resumed listening timer:', timeRemaining, 'seconds remaining');
+      } else {
+        const timerData = {
+          startTime: Date.now(),
+          totalTime: timeRemaining
+        };
+        localStorage.setItem(TIMER_KEY, JSON.stringify(timerData));
+        console.log('⏱️ Started listening timer: 30 minutes');
+      }
+      
+      updateTimerDisplay();
+      
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          alert('⏰ Tempo esgotado!\n\nO tempo oficial para Compreensão do Oral terminou.');
+          timeRemaining = 0;
+        }
+        
+        updateTimerDisplay();
+      }, 1000);
+    }
+    
+    function updateTimerDisplay() {
+      const minutes = Math.floor(timeRemaining / 60);
+      const seconds = timeRemaining % 60;
+      
+      const display = `0:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      document.getElementById('countdown-timer').textContent = display;
+      
+      const timerBox = document.getElementById('timer-display');
+      
+      if (timeRemaining <= 300) {
+        timerBox.classList.add('critical');
+        timerBox.classList.remove('warning');
+      } else if (timeRemaining <= 600) {
+        timerBox.classList.add('warning');
+      } else {
+        timerBox.classList.remove('warning', 'critical');
+      }
+    }
+    
+    window.addEventListener('beforeunload', () => {
+      if (timerInterval) clearInterval(timerInterval);
+    });
     
     // ==========================================================================
     // COMPLETE LISTENING SECTION
     // ==========================================================================
     
     function completeListening() {
-      // Count total questions
       const totalQuestions = listeningData.tasks.reduce((sum, task) => 
         sum + task.questions.length, 0
       );
@@ -327,15 +543,16 @@ function renderMatchOne(container, task, taskIndex) {
         }
       }
       
-      // Grade the section
+      // Clear timer
+      localStorage.removeItem(TIMER_KEY);
+      if (timerInterval) clearInterval(timerInterval);
+      
       showLoading();
       
       setTimeout(() => {
         const result = CIPLEEngine.completeListeningSection(listeningData);
-        
         hideLoading();
         
-        // Show results
         alert(
           `Secção de Oral Completa!\n\n` +
           `Pontuação: ${result.score}%\n` +
@@ -343,14 +560,9 @@ function renderMatchOne(container, task, taskIndex) {
           `Agora vamos para a Produção Escrita.`
         );
         
-        // Navigate to writing (pass exam ID)
         window.location.href = `writing.html?exam=${EXAM_ID}`;
       }, 500);
     }
-    
-    // ==========================================================================
-    // NAVIGATION
-    // ==========================================================================
     
     function goBack() {
       if (confirm('Tem a certeza que quer voltar? O progresso está guardado.')) {
@@ -358,21 +570,11 @@ function renderMatchOne(container, task, taskIndex) {
       }
     }
     
-    // ==========================================================================
-    // PROGRESS UPDATE
-    // ==========================================================================
-    
     function updateProgress() {
       const progress = CIPLEEngine.getProgress();
-      document.getElementById('progress-text').textContent = 
-        `${progress.completed}/4 Secções`;
-      document.getElementById('progress-fill').style.width = 
-        `${progress.percentage}%`;
+      document.getElementById('progress-text').textContent = `${progress.completed}/4 Secções`;
+      document.getElementById('progress-fill').style.width = `${progress.percentage}%`;
     }
-    
-    // ==========================================================================
-    // LOADING OVERLAY
-    // ==========================================================================
     
     function showLoading() {
       document.getElementById('loading-overlay').style.display = 'flex';

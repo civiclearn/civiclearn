@@ -4,11 +4,163 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CIPLE - Produção Oral</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/ciple/assets/css/ciple-styles.css">
+  <style>
+    body {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    .test-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+    
+    .timer-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: #fff5f5;
+      border: 2px solid #fc8181;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #c53030;
+      margin-top: 12px;
+    }
+    
+    .timer-icon { font-size: 1.5rem; }
+    
+    #countdown-timer {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    
+    .timer-box.warning {
+      background: #fffaf0;
+      border-color: #ed8936;
+      color: #c05621;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    
+    .timer-box.critical {
+      background: #fff5f5;
+      border-color: #f56565;
+      color: #c53030;
+      animation: pulse 0.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .btn {
+      font-family: 'Space Grotesk', sans-serif;
+      padding: 14px 28px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-secondary {
+      background: #f7fafc;
+      color: #2d3748;
+      border: 2px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+      background: #edf2f7;
+      border-color: #cbd5e0;
+      transform: translateY(-1px);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+    }
+    
+    .btn-success:hover:not(:disabled) {
+      box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+      color: white;
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    .btn-large {
+      padding: 16px 32px;
+      font-size: 1.05rem;
+    }
+    
+    .nav-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid #e2e8f0;
+    }
+    
+    .recording-controls {
+      display: flex;
+      gap: 12px;
+      margin: 1rem 0;
+    }
+    
+    .recording-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: #fed7d7;
+      border: 2px solid #fc8181;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #c53030;
+    }
+    
+    .recording-indicator.active {
+      animation: pulse 1s ease-in-out infinite;
+    }
+    
+    .rec-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #e53e3e;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Progress Header -->
   <div class="test-header">
     <div class="progress-container">
       <div class="progress-info">
@@ -21,17 +173,22 @@
     </div>
   </div>
 
-  <!-- Main Content -->
   <div class="container">
     
-    <!-- Instructions Card -->
     <div class="card">
+      <div class="test-badge" id="test-badge">CIPLE-XX</div>
       <h1 class="card-title">Produção Oral</h1>
       <p class="card-subtitle">
-        Complete as duas tarefas de fala. 
-        Tempo sugerido: <strong>15 minutos</strong>
+        Complete as duas tarefas de fala.
       </p>
-      <div class="alert alert-info">
+      <div class="timer-box" id="timer-display">
+        <span class="timer-icon">⏱️</span>
+        <div>
+          <div style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 2px;">Tempo restante:</div>
+          <div id="countdown-timer">0:15:00</div>
+        </div>
+      </div>
+      <div class="alert alert-info" style="margin-top: 1rem;">
         <strong>Instruções:</strong> Clique em "Começar Gravação" e fale claramente. 
         As suas gravações serão transcritas e avaliadas por IA segundo os critérios oficiais do CIPLE.
       </div>
@@ -41,12 +198,10 @@
       </div>
     </div>
 
-    <!-- Tasks Container -->
     <div id="tasks-container">
       <!-- Tasks will be dynamically loaded here -->
     </div>
 
-    <!-- Navigation -->
     <div class="nav-buttons">
       <button class="btn btn-secondary" onclick="goBack()">
         ← Voltar à Escrita
@@ -58,417 +213,256 @@
 
   </div>
 
-  <!-- Loading Overlay -->
   <div id="loading-overlay" class="loading-overlay" style="display: none;">
     <div class="spinner"></div>
+    <p id="loading-message" style="margin-top: 1rem; color: white;"></p>
   </div>
 
-  <!-- Scripts -->
   <script src="/ciple/assets/js/ciple-engine-v2.js"></script>
   <script>
-    // ==========================================================================
-    // SPEAKING TEST LOGIC
-    // ==========================================================================
-    
     let speakingData = null;
-    
-    // Get exam ID from URL parameter
     const urlParams = new URLSearchParams(window.location.search);
     const EXAM_ID = urlParams.get('exam') || 'ciple-04';
     
-    // Recording state
     let mediaRecorder = null;
     let audioChunks = [];
     let currentRecordingTask = null;
-    let recordingStartTime = null;
-    let timerInterval = null;
+    let recordingTimerInterval = null;
     
-    // Initialize on page load
+    document.getElementById('test-badge').textContent = EXAM_ID.toUpperCase();
+    
     window.addEventListener('DOMContentLoaded', async () => {
       try {
-        // Initialize engine
         CIPLEEngine.init(EXAM_ID);
         
-        // Load speaking JSON (dynamic based on exam ID)
         const response = await fetch(`/ciple/data/${EXAM_ID}-speaking.json`);
-        
-        if (!response.ok) {
-          throw new Error(`Failed to load test data: ${response.status} ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
         speakingData = await response.json();
-        
-        // Render tasks
         renderTasks();
-        
-        // Update progress
         updateProgress();
-        
-        // Check if microphone is available
-        checkMicrophonePermission();
+        startTimer();
         
       } catch (error) {
-        console.error('Error loading speaking test:', error);
-        alert('Erro ao carregar o teste. Por favor, recarregue a página.\n\nDetalhes: ' + error.message);
+        console.error('Error:', error);
+        alert('Erro ao carregar o teste: ' + error.message);
       }
     });
-    
-    // ==========================================================================
-    // CHECK MICROPHONE PERMISSION
-    // ==========================================================================
-    
-    async function checkMicrophonePermission() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        // Stop the stream immediately - we just wanted to check permission
-        stream.getTracks().forEach(track => track.stop());
-        console.log('Microphone permission granted');
-      } catch (error) {
-        console.error('Microphone permission denied:', error);
-        alert(
-          'Erro: Não foi possível aceder ao microfone.\n\n' +
-          'Por favor, autorize o acesso ao microfone nas definições do navegador.'
-        );
-      }
-    }
-    
-    // ==========================================================================
-    // RENDER TASKS
-    // ==========================================================================
     
     function renderTasks() {
       const container = document.getElementById('tasks-container');
       container.innerHTML = '';
       
-      speakingData.tasks.forEach((task, taskIndex) => {
+      speakingData.tasks.forEach((task, idx) => {
         const taskDiv = document.createElement('div');
         taskDiv.className = 'card task-container';
         
-        // Task Header
         taskDiv.innerHTML = `
           <div class="task-header">
             <h2 class="task-title">${task.title}</h2>
             <p class="task-instructions">${task.instructions}</p>
           </div>
+          <div class="task-content">
+            <div class="alert alert-info">
+              <strong>Tema:</strong> ${task.prompt}
+            </div>
+            
+            <div class="recording-controls">
+              <button class="btn btn-danger" id="record-btn-${task.task_id}" 
+                      onclick="startRecording('${task.task_id}')">
+                🎤 Começar Gravação
+              </button>
+              <button class="btn btn-secondary" id="stop-btn-${task.task_id}" 
+                      onclick="stopRecording('${task.task_id}')" disabled>
+                ⏹️ Parar Gravação
+              </button>
+            </div>
+            
+            <div id="recording-status-${task.task_id}"></div>
+            <div id="playback-${task.task_id}"></div>
+          </div>
         `;
         
-        // Task Content
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'task-content';
-        
-        // Speaking Prompt
-        const promptDiv = document.createElement('div');
-        promptDiv.className = 'speaking-prompt';
-        
-       if (task.type === 'image_description' && task.media && task.media.image) {
-  // Try to load image with any common extension
-  const imagePath = task.media.image.replace(/\.(png|jpg|jpeg|gif|webp)$/i, '');
-  promptDiv.innerHTML = `
-    <h3>Tarefa:</h3>
-    <p>${task.instructions}</p>
-    <div style="margin-top: 1rem; text-align: center;">
-      <img src="${imagePath}.jpg" alt="Imagem para descrição" 
-           style="max-width: 100%; border-radius: 8px; box-shadow: var(--shadow-lg);"
-           onerror="this.onerror=null; this.src='${imagePath}.png';">
-    </div>
-  `;
-} else if (task.type === 'free_speech') {
-          promptDiv.innerHTML = `
-            <h3>Tarefa:</h3>
-            <p style="font-size: 1.125rem; font-weight: 500;">${task.prompt}</p>
-          `;
-        }
-        
-        // Guidance
-        if (task.guidance && task.guidance.length > 0) {
-          const guidanceDiv = document.createElement('div');
-          guidanceDiv.className = 'speaking-guidance';
-          guidanceDiv.innerHTML = `
-            <strong>Orientações:</strong>
-            <ul>
-              ${task.guidance.map(g => `<li>${g}</li>`).join('')}
-            </ul>
-          `;
-          promptDiv.appendChild(guidanceDiv);
-        }
-        
-        contentDiv.appendChild(promptDiv);
-        
-        // Recording Controls
-        const recordingDiv = document.createElement('div');
-        recordingDiv.className = 'recording-controls';
-        recordingDiv.id = `recording-${task.task_id}`;
+        container.appendChild(taskDiv);
         
         // Check if already recorded
-        const savedRecording = CIPLEEngine.currentTest.sections.speaking.recordings[task.task_id];
-        
-        if (savedRecording) {
-          recordingDiv.innerHTML = `
-            <div class="recording-status" style="color: var(--success-color);">
-              ✓ Gravação Completa
-            </div>
-            <audio controls style="margin-top: 1rem;">
-              <source src="${savedRecording}" type="audio/webm">
-            </audio>
-            <button class="btn btn-secondary" onclick="reRecord('${task.task_id}')">
-              Gravar Novamente
-            </button>
-          `;
-        } else {
-          recordingDiv.innerHTML = `
-            <div class="recording-status" id="status-${task.task_id}">
-              Pronto para gravar
-            </div>
-            <div class="recording-timer" id="timer-${task.task_id}" style="display: none;">
-              00:00
-            </div>
-            <button class="btn btn-primary btn-large" id="record-btn-${task.task_id}" 
-                    onclick="startRecording('${task.task_id}')">
-              🎤 Começar Gravação
-            </button>
-          `;
+        const saved = CIPLEEngine.currentTest.sections.speaking.recordings[task.task_id];
+        if (saved) {
+          showPlayback(task.task_id, saved);
         }
-        
-        contentDiv.appendChild(recordingDiv);
-        taskDiv.appendChild(contentDiv);
-        container.appendChild(taskDiv);
       });
       
-      // Check if all tasks are recorded
-      checkAllRecorded();
+      updateSubmitButton();
     }
-    
-    // ==========================================================================
-    // START RECORDING
-    // ==========================================================================
     
     async function startRecording(taskId) {
       try {
-        // Get microphone access
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        
-        // Create MediaRecorder
         mediaRecorder = new MediaRecorder(stream);
         audioChunks = [];
         currentRecordingTask = taskId;
-        recordingStartTime = Date.now();
         
-        // Collect audio data
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            audioChunks.push(event.data);
-          }
+        mediaRecorder.ondataavailable = (e) => {
+          audioChunks.push(e.data);
         };
         
-        // Handle recording stop
         mediaRecorder.onstop = async () => {
           const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-          
-          // Save to engine
           await CIPLEEngine.saveSpeakingRecording(taskId, audioBlob);
-          
-          // Stop all tracks
+          showPlayback(taskId, CIPLEEngine.currentTest.sections.speaking.recordings[taskId]);
+          updateSubmitButton();
           stream.getTracks().forEach(track => track.stop());
-          
-          // Update UI
-          renderTasks();
-          
-          console.log('Recording saved for:', taskId);
         };
         
-        // Start recording
         mediaRecorder.start();
         
-        // Update UI
-        updateRecordingUI(taskId, 'recording');
+        document.getElementById(`record-btn-${taskId}`).disabled = true;
+        document.getElementById(`stop-btn-${taskId}`).disabled = false;
         
-        // Start timer
-        startTimer(taskId);
+        const statusDiv = document.getElementById(`recording-status-${taskId}`);
+        statusDiv.innerHTML = `
+          <div class="recording-indicator active">
+            <div class="rec-dot"></div>
+            <span>A gravar...</span>
+          </div>
+        `;
         
-      } catch (error) {
-        console.error('Error starting recording:', error);
-        alert(
-          'Erro ao iniciar gravação.\n\n' +
-          'Verifique se o microfone está conectado e se deu permissão ao navegador.'
-        );
+      } catch (err) {
+        alert('Erro ao aceder ao microfone: ' + err.message);
       }
     }
-    
-    // ==========================================================================
-    // STOP RECORDING
-    // ==========================================================================
     
     function stopRecording(taskId) {
-      if (mediaRecorder && mediaRecorder.state === 'recording') {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
         mediaRecorder.stop();
-        stopTimer();
-        updateRecordingUI(taskId, 'stopped');
+        document.getElementById(`record-btn-${taskId}`).disabled = false;
+        document.getElementById(`stop-btn-${taskId}`).disabled = true;
+        document.getElementById(`recording-status-${taskId}`).innerHTML = '';
       }
     }
     
-    // ==========================================================================
-    // RE-RECORD
-    // ==========================================================================
-    
-    function reRecord(taskId) {
-      if (confirm('Tem a certeza que quer gravar novamente? A gravação anterior será substituída.')) {
-        // Clear saved recording
-        delete CIPLEEngine.currentTest.sections.speaking.recordings[taskId];
-        CIPLEEngine.saveTestState(EXAM_ID, CIPLEEngine.currentTest);
-        
-        // Re-render
-        renderTasks();
-      }
+    function showPlayback(taskId, base64Audio) {
+      const playbackDiv = document.getElementById(`playback-${taskId}`);
+      playbackDiv.innerHTML = `
+        <div class="alert alert-success" style="margin-top: 1rem;">
+          ✅ Gravação completa
+          <audio controls style="width: 100%; margin-top: 0.5rem;">
+            <source src="${base64Audio}" type="audio/webm">
+          </audio>
+          <button class="btn btn-secondary" style="margin-top: 0.5rem;" 
+                  onclick="startRecording('${taskId}')">
+            🔄 Gravar Novamente
+          </button>
+        </div>
+      `;
     }
     
-    // ==========================================================================
-    // RECORDING UI UPDATES
-    // ==========================================================================
+    function updateSubmitButton() {
+      const totalTasks = speakingData.tasks.length;
+      const completed = Object.keys(CIPLEEngine.currentTest.sections.speaking.recordings).length;
+      document.getElementById('submit-btn').disabled = (completed < totalTasks);
+    }
     
-    function updateRecordingUI(taskId, state) {
-      const recordingDiv = document.getElementById(`recording-${taskId}`);
-      const statusDiv = document.getElementById(`status-${taskId}`);
-      const timerDiv = document.getElementById(`timer-${taskId}`);
-      const recordBtn = document.getElementById(`record-btn-${taskId}`);
+    // ======================================================================
+    // COUNTDOWN TIMER (15 minutes for Speaking)
+    // ======================================================================
+    
+    let timeRemaining = 15 * 60;
+    let timerInterval = null;
+    const TIMER_KEY = `ciple_timer_${EXAM_ID}_speaking`;
+    
+    function startTimer() {
+      const savedTimer = localStorage.getItem(TIMER_KEY);
       
-      if (state === 'recording') {
-        statusDiv.textContent = '🔴 Gravando...';
-        statusDiv.style.color = 'var(--error-color)';
-        timerDiv.style.display = 'block';
-        recordBtn.textContent = '⏹️ Parar Gravação';
-        recordBtn.onclick = () => stopRecording(taskId);
-        recordBtn.classList.remove('btn-primary');
-        recordBtn.classList.add('btn-secondary');
-      } else if (state === 'stopped') {
-        statusDiv.textContent = 'A processar...';
-        statusDiv.style.color = 'var(--text-gray)';
+      if (savedTimer) {
+        const timerData = JSON.parse(savedTimer);
+        const elapsed = Math.floor((Date.now() - timerData.startTime) / 1000);
+        timeRemaining = Math.max(0, timerData.totalTime - elapsed);
+      } else {
+        localStorage.setItem(TIMER_KEY, JSON.stringify({
+          startTime: Date.now(),
+          totalTime: timeRemaining
+        }));
       }
-    }
-    
-    // ==========================================================================
-    // TIMER
-    // ==========================================================================
-    
-    function startTimer(taskId) {
-      const timerDiv = document.getElementById(`timer-${taskId}`);
       
+      updateTimerDisplay();
       timerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
-        const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
-        const seconds = (elapsed % 60).toString().padStart(2, '0');
-        timerDiv.textContent = `${minutes}:${seconds}`;
+        timeRemaining--;
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          alert('⏰ Tempo esgotado!\n\nO tempo oficial para Produção Oral terminou.');
+          timeRemaining = 0;
+        }
+        updateTimerDisplay();
       }, 1000);
     }
     
-    function stopTimer() {
-      if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
+    function updateTimerDisplay() {
+      const minutes = Math.floor(timeRemaining / 60);
+      const seconds = timeRemaining % 60;
+      document.getElementById('countdown-timer').textContent = 
+        `0:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      const timerBox = document.getElementById('timer-display');
+      if (timeRemaining <= 180) {
+        timerBox.classList.add('critical');
+      } else if (timeRemaining <= 300) {
+        timerBox.classList.add('warning');
       }
     }
     
-    // ==========================================================================
-    // CHECK ALL RECORDED
-    // ==========================================================================
+    window.addEventListener('beforeunload', () => {
+      if (timerInterval) clearInterval(timerInterval);
+    });
     
-    function checkAllRecorded() {
-      const totalTasks = speakingData.tasks.length;
-      const recordedCount = Object.keys(
-        CIPLEEngine.currentTest.sections.speaking.recordings
-      ).length;
-      
-      const submitBtn = document.getElementById('submit-btn');
-      
-      if (recordedCount === totalTasks) {
-        submitBtn.disabled = false;
-      } else {
-        submitBtn.disabled = true;
-      }
-    }
-    
-    // ==========================================================================
-    // SUBMIT TEST FOR EVALUATION
-    // ==========================================================================
+    // ======================================================================
+    // SUBMIT TEST
+    // ======================================================================
     
     async function submitTest() {
-      // Final confirmation
       if (!confirm(
-        'Tem a certeza que quer submeter o teste completo?\n\n' +
-        '✓ Leitura: Completa\n' +
-        '✓ Oral: Completa\n' +
-        '✓ Escrita: Completa\n' +
-        '✓ Produção Oral: Completa\n\n' +
-        'O teste será enviado para avaliação por IA. Este processo pode demorar 1-2 minutos.'
+        'Submeter teste para avaliação?\n\n' +
+        'As suas respostas serão enviadas e avaliadas. Esta ação não pode ser revertida.'
       )) {
         return;
       }
       
-      // Mark speaking as complete
+      // Clear timer
+      localStorage.removeItem(TIMER_KEY);
+      if (timerInterval) clearInterval(timerInterval);
+      
       CIPLEEngine.completeSpeakingSection();
       
-      // Show loading
-      showLoading();
+      document.getElementById('loading-overlay').style.display = 'flex';
+      document.getElementById('loading-message').textContent = 'A submeter o teste...';
       
       try {
-        // Submit to Supabase Edge Function
         const result = await CIPLEEngine.submitForEvaluation();
         
-        hideLoading();
+        document.getElementById('loading-message').textContent = 
+          'Teste submetido! A redirecionar para resultados...';
         
-        // Navigate to results (pass both attempt_id and exam_id)
-        alert(
-          'Teste Submetido com Sucesso!\n\n' +
-          'O seu teste foi enviado para avaliação.\n' +
-          'Agora vai ver os resultados.'
-        );
-        
-        window.location.href = `results.html?attempt_id=${result.attempt_id}&exam=${EXAM_ID}`;
+        setTimeout(() => {
+          window.location.href = `results.html?attempt_id=${result.attempt_id}&exam=${EXAM_ID}`;
+        }, 2000);
         
       } catch (error) {
-        hideLoading();
-        console.error('Submission error:', error);
-        alert(
-          'Erro ao submeter o teste.\n\n' +
-          'Por favor, verifique a sua conexão à internet e tente novamente.\n\n' +
-          'Erro: ' + error.message
-        );
+        document.getElementById('loading-overlay').style.display = 'none';
+        alert('Erro ao submeter: ' + error.message);
       }
     }
     
-    // ==========================================================================
-    // NAVIGATION
-    // ==========================================================================
-    
     function goBack() {
-      if (confirm('Tem a certeza que quer voltar? O progresso está guardado.')) {
+      if (confirm('Voltar à Escrita? O progresso está guardado.')) {
         window.location.href = `writing.html?exam=${EXAM_ID}`;
       }
     }
     
-    // ==========================================================================
-    // PROGRESS UPDATE
-    // ==========================================================================
-    
     function updateProgress() {
       const progress = CIPLEEngine.getProgress();
-      document.getElementById('progress-text').textContent = 
-        `${progress.completed}/4 Secções`;
-      document.getElementById('progress-fill').style.width = 
-        `${progress.percentage}%`;
+      document.getElementById('progress-text').textContent = `${progress.completed}/4 Secções`;
+      document.getElementById('progress-fill').style.width = `${progress.percentage}%`;
     }
-    
-    // ==========================================================================
-    // LOADING OVERLAY
-    // ==========================================================================
-    
-    function showLoading() {
-      document.getElementById('loading-overlay').style.display = 'flex';
-    }
-    
-    function hideLoading() {
-      document.getElementById('loading-overlay').style.display = 'none';
-    }
-    
   </script>
 
 </body>
