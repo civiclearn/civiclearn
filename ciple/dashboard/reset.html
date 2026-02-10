@@ -253,12 +253,12 @@
       <button class="btn btn-danger" id="reset-btn" onclick="resetAllData()">
         🗑️ Apagar Tudo e Recomeçar
       </button>
-      <a href="/ciple/dashboard/index.html" class="btn btn-secondary">
+      <a href="../" class="btn btn-secondary">
         ← Cancelar e Voltar
       </a>
     </div>
 
-    <a href="/ciple/dashboard/index.html" class="back-link">← Voltar ao Painel</a>
+    <a href="../" class="back-link">← Voltar ao Painel</a>
   </div>
 
   <script>
@@ -292,26 +292,20 @@
     // ==========================================================================
     
     function resetAllData() {
-      // Confirm action
-      const confirmation = confirm(
-        "⚠️ TEM A CERTEZA?\n\n" +
-        "Esta ação irá:\n" +
-        "• Apagar TODOS os testes guardados\n" +
-        "• Eliminar TODAS as respostas\n" +
-        "• Remover TODOS os resultados\n\n" +
+      // Single confirmation with typed input
+      const userInput = prompt(
+        "⚠️ ATENÇÃO: Esta ação irá APAGAR TODOS os dados!\n\n" +
+        "• Todos os testes guardados\n" +
+        "• Todas as respostas\n" +
+        "• Todos os resultados\n\n" +
         "Esta ação NÃO pode ser revertida!\n\n" +
-        "Escreva SIM para confirmar:"
+        "Digite SIM (em maiúsculas) para confirmar:"
       );
-
-      if (!confirmation) {
-        return;
-      }
-
-      // Double confirmation
-      const userInput = prompt("Digite SIM (em maiúsculas) para confirmar:");
       
       if (userInput !== "SIM") {
-        alert("Reset cancelado.");
+        if (userInput !== null) {
+          alert("Reset cancelado. Deve digitar SIM em maiúsculas.");
+        }
         return;
       }
 
