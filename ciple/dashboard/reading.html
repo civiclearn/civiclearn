@@ -515,13 +515,34 @@
     }
     
     // ==========================================================================
-    // COUNTDOWN TIMER
+    // COUNTDOWN TIMER (Shared with Writing: 1h15m total)
     // ==========================================================================
     
-    let timeRemaining = 75 * 60; // 1h15m in seconds (Reading + Writing combined)
+    let timeRemaining = 75 * 60; // 1h15m in seconds
     let timerInterval = null;
+    const TIMER_KEY = `ciple_timer_${EXAM_ID}_reading_writing`;
     
     function startTimer() {
+      // Check if timer already exists (returning to reading)
+      const savedTimer = localStorage.getItem(TIMER_KEY);
+      
+      if (savedTimer) {
+        const timerData = JSON.parse(savedTimer);
+        const elapsed = Math.floor((Date.now() - timerData.startTime) / 1000);
+        timeRemaining = Math.max(0, timerData.totalTime - elapsed);
+        console.log('⏱️ Resumed timer:', timeRemaining, 'seconds remaining');
+      } else {
+        // First time starting timer
+        const timerData = {
+          startTime: Date.now(),
+          totalTime: timeRemaining
+        };
+        localStorage.setItem(TIMER_KEY, JSON.stringify(timerData));
+        console.log('⏱️ Started new timer: 1h15m');
+      }
+      
+      updateTimerDisplay();
+      
       timerInterval = setInterval(() => {
         timeRemaining--;
         
@@ -561,7 +582,7 @@
       startTimer();
     });
     
-    // Stop timer when leaving page
+    // Stop timer when leaving page (but keep in localStorage)
     window.addEventListener('beforeunload', () => {
       if (timerInterval) clearInterval(timerInterval);
     });

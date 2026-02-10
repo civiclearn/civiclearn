@@ -4,7 +4,194 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CIPLE - Produção Escrita</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/ciple/assets/css/ciple-styles.css">
+  <style>
+    /* Modern font */
+    body {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    /* Test identifier badge */
+    .test-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Shared timer display */
+    .timer-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: #fff5f5;
+      border: 2px solid #fc8181;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #c53030;
+      margin-top: 12px;
+    }
+    
+    .timer-icon {
+      font-size: 1.5rem;
+    }
+    
+    #countdown-timer {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    
+    .timer-box.warning {
+      background: #fffaf0;
+      border-color: #ed8936;
+      color: #c05621;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    
+    .timer-box.critical {
+      background: #fff5f5;
+      border-color: #f56565;
+      color: #c53030;
+      animation: pulse 0.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    /* Compact card styling */
+    .card {
+      padding: 1.75rem;
+    }
+    
+    .card-title {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .card-subtitle {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    /* Professional button styles */
+    .btn {
+      font-family: 'Space Grotesk', sans-serif;
+      padding: 14px 28px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-secondary {
+      background: #f7fafc;
+      color: #2d3748;
+      border: 2px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+      background: #edf2f7;
+      border-color: #cbd5e0;
+      transform: translateY(-1px);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .btn-primary:active, .btn-secondary:active {
+      transform: translateY(0);
+    }
+    
+    .btn-large {
+      padding: 16px 32px;
+      font-size: 1.05rem;
+    }
+    
+    .nav-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid #e2e8f0;
+    }
+    
+    /* Writing-specific styles */
+    .writing-textarea {
+      width: 100%;
+      min-height: 250px;
+      padding: 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      line-height: 1.6;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+    
+    .writing-textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .word-count {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #4a5568;
+      text-align: right;
+    }
+    
+    .word-count.warning {
+      color: #d69e2e;
+    }
+    
+    .word-count.error {
+      color: #e53e3e;
+    }
+    
+    .writing-context, .writing-message {
+      background: #f7fafc;
+      padding: 16px;
+      border-left: 4px solid #667eea;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+    
+    .textarea-container {
+      margin-top: 16px;
+    }
+  </style>
 </head>
 <body>
 
@@ -26,12 +213,19 @@
     
     <!-- Instructions Card -->
     <div class="card">
+      <div class="test-badge" id="test-badge">CIPLE-XX</div>
       <h1 class="card-title">Produção Escrita</h1>
       <p class="card-subtitle">
-        Complete as duas tarefas de escrita. 
-        Tempo sugerido: <strong>45 minutos</strong>
+        Complete as duas tarefas de escrita.
       </p>
-      <div class="alert alert-info">
+      <div class="timer-box" id="timer-display">
+        <span class="timer-icon">⏱️</span>
+        <div>
+          <div style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 2px;">Tempo restante (partilhado com Leitura):</div>
+          <div id="countdown-timer">1:15:00</div>
+        </div>
+      </div>
+      <div class="alert alert-info" style="margin-top: 1rem;">
         <strong>Instruções:</strong> Respeite os limites de palavras indicados. 
         O seu texto será avaliado por IA segundo os critérios oficiais do CIPLE.
       </div>
@@ -72,6 +266,9 @@
     const urlParams = new URLSearchParams(window.location.search);
     const EXAM_ID = urlParams.get('exam') || 'ciple-04';
     
+    // Update test badge
+    document.getElementById('test-badge').textContent = EXAM_ID.toUpperCase();
+    
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', async () => {
       try {
@@ -92,6 +289,9 @@
         
         // Update progress
         updateProgress();
+        
+        // Start shared timer
+        startSharedTimer();
         
       } catch (error) {
         console.error('Error loading writing test:', error);
@@ -206,7 +406,6 @@
     
     function countWords(text) {
       if (!text || text.trim() === '') return 0;
-      // Remove extra whitespace and count words
       return text.trim().split(/\s+/).length;
     }
     
@@ -221,10 +420,7 @@
       const minWords = parseInt(textarea.getAttribute('data-min-words'));
       const maxWords = parseInt(textarea.getAttribute('data-max-words'));
       
-      // Update display
       wordCountDiv.textContent = `${wordCount} palavras`;
-      
-      // Update styling based on constraints
       wordCountDiv.classList.remove('warning', 'error');
       
       if (wordCount < minWords) {
@@ -249,6 +445,74 @@
       
       console.log('Writing saved:', taskId, `${countWords(text)} words`);
     }
+    
+    // ==========================================================================
+    // SHARED TIMER (Reading + Writing combined: 1h15m)
+    // ==========================================================================
+    
+    let timeRemaining = 0;
+    let timerInterval = null;
+    const TIMER_KEY = `ciple_timer_${EXAM_ID}_reading_writing`;
+    
+    function startSharedTimer() {
+      // Check if timer was already started in reading section
+      const savedTimer = localStorage.getItem(TIMER_KEY);
+      
+      if (savedTimer) {
+        const timerData = JSON.parse(savedTimer);
+        const elapsed = Math.floor((Date.now() - timerData.startTime) / 1000);
+        timeRemaining = Math.max(0, timerData.totalTime - elapsed);
+        console.log('📝 Resumed shared timer from reading:', timeRemaining, 'seconds remaining');
+      } else {
+        // Timer not started yet (shouldn't happen, but fallback)
+        timeRemaining = 75 * 60; // 1h15m
+        const timerData = {
+          startTime: Date.now(),
+          totalTime: timeRemaining
+        };
+        localStorage.setItem(TIMER_KEY, JSON.stringify(timerData));
+        console.log('⏱️ Started new timer (fallback)');
+      }
+      
+      updateTimerDisplay();
+      
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          alert('⏰ Tempo esgotado!\n\nO tempo oficial para Leitura e Escrita terminou.');
+          timeRemaining = 0;
+        }
+        
+        updateTimerDisplay();
+      }, 1000);
+    }
+    
+    function updateTimerDisplay() {
+      const hours = Math.floor(timeRemaining / 3600);
+      const minutes = Math.floor((timeRemaining % 3600) / 60);
+      const seconds = timeRemaining % 60;
+      
+      const display = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      document.getElementById('countdown-timer').textContent = display;
+      
+      const timerBox = document.getElementById('timer-display');
+      
+      if (timeRemaining <= 300) {
+        timerBox.classList.add('critical');
+        timerBox.classList.remove('warning');
+      } else if (timeRemaining <= 600) {
+        timerBox.classList.add('warning');
+      } else {
+        timerBox.classList.remove('warning', 'critical');
+      }
+    }
+    
+    // Clean up timer on page unload
+    window.addEventListener('beforeunload', () => {
+      if (timerInterval) clearInterval(timerInterval);
+    });
     
     // ==========================================================================
     // COMPLETE WRITING SECTION
@@ -290,7 +554,6 @@
         return;
       }
       
-      // Confirm submission
       if (!confirm(
         'Tem a certeza que quer submeter as suas respostas?\n\n' +
         'Os textos serão avaliados por IA segundo os critérios do CIPLE.'
@@ -298,10 +561,12 @@
         return;
       }
       
-      // Mark as complete
+      // Clear the shared timer
+      localStorage.removeItem(TIMER_KEY);
+      if (timerInterval) clearInterval(timerInterval);
+      
       CIPLEEngine.completeWritingSection();
       
-      // Navigate to speaking
       alert(
         'Secção de Escrita Completa!\n\n' +
         'Os seus textos foram guardados e serão avaliados no final.\n\n' +
@@ -321,28 +586,10 @@
       }
     }
     
-    // ==========================================================================
-    // PROGRESS UPDATE
-    // ==========================================================================
-    
     function updateProgress() {
       const progress = CIPLEEngine.getProgress();
-      document.getElementById('progress-text').textContent = 
-        `${progress.completed}/4 Secções`;
-      document.getElementById('progress-fill').style.width = 
-        `${progress.percentage}%`;
-    }
-    
-    // ==========================================================================
-    // LOADING OVERLAY
-    // ==========================================================================
-    
-    function showLoading() {
-      document.getElementById('loading-overlay').style.display = 'flex';
-    }
-    
-    function hideLoading() {
-      document.getElementById('loading-overlay').style.display = 'none';
+      document.getElementById('progress-text').textContent = `${progress.completed}/4 Secções`;
+      document.getElementById('progress-fill').style.width = `${progress.percentage}%`;
     }
     
   </script>
