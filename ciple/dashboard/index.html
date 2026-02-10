@@ -44,6 +44,7 @@
       border-radius: 10px;
       padding: 16px 18px;
       border: 1px solid #e5e7eb;
+      transition: background-color 0.5s ease;
     }
 
     .stat-card span {
@@ -54,8 +55,65 @@
     .stat-card strong {
       display: block;
       margin-top: 6px;
-      font-size: 1.4rem;
+      font-size: 3rem;
       font-weight: 700;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    /* Progress Bar for Card 1 */
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    /* Trend Line for Card 2 */
+    .performance-bar-container {
+      width: 100%;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .performance-bar-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    /* Color transitions for Card 3 - Countdown */
+    .stat-card.urgent-high {
+      background: linear-gradient(135deg, #fff5f5 0%, #ffe4e6 100%);
+    }
+
+    .stat-card.urgent-medium {
+      background: linear-gradient(135deg, #fff5f0 0%, #fffbeb 100%);
+    }
+
+    .stat-card.urgent-low {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    }
+
+    .stat-card.today {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .stat-card.today span,
+    .stat-card.today strong {
+      color: white;
     }
 
     .welcome-card {
@@ -265,16 +323,22 @@
         <div class="stat-card">
           <span>Simulações concluídas</span>
           <strong id="doneSims">0/20</strong>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+          </div>
         </div>
 
-        <!-- Stat Card 2: Last Result -->
+        <!-- Stat Card 2: Last Result with Performance Bar -->
         <div class="stat-card">
           <span>Último resultado</span>
           <strong id="lastResult">—</strong>
+          <div class="performance-bar-container">
+            <div class="performance-bar-fill" id="performanceBar" style="width: 0%"></div>
+          </div>
         </div>
 
         <!-- Stat Card 3: Countdown -->
-        <div class="stat-card">
+        <div class="stat-card" id="countdownCard">
           <span>Próximo exame CIPLE</span>
           <strong id="examCountdown">—</strong>
           <div style="margin-top:10px;">
@@ -397,17 +461,37 @@
   function updateCountdown() {
     const selector = document.getElementById('examDateSelector');
     const countdownEl = document.getElementById('examCountdown');
+    const card = document.getElementById('countdownCard');
 
     function updateDisplay(targetString) {
       const targetDate = new Date(targetString + 'T09:00:00');
       const now = new Date();
       const diff = targetDate - now;
       
+      // Remove all urgency classes
+      card.classList.remove('urgent-high', 'urgent-medium', 'urgent-low', 'today');
+      
       if (diff <= 0) {
-        countdownEl.textContent = 'Hoje!';
+        const diffDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
+        if (diffDays === 0) {
+          countdownEl.textContent = 'Hoje!';
+          card.classList.add('today');
+        } else {
+          countdownEl.textContent = 'Passou';
+        }
       } else {
         const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
         countdownEl.textContent = `${days} dia${days !== 1 ? 's' : ''}`;
+        
+        // Apply color based on urgency
+        if (days <= 6) {
+          card.classList.add('urgent-high'); // Red tint (1-6 days)
+        } else if (days <= 14) {
+          card.classList.add('urgent-medium'); // Orange tint (7-14 days)
+        } else if (days <= 30) {
+          card.classList.add('urgent-low'); // Yellow tint (15-30 days)
+        }
+        // else: stays white (>30 days)
       }
       
       localStorage.setItem('ciple_exam_date', targetString);
@@ -561,6 +645,7 @@
     let latestScore = null;
     let latestTest = null;
     let latestDate = null;
+    const allScores = []; // Track all scores for trend line
     
     for (let i = 1; i <= 20; i++) {
       const testNum = String(i).padStart(2, '0');
@@ -582,6 +667,8 @@
           
           const submittedDate = new Date(testState.submitted_at || testState.started_at);
           
+          allScores.push({ score: global, date: submittedDate });
+          
           if (!latestDate || submittedDate > latestDate) {
             latestDate = submittedDate;
             latestScore = global;
@@ -591,11 +678,39 @@
       }
     }
     
+    // Update completed count
     document.getElementById('doneSims').textContent = `${completedCount}/20`;
     
+    // Update progress bar
+    const progressPercentage = (completedCount / 20) * 100;
+    document.getElementById('progressBar').style.width = `${progressPercentage}%`;
+    
+    // Update last result
     if (latestScore !== null) {
       document.getElementById('lastResult').textContent = `${latestScore}%`;
     }
+    
+    // Draw trend line
+    updatePerformanceBar(allScores);
+  }
+  
+  // ==========================================================================
+  // DRAW TREND LINE
+  // ==========================================================================
+  
+  function updatePerformanceBar(scores) {
+    // Get last score
+    if (scores.length === 0) {
+      document.getElementById('lastResult').textContent = '—';
+      document.getElementById('performanceBar').style.width = '0%';
+      return;
+    }
+    
+    scores.sort((a, b) => a.date - b.date);
+    const lastScore = scores[scores.length - 1].score;
+    
+    document.getElementById('lastResult').textContent = `${Math.round(lastScore)}%`;
+    document.getElementById('performanceBar').style.width = `${lastScore}%`;
   }
 
   // ==========================================================================
