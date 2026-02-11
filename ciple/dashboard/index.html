@@ -362,7 +362,7 @@
             Preparação para o exame CIPLE
           </p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <a href="mailto:info@civiclearn.com" class="dash-pill dash-pill-outline">
+            <a href="/cdn-cgi/l/email-protection#cea7a0a8a18eada7b8a7ada2abafbca0e0ada1a3" class="dash-pill dash-pill-outline">
               Contacto
             </a>
             <a href="#" class="dash-pill dash-pill-outline" onclick="alert('Logout'); return false;">
@@ -443,7 +443,7 @@
   </main>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="/ciple/assets/js/ciple-engine-v2.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="/ciple/assets/js/ciple-engine-v2.js"></script>
 <script>
   // ==========================================================================
   // DASHBOARD LOGIC
@@ -463,6 +463,48 @@
     const selector = document.getElementById('examDateSelector');
     const countdownEl = document.getElementById('examCountdown');
     const card = document.getElementById('countdownCard');
+
+    // Hide past dates from dropdown
+    const now = new Date();
+    const options = Array.from(selector.options);
+    
+    options.forEach(opt => {
+      const examDate = new Date(opt.value + 'T09:00:00');
+      if (examDate < now) {
+        opt.style.display = 'none'; // Hide past dates
+      }
+    });
+
+    // Auto-select next future date if nothing saved
+    const saved = localStorage.getItem('ciple_exam_date');
+    if (!saved) {
+      // Find first future date
+      const nextDate = options.find(opt => {
+        const examDate = new Date(opt.value + 'T09:00:00');
+        return examDate > now;
+      });
+      
+      if (nextDate) {
+        selector.value = nextDate.value;
+        localStorage.setItem('ciple_exam_date', nextDate.value);
+      }
+    } else {
+      // Load saved date (if still valid)
+      const savedDate = new Date(saved + 'T09:00:00');
+      if (savedDate > now) {
+        selector.value = saved;
+      } else {
+        // Saved date is in the past, select next available
+        const nextDate = options.find(opt => {
+          const examDate = new Date(opt.value + 'T09:00:00');
+          return examDate > now;
+        });
+        if (nextDate) {
+          selector.value = nextDate.value;
+          localStorage.setItem('ciple_exam_date', nextDate.value);
+        }
+      }
+    }
 
     function updateDisplay(targetString) {
       const targetDate = new Date(targetString + 'T09:00:00');
@@ -719,12 +761,4 @@
   // ==========================================================================
   
   function redoTest(examId) {
-    if (confirm('Tem a certeza que quer refazer o teste?\n\nO teste anterior ficará guardado, mas será substituído pelo novo.')) {
-      CIPLEEngine.clearTestData(examId);
-      window.location.href = `reading.html?exam=${examId}`;
-    }
-  }
-</script>
-
-</body>
-</html>
+    if (confirm('Tem a certeza que quer refazer o teste?\n\nO teste anterior ficará guardado, mas será substituído pel
