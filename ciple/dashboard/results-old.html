@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIPLE - Resultados</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/ciple/assets/css/ciple-styles.css">
+  <style>
+    body {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    .test-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+    
+    .grade-hero {
+      position: relative;
+      text-align: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 16px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .grade-hero h2 {
+      color: white;
+      margin-bottom: 0.5rem;
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+    
+    .grade-display {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
+      line-height: 1;
+    }
+    
+    .grade-label {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-top: 0.25rem;
+      opacity: 0.95;
+    }
+    
+    .sections-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    @media (min-width: 768px) {
+      .sections-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    
+    .section-card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.25rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      text-align: center;
+    }
+    
+    .section-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #2d3748;
+    }
+    
+    .circular-progress {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      margin: 0.75rem auto;
+    }
+    
+    .circular-progress svg {
+      transform: rotate(-90deg);
+    }
+    
+    .circular-progress circle {
+      fill: none;
+      stroke-width: 6;
+    }
+    
+    .circular-progress .bg-circle {
+      stroke: #e2e8f0;
+    }
+    
+    .circular-progress .progress-circle {
+      stroke: #667eea;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease;
+    }
+    
+    .circular-progress .percentage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #667eea;
+    }
+    
+    .section-detail {
+      font-size: 0.75rem;
+      color: #718096;
+      margin-top: 0.5rem;
+    }
+    
+    .section-weight {
+      font-size: 0.7rem;
+      color: #a0aec0;
+      margin-top: 0.375rem;
+    }
+    
+    .feedback-card {
+      background: #f7fafc;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .feedback-card h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #2d3748;
+    }
+    
+    .task-feedback {
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .task-feedback h4 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 0.5rem;
+    }
+    
+    .task-feedback p {
+      font-size: 0.875rem;
+      color: #718096;
+      line-height: 1.6;
+      margin: 0;
+    }
+    
+    .spinner-inline {
+      width: 24px;
+      height: 24px;
+      border: 3px solid #e2e8f0;
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .btn {
+      font-family: 'Space Grotesk', sans-serif;
+      padding: 14px 28px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-secondary {
+      background: #f7fafc;
+      color: #2d3748;
+      border: 2px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+      background: #edf2f7;
+      border-color: #cbd5e0;
+      transform: translateY(-1px);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .nav-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Loading State -->
+    <div id="loading-state" class="card" style="text-align: center; padding: 3rem;">
+      <div class="spinner" style="margin: 0 auto 1rem;"></div>
+      <p>A carregar os resultados...</p>
+    </div>
+
+    <!-- Results Container -->
+    <div id="results-container" style="display: none;">
+
+      <!-- Overall Grade -->
+      <div class="grade-hero">
+        <div class="test-badge" id="test-badge" style="position: absolute; top: 1.5rem; left: 1.5rem; margin: 0;">CIPLE-XX</div>
+        <h2>Classificação Final</h2>
+        <div class="grade-display" id="overall-grade">--</div>
+        <div class="grade-label" id="grade-label">A calcular...</div>
+      </div>
+
+      <!-- Section Breakdown -->
+      <div class="sections-grid">
+        
+        <!-- Reading -->
+        <div class="section-card">
+          <div class="section-name">Compreensão da Leitura</div>
+          <div class="circular-progress">
+            <svg width="100" height="100">
+              <circle class="bg-circle" cx="50" cy="50" r="44"></circle>
+              <circle class="progress-circle" id="reading-progress" cx="50" cy="50" r="44" 
+                      stroke-dasharray="276.46" stroke-dashoffset="276.46"></circle>
+            </svg>
+            <div class="percentage" id="reading-score">--%</div>
+          </div>
+          <div class="section-detail" id="reading-detail">Corretas: -- de --</div>
+          <div class="section-weight">Peso: 22.5%</div>
+        </div>
+
+        <!-- Listening -->
+        <div class="section-card">
+          <div class="section-name">Compreensão do Oral</div>
+          <div class="circular-progress">
+            <svg width="100" height="100">
+              <circle class="bg-circle" cx="50" cy="50" r="44"></circle>
+              <circle class="progress-circle" id="listening-progress" cx="50" cy="50" r="44" 
+                      stroke-dasharray="276.46" stroke-dashoffset="276.46"></circle>
+            </svg>
+            <div class="percentage" id="listening-score">--%</div>
+          </div>
+          <div class="section-detail" id="listening-detail">Corretas: -- de --</div>
+          <div class="section-weight">Peso: 30%</div>
+        </div>
+
+        <!-- Writing -->
+        <div class="section-card">
+          <div class="section-name">Produção Escrita</div>
+          <div class="circular-progress">
+            <svg width="100" height="100">
+              <circle class="bg-circle" cx="50" cy="50" r="44"></circle>
+              <circle class="progress-circle" id="writing-progress" cx="50" cy="50" r="44" 
+                      stroke-dasharray="276.46" stroke-dashoffset="276.46"></circle>
+            </svg>
+            <div class="percentage" id="writing-score"><div class="spinner-inline"></div></div>
+          </div>
+          <div class="section-detail" id="writing-detail">⏳ A avaliar...</div>
+          <div class="section-weight">Peso: 22.5%</div>
+        </div>
+
+        <!-- Speaking -->
+        <div class="section-card">
+          <div class="section-name">Produção Oral</div>
+          <div class="circular-progress">
+            <svg width="100" height="100">
+              <circle class="bg-circle" cx="50" cy="50" r="44"></circle>
+              <circle class="progress-circle" id="speaking-progress" cx="50" cy="50" r="44" 
+                      stroke-dasharray="276.46" stroke-dashoffset="276.46"></circle>
+            </svg>
+            <div class="percentage" id="speaking-score"><div class="spinner-inline"></div></div>
+          </div>
+          <div class="section-detail" id="speaking-detail">⏳ A avaliar...</div>
+          <div class="section-weight">Peso: 25%</div>
+        </div>
+
+      </div>
+
+      <!-- Writing Feedback -->
+      <div class="feedback-card" id="writing-feedback-card" style="display: none;">
+        <h3>📝 Feedback da Escrita</h3>
+        <div id="writing-feedback-content"></div>
+      </div>
+
+      <!-- Speaking Feedback -->
+      <div class="feedback-card" id="speaking-feedback-card" style="display: none;">
+        <h3>🗣️ Feedback da Produção Oral</h3>
+        <div id="speaking-feedback-content"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" onclick="goToDashboard()">
+          ← Voltar ao Painel
+        </button>
+        <button class="btn btn-primary" onclick="window.print()">
+          🖨️ Imprimir Resultados
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Error State -->
+    <div id="error-state" class="card" style="display: none;">
+      <div class="alert alert-error">
+        <strong>Erro ao carregar resultados</strong>
+        <p id="error-message"></p>
+      </div>
+      <button class="btn btn-primary" onclick="location.reload()">
+        Tentar Novamente
+      </button>
+    </div>
+
+  </div>
+
+  <script src="/ciple/assets/js/ciple-engine-v2.js?v=3"></script>
+  <script>
+    let attemptId = null;
+    let examId = null;
+    let pollInterval = null;
+    
+    window.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      attemptId = urlParams.get('attempt_id');
+      examId = urlParams.get('exam') || 'ciple-04';
+      
+      document.getElementById('test-badge').textContent = examId.toUpperCase();
+      
+      if (!attemptId) {
+        showError('ID de tentativa não encontrado na URL');
+        return;
+      }
+      
+      await fetchResults();
+      startPolling();
+    });
+    
+    async function fetchResults() {
+      try {
+        const response = await fetch(
+          `${CIPLEEngine.SUPABASE_URL}/rest/v1/ciple_attempts?id=eq.${attemptId}&select=*`,
+          {
+            headers: {
+              'apikey': CIPLEEngine.SUPABASE_KEY,
+              'Authorization': `Bearer ${CIPLEEngine.SUPABASE_KEY}`
+            }
+          }
+        );
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data || data.length === 0) {
+          throw new Error('Nenhum resultado encontrado');
+        }
+        
+        const result = data[0];
+        displayResults(result);
+        
+        // Stop polling if both are complete
+        if (result.writing_status === 'complete' && result.speaking_status === 'complete') {
+          stopPolling();
+        }
+        
+      } catch (error) {
+        console.error('Error fetching results:', error);
+        showError('Não foi possível carregar os resultados: ' + error.message);
+      }
+    }
+    
+    function setCircularProgress(elementId, percentage) {
+      const circle = document.getElementById(elementId);
+      const circumference = 276.46; // 2 * PI * 44
+      const offset = circumference - (percentage / 100 * circumference);
+      circle.style.strokeDashoffset = offset;
+    }
+    
+    function displayResults(result) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('results-container').style.display = 'block';
+      
+      // Update localStorage
+      const testState = CIPLEEngine.getTestState(examId) || CIPLEEngine.createNewTestState(examId);
+      testState.sections.reading.score = Number(result.reading_score) || 0;
+      testState.sections.reading.correct_count = result.reading_correct || 0;
+      testState.sections.reading.total_questions = result.reading_total || 0;
+      testState.sections.listening.score = Number(result.listening_score) || 0;
+      testState.sections.listening.correct_count = result.listening_correct || 0;
+      testState.sections.listening.total_questions = result.listening_total || 0;
+      testState.sections.writing.score = Number(result.writing_score) || 0;
+      testState.sections.speaking.score = Number(result.speaking_score) || 0;
+      testState.submitted = true;
+      testState.result_id = result.id;
+      CIPLEEngine.saveTestState(examId, testState);
+      console.log('✅ LocalStorage updated with complete results');
+      
+      // Reading
+      const readingScore = result.reading_score || 0;
+      document.getElementById('reading-score').textContent = readingScore.toFixed(0) + '%';
+      document.getElementById('reading-detail').textContent = 
+        `Corretas: ${result.reading_correct || 0} de ${result.reading_total || 0}`;
+      setCircularProgress('reading-progress', readingScore);
+      
+      // Listening
+      const listeningScore = result.listening_score || 0;
+      document.getElementById('listening-score').textContent = listeningScore.toFixed(0) + '%';
+      document.getElementById('listening-detail').textContent = 
+        `Corretas: ${result.listening_correct || 0} de ${result.listening_total || 0}`;
+      setCircularProgress('listening-progress', listeningScore);
+      
+      // Writing
+      if (result.writing_status === 'complete' && result.writing_score !== null) {
+        const writingScore = result.writing_score;
+        document.getElementById('writing-score').textContent = writingScore.toFixed(0) + '%';
+        document.getElementById('writing-detail').textContent = '✅ Avaliação completa';
+        setCircularProgress('writing-progress', writingScore);
+        
+        if (result.writing_feedback) {
+          document.getElementById('writing-feedback-card').style.display = 'block';
+          document.getElementById('writing-feedback-content').innerHTML = formatFeedback(result.writing_feedback);
+        }
+      } else if (result.writing_status === 'failed') {
+        document.getElementById('writing-score').innerHTML = '❌';
+        document.getElementById('writing-detail').innerHTML = '<span style="color: #e53e3e;">Erro na avaliação</span>';
+      }
+      
+      // Speaking
+      if (result.speaking_status === 'complete' && result.speaking_score !== null) {
+        const speakingScore = result.speaking_score;
+        document.getElementById('speaking-score').textContent = speakingScore.toFixed(0) + '%';
+        document.getElementById('speaking-detail').textContent = '✅ Avaliação completa';
+        setCircularProgress('speaking-progress', speakingScore);
+        
+        if (result.speaking_feedback) {
+          document.getElementById('speaking-feedback-card').style.display = 'block';
+          document.getElementById('speaking-feedback-content').innerHTML = formatFeedback(result.speaking_feedback);
+        }
+      } else if (result.speaking_status === 'failed') {
+        document.getElementById('speaking-score').innerHTML = '❌';
+        document.getElementById('speaking-detail').innerHTML = '<span style="color: #e53e3e;">Erro na avaliação</span>';
+      }
+      
+      // Overall Grade with CORRECT OFFICIAL CIPLE classifications
+      const reading = Number(result.reading_score) || 0;
+      const listening = Number(result.listening_score) || 0;
+      const writing = Number(result.writing_score) || 0;
+      const speaking = Number(result.speaking_score) || 0;
+      
+      if (result.reading_score !== null && result.listening_score !== null &&
+          result.writing_score !== null && result.speaking_score !== null) {
+        
+        // OFFICIAL CIPLE WEIGHTS
+        const overallGrade = (reading * 0.225) + (writing * 0.225) + 
+                             (listening * 0.30) + (speaking * 0.25);
+        
+        document.getElementById('overall-grade').textContent = overallGrade.toFixed(1);
+        
+        // OFFICIAL CIPLE CLASSIFICATIONS
+        // Muito Bom: 85-100%
+        // Bom: 70-84%
+        // Suficiente: 55-69%
+        // Insuficiente: <55%
+        let gradeLabel = '';
+        if (overallGrade >= 85) {
+          gradeLabel = '🏆 Muito Bom';
+        } else if (overallGrade >= 70) {
+          gradeLabel = '✅ Bom';
+        } else if (overallGrade >= 55) {
+          gradeLabel = '👍 Suficiente';
+        } else {
+          gradeLabel = '⚠️ Insuficiente';
+        }
+        document.getElementById('grade-label').textContent = gradeLabel;
+        
+      } else {
+        document.getElementById('overall-grade').textContent = '--';
+        document.getElementById('grade-label').textContent = 'A calcular...';
+      }
+    }
+    
+    function formatFeedback(feedback) {
+      if (typeof feedback === 'string') {
+        return `<div class="task-feedback"><p>${feedback.replace(/\n/g, '<br>')}</p></div>`;
+      }
+      
+      if (typeof feedback === 'object') {
+        let html = '';
+        
+        if (feedback.tasks && Array.isArray(feedback.tasks)) {
+          feedback.tasks.forEach((task, index) => {
+            html += `
+              <div class="task-feedback">
+                <h4>Tarefa ${task.task_index || (index + 1)}</h4>
+                ${task.feedback ? `<p>${task.feedback}</p>` : ''}
+                ${task.score?.raw ? `<p><strong>Pontuação:</strong> ${task.score.raw}/10</p>` : ''}
+              </div>
+            `;
+          });
+          
+          if (feedback.feedback) {
+            html += `
+              <div class="task-feedback">
+                <h4>Comentário Global</h4>
+                <p>${feedback.feedback}</p>
+              </div>
+            `;
+          }
+        }
+        
+        return html;
+      }
+      
+      return '<div class="task-feedback"><p>Nenhum feedback disponível</p></div>';
+    }
+    
+    function startPolling() {
+      pollInterval = setInterval(fetchResults, 5000);
+    }
+    
+    function stopPolling() {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+    }
+    
+    function showError(message) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('error-state').style.display = 'block';
+      document.getElementById('error-message').textContent = message;
+      stopPolling();
+    }
+    
+    function goToDashboard() {
+      window.location.href = 'index.html';
+    }
+    
+    window.addEventListener('beforeunload', stopPolling);
+  </script>
+
+</body>
+</html>
