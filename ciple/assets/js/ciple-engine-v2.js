@@ -256,6 +256,7 @@ const CIPLEEngine = {
     console.log('📝 Triggering writing evaluation...');
     fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/evaluate-writing', {
       method: 'POST',
+	  keepalive: true,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${this.SUPABASE_KEY}`
@@ -273,6 +274,7 @@ const CIPLEEngine = {
     console.log('🗣️ Triggering speaking evaluation...');
     fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/evaluate-speaking', {
       method: 'POST',
+	  keepalive: true,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${this.SUPABASE_KEY}`
