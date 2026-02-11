@@ -181,13 +181,9 @@ const CIPLEEngine = {
       throw new Error('Test already submitted');
     }
     
-    // Get user email from localStorage (set by auth system)
-    const userEmail = localStorage.getItem('cl_email') || 'anonymous';
-    
     // Prepare payload
     const payload = {
       exam_id: this.currentExamId,
-      user_email: userEmail, // ADD THIS
       user_id: this.getCurrentUserId(),
       sections: {
         reading: {
@@ -317,9 +313,9 @@ const CIPLEEngine = {
   // =============================================================================
   
   getCurrentUserId() {
-    // TODO: Integrate with your existing CivicLearn auth system
-    // For now, return a placeholder
-    return localStorage.getItem('civiclearn_user_id') || 'anonymous';
+    // Return user email from localStorage
+    // This will be saved in the user_id column for tracking
+    return localStorage.getItem('cl_email') || 'anonymous';
   },
   
   clearTestData(examId) {
