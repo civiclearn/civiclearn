@@ -273,6 +273,15 @@ function notify(type,text){
   setTimeout(()=>el.style.display="none",6000);
 }
 
+function getReturnUrl(){
+  const urlParams=new URLSearchParams(window.location.search);
+  const returnUrl=urlParams.get("return");
+  if(returnUrl){
+    return decodeURIComponent(returnUrl);
+  }
+  return "/ciple/dashboard/index.html";
+}
+
 async function handleSetup(){
   const btn = document.getElementById("setupBtn");
   const email = setupEmail.value.trim().toLowerCase();
@@ -314,7 +323,7 @@ async function handleLogin(){
 
   localStorage.setItem("cl_auth","ok");
   localStorage.setItem("cl_email",email);
-  location.href="/ciple/dashboard/index.html";
+  location.href=getReturnUrl();
 }
 
 function utcDayOfYear(d){
@@ -371,7 +380,7 @@ async function pinLogin(){
   localStorage.setItem("cl_auth","ok");
   localStorage.setItem("cl_email", email);
   localStorage.setItem("cl_login_at", Date.now().toString());
-  location.href="/ciple/dashboard/index.html";
+  location.href=getReturnUrl();
 }
 
 function toggleMainPwd(){
