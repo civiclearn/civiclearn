@@ -181,9 +181,13 @@ const CIPLEEngine = {
       throw new Error('Test already submitted');
     }
     
+    // Get user email from localStorage (set by auth system)
+    const userEmail = localStorage.getItem('cl_email') || 'anonymous';
+    
     // Prepare payload
     const payload = {
       exam_id: this.currentExamId,
+      user_email: userEmail, // ADD THIS
       user_id: this.getCurrentUserId(),
       sections: {
         reading: {
