@@ -362,12 +362,10 @@
             Preparação para o exame CIPLE
           </p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <a href="/cdn-cgi/l/email-protection#cea7a0a8a18eada7b8a7ada2abafbca0e0ada1a3" class="dash-pill dash-pill-outline">
-              Contacto
-            </a>
-            <a href="#" class="dash-pill dash-pill-outline" onclick="alert('Logout'); return false;">
-              Sair
-            </a>
+            <a href="mailto:admin@civiclearn.com">Contacto</a>
+            <a href="#" class="dash-pill dash-pill-outline" onclick="handleLogout(); return false;">
+  Sair
+</a>
           </div>
         </div>
 
@@ -769,6 +767,21 @@
   
   function startTest(examId) {
     window.location.href = `reading.html?exam=${examId}`;
+  }
+  
+    // ==========================================================================
+  // LOGOUT
+  // ==========================================================================
+  
+  function handleLogout() {
+    if (confirm('Tem a certeza que deseja sair?')) {
+      // Clear all local data
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Redirect to login page
+      window.location.href = 'https://civiclearn.com/ciple/login';
+    }
   }
 </script>
 
