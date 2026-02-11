@@ -471,6 +471,32 @@
     // ======================================================================
     
     async function submitTest() {
+      // ========================================================================
+      // AUTH CHECK: Only authenticated users can submit for evaluation
+      // ========================================================================
+      const userEmail = localStorage.getItem('cl_email');
+      
+      if (!userEmail || userEmail === 'anonymous') {
+        const shouldLogin = confirm(
+          '🔐 Login necessário\n\n' +
+          'Para guardar os resultados e receber a avaliação completa, precisa de fazer login.\n\n' +
+          'O seu progresso está guardado localmente e será submetido após o login.\n\n' +
+          'Fazer login agora?'
+        );
+        
+        if (shouldLogin) {
+          // Save current location to return after login
+          const returnUrl = encodeURIComponent(
+            window.location.pathname + window.location.search
+          );
+          window.location.href = `/ciple/login.html?return=${returnUrl}`;
+        }
+        return;
+      }
+      
+      // ========================================================================
+      // PROCEED WITH SUBMISSION
+      // ========================================================================
       if (!confirm(
         'Submeter teste para avaliação?\n\n' +
         'As suas respostas serão enviadas e avaliadas. Esta ação não pode ser revertida.'
