@@ -4,10 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CIPLE - Simulações</title>
-  <script>
-    window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs";
-  </script>
-  <script src="/assets/js/auth-guard.js"></script>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
 
@@ -359,13 +355,14 @@
         <!-- Stat Card 4: Brand/Welcome -->
         <div class="stat-card welcome-card">
           <div style="display:flex;align-items:center;gap:10px;">
-            <strong style="font-size:1.2rem;">🇵🇹 CivicLearn</strong>
+            <img src="/assets/images/pt.svg" width="24" height="24" alt="PT" style="flex-shrink:0;">
+            <strong style="font-size:1.2rem;">CivicLearn</strong>
           </div>
           <p style="margin:8px 0 12px;font-size:0.85rem;color:#4b5563;">
             Preparação para o exame CIPLE
           </p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <a href="/cdn-cgi/l/email-protection#7a1915140e1b190e3a19130c1319161f1b081454191517" class="dash-pill dash-pill-outline">
+            <a href="mailto:info@civiclearn.com" class="dash-pill dash-pill-outline">
               Contacto
             </a>
             <a href="#" class="dash-pill dash-pill-outline" onclick="alert('Logout'); return false;">
@@ -406,38 +403,38 @@
         <!-- FAQ Sidebar -->
         <aside class="dashboard-side">
           <div class="side-card">
-            <h3>O que é uma simulação CIPLE?</h3>
-            <p>Uma simulação reproduz o exame oficial do CIPLE, com as quatro secções: Leitura, Escrita, Escuta e Oral.</p>
+            <h3>Quanto tempo tenho para cada secção?</h3>
+            <p>Leitura e Escrita: 1h15 juntas. Audição: 40 minutos. Oral: 15 minutos. O tempo aparece no canto superior direito.</p>
           </div>
 
           <div class="side-card">
-            <h3>Quantas simulações devo fazer?</h3>
-            <p>Recomenda-se realizar várias simulações completas para ganhar confiança e identificar pontos fracos.</p>
+            <h3>Posso pausar e continuar depois?</h3>
+            <p>Sim! O progresso é guardado automaticamente. Pode fechar o navegador e voltar quando quiser.</p>
           </div>
 
           <div class="side-card">
-            <h3>As perguntas repetem-se no exame?</h3>
-            <p>Não. As simulações treinam competências e formatos, não perguntas específicas do exame oficial.</p>
+            <h3>As perguntas são sempre as mesmas?</h3>
+            <p>Não. As opções de resposta são baralhadas aleatoriamente em cada tentativa para simular melhor o exame oficial.</p>
           </div>
 
           <div class="side-card">
-            <h3>O que significa "Refazer"?</h3>
-            <p>Esta funcionalidade permite apagar todas as tentativas anteriores desta simulação para praticar novamente do zero.</p>
+            <h3>Como funciona a avaliação?</h3>
+            <p>Leitura e Audição são corrigidas instantaneamente. Escrita e Oral são avaliadas por IA em 1-2 minutos.</p>
+          </div>
+
+          <div class="side-card">
+            <h3>E se o tempo acabar?</h3>
+            <p>Pode continuar a responder ou avançar para a próxima secção. Não será expulso automaticamente.</p>
           </div>
 
           <div class="side-card">
             <h3>Componentes e Pesos</h3>
-            <p>A classificação final reflete o desempenho em: Leitura (22.5%), Escrita (22.5%), Escuta (27.5%) e Oral (27.5%).</p>
+            <p>A classificação final reflete o desempenho em: Leitura (22.5%), Escrita (22.5%), Escuta (30%) e Oral (25%).</p>
           </div>
 
           <div class="side-card">
             <h3>Escala de Classificação</h3>
-            <p>Aprovado: ≥50%. Bom: 55-69%. Muito Bom: 70-84%. Excelente: ≥85%.</p>
-          </div>
-
-          <div class="side-card">
-            <h3>Resultados Oficiais</h3>
-            <p>Os resultados do exame oficial demoram cerca de 3 semanas. As notas aqui são automáticas e apenas para treino.</p>
+            <p>Insuficiente: <55%. Suficiente: 55-69%. Bom: 70-84%. Muito Bom: ≥85%.</p>
           </div>
         </aside>
 
@@ -717,12 +714,12 @@
     document.getElementById('performanceBar').style.width = `${lastScore}%`;
   }
 
-// ==========================================================================
+  // ==========================================================================
   // ACTIONS
   // ==========================================================================
   
   function redoTest(examId) {
-    if (confirm(`Refazer ${examId.toUpperCase()}?\n\nOs resultados anteriores deste teste serão apagados.`)) {
+    if (confirm('Tem a certeza que quer refazer o teste?\n\nO teste anterior ficará guardado, mas será substituído pelo novo.')) {
       CIPLEEngine.clearTestData(examId);
       window.location.href = `reading.html?exam=${examId}`;
     }
