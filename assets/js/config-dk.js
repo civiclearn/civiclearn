@@ -2,10 +2,11 @@
    Engine: engine-dk.js
    Keys = Danish labels (as in Sheets / JSON)
 */
+window.CIVIC_SITE_CODE = "dk";
 
 window.CIVICEDGE_CONFIG = {
   country: "denmark",
-
+  
   /* -------------------------------
      LANGUAGE / ACCESSIBILITY
      ------------------------------- */

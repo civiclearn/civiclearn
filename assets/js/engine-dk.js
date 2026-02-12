@@ -219,6 +219,10 @@ function toggleSavedQuestion(questionId) {
   }
 
   setSavedMap(map);
+   // Sync to cloud
+  if (window.CivicSync) {
+    CivicSync.push("civicedge_saved");
+  }
   return !!map[questionId];
 }
 
@@ -1763,6 +1767,11 @@ const session = {
 
     stats.history.push(session);
     writeJsonLS("civicedge_stats", stats);
+	
+	  // Sync to cloud
+    if (window.CivicSync) {
+      CivicSync.push(["civicedge_stats", "civicedge_progress"]);
+    }
   }
 
     // === Delegated click handler for Result Screen ===
