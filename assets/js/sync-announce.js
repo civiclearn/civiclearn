@@ -30,6 +30,11 @@
       text: "Nouveauté\u00a0: Votre progression est désormais synchronisée automatiquement entre tous vos appareils. Connectez-vous simplement avec la même adresse e-mail\u00a0— vos données vous suivent partout.",
       cta: "Compris"
     },
+	
+	ch: {
+      text: "Nouveauté\u00a0: Votre progression est désormais synchronisée automatiquement entre tous vos appareils. Connectez-vous simplement avec la même adresse e-mail\u00a0— vos données vous suivent partout.",
+      cta: "Compris"
+    },
     de: {
       text: "Neu: Ihr Fortschritt wird jetzt automatisch zwischen all Ihren Geräten synchronisiert. Melden Sie sich einfach mit derselben E-Mail-Adresse an — Ihre Daten sind immer dabei.",
       cta: "Verstanden"
