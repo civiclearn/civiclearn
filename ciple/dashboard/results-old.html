@@ -15,7 +15,7 @@
     
     .test-badge {
       display: inline-block;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: rgba(255, 255, 255, 0.25);
       color: white;
       padding: 6px 16px;
       border-radius: 20px;
@@ -23,6 +23,7 @@
       font-weight: 600;
       margin-bottom: 12px;
       letter-spacing: 0.5px;
+      backdrop-filter: blur(10px);
     }
     
     .grade-hero {
@@ -241,7 +242,7 @@
 
       <!-- Overall Grade -->
       <div class="grade-hero">
-        <div class="test-badge" id="test-badge" style="position: absolute; top: 1.5rem; left: 1.5rem; margin: 0;">CIPLE-XX</div>
+        <div class="test-badge" id="test-badge">CIPLE-XX</div>
         <h2>Classificação Final</h2>
         <div class="grade-display" id="overall-grade">--</div>
         <div class="grade-label" id="grade-label">A calcular...</div>
@@ -314,23 +315,23 @@
 
       <!-- Writing Feedback -->
       <div class="feedback-card" id="writing-feedback-card" style="display: none;">
-        <h3>📝 Feedback da Escrita</h3>
+        <h3>Feedback da Escrita</h3>
         <div id="writing-feedback-content"></div>
       </div>
 
       <!-- Speaking Feedback -->
       <div class="feedback-card" id="speaking-feedback-card" style="display: none;">
-        <h3>🗣️ Feedback da Produção Oral</h3>
+        <h3>Feedback da Produção Oral</h3>
         <div id="speaking-feedback-content"></div>
       </div>
 
       <!-- Actions -->
       <div class="nav-buttons">
         <button class="btn btn-secondary" onclick="goToDashboard()">
-          ← Voltar ao Painel
+          Voltar ao Painel
         </button>
         <button class="btn btn-primary" onclick="window.print()">
-          🖨️ Imprimir Resultados
+          Imprimir Resultados
         </button>
       </div>
 
@@ -354,6 +355,17 @@
     let attemptId = null;
     let examId = null;
     let pollInterval = null;
+    
+    // Timeout tracking - persists across page reloads
+    const timeoutKey = `polling_start_${window.location.search}`;
+    let pollingStartTime = parseInt(sessionStorage.getItem(timeoutKey)) || Date.now();
+    if (!sessionStorage.getItem(timeoutKey)) {
+      sessionStorage.setItem(timeoutKey, pollingStartTime.toString());
+    }
+    
+    let writingTimeout = false;
+    let speakingTimeout = false;
+    const TIMEOUT_MS = 120000; // 2 minutes
     
     window.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -453,6 +465,8 @@
         document.getElementById('writing-score').textContent = writingScore.toFixed(0) + '%';
         document.getElementById('writing-detail').textContent = '✅ Avaliação completa';
         setCircularProgress('writing-progress', writingScore);
+        writingTimeout = false;
+        sessionStorage.removeItem(timeoutKey);
         
         if (result.writing_feedback) {
           document.getElementById('writing-feedback-card').style.display = 'block';
@@ -461,6 +475,19 @@
       } else if (result.writing_status === 'failed') {
         document.getElementById('writing-score').innerHTML = '❌';
         document.getElementById('writing-detail').innerHTML = '<span style="color: #e53e3e;">Erro na avaliação</span>';
+        sessionStorage.removeItem(timeoutKey);
+      } else {
+        // Still evaluating
+        if (!writingTimeout) {
+          const elapsed = Date.now() - pollingStartTime;
+          if (elapsed > TIMEOUT_MS) {
+            writingTimeout = true;
+            showTimeoutForSection('writing');
+          } else if (elapsed > 60000) {
+            document.getElementById('writing-detail').textContent = '⏳ A avaliar... (pode demorar até 2 minutos)';
+          }
+        }
+        // If writingTimeout = true, don't overwrite the retry button!
       }
       
       // Speaking
@@ -469,6 +496,8 @@
         document.getElementById('speaking-score').textContent = speakingScore.toFixed(0) + '%';
         document.getElementById('speaking-detail').textContent = '✅ Avaliação completa';
         setCircularProgress('speaking-progress', speakingScore);
+        speakingTimeout = false;
+        sessionStorage.removeItem(timeoutKey);
         
         if (result.speaking_feedback) {
           document.getElementById('speaking-feedback-card').style.display = 'block';
@@ -477,6 +506,19 @@
       } else if (result.speaking_status === 'failed') {
         document.getElementById('speaking-score').innerHTML = '❌';
         document.getElementById('speaking-detail').innerHTML = '<span style="color: #e53e3e;">Erro na avaliação</span>';
+        sessionStorage.removeItem(timeoutKey);
+      } else {
+        // Still evaluating
+        if (!speakingTimeout) {
+          const elapsed = Date.now() - pollingStartTime;
+          if (elapsed > TIMEOUT_MS) {
+            speakingTimeout = true;
+            showTimeoutForSection('speaking');
+          } else if (elapsed > 60000) {
+            document.getElementById('speaking-detail').textContent = '⏳ A avaliar... (pode demorar até 2 minutos)';
+          }
+        }
+        // If speakingTimeout = true, don't overwrite the retry button!
       }
       
       // Overall Grade with CORRECT OFFICIAL CIPLE classifications
@@ -572,6 +614,86 @@
     
     function goToDashboard() {
       window.location.href = 'index.html';
+    }
+    
+    // ==========================================================================
+    // RETRY FUNCTIONALITY
+    // ==========================================================================
+    
+    function showTimeoutForSection(section) {
+      const sectionName = section === 'writing' ? 'Escrita' : 'Oral';
+      const detailEl = document.getElementById(`${section}-detail`);
+      
+      detailEl.innerHTML = `
+        <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 12px; margin-top: 8px; text-align: left;">
+          <p style="margin: 0 0 8px; color: #856404; font-weight: 600; font-size: 0.9rem;">
+            ⚠️ A avaliação está a demorar mais do que o esperado
+          </p>
+          <button 
+            onclick="retryEvaluation('${section}')" 
+            style="background: #667eea; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; font-family: 'Space Grotesk', sans-serif;">
+            🔄 Reavaliar
+          </button>
+          
+        </div>
+      `;
+    }
+    
+    async function retryEvaluation(section) {
+      const sectionName = section === 'writing' ? 'Escrita' : 'Oral';
+      const detailEl = document.getElementById(`${section}-detail`);
+      
+      // Show retrying state
+      detailEl.textContent = '🔄 A tentar novamente...';
+      
+      try {
+        const response = await fetch(
+          `${CIPLEEngine.SUPABASE_URL}/functions/v1/retry-evaluation`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${CIPLEEngine.SUPABASE_KEY}`
+            },
+            body: JSON.stringify({
+              attempt_id: attemptId,
+              section: section
+            })
+          }
+        );
+        
+        const data = await response.json();
+        
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || `HTTP ${response.status}`);
+        }
+        
+        // Success! Reset timeout and fetch fresh results
+        if (section === 'writing') writingTimeout = false;
+        if (section === 'speaking') speakingTimeout = false;
+        
+        detailEl.textContent = '✅ A recarregar...';
+        await fetchResults();
+        
+      } catch (error) {
+        console.error('Retry failed:', error);
+        detailEl.innerHTML = `
+          <div style="background: #fee; border: 1px solid #fcc; border-radius: 8px; padding: 12px; margin-top: 8px; text-align: left;">
+            <p style="margin: 0 0 8px; color: #c00; font-weight: 600; font-size: 0.9rem;">
+              ❌ Não foi possível avaliar
+            </p>
+            <p style="margin: 0 0 8px; font-size: 0.85rem; color: #666;">
+              Por favor, contacte o suporte com o ID:
+            </p>
+            <code style="background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; display: block; margin-bottom: 8px; word-break: break-all;">${attemptId}</code>
+            <a 
+              href="mailto:admin@civiclearn.com?subject=CIPLE Avaliação Falhou&body=Attempt ID: ${attemptId}%0ASection: ${sectionName}%0AError: ${error.message}"
+              style="background: #667eea; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; display: inline-block; font-family: 'Space Grotesk', sans-serif;">
+              📧 Contactar suporte
+            </a>
+          </div>
+        `;
+      }
     }
     
     window.addEventListener('beforeunload', stopPolling);
