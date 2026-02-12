@@ -39,6 +39,7 @@
     "civicedge_saved",
     "dk_active_phase",
     "dk_phase2_unlocked",
+    "dk_phase1_progress",
   ];
 
   // You can add site-specific keys by setting this before sync.js loads:
