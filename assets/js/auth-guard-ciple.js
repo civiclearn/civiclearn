@@ -1,16 +1,19 @@
-// /assets/js/auth-guard-ciple.js
 (async () => {
   if (location.hostname === "localhost") return;
   if (location.pathname.includes("/login")) return;
 
   if (localStorage.getItem("cl_auth") !== "ok") {
-    // Always go to the CIPLE login
-    location.replace("/ciple/login.html");
+    const parts = location.pathname.split("/").filter(Boolean);
+    const loginPath = parts.length > 0 ? `/${parts[0]}/login.html` : "/login.html";
+    location.replace(loginPath);
     return;
   }
 
   const email = localStorage.getItem("cl_email");
   if (!email) return;
+
+  // Use window.SUPABASE_KEY if available, otherwise use hardcoded CIPLE key
+  const supabaseKey = window.SUPABASE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs";
 
   try {
     const res = await fetch(
@@ -19,7 +22,7 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "apikey": window.SUPABASE_KEY
+          "apikey": supabaseKey
         },
         body: JSON.stringify({ email: email.toLowerCase() })
       }
