@@ -14,6 +14,86 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
   <link rel="stylesheet" href="/assets/css/newlogin.css">
+
+  <style>
+    /* === MOBILE LOGIN TABS === */
+    .login-tabs {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+
+      /* Fix header overflow */
+      .header-inner {
+        padding: 10px 12px;
+        gap: 8px;
+      }
+      .header-nav { display: none; }
+      .brand-powered { display: none; }
+      .btn-small-purple {
+        font-size: 12px;
+        padding: 6px 12px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .brand-title {
+        font-size: 15px;
+      }
+
+      /* Tab bar */
+      .login-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 0;
+        margin: 16px auto 0;
+        max-width: 400px;
+        padding: 0 16px;
+      }
+
+      .login-tab {
+        flex: 1;
+        padding: 10px 6px;
+        font-family: 'Lexend', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        text-align: center;
+        border: none;
+        background: #f0eef5;
+        color: #777;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .login-tab:first-child {
+        border-radius: 10px 0 0 10px;
+      }
+      .login-tab:last-child {
+        border-radius: 0 10px 10px 0;
+      }
+
+      .login-tab.active {
+        background: #6c5ce7;
+        color: #fff;
+        font-weight: 600;
+      }
+
+      /* Hide inactive cards */
+      .login-grid {
+        display: block !important;
+        padding: 0 16px;
+      }
+
+      .auth-card {
+        display: none;
+        max-width: 400px;
+        margin: 16px auto 0;
+      }
+
+      .auth-card.tab-active {
+        display: block;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -44,10 +124,16 @@
 
 <div id="status" class="status-msg"></div>
 
+<div class="login-tabs">
+  <button class="login-tab" data-tab="setup">Første gang?</button>
+  <button class="login-tab active" data-tab="login">Login</button>
+  <button class="login-tab" data-tab="pin">PIN-adgang</button>
+</div>
+
 <div class="login-grid">
 
   <!-- LEFT CARD -->
-  <div class="auth-card card-left">
+  <div class="auth-card card-left" data-card="setup">
     <h2 style="color: var(--purple);">Første gang her?</h2>
     <p>
       Har du netop købt adgang? Opret din adgangskode her.
@@ -68,7 +154,7 @@
   </div>
 
   <!-- CENTER CARD -->
-  <div class="auth-card card-center">
+  <div class="auth-card card-center tab-active" data-card="login">
     <h2 style="font-size:28px;text-align:center;">Login</h2>
 
     <div style="margin-top:20px;">
@@ -88,7 +174,7 @@
   </div>
 
   <!-- RIGHT CARD — PIN -->
-  <div class="auth-card card-right">
+  <div class="auth-card card-right" data-card="pin">
     <h2 style="color:#856404;">Problemer?</h2>
     <p>
       Brug en midlertidig adgangs-PIN, hvis login med adgangskode ikke virker.
@@ -118,21 +204,6 @@
 
 </div>
 
-<!--
-<div class="info-section">
-  <div class="info-card">
-    <h3>ℹ️ Information til eksisterende brugere</h3>
-    <p>
-     De fleste eksisterende brugere er automatisk overført til den nye platform. I enkelte tilfælde – især hvis dit køb blev foretaget før 2022 – kan det være nødvendigt at tilføje din konto manuelt. Hvis du er eksisterende bruger, men systemet ikke genkender din e-mailadresse, bedes du kontakte support, så hjælper vi dig videre.
-    </p>
-  </div>
-  <div class="info-card">
-    <h3>📊 Om tidligere træningsprogress</h3>
-    <p>
-     På grund af overgangen til en ny platform er træningsprogress og statistik fra den tidligere løsning ikke overført. Alle brugere starter derfor med en nulstillet progression. Det sikrer, at din træning, statistik og prøvesimulationer fremover er korrekte.
-    </p>
-  </div>
-</div> -->
 
 <script>
 const supabase = window.supabase.createClient(
@@ -297,6 +368,24 @@ function toggleMainPwd(){
     btn.textContent = "Vis";
   }
 }
+</script>
+
+<script>
+/* === MOBILE LOGIN TABS === */
+document.querySelectorAll(".login-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    const target = tab.dataset.tab;
+
+    // Update tab bar
+    document.querySelectorAll(".login-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+
+    // Show matching card, hide others
+    document.querySelectorAll(".auth-card").forEach(card => {
+      card.classList.toggle("tab-active", card.dataset.card === target);
+    });
+  });
+});
 </script>
 
 </body>
