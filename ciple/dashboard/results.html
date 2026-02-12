@@ -921,14 +921,25 @@
           html += `<div class="correction-task">`;
           html += `<div class="correction-task-header">Tarefa ${taskIndex + 1}${task.title ? ': ' + task.title : ''}</div>`;
           
-          // READING: Show text passages
-          if (sectionType === 'reading' && task.content?.texts) {
-            html += `<div class="correction-task-context">`;
-            html += `<div class="correction-task-context-title">📄 Texto:</div>`;
-            task.content.texts.forEach(textObj => {
-              html += `<div class="correction-task-text">${textObj.text.replace(/\n/g, '<br>')}</div>`;
-            });
-            html += `</div>`;
+          // READING: Show text passages (handle both arrays and single text)
+          if (sectionType === 'reading') {
+            if (task.content?.texts) {
+              // Multiple texts (reading tasks 1-6)
+              html += `<div class="correction-task-context">`;
+              html += `<div class="correction-task-context-title">📄 Texto:</div>`;
+              task.content.texts.forEach(textObj => {
+                html += `<div class="correction-task-text">${textObj.text.replace(/\n/g, '<br>')}</div>`;
+              });
+              html += `</div>`;
+            } else if (task.content?.text) {
+              // Single text (reading tasks 7-8)
+              html += `
+                <div class="correction-task-context">
+                  <div class="correction-task-context-title">📄 Texto:</div>
+                  <div class="correction-task-text">${task.content.text.replace(/\n/g, '<br>')}</div>
+                </div>
+              `;
+            }
           }
           
           // LISTENING: Show audio player
