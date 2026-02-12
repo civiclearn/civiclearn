@@ -872,37 +872,11 @@
       let html = '';
       
       tasks.forEach((task, taskIndex) => {
-        html += `<div class="correction-task">`;
-        html += `<div class="correction-task-header">Tarefa ${taskIndex + 1}${task.title ? ': ' + task.title : ''}</div>`;
+        // First, check if this task has any incorrect answers
+        let hasIncorrect = false;
+        const taskContent = [];
         
-        // READING: Show text passages
-        if (sectionType === 'reading' && task.content?.texts) {
-          html += `<div class="correction-task-context">`;
-          html += `<div class="correction-task-context-title">📄 Texto:</div>`;
-          task.content.texts.forEach(textObj => {
-            html += `<div class="correction-task-text">${textObj.text.replace(/\n/g, '<br>')}</div>`;
-          });
-          html += `</div>`;
-        }
-        
-        // LISTENING: Show audio player
-        if (sectionType === 'listening' && task.content?.audio) {
-          html += `
-            <div class="correction-task-context">
-              <div class="correction-task-context-title">🎧 Áudio:</div>
-              <div class="correction-audio-player">
-                <audio controls preload="metadata">
-                  <source src="https://civiclearn.com/ciple${task.content.audio}" type="audio/mpeg">
-                  O seu navegador não suporta o elemento de áudio.
-                </audio>
-              </div>
-            </div>
-          `;
-        }
-        
-        // Show questions
         task.questions.forEach((question, qIndex) => {
-          // Construct question ID
           const questionId = sectionType === 'reading' 
             ? `${task.task_id}-${question.id}`
             : question.id;
@@ -912,7 +886,6 @@
           let userAnswerText, correctAnswerText, isCorrect;
           
           if (sectionType === 'reading') {
-            // Reading: options are objects with {id, text}
             const correctAnswerId = question.correct_option;
             isCorrect = userAnswerId === correctAnswerId;
             
@@ -922,7 +895,6 @@
             userAnswerText = userOption?.text || '(não respondida)';
             correctAnswerText = correctOption?.text || correctAnswerId;
           } else {
-            // Listening: options are array of strings, answers are text
             const correctAnswer = question.correct_option;
             isCorrect = userAnswerId === correctAnswer;
             
@@ -930,46 +902,81 @@
             correctAnswerText = correctAnswer;
           }
           
-          // Clean HTML from prompt
-          const questionText = question.prompt?.replace(/<[^>]*>/g, '') || '';
+          // Only keep incorrect answers
+          if (!isCorrect) {
+            hasIncorrect = true;
+            const questionText = question.prompt?.replace(/<[^>]*>/g, '') || '';
+            
+            taskContent.push({
+              qIndex: qIndex + 1,
+              questionText,
+              userAnswerText,
+              correctAnswerText
+            });
+          }
+        });
+        
+        // Only display task if it has incorrect answers
+        if (hasIncorrect) {
+          html += `<div class="correction-task">`;
+          html += `<div class="correction-task-header">Tarefa ${taskIndex + 1}${task.title ? ': ' + task.title : ''}</div>`;
           
-          html += `
-            <div class="correction-item ${isCorrect ? 'correct' : 'incorrect'}">
-              <div class="correction-item-header">
-                <span class="correction-icon">${isCorrect ? '✅' : '❌'}</span>
-                <span class="correction-question-title">Questão ${qIndex + 1}</span>
-              </div>
-              
-              ${questionText ? `<div class="correction-question-text">${questionText}</div>` : ''}
-          `;
+          // READING: Show text passages
+          if (sectionType === 'reading' && task.content?.texts) {
+            html += `<div class="correction-task-context">`;
+            html += `<div class="correction-task-context-title">📄 Texto:</div>`;
+            task.content.texts.forEach(textObj => {
+              html += `<div class="correction-task-text">${textObj.text.replace(/\n/g, '<br>')}</div>`;
+            });
+            html += `</div>`;
+          }
           
-          if (isCorrect) {
-            // Just show correct answer
+          // LISTENING: Show audio player
+          if (sectionType === 'listening' && task.content?.audio) {
             html += `
-              <div class="correction-answer-block">
-                <div class="correction-answer-label correct">✓ RESPOSTA CORRETA</div>
-                <div class="correction-answer-text">${correctAnswerText}</div>
-              </div>
-            `;
-          } else {
-            // Show both user answer and correct answer
-            html += `
-              <div class="correction-answer-block">
-                <div class="correction-answer-label user">✗ A SUA RESPOSTA</div>
-                <div class="correction-answer-text">${userAnswerText}</div>
-              </div>
-              <div class="correction-answer-block">
-                <div class="correction-answer-label correct">✓ RESPOSTA CORRETA</div>
-                <div class="correction-answer-text">${correctAnswerText}</div>
+              <div class="correction-task-context">
+                <div class="correction-task-context-title">🎧 Áudio:</div>
+                <div class="correction-audio-player">
+                  <audio controls preload="metadata">
+                    <source src="https://civiclearn.com/ciple${task.content.audio}" type="audio/mpeg">
+                    O seu navegador não suporta o elemento de áudio.
+                  </audio>
+                </div>
               </div>
             `;
           }
           
+          // Show only incorrect questions
+          taskContent.forEach(item => {
+            html += `
+              <div class="correction-item incorrect">
+                <div class="correction-item-header">
+                  <span class="correction-icon">❌</span>
+                  <span class="correction-question-title">Questão ${item.qIndex}</span>
+                </div>
+                
+                ${item.questionText ? `<div class="correction-question-text">${item.questionText}</div>` : ''}
+                
+                <div class="correction-answer-block">
+                  <div class="correction-answer-label user">✗ A SUA RESPOSTA</div>
+                  <div class="correction-answer-text">${item.userAnswerText}</div>
+                </div>
+                <div class="correction-answer-block">
+                  <div class="correction-answer-label correct">✓ RESPOSTA CORRETA</div>
+                  <div class="correction-answer-text">${item.correctAnswerText}</div>
+                </div>
+              </div>
+            `;
+          });
+          
           html += `</div>`;
-        });
-        
-        html += `</div>`;
+        }
       });
+      
+      // If no mistakes at all, show a congratulatory message
+      if (!html) {
+        html = '<div style="text-align: center; padding: 2rem; color: #10b981;"><h4>🎉 Parabéns! Todas as respostas estão corretas!</h4></div>';
+      }
       
       return html;
     }
