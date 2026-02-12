@@ -91,6 +91,15 @@
 
       .auth-card.tab-active {
         display: block;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      .auth-card input,
+      .auth-card button,
+      .auth-card .pwd-container {
+        max-width: 100%;
+        box-sizing: border-box;
       }
     }
   </style>
@@ -170,6 +179,12 @@
       <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top:10px;">
         Log ind med adgangskode
       </button>
+
+      <div style="text-align:center;margin-top:14px;">
+        <a href="#" id="forgotLink" style="font-size:13px;color:var(--purple);font-weight:500;text-decoration:none;">
+          Glemt adgangskode?
+        </a>
+      </div>
     </div>
   </div>
 
@@ -384,8 +399,46 @@ document.querySelectorAll(".login-tab").forEach(tab => {
     document.querySelectorAll(".auth-card").forEach(card => {
       card.classList.toggle("tab-active", card.dataset.card === target);
     });
+
+    // Reset setup tab label when switching away from forgot flow
+    if (target !== "setup") {
+      const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
+      if (setupTab) setupTab.textContent = "Første gang?";
+      const setupCard = document.querySelector('.card-left');
+      const h2 = setupCard?.querySelector("h2");
+      if (h2) h2.textContent = "Første gang her?";
+      const p = setupCard?.querySelector("p");
+      if (p) p.textContent = "Har du netop købt adgang? Opret din adgangskode her.";
+    }
   });
 });
+
+/* === FORGOT PASSWORD LINK === */
+const forgotLink = document.getElementById("forgotLink");
+if (forgotLink) {
+  forgotLink.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    // Switch to setup tab
+    document.querySelectorAll(".login-tab").forEach(t => t.classList.remove("active"));
+    const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
+    if (setupTab) {
+      setupTab.classList.add("active");
+      setupTab.textContent = "Glemt adgangskode?";
+    }
+
+    document.querySelectorAll(".auth-card").forEach(card => {
+      card.classList.toggle("tab-active", card.dataset.card === "setup");
+    });
+
+    // Update heading and description
+    const setupCard = document.querySelector('.card-left');
+    const h2 = setupCard?.querySelector("h2");
+    if (h2) h2.textContent = "Glemt adgangskode?";
+    const p = setupCard?.querySelector("p");
+    if (p) p.textContent = "Indtast din e-mail, så sender vi et link til at nulstille din adgangskode.";
+  });
+}
 </script>
 
 </body>
