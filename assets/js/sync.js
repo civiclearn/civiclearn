@@ -205,7 +205,13 @@
         console.log("[Sync] Pull complete. Merged", rows.length, "keys.");
 
         // After merging, push merged state back so server has the latest
-        return pushAll();
+        return pushAll().then(function () {
+          // Reload once so dashboard picks up the synced data
+          if (!sessionStorage.getItem("civicsync_loaded")) {
+            sessionStorage.setItem("civicsync_loaded", "1");
+            location.reload();
+          }
+        });
       })
       .catch(function (err) {
         // Fail silently — sync is best-effort, never blocks the app
