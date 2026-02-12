@@ -875,21 +875,24 @@
         html += `<div class="correction-task">`;
         html += `<div class="correction-task-header">Tarefa ${taskIndex + 1}${task.title ? ': ' + task.title : ''}</div>`;
         
-        // Show context (reading text or listening audio)
-        if (sectionType === 'reading' && task.text) {
-          html += `
-            <div class="correction-task-context">
-              <div class="correction-task-context-title">📄 Texto:</div>
-              <div class="correction-task-text">${task.text.replace(/\n/g, '<br>')}</div>
-            </div>
-          `;
-        } else if (sectionType === 'listening' && task.audio) {
+        // READING: Show text passages
+        if (sectionType === 'reading' && task.content?.texts) {
+          html += `<div class="correction-task-context">`;
+          html += `<div class="correction-task-context-title">📄 Texto:</div>`;
+          task.content.texts.forEach(textObj => {
+            html += `<div class="correction-task-text">${textObj.text.replace(/\n/g, '<br>')}</div>`;
+          });
+          html += `</div>`;
+        }
+        
+        // LISTENING: Show audio player
+        if (sectionType === 'listening' && task.content?.audio) {
           html += `
             <div class="correction-task-context">
               <div class="correction-task-context-title">🎧 Áudio:</div>
               <div class="correction-audio-player">
                 <audio controls preload="metadata">
-                  <source src="https://civiclearn.com/ciple/data/${task.audio}" type="audio/mpeg">
+                  <source src="https://civiclearn.com/ciple${task.content.audio}" type="audio/mpeg">
                   O seu navegador não suporta o elemento de áudio.
                 </audio>
               </div>
@@ -905,12 +908,30 @@
             : question.id;
           
           const userAnswerId = userAnswers[questionId];
-          const correctAnswerId = question.correct_option;
-          const isCorrect = userAnswerId === correctAnswerId;
           
-          // Get full text of answers
-          const userAnswerText = question.options?.[userAnswerId] || '(não respondida)';
-          const correctAnswerText = question.options?.[correctAnswerId] || correctAnswerId;
+          let userAnswerText, correctAnswerText, isCorrect;
+          
+          if (sectionType === 'reading') {
+            // Reading: options are objects with {id, text}
+            const correctAnswerId = question.correct_option;
+            isCorrect = userAnswerId === correctAnswerId;
+            
+            const userOption = question.options?.find(o => o.id === userAnswerId);
+            const correctOption = question.options?.find(o => o.id === correctAnswerId);
+            
+            userAnswerText = userOption?.text || '(não respondida)';
+            correctAnswerText = correctOption?.text || correctAnswerId;
+          } else {
+            // Listening: options are array of strings, answers are text
+            const correctAnswer = question.correct_option;
+            isCorrect = userAnswerId === correctAnswer;
+            
+            userAnswerText = userAnswerId || '(não respondida)';
+            correctAnswerText = correctAnswer;
+          }
+          
+          // Clean HTML from prompt
+          const questionText = question.prompt?.replace(/<[^>]*>/g, '') || '';
           
           html += `
             <div class="correction-item ${isCorrect ? 'correct' : 'incorrect'}">
@@ -919,16 +940,14 @@
                 <span class="correction-question-title">Questão ${qIndex + 1}</span>
               </div>
               
-              <div class="correction-question-text">
-                ${question.question || ''}
-              </div>
+              ${questionText ? `<div class="correction-question-text">${questionText}</div>` : ''}
           `;
           
           if (isCorrect) {
             // Just show correct answer
             html += `
               <div class="correction-answer-block">
-                <div class="correction-answer-label correct">✓ Resposta Correta</div>
+                <div class="correction-answer-label correct">✓ RESPOSTA CORRETA</div>
                 <div class="correction-answer-text">${correctAnswerText}</div>
               </div>
             `;
@@ -936,11 +955,11 @@
             // Show both user answer and correct answer
             html += `
               <div class="correction-answer-block">
-                <div class="correction-answer-label user">✗ A sua resposta</div>
+                <div class="correction-answer-label user">✗ A SUA RESPOSTA</div>
                 <div class="correction-answer-text">${userAnswerText}</div>
               </div>
               <div class="correction-answer-block">
-                <div class="correction-answer-label correct">✓ Resposta Correta</div>
+                <div class="correction-answer-label correct">✓ RESPOSTA CORRETA</div>
                 <div class="correction-answer-text">${correctAnswerText}</div>
               </div>
             `;
