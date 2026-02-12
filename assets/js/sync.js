@@ -154,6 +154,13 @@
       return mergeSaved(local, remote);
     }
 
+    // One-way unlock flags: true always wins (cannot re-lock)
+    if (key === "dk_phase2_unlocked") {
+      return (local === true || local === "true" || remote === true || remote === "true")
+        ? true
+        : (local !== null && local !== undefined ? local : remote);
+    }
+
     // For simple keys (strings, booleans, etc.): prefer local if it exists
     return local !== null && local !== undefined ? local : remote;
   }

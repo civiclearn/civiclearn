@@ -13,10 +13,9 @@
     const STORAGE_UNLOCKED = "dk_phase2_unlocked";
     const STORAGE_FORCE = "dk_phase2_force_unlocked";
 
-    // Default: locked until mastery reaches 70%
-    if (localStorage.getItem(STORAGE_UNLOCKED) === null) {
-      localStorage.setItem(STORAGE_UNLOCKED, "false");
-    }
+    // Note: we no longer pre-write "false" here.
+    // isPhaseUnlocked() already returns false when the key is absent,
+    // and pre-writing would block sync from merging the remote "true".
 
     function getActivePhase() {
       const v = localStorage.getItem(STORAGE_ACTIVE);
@@ -46,6 +45,16 @@ function computeMastery() {
     function maybeAutoUnlock() {
       if (isPhaseUnlocked()) return;
 
+      // Path 1: check the pre-computed progress stored by engine (sync, always available)
+      try {
+        const p1 = JSON.parse(localStorage.getItem("dk_phase1_progress") || "{}");
+        if (p1.percent >= 70) {
+          localStorage.setItem(STORAGE_UNLOCKED, "true");
+          return;
+        }
+      } catch (e) { /* ignore parse errors */ }
+
+      // Path 2: fallback to live-computed mastery from dashboard (may not be ready yet on first render)
       const mastery = computeMastery();
       if (mastery >= 0.7) {
         localStorage.setItem(STORAGE_UNLOCKED, "true");
