@@ -1,5 +1,7 @@
 /* CivicLearn Country Config — France (Carte de séjour pluriannuelle) */
 
+window.CIVIC_SITE_CODE = "fr-csp";
+
 window.CIVICEDGE_CONFIG = {
   country: "france-csp",
 

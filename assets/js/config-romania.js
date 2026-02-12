@@ -1,6 +1,7 @@
 /* CivicEdge Country Config — Romania
    Zero-text version (all strings handled by i18n)
 */
+window.CIVIC_SITE_CODE = "ro";
 
 window.CIVICEDGE_CONFIG = {
   country: "romania",

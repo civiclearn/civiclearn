@@ -1,5 +1,7 @@
 /* CivicLearn Country Config — Geneva */
 
+window.CIVIC_SITE_CODE = "ch";
+
 window.CIVICEDGE_CONFIG = {
   country: "geneva",
 

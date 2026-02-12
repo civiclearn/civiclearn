@@ -1,5 +1,7 @@
 /* CivicLearn Country Config — Luxembourg */
 
+window.CIVIC_SITE_CODE = "lu";
+
 window.CIVICEDGE_CONFIG = {
   country: "lu",
 

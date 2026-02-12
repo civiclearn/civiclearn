@@ -1,5 +1,7 @@
 /* CivicLearn Country Config — Australia */
 
+window.CIVIC_SITE_CODE = "au";
+
 window.CIVICEDGE_CONFIG = {
   country: "australia",
 

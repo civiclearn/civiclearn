@@ -2,6 +2,8 @@
    Zero-text version (all strings handled by i18n)
 */
 
+window.CIVIC_SITE_CODE = "ca-fr";
+
 window.CIVICEDGE_CONFIG = {
   country: "canadafr",
 

@@ -2,6 +2,8 @@
    Monolingual · Classic engine · Topic-constrained simulation
 */
 
+window.CIVIC_SITE_CODE = "es";
+
 window.CIVICEDGE_CONFIG = {
   country: "ccse",
 

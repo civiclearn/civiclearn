@@ -1,5 +1,7 @@
 /* CivicLearn Country Config — United Kingdom */
 
+window.CIVIC_SITE_CODE = "uk";
+
 window.CIVICEDGE_CONFIG = {
   country: "uk",
 

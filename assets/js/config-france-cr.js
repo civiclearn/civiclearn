@@ -1,5 +1,7 @@
 /* CivicLearn Country Config — France (Carte de résident) */
 
+window.CIVIC_SITE_CODE = "fr-cr";
+
 window.CIVICEDGE_CONFIG = {
   country: "france-cr",
 

@@ -13,6 +13,7 @@ Engine.getBank = () => __normalizedBank || [];
 
 Engine.ensureBankLoaded = async function () {
   if (__normalizedBank && __normalizedBank.length) return;
+  if (__normalizedBank && __normalizedBank.length) return;
 
   const fullBank = await loadBankIfNeeded({});
   __normalizedBank = fullBank;
@@ -166,7 +167,13 @@ if (seenIdSet && seenIdSet.has(qid)) {
     }
 
     setSavedMap(map);
-    return !!map[questionId];
+
+  // Sync to cloud
+  if (window.CivicSync) {
+    CivicSync.push("civicedge_saved");
+  }
+
+  return !!map[questionId];
   }
 
   function getSavedQuestionIds() {
@@ -1408,8 +1415,13 @@ const key = `${topicLT}:${question.id}`;
       questions: answeredQuestions
     };
 
-    stats.history.push(session);
+  stats.history.push(session);
     writeJsonLS("civicedge_stats", stats);
+
+    // Sync to cloud
+    if (window.CivicSync) {
+      CivicSync.push(["civicedge_stats", "civicedge_progress"]);
+    }
   }
 
   // Delegated click handler for Result Screen

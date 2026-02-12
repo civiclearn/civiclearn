@@ -1,5 +1,7 @@
 /* CivicLearn Country Config — Lithuania */
 
+window.CIVIC_SITE_CODE = "lt";
+
 window.CIVICEDGE_CONFIG = {
   country: "lt",
 
