@@ -438,6 +438,7 @@ if (Array.isArray(options.questions) && options.questions.length > 0) {
       cfg,
 	  fromTopicsUI: options.fromTopicsUI === true,
       questions: [],
+      playedQuestions: [],
       scopeQuestions: normalizedAll.slice(),
       initialQuestions: normalizedAll.slice(),
       allQuestions: normalizedAll.slice(),
@@ -471,6 +472,9 @@ if (Array.isArray(options.questions) && options.questions.length > 0) {
 
     // current wave
     questions: picked,
+
+    // FIX: the actual sampled questions the user will play (for history only)
+    playedQuestions: picked.slice(),
 
     // 🔒 FULL SCOPE (for ring + remaining)
     scopeQuestions: normalizedAll.slice(),
@@ -598,6 +602,9 @@ state = {
     mode === "topics" && Array.isArray(unmastered)
       ? unmastered.slice()
       : questions.slice(),
+
+  // FIX: the actual sampled questions the user will play (for history only)
+  playedQuestions: questions.slice(),
 
   scopeQuestions:
     mode === "topics" ? stateScopeQuestions || null : null,
@@ -1313,9 +1320,11 @@ function finishQuiz(timeUp) {
   if (!quizEl) return;
 
   const totalBase =
-    state.mode === "topics" && Array.isArray(state.allQuestions)
-      ? state.allQuestions.length
-      : state.questions.length;
+    state.mode === "topics" && Array.isArray(state.playedQuestions)
+      ? state.playedQuestions.length
+      : state.mode === "topics" && Array.isArray(state.allQuestions)
+        ? state.allQuestions.length
+        : state.questions.length;
 
   const total = totalBase || 0;
   const correct = state.correct;
@@ -1673,12 +1682,15 @@ function updateProgress(question, correct) {
     stats.history = stats.history || [];
 
     const totalBase =
-      state.mode === "topics" && Array.isArray(state.allQuestions)
-        ? state.allQuestions.length
+      state.mode === "topics" && Array.isArray(state.playedQuestions)
+        ? state.playedQuestions.length
         : state.questions.length;
 
     const total = totalBase || 0;
-    const correct = state.correct;
+    const correct =
+      state.mode === "topics" && Array.isArray(state.playedQuestions)
+        ? state.playedQuestions.length
+        : state.correct;
     const percent = total ? Math.round((correct / total) * 100) : 0;
 
     const durationSec = Math.round(
@@ -1687,8 +1699,8 @@ function updateProgress(question, correct) {
 
     const topicsSet = new Set();
     const sourceQuestions =
-      state.mode === "topics" && Array.isArray(state.initialQuestions) // <-- FIX: Check for initialQuestions
-        ? state.initialQuestions                                     // <-- FIX: Use initialQuestions
+      state.mode === "topics" && Array.isArray(state.playedQuestions)
+        ? state.playedQuestions                                     
         : state.questions;
 
     sourceQuestions.forEach(q => {
