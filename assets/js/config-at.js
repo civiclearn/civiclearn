@@ -1,5 +1,8 @@
 /* CivicLearn Country Config — Austria */
 
+window.CIVIC_SITE_CODE = "at";
+window.CIVIC_SYNC_EXTRA_KEYS = ["civiclearn_bundesland"];
+
 window.CIVICEDGE_CONFIG = {
   country: "austria",
 

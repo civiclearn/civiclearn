@@ -1154,6 +1154,11 @@ const key = `${topicLT}:${qTextLT}`;
 
     stats.history.push(session);
     writeJsonLS("civicedge_stats", stats);
+
+    // Sync to cloud
+    if (window.CivicSync) {
+      CivicSync.push(["civicedge_stats", "civicedge_progress"]);
+    }
   }
 
   // Delegated click handler for Result Screen
