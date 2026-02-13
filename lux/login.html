@@ -6,67 +6,130 @@
   <title>Login – Vivre-Ensemble.lu</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+
   <script>
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
-<link rel="stylesheet" href="/assets/css/newlogin.css">
-<style>
-@media (max-width: 640px) {
+  <link rel="stylesheet" href="/assets/css/newlogin.css">
 
-  /* MAIN HEADER CONTAINER */
-  .site-header .header-inner {
-    display: flex;
-    flex-wrap: wrap;          
-    row-gap: 10px;
-  }
+  <style>
+    /* === MOBILE LOGIN TABS === */
+    .login-tabs {
+      display: none;
+    }
 
-  /* LEFT: logo */
-  .site-header .header-left {
-    width: 100%;
-    justify-content: flex-start;
-  }
+    @media (max-width: 768px) {
 
-  /* CENTER: language + contact */
-  .site-header .header-center {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+      /* Fix header overflow */
+      .header-inner {
+        padding: 10px 12px;
+        gap: 8px;
+        flex-wrap: wrap;
+        row-gap: 10px;
+      }
+      .header-nav { display: none; }
+      .brand-powered { display: none; }
 
-  /* Language switch must be allowed to shrink */
-  .site-header .lang-switch {
-    max-width: 70%;
-    overflow: hidden;
-  }
+      .header-left {
+        width: auto;
+        flex: 1;
+      }
+      .header-center {
+        width: auto;
+        display: flex;
+        align-items: center;
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+      }
 
-  .site-header .lang-switch button {
-    padding: 6px 10px;
-    font-size: 13px;
-    white-space: nowrap;
-  }
+      .btn-small-purple {
+        font-size: 12px;
+        padding: 6px 12px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .brand-title {
+        font-size: 15px;
+      }
 
-  /* RIGHT: CTA only */
-  .site-header .header-right {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
-  }
+      .lang-switch {
+        max-width: 100%;
+      }
+      .lang-switch button {
+        padding: 5px 8px;
+        font-size: 12px;
+      }
 
-  /* Reduce noise */
-  .site-header .brand-powered {
-    display: none;
-  }
+      /* Tab bar */
+      .login-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 0;
+        margin: 16px auto 0;
+        max-width: 400px;
+        padding: 0 16px;
+      }
 
-}
-</style>
+      .login-tab {
+        flex: 1;
+        padding: 10px 6px;
+        font-family: 'Lexend', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        text-align: center;
+        border: none;
+        background: #f0eef5;
+        color: #777;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
 
-  
+      .login-tab:first-child {
+        border-radius: 10px 0 0 10px;
+      }
+      .login-tab:last-child {
+        border-radius: 0 10px 10px 0;
+      }
+
+      .login-tab.active {
+        background: #6c5ce7;
+        color: #fff;
+        font-weight: 600;
+      }
+
+      /* Hide inactive cards */
+      .login-grid {
+        display: block !important;
+        padding: 0 16px;
+      }
+
+      .auth-card {
+        display: none;
+        max-width: 400px;
+        margin: 16px auto 0;
+      }
+
+      .auth-card.tab-active {
+        display: block;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      .auth-card input,
+      .auth-card button,
+      .auth-card .pwd-container {
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
 <header class="site-header">
@@ -74,7 +137,7 @@
 
     <!-- LEFT -->
     <div class="header-left">
-      <a href="/" class="brand-link">
+      <a href="https://vivre-ensemble.lu/" class="brand-link">
         <img src="/assets/images/lu.svg" alt="LU">
         <div class="brand-title">Vivre-Ensemble.lu</div>
       </a>
@@ -96,7 +159,7 @@
     <!-- RIGHT -->
     <div class="header-right">
       <div class="brand-powered">powered by <span>CivicLearn</span></div>
-      <a href="/lux/checkout.html" class="btn-small-purple">Sign up</a>
+      <a href="/lux/checkout.html" class="btn-small-purple" data-t="nav_signup">Sign up</a>
     </div>
 
   </div>
@@ -104,95 +167,67 @@
 
 <div id="status" class="status-msg"></div>
 
+<div class="login-tabs">
+  <button class="login-tab" data-tab="setup" data-t="tab_setup">First time?</button>
+  <button class="login-tab active" data-tab="login" data-t="tab_login">Login</button>
+  <button class="login-tab" data-tab="pin" data-t="tab_pin">PIN access</button>
+</div>
+
 <div class="login-grid">
-  <div class="auth-card card-left">
+
+  <!-- LEFT CARD -->
+  <div class="auth-card card-left" data-card="setup">
     <h2 style="color: var(--purple);" data-t="left_title"></h2>
     <p data-t="left_desc"></p>
     <input type="email" id="setupEmail" placeholder="name@example.lu">
     <button onclick="handleSetup()" class="btn-action btn-purple" data-t="left_btn"></button>
-    <div style="font-size: 10px; color: var(--purple); font-weight: 600; margin-top: 15px; text-align: center; line-height: 1.4;" data-t="spam_note"></div>
+    <div style="font-size:10px;color:var(--purple);font-weight:600;margin-top:15px;text-align:center;line-height:1.4;" data-t="spam_note"></div>
   </div>
 
-  <div class="auth-card card-center">
-    <h2 style="font-size: 28px; text-align: center;" data-t="center_title"></h2>
-    <div style="margin-top: 20px;">
+  <!-- CENTER CARD -->
+  <div class="auth-card card-center tab-active" data-card="login">
+    <h2 style="font-size:28px;text-align:center;" data-t="center_title"></h2>
+
+    <div style="margin-top:20px;">
       <label data-t="email_label"></label>
       <input type="email" id="loginEmail" placeholder="Email">
+
       <label data-t="pwd_label"></label>
       <div class="pwd-container">
-        <input type="password" id="loginPwd" placeholder="••••••••">
+        <input type="password" id="loginPwd">
         <button type="button" class="toggle-pwd" onclick="toggleMainPwd()" data-t="show_pwd"></button>
       </div>
-      <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top: 10px;" data-t="center_btn"></button>
+
+      <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top:10px;" data-t="center_btn"></button>
+
+      <div style="text-align:center;margin-top:14px;">
+        <a href="#" id="forgotLink" style="font-size:13px;color:var(--purple);font-weight:500;text-decoration:none;" data-t="forgot_link"></a>
+      </div>
     </div>
   </div>
 
+  <!-- RIGHT CARD — PIN -->
+  <div class="auth-card card-right" data-card="pin">
+    <h2 style="color:#856404;" data-t="pin_title"></h2>
+    <p data-t="pin_desc"></p>
 
-  <div class="auth-card card-right">
+    <label data-t="pin_email_label"></label>
+    <input type="email" id="pinEmail" data-t-placeholder="pin_email_placeholder">
 
-  <h2 style="color:#856404;" data-t="pin_title"></h2>
+    <button class="btn-action btn-yellow" onclick="showPin()" data-t="pin_show_btn"></button>
 
-  <p data-t="pin_desc"></p>
+    <div id="pinArea" style="display:none;margin-top:15px;">
+      <div id="pinShown" style="text-align:center;font-size:28px;letter-spacing:6px;font-weight:700;color:var(--purple);margin-bottom:10px;">0000</div>
 
-  <label data-t="pin_email_label"></label>
-  <input
-    type="email"
-    id="pinEmail"
-    data-t-placeholder="pin_email_placeholder"
-  >
+      <label data-t="pin_enter_label"></label>
+      <input type="text" id="pinEnter" maxlength="4" inputmode="numeric" style="text-align:center;letter-spacing:2px;">
 
-  <button
-    class="btn-action btn-yellow"
-    onclick="showPin()"
-    data-t="pin_show_btn"
-  ></button>
-
-  <div id="pinArea" style="display:none;margin-top:15px;">
-
-    <div
-      id="pinShown"
-      style="
-        text-align:center;
-        font-size:28px;
-        letter-spacing:6px;
-        font-weight:700;
-        color:var(--purple);
-        margin-bottom:10px;
-      "
-    >0000</div>
-
-    <label data-t="pin_enter_label"></label>
-
-    <input
-      type="text"
-      id="pinEnter"
-      maxlength="4"
-      inputmode="numeric"
-      style="text-align:center;letter-spacing:2px;"
-    >
-
-    <button
-      class="btn-action btn-black"
-      onclick="pinLogin()"
-      data-t="pin_continue_btn"
-    ></button>
-
+      <button class="btn-action btn-black" onclick="pinLogin()" data-t="pin_continue_btn"></button>
+    </div>
   </div>
 
 </div>
-</div> 
 
-
-<div class="info-section">
-  <div class="info-card">
-    <h3 style="margin-top: 0; font-size: 16px; color: #333;" data-t="info1_title"></h3>
-    <p style="font-size: 13px; line-height: 1.6; color: #444; margin-bottom: 0;" data-t="info1_body"></p>
-  </div>
-  <div class="info-card">
-    <h3 style="margin-top: 0; font-size: 16px; color: #333;" data-t="info2_title"></h3>
-    <p style="font-size: 13px; line-height: 1.6; color: #444; margin-bottom: 0;" data-t="info2_body"></p>
-  </div>
-</div>
 <script>
 /* =========================
    I18N STRINGS
@@ -200,24 +235,23 @@
 const I18N = {
   en: {
     nav_signup: "Sign up",
-    left_title: "First time or Migrated?",
-    left_desc: "Did you just buy access, or are you moving from the old platform? Enter your email to set your password.",
+    tab_setup: "First time?",
+    tab_login: "Login",
+    tab_pin: "PIN access",
+    left_title: "First time here?",
+    left_desc: "Just bought access? Set your password here.",
     left_btn: "Send setup link",
-    spam_note: "ℹ️ Please check your spam folder if you don't receive the email within 2 minutes.",
+    spam_note: "\u2139\uFE0F Please check your spam folder if you don't receive the email within 2 minutes.",
     center_title: "Login",
     email_label: "Email Address",
     pwd_label: "Password",
     show_pwd: "Show",
     hide_pwd: "Hide",
     center_btn: "Login with password",
-    info1_title: "ℹ️ Information for existing users",
-    info1_body: "Most existing users have been automatically transferred. In rare cases—especially for older purchases—it may be necessary to add your account manually.",
-    info2_title: "📊 About training progress",
-    info2_body: "Previous progress was not transferred to ensure accurate statistics.",
-    err_no_email: "Please enter an email.",
-    err_not_found: "Email not found in our system.",
-    err_login: "Invalid email or password.",
-    msg_sent: "If your email is in our system, a link has been sent.",
+    forgot_link: "Forgot password?",
+    forgot_tab: "Forgot password?",
+    forgot_title: "Forgot password?",
+    forgot_desc: "Enter your email and we'll send you a link to reset your password.",
     pin_title: "Problems?",
     pin_desc: "Use a temporary PIN if password login does not work. The PIN is not sent by email.",
     pin_email_label: "Email address",
@@ -225,69 +259,80 @@ const I18N = {
     pin_show_btn: "Show PIN",
     pin_enter_label: "Enter PIN",
     pin_continue_btn: "Continue",
-    err_pin: "Invalid PIN. Please try again."
+    err_no_email: "Please enter an email.",
+    err_not_found: "Email not found in our system.",
+    err_login: "Invalid email or password.",
+    err_pin: "Invalid PIN. Please try again.",
+    msg_sent: "If your email is in our system, a link has been sent."
   },
   fr: {
-    nav_signup: "Je m'inscris",
-    left_title: "Nouveau ou transféré ?",
-    left_desc: "Vous venez d'acheter un accès ou vous migrez de l'ancienne plateforme ? Entrez votre e-mail pour créer votre mot de passe.",
+    nav_signup: "S'inscrire",
+    tab_setup: "Nouveau ?",
+    tab_login: "Connexion",
+    tab_pin: "Acc\u00e8s PIN",
+    left_title: "Premi\u00e8re visite ?",
+    left_desc: "Vous venez d'acheter un acc\u00e8s ? Cr\u00e9ez votre mot de passe ici.",
     left_btn: "Envoyer le lien",
-    spam_note: "ℹ️ Vérifiez vos spams si vous ne recevez pas l’e-mail.",
+    spam_note: "\u2139\uFE0F V\u00e9rifiez vos spams si vous ne recevez pas l'e-mail.",
     center_title: "Connexion",
     email_label: "Adresse e-mail",
     pwd_label: "Mot de passe",
     show_pwd: "Voir",
     hide_pwd: "Cacher",
     center_btn: "Se connecter",
-    info1_title: "ℹ️ Information aux utilisateurs",
-    info1_body: "La plupart des comptes ont été transférés automatiquement.",
-    info2_title: "📊 Progression d'entraînement",
-    info2_body: "Les anciennes statistiques n'ont pas été conservées.",
-    err_no_email: "Veuillez entrer un e-mail.",
-    err_not_found: "E-mail non trouvé.",
-    err_login: "E-mail ou mot de passe invalide.",
-    msg_sent: "Si votre e-mail existe, un lien a été envoyé.",
-    pin_title: "Un problème ?",
-    pin_desc: "Utilisez un code PIN temporaire si la connexion échoue.",
+    forgot_link: "Mot de passe oubli\u00e9 ?",
+    forgot_tab: "Mot de passe oubli\u00e9 ?",
+    forgot_title: "Mot de passe oubli\u00e9 ?",
+    forgot_desc: "Entrez votre e-mail et nous vous enverrons un lien pour r\u00e9initialiser votre mot de passe.",
+    pin_title: "Un probl\u00e8me ?",
+    pin_desc: "Utilisez un code PIN temporaire si la connexion \u00e9choue. Le PIN n'est pas envoy\u00e9 par e-mail.",
     pin_email_label: "Adresse e-mail",
     pin_email_placeholder: "nom@exemple.lu",
     pin_show_btn: "Afficher le PIN",
     pin_enter_label: "Saisir le PIN",
     pin_continue_btn: "Continuer",
-    err_pin: "PIN invalide."
+    err_no_email: "Veuillez entrer un e-mail.",
+    err_not_found: "E-mail non trouv\u00e9.",
+    err_login: "E-mail ou mot de passe invalide.",
+    err_pin: "PIN invalide.",
+    msg_sent: "Si votre e-mail existe, un lien a \u00e9t\u00e9 envoy\u00e9."
   },
   de: {
     nav_signup: "Registrieren",
-    left_title: "Neu oder migriert?",
-    left_desc: "Haben Sie gerade Zugang gekauft oder wechseln Sie von der alten Plattform?",
+    tab_setup: "Neu hier?",
+    tab_login: "Anmelden",
+    tab_pin: "PIN-Zugang",
+    left_title: "Zum ersten Mal hier?",
+    left_desc: "Gerade Zugang gekauft? Erstellen Sie hier Ihr Passwort.",
     left_btn: "Link senden",
-    spam_note: "ℹ️ Bitte prüfen Sie Ihren Spam-Ordner.",
+    spam_note: "\u2139\uFE0F Bitte pr\u00fcfen Sie Ihren Spam-Ordner.",
     center_title: "Anmelden",
     email_label: "E-Mail-Adresse",
     pwd_label: "Passwort",
     show_pwd: "Anzeigen",
     hide_pwd: "Verbergen",
     center_btn: "Mit Passwort anmelden",
-    info1_title: "ℹ️ Informationen",
-    info1_body: "Die meisten Nutzer wurden automatisch übertragen.",
-    info2_title: "📊 Trainingsfortschritt",
-    info2_body: "Alter Fortschritt wurde nicht übernommen.",
-    err_no_email: "E-Mail eingeben.",
-    err_not_found: "E-Mail nicht gefunden.",
-    err_login: "Ungültige Zugangsdaten.",
-    msg_sent: "Falls vorhanden, wurde ein Link gesendet.",
+    forgot_link: "Passwort vergessen?",
+    forgot_tab: "Passwort vergessen?",
+    forgot_title: "Passwort vergessen?",
+    forgot_desc: "Geben Sie Ihre E-Mail ein, und wir senden Ihnen einen Link zum Zur\u00fccksetzen.",
     pin_title: "Probleme?",
-    pin_desc: "Temporäre PIN verwenden.",
+    pin_desc: "Verwenden Sie eine tempor\u00e4re PIN, wenn die Passwort-Anmeldung nicht funktioniert. Die PIN wird nicht per E-Mail gesendet.",
     pin_email_label: "E-Mail-Adresse",
     pin_email_placeholder: "name@beispiel.lu",
     pin_show_btn: "PIN anzeigen",
     pin_enter_label: "PIN eingeben",
     pin_continue_btn: "Weiter",
-    err_pin: "Ungültige PIN."
+    err_no_email: "E-Mail eingeben.",
+    err_not_found: "E-Mail nicht gefunden.",
+    err_login: "Ung\u00fcltige Zugangsdaten.",
+    err_pin: "Ung\u00fcltige PIN.",
+    msg_sent: "Falls vorhanden, wurde ein Link gesendet."
   }
 };
 
 let currentLang = "en";
+let _forgotActive = false;
 
 /* =========================
    LANGUAGE APPLY
@@ -305,6 +350,17 @@ function applyLang(lang) {
   document.querySelectorAll(".lang-switch button").forEach(btn => {
     btn.classList.toggle("active", btn.id === `btn-${lang}`);
   });
+
+  // If forgot flow is active, keep its labels in the new language
+  if (_forgotActive) {
+    const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
+    if (setupTab) setupTab.textContent = I18N[lang].forgot_tab;
+    const setupCard = document.querySelector('.card-left');
+    const h2 = setupCard?.querySelector("h2");
+    if (h2) h2.textContent = I18N[lang].forgot_title;
+    const p = setupCard?.querySelector("p");
+    if (p) p.textContent = I18N[lang].forgot_desc;
+  }
 }
 
 /* =========================
@@ -381,17 +437,23 @@ async function showPin() {
   const email = pinEmail.value.trim().toLowerCase();
   if (!email) return notify("error", I18N[currentLang].err_no_email);
 
-  const res = await fetch(
-    "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/check-user-exists",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email })
-    }
-  );
+  let exists = false;
+  try {
+    const res = await fetch(
+      "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/check-user-exists",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      }
+    );
+    const data = await res.json();
+    exists = data.exists === true;
+  } catch (e) {
+    return notify("error", I18N[currentLang].err_not_found);
+  }
 
-  const data = await res.json();
-  if (!data.exists) return notify("error", I18N[currentLang].err_not_found);
+  if (!exists) return notify("error", I18N[currentLang].err_not_found);
 
   pinShown.textContent = computePin(email);
   pinArea.style.display = "block";
@@ -444,6 +506,63 @@ function toggleMainPwd() {
 applyLang(currentLang);
 </script>
 
+<script>
+/* === MOBILE LOGIN TABS === */
+document.querySelectorAll(".login-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    const target = tab.dataset.tab;
+
+    // Update tab bar
+    document.querySelectorAll(".login-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+
+    // Show matching card, hide others
+    document.querySelectorAll(".auth-card").forEach(card => {
+      card.classList.toggle("tab-active", card.dataset.card === target);
+    });
+
+    // Reset setup tab label when switching away from forgot flow
+    if (target !== "setup" && _forgotActive) {
+      _forgotActive = false;
+      const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
+      if (setupTab) setupTab.textContent = I18N[currentLang].tab_setup;
+      const setupCard = document.querySelector('.card-left');
+      const h2 = setupCard?.querySelector("h2");
+      if (h2) h2.textContent = I18N[currentLang].left_title;
+      const p = setupCard?.querySelector("p");
+      if (p) p.textContent = I18N[currentLang].left_desc;
+    }
+  });
+});
+
+/* === FORGOT PASSWORD LINK === */
+const forgotLink = document.getElementById("forgotLink");
+if (forgotLink) {
+  forgotLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    _forgotActive = true;
+
+    // Switch to setup tab
+    document.querySelectorAll(".login-tab").forEach(t => t.classList.remove("active"));
+    const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
+    if (setupTab) {
+      setupTab.classList.add("active");
+      setupTab.textContent = I18N[currentLang].forgot_tab;
+    }
+
+    document.querySelectorAll(".auth-card").forEach(card => {
+      card.classList.toggle("tab-active", card.dataset.card === "setup");
+    });
+
+    // Update heading and description
+    const setupCard = document.querySelector('.card-left');
+    const h2 = setupCard?.querySelector("h2");
+    if (h2) h2.textContent = I18N[currentLang].forgot_title;
+    const p = setupCard?.querySelector("p");
+    if (p) p.textContent = I18N[currentLang].forgot_desc;
+  });
+}
+</script>
 
 </body>
 </html>
