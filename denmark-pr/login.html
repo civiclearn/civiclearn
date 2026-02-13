@@ -3,212 +3,146 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – Medborgerskabsprove.dk</title>
+  <title>Login – Medborgerskabsprove.dk - CivicLearn</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+
   <script>
     window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
     window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
+  <link rel="stylesheet" href="/assets/css/newlogin.css">
 
   <style>
-    :root {
-      --purple: #7c3aed;
-      --yellow: #f1c40f;
-      --black: #333;
-      --bg: #fdfaf5;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Lexend', sans-serif;
-      background-color: var(--bg);
-      color: #111;
-    }
-
-    .site-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 40px;
-      background: white;
-    }
-
-    .brand-main { display: flex; align-items: center; gap: 10px; font-weight: 700; }
-    
-    .btn-small-purple {
-      background: var(--purple);
-      color: white;
-      text-decoration: none;
-      padding: 8px 20px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .login-grid {
-      display: flex;
-      justify-content: center;
-      align-items: stretch;
-      gap: 0;
-      max-width: 1100px;
-      margin: 80px auto 40px;
-      padding: 20px;
-    }
-
-    .auth-card {
-      background: white;
-      padding: 40px 30px;
-      width: 320px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .card-left {
-      border-radius: 20px 0 0 20px;
-      background-color: #f3ebff;
-      border: 1px solid #e0d0f9;
-      z-index: 1;
-    }
-
-    .card-center {
-      border-radius: 20px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.08);
-      z-index: 10;
-      margin: -20px 0;
-      padding: 60px 40px;
-      border: 1px solid #eee;
-    }
-
-    .card-right {
-      border-radius: 0 20px 20px 0;
-      background-color: #fffdf0;
-      border: 1px solid #f9edbc;
-      z-index: 1;
-    }
-
-    h2 { font-size: 20px; margin-top: 0; margin-bottom: 15px; }
-    p { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 20px; }
-
-    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
-    input {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #e5dfd2;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      box-sizing: border-box;
-      font-family: 'Lexend', sans-serif;
-    }
-
-    .btn-action {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: none;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: 'Lexend', sans-serif;
-      margin-top: auto;
-    }
-
-    .btn-purple { background: var(--purple); color: white; }
-    .btn-black { background: var(--black); color: white; }
-    .btn-yellow { background: var(--yellow); color: #111; }
-
-    .pwd-container { position: relative; width: 100%; }
-    .pwd-container input { padding-right: 60px; }
-    
-    .toggle-pwd {
-      position: absolute;
-      right: 12px;
-      top: 12px;
-      background: none;
-      border: none;
-      color: var(--purple);
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .status-msg {
-      position: fixed;
-      top: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 24px;
-      border-radius: 30px;
-      font-size: 14px;
-      font-weight: 500;
+    /* === MOBILE LOGIN TABS === */
+    .login-tabs {
       display: none;
-      z-index: 100;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .error { background: #fee2e2; color: #dc2626; display: block; }
-    .success { background: #dcfce7; color: #166534; display: block; }
-
-    .info-section {
-      max-width: 1100px;
-      margin: 0 auto 80px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      padding: 0 20px;
     }
 
-    .info-card {
-      background: white;
-      border: 1px solid rgba(0,0,0,.08);
-      border-radius: 18px;
-      padding: 24px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-    }
+    @media (max-width: 768px) {
 
-    @media (max-width: 900px) {
-      .login-grid { flex-direction: column; align-items: center; gap: 20px; }
-      .auth-card { border-radius: 20px; margin: 0; width: 100%; max-width: 400px; }
-      .info-section { grid-template-columns: 1fr; }
+      /* Fix header overflow */
+      .header-inner {
+        padding: 10px 12px;
+        gap: 8px;
+      }
+      .header-nav { display: none; }
+      .brand-powered { display: none; }
+      .btn-small-purple {
+        font-size: 12px;
+        padding: 6px 12px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .brand-title {
+        font-size: 15px;
+      }
+
+      /* Tab bar */
+      .login-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 0;
+        margin: 16px auto 0;
+        max-width: 400px;
+        padding: 0 16px;
+      }
+
+      .login-tab {
+        flex: 1;
+        padding: 10px 6px;
+        font-family: 'Lexend', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        text-align: center;
+        border: none;
+        background: #f0eef5;
+        color: #777;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .login-tab:first-child {
+        border-radius: 10px 0 0 10px;
+      }
+      .login-tab:last-child {
+        border-radius: 0 10px 10px 0;
+      }
+
+      .login-tab.active {
+        background: #6c5ce7;
+        color: #fff;
+        font-weight: 600;
+      }
+
+      /* Hide inactive cards */
+      .login-grid {
+        display: block !important;
+        padding: 0 16px;
+      }
+
+      .auth-card {
+        display: none;
+        max-width: 400px;
+        margin: 16px auto 0;
+      }
+
+      .auth-card.tab-active {
+        display: block;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      .auth-card input,
+      .auth-card button,
+      .auth-card .pwd-container {
+        max-width: 100%;
+        box-sizing: border-box;
+      }
     }
   </style>
 </head>
+
 <body>
 
 <header class="site-header">
-  <div class="brand-main">
-    <img src="/assets/images/icons/dk.svg" width="24" alt="">
-    Medborgerskabsprove.dk - CivicLearn
+  <div class="header-inner">
+
+    <div class="header-left">
+      <a href="https://medborgerskabsprove.dk/" class="brand-link">
+        <img src="/assets/images/dk.svg" alt="DK">
+        <div class="brand-title">Medborgerskabsprove.dk</div>
+      </a>
+    </div>
+
+    <div class="header-center">
+      <nav class="header-nav">
+        <a href="https://medborgerskabsprove.dk/kontakt/">Contact</a>
+      </nav>
+    </div>
+
+    <div class="header-right">
+      <div class="brand-powered">powered by <span>CivicLearn</span></div>
+      <a href="/denmark-pr/checkout.html" class="btn-small-purple">Opret adgang</a>
+    </div>
+
   </div>
-  <a href="/denmark/checkout.html" class="btn-small-purple">Opret en adgang</a>
 </header>
 
 <div id="status" class="status-msg"></div>
 
-<div style="
-  max-width: 1100px;
-  margin: 20px auto 0;
-  padding: 14px 18px;
-  background: #fff4e5;
-  border: 1px solid #f3d19c;
-  border-radius: 12px;
-  font-size: 14px;
-  line-height: 1.45;
-  color: #7a4b00;
-">
-  <strong>Important:</strong>
-  This login page is for <strong>Medborgerskabsprøven (Permanent Residence)</strong>.<br>
-  If you purchased access to <strong>Indfødsretsprøven (Citizenship)</strong>, please log in here instead:
-  <a href="/denmark/login.html" style="font-weight:600;color:#7c3aed;">
-    civiclearn.com/denmark/login
-  </a>
+<div class="login-tabs">
+  <button class="login-tab" data-tab="setup">Første gang?</button>
+  <button class="login-tab active" data-tab="login">Login</button>
+  <button class="login-tab" data-tab="pin">PIN-adgang</button>
 </div>
 
 <div class="login-grid">
 
   <!-- LEFT CARD -->
-  <div class="auth-card card-left">
+  <div class="auth-card card-left" data-card="setup">
     <h2 style="color: var(--purple);">Første gang her?</h2>
     <p>
       Har du netop købt adgang? Opret din adgangskode her.
@@ -229,7 +163,7 @@
   </div>
 
   <!-- CENTER CARD -->
-  <div class="auth-card card-center">
+  <div class="auth-card card-center tab-active" data-card="login">
     <h2 style="font-size:28px;text-align:center;">Login</h2>
 
     <div style="margin-top:20px;">
@@ -245,11 +179,17 @@
       <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top:10px;">
         Log ind med adgangskode
       </button>
+
+      <div style="text-align:center;margin-top:14px;">
+        <a href="#" id="forgotLink" style="font-size:13px;color:var(--purple);font-weight:500;text-decoration:none;">
+          Glemt adgangskode?
+        </a>
+      </div>
     </div>
   </div>
 
   <!-- RIGHT CARD — PIN -->
-  <div class="auth-card card-right">
+  <div class="auth-card card-right" data-card="pin">
     <h2 style="color:#856404;">Problemer?</h2>
     <p>
       Brug en midlertidig adgangs-PIN, hvis login med adgangskode ikke virker.
@@ -279,21 +219,6 @@
 
 </div>
 
-<!--
-<div class="info-section">
-  <div class="info-card">
-    <h3>ℹ️ Information til eksisterende brugere</h3>
-    <p>
-     De fleste eksisterende brugere er automatisk overført til den nye platform. I enkelte tilfælde – især hvis dit køb blev foretaget før 2022 – kan det være nødvendigt at tilføje din konto manuelt. Hvis du er eksisterende bruger, men systemet ikke genkender din e-mailadresse, bedes du kontakte support, så hjælper vi dig videre.
-    </p>
-  </div>
-  <div class="info-card">
-    <h3>📊 Om tidligere træningsprogress</h3>
-    <p>
-     På grund af overgangen til en ny platform er træningsprogress og statistik fra den tidligere løsning ikke overført. Alle brugere starter derfor med en nulstillet progression. Det sikrer, at din træning, statistik og prøvesimulationer fremover er korrekte.
-    </p>
-  </div>
-</div> -->
 
 <script>
 const supabase = window.supabase.createClient(
@@ -340,6 +265,7 @@ async function handleSetup() {
 
   notify("success","Hvis e-mailen findes, er et link sendt.");
 }
+
 
 /* ---------- PASSWORD LOGIN ---------- */
 async function handleLogin() {
@@ -438,7 +364,7 @@ async function pinLogin() {
   }
 
   localStorage.setItem("cl_auth","ok");
-  localStorage.setItem("cl_email", email); 
+  localStorage.setItem("cl_email", email);
   localStorage.setItem("cl_login_at", Date.now().toString());
   location.href="/denmark-pr/dashboard/";
 }
@@ -456,6 +382,62 @@ function toggleMainPwd(){
     pwd.type = "password";
     btn.textContent = "Vis";
   }
+}
+</script>
+
+<script>
+/* === MOBILE LOGIN TABS === */
+document.querySelectorAll(".login-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    const target = tab.dataset.tab;
+
+    // Update tab bar
+    document.querySelectorAll(".login-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+
+    // Show matching card, hide others
+    document.querySelectorAll(".auth-card").forEach(card => {
+      card.classList.toggle("tab-active", card.dataset.card === target);
+    });
+
+    // Reset setup tab label when switching away from forgot flow
+    if (target !== "setup") {
+      const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
+      if (setupTab) setupTab.textContent = "Første gang?";
+      const setupCard = document.querySelector('.card-left');
+      const h2 = setupCard?.querySelector("h2");
+      if (h2) h2.textContent = "Første gang her?";
+      const p = setupCard?.querySelector("p");
+      if (p) p.textContent = "Har du netop købt adgang? Opret din adgangskode her.";
+    }
+  });
+});
+
+/* === FORGOT PASSWORD LINK === */
+const forgotLink = document.getElementById("forgotLink");
+if (forgotLink) {
+  forgotLink.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    // Switch to setup tab
+    document.querySelectorAll(".login-tab").forEach(t => t.classList.remove("active"));
+    const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
+    if (setupTab) {
+      setupTab.classList.add("active");
+      setupTab.textContent = "Glemt adgangskode?";
+    }
+
+    document.querySelectorAll(".auth-card").forEach(card => {
+      card.classList.toggle("tab-active", card.dataset.card === "setup");
+    });
+
+    // Update heading and description
+    const setupCard = document.querySelector('.card-left');
+    const h2 = setupCard?.querySelector("h2");
+    if (h2) h2.textContent = "Glemt adgangskode?";
+    const p = setupCard?.querySelector("p");
+    if (p) p.textContent = "Indtast din e-mail, så sender vi et link til at nulstille din adgangskode.";
+  });
 }
 </script>
 
