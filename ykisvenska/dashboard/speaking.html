@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/ykisvenska/assets/css/yki-styles.css">
+  <link rel="stylesheet" href="../assets/css/yki-styles.css">
   <style>
     body { font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif; }
     
@@ -41,21 +41,56 @@
     }
     .btn-secondary { background: #f7fafc; color: #2d3748; border: 2px solid #e2e8f0; }
     .btn-secondary:hover { background: #edf2f7; border-color: #cbd5e0; transform: translateY(-1px); }
+    .btn-danger {
+      background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+      color: white; box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
+    }
+    .btn-danger:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(245, 101, 101, 0.4); transform: translateY(-2px); }
+    .btn-success {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: white; box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+    }
+    .btn-success:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4); transform: translateY(-2px); }
     .btn-primary {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
-    .btn-primary:hover { box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); transform: translateY(-2px); }
-    .btn-primary:active, .btn-secondary:active { transform: translateY(0); }
+    .btn-primary:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); transform: translateY(-2px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
     .btn-large { padding: 16px 32px; font-size: 1.05rem; }
+    .btn:active:not(:disabled) { transform: translateY(0); }
     
     .nav-buttons {
       display: flex; gap: 16px; justify-content: space-between;
       margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;
+      flex-wrap: wrap;
     }
     
+    /* Recording UI */
+    .recording-controls {
+      display: flex; gap: 12px; margin: 1rem 0; flex-wrap: wrap;
+    }
+    
+    .recording-indicator {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px; background: #fed7d7; border: 2px solid #fc8181;
+      border-radius: 8px; font-weight: 600; color: #c53030;
+    }
+    .recording-indicator.active { animation: pulse 1s ease-in-out infinite; }
+    
+    .rec-dot {
+      width: 12px; height: 12px; border-radius: 50%; background: #e53e3e;
+    }
+    
+    /* Text fallback */
+    .text-fallback {
+      margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed #e2e8f0;
+    }
+    .text-fallback-label {
+      font-size: 0.85rem; color: #718096; margin-bottom: 8px; font-weight: 500;
+    }
     .speaking-textarea {
-      width: 100%; min-height: 200px; padding: 16px;
+      width: 100%; min-height: 150px; padding: 16px;
       border: 2px solid #e2e8f0; border-radius: 10px;
       font-family: 'Space Grotesk', sans-serif; font-size: 1rem;
       line-height: 1.6; resize: vertical; transition: border-color 0.2s;
@@ -67,17 +102,13 @@
       border-radius: 8px; margin-bottom: 12px; line-height: 1.6;
     }
     
-    .speaking-tip {
-      background: #fffff0; border: 1px solid #ecc94b; border-radius: 8px;
-      padding: 12px 16px; margin-top: 12px; font-size: 0.9rem; color: #744210;
+    .task-status {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600;
+      margin-left: 12px;
     }
-    .speaking-tip::before { content: '💡 '; }
-    
-    .task-duration {
-      display: inline-block; background: #ebf4ff; color: #2b6cb0;
-      padding: 4px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;
-      margin-top: 8px;
-    }
+    .task-status.done { background: #c6f6d5; color: #276749; }
+    .task-status.pending { background: #fed7d7; color: #9b2c2c; }
   </style>
 </head>
 <body>
@@ -99,7 +130,7 @@
     <div class="card">
       <div class="test-badge" id="test-badge">YKI-XX</div>
       <h1 class="card-title">Muntlig framställning</h1>
-      <p class="card-subtitle">Svara muntligt på alla uppgifter. Skriv dina svar som om du talar.</p>
+      <p class="card-subtitle">Svara muntligt på alla uppgifter. Spela in dina svar eller skriv vad du skulle säga.</p>
       <div class="timer-box" id="timer-display">
         <span class="timer-icon">⏱️</span>
         <div>
@@ -108,8 +139,12 @@
         </div>
       </div>
       <div class="alert alert-info" style="margin-top: 1rem;">
-        <strong>Instruktioner:</strong> I det riktiga provet talar du in dina svar. 
-        Här skriver du vad du skulle säga. Din text utvärderas av AI enligt YKI-kriterier.
+        <strong>Instruktioner:</strong> Klicka på "Börja inspelning" och tala tydligt. 
+        Dina inspelningar transkriberas och utvärderas av AI enligt YKI-kriterier.
+      </div>
+      <div class="alert alert-warning">
+        <strong>Mikrofon:</strong> Din webbläsare kommer att be om tillåtelse att använda mikrofonen. 
+        Tillåt för att kunna spela in. Du kan också skriva ditt svar som alternativ.
       </div>
     </div>
 
@@ -120,21 +155,27 @@
       <button class="btn" onclick="restartTest()" style="background: #ed8936; color: white; border: 2px solid #dd6b20;">
         🔄 Starta om testet
       </button>
-      <button class="btn btn-primary btn-large" id="submit-btn" onclick="submitTest()">
-        ✅ Skicka in testet
+      <button class="btn btn-success btn-large" id="submit-btn" onclick="submitTest()" disabled>
+        Skicka in testet för bedömning →
       </button>
     </div>
 
   </div>
 
-  <div id="loading-overlay" class="loading-overlay" style="display: none;"><div class="spinner"></div></div>
+  <div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="spinner"></div>
+    <p id="loading-message" style="margin-top: 1rem; color: white;"></p>
+  </div>
 
-  <script src="/ykisvenska/assets/js/yki-engine.js?v=1"></script>
+  <script src="../assets/js/yki-engine.js?v=2"></script>
   <script>
     let speakingData = null;
-    
     const urlParams = new URLSearchParams(window.location.search);
     const EXAM_ID = urlParams.get('exam') || 'yki-01';
+    
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let currentRecordingTask = null;
     
     document.getElementById('test-badge').textContent = EXAM_ID.toUpperCase();
     
@@ -147,6 +188,7 @@
         
         speakingData = await response.json();
         renderTasks();
+        updateSubmitButton();
         updateProgress();
         startTimer();
         
@@ -156,88 +198,240 @@
       }
     });
     
+    // ======================================================================
+    // RENDER TASKS
+    // ======================================================================
+    
     function renderTasks() {
       const container = document.getElementById('tasks-container');
       container.innerHTML = '';
       
-      speakingData.tasks.forEach((task, taskIndex) => {
+      speakingData.tasks.forEach((task, idx) => {
         const taskDiv = document.createElement('div');
         taskDiv.className = 'card task-container';
         
-        let durationHtml = '';
-        if (task.duration) {
-          durationHtml = `<div class="task-duration">⏱ Taltid: ${task.duration}</div>`;
-        }
-        
         taskDiv.innerHTML = `
           <div class="task-header">
-            <h2 class="task-title">${task.title}</h2>
+            <h2 class="task-title">
+              ${task.title}
+              <span class="task-status pending" id="status-${task.task_id}">⏳ Ej besvarad</span>
+            </h2>
             <p class="task-instructions">${task.instructions}</p>
-            ${durationHtml}
+          </div>
+          <div class="task-content">
+            ${renderTaskPrompt(task)}
+            
+            <div class="recording-controls">
+              <button class="btn btn-danger" id="record-btn-${task.task_id}" 
+                      onclick="startRecording('${task.task_id}')">
+                🎤 Börja inspelning
+              </button>
+              <button class="btn btn-secondary" id="stop-btn-${task.task_id}" 
+                      onclick="stopRecording('${task.task_id}')" disabled>
+                ⏹️ Stoppa inspelning
+              </button>
+            </div>
+            
+            <div id="recording-status-${task.task_id}"></div>
+            <div id="playback-${task.task_id}"></div>
+            
+            <div class="text-fallback">
+              <div class="text-fallback-label">✏️ Alternativ: Skriv ditt svar om du inte kan spela in</div>
+              <textarea class="speaking-textarea" id="textarea-${task.task_id}"
+                        placeholder="Skriv vad du skulle säga här..."
+                        data-task-id="${task.task_id}"
+                        oninput="onTextInput('${task.task_id}', this.value)"></textarea>
+            </div>
           </div>
         `;
         
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'task-content';
-        contentDiv.style.marginTop = '16px';
+        container.appendChild(taskDiv);
         
-        // Prompt / scenario
-        if (task.prompt) {
-          const promptDiv = document.createElement('div');
-          promptDiv.className = 'speaking-context';
-          if (typeof task.prompt === 'string') {
-            promptDiv.innerHTML = task.prompt;
-          } else if (task.prompt.scenario) {
-            promptDiv.innerHTML = task.prompt.scenario;
-          } else if (task.prompt.topic) {
-            promptDiv.innerHTML = `<strong>Ämne:</strong> ${task.prompt.topic}`;
-          }
-          contentDiv.appendChild(promptDiv);
+        // Restore saved recording
+        const savedRecording = YKIEngine.currentTest.sections.speaking.recordings[task.task_id];
+        if (savedRecording) {
+          showPlayback(task.task_id, savedRecording);
         }
-        
-        // Bullet points / sub-questions
-        if (task.prompt && task.prompt.points && Array.isArray(task.prompt.points)) {
-          const pointsDiv = document.createElement('div');
-          pointsDiv.className = 'speaking-context';
-          pointsDiv.innerHTML = '<strong>Tänk på att nämna:</strong><ul style="margin: 8px 0 0 16px;">' +
-            task.prompt.points.map(p => `<li>${p}</li>`).join('') + '</ul>';
-          contentDiv.appendChild(pointsDiv);
-        }
-        
-        // Tip
-        if (task.tip) {
-          const tipDiv = document.createElement('div');
-          tipDiv.className = 'speaking-tip';
-          tipDiv.textContent = task.tip;
-          contentDiv.appendChild(tipDiv);
-        }
-        
-        // Textarea
-        const textareaContainer = document.createElement('div');
-        textareaContainer.style.marginTop = '16px';
-        
-        const textarea = document.createElement('textarea');
-        textarea.className = 'speaking-textarea';
-        textarea.id = `textarea-${task.task_id}`;
-        textarea.placeholder = 'Skriv vad du skulle säga här...';
-        textarea.setAttribute('data-task-id', task.task_id);
         
         // Restore saved text
         const savedText = YKIEngine.currentTest.sections.speaking.responses[task.task_id];
-        if (savedText) textarea.value = savedText;
+        if (savedText) {
+          document.getElementById(`textarea-${task.task_id}`).value = savedText;
+        }
         
-        textarea.addEventListener('input', () => {
-          YKIEngine.saveSpeakingResponse(task.task_id, textarea.value);
-        });
-        
-        textareaContainer.appendChild(textarea);
-        contentDiv.appendChild(textareaContainer);
-        taskDiv.appendChild(contentDiv);
-        container.appendChild(taskDiv);
+        updateTaskStatus(task.task_id);
       });
     }
     
-    // Timer (15 minutes)
+    function renderTaskPrompt(task) {
+      let html = '';
+      
+      // Main prompt
+      if (task.prompt) {
+        html += `<div class="speaking-context">`;
+        if (typeof task.prompt === 'string') {
+          html += task.prompt;
+        } else if (task.prompt.scenario) {
+          html += task.prompt.scenario;
+        } else if (task.prompt.topic) {
+          html += `<strong>Ämne:</strong> ${task.prompt.topic}`;
+        }
+        html += `</div>`;
+      }
+      
+      // Bullet points
+      if (task.prompt && task.prompt.points && Array.isArray(task.prompt.points)) {
+        html += `<div class="speaking-context">
+          <strong>Tänk på att nämna:</strong>
+          <ul style="margin: 8px 0 0 16px;">
+            ${task.prompt.points.map(p => `<li>${p}</li>`).join('')}
+          </ul>
+        </div>`;
+      }
+      
+      // Guidance tips
+      if (task.guidance && Array.isArray(task.guidance)) {
+        html += `<div class="alert alert-info" style="margin-top: 0.5rem;">
+          <strong>Tips:</strong>
+          <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0;">
+            ${task.guidance.map(tip => `<li>${tip}</li>`).join('')}
+          </ul>
+        </div>`;
+      }
+      
+      // Tip (single string)
+      if (task.tip) {
+        html += `<div class="alert alert-info" style="margin-top: 0.5rem;">💡 ${task.tip}</div>`;
+      }
+      
+      return html;
+    }
+    
+    // ======================================================================
+    // RECORDING
+    // ======================================================================
+    
+    async function startRecording(taskId) {
+      // Stop any active recording first
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+      
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        currentRecordingTask = taskId;
+        
+        mediaRecorder.ondataavailable = (e) => {
+          audioChunks.push(e.data);
+        };
+        
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          await YKIEngine.saveSpeakingRecording(taskId, audioBlob);
+          showPlayback(taskId, YKIEngine.currentTest.sections.speaking.recordings[taskId]);
+          updateTaskStatus(taskId);
+          updateSubmitButton();
+          stream.getTracks().forEach(track => track.stop());
+        };
+        
+        mediaRecorder.start();
+        
+        document.getElementById(`record-btn-${taskId}`).disabled = true;
+        document.getElementById(`stop-btn-${taskId}`).disabled = false;
+        
+        const statusDiv = document.getElementById(`recording-status-${taskId}`);
+        statusDiv.innerHTML = `
+          <div class="recording-indicator active">
+            <div class="rec-dot"></div>
+            <span>Spelar in...</span>
+          </div>
+        `;
+        
+      } catch (err) {
+        console.error('Microphone error:', err);
+        alert('Kunde inte komma åt mikrofonen.\n\n' + err.message + '\n\nDu kan skriva ditt svar istället i textfältet nedan.');
+      }
+    }
+    
+    function stopRecording(taskId) {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+        document.getElementById(`record-btn-${taskId}`).disabled = false;
+        document.getElementById(`stop-btn-${taskId}`).disabled = true;
+        document.getElementById(`recording-status-${taskId}`).innerHTML = '';
+      }
+    }
+    
+    function showPlayback(taskId, base64Audio) {
+      const playbackDiv = document.getElementById(`playback-${taskId}`);
+      playbackDiv.innerHTML = `
+        <div class="alert alert-success" style="margin-top: 1rem;">
+          ✅ Inspelning klar
+          <audio controls style="width: 100%; margin-top: 0.5rem;">
+            <source src="${base64Audio}" type="audio/webm">
+          </audio>
+          <button class="btn btn-secondary" style="margin-top: 0.5rem;" 
+                  onclick="startRecording('${taskId}')">
+            🔄 Spela in igen
+          </button>
+        </div>
+      `;
+    }
+    
+    // ======================================================================
+    // TEXT FALLBACK
+    // ======================================================================
+    
+    function onTextInput(taskId, text) {
+      YKIEngine.saveSpeakingResponse(taskId, text);
+      updateTaskStatus(taskId);
+      updateSubmitButton();
+    }
+    
+    // ======================================================================
+    // TASK STATUS
+    // ======================================================================
+    
+    function updateTaskStatus(taskId) {
+      const statusEl = document.getElementById(`status-${taskId}`);
+      if (!statusEl) return;
+      
+      const hasRecording = !!YKIEngine.currentTest.sections.speaking.recordings[taskId];
+      const hasText = !!(YKIEngine.currentTest.sections.speaking.responses[taskId] || '').trim();
+      
+      if (hasRecording) {
+        statusEl.className = 'task-status done';
+        statusEl.textContent = '🎤 Inspelad';
+      } else if (hasText) {
+        statusEl.className = 'task-status done';
+        statusEl.textContent = '✏️ Textbesvarad';
+      } else {
+        statusEl.className = 'task-status pending';
+        statusEl.textContent = '⏳ Ej besvarad';
+      }
+    }
+    
+    function updateSubmitButton() {
+      if (!speakingData) return;
+      
+      const totalTasks = speakingData.tasks.length;
+      let completedTasks = 0;
+      
+      speakingData.tasks.forEach(task => {
+        const hasRecording = !!YKIEngine.currentTest.sections.speaking.recordings[task.task_id];
+        const hasText = !!(YKIEngine.currentTest.sections.speaking.responses[task.task_id] || '').trim();
+        if (hasRecording || hasText) completedTasks++;
+      });
+      
+      document.getElementById('submit-btn').disabled = (completedTasks < totalTasks);
+    }
+    
+    // ======================================================================
+    // TIMER (15 minutes)
+    // ======================================================================
+    
     let timeRemaining = 15 * 60;
     let timerInterval = null;
     const TIMER_KEY = `yki_timer_${EXAM_ID}_speaking`;
@@ -256,7 +450,8 @@
         timeRemaining--;
         if (timeRemaining <= 0) {
           clearInterval(timerInterval); timeRemaining = 0; updateTimerDisplay();
-          alert('⏰ Tiden är slut!\n\nDen officiella tiden för Tal har gått ut.\n\nDu kan fortsätta skriva eller skicka in testet.');
+          updateSubmitButton();
+          alert('⏰ Tiden är slut!\n\nDen officiella tiden för Tal har gått ut.\n\nDu kan fortsätta eller skicka in testet.');
           return;
         }
         updateTimerDisplay();
@@ -274,32 +469,58 @@
     
     window.addEventListener('beforeunload', () => { if (timerInterval) clearInterval(timerInterval); });
     
-    function submitTest() {
-      let allFilled = true;
-      const errors = [];
+    // ======================================================================
+    // SUBMIT TEST
+    // ======================================================================
+    
+    async function submitTest() {
+      // Auth check
+      const userEmail = localStorage.getItem('cl_email');
       
-      speakingData.tasks.forEach(task => {
-        const textarea = document.getElementById(`textarea-${task.task_id}`);
-        if (!textarea || textarea.value.trim() === '') {
-          allFilled = false;
-          errors.push(`${task.title}: Inget svar skrivet.`);
+      if (!userEmail || userEmail === 'anonymous') {
+        const shouldLogin = confirm(
+          '🔐 Inloggning krävs\n\n' +
+          'För att spara resultaten och få fullständig bedömning behöver du logga in.\n\n' +
+          'Dina framsteg sparas lokalt och skickas in efter inloggning.\n\n' +
+          'Logga in nu?'
+        );
+        
+        if (shouldLogin) {
+          const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = `../login.html?return=${returnUrl}`;
         }
-      });
-      
-      if (!allFilled) {
-        alert('Vänligen svara på alla uppgifter:\n\n' + errors.join('\n'));
         return;
       }
       
-      if (!confirm('Är du säker på att du vill skicka in testet?\n\nAlla svar kommer att utvärderas av AI.\n\nDetta kan inte ångras.')) return;
+      // Confirm
+      if (!confirm(
+        'Skicka in testet för bedömning?\n\n' +
+        'Dina svar skickas in och utvärderas. Detta kan inte ångras.'
+      )) return;
       
+      // Clear timer
       localStorage.removeItem(TIMER_KEY);
       if (timerInterval) clearInterval(timerInterval);
       
       YKIEngine.completeSpeakingSection();
-      console.log('✅ Speaking completed, test submitted');
       
-      window.location.href = `results.html?exam=${EXAM_ID}`;
+      document.getElementById('loading-overlay').style.display = 'flex';
+      document.getElementById('loading-message').textContent = 'Skickar in testet...';
+      
+      try {
+        const result = await YKIEngine.submitForEvaluation();
+        
+        document.getElementById('loading-message').textContent = 
+          'Testet inskickat! Omdirigerar till resultat...';
+        
+        setTimeout(() => {
+          window.location.href = `results.html?attempt_id=${result.attempt_id}&exam=${EXAM_ID}`;
+        }, 500);
+        
+      } catch (error) {
+        document.getElementById('loading-overlay').style.display = 'none';
+        alert('Fel vid inskickning: ' + error.message);
+      }
     }
     
     function goBack() {
