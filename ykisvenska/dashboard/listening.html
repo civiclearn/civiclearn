@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/ykisvenska/assets/css/yki-styles.css">
+  <link rel="stylesheet" href="../assets/css/yki-styles.css">
   <style>
     body { font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif; }
     
@@ -113,7 +113,7 @@
 
   <div id="loading-overlay" class="loading-overlay" style="display: none;"><div class="spinner"></div></div>
 
-  <script src="/ykisvenska/assets/js/yki-engine.js?v=1"></script>
+  <script src="../assets/js/yki-engine.js?v=1"></script>
   <script>
     let listeningData = null;
     
@@ -218,14 +218,18 @@
           questionDiv.innerHTML = `
             <div class="question-prompt">${question.prompt}</div>
             <div class="options-container">
-              ${shuffledOptions.map(option => `
+              ${shuffledOptions.map((option, oIdx) => {
+                const optText = typeof option === 'string' ? option : option.text;
+                const optValue = typeof option === 'string' ? option : (option.id || option.text);
+                const escapedValue = optValue.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                return `
                 <label class="option-button">
-                  <input type="radio" name="${uniqueName}" value="${option.id}"
+                  <input type="radio" name="${uniqueName}" value="${escapedValue}"
                     data-question-id="${question.id}"
-                    onchange="saveAnswer('${question.id}', '${option.id}')">
-                  <span>${option.text}</span>
+                    onchange="saveAnswer('${question.id}', this.value)">
+                  <span>${optText}</span>
                 </label>
-              `).join('')}
+              `}).join('')}
             </div>
           `;
           
@@ -260,10 +264,10 @@
     
     function saveAnswer(questionId, optionId) {
       const allRadios = document.querySelectorAll(`input[data-question-id="${questionId}"]`);
-      allRadios.forEach(r => r.closest('.option-button').classList.remove('selected'));
-      
-      const selected = document.querySelector(`input[data-question-id="${questionId}"][value="${optionId}"]`);
-      if (selected) selected.closest('.option-button').classList.add('selected');
+      allRadios.forEach(r => {
+        r.closest('.option-button').classList.remove('selected');
+        if (r.checked) r.closest('.option-button').classList.add('selected');
+      });
       
       YKIEngine.saveListeningAnswer(questionId, optionId);
       console.log('Answer saved:', questionId, optionId);
