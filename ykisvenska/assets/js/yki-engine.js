@@ -12,6 +12,9 @@ const YKIEngine = {
   currentTest: null,
   currentExamId: null,
   
+  // Audio recordings kept in memory only (too large for localStorage)
+  _recordings: {},
+  
   // =============================================================================
   // INITIALIZATION
   // =============================================================================
@@ -24,6 +27,19 @@ const YKIEngine = {
     if (this.currentTest.sections.speaking && !this.currentTest.sections.speaking.responses) {
       this.currentTest.sections.speaking.responses = {};
       this.saveTestState(examId, this.currentTest);
+    }
+    
+    // Clear stale recording flags — actual audio lives in memory only and doesn't survive reload
+    if (this.currentTest.sections.speaking && this.currentTest.sections.speaking.recordings) {
+      const flags = this.currentTest.sections.speaking.recordings;
+      let cleared = false;
+      for (const taskId in flags) {
+        if (!this._recordings[taskId]) {
+          delete flags[taskId];
+          cleared = true;
+        }
+      }
+      if (cleared) this.saveTestState(examId, this.currentTest);
     }
     
     console.log('YKI Engine initialized for:', examId);
@@ -162,13 +178,26 @@ const YKIEngine = {
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64Audio = reader.result;
-        this.currentTest.sections.speaking.recordings[taskId] = base64Audio;
+        // Store in memory only — base64 audio is too large for localStorage
+        this._recordings[taskId] = base64Audio;
+        // Mark in state that a recording exists (lightweight flag)
+        this.currentTest.sections.speaking.recordings[taskId] = true;
         this.saveTestState(this.currentExamId, this.currentTest);
         resolve();
       };
       reader.onerror = reject;
       reader.readAsDataURL(audioBlob);
     });
+  },
+  
+  // Get actual recording data (base64) from memory
+  getRecording(taskId) {
+    return this._recordings[taskId] || null;
+  },
+  
+  // Get all recordings for submission
+  getAllRecordings() {
+    return { ...this._recordings };
   },
   
   saveSpeakingResponse(taskId, text) {
@@ -210,7 +239,7 @@ const YKIEngine = {
           responses: this.currentTest.sections.writing.responses
         },
         speaking: {
-          recordings: this.currentTest.sections.speaking.recordings,
+          recordings: this.getAllRecordings(),
           responses: this.currentTest.sections.speaking.responses
         }
       },

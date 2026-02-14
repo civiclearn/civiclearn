@@ -247,8 +247,8 @@
         
         container.appendChild(taskDiv);
         
-        // Restore saved recording
-        const savedRecording = YKIEngine.currentTest.sections.speaking.recordings[task.task_id];
+        // Restore saved recording (from memory — won't survive page reload)
+        const savedRecording = YKIEngine.getRecording(task.task_id);
         if (savedRecording) {
           showPlayback(task.task_id, savedRecording);
         }
@@ -330,7 +330,7 @@
         mediaRecorder.onstop = async () => {
           const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
           await YKIEngine.saveSpeakingRecording(taskId, audioBlob);
-          showPlayback(taskId, YKIEngine.currentTest.sections.speaking.recordings[taskId]);
+          showPlayback(taskId, YKIEngine.getRecording(taskId));
           updateTaskStatus(taskId);
           updateSubmitButton();
           stream.getTracks().forEach(track => track.stop());
