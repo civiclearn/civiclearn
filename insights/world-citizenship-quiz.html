@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The World Citizenship Quiz — CivicLearn Insights</title>
+
+  <meta name="description" content="Fifteen real questions from real citizenship tests. Five countries ask about your past, your laws, your neighbours, your values, and your daily life. How many can you answer?">
+  <link rel="canonical" href="https://civiclearn.com/insights/world-citizenship-quiz">
+
+  <!-- Fonts: Lexend for UI, Lora for editorial body -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap">
+
+  <style>
+    :root {
+      --brand: #7c3aed;
+      --brand-dark: #5b21b6;
+      --bg-soft: #f7f2e8;
+      --text-main: #101013;
+      --muted: #555;
+      --card-bg: #ffffff;
+      --radius-lg: 1.6rem;
+      --article-width: 720px;
+      --wide-width: 920px;
+      --correct: #16a34a;
+      --incorrect: #dc2626;
+      --quiz-accent: #7c3aed;
+    }
+
+    * { box-sizing: border-box; margin: 0; }
+
+    body {
+      font-family: "Lexend", system-ui, sans-serif;
+      background: var(--bg-soft);
+      color: var(--text-main);
+    }
+
+    a { color: inherit; }
+
+    /* ── HEADER ──────────────────────────────── */
+
+    .site-header {
+      position: sticky; top: 0; z-index: 20;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(to bottom, rgba(247,242,232,0.94), rgba(247,242,232,0.88));
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .header-inner {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0.9rem 2rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+    }
+    .header-left { display: flex; align-items: center; gap: 0.9rem; }
+    .brand-main { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+    .brand-mark {
+      width: 26px; height: 26px; border-radius: 9px;
+      background: radial-gradient(circle at 20% 0%, #a855f7, #4f46e5);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 0.9rem; font-weight: 700;
+    }
+    .brand-title { font-weight: 600; font-size: 1.05rem; }
+    .brand-sub {
+      font-size: 0.78rem; color: var(--muted);
+      border-left: 1px solid rgba(0,0,0,0.08); padding-left: 0.7rem;
+    }
+    .header-right { display: flex; align-items: center; gap: 0.75rem; }
+    .btn-ghost {
+      font-size: 0.85rem; padding: 0.45rem 0.9rem; border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.08); background: rgba(255,255,255,0.8); text-decoration: none;
+    }
+    .btn-ghost:hover { border-color: rgba(0,0,0,0.16); background: #fff; }
+    .btn-small-purple {
+      font-size: 0.85rem; padding: 0.45rem 0.9rem; border-radius: 999px;
+      background: var(--brand); color: #fff; text-decoration: none; font-weight: 500;
+    }
+    .btn-small-purple:hover { background: var(--brand-dark); }
+
+    /* ── INSIGHTS NAV ──────────────────────── */
+
+    .insights-nav {
+      max-width: var(--wide-width);
+      margin: 1.6rem auto 0;
+      padding: 0 2rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .insights-nav a { text-decoration: none; color: var(--brand); font-weight: 500; }
+    .insights-nav a:hover { text-decoration: underline; }
+    .insights-nav .sep { margin: 0 0.4rem; opacity: 0.5; }
+
+    /* ── ARTICLE HERO ──────────────────────── */
+
+    .article-hero {
+      max-width: var(--wide-width);
+      margin: 1.4rem auto 0;
+      padding: 0 2rem;
+    }
+    .article-meta-top {
+      display: flex; align-items: center; gap: 0.7rem;
+      margin-bottom: 1rem; flex-wrap: wrap;
+    }
+    .article-category {
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em;
+      font-weight: 600; color: var(--brand-dark);
+      padding: 0.2rem 0.75rem; border-radius: 999px;
+      background: rgba(124,58,237,0.1);
+    }
+    .article-date { font-size: 0.8rem; color: var(--muted); }
+    .article-reading-time {
+      font-size: 0.8rem; color: var(--muted);
+      padding-left: 0.6rem;
+      border-left: 1px solid rgba(0,0,0,0.1);
+    }
+    .article-hero h1 {
+      font-family: "Lora", Georgia, serif;
+      font-size: 2.6rem;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      font-weight: 700;
+      margin-bottom: 0.7rem;
+      max-width: 680px;
+    }
+    .article-hero .subtitle {
+      font-family: "Lora", Georgia, serif;
+      font-size: 1.2rem;
+      line-height: 1.5;
+      color: #444;
+      font-style: italic;
+      max-width: 620px;
+      margin-bottom: 1.4rem;
+    }
+    .article-byline {
+      display: flex; align-items: center; gap: 0.7rem;
+      padding-bottom: 1.6rem;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    .byline-avatar {
+      width: 38px; height: 38px; border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #a855f7, #4f46e5);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 0.8rem;
+    }
+    .byline-text { font-size: 0.82rem; }
+    .byline-name { font-weight: 600; }
+    .byline-role { color: var(--muted); }
+
+    /* ── READING PROGRESS ──────────────────── */
+
+    .progress-bar {
+      position: fixed; top: 0; left: 0; height: 3px; z-index: 100;
+      background: linear-gradient(90deg, var(--brand), #a855f7);
+      width: 0%; transition: width 120ms;
+    }
+
+    /* ── ARTICLE BODY ──────────────────────── */
+
+    .article-body {
+      max-width: var(--article-width);
+      margin: 2.4rem auto;
+      padding: 0 2rem;
+      font-family: "Lora", Georgia, serif;
+      font-size: 1.12rem;
+      line-height: 1.78;
+      color: #1a1a1a;
+    }
+    .article-body p { margin-bottom: 1.4rem; }
+    .article-body h2 {
+      font-family: "Lexend", system-ui, sans-serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 2.8rem 0 1rem;
+      letter-spacing: -0.01em;
+    }
+    .article-body h3 {
+      font-family: "Lexend", system-ui, sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 2rem 0 0.8rem;
+    }
+
+    /* ── SECTION INTRO CARDS ───────────────── */
+
+    .section-intro {
+      background: #fff;
+      border-radius: 1.2rem;
+      padding: 2rem 2.2rem;
+      margin: 2.5rem -1rem 1.8rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+    .section-intro .section-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: "Lexend", sans-serif;
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em;
+      font-weight: 700; color: var(--brand-dark);
+      margin-bottom: 0.8rem;
+    }
+    .section-intro .section-badge .num {
+      background: var(--brand);
+      color: #fff;
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem;
+    }
+    .section-intro h3 {
+      font-family: "Lora", Georgia, serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin: 0 0 0.6rem;
+    }
+    .section-intro p {
+      font-family: "Lora", Georgia, serif;
+      font-size: 1rem;
+      line-height: 1.65;
+      color: #444;
+      margin-bottom: 0;
+    }
+
+    /* ── QUIZ CONTAINER ────────────────────── */
+
+    .quiz-container {
+      max-width: var(--wide-width);
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ── QUIZ QUESTION CARD ────────────────── */
+
+    .question-card {
+      background: #fff;
+      border-radius: 1.4rem;
+      padding: 2rem 2.4rem 2.2rem;
+      margin-bottom: 1.6rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+      transition: border-color 0.3s;
+    }
+    .question-card.answered-correct {
+      border-color: rgba(22,163,74,0.3);
+      background: linear-gradient(to bottom right, #fff, #f0fdf4);
+    }
+    .question-card.answered-wrong {
+      border-color: rgba(220,38,38,0.2);
+      background: linear-gradient(to bottom right, #fff, #fef2f2);
+    }
+
+    .question-header {
+      display: flex; align-items: center; gap: 0.8rem;
+      margin-bottom: 1.2rem;
+    }
+    .question-number {
+      font-family: "Lexend", sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--brand);
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .question-country {
+      font-family: "Lexend", sans-serif;
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .country-flag {
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .question-text {
+      font-family: "Lora", Georgia, serif;
+      font-size: 1.15rem;
+      line-height: 1.55;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+      color: var(--text-main);
+    }
+
+    .options-list {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    .option-btn {
+      display: flex; align-items: flex-start; gap: 0.8rem;
+      padding: 0.9rem 1.2rem;
+      border: 1.5px solid rgba(0,0,0,0.1);
+      border-radius: 0.9rem;
+      background: #fff;
+      cursor: pointer;
+      font-family: "Lexend", sans-serif;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      text-align: left;
+      transition: all 0.2s;
+      color: var(--text-main);
+      width: 100%;
+    }
+    .option-btn:hover:not(.disabled) {
+      border-color: var(--brand);
+      background: rgba(124,58,237,0.04);
+      transform: translateY(-1px);
+    }
+    .option-btn .option-letter {
+      font-weight: 700;
+      color: var(--brand);
+      min-width: 1.4rem;
+      flex-shrink: 0;
+    }
+    .option-btn.selected-correct {
+      border-color: var(--correct);
+      background: rgba(22,163,74,0.08);
+    }
+    .option-btn.selected-correct .option-letter { color: var(--correct); }
+    .option-btn.selected-wrong {
+      border-color: var(--incorrect);
+      background: rgba(220,38,38,0.06);
+    }
+    .option-btn.selected-wrong .option-letter { color: var(--incorrect); }
+    .option-btn.reveal-correct {
+      border-color: var(--correct);
+      background: rgba(22,163,74,0.06);
+    }
+    .option-btn.reveal-correct .option-letter { color: var(--correct); }
+    .option-btn.disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+    .option-btn.disabled:not(.selected-correct):not(.selected-wrong):not(.reveal-correct) {
+      opacity: 0.45;
+    }
+
+    /* ── EXPLANATION ────────────────────────── */
+
+    .explanation {
+      margin-top: 1rem;
+      padding: 1rem 1.2rem;
+      border-radius: 0.8rem;
+      font-family: "Lora", Georgia, serif;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+    .explanation.correct-exp {
+      background: rgba(22,163,74,0.06);
+      border-left: 3px solid var(--correct);
+      display: block;
+    }
+    .explanation.wrong-exp {
+      background: rgba(220,38,38,0.04);
+      border-left: 3px solid var(--incorrect);
+      display: block;
+    }
+    .explanation strong {
+      font-family: "Lexend", sans-serif;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .explanation .exp-correct strong { color: var(--correct); }
+    .explanation .exp-wrong strong { color: var(--incorrect); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── QUIZ PROGRESS BAR ─────────────────── */
+
+    .quiz-progress-strip {
+      max-width: var(--wide-width);
+      margin: 0 auto 2rem;
+      padding: 0 2rem;
+    }
+    .quiz-progress-bar {
+      height: 6px;
+      background: rgba(0,0,0,0.06);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+    .quiz-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--brand), #a855f7);
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .quiz-progress-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    /* ── RESULTS SCREEN ────────────────────── */
+
+    .results-screen {
+      display: none;
+      max-width: var(--wide-width);
+      margin: 0 auto;
+      padding: 0 2rem 3rem;
+    }
+
+    .results-hero {
+      background: #fff;
+      border-radius: 1.6rem;
+      padding: 3rem;
+      text-align: center;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+      margin-bottom: 2rem;
+    }
+    .results-score-circle {
+      width: 120px; height: 120px;
+      border-radius: 999px;
+      margin: 0 auto 1.4rem;
+      display: flex; align-items: center; justify-content: center;
+      font-family: "Lora", Georgia, serif;
+      font-size: 2.4rem;
+      font-weight: 700;
+    }
+    .results-score-circle.score-high {
+      background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+      color: var(--correct);
+    }
+    .results-score-circle.score-mid {
+      background: linear-gradient(135deg, #fef9c3, #fde68a);
+      color: #92400e;
+    }
+    .results-score-circle.score-low {
+      background: linear-gradient(135deg, #fee2e2, #fecaca);
+      color: var(--incorrect);
+    }
+    .results-title {
+      font-family: "Lora", Georgia, serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+    .results-subtitle {
+      font-family: "Lora", Georgia, serif;
+      font-size: 1.05rem;
+      color: #555;
+      line-height: 1.6;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── PASSPORT WALL ─────────────────────── */
+
+    .passport-wall {
+      background: #fff;
+      border-radius: 1.4rem;
+      padding: 2.2rem 2.4rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+      margin-bottom: 2rem;
+    }
+    .passport-wall h3 {
+      font-family: "Lexend", sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1.4rem;
+      text-align: center;
+    }
+    .passport-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .passport-card {
+      display: flex; align-items: center; gap: 0.9rem;
+      padding: 1rem 1.2rem;
+      border-radius: 1rem;
+      border: 1.5px solid rgba(0,0,0,0.08);
+      transition: all 0.3s;
+    }
+    .passport-card.pass {
+      border-color: rgba(22,163,74,0.3);
+      background: rgba(22,163,74,0.04);
+    }
+    .passport-card.fail {
+      border-color: rgba(220,38,38,0.2);
+      background: rgba(220,38,38,0.03);
+    }
+    .passport-flag { font-size: 2rem; }
+    .passport-info { flex: 1; }
+    .passport-country {
+      font-family: "Lexend", sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .passport-status {
+      font-size: 0.78rem;
+      font-weight: 500;
+      margin-top: 0.15rem;
+    }
+    .passport-status.pass-text { color: var(--correct); }
+    .passport-status.fail-text { color: var(--incorrect); }
+    .passport-threshold {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.1rem;
+    }
+    .passport-stamp {
+      font-size: 1.4rem;
+    }
+
+    /* ── EDITORIAL WRAP BELOW QUIZ ─────────── */
+
+    .editorial-close {
+      max-width: var(--article-width);
+      margin: 2rem auto 0;
+      padding: 0 2rem;
+      font-family: "Lora", Georgia, serif;
+      font-size: 1.12rem;
+      line-height: 1.78;
+      color: #1a1a1a;
+    }
+    .editorial-close p { margin-bottom: 1.4rem; }
+
+    /* ── PULL QUOTE ────────────────────────── */
+
+    .pull-quote {
+      font-family: "Lora", Georgia, serif;
+      font-size: 1.35rem;
+      font-style: italic;
+      line-height: 1.55;
+      border-left: 3px solid var(--brand);
+      padding: 0.5rem 0 0.5rem 1.8rem;
+      margin: 2.2rem 0;
+      color: #333;
+    }
+
+    /* ── KEY FACT BOX ──────────────────────── */
+
+    .key-fact-box {
+      background: rgba(124,58,237,0.05);
+      border: 1px solid rgba(124,58,237,0.12);
+      border-radius: 1rem;
+      padding: 1.6rem 1.8rem;
+      margin: 2rem 0;
+      font-family: "Lexend", sans-serif;
+      font-size: 0.88rem;
+      line-height: 1.7;
+    }
+    .key-fact-box .kf-title {
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.72rem;
+      color: var(--brand-dark);
+      margin-bottom: 0.7rem;
+    }
+
+    /* ── AUTHOR BIO ────────────────────────── */
+
+    .author-bio {
+      max-width: var(--article-width);
+      margin: 3rem auto;
+      padding: 0 2rem;
+    }
+    .author-card {
+      display: flex; gap: 1.2rem;
+      background: #fff;
+      border-radius: 1.2rem;
+      padding: 1.6rem 1.8rem;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+    .author-avatar {
+      width: 52px; height: 52px; border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #a855f7, #4f46e5);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 1rem; flex-shrink: 0;
+    }
+    .author-info { flex: 1; }
+    .author-name {
+      font-family: "Lexend", sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.3rem;
+    }
+    .author-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .author-desc a { color: var(--brand); text-decoration: none; }
+    .author-desc a:hover { text-decoration: underline; }
+
+    /* ── RELATED ARTICLES ──────────────────── */
+
+    .related-section {
+      max-width: var(--wide-width);
+      margin: 2rem auto 4rem;
+      padding: 0 2rem;
+    }
+    .related-title {
+      font-family: "Lexend", sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+    }
+    .related-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.2rem;
+    }
+    .related-card {
+      background: #fff;
+      border-radius: 1.2rem;
+      padding: 1.4rem 1.6rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .related-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+    .related-card .rc-category {
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
+      font-weight: 600; color: var(--brand-dark); margin-bottom: 0.5rem;
+    }
+    .related-card .rc-title {
+      font-family: "Lora", Georgia, serif;
+      font-weight: 700; font-size: 1.05rem;
+      line-height: 1.35; margin-bottom: 0.4rem;
+    }
+    .related-card .rc-date { font-size: 0.78rem; color: var(--muted); }
+
+    /* ── START QUIZ BUTTON ─────────────────── */
+
+    .start-quiz-section {
+      text-align: center;
+      margin: 2rem 0 1rem;
+    }
+    .start-quiz-btn {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 1rem 2.4rem;
+      font-family: "Lexend", sans-serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), #6d28d9);
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(124,58,237,0.3);
+      transition: all 0.25s;
+    }
+    .start-quiz-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(124,58,237,0.4);
+    }
+
+    /* ── FOOTER ─────────────────────────────── */
+
+    .site-footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* ── RESPONSIVE ─────────────────────────── */
+
+    @media (max-width: 700px) {
+      .article-hero h1 { font-size: 1.9rem; }
+      .article-hero .subtitle { font-size: 1.05rem; }
+      .header-inner { padding: 0.8rem 1.2rem; }
+      .brand-sub { display: none; }
+      .header-right .btn-ghost { display: none; }
+      .article-hero, .article-body, .quiz-container,
+      .editorial-close, .author-bio, .related-section,
+      .quiz-progress-strip, .results-screen { padding-left: 1.2rem; padding-right: 1.2rem; }
+      .question-card { padding: 1.4rem 1.4rem; }
+      .section-intro { margin-left: 0; margin-right: 0; padding: 1.4rem 1.6rem; }
+      .passport-grid { grid-template-columns: 1fr; }
+      .results-hero { padding: 2rem 1.4rem; }
+      .pull-quote { font-size: 1.15rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ══════════════════════════════════════════════ HEADER ═══ -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <a href="https://civiclearn.com" class="brand-main">
+        <div class="brand-mark">C</div>
+        <span class="brand-title">CivicLearn</span>
+      </a>
+      <span class="brand-sub">Insights</span>
+    </div>
+    <div class="header-right">
+      <a href="https://civiclearn.com/insights" class="btn-ghost">All Articles</a>
+      <a href="https://civiclearn.com" class="btn-small-purple">Explore Tests</a>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════ BREADCRUMB ═══ -->
+<nav class="insights-nav">
+  <a href="https://civiclearn.com">CivicLearn</a><span class="sep">›</span>
+  <a href="https://civiclearn.com/insights">Insights</a><span class="sep">›</span>
+  The World Citizenship Quiz
+</nav>
+
+<!-- ══════════════════════════════════════════════ HERO ═══ -->
+<div class="article-hero">
+  <div class="article-meta-top">
+    <span class="article-category">Interactive</span>
+    <span class="article-date">February 2026</span>
+    <span class="article-reading-time">15 questions · ~12 min</span>
+  </div>
+  <h1>The World Citizenship Quiz</h1>
+  <p class="subtitle">Fifteen real questions from eight countries' citizenship exams. One quiz. How many nations would let you in?</p>
+  <div class="article-byline">
+    <div class="byline-avatar">C</div>
+    <div class="byline-text">
+      <div class="byline-name">CivicLearn</div>
+      <div class="byline-role">Citizenship & Civic Testing · 20 years of test preparation across 15+ countries</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ EDITORIAL INTRO ═══ -->
+<article class="article-body" id="editorialIntro">
+
+  <p>Somewhere right now, a 34-year-old software engineer in Munich is staring at a question about Article 1 of the German <em>Grundgesetz</em>. A nurse in Sydney is trying to remember the colours of the Aboriginal flag. A retired teacher in Copenhagen is working through five questions on "Danish values" — knowing that getting even one wrong could fail the entire exam.</p>
+
+  <p>Every year, more than three million people worldwide sit a citizenship test. The questions range from the profound to the peculiar. The United States asks about the Louisiana Purchase. Switzerland once denied a man citizenship for not knowing what animals lived in his local zoo. Denmark's exam sparked a national scandal in 2019 when two of its multiple-choice answers turned out to be equally correct — <a href="https://civiclearn.com/insights/denmark-failure-rate">a story we covered in detail</a>.</p>
+
+  <p>As we explored in <a href="https://civiclearn.com/insights/dna-of-a-citizen"><em>The DNA of a Citizen</em></a>, the questions a country asks are never neutral. They reveal what a nation believes citizenship <em>means</em>. Germany tests whether you understand the constitutional weight of human dignity. Australia wants proof you accept that men and women are equal. France, launching its first-ever civic test in 2026, will present you with real-life dilemmas and ask what you'd do.</p>
+
+  <p>Below are fifteen real (or closely adapted) questions from the actual citizenship exams of eight countries. They are organized not by nation but by <em>what kind of knowledge they test</em> — your sense of history, your understanding of law, your knowledge of geography, your alignment with national values, and your familiarity with daily life. Three questions per section. Fifteen questions total.</p>
+
+  <p>At the end, we'll tell you which countries would have let you through the gate — and which would have turned you away.</p>
+
+  <div class="start-quiz-section">
+    <button class="start-quiz-btn" onclick="startQuiz()">
+      <span>🌍</span> Begin the Quiz
+    </button>
+  </div>
+
+</article>
+
+<!-- ══════════════════════════════════════════════ QUIZ ═══ -->
+<div class="quiz-container" id="quizContainer" style="display:none;">
+
+  <div class="quiz-progress-strip">
+    <div class="quiz-progress-bar">
+      <div class="quiz-progress-fill" id="quizProgressFill"></div>
+    </div>
+    <div class="quiz-progress-label" id="quizProgressLabel">0 of 15 answered</div>
+  </div>
+
+  <!-- Questions are injected by JS -->
+  <div id="quizQuestions"></div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════ RESULTS ═══ -->
+<div class="results-screen" id="resultsScreen">
+
+  <div class="results-hero">
+    <div class="results-score-circle" id="resultsCircle">0</div>
+    <h2 class="results-title" id="resultsTitle"></h2>
+    <p class="results-subtitle" id="resultsSubtitle"></p>
+  </div>
+
+  <div class="passport-wall">
+    <h3>Your Passport Wall</h3>
+    <p style="text-align:center; font-size:0.88rem; color:var(--muted); margin-bottom:1.4rem; font-family:'Lora',serif; line-height:1.6;">
+      Based on each country's actual pass threshold applied proportionally to three questions, here's where you'd stand.
+    </p>
+    <div class="passport-grid" id="passportGrid"></div>
+  </div>
+
+  <div class="editorial-close" id="resultsEditorial">
+
+    <h2 style="font-family:'Lexend',sans-serif; font-size:1.3rem; font-weight:600; margin-bottom:1rem;">What the Questions Reveal</h2>
+
+    <p>If you breezed through the history section but stumbled on the values questions, you're in good company. Across the countries we track, the questions that trip people up most often aren't about memorizing dates — they're about internalizing principles. Denmark's notorious values gate, which requires four out of five correct answers on a separate subset, is the single biggest cause of failure on the Danish exam, even among candidates who easily pass the knowledge portion.</p>
+
+    <p>The geography and daily-life sections tend to split along lines of cultural familiarity. Most Australians know their flag is red, white, and blue. Fewer could tell you the colours of the Aboriginal flag, even though citizenship candidates are expected to. Most Germans understand <em>Sonntagsruhe</em> intuitively. For a newcomer, the idea that you can be fined for mowing your lawn on a Sunday is bewildering.</p>
+
+    <div class="pull-quote">
+      "The questions a country asks its would-be citizens are never just about knowledge. They are about belonging."
+    </div>
+
+    <p>The United States, with its 97% pass rate and questions drawn from a published list of 128, designs its test for success. Denmark, with its 47% pass rate, ten questions pulled from current events that cannot be studied in advance, and a values gate with no margin for error, designs its test as a filter. Both are legitimate choices. Neither is accidental.</p>
+
+    <p>France enters this landscape in 2026 with the most intriguing innovation: <em>mises en situation</em>, scenario-based questions that ask not what you <em>know</em> but what you would <em>do</em>. When a colleague insults your religion, do you resign or report it? When someone collapses on the street, do you call 15 or 112? These questions have no official study guide. They assume that if you've been living in France — really living, as a participant in its society — you already know.</p>
+
+    <p>That, ultimately, is the thesis hidden inside every citizenship exam on earth. The test isn't asking whether you can <em>become</em> a citizen. It's asking whether you already are one — and just haven't received the paperwork yet.</p>
+
+    <div class="key-fact-box">
+      <div class="kf-title">The Numbers Behind the Quiz</div>
+      <strong>Questions sourced from:</strong> USA (USCIS 128-question pool), UK (Life in the UK, 3rd Edition), Germany (Einbürgerungstest, 310-question BAMF catalogue), Australia (Our Common Bond, 200-question pool), Canada (Discover Canada study guide), Denmark (Indfødsretsprøven, SIRI), France (2026 civic exam framework), Switzerland (cantonal naturalisation interviews).<br><br>
+      <strong>Pass thresholds by country:</strong> USA 60%, UK 75%, Germany 52%, Australia 75% (plus 100% on values), Canada 75%, Denmark 80% (plus 80% on values subset), France 80%, Switzerland varies by canton (50–80%).
+    </div>
+
+  </div>
+
+  <!-- AUTHOR BIO -->
+  <div class="author-bio">
+    <div class="author-card">
+      <div class="author-avatar">C</div>
+      <div class="author-info">
+        <div class="author-name">CivicLearn</div>
+        <div class="author-desc">
+          CivicLearn has offered citizenship test preparation since 2005, serving over 11,000 users across 15+ countries including Denmark, Luxembourg, Australia, Canada, and France. We provide questions, practice exams, and study materials for every level of preparation. Explore our full range at <a href="https://civiclearn.com">civiclearn.com</a>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RELATED ARTICLES -->
+  <div class="related-section">
+    <div class="related-title">Continue Reading</div>
+    <div class="related-grid">
+      <a href="https://civiclearn.com/insights/dna-of-a-citizen" class="related-card">
+        <div class="rc-category">Cornerstone</div>
+        <div class="rc-title">The DNA of a Citizen</div>
+        <div class="rc-date">January 2026</div>
+      </a>
+      <a href="https://civiclearn.com/insights/france-civics-exam" class="related-card">
+        <div class="rc-category">Deep Dive</div>
+        <div class="rc-title">Inside France's First Civics Exam</div>
+        <div class="rc-date">January 2026</div>
+      </a>
+      <a href="https://civiclearn.com/insights/denmark-failure-rate" class="related-card">
+        <div class="rc-category">Deep Dive</div>
+        <div class="rc-title">Why 53% Fail the Danish Citizenship Test</div>
+        <div class="rc-date">February 2026</div>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════ FOOTER ═══ -->
+<footer class="site-footer">
+  © 2026 CivicLearn · <a href="https://civiclearn.com/insights">Insights</a> · <a href="https://civiclearn.com">civiclearn.com</a>
+</footer>
+
+<!-- ══════════════════════════════════════════════ QUIZ ENGINE ═══ -->
+<script>
+const QUESTIONS = [
+  // ─── SECTION 1: YOUR PAST (History) ────────────────────
+  {
+    section: 1,
+    sectionTitle: "Your Past",
+    sectionDesc: "Every nation has a founding story — and a citizenship exam that tests whether you know it. These three questions come from the history sections of the Danish, American, and Australian exams. They test dates, events, and the moments a country considers definitive.",
+    country: "Denmark",
+    flag: "🇩🇰",
+    source: "Indfødsretsprøven (SIRI)",
+    question: "What did the British seize from Denmark in 1807?",
+    options: [
+      "The Danish West Indies",
+      "Denmark's fleet",
+      "Copenhagen Castle",
+      "The Faroe Islands"
+    ],
+    correct: 1,
+    explanation: "The British bombarded Copenhagen and seized the Danish-Norwegian fleet to prevent it from falling into Napoleon's hands. This question became notorious in 2019 when SIRI included it on the actual exam with <em>two correct answers</em> — the fleet and the Danish West Indies (ceded later, in 1917). After a national outcry, SIRI accepted both answers and apologized."
+  },
+  {
+    section: 1,
+    country: "United States",
+    flag: "🇺🇸",
+    source: "USCIS Civics Test (128-question pool)",
+    question: "What territory did the United States buy from France in 1803?",
+    options: [
+      "Alaska",
+      "Florida",
+      "The Louisiana Territory",
+      "Hawaii"
+    ],
+    correct: 2,
+    explanation: "The Louisiana Purchase doubled the size of the United States and cost approximately $15 million — roughly 4 cents per acre. Alaska was purchased from Russia in 1867. Florida was ceded by Spain in 1819. Hawaii was annexed in 1898."
+  },
+  {
+    section: 1,
+    country: "Australia",
+    flag: "🇦🇺",
+    source: "Australian Citizenship Test (Our Common Bond)",
+    question: "In what year did European settlement of Australia begin?",
+    options: [
+      "1642",
+      "1770",
+      "1788",
+      "1801"
+    ],
+    correct: 2,
+    explanation: "The First Fleet arrived at Sydney Cove on 26 January 1788, establishing the first European settlement. Abel Tasman reached Tasmania in 1642, and James Cook charted the east coast in 1770, but permanent settlement began in 1788 — a date that remains both celebrated (Australia Day) and contested."
+  },
+
+  // ─── SECTION 2: YOUR LAWS (Governance & Rights) ────────
+  {
+    section: 2,
+    sectionTitle: "Your Laws",
+    sectionDesc: "Citizenship exams test whether you understand the legal architecture of the country you want to join. Germany asks about constitutional principles. Canada asks about the Charter. The UK asks about the fundamental idea that holds it all together. Get these wrong and you haven't just failed a test — you've missed the point.",
+    country: "Germany",
+    flag: "🇩🇪",
+    source: "Einbürgerungstest (BAMF, 310-question catalogue)",
+    question: "What does Article 1 of the German Basic Law (Grundgesetz) state?",
+    options: [
+      "All citizens have the right to vote",
+      "Germany is a federal republic",
+      "Human dignity is inviolable",
+      "All Germans are equal before the law"
+    ],
+    correct: 2,
+    explanation: "\"Die Würde des Menschen ist unantastbar\" — human dignity is inviolable. It is the first article of the German Basic Law, written in 1949 in direct response to the horrors of the Nazi regime. It is not just a legal principle but a moral foundation: the one sentence upon which the entire constitutional order rests."
+  },
+  {
+    section: 2,
+    country: "Canada",
+    flag: "🇨🇦",
+    source: "Canadian Citizenship Test (Discover Canada)",
+    question: "What is the significance of the Canadian Charter of Rights and Freedoms?",
+    options: [
+      "It is a federal law passed annually by Parliament",
+      "It is the part of the Constitution that protects fundamental rights",
+      "It is an international treaty Canada signed at the UN",
+      "It was the original document of Confederation in 1867"
+    ],
+    correct: 1,
+    explanation: "The Canadian Charter of Rights and Freedoms is Part I of the Constitution Act, 1982. It guarantees fundamental freedoms (expression, religion, assembly), democratic rights, mobility rights, and legal rights. Unlike ordinary legislation, it cannot be overridden by a simple act of Parliament — though the \"notwithstanding clause\" (Section 33) allows limited exceptions."
+  },
+  {
+    section: 2,
+    country: "United Kingdom",
+    flag: "🇬🇧",
+    source: "Life in the UK Test (3rd Edition handbook)",
+    question: "Which of the following is a fundamental principle of British life?",
+    options: [
+      "Everyone must support the established church",
+      "The law applies equally to everyone, including the government",
+      "Citizens must always agree with the majority",
+      "The monarch makes the laws"
+    ],
+    correct: 1,
+    explanation: "The rule of law — the principle that no one, including the government, is above the law — is one of the fundamental principles tested on the Life in the UK exam. The UK has no established requirement to support any church (despite the Church of England's official status), the monarch does not make laws, and individual conscience is protected."
+  },
+
+  // ─── SECTION 3: YOUR NEIGHBOURS (Geography & Culture) ──
+  {
+    section: 3,
+    sectionTitle: "Your Neighbours",
+    sectionDesc: "Can you describe where you live? Citizenship tests around the world probe whether you understand the physical and cultural landscape of your new home. Switzerland demands you know your canton's rivers. Australia expects you to recognise its Indigenous symbols. These questions are about seeing the country with a citizen's eyes.",
+    country: "Switzerland",
+    flag: "🇨🇭",
+    source: "Swiss Naturalisation Interview (varies by canton)",
+    question: "How many official languages does Switzerland have?",
+    options: [
+      "Two (German and French)",
+      "Three (German, French, and Italian)",
+      "Four (German, French, Italian, and Romansh)",
+      "Five (German, French, Italian, Romansh, and English)"
+    ],
+    correct: 2,
+    explanation: "Switzerland has four official languages: German (spoken by ~63% of the population), French (~23%), Italian (~8%), and Romansh (~0.5%). Swiss naturalisation interviews are conducted in the official language of your region — never in English — and you may be asked to name rivers, mountains, cheeses, or even the animals in your local zoo."
+  },
+  {
+    section: 3,
+    country: "Australia",
+    flag: "🇦🇺",
+    source: "Australian Citizenship Test (Our Common Bond)",
+    question: "What are the colours of the Australian Aboriginal Flag?",
+    options: [
+      "Green, gold, and black",
+      "Blue, white, and red",
+      "Black, red, and yellow",
+      "Red, white, and blue"
+    ],
+    correct: 2,
+    explanation: "The Australian Aboriginal Flag, designed by Harold Thomas in 1971, has three horizontal bands: black (representing Aboriginal people), red (the earth and ochre used in ceremonies), and yellow (the sun, the giver of life). It became an official flag of Australia in 1995 and was fully acquired by the Commonwealth in 2022."
+  },
+  {
+    section: 3,
+    country: "United States",
+    flag: "🇺🇸",
+    source: "USCIS Civics Test (128-question pool)",
+    question: "How many amendments does the U.S. Constitution have?",
+    options: [
+      "10",
+      "21",
+      "27",
+      "33"
+    ],
+    correct: 2,
+    explanation: "The U.S. Constitution has 27 amendments. The first ten, ratified in 1791, are known as the Bill of Rights. The most recent, the 27th Amendment (concerning congressional pay), was ratified in 1992 — 202 years after it was originally proposed."
+  },
+
+  // ─── SECTION 4: YOUR VALUES ────────────────────────────
+  {
+    section: 4,
+    sectionTitle: "Your Values",
+    sectionDesc: "This is where exams get philosophical. Denmark introduced a dedicated values section in 2021 — and failure rates jumped overnight. France's 2026 exam will present ethical dilemmas with no study guide. Australia asks whether you accept gender equality as non-negotiable. These questions don't test what you know. They test who you are.",
+    country: "Denmark",
+    flag: "🇩🇰",
+    source: "Indfødsretsprøven — Values section (post-2021 reform)",
+    question: "In Denmark, which best describes the relationship between religion and public institutions?",
+    options: [
+      "All citizens are required to belong to the state church",
+      "Religious leaders must approve legislation",
+      "There is freedom of religion, and faith does not govern public institutions",
+      "Only Christianity is legally permitted"
+    ],
+    correct: 2,
+    explanation: "Denmark has the Evangelical Lutheran Church as its state church (Folkekirken), and a majority of Danes are nominal members. But the constitution also guarantees full freedom of religion, and religious bodies have no role in legislation. The values section of the Danish exam tests whether candidates understand this distinction — and it's where 23% of test-takers fail."
+  },
+  {
+    section: 4,
+    country: "France",
+    flag: "🇫🇷",
+    source: "French Civic Exam framework (2026, mise en situation format)",
+    question: "A colleague at work repeatedly makes derogatory comments about your religion. What should you do?",
+    options: [
+      "Accept it — freedom of speech is absolute in France",
+      "Respond with equal criticism of their beliefs",
+      "Report it — discrimination based on religion is illegal in the workplace",
+      "Resign from the job quietly"
+    ],
+    correct: 2,
+    explanation: "France's principle of laïcité separates church and state, but it does not permit discrimination. The French Labour Code and the Penal Code both prohibit workplace harassment and discrimination based on religion, origin, or belief. The 2026 civic exam uses these real-life dilemmas — called <em>mises en situation</em> — to test whether candidates understand the practical application of French republican values."
+  },
+  {
+    section: 4,
+    country: "Australia",
+    flag: "🇦🇺",
+    source: "Australian Citizenship Test (Values section, Our Common Bond)",
+    question: "In Australia, can a husband prevent his wife from working?",
+    options: [
+      "Yes, if they have young children",
+      "Yes, with a valid family reason",
+      "No — men and women have equal rights in all areas, including employment",
+      "Only with a court order"
+    ],
+    correct: 2,
+    explanation: "Australian law guarantees gender equality across all domains, including employment, education, and family life. The Australian values section — which must be answered with 100% accuracy to pass — specifically tests whether candidates accept that \"men and women have equal rights\" and that no one can restrict another person's freedom to work or study."
+  },
+
+  // ─── SECTION 5: YOUR DAILY LIFE ───────────────────────
+  {
+    section: 5,
+    sectionTitle: "Your Daily Life",
+    sectionDesc: "The strangest questions on citizenship exams are often the most revealing. Germany wants to know if you understand why Sundays are quiet. Switzerland might ask about toilet flushing after 10 PM. Britain asks about horse racing. These aren't trivia — they're tests of whether you've actually lived in the place you want to call home.",
+    country: "Germany",
+    flag: "🇩🇪",
+    source: "Einbürgerungstest (BAMF, 310-question catalogue)",
+    question: "In Germany, what is \"Sonntagsruhe\"?",
+    options: [
+      "A traditional Sunday breakfast with the family",
+      "The legal requirement to keep quiet on Sundays — including no loud work or mowing",
+      "A religious holiday observed in December",
+      "The constitutional right to vote on Sundays"
+    ],
+    correct: 1,
+    explanation: "Sonntagsruhe (Sunday rest) is a legally protected quiet period in Germany. Most shops are closed, and activities like mowing the lawn, drilling, or operating loud machinery are prohibited. The concept is rooted in both Christian tradition and labour rights, and violations can result in fines. For newcomers, it's one of the most culturally distinctive features of daily life in Germany."
+  },
+  {
+    section: 5,
+    country: "Switzerland",
+    flag: "🇨🇭",
+    source: "Swiss Naturalisation Interview (integration assessment)",
+    question: "You want to become a Swiss citizen. In an interview, you are asked: \"Do you like hiking?\" What is the expected significance of this question?",
+    options: [
+      "There is no significance — it's just polite conversation",
+      "Hiking ability is legally required for Swiss citizenship",
+      "It assesses whether you participate in Swiss outdoor culture and community life",
+      "Only people living near mountains need to answer"
+    ],
+    correct: 2,
+    explanation: "This question is real. In Swiss naturalisation interviews, seemingly casual questions about hiking, skiing, or local festivals are used to assess cultural integration. In 2017, a woman born in Switzerland who answered \"no\" to the hiking question had her application rejected, leading the newspaper TagesAnzeiger to call the process \"embarrassing.\" The question isn't about hiking — it's about belonging."
+  },
+  {
+    section: 5,
+    country: "United Kingdom",
+    flag: "🇬🇧",
+    source: "Life in the UK Test (3rd Edition handbook)",
+    question: "The Grand National is a famous race involving what?",
+    options: [
+      "Motor cars",
+      "Horses",
+      "Greyhounds",
+      "Rowing boats"
+    ],
+    correct: 1,
+    explanation: "The Grand National is one of the world's most famous horse races, held annually at Aintree Racecourse near Liverpool since 1839. It features 30 fences over a course of roughly 4.5 miles. It is one of many cultural facts tested on the Life in the UK exam — alongside the NHS, the Queen's role, Guy Fawkes Night, and the rules of cricket."
+  }
+];
+
+// ── Country pass thresholds (applied proportionally to 3 questions each) ──
+const COUNTRIES = {
+  "United States": { flag: "🇺🇸", threshold: 2, thresholdLabel: "60% (2/3)", questions: [] },
+  "United Kingdom": { flag: "🇬🇧", threshold: 2, thresholdLabel: "75% (2/3)", questions: [] },
+  "Germany": { flag: "🇩🇪", threshold: 2, thresholdLabel: "52% (2/3)", questions: [] },
+  "Australia": { flag: "🇦🇺", threshold: 2, thresholdLabel: "75% (2/3)", questions: [] },
+  "Canada": { flag: "🇨🇦", threshold: 2, thresholdLabel: "75% (2/3)", questions: [] },
+  "Denmark": { flag: "🇩🇰", threshold: 3, thresholdLabel: "80% (3/3)", questions: [] },
+  "France": { flag: "🇫🇷", threshold: 1, thresholdLabel: "80% (1/1)", questions: [] },
+  "Switzerland": { flag: "🇨🇭", threshold: 1, thresholdLabel: "50-80% (1/2)", questions: [] }
+};
+
+// Map questions to countries
+QUESTIONS.forEach((q, i) => {
+  if (COUNTRIES[q.country]) {
+    COUNTRIES[q.country].questions.push(i);
+  }
+});
+
+let answered = 0;
+const userAnswers = new Array(QUESTIONS.length).fill(null);
+
+function startQuiz() {
+  document.getElementById('editorialIntro').style.display = 'none';
+  document.getElementById('quizContainer').style.display = 'block';
+  renderQuiz();
+  document.getElementById('quizContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderQuiz() {
+  const container = document.getElementById('quizQuestions');
+  let html = '';
+  let currentSection = 0;
+
+  QUESTIONS.forEach((q, idx) => {
+    // Section intro card
+    if (q.section !== currentSection) {
+      currentSection = q.section;
+      const sectionQ = QUESTIONS.find(x => x.section === currentSection && x.sectionTitle);
+      html += `
+        <div class="section-intro">
+          <div class="section-badge">
+            <span class="num">${currentSection}</span>
+            Section ${currentSection} of 5
+          </div>
+          <h3>${sectionQ.sectionTitle}</h3>
+          <p>${sectionQ.sectionDesc}</p>
+        </div>
+      `;
+    }
+
+    html += `
+      <div class="question-card" id="qcard-${idx}">
+        <div class="question-header">
+          <div class="question-number">${idx + 1}</div>
+          <div class="question-country">
+            <span class="country-flag">${q.flag}</span>
+            ${q.country} · <span style="font-style:italic; opacity:0.7">${q.source}</span>
+          </div>
+        </div>
+        <div class="question-text">${q.question}</div>
+        <div class="options-list" id="options-${idx}">
+          ${q.options.map((opt, oi) => `
+            <button class="option-btn" id="opt-${idx}-${oi}" onclick="selectAnswer(${idx}, ${oi})">
+              <span class="option-letter">${String.fromCharCode(65 + oi)}.</span>
+              <span>${opt}</span>
+            </button>
+          `).join('')}
+        </div>
+        <div class="explanation" id="exp-${idx}"></div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function selectAnswer(qIdx, optIdx) {
+  if (userAnswers[qIdx] !== null) return; // already answered
+
+  userAnswers[qIdx] = optIdx;
+  answered++;
+
+  const q = QUESTIONS[qIdx];
+  const isCorrect = optIdx === q.correct;
+  const card = document.getElementById(`qcard-${qIdx}`);
+  const exp = document.getElementById(`exp-${qIdx}`);
+
+  // Mark selected option
+  const selectedBtn = document.getElementById(`opt-${qIdx}-${optIdx}`);
+  selectedBtn.classList.add(isCorrect ? 'selected-correct' : 'selected-wrong');
+
+  // If wrong, reveal correct
+  if (!isCorrect) {
+    document.getElementById(`opt-${qIdx}-${q.correct}`).classList.add('reveal-correct');
+  }
+
+  // Disable all options
+  q.options.forEach((_, oi) => {
+    document.getElementById(`opt-${qIdx}-${oi}`).classList.add('disabled');
+  });
+
+  // Style card
+  card.classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+
+  // Show explanation
+  exp.className = `explanation ${isCorrect ? 'correct-exp' : 'wrong-exp'}`;
+  exp.innerHTML = `
+    <div class="${isCorrect ? 'exp-correct' : 'exp-wrong'}">
+      <strong>${isCorrect ? '✓ Correct' : '✗ Incorrect'}</strong>
+    </div>
+    <div style="margin-top:0.5rem">${q.explanation}</div>
+  `;
+
+  // Update progress
+  updateProgress();
+
+  // If all answered, show results button
+  if (answered === QUESTIONS.length) {
+    setTimeout(showResults, 800);
+  }
+}
+
+function updateProgress() {
+  const pct = (answered / QUESTIONS.length) * 100;
+  document.getElementById('quizProgressFill').style.width = pct + '%';
+  document.getElementById('quizProgressLabel').textContent = `${answered} of ${QUESTIONS.length} answered`;
+}
+
+function showResults() {
+  const score = userAnswers.reduce((acc, ans, idx) =>
+    acc + (ans === QUESTIONS[idx].correct ? 1 : 0), 0);
+
+  document.getElementById('resultsScreen').style.display = 'block';
+
+  // Score circle
+  const circle = document.getElementById('resultsCircle');
+  circle.textContent = `${score}/15`;
+  if (score >= 12) {
+    circle.className = 'results-score-circle score-high';
+  } else if (score >= 8) {
+    circle.className = 'results-score-circle score-mid';
+  } else {
+    circle.className = 'results-score-circle score-low';
+  }
+
+  // Title & subtitle
+  const titles = {
+    high: "World Citizen",
+    mid: "Border Control",
+    low: "Visa Denied"
+  };
+  const subtitles = {
+    high: "You'd walk through most immigration offices in the world with confidence. Your knowledge of history, law, culture, and values spans continents.",
+    mid: "You know enough to pass in several countries, but the tougher exams — Denmark, France — would give you serious trouble. Time to study up.",
+    low: "The world's citizenship exams have you stumped. Don't worry — so do most people. Even native citizens routinely fail their own country's test."
+  };
+  const tier = score >= 12 ? 'high' : score >= 8 ? 'mid' : 'low';
+  document.getElementById('resultsTitle').textContent = titles[tier];
+  document.getElementById('resultsSubtitle').textContent = subtitles[tier];
+
+  // Passport wall
+  const grid = document.getElementById('passportGrid');
+  let passportHtml = '';
+
+  // Calculate per-country scores
+  for (const [name, data] of Object.entries(COUNTRIES)) {
+    const countryScore = data.questions.reduce((acc, qIdx) =>
+      acc + (userAnswers[qIdx] === QUESTIONS[qIdx].correct ? 1 : 0), 0);
+    const pass = countryScore >= data.threshold;
+
+    passportHtml += `
+      <div class="passport-card ${pass ? 'pass' : 'fail'}">
+        <span class="passport-flag">${data.flag}</span>
+        <div class="passport-info">
+          <div class="passport-country">${name}</div>
+          <div class="passport-status ${pass ? 'pass-text' : 'fail-text'}">
+            ${pass ? '✓ Passed' : '✗ Failed'} — ${countryScore}/${data.questions.length} correct
+          </div>
+          <div class="passport-threshold">Threshold: ${data.thresholdLabel}</div>
+        </div>
+        <span class="passport-stamp">${pass ? '🛂' : '🚫'}</span>
+      </div>
+    `;
+  }
+
+  grid.innerHTML = passportHtml;
+
+  // Scroll to results
+  setTimeout(() => {
+    document.getElementById('resultsScreen').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 200);
+}
+
+// ── Reading progress bar ──
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  document.getElementById('progressBar').style.width = Math.min(pct, 100) + '%';
+});
+</script>
+
+</body>
+</html>
