@@ -247,7 +247,7 @@ const YKIEngine = {
     };
     
     try {
-      const response = await fetch(`${this.SUPABASE_URL}/functions/v1/submit-test`, {
+      const response = await fetch(`${this.SUPABASE_URL}/functions/v1/yki-submit-test`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -286,7 +286,7 @@ const YKIEngine = {
     
     // Trigger writing evaluation
     console.log('📝 Triggering writing evaluation...');
-    fetch(`${this.SUPABASE_URL}/functions/v1/evaluate-writing`, {
+    fetch(`${this.SUPABASE_URL}/functions/v1/yki-evaluate-writing`, {
       method: 'POST',
       keepalive: true,
       headers: {
@@ -301,7 +301,7 @@ const YKIEngine = {
     
     // Trigger speaking evaluation
     console.log('🗣️ Triggering speaking evaluation...');
-    fetch(`${this.SUPABASE_URL}/functions/v1/evaluate-speaking`, {
+    fetch(`${this.SUPABASE_URL}/functions/v1/yki-evaluate-speaking`, {
       method: 'POST',
       keepalive: true,
       headers: {
