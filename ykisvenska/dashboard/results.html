@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YKI - Resultat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/ykisvenska/assets/css/yki-styles.css">
+  <style>
+    body { font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif; background: #f8fafc; }
+    
+    .grade-hero {
+      text-align: center; padding: 2.5rem 1.5rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px; color: white; margin-bottom: 2rem;
+      box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+    }
+    .grade-hero h2 { margin: 0.5rem 0 1rem; font-size: 1.5rem; opacity: 0.95; }
+    
+    .grade-display {
+      font-size: 4rem; font-weight: 800; line-height: 1;
+      margin: 0.5rem 0; letter-spacing: -2px;
+    }
+    .grade-label {
+      font-size: 1.3rem; font-weight: 600;
+      margin-top: 0.5rem; opacity: 0.95;
+    }
+    
+    .sections-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 16px; margin: 2rem 0;
+    }
+    @media (max-width: 768px) {
+      .sections-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    .section-card {
+      background: white; border-radius: 12px; padding: 1.5rem;
+      text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid #e2e8f0;
+    }
+    .section-name { font-weight: 600; font-size: 0.9rem; color: #4a5568; margin-bottom: 1rem; }
+    
+    .circular-progress {
+      position: relative; width: 110px; height: 110px; margin: 0 auto 0.75rem;
+    }
+    .circular-progress svg { transform: rotate(-90deg); }
+    .bg-circle { fill: none; stroke: #e2e8f0; stroke-width: 8; }
+    .progress-circle {
+      fill: none; stroke: #667eea; stroke-width: 8;
+      stroke-linecap: round; stroke-dasharray: 276.46; stroke-dashoffset: 276.46;
+      transition: stroke-dashoffset 1s ease;
+    }
+    .percentage {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); font-size: 1.4rem; font-weight: 700; color: #2d3748;
+    }
+    .spinner-inline {
+      width: 24px; height: 24px; border: 3px solid #e2e8f0;
+      border-top: 3px solid #667eea; border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .section-detail { font-size: 0.85rem; color: #718096; margin-top: 4px; }
+    .section-weight { font-size: 0.8rem; color: #a0aec0; margin-top: 4px; }
+    
+    .corrections-section {
+      background: white; border-radius: 12px; margin-bottom: 1rem;
+      border: 1px solid #e2e8f0; overflow: hidden;
+    }
+    .corrections-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 1.5rem; cursor: pointer; font-weight: 600;
+      color: #2d3748; background: #f7fafc; border-bottom: 1px solid #e2e8f0;
+    }
+    .corrections-header:hover { background: #edf2f7; }
+    .corrections-toggle { transition: transform 0.3s; font-size: 0.8rem; }
+    .corrections-toggle.open { transform: rotate(180deg); }
+    .corrections-content { display: none; padding: 1.5rem; }
+    .corrections-content.show { display: block; }
+    
+    .correction-task { margin-bottom: 1.5rem; }
+    .correction-task-header { font-weight: 700; font-size: 1rem; color: #2d3748; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #edf2f7; }
+    .correction-task-context { background: #f7fafc; padding: 12px 16px; border-radius: 8px; margin-bottom: 12px; border-left: 3px solid #667eea; }
+    .correction-task-context-title { font-weight: 600; font-size: 0.85rem; color: #667eea; margin-bottom: 6px; }
+    .correction-task-text { font-size: 0.9rem; line-height: 1.6; color: #4a5568; }
+    .correction-audio-player { margin-top: 8px; }
+    .correction-audio-player audio { width: 100%; max-width: 400px; }
+    
+    .correction-item { padding: 12px 16px; border-radius: 8px; margin-bottom: 10px; }
+    .correction-item.incorrect { background: #fff5f5; border: 1px solid #fed7d7; }
+    .correction-item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .correction-icon { font-size: 1.1rem; }
+    .correction-question-title { font-weight: 600; font-size: 0.9rem; color: #2d3748; }
+    .correction-question-text { font-size: 0.9rem; color: #4a5568; margin-bottom: 8px; line-height: 1.5; }
+    .correction-answer-block { margin: 4px 0; padding: 6px 12px; border-radius: 6px; }
+    .correction-answer-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .correction-answer-label.user { color: #e53e3e; }
+    .correction-answer-label.correct { color: #38a169; }
+    .correction-answer-text { font-size: 0.9rem; color: #2d3748; }
+    
+    .feedback-card {
+      background: white; border-radius: 12px; padding: 1.5rem;
+      margin-bottom: 1rem; border: 1px solid #e2e8f0;
+    }
+    .feedback-card h3 { margin: 0 0 1rem; font-size: 1.1rem; color: #2d3748; }
+    .task-feedback { margin-bottom: 1rem; padding: 12px; background: #f7fafc; border-radius: 8px; }
+    .task-feedback h4 { margin: 0 0 8px; font-size: 0.95rem; color: #667eea; }
+    .task-feedback p { margin: 0; font-size: 0.9rem; line-height: 1.6; color: #4a5568; }
+    
+    .test-badge {
+      display: inline-block; background: rgba(255,255,255,0.2);
+      color: white; padding: 6px 16px; border-radius: 20px;
+      font-size: 0.875rem; font-weight: 600; letter-spacing: 0.5px;
+    }
+    
+    .btn {
+      font-family: 'Space Grotesk', sans-serif; padding: 14px 28px; border-radius: 10px;
+      border: none; font-size: 1rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); transform: translateY(-2px); }
+    
+    .card { padding: 1.75rem; }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
+    .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid #667eea; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- LOADING STATE -->
+    <div id="loading-state" class="card" style="text-align: center; padding: 3rem; background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+      <div class="spinner" style="margin: 0 auto 1rem;"></div>
+      <p style="color: #4a5568; font-weight: 500;">Laddar resultat...</p>
+    </div>
+    
+    <!-- RESULTS CONTAINER -->
+    <div id="results-container" style="display: none;">
+    
+      <div class="grade-hero">
+        <div class="test-badge" id="test-badge">YKI-XX</div>
+        <h2>Slutbetyg</h2>
+        <div class="grade-display" id="overall-grade">--</div>
+        <div class="grade-label" id="grade-label">Beräknar...</div>
+      </div>
+      
+      <div class="sections-grid">
+        
+        <div class="section-card">
+          <div class="section-name">Textförståelse</div>
+          <div class="circular-progress">
+            <svg width="110" height="110">
+              <circle class="bg-circle" cx="55" cy="55" r="44"></circle>
+              <circle class="progress-circle" id="reading-progress" cx="55" cy="55" r="44" 
+                      stroke-dasharray="276.46" stroke-dashoffset="276.46"></circle>
+            </svg>
+            <div class="percentage" id="reading-score">--%</div>
+          </div>
+          <div class="section-detail" id="reading-detail">Rätt: -- av --</div>
+          <div class="section-weight">Vikt: 25%</div>
+        </div>
+        
+        <div class="section-card">
+          <div class="section-name">Talförståelse</div>
+          <div class="circular-progress">
+            <svg width="110" height="110">
+              <circle class="bg-circle" cx="55" cy="55" r="44"></circle>
+              <circle class="progress-circle" id="listening-progress" cx="55" cy="55" r="44" 
+                      stroke-dasharray="276.46" stroke-dashoffset="276.46"></circle>
+            </svg>
+            <div class="percentage" id="listening-score">--%</div>
+          </div>
+          <div class="section-detail" id="listening-detail">Rätt: -- av --</div>
+          <div class="section-weight">Vikt: 25%</div>
+        </div>
+        
+        <div class="section-card">
+          <div class="section-name">Skriftlig framställning</div>
+          <div class="circular-progress">
+            <svg width="110" height="110">
+              <circle class="bg-circle" cx="55" cy="55" r="44"></circle>
+              <circle class="progress-circle" id="writing-progress" cx="55" cy="55" r="44" 
+                      stroke-dasharray="276.46" stroke-dashoffset="276.46"></circle>
+            </svg>
+            <div class="percentage" id="writing-score"><div class="spinner-inline"></div></div>
+          </div>
+          <div class="section-detail" id="writing-detail">⏳ Utvärderar...</div>
+          <div class="section-weight">Vikt: 25%</div>
+        </div>
+        
+        <div class="section-card">
+          <div class="section-name">Muntlig framställning</div>
+          <div class="circular-progress">
+            <svg width="110" height="110">
+              <circle class="bg-circle" cx="55" cy="55" r="44"></circle>
+              <circle class="progress-circle" id="speaking-progress" cx="55" cy="55" r="44" 
+                      stroke-dasharray="276.46" stroke-dashoffset="276.46"></circle>
+            </svg>
+            <div class="percentage" id="speaking-score"><div class="spinner-inline"></div></div>
+          </div>
+          <div class="section-detail" id="speaking-detail">⏳ Utvärderar...</div>
+          <div class="section-weight">Vikt: 25%</div>
+        </div>
+        
+      </div>
+      
+      <!-- READING CORRECTIONS -->
+      <div class="corrections-section" id="reading-corrections" style="display: none;">
+        <div class="corrections-header" onclick="toggleCorrections('reading')">
+          <span>📖 Textförståelse — Rättelser</span>
+          <span class="corrections-toggle" id="reading-toggle">▼</span>
+        </div>
+        <div class="corrections-content" id="reading-corrections-content">
+        </div>
+      </div>
+      
+      <!-- LISTENING CORRECTIONS -->
+      <div class="corrections-section" id="listening-corrections" style="display: none;">
+        <div class="corrections-header" onclick="toggleCorrections('listening')">
+          <span>🎧 Talförståelse — Rättelser</span>
+          <span class="corrections-toggle" id="listening-toggle">▼</span>
+        </div>
+        <div class="corrections-content" id="listening-corrections-content">
+        </div>
+      </div>
+      
+      <!-- WRITING FEEDBACK -->
+      <div class="feedback-card" id="writing-feedback-card" style="display: none;">
+        <h3>✍️ Skriftlig framställning — Feedback</h3>
+        <div id="writing-feedback-content"></div>
+      </div>
+      
+      <!-- SPEAKING FEEDBACK -->
+      <div class="feedback-card" id="speaking-feedback-card" style="display: none;">
+        <h3>🗣️ Muntlig framställning — Feedback</h3>
+        <div id="speaking-feedback-content"></div>
+      </div>
+      
+      <!-- ACTIONS -->
+      <div style="text-align: center; margin-top: 2rem;">
+        <button class="btn btn-primary" onclick="goToDashboard()">
+          ← Tillbaka till Instrumentpanelen
+        </button>
+      </div>
+      
+    </div>
+    
+    <!-- ERROR STATE -->
+    <div id="error-state" style="display: none; text-align: center; padding: 3rem;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+      <h3>Kunde inte ladda resultat</h3>
+      <p id="error-message" style="color: #718096;"></p>
+      <button class="btn btn-primary" onclick="goToDashboard()" style="margin-top: 1rem;">
+        ← Tillbaka till Instrumentpanelen
+      </button>
+    </div>
+    
+  </div>
+
+  <script src="/ykisvenska/assets/js/yki-engine.js?v=1"></script>
+  <script>
+    let attemptId = null;
+    let examId = null;
+    let pollInterval = null;
+    let pollingStartTime = Date.now();
+    let writingTimeout = false;
+    let speakingTimeout = false;
+    const timeoutKey = 'yki_eval_timeout';
+    const TIMEOUT_MS = 120000; // 2 minutes
+    
+    window.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      attemptId = urlParams.get('attempt_id');
+      examId = urlParams.get('exam') || 'yki-01';
+      
+      document.getElementById('test-badge').textContent = examId.toUpperCase();
+      
+      if (!attemptId) {
+        showError('Försöks-ID saknas i URL:en');
+        return;
+      }
+      
+      await fetchResults();
+      startPolling();
+    });
+    
+    async function fetchResults() {
+      try {
+        const response = await fetch(
+          `${YKIEngine.SUPABASE_URL}/rest/v1/yki_attempts?id=eq.${attemptId}&select=*`,
+          {
+            headers: {
+              'apikey': YKIEngine.SUPABASE_KEY,
+              'Authorization': `Bearer ${YKIEngine.SUPABASE_KEY}`
+            }
+          }
+        );
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        if (!data || data.length === 0) throw new Error('Inga resultat hittades');
+        
+        const result = data[0];
+        displayResults(result);
+        
+        if (result.writing_status === 'complete' && result.speaking_status === 'complete') {
+          stopPolling();
+        }
+        
+      } catch (error) {
+        console.error('Error fetching results:', error);
+        showError('Kunde inte ladda resultaten: ' + error.message);
+      }
+    }
+    
+    function setCircularProgress(elementId, percentage) {
+      const circle = document.getElementById(elementId);
+      const circumference = 276.46;
+      const offset = circumference - (percentage / 100 * circumference);
+      circle.style.strokeDashoffset = offset;
+    }
+    
+    function displayResults(result) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('results-container').style.display = 'block';
+      
+      // Update localStorage
+      const testState = YKIEngine.getTestState(examId) || YKIEngine.createNewTestState(examId);
+      testState.sections.reading.score = Number(result.reading_score) || 0;
+      testState.sections.reading.correct_count = result.reading_correct || 0;
+      testState.sections.reading.total_questions = result.reading_total || 0;
+      testState.sections.listening.score = Number(result.listening_score) || 0;
+      testState.sections.listening.correct_count = result.listening_correct || 0;
+      testState.sections.listening.total_questions = result.listening_total || 0;
+      testState.sections.writing.score = Number(result.writing_score) || 0;
+      testState.sections.speaking.score = Number(result.speaking_score) || 0;
+      testState.submitted = true;
+      testState.result_id = result.id;
+      YKIEngine.saveTestState(examId, testState);
+      
+      // Reading
+      const readingScore = result.reading_score || 0;
+      document.getElementById('reading-score').textContent = readingScore.toFixed(0) + '%';
+      document.getElementById('reading-detail').textContent = 
+        `Rätt: ${result.reading_correct || 0} av ${result.reading_total || 0}`;
+      setCircularProgress('reading-progress', readingScore);
+      
+      // Listening
+      const listeningScore = result.listening_score || 0;
+      document.getElementById('listening-score').textContent = listeningScore.toFixed(0) + '%';
+      document.getElementById('listening-detail').textContent = 
+        `Rätt: ${result.listening_correct || 0} av ${result.listening_total || 0}`;
+      setCircularProgress('listening-progress', listeningScore);
+      
+      // Writing
+      if (result.writing_status === 'complete' && result.writing_score !== null) {
+        const writingScore = result.writing_score;
+        document.getElementById('writing-score').textContent = writingScore.toFixed(0) + '%';
+        document.getElementById('writing-detail').textContent = '✅ Utvärdering klar';
+        setCircularProgress('writing-progress', writingScore);
+        writingTimeout = false;
+        sessionStorage.removeItem(timeoutKey);
+        
+        if (result.writing_feedback) {
+          document.getElementById('writing-feedback-card').style.display = 'block';
+          document.getElementById('writing-feedback-content').innerHTML = formatFeedback(result.writing_feedback);
+        }
+      } else if (result.writing_status === 'failed') {
+        document.getElementById('writing-score').innerHTML = '❌';
+        document.getElementById('writing-detail').innerHTML = '<span style="color: #e53e3e;">Utvärderingsfel</span>';
+        sessionStorage.removeItem(timeoutKey);
+      } else {
+        if (!writingTimeout) {
+          const elapsed = Date.now() - pollingStartTime;
+          if (elapsed > TIMEOUT_MS) {
+            writingTimeout = true;
+            showTimeoutForSection('writing');
+          } else if (elapsed > 60000) {
+            document.getElementById('writing-detail').textContent = '⏳ Utvärderar... (kan ta upp till 2 minuter)';
+          }
+        }
+      }
+      
+      // Speaking
+      if (result.speaking_status === 'complete' && result.speaking_score !== null) {
+        const speakingScore = result.speaking_score;
+        document.getElementById('speaking-score').textContent = speakingScore.toFixed(0) + '%';
+        document.getElementById('speaking-detail').textContent = '✅ Utvärdering klar';
+        setCircularProgress('speaking-progress', speakingScore);
+        speakingTimeout = false;
+        sessionStorage.removeItem(timeoutKey);
+        
+        if (result.speaking_feedback) {
+          document.getElementById('speaking-feedback-card').style.display = 'block';
+          document.getElementById('speaking-feedback-content').innerHTML = formatFeedback(result.speaking_feedback);
+        }
+      } else if (result.speaking_status === 'failed') {
+        document.getElementById('speaking-score').innerHTML = '❌';
+        document.getElementById('speaking-detail').innerHTML = '<span style="color: #e53e3e;">Utvärderingsfel</span>';
+        sessionStorage.removeItem(timeoutKey);
+      } else {
+        if (!speakingTimeout) {
+          const elapsed = Date.now() - pollingStartTime;
+          if (elapsed > TIMEOUT_MS) {
+            speakingTimeout = true;
+            showTimeoutForSection('speaking');
+          } else if (elapsed > 60000) {
+            document.getElementById('speaking-detail').textContent = '⏳ Utvärderar... (kan ta upp till 2 minuter)';
+          }
+        }
+      }
+      
+      // Overall Grade — EQUAL 25% WEIGHTS
+      const reading = Number(result.reading_score) || 0;
+      const listening = Number(result.listening_score) || 0;
+      const writing = Number(result.writing_score) || 0;
+      const speaking = Number(result.speaking_score) || 0;
+      
+      if (result.reading_score !== null && result.listening_score !== null &&
+          result.writing_score !== null && result.speaking_score !== null) {
+        
+        const overallGrade = (reading * 0.25) + (listening * 0.25) + 
+                             (writing * 0.25) + (speaking * 0.25);
+        
+        document.getElementById('overall-grade').textContent = overallGrade.toFixed(1);
+        
+        // YKI Grade Labels (Swedish)
+        let gradeLabel = '';
+        if (overallGrade >= 85) {
+          gradeLabel = '🏆 Utmärkt';
+        } else if (overallGrade >= 70) {
+          gradeLabel = '✅ Bra';
+        } else if (overallGrade >= 55) {
+          gradeLabel = '👍 Godkänt';
+        } else {
+          gradeLabel = '⚠️ Underkänt';
+        }
+        document.getElementById('grade-label').textContent = gradeLabel;
+        
+      } else {
+        document.getElementById('overall-grade').textContent = '--';
+        document.getElementById('grade-label').textContent = 'Beräknar...';
+      }
+      
+      displayCorrections(result);
+    }
+    
+    function formatFeedback(feedback) {
+      if (typeof feedback === 'string') {
+        return `<div class="task-feedback"><p>${feedback.replace(/\n/g, '<br>')}</p></div>`;
+      }
+      
+      if (typeof feedback === 'object') {
+        let html = '';
+        
+        if (feedback.tasks && Array.isArray(feedback.tasks)) {
+          feedback.tasks.forEach((task, index) => {
+            html += `
+              <div class="task-feedback">
+                <h4>Uppgift ${task.task_index || (index + 1)}</h4>
+                ${task.feedback ? `<p>${task.feedback}</p>` : ''}
+                ${task.score?.raw ? `<p><strong>Poäng:</strong> ${task.score.raw}/10</p>` : ''}
+              </div>
+            `;
+          });
+          
+          if (feedback.feedback) {
+            html += `
+              <div class="task-feedback">
+                <h4>Övergripande kommentar</h4>
+                <p>${feedback.feedback}</p>
+              </div>
+            `;
+          }
+        }
+        
+        return html;
+      }
+      
+      return '<div class="task-feedback"><p>Ingen feedback tillgänglig</p></div>';
+    }
+    
+    function startPolling() {
+      pollInterval = setInterval(fetchResults, 5000);
+    }
+    
+    function stopPolling() {
+      if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+    }
+    
+    function showError(message) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('error-state').style.display = 'block';
+      document.getElementById('error-message').textContent = message;
+      stopPolling();
+    }
+    
+    // ==========================================================================
+    // CORRECTIONS DISPLAY
+    // ==========================================================================
+    
+    function toggleCorrections(section) {
+      const content = document.getElementById(`${section}-corrections-content`);
+      const toggle = document.getElementById(`${section}-toggle`);
+      
+      if (content.classList.contains('show')) {
+        content.classList.remove('show'); toggle.classList.remove('open');
+      } else {
+        content.classList.add('show'); toggle.classList.add('open');
+      }
+    }
+    
+    async function displayCorrections(result) {
+      const eid = result.exam_id || examId;
+      
+      // Reading corrections
+      if (result.reading_answers && result.reading_score !== null) {
+        try {
+          const response = await fetch(`../data/${eid}-reading.json`);
+          const readingData = await response.json();
+          
+          const html = generateCorrectionsHTML(readingData.tasks, result.reading_answers, 'reading');
+          document.getElementById('reading-corrections-content').innerHTML = html;
+          document.getElementById('reading-corrections').style.display = 'block';
+        } catch (error) {
+          console.error('Error loading reading corrections:', error);
+        }
+      }
+      
+      // Listening corrections
+      if (result.listening_answers && result.listening_score !== null) {
+        try {
+          const response = await fetch(`../data/${eid}-listening.json`);
+          const listeningData = await response.json();
+          
+          const html = generateCorrectionsHTML(listeningData.tasks, result.listening_answers, 'listening');
+          document.getElementById('listening-corrections-content').innerHTML = html;
+          document.getElementById('listening-corrections').style.display = 'block';
+        } catch (error) {
+          console.error('Error loading listening corrections:', error);
+        }
+      }
+    }
+    
+    function generateCorrectionsHTML(tasks, userAnswers, sectionType) {
+      let html = '';
+      
+      tasks.forEach((task, taskIndex) => {
+        let hasIncorrect = false;
+        const taskContent = [];
+        
+        task.questions.forEach((question, qIndex) => {
+          const questionId = sectionType === 'reading' 
+            ? `${task.task_id}-${question.id}`
+            : question.id;
+          
+          const userAnswerId = userAnswers[questionId];
+          let userAnswerText, correctAnswerText, isCorrect;
+          
+          if (sectionType === 'reading') {
+            const correctAnswerId = question.correct_option;
+            isCorrect = userAnswerId === correctAnswerId;
+            const userOption = question.options?.find(o => o.id === userAnswerId);
+            const correctOption = question.options?.find(o => o.id === correctAnswerId);
+            userAnswerText = userOption?.text || '(inget svar)';
+            correctAnswerText = correctOption?.text || correctAnswerId;
+          } else {
+            const correctAnswer = question.correct_option;
+            isCorrect = userAnswerId === correctAnswer;
+            userAnswerText = userAnswerId || '(inget svar)';
+            correctAnswerText = correctAnswer;
+          }
+          
+          if (!isCorrect) {
+            hasIncorrect = true;
+            const questionText = question.prompt?.replace(/<[^>]*>/g, '') || '';
+            taskContent.push({ qIndex: qIndex + 1, questionText, userAnswerText, correctAnswerText });
+          }
+        });
+        
+        if (hasIncorrect) {
+          html += `<div class="correction-task">`;
+          html += `<div class="correction-task-header">Uppgift ${taskIndex + 1}${task.title ? ': ' + task.title : ''}</div>`;
+          
+          // Reading: show text passages
+          if (sectionType === 'reading') {
+            if (task.content?.texts) {
+              html += `<div class="correction-task-context"><div class="correction-task-context-title">📄 Text:</div>`;
+              task.content.texts.forEach(textObj => {
+                html += `<div class="correction-task-text">${textObj.text.replace(/\n/g, '<br>')}</div>`;
+              });
+              html += `</div>`;
+            } else if (task.content?.text) {
+              html += `<div class="correction-task-context"><div class="correction-task-context-title">📄 Text:</div><div class="correction-task-text">${task.content.text.replace(/\n/g, '<br>')}</div></div>`;
+            }
+          }
+          
+          // Listening: show audio
+          if (sectionType === 'listening' && task.content?.audio) {
+            html += `
+              <div class="correction-task-context">
+                <div class="correction-task-context-title">🎧 Ljud:</div>
+                <div class="correction-audio-player">
+                  <audio controls preload="metadata">
+                    <source src="../data/${examId}/${task.content.audio.split('/').pop()}" type="audio/mpeg">
+                    Din webbläsare stöder inte ljudelementet.
+                  </audio>
+                </div>
+              </div>
+            `;
+          }
+          
+          taskContent.forEach(item => {
+            html += `
+              <div class="correction-item incorrect">
+                <div class="correction-item-header">
+                  <span class="correction-icon">❌</span>
+                  <span class="correction-question-title">Fråga ${item.qIndex}</span>
+                </div>
+                ${item.questionText ? `<div class="correction-question-text">${item.questionText}</div>` : ''}
+                <div class="correction-answer-block">
+                  <div class="correction-answer-label user">✗ DITT SVAR</div>
+                  <div class="correction-answer-text">${item.userAnswerText}</div>
+                </div>
+                <div class="correction-answer-block">
+                  <div class="correction-answer-label correct">✓ RÄTT SVAR</div>
+                  <div class="correction-answer-text">${item.correctAnswerText}</div>
+                </div>
+              </div>
+            `;
+          });
+          
+          html += `</div>`;
+        }
+      });
+      
+      if (!html) {
+        html = '<div style="text-align: center; padding: 2rem; color: #10b981;"><h4>🎉 Grattis! Alla svar är korrekta!</h4></div>';
+      }
+      
+      return html;
+    }
+    
+    function goToDashboard() {
+      window.location.href = 'index.html';
+    }
+    
+    // ==========================================================================
+    // RETRY FUNCTIONALITY
+    // ==========================================================================
+    
+    function showTimeoutForSection(section) {
+      const sectionName = section === 'writing' ? 'Skrivning' : 'Tal';
+      const detailEl = document.getElementById(`${section}-detail`);
+      
+      detailEl.innerHTML = `
+        <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 12px; margin-top: 8px; text-align: left;">
+          <p style="margin: 0 0 8px; color: #856404; font-weight: 600; font-size: 0.9rem;">
+            ⚠️ Utvärderingen tar längre tid än förväntat
+          </p>
+          <button 
+            onclick="retryEvaluation('${section}')" 
+            style="background: #667eea; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; font-family: 'Space Grotesk', sans-serif;">
+            🔄 Utvärdera igen
+          </button>
+        </div>
+      `;
+    }
+    
+    async function retryEvaluation(section) {
+      const detailEl = document.getElementById(`${section}-detail`);
+      detailEl.textContent = '🔄 Försöker igen...';
+      
+      try {
+        const response = await fetch(
+          `${YKIEngine.SUPABASE_URL}/functions/v1/retry-evaluation`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${YKIEngine.SUPABASE_KEY}`
+            },
+            body: JSON.stringify({ attempt_id: attemptId, section: section })
+          }
+        );
+        
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || `HTTP ${response.status}`);
+        
+        if (section === 'writing') writingTimeout = false;
+        if (section === 'speaking') speakingTimeout = false;
+        
+        detailEl.textContent = '✅ Laddar om...';
+        await fetchResults();
+        
+      } catch (error) {
+        console.error('Retry failed:', error);
+        const sectionName = section === 'writing' ? 'Skrivning' : 'Tal';
+        detailEl.innerHTML = `
+          <div style="background: #fee; border: 1px solid #fcc; border-radius: 8px; padding: 12px; margin-top: 8px; text-align: left;">
+            <p style="margin: 0 0 8px; color: #c00; font-weight: 600; font-size: 0.9rem;">
+              ❌ Utvärderingen misslyckades
+            </p>
+            <p style="margin: 0 0 8px; font-size: 0.85rem; color: #666;">
+              Kontakta supporten med detta ID:
+            </p>
+            <code style="background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; display: block; margin-bottom: 8px; word-break: break-all;">${attemptId}</code>
+            <a 
+              href="mailto:admin@civiclearn.com?subject=YKI Utvärdering Misslyckades&body=Attempt ID: ${attemptId}%0ASection: ${sectionName}%0AError: ${error.message}"
+              style="background: #667eea; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; display: inline-block; font-family: 'Space Grotesk', sans-serif;">
+              📧 Kontakta support
+            </a>
+          </div>
+        `;
+      }
+    }
+    
+    window.addEventListener('beforeunload', stopPolling);
+  </script>
+
+</body>
+</html>

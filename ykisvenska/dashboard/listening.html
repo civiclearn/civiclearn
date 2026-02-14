@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YKI - Talförståelse</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/ykisvenska/assets/css/yki-styles.css">
+  <style>
+    body { font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif; }
+    
+    .test-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; padding: 6px 16px; border-radius: 20px;
+      font-size: 0.875rem; font-weight: 600; margin-bottom: 12px; letter-spacing: 0.5px;
+    }
+    
+    .timer-box {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: #fff5f5; border: 2px solid #fc8181;
+      padding: 12px 20px; border-radius: 12px;
+      font-size: 1.1rem; font-weight: 600; color: #c53030; margin-top: 12px;
+    }
+    .timer-icon { font-size: 1.5rem; }
+    #countdown-timer {
+      font-family: 'Space Grotesk', monospace; font-size: 1.3rem; font-weight: 700; letter-spacing: 1px;
+    }
+    .timer-box.warning { background: #fffaf0; border-color: #ed8936; color: #c05621; animation: pulse 1s ease-in-out infinite; }
+    .timer-box.critical { background: #fff5f5; border-color: #f56565; color: #c53030; animation: pulse 0.5s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+    
+    .card { padding: 1.75rem; }
+    .card-title { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .card-subtitle { font-size: 1rem; margin-bottom: 1rem; }
+    
+    .btn {
+      font-family: 'Space Grotesk', sans-serif; padding: 14px 28px; border-radius: 10px;
+      border: none; font-size: 1rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-secondary { background: #f7fafc; color: #2d3748; border: 2px solid #e2e8f0; }
+    .btn-secondary:hover { background: #edf2f7; border-color: #cbd5e0; transform: translateY(-1px); }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); transform: translateY(-2px); }
+    .btn-primary:active, .btn-secondary:active { transform: translateY(0); }
+    .btn-large { padding: 16px 32px; font-size: 1.05rem; }
+    
+    .nav-buttons {
+      display: flex; gap: 16px; justify-content: space-between;
+      margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;
+    }
+    
+    .audio-container {
+      margin: 1.5rem 0; padding: 1.5rem;
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      border-radius: 12px; border: 2px solid #e2e8f0;
+    }
+    .audio-player { width: 100%; height: 48px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+  <div class="test-header">
+    <div class="progress-container">
+      <div class="progress-info">
+        <span>Testprogress</span>
+        <span id="progress-text">2/4 Delar</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 50%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    
+    <div class="card">
+      <div class="test-badge" id="test-badge">YKI-XX</div>
+      <h1 class="card-title">Talförståelse</h1>
+      <p class="card-subtitle">Lyssna noggrant på ljuden och svara på frågorna.</p>
+      <div class="timer-box" id="timer-display">
+        <span class="timer-icon">⏱️</span>
+        <div>
+          <div style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 2px;">Tid kvar:</div>
+          <div id="countdown-timer">0:30:00</div>
+        </div>
+      </div>
+      <div class="alert alert-info" style="margin-top: 1rem;">
+        <strong>Instruktioner:</strong> Du kan lyssna på varje ljud <strong>upp till 2 gånger</strong> (som i det officiella provet). 
+        Dina svar sparas automatiskt.
+      </div>
+    </div>
+
+    <div id="tasks-container"></div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goBack()">← Tillbaka till Textförståelse</button>
+      <button class="btn" onclick="restartTest()" style="background: #ed8936; color: white; border: 2px solid #dd6b20;">
+        🔄 Starta om testet
+      </button>
+      <button class="btn btn-primary btn-large" id="complete-btn" onclick="completeListening()">
+        Slutför Talförståelse →
+      </button>
+    </div>
+
+  </div>
+
+  <div id="loading-overlay" class="loading-overlay" style="display: none;"><div class="spinner"></div></div>
+
+  <script src="/ykisvenska/assets/js/yki-engine.js?v=1"></script>
+  <script>
+    let listeningData = null;
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const EXAM_ID = urlParams.get('exam') || 'yki-01';
+    
+    document.getElementById('test-badge').textContent = EXAM_ID.toUpperCase();
+    
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        YKIEngine.init(EXAM_ID);
+        
+        const response = await fetch(`../data/${EXAM_ID}-listening.json`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        listeningData = await response.json();
+        renderTasks();
+        updateProgress();
+        startTimer();
+        
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Fel vid laddning av testet.\n\n' + error.message);
+      }
+    });
+    
+    function renderTasks() {
+      const container = document.getElementById('tasks-container');
+      container.innerHTML = '';
+      
+      listeningData.tasks.forEach((task, taskIndex) => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'card task-container';
+        
+        taskDiv.innerHTML = `
+          <div class="task-header">
+            <h2 class="task-title">${task.title}</h2>
+            <p class="task-instructions">${task.instructions || ''}</p>
+          </div>
+        `;
+        
+        // Audio Player
+        const audioDiv = document.createElement('div');
+        audioDiv.className = 'audio-container';
+        const audioId = `audio-${task.task_id}`;
+        audioDiv.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+            <audio controls class="audio-player" preload="metadata" id="${audioId}">
+              <source src="${task.content.audio}" type="audio/mpeg">
+              Din webbläsare stöder inte ljudelementet.
+            </audio>
+            <div id="play-count-${task.task_id}" style="font-size: 0.875rem; color: #718096; font-weight: 600;">
+              🎧 0/2 uppspelningar
+            </div>
+          </div>
+          <div id="play-warning-${task.task_id}" style="display: none; margin-top: 0.5rem;">
+            <div class="alert alert-warning" style="font-size: 0.875rem;">⚠️ Sista uppspelningen!</div>
+          </div>
+          <div id="play-limit-${task.task_id}" style="display: none; margin-top: 0.5rem;">
+            <div class="alert alert-error" style="font-size: 0.875rem; background: #fff5f5; border-color: #fc8181; color: #c53030;">
+              🔒 Gränsen på 2 uppspelningar har nåtts (officiellt provvillkor)
+            </div>
+          </div>
+        `;
+        taskDiv.appendChild(audioDiv);
+        
+        // Enforce 2-listen limit
+        setTimeout(() => {
+          const audioElement = document.getElementById(audioId);
+          let playCount = 0;
+          
+          audioElement.addEventListener('play', () => {
+            if (playCount >= 2) { audioElement.pause(); audioElement.currentTime = 0; return; }
+          });
+          
+          audioElement.addEventListener('ended', () => {
+            playCount++;
+            document.getElementById(`play-count-${task.task_id}`).textContent = `🎧 ${playCount}/2 uppspelningar`;
+            
+            if (playCount === 1) {
+              document.getElementById(`play-warning-${task.task_id}`).style.display = 'block';
+            } else if (playCount >= 2) {
+              audioElement.controls = false;
+              document.getElementById(`play-warning-${task.task_id}`).style.display = 'none';
+              document.getElementById(`play-limit-${task.task_id}`).style.display = 'block';
+              document.getElementById(`play-count-${task.task_id}`).style.color = '#e53e3e';
+            }
+          });
+        }, 100);
+        
+        // Render MCQ questions
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'task-content';
+        
+        task.questions.forEach((question, qIndex) => {
+          const questionDiv = document.createElement('div');
+          questionDiv.className = 'question-block';
+          const uniqueName = `${task.task_id}-${question.id}`;
+          
+          const shuffledOptions = shuffleArray([...question.options]);
+          
+          questionDiv.innerHTML = `
+            <div class="question-prompt">${question.prompt}</div>
+            <div class="options-container">
+              ${shuffledOptions.map(option => `
+                <label class="option-button">
+                  <input type="radio" name="${uniqueName}" value="${option.id}"
+                    data-question-id="${question.id}"
+                    onchange="saveAnswer('${question.id}', '${option.id}')">
+                  <span>${option.text}</span>
+                </label>
+              `).join('')}
+            </div>
+          `;
+          
+          contentDiv.appendChild(questionDiv);
+          
+          // Restore saved answer
+          const savedAnswer = YKIEngine.currentTest.sections.listening.answers[question.id];
+          if (savedAnswer) {
+            const radios = questionDiv.querySelectorAll(`input[name="${uniqueName}"]`);
+            radios.forEach(radio => {
+              if (radio.value === savedAnswer) {
+                radio.checked = true;
+                radio.closest('.option-button').classList.add('selected');
+              }
+            });
+          }
+        });
+        
+        taskDiv.appendChild(contentDiv);
+        container.appendChild(taskDiv);
+      });
+    }
+    
+    function shuffleArray(array) {
+      const s = [...array];
+      for (let i = s.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [s[i], s[j]] = [s[j], s[i]];
+      }
+      return s;
+    }
+    
+    function saveAnswer(questionId, optionId) {
+      const allRadios = document.querySelectorAll(`input[data-question-id="${questionId}"]`);
+      allRadios.forEach(r => r.closest('.option-button').classList.remove('selected'));
+      
+      const selected = document.querySelector(`input[data-question-id="${questionId}"][value="${optionId}"]`);
+      if (selected) selected.closest('.option-button').classList.add('selected');
+      
+      YKIEngine.saveListeningAnswer(questionId, optionId);
+      console.log('Answer saved:', questionId, optionId);
+    }
+    
+    // Timer (45 minutes)
+    let timeRemaining = 30 * 60;
+    let timerInterval = null;
+    const TIMER_KEY = `yki_timer_${EXAM_ID}_listening`;
+    
+    function startTimer() {
+      const savedTimer = localStorage.getItem(TIMER_KEY);
+      if (savedTimer) {
+        const timerData = JSON.parse(savedTimer);
+        const elapsed = Math.floor((Date.now() - timerData.startTime) / 1000);
+        timeRemaining = Math.max(0, timerData.totalTime - elapsed);
+      } else {
+        localStorage.setItem(TIMER_KEY, JSON.stringify({ startTime: Date.now(), totalTime: timeRemaining }));
+      }
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval); timeRemaining = 0; updateTimerDisplay();
+          alert('⏰ Tiden är slut!\n\nDen officiella tiden för Talförståelse har gått ut.\n\nDu kan fortsätta svara eller gå vidare.');
+          return;
+        }
+        updateTimerDisplay();
+      }, 1000);
+    }
+    
+    function updateTimerDisplay() {
+      const m = Math.floor(timeRemaining / 60), s = timeRemaining % 60;
+      document.getElementById('countdown-timer').textContent = `0:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+      const tb = document.getElementById('timer-display');
+      if (timeRemaining <= 300) { tb.classList.add('critical'); tb.classList.remove('warning'); }
+      else if (timeRemaining <= 600) { tb.classList.add('warning'); }
+      else { tb.classList.remove('warning', 'critical'); }
+    }
+    
+    window.addEventListener('beforeunload', () => { if (timerInterval) clearInterval(timerInterval); });
+    
+    function completeListening() {
+      const totalQuestions = listeningData.tasks.reduce((sum, t) => sum + t.questions.length, 0);
+      const answeredCount = Object.keys(YKIEngine.currentTest.sections.listening.answers).length;
+      
+      if (answeredCount < totalQuestions) {
+        if (!confirm(`Du har ${totalQuestions - answeredCount} obesvarade frågor.\n\nÄr du säker?`)) return;
+      }
+      
+      localStorage.removeItem(TIMER_KEY);
+      if (timerInterval) clearInterval(timerInterval);
+      
+      document.getElementById('loading-overlay').style.display = 'flex';
+      setTimeout(() => {
+        const result = YKIEngine.completeListeningSection(listeningData);
+        document.getElementById('loading-overlay').style.display = 'none';
+        console.log('✅ Listening completed:', result);
+        window.location.href = `writing.html?exam=${EXAM_ID}`;
+      }, 500);
+    }
+    
+    function goBack() {
+      if (confirm('Tillbaka till Textförståelse? Dina framsteg sparas.')) {
+        window.location.href = `reading.html?exam=${EXAM_ID}`;
+      }
+    }
+    
+    function restartTest() {
+      if (!confirm('Starta om detta test?\n\nAlla framsteg raderas.\n\nDetta kan inte ångras.')) return;
+      localStorage.removeItem(`yki_test_${EXAM_ID}`);
+      ['reading','listening','writing','speaking'].forEach(s => localStorage.removeItem(`yki_timer_${EXAM_ID}_${s}`));
+      alert('✅ Testet har startats om!');
+      window.location.href = 'index.html';
+    }
+    
+    function updateProgress() {
+      const p = YKIEngine.getProgress();
+      document.getElementById('progress-text').textContent = `${p.completed}/4 Delar`;
+      document.getElementById('progress-fill').style.width = `${p.percentage}%`;
+    }
+  </script>
+
+</body>
+</html>
