@@ -19,6 +19,13 @@ const YKIEngine = {
   init(examId) {
     this.currentExamId = examId;
     this.currentTest = this.getTestState(examId) || this.createNewTestState(examId);
+    
+    // Backward-compat: ensure speaking.responses exists (added after initial release)
+    if (this.currentTest.sections.speaking && !this.currentTest.sections.speaking.responses) {
+      this.currentTest.sections.speaking.responses = {};
+      this.saveTestState(examId, this.currentTest);
+    }
+    
     console.log('YKI Engine initialized for:', examId);
   },
   
@@ -40,7 +47,7 @@ const YKIEngine = {
         reading: { completed: false, answers: {}, score: null },
         listening: { completed: false, answers: {}, score: null },
         writing: { completed: false, responses: {} },
-        speaking: { completed: false, recordings: {} }
+        speaking: { completed: false, recordings: {}, responses: {} }
       },
       submitted: false,
       result_id: null
@@ -164,6 +171,11 @@ const YKIEngine = {
     });
   },
   
+  saveSpeakingResponse(taskId, text) {
+    this.currentTest.sections.speaking.responses[taskId] = text;
+    this.saveTestState(this.currentExamId, this.currentTest);
+  },
+  
   completeSpeakingSection() {
     this.currentTest.sections.speaking.completed = true;
     this.saveTestState(this.currentExamId, this.currentTest);
@@ -198,7 +210,8 @@ const YKIEngine = {
           responses: this.currentTest.sections.writing.responses
         },
         speaking: {
-          recordings: this.currentTest.sections.speaking.recordings
+          recordings: this.currentTest.sections.speaking.recordings,
+          responses: this.currentTest.sections.speaking.responses
         }
       },
       submitted_at: new Date().toISOString()
