@@ -266,7 +266,7 @@
     
   </div>
 
-  <script src="../assets/js/yki-engine.js?v=3"></script>
+  <script src="../assets/js/yki-engine.js?v=4"></script>
   <script>
     let attemptId = null;
     let examId = null;
@@ -469,7 +469,7 @@
               <div class="task-feedback">
                 <h4>Uppgift ${task.task_index || (index + 1)}</h4>
                 ${task.feedback ? `<p>${task.feedback}</p>` : ''}
-                ${task.score?.raw ? `<p><strong>Poäng:</strong> ${task.score.raw}/10</p>` : ''}
+                ${task.score?.raw != null ? `<p><strong>Poäng:</strong> ${task.score.raw}/${task.score.max || 5}</p>` : ''}
               </div>
             `;
           });
@@ -570,10 +570,16 @@
           if (sectionType === 'reading') {
             const correctAnswerId = question.correct_option;
             isCorrect = userAnswerId === correctAnswerId;
-            const userOption = question.options?.find(o => o.id === userAnswerId);
-            const correctOption = question.options?.find(o => o.id === correctAnswerId);
-            userAnswerText = userOption?.text || '(inget svar)';
-            correctAnswerText = correctOption?.text || correctAnswerId;
+            // Options can be plain strings or objects with {id, text}
+            if (question.options && typeof question.options[0] === 'string') {
+              userAnswerText = userAnswerId || '(inget svar)';
+              correctAnswerText = correctAnswerId;
+            } else {
+              const userOption = question.options?.find(o => o.id === userAnswerId);
+              const correctOption = question.options?.find(o => o.id === correctAnswerId);
+              userAnswerText = userOption?.text || userAnswerId || '(inget svar)';
+              correctAnswerText = correctOption?.text || correctAnswerId;
+            }
           } else {
             const correctAnswer = question.correct_option;
             isCorrect = userAnswerId === correctAnswer;
