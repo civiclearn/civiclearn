@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kirjaudu sisään – YKI Suomi</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
+  <link rel="stylesheet" href="/assets/css/newlogin.css">
+
+  <style>
+    /* === MOBILE LOGIN TABS === */
+    .login-tabs {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+
+      /* Fix header overflow */
+      .header-inner {
+        padding: 10px 12px;
+        gap: 8px;
+      }
+      .header-nav { display: none; }
+      .brand-powered { display: none; }
+      .btn-small-purple {
+        font-size: 12px;
+        padding: 6px 12px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .brand-title {
+        font-size: 15px;
+      }
+
+      /* Tab bar */
+      .login-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 0;
+        margin: 16px auto 0;
+        max-width: 400px;
+        padding: 0 16px;
+      }
+
+      .login-tab {
+        flex: 1;
+        padding: 10px 6px;
+        font-family: 'Lexend', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        text-align: center;
+        border: none;
+        background: #f0eef5;
+        color: #777;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .login-tab:first-child {
+        border-radius: 10px 0 0 10px;
+      }
+      .login-tab:last-child {
+        border-radius: 0 10px 10px 0;
+      }
+
+      .login-tab.active {
+        background: #6c5ce7;
+        color: #fff;
+        font-weight: 600;
+      }
+
+      /* Hide inactive cards */
+      .login-grid {
+        display: block !important;
+        padding: 0 16px;
+      }
+
+      .auth-card {
+        display: none;
+        max-width: 400px;
+        margin: 16px auto 0;
+      }
+
+      .auth-card.tab-active {
+        display: block;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      .auth-card input,
+      .auth-card button,
+      .auth-card .pwd-container {
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+
+    <div class="header-left">
+      <a href="/ykifinnish/" class="brand-link">
+        <img src="/assets/images/fi.svg" alt="FI">
+        <div class="brand-title">YKI Suomi</div>
+      </a>
+    </div>
+
+    <div class="header-center">
+      <nav class="header-nav">
+        <a href="https://ykifinnish.fi/yhteystiedot/">Yhteystiedot</a>
+      </nav>
+    </div>
+
+    <div class="header-right">
+      <div class="brand-powered">powered by <span>CivicLearn</span></div>
+      <a href="/ykifinnish/checkout.html" class="btn-small-purple">Osta käyttöoikeus</a>
+    </div>
+
+  </div>
+</header>
+
+<div id="status" class="status-msg"></div>
+
+<div class="login-tabs">
+  <button class="login-tab" data-tab="setup">Uusi käyttäjä?</button>
+  <button class="login-tab active" data-tab="login">Kirjaudu</button>
+  <button class="login-tab" data-tab="pin">PIN</button>
+</div>
+
+<div class="login-grid">
+
+  <!-- LEFT CARD -->
+  <div class="auth-card card-left" data-card="setup">
+    <h2 style="color: var(--purple);">Ensimmäinen kerta?</h2>
+    <p>
+      Ostitko juuri käyttöoikeuden? Luo salasanasi tästä.
+    </p>
+
+    <input type="email" id="setupEmail" placeholder="nimi@esimerkki.fi">
+    <button
+      type="button"
+      id="setupBtn"
+      onclick="handleSetup()"
+      class="btn-action btn-purple">
+      Lähetä asetusLinkki
+    </button>
+
+    <div style="font-size:10px;color:var(--purple);font-weight:600;margin-top:15px;text-align:center;line-height:1.4;">
+      ℹ️ Tarkista myös roskapostikansio.
+    </div>
+  </div>
+
+  <!-- CENTER CARD -->
+  <div class="auth-card card-center tab-active" data-card="login">
+    <h2 style="font-size:28px;text-align:center;">Kirjaudu sisään</h2>
+
+    <div style="margin-top:20px;">
+      <label>Sähköposti</label>
+      <input type="email" id="loginEmail">
+
+      <label>Salasana</label>
+      <div class="pwd-container">
+        <input type="password" id="loginPwd">
+        <button type="button" class="toggle-pwd" onclick="toggleMainPwd()">Näytä</button>
+      </div>
+
+      <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top:10px;">
+        Kirjaudu salasanalla
+      </button>
+
+      <div style="text-align:center;margin-top:14px;">
+        <a href="#" id="forgotLink" style="font-size:13px;color:var(--purple);font-weight:500;text-decoration:none;">
+          Unohditko salasanan?
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT CARD — PIN -->
+  <div class="auth-card card-right" data-card="pin">
+    <h2 style="color:#856404;">Ongelmia?</h2>
+    <p>
+      Käytä väliaikaista PIN-koodia, jos salasanakirjautuminen ei toimi.
+      PIN-koodia ei lähetetä sähköpostitse.
+    </p>
+
+    <label>Sähköposti</label>
+    <input type="email" id="pinEmail" placeholder="nimi@esimerkki.fi">
+
+    <button class="btn-action btn-yellow" onclick="showPin()">
+      Näytä PIN-koodi
+    </button>
+
+    <div id="pinArea" style="display:none;margin-top:15px;">
+      <div id="pinShown" style="text-align:center;font-size:28px;letter-spacing:6px;font-weight:700;color:var(--purple);margin-bottom:10px;">0000</div>
+
+      <label>Syötä PIN</label>
+      <input type="text" id="pinEnter" maxlength="4" inputmode="numeric" style="text-align:center;letter-spacing:2px;">
+
+      <button class="btn-action btn-black" onclick="pinLogin()">
+        Jatka
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const supabase = window.supabase.createClient(
+  window.SUPABASE_URL,
+  window.SUPABASE_KEY
+);
+
+function notify(type, text) {
+  const el = document.getElementById("status");
+  el.textContent = text;
+  el.className = "status-msg " + type;
+  el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 6000);
+}
+
+/* Return URL: preserves ?return= param so users land back where they came from */
+function getReturnUrl() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const returnUrl = urlParams.get("return");
+  if (returnUrl) {
+    return decodeURIComponent(returnUrl);
+  }
+  return "/ykifinnish/dashboard/index.html";
+}
+
+/* ---------- PASSWORD SETUP ---------- */
+async function handleSetup() {
+  const btn = document.getElementById("setupBtn");
+  const email = setupEmail.value.trim().toLowerCase();
+
+  if (!email) {
+    notify("error", "Syötä sähköpostiosoitteesi.");
+    return;
+  }
+
+  if (btn.disabled) return;
+
+  btn.disabled = true;
+  btn.textContent = "Odota…";
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + "/ykifinnish/login-password.html"
+  });
+
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = "Lähetä asetuslinkki";
+    notify("error", "Linkin lähettäminen ei onnistunut.");
+    return;
+  }
+
+  btn.textContent = "Tarkista sähköpostisi";
+  setTimeout(() => btn.remove(), 2500);
+
+  notify("success", "Jos sähköpostiosoite on järjestelmässä, linkki on lähetetty.");
+}
+
+/* ---------- PASSWORD LOGIN ---------- */
+async function handleLogin() {
+  const email = loginEmail.value.trim().toLowerCase();
+  const password = loginPwd.value;
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    return notify("error", "Väärä sähköpostiosoite tai salasana.");
+  }
+
+  await supabase.from("login_history").insert({
+    email,
+    status: "success",
+    method: "password"
+  });
+
+  localStorage.setItem("cl_auth", "ok");
+  localStorage.setItem("cl_email", email);
+  localStorage.setItem("cl_login_at", Date.now().toString());
+
+  location.href = getReturnUrl();
+}
+
+/* ---------- PIN LOGIC ---------- */
+function utcDayOfYear(d) {
+  const s = new Date(Date.UTC(d.getUTCFullYear(), 0, 0));
+  return Math.floor((d - s) / 86400000);
+}
+
+function computePin(email) {
+  const n = new Date();
+  const v = (utcDayOfYear(n) * 37) + (n.getUTCHours() * 91) + (email.length * 17);
+  return String(v % 10000).padStart(4, "0");
+}
+
+async function showPin() {
+  const email = pinEmail.value.trim().toLowerCase();
+  if (!email) return notify("error", "Syötä sähköpostiosoitteesi.");
+
+  let exists = false;
+  try {
+    const res = await fetch(
+      "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/check-user-exists",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      }
+    );
+    const data = await res.json();
+    exists = data.exists === true;
+  } catch (e) {
+    return notify("error", "Sähköpostiosoitteen tarkistus epäonnistui. Yritä uudelleen.");
+  }
+
+  if (!exists) {
+    return notify("error", "Tätä sähköpostiosoitetta ei löydy järjestelmästä.");
+  }
+
+  pinShown.textContent = computePin(email);
+  pinArea.style.display = "block";
+  localStorage.setItem("cl_email", email);
+}
+
+async function pinLogin() {
+  const email = localStorage.getItem("cl_email");
+  const enteredPin = pinEnter.value.trim();
+
+  const res = await fetch(
+    "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/verify-pin-and-log",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": window.SUPABASE_KEY
+      },
+      body: JSON.stringify({ email, enteredPin })
+    }
+  );
+
+  const data = await res.json();
+  if (!data.success) {
+    return notify("error", "Väärä PIN-koodi.");
+  }
+
+  localStorage.setItem("cl_auth", "ok");
+  localStorage.setItem("cl_email", email);
+  localStorage.setItem("cl_login_at", Date.now().toString());
+  location.href = getReturnUrl();
+}
+
+function toggleMainPwd() {
+  const pwd = loginPwd;
+  const btn = document.querySelector(".toggle-pwd");
+  if (pwd.type === "password") {
+    pwd.type = "text";
+    btn.textContent = "Piilota";
+  } else {
+    pwd.type = "password";
+    btn.textContent = "Näytä";
+  }
+}
+</script>
+
+<script>
+/* === MOBILE LOGIN TABS === */
+document.querySelectorAll(".login-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    const target = tab.dataset.tab;
+
+    // Update tab bar
+    document.querySelectorAll(".login-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+
+    // Show matching card, hide others
+    document.querySelectorAll(".auth-card").forEach(card => {
+      card.classList.toggle("tab-active", card.dataset.card === target);
+    });
+
+    // Reset setup tab label when switching away from forgot flow
+    if (target !== "setup") {
+      const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
+      if (setupTab) setupTab.textContent = "Uusi käyttäjä?";
+      const setupCard = document.querySelector('.card-left');
+      const h2 = setupCard?.querySelector("h2");
+      if (h2) h2.textContent = "Ensimmäinen kerta?";
+      const p = setupCard?.querySelector("p");
+      if (p) p.textContent = "Ostitko juuri käyttöoikeuden? Luo salasanasi tästä.";
+    }
+  });
+});
+
+/* === FORGOT PASSWORD LINK === */
+const forgotLink = document.getElementById("forgotLink");
+if (forgotLink) {
+  forgotLink.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    // Switch to setup tab
+    document.querySelectorAll(".login-tab").forEach(t => t.classList.remove("active"));
+    const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
+    if (setupTab) {
+      setupTab.classList.add("active");
+      setupTab.textContent = "Salasana?";
+    }
+
+    document.querySelectorAll(".auth-card").forEach(card => {
+      card.classList.toggle("tab-active", card.dataset.card === "setup");
+    });
+
+    // Update heading and description
+    const setupCard = document.querySelector('.card-left');
+    const h2 = setupCard?.querySelector("h2");
+    if (h2) h2.textContent = "Unohditko salasanan?";
+    const p = setupCard?.querySelector("p");
+    if (p) p.textContent = "Syötä sähköpostiosoitteesi, niin lähetämme linkin salasanan palauttamiseksi.";
+  });
+}
+</script>
+
+</body>
+</html>
