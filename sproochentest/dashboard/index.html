@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="lb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sproochentest — Simulatiounen</title>
+  <script src="/assets/js/auth-guard-sproochentest.js"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f7f7f4;
+      color: #111827;
+    }
+
+    .wrap { display: flex; min-height: 100vh; }
+    main { flex: 1; padding: 24px; }
+    .dashboard-wrap { max-width: 1400px; margin: 0 auto; }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .stat-card {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 16px 18px;
+      border: 1px solid #e5e7eb;
+      transition: background-color 0.5s ease;
+    }
+    .stat-card span { font-size: 0.85rem; color: #6b7280; }
+    .stat-card strong {
+      display: block; margin-top: 6px;
+      font-size: 3rem; font-weight: 700; line-height: 1; margin-bottom: 12px;
+    }
+
+    .progress-bar-container {
+      width: 100%; height: 8px; background: #e2e8f0;
+      border-radius: 4px; overflow: hidden; margin-top: 12px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #d4145a 0%, #fbb03b 100%);
+      border-radius: 4px; transition: width 0.5s ease;
+    }
+
+    .performance-bar-container {
+      width: 100%; height: 8px; background: #e2e8f0;
+      border-radius: 4px; overflow: hidden;
+    }
+    .performance-bar-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #d4145a 0%, #fbb03b 100%);
+      border-radius: 4px; transition: width 0.5s ease;
+    }
+
+    .stat-card.urgent-high { background: linear-gradient(135deg, #fff5f5 0%, #ffe4e6 100%); }
+    .stat-card.urgent-medium { background: linear-gradient(135deg, #fff5f0 0%, #fffbeb 100%); }
+    .stat-card.urgent-low { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); }
+    .stat-card.today { background: linear-gradient(135deg, #d4145a 0%, #fbb03b 100%); }
+    .stat-card.today span, .stat-card.today strong { color: white; }
+
+    .welcome-card { display: flex; flex-direction: column; gap: 8px; }
+
+    .sim-table-wrap { grid-column: 1 / span 3; width: 100%; }
+
+    .sim-table {
+      width: 100%; border-collapse: collapse; background: #ffffff;
+      border-radius: 10px; overflow: hidden; border: 1px solid #e5e7eb;
+    }
+    .sim-table th, .sim-table td {
+      padding: 12px 14px; border-bottom: 1px solid #eef0f3;
+      font-size: 0.9rem; text-align: center; height: 56px; vertical-align: middle;
+    }
+    .sim-table th { background: #fafafa; font-weight: 600; color: #374151; }
+    .sim-table th:first-child, .sim-table td:first-child { text-align: left; }
+    .sim-table td:first-child > .cell-flex { display: flex; align-items: center; gap: 10px; }
+
+    .score-circle {
+      width: 46px; height: 46px; border-radius: 50%; background: #eef2ff;
+      color: #1e3a8a; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; margin: 0 auto; font-size: 0.85rem;
+    }
+    .score-circle.pass { background: #dcfce7; color: #166534; }
+    .score-circle.fail { background: #fee2e2; color: #991b1b; }
+
+    .exam-link { font-weight: 600; color: #be123c; text-decoration: none; }
+    .exam-link:hover { text-decoration: underline; }
+
+    .dash-pill {
+      font-size: 0.75rem; padding: 4px 10px; border-radius: 999px;
+      text-decoration: none !important; white-space: nowrap; display: inline-block;
+    }
+    .dash-pill-primary { background: #d4145a; color: #fff; }
+    .dash-pill-secondary { background: #fce4ec; color: #be123c; }
+    .dash-pill-outline { border: 1px solid #d1d5db; color: #374151; background: white; }
+    .dash-pill:hover { opacity: 0.9; }
+
+    .state-badge {
+      display: inline-block; padding: 4px 10px; border-radius: 999px;
+      font-size: 0.75rem; font-weight: 600;
+    }
+    .state-Ofgeschloss { background: #dcfce7; color: #166534; }
+    .state-Ugefaang { background: #fef9c3; color: #854d0e; }
+    .state-Verfügbar { background: #e5e7eb; color: #374151; }
+
+    .status-dot {
+      display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; background: #d1d5db;
+    }
+    td.done .status-dot { background: #16a34a; }
+
+    .dashboard-side {
+      grid-column: 4; display: flex; flex-direction: column;
+      align-self: flex-start; gap: 12px;
+    }
+    .side-card {
+      background: #ffffff; border: 1px solid #e5e7eb;
+      border-radius: 10px; padding: 14px;
+    }
+    .side-card h3 { font-size: 0.9rem; margin: 0 0 6px; }
+    .side-card p { margin: 0; font-size: 0.85rem; line-height: 1.4; color: #4b5563; }
+
+    .date-controls { margin-top: 10px; }
+    .date-controls select, .date-controls input[type="date"] {
+      width: 100%; padding: 5px; border-radius: 4px; border: 1px solid #ddd;
+      font-family: inherit; font-size: 0.85rem; margin-bottom: 6px;
+    }
+    .custom-date-row { display: none; align-items: center; gap: 6px; }
+    .custom-date-row.show { display: flex; }
+    .custom-date-row input[type="date"] { flex: 1; margin-bottom: 0; }
+    .custom-date-row button {
+      padding: 5px 10px; border-radius: 4px; border: 1px solid #ddd;
+      background: #d4145a; color: white; font-family: inherit;
+      font-size: 0.8rem; cursor: pointer; white-space: nowrap;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+      .dashboard-grid .stat-card { grid-row: auto; }
+      .sim-table-wrap { grid-column: 1 / -1; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .sim-table { min-width: 600px; }
+      .dashboard-side { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <main>
+    <div class="dashboard-wrap">
+      <div class="dashboard-grid">
+
+        <!-- Stat Card 1: Progress -->
+        <div class="stat-card">
+          <span>Ofgeschloss Simulatiounen</span>
+          <strong id="doneSims">0/11</strong>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Stat Card 2: Last Result -->
+        <div class="stat-card">
+          <span>Lescht Resultat</span>
+          <strong id="lastResult">—</strong>
+          <div class="performance-bar-container">
+            <div class="performance-bar-fill" id="performanceBar" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Stat Card 3: Countdown -->
+        <div class="stat-card" id="countdownCard">
+          <span>Nächste Sproochentest</span>
+          <strong id="examCountdown">—</strong>
+          <div class="date-controls">
+            <select id="examDateSelector" onchange="handleDateSelection()">
+              <option value="2026-04-04">4. Abrëll 2026</option>
+              <option value="2026-06-27">27. Juni 2026</option>
+              <option value="2026-10-24">24. Oktober 2026</option>
+              <option value="custom">📅 Eegenen Datum...</option>
+            </select>
+            <div class="custom-date-row" id="customDateRow">
+              <input type="date" id="customDateInput" min="2026-01-01">
+              <button onclick="applyCustomDate()">OK</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stat Card 4: Brand/Welcome -->
+        <div class="stat-card welcome-card">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <img src="/assets/images/lu.svg" width="24" height="24" alt="LU" style="flex-shrink:0;" 
+              onerror="this.textContent='🇱🇺'; this.style.fontSize='1.5rem';">
+            <strong style="font-size:1.2rem;">CivicLearn</strong>
+          </div>
+          <p style="margin:8px 0 12px;font-size:0.85rem;color:#4b5563;">
+            Virbereedung fir de Lëtzebuerger Sproochentest A2
+          </p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="/cdn-cgi/l/email-protection#86e7e2ebefe8c6e5eff0efe5eae3e7f4e8a8e5e9eb" class="dash-pill dash-pill-outline" style="text-decoration: none !important;">
+              Kontakt
+            </a>
+            <a href="#" class="dash-pill dash-pill-outline" onclick="handleLogout(); return false;">
+              Ausloggen
+            </a>
+          </div>
+        </div>
+
+        <!-- Simulations Table -->
+        <div class="sim-table-wrap">
+          <table class="sim-table">
+            <colgroup>
+              <col style="width: 24%">
+              <col style="width: 14%">
+              <col style="width: 14%">
+              <col style="width: 14%">
+              <col style="width: 18%">
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Simulatioun</th>
+                <th>Resultat</th>
+                <th>Schwätzen</th>
+                <th>Héierverstoen</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="simTableBody">
+            </tbody>
+          </table>
+        </div>
+
+        <!-- FAQ Sidebar -->
+        <aside class="dashboard-side">
+          <div class="side-card">
+            <h3>Wéi laang ass all Deel?</h3>
+            <p>Schwätzen: 20 Min. Héierverstoen: 30 Min. All Deel huet säin eegenen Timer.</p>
+          </div>
+          <div class="side-card">
+            <h3>Kann ech pauséieren?</h3>
+            <p>Jo! Är Fortschrëtt ginn automatesch gespäichert. Dir kënnt de Browser zoumaachen an spéider zréckkommen.</p>
+          </div>
+          <div class="side-card">
+            <h3>Wéi funktionéiert d'Evaluatioun?</h3>
+            <p>Héierverstoen gëtt direkt korrigéiert. Schwätzen gëtt duerch KI evaluéiert bannent 1–2 Minutten.</p>
+          </div>
+          <div class="side-card">
+            <h3>Wat geschitt wann d'Zäit eriwwer ass?</h3>
+            <p>Dir kënnt trotzdem weider äntweren oder zur nächster Aufgab goen.</p>
+          </div>
+          <div class="side-card">
+            <h3>Bestoen/Net bestanen</h3>
+            <p>Fir ze bestoen, braucht Dir mindestens 50% an BÉID Deeler (Schwätzen + Héierverstoen).</p>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="../assets/js/sproochentest-hydrate.js"></script>
+<script src="../assets/js/sproochentest-engine.js"></script>
+<script>
+  // ==========================================================================
+  // DASHBOARD LOGIC
+  // ==========================================================================
+
+  window.addEventListener('DOMContentLoaded', () => {
+    generateTestsTable();
+    updateStatsCards();
+    updateCountdown();
+  });
+
+  // ==========================================================================
+  // COUNTDOWN
+  // ==========================================================================
+
+  function updateCountdown() {
+    const countdownEl = document.getElementById('examCountdown');
+    const card = document.getElementById('countdownCard');
+    const selector = document.getElementById('examDateSelector');
+    const saved = localStorage.getItem('sproochentest_exam_date');
+
+    if (saved) {
+      let matched = false;
+      for (const opt of selector.options) {
+        if (opt.value === saved) { opt.selected = true; matched = true; break; }
+      }
+      if (!matched) {
+        selector.value = 'custom';
+        document.getElementById('customDateRow').classList.add('show');
+        document.getElementById('customDateInput').value = saved;
+      }
+      updateDisplay(saved);
+    } else {
+      const today = new Date(); today.setHours(0,0,0,0);
+      let found = false;
+      for (const opt of selector.options) {
+        if (opt.value === 'custom') continue;
+        if (new Date(opt.value) >= today) {
+          opt.selected = true;
+          localStorage.setItem('sproochentest_exam_date', opt.value);
+          updateDisplay(opt.value);
+          found = true; break;
+        }
+      }
+      if (!found) {
+        selector.value = selector.options[0].value;
+        localStorage.setItem('sproochentest_exam_date', selector.value);
+        updateDisplay(selector.value);
+      }
+    }
+
+    function updateDisplay(targetString) {
+      const target = new Date(targetString + 'T00:00:00');
+      const now = new Date(); now.setHours(0,0,0,0);
+      const diff = target - now;
+      const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+      card.classList.remove('urgent-high', 'urgent-medium', 'urgent-low', 'today');
+      if (days === 0) { countdownEl.textContent = 'Haut!'; card.classList.add('today'); }
+      else if (days < 0) { countdownEl.textContent = 'Passéiert'; }
+      else {
+        countdownEl.textContent = `${days} Dag${days !== 1 ? 'er' : ''}`;
+        if (days <= 7) card.classList.add('urgent-high');
+        else if (days <= 30) card.classList.add('urgent-medium');
+        else if (days <= 60) card.classList.add('urgent-low');
+      }
+    }
+
+    window._updateCountdownDisplay = updateDisplay;
+  }
+
+  function handleDateSelection() {
+    const selector = document.getElementById('examDateSelector');
+    const customRow = document.getElementById('customDateRow');
+    if (selector.value === 'custom') {
+      customRow.classList.add('show');
+    } else {
+      customRow.classList.remove('show');
+      localStorage.setItem('sproochentest_exam_date', selector.value);
+      window._updateCountdownDisplay(selector.value);
+    }
+  }
+
+  function applyCustomDate() {
+    const input = document.getElementById('customDateInput');
+    if (!input.value) return;
+    localStorage.setItem('sproochentest_exam_date', input.value);
+    window._updateCountdownDisplay(input.value);
+  }
+
+  // ==========================================================================
+  // GENERATE TESTS TABLE
+  // ==========================================================================
+
+  function generateTestsTable() {
+    const tbody = document.getElementById('simTableBody');
+    tbody.innerHTML = '';
+
+    for (let i = 1; i <= SproochEngine.TOTAL_EXAMS; i++) {
+      const testNum = String(i).padStart(2, '0');
+      const examId = `sproochentest-${testNum}`;
+      const testState = SproochEngine.getTestState(examId);
+      const row = createTableRow(testNum, examId, testState, i);
+      tbody.appendChild(row);
+    }
+  }
+
+  function createTableRow(testNum, examId, testState, examNumber) {
+    const tr = document.createElement('tr');
+    let state = 'Verfügbar';
+    let listeningScore = null, speakingScore = null, globalScore = null;
+
+    if (testState && testState.submitted) {
+      state = 'Ofgeschloss';
+      listeningScore = testState.sections.listening.score;
+      speakingScore = testState.sections.speaking.score;
+      if (typeof listeningScore === 'number' && typeof speakingScore === 'number') {
+        globalScore = Math.round((listeningScore * 0.5) + (speakingScore * 0.5));
+      }
+    } else if (testState) {
+      const s = testState.sections;
+      if (s.speaking.completed || s.listening.completed ||
+          Object.keys(s.speaking.responses || {}).length > 0 ||
+          Object.keys(s.listening.answers || {}).length > 0) {
+        state = 'Ugefaang';
+      }
+    }
+
+    const isPassed = globalScore !== null && globalScore >= 50;
+
+    const fmt = (score) => {
+      if (typeof score === 'number') {
+        return `<span class="status-dot"></span> <span style="font-size:0.85rem;font-weight:500;">${Math.round(score)}%</span>`;
+      }
+      return `<span class="status-dot"></span> <span style="font-size:0.85rem;color:#9ca3af;">—</span>`;
+    };
+
+    const label = `Test ${examNumber}`;
+
+    tr.innerHTML = `
+      <td>
+        <div class="cell-flex">
+          <a class="exam-link" href="speaking.html?exam=${examId}">
+            ${label}
+          </a>
+          ${state === 'Ofgeschloss'
+            ? `<a class="dash-pill dash-pill-secondary" href="results.html?attempt_id=${testState.result_id}&exam=${examId}">Resultater</a>`
+            : state === 'Ugefaang'
+              ? `<a class="dash-pill dash-pill-primary" href="speaking.html?exam=${examId}">Weidermaachen</a>`
+              : `<a class="dash-pill dash-pill-primary" href="speaking.html?exam=${examId}">Starten</a>`
+          }
+        </div>
+      </td>
+      <td>
+        ${globalScore !== null
+          ? `<div class="score-circle ${isPassed ? 'pass' : 'fail'}">${globalScore}%</div>`
+          : `<span style="color: #9ca3af;">—</span>`
+        }
+      </td>
+      <td class="${typeof speakingScore === 'number' ? 'done' : 'pending'}">${fmt(speakingScore)}</td>
+      <td class="${typeof listeningScore === 'number' ? 'done' : 'pending'}">${fmt(listeningScore)}</td>
+      <td>
+        <div style="display: inline-flex; align-items: center; gap: 8px;">
+          <span class="state-badge state-${state}">${state}</span>
+          ${state === 'Ofgeschloss'
+            ? `<a class="dash-pill dash-pill-outline" href="#" onclick="redoTest('${examId}'); return false;">Nei maachen</a>`
+            : ''
+          }
+        </div>
+      </td>
+    `;
+
+    return tr;
+  }
+
+  // ==========================================================================
+  // UPDATE STATS CARDS
+  // ==========================================================================
+
+  function updateStatsCards() {
+    let completedCount = 0;
+    let latestScore = null;
+    let latestDate = null;
+    const allScores = [];
+
+    for (let i = 1; i <= SproochEngine.TOTAL_EXAMS; i++) {
+      const testNum = String(i).padStart(2, '0');
+      const examId = `sproochentest-${testNum}`;
+      const testState = SproochEngine.getTestState(examId);
+
+      if (testState && testState.submitted) {
+        completedCount++;
+        const l = testState.sections.listening.score;
+        const s = testState.sections.speaking.score;
+
+        if (typeof l === 'number' && typeof s === 'number') {
+          const global = Math.round((l * 0.5) + (s * 0.5));
+          const submittedDate = new Date(testState.submitted_at || testState.started_at);
+          allScores.push({ score: global, date: submittedDate });
+
+          if (!latestDate || submittedDate > latestDate) {
+            latestDate = submittedDate;
+            latestScore = global;
+          }
+        }
+      }
+    }
+
+    document.getElementById('doneSims').textContent = `${completedCount}/${SproochEngine.TOTAL_EXAMS}`;
+    const progressPercentage = (completedCount / SproochEngine.TOTAL_EXAMS) * 100;
+    document.getElementById('progressBar').style.width = `${progressPercentage}%`;
+
+    if (latestScore !== null) {
+      document.getElementById('lastResult').textContent = `${latestScore}%`;
+    }
+
+    updatePerformanceBar(allScores);
+  }
+
+  function updatePerformanceBar(scores) {
+    if (scores.length === 0) {
+      document.getElementById('lastResult').textContent = '—';
+      document.getElementById('performanceBar').style.width = '0%';
+      return;
+    }
+    scores.sort((a, b) => a.date - b.date);
+    const lastScore = scores[scores.length - 1].score;
+    document.getElementById('lastResult').textContent = `${Math.round(lastScore)}%`;
+    document.getElementById('performanceBar').style.width = `${lastScore}%`;
+  }
+
+  // ==========================================================================
+  // ACTIONS
+  // ==========================================================================
+
+  function redoTest(examId) {
+    if (confirm('Sidd Dir sécher, datt Dir den Test nei maache wëllt?\n\nDe viregten Test gëtt gespäichert awer duerch den neien ersat.')) {
+      SproochEngine.clearTestData(examId);
+      window.location.href = `speaking.html?exam=${examId}`;
+    }
+  }
+
+  function handleLogout() {
+    if (confirm('Sidd Dir sécher, datt Dir Iech auslogge wëll

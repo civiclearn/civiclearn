@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="lb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sproochentest — Schwätzen</title>
+  <script src="/assets/js/auth-guard-sproochentest.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/yki-styles.css">
+  <style>
+    body { font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif; }
+    
+    .test-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #d4145a 0%, #fbb03b 100%);
+      color: white; padding: 6px 16px; border-radius: 20px;
+      font-size: 0.875rem; font-weight: 600; margin-bottom: 12px; letter-spacing: 0.5px;
+    }
+    
+    .timer-box {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: #fff5f5; border: 2px solid #fc8181;
+      padding: 12px 20px; border-radius: 12px;
+      font-size: 1.1rem; font-weight: 600; color: #c53030; margin-top: 12px;
+    }
+    .timer-icon { font-size: 1.5rem; }
+    #countdown-timer { font-family: 'Space Grotesk', monospace; font-size: 1.3rem; font-weight: 700; letter-spacing: 1px; }
+    .timer-box.warning { background: #fffaf0; border-color: #ed8936; color: #c05621; animation: pulse 1s ease-in-out infinite; }
+    .timer-box.critical { background: #fff5f5; border-color: #f56565; color: #c53030; animation: pulse 0.5s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+    
+    .card { padding: 1.75rem; }
+    .card-title { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .card-subtitle { font-size: 1rem; margin-bottom: 1rem; }
+    
+    .btn {
+      font-family: 'Space Grotesk', sans-serif; padding: 14px 28px; border-radius: 10px;
+      border: none; font-size: 1rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-secondary { background: #f7fafc; color: #2d3748; border: 2px solid #e2e8f0; }
+    .btn-secondary:hover { background: #edf2f7; border-color: #cbd5e0; transform: translateY(-1px); }
+    .btn-primary {
+      background: linear-gradient(135deg, #d4145a 0%, #fbb03b 100%);
+      color: white; box-shadow: 0 4px 12px rgba(212, 20, 90, 0.3);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(212, 20, 90, 0.4); transform: translateY(-2px); }
+    .btn-primary:active, .btn-secondary:active { transform: translateY(0); }
+    .btn-large { padding: 16px 32px; font-size: 1.05rem; }
+    
+    .nav-buttons {
+      display: flex; gap: 16px; justify-content: space-between; flex-wrap: wrap;
+      margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;
+    }
+    
+    .writing-textarea {
+      width: 100%; min-height: 200px; padding: 16px;
+      border: 2px solid #e2e8f0; border-radius: 10px;
+      font-family: 'Space Grotesk', sans-serif; font-size: 1rem;
+      line-height: 1.6; resize: vertical; transition: border-color 0.2s;
+    }
+    .writing-textarea:focus { outline: none; border-color: #d4145a; box-shadow: 0 0 0 3px rgba(212, 20, 90, 0.1); }
+    .writing-textarea.photo-textarea { min-height: 280px; }
+    
+    .word-count { margin-top: 8px; font-size: 0.9rem; font-weight: 600; color: #4a5568; text-align: right; }
+    .word-count.low { color: #d69e2e; }
+    .word-count.good { color: #38a169; }
+    
+    .prompt-card {
+      background: #f7fafc; padding: 16px; border-left: 4px solid #d4145a;
+      border-radius: 8px; margin-bottom: 16px; line-height: 1.6; font-size: 1.05rem;
+    }
+    
+    .photo-container {
+      margin: 16px 0; text-align: center;
+    }
+    .photo-container img {
+      max-width: 100%; max-height: 400px; border-radius: 12px;
+      border: 2px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .textarea-container { margin-top: 12px; }
+    
+    .prompt-number {
+      display: inline-block; background: #d4145a; color: white;
+      width: 28px; height: 28px; line-height: 28px; text-align: center;
+      border-radius: 50%; font-weight: 700; font-size: 0.85rem; margin-right: 8px;
+    }
+    
+    .prompt-group { margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+
+  <div class="test-header">
+    <div class="progress-container">
+      <div class="progress-info">
+        <span>Testfortschrëtt</span>
+        <span id="progress-text">0/2 Deeler</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    
+    <div class="card">
+      <div class="test-badge" id="test-badge">TEST XX</div>
+      <h1 class="card-title">Schwätzen</h1>
+      <p class="card-subtitle">Schreift Är Äntwerten esou, wéi wann Dir schwätzt.</p>
+      <div class="timer-box" id="timer-display">
+        <span class="timer-icon">⏱️</span>
+        <div>
+          <div style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 2px;">Zäit iwwreg:</div>
+          <div id="countdown-timer">0:20:00</div>
+        </div>
+      </div>
+      <div class="alert alert-info" style="margin-top: 1rem;">
+        <strong>Instruktiounen:</strong> Schreift wéi wann Dir schwätzt! Et ass net wichteg, 
+        perfekt ze schreiwen — d'Kommunikatioun zielt. Är Äntwerten ginn duerch KI evaluéiert.
+      </div>
+    </div>
+
+    <div id="tasks-container"></div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goToDashboard()">← Zréck zum Dashboard</button>
+      <button class="btn" onclick="restartTest()" style="background: #ed8936; color: white; border: 2px solid #dd6b20;">
+        🔄 Test nei starten
+      </button>
+      <button class="btn btn-primary btn-large" id="complete-btn" onclick="completeSpeaking()">
+        Schwätzen ofschléissen →
+      </button>
+    </div>
+
+  </div>
+
+  <div id="loading-overlay" class="loading-overlay" style="display: none;"><div class="spinner"></div></div>
+
+  <script src="../assets/js/sproochentest-engine.js"></script>
+  <script>
+    let speakingData = null;
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const EXAM_ID = urlParams.get('exam') || 'sproochentest-01';
+    
+    document.getElementById('test-badge').textContent = EXAM_ID.replace('sproochentest-', 'Test ').replace(/^Test 0/, 'Test ');
+    
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        SproochEngine.init(EXAM_ID);
+        
+        const response = await fetch(`../data/${EXAM_ID}-speaking.json`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        speakingData = await response.json();
+        renderTasks();
+        updateProgress();
+        startTimer();
+        
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Feeler beim Lueden vum Test.\n\n' + error.message);
+      }
+    });
+    
+    function renderTasks() {
+      const container = document.getElementById('tasks-container');
+      container.innerHTML = '';
+      
+      speakingData.tasks.forEach((task, taskIndex) => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'card task-container';
+        
+        if (task.type === 'topic_discussion') {
+          // ─── TASK 1: Topic Discussion — 3 separate prompts ───
+          taskDiv.innerHTML = `
+            <div class="task-header">
+              <h2 class="task-title">Aufgab 1: ${task.title}</h2>
+              <p class="task-instructions">${task.instructions || ''}</p>
+            </div>
+          `;
+          
+          const contentDiv = document.createElement('div');
+          contentDiv.className = 'task-content';
+          
+          task.prompts.forEach((prompt, pIdx) => {
+            const group = document.createElement('div');
+            group.className = 'prompt-group';
+            
+            const responseKey = `speaking_1_prompt_${pIdx + 1}`;
+            const savedText = SproochEngine.currentTest.sections.speaking.responses[responseKey] || '';
+            
+            group.innerHTML = `
+              <div class="prompt-card">
+                <span class="prompt-number">${pIdx + 1}</span>
+                ${prompt}
+              </div>
+              <div class="textarea-container">
+                <textarea class="writing-textarea" id="textarea-${responseKey}"
+                  placeholder="Schreift hei Är Äntwert..."
+                  data-response-key="${responseKey}"
+                  oninput="handleInput('${responseKey}')">${savedText}</textarea>
+                <div class="word-count" id="wc-${responseKey}">0 Wierder</div>
+              </div>
+            `;
+            
+            contentDiv.appendChild(group);
+          });
+          
+          taskDiv.appendChild(contentDiv);
+          
+        } else if (task.type === 'photo_description') {
+          // ─── TASK 2: Photo Description ───
+          const responseKey = 'speaking_2';
+          const savedText = SproochEngine.currentTest.sections.speaking.responses[responseKey] || '';
+          
+          taskDiv.innerHTML = `
+            <div class="task-header">
+              <h2 class="task-title">Aufgab 2: ${task.title}</h2>
+              <p class="task-instructions">${task.instructions || ''}</p>
+            </div>
+            <div class="task-content">
+              <div class="prompt-card">
+                ${task.prompt || 'Wat gesitt Dir op dem Bild?'}
+                ${task.description_hint ? `<br><em>${task.description_hint}</em>` : ''}
+              </div>
+              <div class="photo-container">
+                <img src="${task.image_url}" alt="Bild fir ze beschreiwen" 
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display:none; padding: 2rem; background: #f7fafc; border-radius: 12px; border: 2px dashed #cbd5e0; color: #718096;">
+                  ⚠️ D'Bild konnt net geluede ginn. Beschreift dat, wat Dir gesitt.
+                </div>
+              </div>
+              <div class="textarea-container">
+                <textarea class="writing-textarea photo-textarea" id="textarea-${responseKey}"
+                  placeholder="Beschreift d'Bild esou wéi Dir et an engem Gespréich géif maachen..."
+                  data-response-key="${responseKey}"
+                  oninput="handleInput('${responseKey}')">${savedText}</textarea>
+                <div class="word-count" id="wc-${responseKey}">0 Wierder</div>
+              </div>
+            </div>
+          `;
+        }
+        
+        container.appendChild(taskDiv);
+      });
+      
+      // Update all word counts on load
+      document.querySelectorAll('.writing-textarea').forEach(ta => {
+        const key = ta.getAttribute('data-response-key');
+        updateWordCount(key);
+      });
+    }
+    
+    // ─── Input handling ───
+    
+    function handleInput(responseKey) {
+      SproochEngine.saveSpeakingResponse(responseKey, document.getElementById(`textarea-${responseKey}`).value);
+      updateWordCount(responseKey);
+    }
+    
+    function countWords(text) {
+      if (!text || text.trim() === '') return 0;
+      return text.trim().split(/\s+/).length;
+    }
+    
+    function updateWordCount(responseKey) {
+      const ta = document.getElementById(`textarea-${responseKey}`);
+      const wcDiv = document.getElementById(`wc-${responseKey}`);
+      if (!ta || !wcDiv) return;
+      
+      const wc = countWords(ta.value);
+      wcDiv.textContent = `${wc} Wierder`;
+      wcDiv.classList.remove('low', 'good');
+      
+      // Guidance thresholds (not hard limits — it's speaking simulation)
+      const isPhoto = responseKey === 'speaking_2';
+      const minSuggested = isPhoto ? 40 : 20;
+      
+      if (wc > 0 && wc < minSuggested) {
+        wcDiv.classList.add('low');
+        wcDiv.textContent += ` (probéiert mindestens ${minSuggested})`;
+      } else if (wc >= minSuggested) {
+        wcDiv.classList.add('good');
+      }
+    }
+    
+    // ─── Timer (20 minutes) ───
+    
+    let timeRemaining = 20 * 60;
+    let timerInterval = null;
+    const TIMER_KEY = `sproochentest_timer_${EXAM_ID}_speaking`;
+    
+    function startTimer() {
+      const saved = localStorage.getItem(TIMER_KEY);
+      if (saved) {
+        const td = JSON.parse(saved);
+        const elapsed = Math.floor((Date.now() - td.startTime) / 1000);
+        timeRemaining = Math.max(0, td.totalTime - elapsed);
+      } else {
+        localStorage.setItem(TIMER_KEY, JSON.stringify({ startTime: Date.now(), totalTime: timeRemaining }));
+      }
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval); timeRemaining = 0; updateTimerDisplay();
+          alert('⏰ D\'Zäit ass eriwwer!\n\nDir kënnt trotzdem weider schreiwen oder zur nächster Aufgab goen.');
+          return;
+        }
+        updateTimerDisplay();
+      }, 1000);
+    }
+    
+    function updateTimerDisplay() {
+      const m = Math.floor(timeRemaining / 60), s = timeRemaining % 60;
+      document.getElementById('countdown-timer').textContent = `0:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+      const tb = document.getElementById('timer-display');
+      if (timeRemaining <= 120) { tb.classList.add('critical'); tb.classList.remove('warning'); }
+      else if (timeRemaining <= 300) { tb.classList.add('warning'); }
+      else { tb.classList.remove('warning', 'critical'); }
+    }
+    
+    window.addEventListener('beforeunload', () => { if (timerInterval) clearInterval(timerInterval); });
+    
+    // ─── Complete & Navigate ───
+    
+    function completeSpeaking() {
+      const responses = SproochEngine.currentTest.sections.speaking.responses;
+      const keys = ['speaking_1_prompt_1', 'speaking_1_prompt_2', 'speaking_1_prompt_3', 'speaking_2'];
+      const empty = keys.filter(k => !responses[k] || responses[k].trim() === '');
+      
+      if (empty.length > 0) {
+        if (!confirm(`Dir hutt ${empty.length} Äntwert(en) nach net geschriwwen.\n\nWollt Dir trotzdem weidergoen?`)) return;
+      }
+      
+      if (!confirm('Schwätzen ofschléissen an zum Héierverstoen goen?')) return;
+      
+      localStorage.removeItem(TIMER_KEY);
+      if (timerInterval) clearInterval(timerInterval);
+      
+      SproochEngine.completeSpeakingSection();
+      console.log('✅ Speaking completed');
+      
+      window.location.href = `listening.html?exam=${EXAM_ID}`;
+    }
+    
+    function goToDashboard() {
+      if (confirm('Zréck zum Dashboard? Är Fortschrëtt ginn gespäichert.')) {
+        window.location.href = 'index.html';
+      }
+    }
+    
+    function restartTest() {
+      if (!confirm('Test nei starten?\n\nAlle Fortschrëtt gëtt geläscht.\n\nDat kann net réckgängeg gemaach ginn.')) return;
+      SproochEngine.clearTestData(EXAM_ID);
+      localStorage.removeItem(TIMER_KEY);
+      localStorage.removeItem(`sproochentest_timer_${EXAM_ID}_listening`);
+      alert('✅ Den Test gouf nei gestart!');
+      window.location.href = 'index.html';
+    }
+    
+    function updateProgress() {
+      const p = SproochEngine.getProgress();
+      document.getElementById('progress-text').textContent = `${p.completed}/2 Deeler`;
+      document.getElementById('progress-fill').style.width = `${p.percentage}%`;
+    }
+  </script>
+
+</body>
+</html>
