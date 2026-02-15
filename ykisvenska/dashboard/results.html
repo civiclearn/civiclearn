@@ -124,6 +124,49 @@
       font-size: 0.875rem; font-weight: 600; letter-spacing: 0.5px;
     }
     
+    .yki-grade-badge {
+      display: inline-block; width: 36px; height: 36px; line-height: 36px;
+      border-radius: 50%; font-weight: 800; font-size: 1.1rem; text-align: center;
+      margin-top: 6px;
+    }
+    .yki-grade-1 { background: #fed7d7; color: #c53030; }
+    .yki-grade-2 { background: #fefcbf; color: #975a16; }
+    .yki-grade-3 { background: #c6f6d5; color: #276749; }
+    .yki-grade-4 { background: #bee3f8; color: #2a4365; }
+    .yki-grade-pending { background: #e2e8f0; color: #718096; }
+    
+    .citizenship-card {
+      background: white; border-radius: 12px; padding: 1.5rem;
+      margin-bottom: 1.5rem; border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .citizenship-card h3 { margin: 0 0 1rem; font-size: 1.1rem; color: #2d3748; }
+    .citizenship-result {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-radius: 10px; margin-bottom: 10px;
+    }
+    .citizenship-pass { background: #f0fff4; border: 1px solid #c6f6d5; }
+    .citizenship-fail { background: #fff5f5; border: 1px solid #fed7d7; }
+    .citizenship-pending { background: #f7fafc; border: 1px solid #e2e8f0; }
+    .citizenship-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .citizenship-text { font-size: 0.9rem; color: #2d3748; line-height: 1.4; }
+    .citizenship-text strong { font-weight: 700; }
+    
+    .grade-row {
+      display: flex; justify-content: center; gap: 24px; margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    .grade-row-item {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .grade-row-label { font-size: 0.75rem; opacity: 0.85; font-weight: 500; }
+    .grade-row-value {
+      font-size: 2rem; font-weight: 800; width: 52px; height: 52px;
+      line-height: 52px; text-align: center; border-radius: 12px;
+      background: rgba(255,255,255,0.2);
+    }
+    .grade-row-sub { font-size: 0.7rem; opacity: 0.7; }
+    
     .btn {
       font-family: 'Space Grotesk', sans-serif; padding: 14px 28px; border-radius: 10px;
       border: none; font-size: 1rem; font-weight: 600; cursor: pointer;
@@ -155,9 +198,41 @@
     
       <div class="grade-hero">
         <div class="test-badge" id="test-badge">YKI-XX</div>
-        <h2>Slutbetyg</h2>
-        <div class="grade-display" id="overall-grade">--</div>
-        <div class="grade-label" id="grade-label">Beräknar...</div>
+        <h2>YKI Resultat — Mellannivå</h2>
+        <div class="grade-row" id="grade-row">
+          <div class="grade-row-item">
+            <span class="grade-row-label">Läsning</span>
+            <span class="grade-row-value" id="hero-reading">—</span>
+            <span class="grade-row-sub" id="hero-reading-pct"></span>
+          </div>
+          <div class="grade-row-item">
+            <span class="grade-row-label">Hörförståelse</span>
+            <span class="grade-row-value" id="hero-listening">—</span>
+            <span class="grade-row-sub" id="hero-listening-pct"></span>
+          </div>
+          <div class="grade-row-item">
+            <span class="grade-row-label">Skrivning</span>
+            <span class="grade-row-value" id="hero-writing">⏳</span>
+            <span class="grade-row-sub" id="hero-writing-pct"></span>
+          </div>
+          <div class="grade-row-item">
+            <span class="grade-row-label">Tal</span>
+            <span class="grade-row-value" id="hero-speaking">⏳</span>
+            <span class="grade-row-sub" id="hero-speaking-pct"></span>
+          </div>
+        </div>
+        <div class="grade-label" id="grade-label">Väntar på utvärdering...</div>
+      </div>
+      
+      <!-- CITIZENSHIP ELIGIBILITY -->
+      <div class="citizenship-card" id="citizenship-card" style="display: none;">
+        <h3>🇫🇮 Medborgarskapstest</h3>
+        <p style="font-size: 0.85rem; color: #718096; margin: 0 0 12px;">
+          Finskt medborgarskap kräver minst vitsord 3 i ett muntligt delprov OCH ett skriftligt delprov.
+        </p>
+        <div id="citizenship-combo-a"></div>
+        <div id="citizenship-combo-b"></div>
+        <div id="citizenship-verdict" style="margin-top: 12px; font-weight: 600; font-size: 1rem;"></div>
       </div>
       
       <div class="sections-grid">
@@ -173,7 +248,7 @@
             <div class="percentage" id="reading-score">--%</div>
           </div>
           <div class="section-detail" id="reading-detail">Rätt: -- av --</div>
-          <div class="section-weight">Vikt: 25%</div>
+          <div class="yki-grade-badge yki-grade-pending" id="reading-grade">—</div>
         </div>
         
         <div class="section-card">
@@ -187,7 +262,7 @@
             <div class="percentage" id="listening-score">--%</div>
           </div>
           <div class="section-detail" id="listening-detail">Rätt: -- av --</div>
-          <div class="section-weight">Vikt: 25%</div>
+          <div class="yki-grade-badge yki-grade-pending" id="listening-grade">—</div>
         </div>
         
         <div class="section-card">
@@ -201,7 +276,7 @@
             <div class="percentage" id="writing-score"><div class="spinner-inline"></div></div>
           </div>
           <div class="section-detail" id="writing-detail">⏳ Utvärderar...</div>
-          <div class="section-weight">Vikt: 25%</div>
+          <div class="yki-grade-badge yki-grade-pending" id="writing-grade">⏳</div>
         </div>
         
         <div class="section-card">
@@ -215,7 +290,7 @@
             <div class="percentage" id="speaking-score"><div class="spinner-inline"></div></div>
           </div>
           <div class="section-detail" id="speaking-detail">⏳ Utvärderar...</div>
-          <div class="section-weight">Vikt: 25%</div>
+          <div class="yki-grade-badge yki-grade-pending" id="speaking-grade">⏳</div>
         </div>
         
       </div>
@@ -340,6 +415,39 @@
       const circumference = 276.46;
       const offset = circumference - (percentage / 100 * circumference);
       circle.style.strokeDashoffset = offset;
+      // Color by YKI grade
+      const grade = percentToYKIGrade(percentage);
+      const colors = { 1: '#e53e3e', 2: '#d69e2e', 3: '#38a169', 4: '#3182ce' };
+      circle.style.stroke = colors[grade] || '#667eea';
+    }
+    
+    function percentToYKIGrade(percent) {
+      // YKI Mellannivå grade mapping:
+      // Grade 4 = strong B2 (≥75%)
+      // Grade 3 = B1 pass (≥55%) — citizenship threshold
+      // Grade 2 = below B1 (≥30%)
+      // Grade 1 = basic (<30%)
+      if (percent >= 75) return 4;
+      if (percent >= 55) return 3;
+      if (percent >= 30) return 2;
+      return 1;
+    }
+    
+    function updateGradeBadge(elementId, percent) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      const grade = percentToYKIGrade(percent);
+      el.textContent = grade;
+      el.className = `yki-grade-badge yki-grade-${grade}`;
+    }
+    
+    function setHeroGrade(elementId, percent) {
+      const el = document.getElementById(elementId);
+      const pctEl = document.getElementById(elementId + '-pct');
+      if (!el) return;
+      const grade = percentToYKIGrade(percent);
+      el.textContent = grade;
+      if (pctEl) pctEl.textContent = percent.toFixed(0) + '%';
     }
     
     function displayResults(result) {
@@ -432,36 +540,83 @@
         }
       }
       
-      // Overall Grade — EQUAL 25% WEIGHTS
+      // Overall Grade → YKI Grades (1-4) per section
       const reading = Number(result.reading_score) || 0;
       const listening = Number(result.listening_score) || 0;
       const writing = Number(result.writing_score) || 0;
       const speaking = Number(result.speaking_score) || 0;
       
-      if (result.reading_score !== null && result.listening_score !== null &&
-          result.writing_score !== null && result.speaking_score !== null) {
+      // Update YKI grade badges on section cards
+      updateGradeBadge('reading-grade', reading);
+      updateGradeBadge('listening-grade', listening);
+      
+      // Hero row — always show reading & listening
+      setHeroGrade('hero-reading', reading);
+      setHeroGrade('hero-listening', listening);
+      
+      if (result.writing_status === 'complete' && result.writing_score !== null) {
+        updateGradeBadge('writing-grade', writing);
+        setHeroGrade('hero-writing', writing);
+      }
+      if (result.speaking_status === 'complete' && result.speaking_score !== null) {
+        updateGradeBadge('speaking-grade', speaking);
+        setHeroGrade('hero-speaking', speaking);
+      }
+      
+      // Check if all sections are done
+      const allDone = result.reading_score !== null && result.listening_score !== null &&
+                      result.writing_score !== null && result.speaking_score !== null;
+      
+      if (allDone) {
+        const grades = {
+          reading: percentToYKIGrade(reading),
+          listening: percentToYKIGrade(listening),
+          writing: percentToYKIGrade(writing),
+          speaking: percentToYKIGrade(speaking)
+        };
         
-        const overallGrade = (reading * 0.25) + (listening * 0.25) + 
-                             (writing * 0.25) + (speaking * 0.25);
+        // Citizenship check
+        // Combo A: speaking ≥ 3 AND writing ≥ 3
+        const comboA = grades.speaking >= 3 && grades.writing >= 3;
+        // Combo B: listening ≥ 3 AND writing ≥ 3
+        const comboB = grades.listening >= 3 && grades.writing >= 3;
+        const eligible = comboA || comboB;
         
-        document.getElementById('overall-grade').textContent = overallGrade.toFixed(1);
+        document.getElementById('citizenship-card').style.display = 'block';
         
-        // YKI Grade Labels (Swedish)
-        let gradeLabel = '';
-        if (overallGrade >= 85) {
-          gradeLabel = '🏆 Utmärkt';
-        } else if (overallGrade >= 70) {
-          gradeLabel = '✅ Bra';
-        } else if (overallGrade >= 55) {
-          gradeLabel = '👍 Godkänt';
+        document.getElementById('citizenship-combo-a').innerHTML = `
+          <div class="citizenship-result ${comboA ? 'citizenship-pass' : 'citizenship-fail'}">
+            <span class="citizenship-icon">${comboA ? '✅' : '❌'}</span>
+            <span class="citizenship-text">
+              <strong>Alt. A:</strong> Tal (${grades.speaking}) + Skrivning (${grades.writing})
+              — ${comboA ? 'Uppfyllt' : 'Ej uppfyllt'} (kräver båda ≥ 3)
+            </span>
+          </div>`;
+        
+        document.getElementById('citizenship-combo-b').innerHTML = `
+          <div class="citizenship-result ${comboB ? 'citizenship-pass' : 'citizenship-fail'}">
+            <span class="citizenship-icon">${comboB ? '✅' : '❌'}</span>
+            <span class="citizenship-text">
+              <strong>Alt. B:</strong> Hörförståelse (${grades.listening}) + Skrivning (${grades.writing})
+              — ${comboB ? 'Uppfyllt' : 'Ej uppfyllt'} (kräver båda ≥ 3)
+            </span>
+          </div>`;
+        
+        const verdictEl = document.getElementById('citizenship-verdict');
+        if (eligible) {
+          verdictEl.innerHTML = '🎉 <span style="color: #276749;">Medborgarskapskrav UPPFYLLT!</span>';
         } else {
-          gradeLabel = '⚠️ Underkänt';
+          verdictEl.innerHTML = '⚠️ <span style="color: #c53030;">Medborgarskapskrav ej uppfyllt — minst vitsord 3 krävs i ett muntligt + ett skriftligt delprov.</span>';
         }
-        document.getElementById('grade-label').textContent = gradeLabel;
         
+        // Hero label
+        const gradeStr = `${grades.reading} – ${grades.listening} – ${grades.writing} – ${grades.speaking}`;
+        document.getElementById('grade-label').textContent = eligible
+          ? `${gradeStr} — Medborgarskapskrav uppfyllt ✅`
+          : `${gradeStr}`;
+          
       } else {
-        document.getElementById('overall-grade').textContent = '--';
-        document.getElementById('grade-label').textContent = 'Beräknar...';
+        document.getElementById('grade-label').textContent = 'Väntar på utvärdering...';
       }
       
       displayCorrections(result);
