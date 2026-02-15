@@ -302,6 +302,7 @@
     
     async function fetchResults() {
       try {
+        console.log('🔄 Polling for results...', new Date().toLocaleTimeString());
         const response = await fetch(
           `${YKIEngine.SUPABASE_URL}/rest/v1/yki_attempts?id=eq.${attemptId}&select=*`,
           {
@@ -318,9 +319,13 @@
         if (!data || data.length === 0) throw new Error('Inga resultat hittades');
         
         const result = data[0];
+        console.log('📊 Status:', `writing=${result.writing_status}`, `speaking=${result.speaking_status}`,
+          result.writing_score != null ? `✍️${result.writing_score}%` : '',
+          result.speaking_score != null ? `🗣️${result.speaking_score}%` : '');
         displayResults(result);
         
         if (result.writing_status === 'complete' && result.speaking_status === 'complete') {
+          console.log('✅ All evaluations complete!');
           stopPolling();
         }
         
