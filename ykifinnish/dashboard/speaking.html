@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YKI - Puhuminen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/yki-styles.css">
+  <style>
+    body { font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif; }
+    
+    .test-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; padding: 6px 16px; border-radius: 20px;
+      font-size: 0.875rem; font-weight: 600; margin-bottom: 12px; letter-spacing: 0.5px;
+    }
+    
+    .timer-box {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: #fff5f5; border: 2px solid #fc8181;
+      padding: 12px 20px; border-radius: 12px;
+      font-size: 1.1rem; font-weight: 600; color: #c53030; margin-top: 12px;
+    }
+    .timer-icon { font-size: 1.5rem; }
+    #countdown-timer { font-family: 'Space Grotesk', monospace; font-size: 1.3rem; font-weight: 700; letter-spacing: 1px; }
+    .timer-box.warning { background: #fffaf0; border-color: #ed8936; color: #c05621; animation: pulse 1s ease-in-out infinite; }
+    .timer-box.critical { background: #fff5f5; border-color: #f56565; color: #c53030; animation: pulse 0.5s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+    
+    .card { padding: 1.75rem; }
+    .card-title { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .card-subtitle { font-size: 1rem; margin-bottom: 1rem; }
+    
+    .btn {
+      font-family: 'Space Grotesk', sans-serif; padding: 14px 28px; border-radius: 10px;
+      border: none; font-size: 1rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-secondary { background: #f7fafc; color: #2d3748; border: 2px solid #e2e8f0; }
+    .btn-secondary:hover { background: #edf2f7; border-color: #cbd5e0; transform: translateY(-1px); }
+    .btn-danger {
+      background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+      color: white; box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
+    }
+    .btn-danger:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(245, 101, 101, 0.4); transform: translateY(-2px); }
+    .btn-success {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: white; box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+    }
+    .btn-success:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4); transform: translateY(-2px); }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    .btn-primary:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); transform: translateY(-2px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+    .btn-large { padding: 16px 32px; font-size: 1.05rem; }
+    .btn:active:not(:disabled) { transform: translateY(0); }
+    
+    .nav-buttons {
+      display: flex; gap: 16px; justify-content: space-between;
+      margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;
+      flex-wrap: wrap;
+    }
+    
+    .recording-controls {
+      display: flex; gap: 12px; margin: 1rem 0; flex-wrap: wrap;
+    }
+    
+    .recording-indicator {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px; background: #fed7d7; border: 2px solid #fc8181;
+      border-radius: 8px; font-weight: 600; color: #c53030;
+    }
+    .recording-indicator.active { animation: pulse 1s ease-in-out infinite; }
+    
+    .rec-dot {
+      width: 12px; height: 12px; border-radius: 50%; background: #e53e3e;
+    }
+    
+    .text-fallback {
+      margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed #e2e8f0;
+    }
+    .text-fallback-label {
+      font-size: 0.85rem; color: #718096; margin-bottom: 8px; font-weight: 500;
+    }
+    .speaking-textarea {
+      width: 100%; min-height: 150px; padding: 16px;
+      border: 2px solid #e2e8f0; border-radius: 10px;
+      font-family: 'Space Grotesk', sans-serif; font-size: 1rem;
+      line-height: 1.6; resize: vertical; transition: border-color 0.2s;
+    }
+    .speaking-textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+    
+    .speaking-context {
+      background: #f7fafc; padding: 16px; border-left: 4px solid #667eea;
+      border-radius: 8px; margin-bottom: 12px; line-height: 1.6;
+    }
+    
+    .task-status {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600;
+      margin-left: 12px;
+    }
+    .task-status.done { background: #c6f6d5; color: #276749; }
+    .task-status.pending { background: #fed7d7; color: #9b2c2c; }
+  </style>
+</head>
+<body>
+
+  <div class="test-header">
+    <div class="progress-container">
+      <div class="progress-info">
+        <span>Testin edistyminen</span>
+        <span id="progress-text">4/4 Osaa</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 100%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    
+    <div class="card">
+      <div class="test-badge" id="test-badge">YKI-XX</div>
+      <h1 class="card-title">Puhuminen</h1>
+      <p class="card-subtitle">Vastaa suullisesti kaikkiin tehtäviin. Nauhoita vastauksesi tai kirjoita, mitä sanoisit.</p>
+      <div class="timer-box" id="timer-display">
+        <span class="timer-icon">⏱️</span>
+        <div>
+          <div style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 2px;">Aikaa jäljellä:</div>
+          <div id="countdown-timer">0:15:00</div>
+        </div>
+      </div>
+      <div class="alert alert-info" style="margin-top: 1rem;">
+        <strong>Ohjeet:</strong> Paina "Aloita nauhoitus" ja puhu selkeästi. 
+        Nauhoituksesi puretaan tekstiksi ja arvioidaan tekoälyllä YKI-kriteerien mukaan.
+      </div>
+      <div class="alert alert-warning">
+        <strong>Mikrofoni:</strong> Selain pyytää lupaa käyttää mikrofonia. 
+        Anna lupa, jotta voit nauhoittaa. Voit myös kirjoittaa vastauksesi vaihtoehtoisesti.
+      </div>
+    </div>
+
+    <div id="tasks-container"></div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goBack()">← Takaisin kirjoittamiseen</button>
+      <button class="btn" onclick="restartTest()" style="background: #ed8936; color: white; border: 2px solid #dd6b20;">
+        🔄 Aloita testi alusta
+      </button>
+      <button class="btn btn-success btn-large" id="submit-btn" onclick="submitTest()" disabled>
+        Lähetä testi arvioitavaksi →
+      </button>
+    </div>
+
+  </div>
+
+  <div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="spinner"></div>
+    <p id="loading-message" style="margin-top: 1rem; color: white;"></p>
+  </div>
+
+  <script src="../assets/js/yki-engine.js?v=2"></script>
+  <script>
+    let speakingData = null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const EXAM_ID = urlParams.get('exam') || 'yki-01';
+    
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let currentRecordingTask = null;
+    
+    document.getElementById('test-badge').textContent = EXAM_ID.toUpperCase();
+    
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        YKIEngine.init(EXAM_ID);
+        
+        const response = await fetch(`../data/${EXAM_ID}-speaking.json`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        speakingData = await response.json();
+        renderTasks();
+        updateSubmitButton();
+        updateProgress();
+        startTimer();
+        
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Virhe testin latauksessa.\n\n' + error.message);
+      }
+    });
+    
+    // ======================================================================
+    // RENDER TASKS
+    // ======================================================================
+    
+    function renderTasks() {
+      const container = document.getElementById('tasks-container');
+      container.innerHTML = '';
+      
+      speakingData.tasks.forEach((task, idx) => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'card task-container';
+        
+        taskDiv.innerHTML = `
+          <div class="task-header">
+            <h2 class="task-title">
+              Tehtävä ${idx + 1}
+              <span class="task-status pending" id="status-${task.task_id}">⏳ Ei vastattu</span>
+            </h2>
+          </div>
+          <div class="task-content">
+            <div class="speaking-context">${task.prompt.replace(/\n/g, '<br>')}</div>
+            
+            <div class="recording-controls">
+              <button class="btn btn-danger" id="record-btn-${task.task_id}" 
+                      onclick="startRecording('${task.task_id}')">
+                🎤 Aloita nauhoitus
+              </button>
+              <button class="btn btn-secondary" id="stop-btn-${task.task_id}" 
+                      onclick="stopRecording('${task.task_id}')" disabled>
+                ⏹️ Lopeta nauhoitus
+              </button>
+            </div>
+            
+            <div id="recording-status-${task.task_id}"></div>
+            <div id="playback-${task.task_id}"></div>
+            
+            <div class="text-fallback">
+              <div class="text-fallback-label">✏️ Vaihtoehto: Kirjoita vastauksesi, jos et voi nauhoittaa</div>
+              <textarea class="speaking-textarea" id="textarea-${task.task_id}"
+                        placeholder="Kirjoita, mitä sanoisit tähän..."
+                        data-task-id="${task.task_id}"
+                        oninput="onTextInput('${task.task_id}', this.value)"></textarea>
+            </div>
+          </div>
+        `;
+        
+        container.appendChild(taskDiv);
+        
+        // Restore saved recording
+        const savedRecording = YKIEngine.getRecording(task.task_id);
+        if (savedRecording) {
+          showPlayback(task.task_id, savedRecording);
+        }
+        
+        // Restore saved text
+        const savedText = YKIEngine.currentTest.sections.speaking.responses[task.task_id];
+        if (savedText) {
+          document.getElementById(`textarea-${task.task_id}`).value = savedText;
+        }
+        
+        updateTaskStatus(task.task_id);
+      });
+    }
+    
+    // ======================================================================
+    // RECORDING
+    // ======================================================================
+    
+    async function startRecording(taskId) {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+      
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        currentRecordingTask = taskId;
+        
+        mediaRecorder.ondataavailable = (e) => {
+          audioChunks.push(e.data);
+        };
+        
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          await YKIEngine.saveSpeakingRecording(taskId, audioBlob);
+          showPlayback(taskId, YKIEngine.getRecording(taskId));
+          updateTaskStatus(taskId);
+          updateSubmitButton();
+          stream.getTracks().forEach(track => track.stop());
+        };
+        
+        mediaRecorder.start();
+        
+        document.getElementById(`record-btn-${taskId}`).disabled = true;
+        document.getElementById(`stop-btn-${taskId}`).disabled = false;
+        
+        const statusDiv = document.getElementById(`recording-status-${taskId}`);
+        statusDiv.innerHTML = `
+          <div class="recording-indicator active">
+            <div class="rec-dot"></div>
+            <span>Nauhoitetaan...</span>
+          </div>
+        `;
+        
+      } catch (err) {
+        console.error('Microphone error:', err);
+        alert('Mikrofonia ei voitu käyttää.\n\n' + err.message + '\n\nVoit kirjoittaa vastauksesi alla olevaan tekstikenttään.');
+      }
+    }
+    
+    function stopRecording(taskId) {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+        document.getElementById(`record-btn-${taskId}`).disabled = false;
+        document.getElementById(`stop-btn-${taskId}`).disabled = true;
+        document.getElementById(`recording-status-${taskId}`).innerHTML = '';
+      }
+    }
+    
+    function showPlayback(taskId, base64Audio) {
+      const playbackDiv = document.getElementById(`playback-${taskId}`);
+      playbackDiv.innerHTML = `
+        <div class="alert alert-success" style="margin-top: 1rem;">
+          ✅ Nauhoitus valmis
+          <audio controls style="width: 100%; margin-top: 0.5rem;">
+            <source src="${base64Audio}" type="audio/webm">
+          </audio>
+          <button class="btn btn-secondary" style="margin-top: 0.5rem;" 
+                  onclick="startRecording('${taskId}')">
+            🔄 Nauhoita uudelleen
+          </button>
+        </div>
+      `;
+    }
+    
+    // ======================================================================
+    // TEXT FALLBACK
+    // ======================================================================
+    
+    function onTextInput(taskId, text) {
+      YKIEngine.saveSpeakingResponse(taskId, text);
+      updateTaskStatus(taskId);
+      updateSubmitButton();
+    }
+    
+    // ======================================================================
+    // TASK STATUS
+    // ======================================================================
+    
+    function updateTaskStatus(taskId) {
+      const statusEl = document.getElementById(`status-${taskId}`);
+      if (!statusEl) return;
+      
+      const hasRecording = !!YKIEngine.currentTest.sections.speaking.recordings[taskId];
+      const hasText = !!(YKIEngine.currentTest.sections.speaking.responses[taskId] || '').trim();
+      
+      if (hasRecording) {
+        statusEl.className = 'task-status done';
+        statusEl.textContent = '🎤 Nauhoitettu';
+      } else if (hasText) {
+        statusEl.className = 'task-status done';
+        statusEl.textContent = '✏️ Tekstivastaus';
+      } else {
+        statusEl.className = 'task-status pending';
+        statusEl.textContent = '⏳ Ei vastattu';
+      }
+    }
+    
+    function updateSubmitButton() {
+      if (!speakingData) return;
+      
+      const totalTasks = speakingData.tasks.length;
+      let completedTasks = 0;
+      
+      speakingData.tasks.forEach(task => {
+        const hasRecording = !!YKIEngine.currentTest.sections.speaking.recordings[task.task_id];
+        const hasText = !!(YKIEngine.currentTest.sections.speaking.responses[task.task_id] || '').trim();
+        if (hasRecording || hasText) completedTasks++;
+      });
+      
+      document.getElementById('submit-btn').disabled = (completedTasks < totalTasks);
+    }
+    
+    // ======================================================================
+    // TIMER (15 minutes)
+    // ======================================================================
+    
+    let timeRemaining = 15 * 60;
+    let timerInterval = null;
+    const TIMER_KEY = `yki_timer_${EXAM_ID}_speaking`;
+    
+    function startTimer() {
+      const savedTimer = localStorage.getItem(TIMER_KEY);
+      if (savedTimer) {
+        const td = JSON.parse(savedTimer);
+        const elapsed = Math.floor((Date.now() - td.startTime) / 1000);
+        timeRemaining = Math.max(0, td.totalTime - elapsed);
+      } else {
+        localStorage.setItem(TIMER_KEY, JSON.stringify({ startTime: Date.now(), totalTime: timeRemaining }));
+      }
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval); timeRemaining = 0; updateTimerDisplay();
+          updateSubmitButton();
+          alert('⏰ Aika on loppunut!\n\nPuhumisen virallinen aika on päättynyt.\n\nVoit jatkaa tai lähettää testin.');
+          return;
+        }
+        updateTimerDisplay();
+      }, 1000);
+    }
+    
+    function updateTimerDisplay() {
+      const m = Math.floor(timeRemaining / 60), s = timeRemaining % 60;
+      document.getElementById('countdown-timer').textContent = `0:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+      const tb = document.getElementById('timer-display');
+      if (timeRemaining <= 180) { tb.classList.add('critical'); tb.classList.remove('warning'); }
+      else if (timeRemaining <= 300) { tb.classList.add('warning'); }
+      else { tb.classList.remove('warning', 'critical'); }
+    }
+    
+    window.addEventListener('beforeunload', () => { if (timerInterval) clearInterval(timerInterval); });
+    
+    // ======================================================================
+    // SUBMIT TEST
+    // ======================================================================
+    
+    async function submitTest() {
+      const userEmail = localStorage.getItem('cl_email');
+      
+      if (!userEmail || userEmail === 'anonymous') {
+        const shouldLogin = confirm(
+          '🔐 Kirjautuminen vaaditaan\n\n' +
+          'Tulosten tallentamiseksi ja täydellisen arvioinnin saamiseksi sinun on kirjauduttava sisään.\n\n' +
+          'Edistymisesi tallennetaan paikallisesti ja lähetetään kirjautumisen jälkeen.\n\n' +
+          'Kirjaudu sisään nyt?'
+        );
+        
+        if (shouldLogin) {
+          const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = `../login.html?return=${returnUrl}`;
+        }
+        return;
+      }
+      
+      if (!confirm(
+        'Lähetä testi arvioitavaksi?\n\n' +
+        'Vastauksesi lähetetään ja arvioidaan. Tätä ei voi kumota.'
+      )) return;
+      
+      localStorage.removeItem(TIMER_KEY);
+      if (timerInterval) clearInterval(timerInterval);
+      
+      YKIEngine.completeSpeakingSection();
+      
+      document.getElementById('loading-overlay').style.display = 'flex';
+      document.getElementById('loading-message').textContent = 'Lähetetään testiä...';
+      
+      try {
+        const result = await YKIEngine.submitForEvaluation();
+        
+        document.getElementById('loading-message').textContent = 
+          'Testi lähetetty! Ohjataan tuloksiin...';
+        
+        setTimeout(() => {
+          window.location.href = `results.html?attempt_id=${result.attempt_id}&exam=${EXAM_ID}`;
+        }, 500);
+        
+      } catch (error) {
+        document.getElementById('loading-overlay').style.display = 'none';
+        alert('Virhe lähetyksessä: ' + error.message);
+      }
+    }
+    
+    function goBack() {
+      if (confirm('Takaisin kirjoittamiseen? Edistymisesi tallennetaan.')) {
+        window.location.href = `writing.html?exam=${EXAM_ID}`;
+      }
+    }
+    
+    function restartTest() {
+      if (!confirm('Aloita testi alusta?\n\nKaikki edistyminen poistetaan.\n\nTätä ei voi kumota.')) return;
+      localStorage.removeItem(`yki_test_${EXAM_ID}`);
+      ['reading','listening','writing','speaking'].forEach(s => localStorage.removeItem(`yki_timer_${EXAM_ID}_${s}`));
+      alert('✅ Testi on aloitettu alusta!');
+      window.location.href = 'index.html';
+    }
+    
+    function updateProgress() {
+      const p = YKIEngine.getProgress();
+      document.getElementById('progress-text').textContent = `${p.completed}/4 Osaa`;
+      document.getElementById('progress-fill').style.width = `${p.percentage}%`;
+    }
+  </script>
+
+</body>
+</html>
