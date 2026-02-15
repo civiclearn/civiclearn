@@ -141,6 +141,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
     .citizenship-card h3 { margin: 0 0 1rem; font-size: 1.1rem; color: #2d3748; }
+    .citizenship-accordion-open #citizenship-toggle { transform: rotate(180deg); }
     .citizenship-result {
       display: flex; align-items: center; gap: 12px;
       padding: 12px 16px; border-radius: 10px; margin-bottom: 10px;
@@ -221,18 +222,30 @@
             <span class="grade-row-sub" id="hero-speaking-pct"></span>
           </div>
         </div>
-        <div class="grade-label" id="grade-label" style="display:none;"></div>
+        <!-- Citizenship verdict bar (inside hero) -->
+        <div id="citizenship-hero-bar" style="display:none; margin-top: 1rem; cursor: pointer;" onclick="toggleCitizenshipAccordion()">
+          <div id="citizenship-hero-text" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(255,255,255,0.18); padding: 10px 18px; border-radius: 12px; font-weight: 700; font-size: 1.05rem;">
+          </div>
+          <div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px;">Napsauta nähdäksesi lisätiedot ▼</div>
+        </div>
       </div>
       
-      <!-- CITIZENSHIP ELIGIBILITY -->
+      <!-- CITIZENSHIP ELIGIBILITY (accordion) -->
       <div class="citizenship-card" id="citizenship-card" style="display: none;">
-        <h3>🇫🇮 Kansalaisuuskoe</h3>
-        <p style="font-size: 0.85rem; color: #718096; margin: 0 0 12px;">
-          Suomen kansalaisuus edellyttää vähintään arvosanaa 3 yhdessä suullisessa JA yhdessä kirjallisessa osakokeessa.
-        </p>
-        <div id="citizenship-combo-a"></div>
-        <div id="citizenship-combo-b"></div>
-        <div id="citizenship-verdict" style="margin-top: 12px; font-weight: 600; font-size: 1rem;"></div>
+        <div class="citizenship-accordion-header" onclick="toggleCitizenshipAccordion()" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+          <h3 style="display: flex; align-items: center; gap: 8px; margin: 0;">
+            <img src="/assets/images/fi.svg" alt="🇫🇮" style="width: 22px; height: 16px; border-radius: 2px;">
+            Kielitaitovaatimus kansalaisuutta varten
+          </h3>
+          <span class="citizenship-toggle" id="citizenship-toggle" style="transition: transform 0.3s; font-size: 0.8rem;">▼</span>
+        </div>
+        <div id="citizenship-accordion-content" style="display: none; margin-top: 12px;">
+          <p style="font-size: 0.85rem; color: #718096; margin: 0 0 12px;">
+            Suomen kansalaisuus edellyttää vähintään arvosanaa 3 yhdessä suullisessa JA yhdessä kirjallisessa osakokeessa.
+          </p>
+          <div id="citizenship-combo-a"></div>
+          <div id="citizenship-combo-b"></div>
+        </div>
       </div>
       
       <div class="sections-grid">
@@ -571,6 +584,18 @@
         const comboB = grades.listening >= 3 && grades.writing >= 3;
         const eligible = comboA || comboB;
         
+        // Show verdict in hero bar
+        const heroBar = document.getElementById('citizenship-hero-bar');
+        const heroText = document.getElementById('citizenship-hero-text');
+        heroBar.style.display = 'block';
+        
+        if (eligible) {
+          heroText.innerHTML = '<img src="/assets/images/fi.svg" alt="🇫🇮" style="width:22px;height:16px;border-radius:2px;"> <span style="color: #c6f6d5;">Kansalaisuusvaatimus täytetty ✅</span>';
+        } else {
+          heroText.innerHTML = '<img src="/assets/images/fi.svg" alt="🇫🇮" style="width:22px;height:16px;border-radius:2px;"> <span style="color: #fed7d7;">Kansalaisuusvaatimusta ei täytetty ⚠️</span>';
+        }
+        
+        // Show accordion card (collapsed)
         document.getElementById('citizenship-card').style.display = 'block';
         
         document.getElementById('citizenship-combo-a').innerHTML = `
@@ -591,22 +616,14 @@
             </span>
           </div>`;
         
-        const verdictEl = document.getElementById('citizenship-verdict');
-        if (eligible) {
-          verdictEl.innerHTML = '🎉 <span style="color: #276749;">Kansalaisuusvaatimus TÄYTETTY!</span>';
-        } else {
-          verdictEl.innerHTML = '⚠️ <span style="color: #c53030;">Kansalaisuusvaatimusta ei täytetty — vähintään arvosana 3 vaaditaan yhdessä suullisessa + yhdessä kirjallisessa osakokeessa.</span>';
-        }
-        
-        const gradeStr = `${grades.reading} – ${grades.listening} – ${grades.writing} – ${grades.speaking}`;
-        document.getElementById('grade-label').textContent = eligible
-          ? `${gradeStr} — Kansalaisuusvaatimus täytetty ✅`
-          : `${gradeStr}`;
-        document.getElementById('grade-label').style.display = 'block';
+        // (grade-label removed — grades already shown in hero row)
           
       } else {
-        document.getElementById('grade-label').textContent = 'Odotetaan arviointia...';
-        document.getElementById('grade-label').style.display = 'block';
+        // Still waiting for evaluations
+        const heroBar = document.getElementById('citizenship-hero-bar');
+        heroBar.style.display = 'block';
+        const heroText = document.getElementById('citizenship-hero-text');
+        heroText.innerHTML = '<img src="/assets/images/fi.svg" alt="🇫🇮" style="width:22px;height:16px;border-radius:2px;"> <span style="opacity:0.8;">Odotetaan arviointia...</span>';
       }
       
       displayCorrections(result);
@@ -678,6 +695,24 @@
     // ==========================================================================
     // CORRECTIONS DISPLAY
     // ==========================================================================
+    
+    function toggleCitizenshipAccordion() {
+      const content = document.getElementById('citizenship-accordion-content');
+      const toggle = document.getElementById('citizenship-toggle');
+      const card = document.getElementById('citizenship-card');
+      
+      if (content.style.display === 'none') {
+        content.style.display = 'block';
+        toggle.style.transform = 'rotate(180deg)';
+        card.classList.add('citizenship-accordion-open');
+        // Scroll to card
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        content.style.display = 'none';
+        toggle.style.transform = '';
+        card.classList.remove('citizenship-accordion-open');
+      }
+    }
     
     function toggleCorrections(section) {
       const content = document.getElementById(`${section}-corrections-content`);
