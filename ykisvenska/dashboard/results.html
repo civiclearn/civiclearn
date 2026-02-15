@@ -110,6 +110,13 @@
     .task-feedback { margin-bottom: 1rem; padding: 12px; background: #f7fafc; border-radius: 8px; }
     .task-feedback h4 { margin: 0 0 8px; font-size: 0.95rem; color: #667eea; }
     .task-feedback p { margin: 0; font-size: 0.9rem; line-height: 1.6; color: #4a5568; }
+    .mistakes-list { margin: 8px 0; padding: 10px; background: #fff5f5; border-left: 3px solid #fc8181; border-radius: 4px; }
+    .mistakes-list p { margin: 0 0 6px; color: #c53030; }
+    .mistakes-list ul { margin: 4px 0 0; padding-left: 18px; }
+    .mistakes-list li { margin-bottom: 6px; font-size: 0.85rem; color: #4a5568; }
+    .mistake-type { display: inline-block; background: #fed7d7; color: #c53030; padding: 1px 6px; border-radius: 3px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-right: 4px; }
+    .mistake-original { color: #c53030; text-decoration: line-through; }
+    .mistake-correction { color: #276749; font-weight: 500; }
     
     .test-badge {
       display: inline-block; background: rgba(255,255,255,0.2);
@@ -465,10 +472,23 @@
         
         if (feedback.tasks && Array.isArray(feedback.tasks)) {
           feedback.tasks.forEach((task, index) => {
+            let mistakesHtml = '';
+            if (task.mistakes && Array.isArray(task.mistakes) && task.mistakes.length > 0) {
+              mistakesHtml = `<div class="mistakes-list">
+                <p><strong>Specifika fel:</strong></p>
+                <ul>${task.mistakes.map(m => `<li>
+                  <span class="mistake-type">${m.type || ''}</span>
+                  ${m.original ? `<span class="mistake-original">"${m.original}"</span> → ` : ''}
+                  ${m.correction ? `<span class="mistake-correction">"${m.correction}"</span>` : ''}
+                  ${m.explanation ? `<br><em>${m.explanation}</em>` : ''}
+                </li>`).join('')}</ul>
+              </div>`;
+            }
             html += `
               <div class="task-feedback">
-                <h4>Uppgift ${task.task_index || (index + 1)}</h4>
+                <h4>Uppgift ${task.task_index || task.taskId || (index + 1)}</h4>
                 ${task.feedback ? `<p>${task.feedback}</p>` : ''}
+                ${mistakesHtml}
                 ${task.score?.raw != null ? `<p><strong>Poäng:</strong> ${task.score.raw}/${task.score.max || 5}</p>` : ''}
               </div>
             `;
