@@ -266,8 +266,7 @@
   </main>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="../assets/js/sproochentest-hydrate.js"></script>
-<script src="../assets/js/sproochentest-engine.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="/sproochentest/assets/js/sproochentest-hydrate.js"></script>
 <script>
   // ==========================================================================
   // DASHBOARD LOGIC
@@ -361,14 +360,23 @@
   // GENERATE TESTS TABLE
   // ==========================================================================
 
+  const TOTAL_EXAMS = 11;
+
+  function getTestState(examId) {
+    try {
+      const raw = localStorage.getItem('sproochentest_' + examId);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+
   function generateTestsTable() {
     const tbody = document.getElementById('simTableBody');
     tbody.innerHTML = '';
 
-    for (let i = 1; i <= SproochEngine.TOTAL_EXAMS; i++) {
+    for (let i = 1; i <= TOTAL_EXAMS; i++) {
       const testNum = String(i).padStart(2, '0');
       const examId = `sproochentest-${testNum}`;
-      const testState = SproochEngine.getTestState(examId);
+      const testState = getTestState(examId);
       const row = createTableRow(testNum, examId, testState, i);
       tbody.appendChild(row);
     }
@@ -452,10 +460,10 @@
     let latestDate = null;
     const allScores = [];
 
-    for (let i = 1; i <= SproochEngine.TOTAL_EXAMS; i++) {
+    for (let i = 1; i <= TOTAL_EXAMS; i++) {
       const testNum = String(i).padStart(2, '0');
       const examId = `sproochentest-${testNum}`;
-      const testState = SproochEngine.getTestState(examId);
+      const testState = getTestState(examId);
 
       if (testState && testState.submitted) {
         completedCount++;
@@ -475,8 +483,8 @@
       }
     }
 
-    document.getElementById('doneSims').textContent = `${completedCount}/${SproochEngine.TOTAL_EXAMS}`;
-    const progressPercentage = (completedCount / SproochEngine.TOTAL_EXAMS) * 100;
+    document.getElementById('doneSims').textContent = `${completedCount}/${TOTAL_EXAMS}`;
+    const progressPercentage = (completedCount / TOTAL_EXAMS) * 100;
     document.getElementById('progressBar').style.width = `${progressPercentage}%`;
 
     if (latestScore !== null) {
@@ -504,7 +512,9 @@
 
   function redoTest(examId) {
     if (confirm('Sidd Dir sécher, datt Dir den Test nei maache wëllt?\n\nDe viregten Test gëtt gespäichert awer duerch den neien ersat.')) {
-      SproochEngine.clearTestData(examId);
+      localStorage.removeItem('sproochentest_' + examId);
+      localStorage.removeItem('sproochentest_timer_' + examId + '_speaking');
+      localStorage.removeItem('sproochentest_timer_' + examId + '_listening');
       window.location.href = `speaking.html?exam=${examId}`;
     }
   }
