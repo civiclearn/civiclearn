@@ -4,11 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sproochentest — Héierverstoen</title>
-  <script src="/assets/js/auth-guard-sproochentest.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/yki-styles.css">
+  <link rel="stylesheet" href="/sproochentest/assets/css/yki-styles.css">
   <style>
     body { font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif; }
     
@@ -119,7 +118,7 @@
     </div>
   </div>
 
-  <script src="../assets/js/sproochentest-engine.js"></script>
+  <script src="/sproochentest/assets/js/sproochentest-engine.js"></script>
   <script>
     let listeningData = null;
     
@@ -132,7 +131,7 @@
       try {
         SproochEngine.init(EXAM_ID);
         
-        const response = await fetch(`../data/${EXAM_ID}-listening.json`);
+        const response = await fetch(`/sproochentest/data/${EXAM_ID}-listening.json`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
         listeningData = await response.json();
@@ -319,6 +318,22 @@
     // ─── Complete Listening + Submit Entire Test ───
     
     async function completeListeningAndSubmit() {
+      // Auth gate — require login before submission
+      const userEmail = localStorage.getItem('cl_email');
+      if (!userEmail || userEmail === 'anonymous') {
+        const shouldLogin = confirm(
+          '🔐 Login néideg\n\n' +
+          'Fir Är Resultater ze späicheren an eng komplett Evaluatioun ze kréien, musst Dir Iech aloggen.\n\n' +
+          'Äre Fortschrëtt gëtt lokal gespäichert a gëtt nom Login ofgeschéckt.\n\n' +
+          'Elo aloggen?'
+        );
+        if (shouldLogin) {
+          const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = `login.html?return=${returnUrl}`;
+        }
+        return;
+      }
+
       const totalQuestions = listeningData.tasks.reduce((sum, t) => sum + t.questions.length, 0);
       const answeredCount = Object.keys(SproochEngine.currentTest.sections.listening.answers).length;
       
