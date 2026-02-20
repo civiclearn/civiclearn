@@ -1,0 +1,211 @@
+# Odense – H.C. Andersens fødeby
+
+**Tekstsamling**
+
+*Fremstillet til prøveformål*
+
+---
+
+## Indhold
+
+Odenses historie — 3
+  Fra vikingetid til moderne storby — 3
+  Odense Letbane — 4
+
+H.C. Andersen i Odense — 5
+  H.C. Andersens Hus — 5
+  Barndomshjemmet i Munkemøllestræde — 6
+  Eventyrskulturer i byrummet — 7
+
+Museer og attraktioner — 8
+  Den Fynske Landsby — 8
+  Danmarks Jernbanemuseum — 9
+  Odense ZOO — 10
+
+Mad og drikke i Odense — 11
+  Storms Pakhus — 11
+  Det fynske køkken — 12
+
+Grønne oplevelser i Odense — 13
+  Munke Mose og Odense Å — 13
+  Fruens Bøge — 13
+  Cykelruter på Fyn — 14
+
+At bo og studere i Odense — 15
+  Syddansk Universitet — 15
+  Mød tre odenseanere — 16
+
+---
+
+## Odenses historie
+
+### Fra vikingetid til moderne storby
+
+Odense er Danmarks tredjestørste by med omkring 185.000 indbyggere og er den største by på øen Fyn. Byens navn stammer fra den nordiske gud Odin og blev første gang nævnt i et dokument fra år 988, da den tysk-romerske kejser Otto III udstedte et privilegiebrev til byen. Odense har dermed en over tusind år lang historie.
+
+I middelalderen var Odense en vigtig kirkelig by. Den gotiske domkirke, Sankt Knuds Kirke, blev opført i 1300-tallet og er opkaldt efter den danske kong Knud den Hellige, der ifølge overleveringen blev myrdet i en tidligere kirke på stedet i 1086. Knud den Helliges skelet kan i dag ses i en glaskiste i kirkens krypt.
+
+I 1800-tallet voksede Odense hurtigt, ikke mindst takket være åbningen af Odense Kanal i 1804, der gjorde det muligt for større skibe at sejle helt ind til byen. Kanalen er 7,5 kilometer lang og forbinder Odense med Odense Fjord. Det var i denne periode, at byens mest berømte søn, Hans Christian Andersen, blev født – den 2. april 1805.
+
+I det 20. århundrede udviklede Odense sig til en moderne industriby. Odense Staalskibsværft, grundlagt i 1918, blev et af Danmarks største skibsværfter og beskæftigede på sit højeste over 6.000 arbejdere. Værftet lukkede endeligt i 2012, og det store havneområde er siden blevet omdannet til en ny bydel med boliger, kontorer og kulturelle tilbud.
+
+
+### Odense Letbane
+
+I 2022 åbnede Odenses nye letbane, som var den første letbane på Fyn. Letbanen kører fra Tarup i det nordvestlige Odense til Hjallese i syd og passerer undervejs vigtige steder som Odense Banegård, Rosengårdcentret og Syddansk Universitet. Strækningen er 14,5 kilometer lang og har 26 stationer.
+
+Letbanen kører på elektricitet og erstatter den tidligere buslinje, der kørte samme rute. Målet med letbanen er at gøre den offentlige transport hurtigere og mere miljøvenlig. I hverdagene kører letbanen med en frekvens på ca. 7½ minut i myldretiden. Letbanen blev bygget af det franske firma Alstom og kostede i alt omkring 3,5 milliarder kroner. Det var et kontroversielt projekt, da anlægsarbejdet medførte mange års trafikgener i byen, men i dag betragtes letbanen som en succes, der har gjort det lettere for borgerne at komme rundt i byen.
+
+---
+
+## H.C. Andersen i Odense
+
+### H.C. Andersens Hus
+
+Hans Christian Andersen er uden tvivl Odenses mest berømte borger. Hans eventyr, der er oversat til mere end 125 sprog, er blandt de mest læste litterære værker i verden. I Odense kan man opleve hans univers på flere måder, men den største attraktion er H.C. Andersens Hus.
+
+Museet ligger i det historiske kvarter af Odense, kun ti minutters gang fra Odense Banegård. Det originale fødehjem – et lille gult bindingsværkshus på hjørnet af Hans Jensens Stræde og Bangs Boder – blev købt i 1905 og åbnet som museum tre år senere, i 1908. Det gør det til et af verdens ældste digtermuseer.
+
+I juni 2021 åbnede et helt nyt og moderne museum på samme adresse. Det nye museum er tegnet af den japanske arkitekt Kengo Kuma og hans team i samarbejde med det danske firma Cornelius+Vöge. To tredjedele af museet ligger under jorden og er omgivet af en eventyrhave, der om sommeren er fyldt med farverige blomster. Museet dækker et areal på omkring 5.600 kvadratmeter.
+
+I modsætning til traditionelle museer handler H.C. Andersens Hus ikke om genstande bag glas. Her bliver gæsterne selv en del af eventyret. Man får udleveret et headset ved indgangen og kan i sit eget tempo vandre gennem rum fyldt med lyd, lys og kunstinstallationer, der fortolker Andersens eventyr og liv. Kunstnere fra tolv forskellige lande har bidraget med værker til museet. Museet har også fået den danske miljøcertificering Green Attraction, der gives til attraktioner, som aktivt prioriterer bæredygtighed og miljøansvar.
+
+En billet til H.C. Andersens Hus giver også adgang til Ville Vau, som er et kreativt univers for børn, inspireret af H.C. Andersens eventyr. Her kan de yngste besøgende selv skabe og lege i en verden af fantasi og fortælling.
+
+
+### Barndomshjemmet i Munkemøllestræde
+
+Ud over fødehjemmet kan man også besøge det hus, hvor H.C. Andersen tilbragte sin barndom. Barndomshjemmet ligger i Munkemøllestræde, tæt på Odense Domkirke og Odense Å. Det er et lille bindingsværkshus, hvor Andersen boede med sine forældre fra han var 2 til 14 år gammel. Huset blev restaureret og åbnet for offentligheden i 1930.
+
+Andersens far var skomager, og familien levede under beskedne forhold. Moderen, Anne Marie Andersdatter, arbejdede som vaskekone og vaskede tøj i Odense Å. Langs åen var der flere vaskepladser, hvor kvinderne stod i timevis i det kolde vand. Disse barndomsoplevelser inspirerede mange af Andersens eventyr, herunder "Den grimme ælling" og "Fyrtøjet".
+
+I barndomshjemmet er stuerne indrettet, så de viser, hvordan familien levede i begyndelsen af 1800-tallet. Man kan bl.a. se en rekonstruktion af faderens skomagerværksted. Huset er kun 56 kvadratmeter, og på Andersens tid boede der op til tre familier i bygningen.
+
+
+### Eventyrskulturer i byrummet
+
+Odense hylder også H.C. Andersen i det offentlige rum. Spredt ud over byen finder man en række skulpturer af figurer fra hans eventyr. I Munke Mose-parken kan man bl.a. se skulpturer af Den lille Havfrue, De vilde Svaner og Tommelise. Skulpturerne er skabt af forskellige kunstnere og er placeret langs åen, så man kan opleve dem på en gåtur.
+
+På gavlen af Bangs Boder nr. 26, tæt på museet, finder man et stort vægmaleri af H.C. Andersens ansigt. Maleriet er 12 meter højt og er malet af den danske kunstner Don John. Det er blevet et af de mest fotograferede motiver i Odense.
+
+Hvert år i august afholdes H.C. Andersen Festivalen, en ugelang begivenhed med forestillinger, parader og kulturelle arrangementer i hele byen. Festivalen tiltrækker over 500.000 besøgende hvert år og har fundet sted siden 1965. Under festivalen opføres der teater og musik i parker og på gader, og mange af arrangementerne er gratis.
+
+---
+
+## Museer og attraktioner
+
+### Den Fynske Landsby
+
+Vil man opleve, hvordan livet var på landet i 1800-tallets Danmark, kan man besøge Den Fynske Landsby. Frilandsmuseet ligger i naturskønne omgivelser i bydelen Fruens Bøge i det sydlige Odense og blev grundlagt i 1942.
+
+Museet består af omkring 25 historiske bygninger – gårde, husmandssteder, en skole, en kro og et værksted – der er samlet ind fra hele Fyn og genopført på museets areal. Bygningerne er typiske eksempler på fynsk bindingsværk, og mange af dem er åbne for publikum. I landsbyen møder man personale klædt i 1800-tallets dragter, der fortæller om livet dengang. De hilser gæsterne med et "Guds fred" og viser, hvordan man lavede mad, dyrkede jorden og udførte forskellige håndværk.
+
+Den Fynske Landsby har i de seneste år sat fokus på bæredygtighed og genbrug med udgangspunkt i 1800-tallets selvforsynende livsstil. Museet tilbyder bl.a. kurser i gamle håndværk som broderi, restaurering af vinduer og pasning af høns. For børn mellem 9 og 12 år tilbydes der hvert forår et "Gå til Have"-forløb, hvor børnene lærer at dyrke deres egne grøntsager.
+
+Man kan komme til Den Fynske Landsby med bus 110 eller 111 fra Odense Banegård, med tog til Fruens Bøge station eller med bådtransport fra Munke Mose via Odense Å.
+
+
+### Danmarks Jernbanemuseum
+
+Lige ved siden af Odense Banegård finder man Danmarks Jernbanemuseum, der er Skandinaviens største jernbanemuseum. Museet er indrettet i den autentiske remisebygning fra 1954 og rummer en imponerende samling af lokomotiver, togvogne og modeltog.
+
+Blandt museets mest populære genstande er det kongelige salonvogntog, som blev brugt af den danske kongefamilie fra 1854 til 1940. Toget er fuldt restaureret og giver et indblik i, hvordan kongelige rejste i gamle dage. Man kan også se Danmarks første damplokomotiv, "Odin", der blev sat i drift i 1847 på strækningen mellem København og Roskilde.
+
+For børn er der mulighed for at køre en tur med museets miniaturtog, der kører på en bane inde i museet. Derudover er der interaktive udstillinger, hvor man kan prøve at styre et togsimulatorsystem. Museet afholder jævnligt særudstillinger og arrangementer, bl.a. "Jernbanens Dag" i september, hvor ældre tog kører på de virkelige skinner.
+
+Museet er åbent alle dage undtagen mandage og koster 90 kr. for voksne. Børn under 18 år har gratis adgang.
+
+
+### Odense ZOO
+
+Odense ZOO er en af Danmarks mest besøgte zoologiske haver og ligger centralt i byen langs Odense Å. Haven blev grundlagt i 1930 som en mindre dyrehave med ganske få dyr og er siden vokset til at huse over 2.000 dyr fordelt på ca. 130 arter.
+
+Zooen er opdelt i geografiske zoner, der efterligner dyrenes naturlige levesteder. I den afrikanske zone kan man bl.a. opleve giraffer, zebraer og løver, mens man i den sydamerikanske zone finder aber, dovendyr og farverige papegøjer. En af de nyeste tilføjelser er Oceanium, et stort akvarium, der åbnede i 2018 og fokuserer på havets økosystemer. Oceaniums hovedtank rummer 900.000 liter vand og huser bl.a. hajer og rokker.
+
+Odense ZOO er kendt for at prioritere dyrevelfærd og deltager i en række internationale avlsprogrammer for truede arter. Haven har bl.a. haft succes med at opdrætte den sjældne sydamerikanske tapir. Hvert år besøger omkring 400.000 gæster haven, og den er åben 365 dage om året.
+
+For familier med børn tilbyder Odense ZOO også "ZOO-skole", hvor børn i alderen 6-12 år kan deltage i undervisning om dyr og natur. Undervisningen foregår i samarbejde med lokale skoler og har fokus på biologisk mangfoldighed.
+
+---
+
+## Mad og drikke i Odense
+
+### Storms Pakhus
+
+Storms Pakhus er Odenses populære street food-marked og ligger i et historisk pakhus nær Odense Havn. Bygningen er 107 meter lang og blev oprindeligt opført i midten af 1940'erne som tømmerlade for tømmerhandleren N. Petersens Trælasthandel. Bygmester var den kendte ingeniør Christen Ostenfeld, der senere blev berømt for at projektere den nye Lillebæltsbro.
+
+I 1980 overtog firmaet Eric Storm A/S bygningen og brugte den til opbevaring af emballage. Pakhuset blev i folkemunde kaldt "Storms Pakhus" efter ejeren, og da bygningen i 2016 blev omdannet til street food-marked, beholdt man det populære navn.
+
+I dag rummer Storms Pakhus 18 madboder og 6 barer under ét tag. Her kan man smage mad fra hele verden – fra græsk gyros og japansk ramen til mexicanske tacos og stenovnsbagt pizza. Der er også flere boder med fokus på nordisk og fynsk mad. Ved de lange fællesborde sidder lokale og turister side om side i det højtloftede rum med rå træsøjler og industriel atmosfære.
+
+Ud over mad og drikke er Storms Pakhus også et kultursted, der afholder ca. 300 arrangementer om året, heriblandt koncerter, loppemarkeder og madfestivaler. Man må ikke medbringe egen mad og drikke, og hunde er kun tilladt i udendørsområdet. Der er parkeringsmuligheder i nærheden, og Odense Banegård ligger i kort gåafstand.
+
+
+### Det fynske køkken
+
+Fyn er kendt som "Danmarks have" på grund af øens frugtbare jord og milde klima. Den fynske madtradition bygger på friske, lokale råvarer – især frugt, grøntsager og mejeriprodukter.
+
+Et af de mest kendte fynske retter er æbleflæsk, en traditionel ret bestående af stegt flæsk med æbler og løg. Retten serveres typisk med rugbrød og er en populær frokostret på Fyn. Et andet lokalt speciale er den fynske rygeost, en blød ost, der traditionelt ryges over halm. Rygeost spises typisk med radiser, purløg og rugbrød.
+
+I Odense kan man smage fynske specialiteter på byens markeder. Hver onsdag og lørdag holdes der grønttorv foran Odense Koncerthus, hvor lokale producenter sælger friske råvarer fra hele Fyn. Markedet har eksisteret i flere hundrede år og er en af byens ældste traditioner.
+
+For den, der har en sød tand, er hindbærsnitten et must. Denne klassiske danske kage med hindbærmarmelade og glasur var angiveligt H.C. Andersens yndlingskage, og den kan stadig købes i flere af Odenses bagerier.
+
+---
+
+## Grønne oplevelser i Odense
+
+### Munke Mose og Odense Å
+
+Munke Mose er Odenses mest populære park og ligger midt i byen langs Odense Å. Parken er et yndet samlingssted for odenseanerne, der bruger den til gåture, picnic og afslapning. I parken finder man også en café med udsigt over åen.
+
+Fra Munke Mose kan man tage en af Odense Aafarts turbåde, der sejler ad Odense Å fra centrum til Fruens Bøge. Turen tager ca. 40 minutter og giver et unikt perspektiv på byen set fra vandet. Man kan også leje vandcykler og kanoer i parken. Aafarten opererer fra maj til september.
+
+Odense Å er i alt 60 kilometer lang og løber fra Arreskov Sø i det sydlige Fyn gennem Odense og ud i Odense Fjord. Åen har stor betydning for byens identitet og har historisk set været brugt til transport, industri og vaskeri. I dag er åen omgivet af grønne stier, der gør den ideel til gå- og cykelture.
+
+
+### Fruens Bøge
+
+Fruens Bøge er et skovområde i det sydlige Odense, der støder op til Den Fynske Landsby. Navnet betyder "fruens bøgetræer" og stammer fra en gammel overlevering om en adelsfrue, der plantede bøgetræer i skoven. Skoven er omkring 28 hektar stor og er et populært udflugtsmål for familier.
+
+I skoven finder man bl.a. Fruens Bøge station, et lille trinbræt på jernbanestrækningen mellem Odense og Svendborg. Stationen er et charmerende stop, der giver direkte adgang til både skoven og frilandsmuseet. Der er også en kro i området, Dalum Landbrugsskoles kursuscenter, hvor man kan spise frokost med udsigt over naturen.
+
+
+### Cykelruter på Fyn
+
+Odense er en af Danmarks bedste cykelbyer, og Fyn er et eldorado for cykelturisme. Øen har over 1.200 kilometer afmærkede cykelruter, der fører gennem fynske landsbyer, langs kysten og forbi historiske slotte og herregårde.
+
+Den mest populære rute er Øhavsstien, en national cykelrute på 220 kilometer, der går rundt om det sydfynske øhav. Ruten starter og slutter i Faaborg, og undervejs passerer man gennem små havnebyer, forbi frugtplantager og over dæmninger til de mange små øer. Øhavsstien blev kåret til Europas bedste cykelrute i 2022 af det europæiske cyklistforbund.
+
+En anden populær rute er Den Grønne Sti, der forbinder Odense med kystbyen Kerteminde over en strækning på 32 kilometer. Stien følger en nedlagt jernbanetracé og er derfor fuldstændig flad, hvilket gør den ideel for familier med børn. Undervejs passerer man bl.a. det historiske Ladbyskibet – et vikingetidsskibsgravsted fra ca. 925 e.Kr., der er det eneste af sin slags i Danmark.
+
+I Odense by er der over 550 kilometer cykelstier, og byen har som mål at blive Danmarks førende cykelby. Kommunen tilbyder gratis bycykler til turister i sommerperioden, og der er cykelparkeringspladser ved alle vigtige attraktioner og trafikknudepunkter.
+
+---
+
+## At bo og studere i Odense
+
+### Syddansk Universitet
+
+Syddansk Universitet (SDU) har sit hovedcampus i Odense og er et af Danmarks største universiteter med over 27.000 studerende. Universitetet blev grundlagt i 1966 under navnet Odense Universitet og fik sit nuværende navn i 1998, da det fusionerede med flere andre uddannelsesinstitutioner i Syddanmark.
+
+Hovedcampus ligger i den sydlige del af Odense og er direkte forbundet med bycentrum via letbanen. Campusset er tegnet af den danske arkitekt Knud Holscher og er kendt for sin karakteristiske brutalisme-arkitektur med rå betonflader. Bygningskomplekset er forbundet af et system af indendørs gader, der gør det muligt at bevæge sig tørskoet mellem alle fakulteter – også i dårligt vejr.
+
+SDU er kendt for sin forskning inden for bl.a. robotteknologi, sundhedsvidenskab og humaniora. Universitetet huser også H.C. Andersen Centret, der forsker i H.C. Andersens værk, liv og kulturelle betydning. Centret holder til i Odense Adelige Jomfrukloster og samarbejder tæt med Museum Odense.
+
+For internationale studerende tilbyder SDU en bred vifte af engelsksprogede programmer. Universitetet har desuden en særlig afdeling for integrationsrådgivning, der hjælper udenlandske studerende med alt fra boligsøgning til at finde studiejobs i byen.
+
+
+### Mød tre odenseanere
+
+**Laura, 34 år – fra Rumænien**
+
+Laura flyttede til Odense i 2018 for at tage en kandidatuddannelse i robotteknologi på SDU. Efter sin uddannelse fik hun arbejde hos en af byens mange robotvirksomheder. "Det, der overraskede mig mest ved Odense, var antallet af robotvirksomheder. Der er over 130 virksomheder i den fynske robotklynge, og det gjorde det nemt at finde et relevant job efter studierne," fortæller Laura. Hun fremhæver især byens størrelse som en fordel: "Odense er stor nok til at have alt, man har brug for, men lille nok til, at man hurtigt føler sig hjemme."
+
+**Ahmed, 41 år – fra Syrien**
+
+Ahmed kom til Danmark i 2015 og boede først i København, før han flyttede til Odense med sin familie i 2019. Han arbejder i dag som tolk og kulturformidler på et af byens sprogcentre. "I København var alt dyrt, og vi boede i en lille lejlighed. I Odense fik vi en stor lejlighed til halvdelen af prisen," siger Ahmed. Han værdsætter også det stærke fællesskab i byen: "Vi har fundet et netværk af danske og internationale familier gennem børnenes skole. Mine børn taler flydende dansk og har mange venner."
+
+**Mette, 28 år – fra Jylland**
+
+Mette er født og opvokset i Aalborg, men valgte at flytte til Odense for at læse medicin på SDU. Efter sin uddannelse blev hun ansat på Odense Universitetshospital (OUH), der i 2024 flyttede til en helt ny bygning – Nyt OUH – i det sydlige Odense. "Nyt OUH er et af Nordens største hospitaler og har nogle fantastiske forskningsfaciliteter," fortæller Mette. Hun pendler til hospitalet med letbanen direkte fra sin lejlighed i centrum. "Det tager kun 18 minutter med letbanen fra Banegården til Nyt OUH. Det var faktisk letbanen, der fik mig til at vælge at bo i centrum i stedet for tættere på hospitalet," siger hun.

@@ -1,0 +1,281 @@
+# Dansk filmkunst – Fra stumfilm til international anerkendelse
+
+**Tekstsamling**
+
+*Fremstillet til prøveformål*
+
+---
+
+## Indhold
+
+Dansk films historie — 3
+  Stumfilmens guldalder — 3
+  Besættelsestiden og efterkrigstiden — 4
+
+Danske instruktører gennem tiderne — 5
+  Carl Theodor Dreyer — 5
+  De store navne fra 1960-90'erne — 6
+  Moderne mestre — 7
+
+Dogme 95-manifestet — 8
+  Ideologi og regler — 8
+  Dogme-filmene og deres betydning — 9
+
+Dansk film internationalt — 10
+  Oscarvinderene — 10
+  Danske skuespillere i Hollywood — 11
+
+Filmproduktion i Danmark — 12
+  Det Danske Filminstitut — 12
+  Finansiering og støtteordninger — 13
+
+Dansk films fremtid — 14
+  Streamingtjenester og nye platforme — 14
+  Nye stemmer og diversitet — 15
+  De kommende generationer — 16
+
+---
+
+## Dansk films historie
+
+### Stumfilmens guldalder
+
+Dansk film har en lang og stolt historie, der går tilbage til filmens tidligste dage. I 1897 viste Peter Elfelt, en dansk fotograf, de første levende billeder i Danmark. Kort efter blev der etableret flere produktionsselskaber, og den danske filmindustri var født.
+
+Det mest betydningsfulde selskab var Nordisk Film Kompagni, der blev grundlagt i 1906 af Ole Olsen. Nordisk Film blev hurtigt et af verdens største filmproduktionsselskaber og producerede hundreder af film i de følgende årtier. Selskabet eksisterer stadig i dag og er dermed et af verdens ældste filmselskaber i drift.
+
+I perioden 1910-1920 oplevede dansk film sin første internationale guldalder. Danske stumfilm blev eksporteret til hele verden og var særligt populære i Tyskland og USA. Instruktører som August Blom og Benjamin Christensen skabte film, der blev beundret for deres tekniske innovation og dramatiske historiefortælling.
+
+En af de mest kendte film fra denne periode er "Häxan" (1922) af Benjamin Christensen. Filmen er en blanding af dokumentar og fiktion om hekseforfølgelser gennem historien og blev betragtet som kontroversiel på grund af sit groteske indhold. I dag anses "Häxan" for at være et af stumfilmens mesterværker.
+
+Danske skuespillere som Asta Nielsen blev internationale stjerner. Nielsen, kaldet "den første filmdiva", spillede hovedrollen i over 70 stumfilm og var en af sin tids mest berømte skuespillerinder. Hun flyttede til Tyskland, hvor hun fik enorm succes og blev et ikon for stumfilmen.
+
+Den danske stumfilms succes var baseret på høj produktionskvalitet, professionelle skuespillere og innovative fortælleteknikker. Nordisk Film investerede store summer i dekorationer og kostumer og sørgede for, at filmene havde en visuel stil, der adskilte sig fra konkurrenterne.
+
+Men med talefilmens ankomst i slutningen af 1920'erne mistede dansk film sin internationale position. Sprogbarrierer gjorde det sværere at eksportere film, og Hollywood overtog dominansen på det globale marked. Dansk film blev primært et hjemmemarked, og produktionen faldt dramatisk i 1930'erne.
+
+
+### Besættelsestiden og efterkrigstiden
+
+Under den tyske besættelse af Danmark fra 1940 til 1945 fortsatte filmproduktionen, men under strenge censurregler. De tyske besættelsesmyndigheder kontrollerede indholdet af danske film og forbød alt, der kunne kritisere nazismen eller fremme modstandsbevægelsen. Mange instruktører valgte derfor at lave lettere underholdningsfilm, komedier og melodramaer, der ikke havde politisk indhold.
+
+Trods censuren lykkedes det enkelte film at smugle subtile kritikker ind. Filmen "Røde Mølle" (1943) af instruktøren Bodil Ipsen og Lau Lauritzen Jr. omhandler modstand mod undertrykkelse og blev set som et symbol på modstanden mod besættelsen, selvom den foregår i en anden historisk periode.
+
+Efter befrielsen i 1945 genoplivedes den danske filmindustri. Der var en begejstring for at fortælle historier om besættelsen og modstandskampen. Film som "De røde enge" (1945) og "Danmark i lænker" (1946) behandlede perioden direkte og blev meget populære blandt danskere, der ønskede at bearbejde krigens oplevelser.
+
+I 1950'erne og 1960'erne blev der produceret mange folkelige komedier og familiefilm. Serier som Olsen-banden og Morten Korch-filmene blev enorme succeser og trak millioner af biografgæster. Disse film var ikke kunstnerisk ambitiøse, men de spillede en vigtig rolle i at opbygge en dansk filmtradition og skabe arbejdspladser i branchen.
+
+Olsen-banden-filmene, der startede i 1968, blev en institution i dansk filmkultur. I alt 13 film blev lavet med karaktererne Egon, Benny og Kjeld, spillet af Ove Sprogøe, Morten Grunwald og Poul Bundgaard. Filmene handlede om en trio af amatør-tyve, der laver komplicerede planer for at stjæle store værdier – men altid fejler på humoristisk vis. Olsen-banden blev en kærkommen julefilm-tradition for mange danske familier.
+
+
+---
+
+## Danske instruktører gennem tiderne
+
+### Carl Theodor Dreyer
+
+Carl Theodor Dreyer (1889-1968) er bredt anerkendt som den største danske filminstruktør nogensinde. Hans film er kendetegnet ved deres intense visuelle stil, langsomme tempo og dybe psykologiske portrætter.
+
+Dreyer startede sin karriere i stumfilmens æra og lavede flere betydningsfulde film i 1920'erne, herunder "Prästänkan" (1920) og "Mikael" (1924). Men hans internationale gennembrud kom med "La Passion de Jeanne d'Arc" (Jeanne d'Arcs lidelse) fra 1928, en fransk stumfilm om Jeanne d'Arc's retssag og henrettelse.
+
+"La Passion de Jeanne d'Arc" regnes i dag for en af filmhistoriens største mesterværker. Filmen er berømt for sine intense nærbilleder af Jeanne d'Arc, spillet af den franske skuespillerinde Renée Falconetti. Dreyer brugte nærbilleder uden makeup for at fange karakterernes sjæle direkte. Filmen har en rå, følelsesmæssig kraft, der stadig rører moderne publikum.
+
+I 1932 lavede Dreyer "Vampyr", en skræmmende og surrealistisk film om overnaturlige kræfter. Filmen flopped kommercielt, men har siden fået kultstatus og betragtes som et vigtigt værk inden for horror-genren.
+
+Dreyers mest berømte danske film er "Ordet" (1955), baseret på et skuespil af Kaj Munk. Filmen handler om tro, tvivl og mirakler i en jysk bondeslægt. "Ordet" vandt Guldløven ved filmfestivalen i Venedig og etablerede Dreyer som en af verdens mest respekterede instruktører.
+
+Dreyers sidste film var "Gertrud" (1964), et langsomt, kontemplativt portræt af en kvinde, der vælger sin egen frihed frem for konventionelle forhold. Filmen blev modtaget koldt ved premieren, men er siden blevet genovervejet og anses i dag for et mesterværk.
+
+Dreyers indflydelse på senere instruktører er enorm. Hans brug af nærbilleder, langsomme bevægelser og interesse for det transcendente har inspireret filmskabere verden over, herunder Ingmar Bergman og Robert Bresson.
+
+
+### De store navne fra 1960-90'erne
+
+I 1960'erne og 1970'erne begyndte en ny generation af danske instruktører at eksperimentere med filmkunsten. De søgte at bryde med de traditionelle genrer og lave mere kunstnerisk ambitiøse film.
+
+En af de vigtigste var Henning Carlsen, der lavede "Sult" (1966), baseret på Knut Hamsuns roman. Filmen er et studie af en ung kunstners kamp mod fattigdom og sult i Kristiania (Oslo) og blev en international succes. Hovedrollen blev spillet af den svenske skuespiller Per Oscarsson, der vandt prisen for bedste mandlige skuespiller ved Cannes Film Festival.
+
+Palle Kjærulff-Schmidt lavede "Sådan er jeg også" (1980), en af de første danske film, der åbent behandlede homoseksualitet. Filmen var kontroversiel på sin tid, men banede vejen for mere åben debat om LGBT-emner i dansk film.
+
+I 1980'erne fik Bille August international opmærksomhed med "Pelle Erobreren" (1987), baseret på Martin Andersen Nexøs roman. Filmen handler om en svensk far og søn, der immigrerer til Bornholm i slutningen af 1800-tallet og møder hårde arbejdsvilkår. "Pelle Erobreren" vandt både Palme d'Or i Cannes og en Oscar for bedste fremmedsprogede film i 1988 – en enorm bedrift for dansk film.
+
+Bille August fulgte op med "Den goda viljan" (1992), en svensk-dansk produktion baseret på Ingmar Bergmans erindringer, der også fik stor international anerkendelse.
+
+Gabriel Axel vandt i 1987 en Oscar for "Babettes gæstebud", baseret på Karen Blixens novelle. Filmen fortæller om en fransk kok, der laver et overdådigt måltid for en puritansk menighed i Jylland. Filmen er en fejring af kunst, generøsitet og livsnydelse og er blevet en klassiker.
+
+
+### Moderne mestre
+
+I 1990'erne og 2000'erne opstod en ny generation af danske instruktører, der opnåede international anerkendelse og satte dansk film på verdenskortet.
+
+Lars von Trier er uden tvivl den mest kendte og kontroversielle. Hans karriere begyndte i 1980'erne, men hans internationale gennembrud kom med "Breaking the Waves" (1996), en følelsesmæssig drama om en kvinde i et isoleret skotsk samfund. Filmen vandt Jurys Grand Prix i Cannes og blev rost for sin rå fortællestil.
+
+Von Trier er medstifter af Dogme 95-bevægelsen (som beskrives i næste afsnit) og har lavet en lang række markante film, herunder "Dancer in the Dark" (2000), der vandt Palme d'Or i Cannes, samt "Melancholia" (2011) og "Nymphomaniac" (2013). Hans film er ofte mørke, provokerende og udfordrer publikums forventninger.
+
+Thomas Vinterberg, von Triers Dogme 95-partner, lavede "Festen" (1998), en af Dogme-bevægelsens mest succesfulde film. "Festen" handler om en familiemiddag, hvor et familiemedlem afslører mørke hemmeligheder fra fortiden. Filmen blev en international sensation og vandt Jurys Pris i Cannes.
+
+Vinterberg fortsatte med at lave internationalt anerkendte film, herunder "Jagten" (2012), der handler om en mand, der fejlagtigt beskyldes for pædofili. Filmen nomineres til en Oscar og vandt prisen for bedste skuespiller til Mads Mikkelsen i Cannes.
+
+Susanne Bier er en anden betydningsfuld instruktør fra denne generation. Hendes film behandler ofte komplekse menneskelige relationer, sorg og moralske dilemmaer. Hun vandt en Oscar for "Hævnen" (2010), en dansk-svensk film om hævn, tilgivelse og de moralske valg, vi står overfor.
+
+Bier har også lavet internationale produktioner, herunder TV-serien "The Night Manager" (2016), der vandt flere Emmy- og Golden Globe-priser, samt filmen "Bird Box" (2018) for Netflix.
+
+Nicolas Winding Refn skabte sig et navn med den intense kriminaltrilogi "Pusher" (1996-2005), der skildrer Københavns underverden. Han blev internationalt kendt med "Drive" (2011), en stiliseret neo-noir film med Ryan Gosling, der vandt prisen for bedste instruktør i Cannes.
+
+
+---
+
+## Dogme 95-manifestet
+
+### Ideologi og regler
+
+I 1995 proklamerede Lars von Trier og Thomas Vinterberg Dogme 95-manifestet på en filmkonference i Paris. Manifestet var en protest mod moderne films afhængighed af special effects, dyre produktioner og overfladisk underholdning. Von Trier og Vinterberg ønskede at vende tilbage til filmens essens – historiefortælling og skuespil.
+
+Dogme 95 bestod af ti regler, kaldet "Kyskhedsløftet", som instruktører skulle følge:
+
+1. Optagelser skal foregå på location. Rekvisitter og kulisser må ikke medbringe (hvis en bestemt rekvisit er nødvendig til historien, må der vælges en location, hvor denne rekvisit er til stede).
+2. Lyden må aldrig produceres adskilt fra billederne eller omvendt. (Musik må ikke bruges, medmindre den optages samtidig med, at scenen optages).
+3. Kameraet skal være håndholdt. Enhver bevægelse eller ubevægelighed, der kan opnås med håndholdt kamera, er tilladt.
+4. Filmen skal være i farver. Særlig belysning er ikke acceptabel.
+5. Optiske effekter og filtre er forbudt.
+6. Filmen må ikke indeholde overfladisk action. (Mord, våben osv. må ikke forekomme).
+7. Tidslig og geografisk tilbagerykning er forbudt. (Filmen foregår her og nu).
+8. Genrefilm er ikke acceptabel.
+9. Filmformatet skal være Academy 35 mm.
+10. Instruktøren må ikke krediteres.
+
+Disse regler var designet til at tvinge instruktører til at fokusere på skuespil, dialog og autentiske følelser i stedet for tekniske tricks og glamourøse produktioner.
+
+
+### Dogme-filmene og deres betydning
+
+Den første Dogme 95-film var Thomas Vinterbergs "Festen" (1998). Filmen handler om en familiemiddag, hvor sønnen Christian afslører, at hans afdøde tvilling blev seksuelt misbrugt af faren. Afsløringen skaber kaos, og familiens facade brydes ned.
+
+"Festen" blev indspillet med håndholdt kamera, naturligt lys og ingen ekstra musik. Den rå æstetik gav filmen en dokumentarisk følelse og forstærkede den emotionelle intensitet. Filmen blev en international sensation og viste, at Dogme 95-reglerne kunne skabe kraftfuld kunst.
+
+Lars von Triers "Idioterne" (1998) var den anden Dogme-film og handlede om en gruppe mennesker, der udgiver sig for at være udviklingshæmmede i offentligheden som en form for social provokation. Filmen var ekstrem kontroversiel på grund af dens eksplicitte scener og provokerende tema, men blev også rost for sin radikale ærlighed.
+
+I alt blev der lavet omkring 35 officielt certificerede Dogme 95-film af instruktører fra hele verden, herunder USA, Frankrig, Argentina og Sydkorea. Bevægelsen inspirerede en generation af filmskabere til at eksperimentere med lavbudgetproduktioner og fokusere på autenticitet.
+
+Selvom Dogme 95-manifestet officielt blev opløst i begyndelsen af 2000'erne, har dets indflydelse været vedvarende. Mange moderne film og tv-serier bruger håndholdt kamera og naturligt lys for at skabe en mere realistisk æstetik. Dogme 95 påvirkede også udviklingen af digital filmproduktion, da bevægelsen viste, at man ikke behøvede store budgetter for at lave meningsfuld film.
+
+
+---
+
+## Dansk film internationalt
+
+### Oscarvinderene
+
+Danmark har en bemærkelsesværdig track record ved Oscar-uddelingen. Siden 1950'erne har fire danske film vundet prisen for bedste fremmedsprogede film (nu kaldet bedste internationale film):
+
+1. **"Babettes gæstebud"** (1987) – Gabriel Axel  
+   Baseret på Karen Blixens novelle om en fransk kok, der laver et overdådigt måltid for en puritansk menighed i Jylland. Filmen er poetisk, smukt fotograferet og fejrer kunstens evne til at forene mennesker.
+
+2. **"Pelle Erobreren"** (1987) – Bille August  
+   En episk historie om en svensk far og søn, der immigrerer til Bornholm og kæmper mod fattigdom og undertrykkelse. Filmen vandt både Palme d'Or i Cannes og Oscar.
+
+3. **"Hævnen"** (2010) – Susanne Bier  
+   En intens historie om to familier forbundet af tragedie og hævn. Filmen udforsker moralske dilemmaer og konsekvenserne af vold.
+
+4. **"Druk"** (2020) – Thomas Vinterberg  
+   Filmen handler om fire gymnasielærere, der beslutter at teste en teori om, at et konstant lavt alkoholniveau forbedrer kreativitet og lykke. Eksperimentet får dramatiske konsekvenser. "Druk" blev enormt populær internationalt og vandt både Oscar og BAFTA.
+
+Ud over disse har flere danske film været nomineret, herunder Lars von Triers "Melancholia" og Thomas Vinterbergs "Jagten".
+
+Danmark er et af de lande, der har vundet flest Oscar-priser i forhold til sin befolkningsstørrelse, hvilket vidner om den høje kvalitet og internationale appel af dansk filmkunst.
+
+
+### Danske skuespillere i Hollywood
+
+Flere danske skuespillere har gjort international karriere og opnået success i Hollywood.
+
+**Mads Mikkelsen** er uden tvivl den mest kendte. Han begyndte sin karriere i danske film og tv-serier, men fik internationalt gennembrud med rollen som skurken Le Chiffre i James Bond-filmen "Casino Royale" (2006). Siden da har han spillet i en lang række internationale produktioner, herunder "Hannibal" (TV-serie, 2013-2015), "Doctor Strange" (2016), "Rogue One: A Star Wars Story" (2016), og "Fantastic Beasts" serien.
+
+Mikkelsen er kendt for sin intense og karismatiske tilstedeværelse på skærmen. Han vandt prisen for bedste skuespiller i Cannes for sin rolle i "Jagten" (2012).
+
+**Nikolaj Coster-Waldau** blev verdensberømt for sin rolle som Jaime Lannister i HBO's "Game of Thrones" (2011-2019). Han har også medvirket i film som "Oblivion" (2013) og "Gods of Egypt" (2016). Coster-Waldau har brugt sin berømmelse til at fremme danske film og støtte velgørende formål.
+
+**Connie Nielsen** har haft en lang karriere i Hollywood siden 1990'erne. Hun medvirkede i "Gladiator" (2000), "One Hour Photo" (2002), og spillede rollen som Hippolyta i "Wonder Woman" (2017) og dens efterfølger.
+
+**Pilou Asbæk** fik international anerkendelse gennem rollen som Euron Greyjoy i "Game of Thrones" og har medvirket i film som "Ghost in the Shell" (2017) og "Aquaman" (2018).
+
+**Claes Bang** har også gjort sig bemærket internationalt med roller i "The Square" (2017), "Dracula" (BBC-serie, 2020), og "The Northman" (2022).
+
+Disse skuespillere har ikke kun opnået personlig succes, men har også hjulpet med at promovere dansk film og kultur internationalt.
+
+
+---
+
+## Filmproduktion i Danmark
+
+### Det Danske Filminstitut
+
+Det Danske Filminstitut (DFI) blev grundlagt i 1972 og spiller en central rolle i den danske filmindustri. Instituttet har til opgave at støtte dansk filmproduktion, bevare dansk filmkultur og fremme dansk film både nationalt og internationalt.
+
+DFI administrerer støtteordninger, uddeler produktionsstøtte til spillefilm, dokumentarfilm og kortfilm, og driver Den Danske Filmskole, der uddanner fremtidens instruktører, fotografer, producere og andre filmfagfolk.
+
+Instituttet driver også Cinemateket i København, et af Nordeuropas største filmhuse med fire biografsale, der viser klassiske og samtidsfilm fra hele verden. Cinemateket fungerer også som arkiv og bevarer tusindvis af danske film.
+
+DFI spiller en afgørende rolle i at sikre, at dansk film kan konkurrere internationalt. Gennem konsulentordninger får instruktører rådgivning og økonomisk støtte til at udvikle deres projekter. DFI har også internationale kontorer og samarbejder med filmfestivaler, distributører og andre filminstitutter for at promovere danske film.
+
+
+### Finansiering og støtteordninger
+
+Dansk filmproduktion er i høj grad afhængig af offentlig støtte. Uden denne støtte ville mange kunstneriske og eksperimentelle film ikke blive lavet, da de ikke kunne finansieres gennem private investorer alene.
+
+DFI's støtteordninger er opdelt i flere kategorier:
+
+**Markedsstøtte**: Gives til film med kommercielt potentiale. Producenter kan søge om støtte baseret på et manuskript, budget og en markedsanalyse. Denne støtte forudsætter, at filmen kan tiltrække et publikum og tjene penge.
+
+**Konsulentordningen**: Giver erfarne filmkonsulenter mulighed for at støtte projekter, de tror på. Konsulenter har budgetter, de kan uddele til instruktører. Denne ordning giver mere kunstnerisk frihed og har resulteret i mange af dansk films mest innovative værker.
+
+**Ny Dansk Skærm**: En pulje dedikeret til at støtte debuterende instruktører og unge talenter. Denne ordning har hjulpet mange nye stemmer med at få deres første film produceret.
+
+**Co-produktioner**: DFI støtter også internationale co-produktioner, hvor danske instruktører samarbejder med udenlandske partnere. Dette udvider budgetterne og giver adgang til internationale markeder.
+
+Ud over DFI-støtten findes der regionale filmfonde, TV-stationer (især DR og TV2), som co-producerer film, samt private investorer og sponsorer.
+
+Den danske filmbranche beskæftiger omkring 6.000 personer direkte og bidrager med cirka 3 milliarder kroner til den danske økonomi årligt. Filmindustrien er altså ikke kun kulturelt vigtig, men også økonomisk betydningsfuld.
+
+
+---
+
+## Dansk films fremtid
+
+### Streamingtjenester og nye platforme
+
+Fremkomsten af streamingtjenester som Netflix, HBO, Apple TV+ og Disney+ har ændret filmlandskabet fundamentalt. I stedet for biografpremiere får flere film og især tv-serier nu premiere på digitale platforme, hvilket giver adgang til et globalt publikum fra dag ét.
+
+Flere danske instruktører og producenter arbejder nu direkte med streamingselskaberne. Susanne Biers "The Undoing" (2020) og "The Perfect Couple" (2024) blev produceret af HBO og Netflix, mens "Borgen", "Bron/Broen" og "Bedrag" har fået international distribution gennem streaming.
+
+Den største danske streaming-succes er "Borgen" (2010-2022), en politisk dramaserie skabt af Adam Price. Serien blev oprindeligt vist på DR, men Netflix købte internationale rettigheder, og serien blev en global hit. Dette førte til, at DR og Netflix co-producerede en fjerde sæson i 2022.
+
+En anden stor succes er "Rita" (2012-2020), en komedieserie om en ukonventionel skolelærer. Serien blev solgt til over 70 lande og fik en amerikansk remake.
+
+Streamingtjenester giver danske instruktører adgang til større budgetter og internationale publikum, men de stiller også krav om at appellere til globale smagsdomme. Nogle kritikere frygter, at dansk film kan miste sin unikke karakter, hvis den skal tilpasse sig internationale krav.
+
+
+### Nye stemmer og diversitet
+
+De seneste år har der været et stigende fokus på at inkludere flere perspektiver i dansk film. Historisk set har hovedparten af danske instruktører været hvide mænd, men dette er ved at ændre sig.
+
+Flere kvindelige instruktører har fået succes, herunder **Paprika Steen**, der debuterede som instruktør med "Jeg er din" (2013) og har siden lavet flere anerkendte film. **May el-Toukhy** fik international anerkendelse for "Dronningen" (2019), en intens drama om forbudt kærlighed, der blev nomineret til en Oscar.
+
+Der er også kommet flere instruktører med minoritetsbaggrund. **Fenar Ahmad** lavede "Unge Andersen" (2005) og "Ækte vare" (2014), der begge behandler temaer om identitet, integration og kriminalitet i Danmark. **Phie Ambo** har lavet prisbelønnede dokumentarfilm om filosofi og samfundskritik.
+
+Der er også en stigende interesse for at fortælle historier fra ikke-vestlige perspektiver og behandle temaer som racisme, LGBTQ+-rettigheder og social ulighed. Film som "Før frosten" (2018) af Michael Noer, der handler om grønlandske ungdomsproblemer, og "Retfærdighedens ryttere" (2020) af Anders Thomas Jensen, der satiriserer politisk korrekthed og hævn, viser bredden i moderne danske film.
+
+Den Danske Filmskole har også arbejdet aktivt på at rekruttere mere mangfoldige studerende, og fremtidens danske film vil sandsynligvis afspejle et langt bredere spektrum af stemmer og erfaringer.
+
+
+### De kommende generationer
+
+Fremtidens danske instruktører vokser op i en digital tidsalder, hvor filmproduktionsværktøjer er mere tilgængelige end nogensinde før. Smartphones, billige kameraer og redigeringssoftware betyder, at unge filmskabere kan eksperimentere uden store budgetter.
+
+Sociale medier som YouTube, TikTok og Instagram giver også mulighed for at dele film direkte med publikum uden at skulle gennem traditionelle distributionskanaler. Mange unge filmskabere bygger publikum gennem kortfilm, sketches og eksperimentelle projekter online.
+
+Den Danske Filmskole modtager hvert år hundredvis af ansøgninger fra ambitiøse unge talenter. Skolen fokuserer på både traditionel filmhåndværk og nye digitale platforme. Studerende lærer at arbejde med alt fra 35mm film til virtual reality.
+
+Fremtidens danske film vil sandsynligvis være mere varieret, teknologisk innovativ og globalt orienteret end nogensinde før. Men de bedste danske film vil fortsat være dem, der fortæller menneskelige historier med ærlighed, dybde og kunstnerisk integritet – værdier, der har kendetegnet dansk film siden Carl Theodor Dreyers tid.
+
+Den internationale anerkendelse, som dansk film har opnået i de seneste årtier, betyder, at unge danske filmskabere i dag har muligheder, som tidligere generationer kun kunne drømme om. Dansk film står stærkt – og fremtiden ser lys ud.

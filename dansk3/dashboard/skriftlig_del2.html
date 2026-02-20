@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skriftlig Fremstilling Del 2</title>
+  <script src="/assets/js/auth-guard-dansk3.js"></script>
+  <script src="/assets/js/pd3-engine.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --red:    #c8102e;
+      --navy:   #0f172a;
+      --slate:  #334155;
+      --muted:  #64748b;
+      --border: #e2e8f0;
+      --surface:#ffffff;
+      --bg:     #f8f7f4;
+      --correct:#166534;
+      --correct-bg:#f0fdf4;
+      --correct-border:#bbf7d0;
+      --amber:  #92400e;
+      --amber-bg:#fffbeb;
+      --amber-border:#fde68a;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+    body {
+      font-family:"DM Sans",system-ui,sans-serif;
+      background:var(--bg); color:var(--navy);
+      min-height:100vh;
+    }
+
+    /* ── TOPBAR ─────────────────────────────────────── */
+    .topbar {
+      background:var(--navy); border-bottom:3px solid var(--red);
+      padding:0 28px; height:52px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:200;
+    }
+    .topbar-left { display:flex; align-items:center; gap:12px; }
+    .back-link {
+      color:#64748b; text-decoration:none; font-size:0.8rem;
+      display:flex; align-items:center; gap:5px; transition:color 0.15s;
+    }
+    .back-link:hover { color:#fff; }
+    .topbar-divider { width:1px; height:20px; background:#1e293b; }
+    .topbar-flag {
+      width:22px; height:16px; background:var(--red);
+      border-radius:2px; position:relative; overflow:hidden; flex-shrink:0;
+    }
+    .topbar-flag::before { content:''; position:absolute; left:8px; top:0; width:3px; height:100%; background:white; }
+    .topbar-flag::after  { content:''; position:absolute; left:0; top:5.5px; width:100%; height:3px; background:white; }
+    .topbar-brand { display:flex; align-items:center; gap:10px; }
+    .topbar-title { font-family:"Fraunces",serif; font-size:0.9rem; font-weight:600; color:#fff; }
+    .topbar-sub   { font-size:0.75rem; color:#64748b; }
+    .topbar-right { display:flex; align-items:center; gap:12px; }
+    .word-count-pill {
+      background:#1e293b; border-radius:99px;
+      padding:4px 12px; font-size:0.75rem; color:#94a3b8;
+    }
+    .word-count-pill span { color:#fff; font-weight:600; }
+
+    /* ── LOADING ────────────────────────────────────── */
+    #loading-overlay {
+      position:fixed; inset:0; background:var(--bg);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:16px;
+      z-index:9999; transition:opacity 0.35s;
+    }
+    #loading-overlay.hidden { opacity:0; pointer-events:none; }
+    .loading-spinner {
+      width:32px; height:32px; border-radius:50%;
+      border:3px solid var(--border); border-top-color:var(--red);
+      animation:spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-text { font-size:0.9rem; color:var(--muted); }
+
+    /* ══════════════════════════════════════════════════
+       CHOICE SCREEN
+    ══════════════════════════════════════════════════ */
+    #choiceScreen {
+      max-width:800px; margin:0 auto;
+      padding:48px 28px 80px;
+    }
+    .choice-eyebrow {
+      font-size:0.7rem; font-weight:600; text-transform:uppercase;
+      letter-spacing:0.09em; color:var(--muted);
+      display:flex; align-items:center; gap:8px; margin-bottom:14px;
+    }
+    .choice-eyebrow-dot { width:5px; height:5px; border-radius:50%; background:var(--red); }
+    .choice-title {
+      font-family:"Fraunces",serif;
+      font-size:clamp(1.4rem,3vw,1.9rem);
+      font-weight:700; letter-spacing:-0.025em; line-height:1.15;
+      margin-bottom:8px;
+    }
+    .choice-subtitle {
+      font-size:0.9rem; color:var(--muted); margin-bottom:32px; line-height:1.5;
+    }
+    .choice-cards {
+      display:grid; grid-template-columns:1fr 1fr; gap:20px;
+    }
+    .choice-card {
+      background:var(--surface); border:2px solid var(--border);
+      border-radius:16px; overflow:hidden;
+      cursor:pointer;
+      transition:border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+    }
+    .choice-card:hover {
+      border-color:#94a3b8;
+      box-shadow:0 4px 20px rgba(0,0,0,0.08);
+      transform:translateY(-2px);
+    }
+    .cc-badge {
+      padding:10px 16px 0;
+    }
+    .cc-badge-inner {
+      display:inline-flex; align-items:center; gap:6px;
+      background:var(--navy); color:white;
+      border-radius:7px; padding:4px 11px;
+      font-size:0.72rem; font-weight:700;
+    }
+    .cc-body { padding:16px; }
+    .cc-label {
+      font-size:0.7rem; font-weight:600; text-transform:uppercase;
+      letter-spacing:0.07em; color:var(--muted); margin-bottom:6px;
+    }
+    .cc-title {
+      font-family:"Fraunces",serif;
+      font-size:1.05rem; font-weight:700; line-height:1.3;
+      margin-bottom:10px;
+    }
+    .cc-desc { font-size:0.82rem; color:var(--slate); line-height:1.55; }
+    .cc-footer {
+      padding:14px 16px;
+      border-top:1px solid var(--border);
+      background:#f8fafc;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .cc-meta { font-size:0.75rem; color:var(--muted); }
+    .cc-btn {
+      background:var(--navy); color:white; border:none;
+      border-radius:8px; padding:8px 18px;
+      font-family:"DM Sans",sans-serif; font-size:0.83rem; font-weight:600;
+      cursor:pointer; transition:opacity 0.15s;
+    }
+    .cc-btn:hover { opacity:0.84; }
+
+    /* Mini diagram preview */
+    .cc-diagram-preview {
+      margin:10px 0 0;
+      background:#f8fafc; border-radius:8px; padding:10px 12px;
+    }
+    .cc-diagram-preview-title {
+      font-size:0.68rem; color:var(--muted); margin-bottom:7px; font-weight:600;
+    }
+    .mini-bar-row {
+      display:flex; align-items:center; gap:6px; margin-bottom:4px;
+    }
+    .mini-bar-label { font-size:0.65rem; color:var(--muted); width:52px; flex-shrink:0; text-align:right; }
+    .mini-bar-track { flex:1; background:#e2e8f0; border-radius:3px; height:7px; overflow:hidden; }
+    .mini-bar-fill  { height:100%; background:var(--red); border-radius:3px; transition:width 0.5s; }
+    .mini-bar-val   { font-size:0.65rem; font-weight:700; color:var(--navy); width:28px; }
+
+    /* Topic preview */
+    .cc-topic-preview {
+      margin:10px 0 0;
+      background:#f8fafc; border-radius:8px; padding:10px 12px;
+      font-size:0.78rem; color:var(--slate); line-height:1.55;
+    }
+
+    @media (max-width:600px) {
+      .choice-cards { grid-template-columns:1fr; }
+      #choiceScreen { padding:32px 16px 60px; }
+    }
+
+    /* ══════════════════════════════════════════════════
+       TASK SCREEN
+    ══════════════════════════════════════════════════ */
+    #taskScreen { display:none; }
+
+    /* Mobile toggle */
+    .task-toggle {
+      display:none;
+      width:100%; background:var(--surface); border:none;
+      border-bottom:1px solid var(--border);
+      padding:13px 20px;
+      font-family:"DM Sans",sans-serif; font-size:0.88rem; font-weight:600;
+      color:var(--navy); cursor:pointer; text-align:left;
+      align-items:center; gap:10px;
+      position:sticky; top:52px; z-index:100;
+    }
+    .toggle-icon { transition:transform 0.2s; font-size:0.75rem; }
+    .task-toggle.collapsed .toggle-icon { transform:rotate(-90deg); }
+    @media (min-width:901px) { .task-toggle { display:none !important; } }
+    @media (max-width:900px) { .task-toggle { display:flex; } }
+
+    .exam-layout {
+      display:grid; grid-template-columns:1fr 440px;
+      min-height:calc(100vh - 52px);
+    }
+
+    /* LEFT: task material */
+    .material-column {
+      border-right:1px solid var(--border);
+      overflow-y:auto;
+      position:sticky; top:52px;
+      height:calc(100vh - 52px);
+    }
+    .material-inner { max-width:640px; padding:36px 40px 80px; }
+
+    .variant-badge {
+      display:inline-flex; align-items:center; gap:7px;
+      background:var(--navy); color:white;
+      border-radius:8px; padding:5px 13px;
+      font-size:0.75rem; font-weight:700;
+      margin-bottom:16px;
+    }
+    .material-title {
+      font-family:"Fraunces",serif;
+      font-size:clamp(1.2rem,2vw,1.6rem);
+      font-weight:700; letter-spacing:-0.02em; line-height:1.2;
+      margin-bottom:20px;
+    }
+
+    /* ── DIAGRAM (2A) ───────────────────────────────── */
+    .diagram-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:14px; overflow:hidden;
+      margin-bottom:24px;
+    }
+    .diagram-header {
+      padding:14px 20px; border-bottom:1px solid var(--border);
+      background:#f8fafc;
+    }
+    .diagram-title {
+      font-family:"Fraunces",serif;
+      font-size:0.95rem; font-weight:700; line-height:1.3;
+    }
+    .diagram-subtitle {
+      font-size:0.75rem; color:var(--muted); margin-top:3px;
+    }
+    .diagram-body { padding:20px 24px 16px; }
+    .bar-chart { display:flex; flex-direction:column; gap:10px; }
+    .bar-row {
+      display:grid;
+      grid-template-columns:96px 1fr 44px;
+      align-items:center; gap:10px;
+    }
+    .bar-group-label {
+      font-size:0.82rem; color:var(--slate); text-align:right;
+      font-weight:500; line-height:1.2;
+    }
+    .bar-track {
+      background:#e9eef5; border-radius:5px; height:22px; overflow:hidden;
+    }
+    .bar-fill {
+      height:100%; background:var(--red); border-radius:5px;
+      transition:width 0.6s cubic-bezier(.4,0,.2,1);
+      display:flex; align-items:center; justify-content:flex-end;
+      padding-right:6px;
+    }
+    .bar-fill-label {
+      font-size:0.7rem; font-weight:700; color:rgba(255,255,255,0.9);
+      white-space:nowrap;
+    }
+    .bar-value {
+      font-size:0.82rem; font-weight:700; color:var(--navy);
+    }
+    /* Highlight the anomaly bar */
+    .bar-fill.highlight { background:#1d4ed8; }
+    .diagram-source {
+      font-size:0.68rem; color:#94a3b8; margin-top:12px;
+      padding-top:10px; border-top:1px solid var(--border);
+    }
+    .diagram-x-label {
+      font-size:0.7rem; color:var(--muted); text-align:center;
+      margin-bottom:8px; font-weight:600;
+    }
+    .key-obs-title {
+      font-size:0.7rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.07em; color:var(--muted); margin-bottom:8px; margin-top:20px;
+    }
+    .key-obs-item {
+      display:flex; gap:7px;
+      font-size:0.8rem; color:var(--slate); line-height:1.5;
+      margin-bottom:6px;
+      padding:6px 10px; border-radius:7px;
+      background:#f8fafc; border-left:3px solid var(--border);
+    }
+    .key-obs-item.notable { border-left-color:#1d4ed8; background:#eff6ff; color:#1e3a8a; }
+
+    /* ── TOPIC CONTEXT (2B) ─────────────────────────── */
+    .topic-context-card {
+      background:var(--amber-bg); border:1px solid var(--amber-border);
+      border-radius:12px; padding:18px 20px;
+      margin-bottom:20px;
+    }
+    .tc-eyebrow {
+      font-size:0.68rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--amber); margin-bottom:8px;
+    }
+    .tc-body { font-size:0.88rem; color:var(--amber); line-height:1.65; }
+
+    .vocab-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:12px; padding:16px 18px;
+      margin-bottom:20px;
+    }
+    .vocab-title {
+      font-size:0.7rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--muted); margin-bottom:10px;
+    }
+    .vocab-chips {
+      display:flex; flex-wrap:wrap; gap:6px;
+    }
+    .vocab-chip {
+      background:#f1f5f9; border:1px solid var(--border);
+      border-radius:6px; padding:4px 10px;
+      font-size:0.77rem; color:var(--slate);
+    }
+
+    /* ── TASK INSTRUCTIONS ──────────────────────────── */
+    .task-inst-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:12px; overflow:hidden;
+    }
+    .task-inst-header {
+      background:#f8fafc; padding:12px 16px;
+      border-bottom:1px solid var(--border);
+    }
+    .task-inst-title {
+      font-size:0.7rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--muted);
+    }
+    .task-inst-body { padding:14px 16px; }
+    .task-inst-body p {
+      font-size:0.88rem; color:var(--navy); font-weight:600;
+      margin-bottom:10px;
+    }
+    .task-inst-item {
+      display:flex; gap:8px;
+      font-size:0.84rem; color:var(--slate); line-height:1.55;
+      margin-bottom:8px;
+      padding:7px 10px;
+      background:#f8fafc; border-radius:7px;
+      border-left:3px solid var(--border);
+    }
+    .task-inst-item:last-child { margin-bottom:0; }
+    .task-inst-item.emphasis { border-left-color:var(--red); }
+    .ti-bullet { color:var(--red); font-weight:700; flex-shrink:0; }
+    .task-min-words {
+      margin-top:12px; padding:8px 12px;
+      background:var(--amber-bg); border:1px solid var(--amber-border);
+      border-radius:8px; font-size:0.8rem; color:var(--amber); font-weight:600;
+    }
+
+    /* RIGHT: writing pane */
+    .write-column {
+      position:sticky; top:52px;
+      height:calc(100vh - 52px);
+      overflow-y:auto;
+      background:var(--surface);
+      display:flex; flex-direction:column;
+    }
+    .write-header {
+      padding:18px 22px 14px;
+      border-bottom:1px solid var(--border); flex-shrink:0;
+    }
+    .write-eyebrow {
+      font-size:0.68rem; font-weight:600; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--muted); margin-bottom:6px;
+    }
+    .write-header h2 {
+      font-family:"Fraunces",serif; font-size:1.05rem; font-weight:700; line-height:1.3;
+    }
+
+    /* Task checklist */
+    .task-checklist { margin:14px 22px 0; flex-shrink:0; }
+    .task-checklist-title {
+      font-size:0.68rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--muted); margin-bottom:8px;
+    }
+    .task-item {
+      display:flex; align-items:flex-start; gap:8px;
+      font-size:0.79rem; line-height:1.45; color:var(--slate);
+      margin-bottom:5px; padding:6px 10px;
+      border-radius:7px; background:#f8fafc; border:1px solid var(--border);
+    }
+    .task-bullet {
+      width:16px; height:16px; border-radius:50%;
+      border:2px solid #cbd5e1; flex-shrink:0; margin-top:1px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:0.6rem; color:transparent; transition:all 0.15s;
+    }
+    .task-item.done .task-bullet { background:var(--correct); border-color:var(--correct); color:white; }
+    .task-item.done { border-color:var(--correct-border); background:var(--correct-bg); }
+    /* Emphasis item (50% note) */
+    .task-item.emphasis-item {
+      border-left:3px solid var(--red); background:#fdf2f3;
+      border-color:var(--border); border-left-color:var(--red);
+    }
+    .task-item.emphasis-item.done { border-left-color:var(--correct); }
+
+    .write-area {
+      flex:1; padding:14px 22px;
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .write-top-row {
+      display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:8px;
+    }
+    .write-label { font-size:0.78rem; font-weight:600; color:var(--navy); }
+    .register-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      background:#f1f5f9; border:1px solid var(--border);
+      border-radius:7px; padding:4px 10px;
+      font-size:0.73rem; color:var(--muted);
+    }
+    .register-badge strong { color:var(--navy); }
+
+    .reply-textarea {
+      flex:1; width:100%; min-height:300px;
+      padding:14px 16px;
+      border:1.5px solid var(--border); border-radius:10px;
+      font-family:"DM Sans",sans-serif; font-size:0.92rem;
+      line-height:1.75; color:var(--navy); background:var(--surface);
+      resize:vertical; outline:none; transition:border-color 0.15s;
+    }
+    .reply-textarea:focus { border-color:#94a3b8; }
+    .reply-textarea:disabled { background:#f8fafc; color:var(--muted); cursor:default; resize:none; }
+    .reply-textarea::placeholder { color:#94a3b8; }
+
+    /* Word count */
+    .wc-bar-wrap { flex-shrink:0; }
+    .wc-bar-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+    .wc-label { font-size:0.75rem; color:var(--muted); }
+    .wc-count { font-size:0.75rem; font-weight:700; color:var(--navy); }
+    .wc-bar-bg { height:5px; border-radius:3px; background:#e2e8f0; overflow:hidden; }
+    .wc-bar-fill {
+      height:100%; border-radius:3px; background:var(--muted);
+      transition:width 0.2s, background 0.2s; width:0%;
+    }
+    .wc-bar-fill.good { background:#22c55e; }
+    .wc-bar-fill.over { background:var(--red); }
+    .wc-target-hint { font-size:0.7rem; color:var(--muted); margin-top:4px; }
+    .wc-target-hint.good { color:var(--correct); font-weight:600; }
+    .wc-target-hint.over { color:var(--red); font-weight:600; }
+
+    /* Footer */
+    .write-footer { padding:14px 22px; border-top:1px solid var(--border); flex-shrink:0; }
+    .already-done {
+      display:none; background:var(--correct-bg); border:1px solid var(--correct-border);
+      border-radius:10px; padding:12px; font-size:0.82rem; color:var(--correct);
+      text-align:center; margin-bottom:12px;
+    }
+    .already-done.visible { display:block; }
+    .submitted-notice {
+      display:none; background:var(--correct-bg); border:1px solid var(--correct-border);
+      border-radius:10px; padding:16px; text-align:center; font-size:0.85rem;
+      color:var(--correct); font-weight:600; margin-bottom:12px;
+    }
+    .submitted-notice.visible { display:block; }
+    .submitted-notice p { font-weight:400; font-size:0.78rem; color:var(--muted); margin-top:6px; }
+    .submit-btn {
+      width:100%; background:var(--navy); color:white; border:none;
+      border-radius:10px; padding:14px;
+      font-family:"DM Sans",sans-serif; font-size:0.93rem; font-weight:600;
+      cursor:pointer; transition:opacity 0.15s;
+    }
+    .submit-btn:hover:not(:disabled) { opacity:0.84; }
+    .submit-btn:disabled { opacity:0.4; cursor:not-allowed; }
+    .continue-btn {
+      width:100%; background:var(--red); color:white; border:none;
+      border-radius:10px; padding:14px;
+      font-family:"DM Sans",sans-serif; font-size:0.93rem; font-weight:600;
+      cursor:pointer; transition:opacity 0.15s;
+    }
+    .continue-btn:hover { opacity:0.88; }
+    .submit-info { font-size:0.74rem; color:var(--muted); text-align:center; margin-top:8px; line-height:1.4; }
+    .skip-link {
+      display:block; text-align:center; margin-top:10px;
+      font-size:0.75rem; color:#94a3b8; cursor:pointer;
+      text-decoration:underline; text-underline-offset:3px;
+    }
+    .skip-link:hover { color:var(--muted); }
+
+    /* Mobile */
+    @media (max-width:900px) {
+      .exam-layout { grid-template-columns:1fr; min-height:unset; }
+      .material-column { position:static; height:auto; overflow-y:visible; border-right:none; border-bottom:1px solid var(--border); }
+      .material-column.collapsed { display:none; }
+      .write-column { position:static; height:auto; overflow-y:visible; }
+      .material-inner { padding:24px 20px 32px; }
+      .write-area { flex:unset; }
+      .reply-textarea { min-height:260px; }
+    }
+    @media (max-width:600px) {
+      .topbar { padding:0 14px; }
+      .material-inner { padding:20px 14px 28px; }
+      .write-header, .task-checklist, .write-area, .write-footer { padding-left:14px; padding-right:14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <p class="loading-text">Henter opgaver…</p>
+</div>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" id="backLink" href="exam.html">← Tilbage</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-brand">
+      <div class="topbar-flag" aria-hidden="true"></div>
+      <div>
+        <div class="topbar-title" id="topbarTitle">Skriftlig Del 2</div>
+        <div class="topbar-sub">Prøve i Dansk 3</div>
+      </div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="word-count-pill" id="wcPill" style="display:none;">Ord: <span id="topbarWc">0</span></div>
+  </div>
+</header>
+
+<!-- ── CHOICE SCREEN ─────────────────────────────────────── -->
+<div id="choiceScreen" style="display:none;">
+  <div class="choice-eyebrow">
+    <div class="choice-eyebrow-dot"></div>
+    <span>Skriftlig fremstilling · Del 2</span>
+  </div>
+  <h1 class="choice-title">Vælg din opgave</h1>
+  <p class="choice-subtitle">Du skal besvare én af de to opgaver nedenfor. Læs begge grundigt igennem, inden du vælger.</p>
+
+  <div class="choice-cards">
+    <!-- 2A -->
+    <div class="choice-card" id="card2A" onclick="selectVariant('A')">
+      <div class="cc-badge"><div class="cc-badge-inner">📊 Opgave 2A — Diagram</div></div>
+      <div class="cc-body">
+        <div class="cc-label">Skriv om et diagram</div>
+        <div class="cc-title" id="cc-title-A">…</div>
+        <div class="cc-desc">Beskriv diagrammet, forklar årsager, og vurdér hvad staten og kommunerne kan gøre.</div>
+        <div class="cc-diagram-preview" id="ccDiagramPreview">
+          <div class="cc-diagram-preview-title">Forhåndsvisning af diagram</div>
+          <!-- mini bars rendered by JS -->
+        </div>
+      </div>
+      <div class="cc-footer">
+        <span class="cc-meta">Min. 200 ord · AI-bedømt</span>
+        <button class="cc-btn">Vælg denne →</button>
+      </div>
+    </div>
+
+    <!-- 2B -->
+    <div class="choice-card" id="card2B" onclick="selectVariant('B')">
+      <div class="cc-badge"><div class="cc-badge-inner">✍️ Opgave 2B — Emne</div></div>
+      <div class="cc-body">
+        <div class="cc-label">Skriv om et emne</div>
+        <div class="cc-title" id="cc-title-B">…</div>
+        <div class="cc-desc">Beskriv emnet, forklar fordele og ulemper, og giv en begrundet personlig vurdering.</div>
+        <div class="cc-topic-preview" id="ccTopicPreview"></div>
+      </div>
+      <div class="cc-footer">
+        <span class="cc-meta">Min. 200 ord · AI-bedømt</span>
+        <button class="cc-btn">Vælg denne →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TASK SCREEN ────────────────────────────────────────── -->
+<div id="taskScreen">
+  <button class="task-toggle" id="taskToggle" onclick="toggleMaterial()">
+    <span id="toggleLabel">📋 Vis opgave</span>
+    <span class="toggle-icon">▾</span>
+  </button>
+
+  <div class="exam-layout">
+    <!-- LEFT -->
+    <div class="material-column" id="materialColumn">
+      <div class="material-inner">
+        <div class="variant-badge" id="variantBadge">…</div>
+        <h2 class="material-title" id="materialTitle">…</h2>
+        <!-- 2A: diagram -->
+        <div id="diagramSection" style="display:none;">
+          <div class="diagram-card">
+            <div class="diagram-header">
+              <div class="diagram-title" id="diagramTitle"></div>
+              <div class="diagram-subtitle" id="diagramSubtitle"></div>
+            </div>
+            <div class="diagram-body">
+              <div class="diagram-x-label" id="diagramXLabel"></div>
+              <div class="bar-chart" id="barChart"></div>
+              <div class="diagram-source" id="diagramSource"></div>
+            </div>
+          </div>
+          <div class="key-obs-title">Bemærkelsesværdige observationer</div>
+          <div id="keyObsList"></div>
+        </div>
+        <!-- 2B: topic context -->
+        <div id="topicSection" style="display:none;">
+          <div class="topic-context-card">
+            <div class="tc-eyebrow">Baggrundsinformation</div>
+            <div class="tc-body" id="topicContextBody"></div>
+          </div>
+          <div class="vocab-card" id="vocabCard" style="display:none;">
+            <div class="vocab-title">Nyttig ordforråd</div>
+            <div class="vocab-chips" id="vocabChips"></div>
+          </div>
+        </div>
+        <!-- Task instructions (shared) -->
+        <div class="task-inst-card" style="margin-top:20px;">
+          <div class="task-inst-header">
+            <div class="task-inst-title">Din opgave</div>
+          </div>
+          <div class="task-inst-body" id="taskInstBody"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="write-column">
+      <div class="write-header">
+        <div class="write-eyebrow" id="writeEyebrow">Skriftlig fremstilling · Del 2</div>
+        <h2 id="writeTitle">Skriv din tekst</h2>
+      </div>
+
+      <div class="task-checklist">
+        <div class="task-checklist-title">Huskeliste</div>
+        <div id="taskChecklistItems"></div>
+      </div>
+
+      <div class="write-area">
+        <div class="write-top-row">
+          <label class="write-label" for="replyTextarea">Din tekst</label>
+          <div class="register-badge">
+            Tone: <strong id="registerBadgeText">halvformel</strong>
+          </div>
+        </div>
+        <textarea
+          class="reply-textarea"
+          id="replyTextarea"
+          placeholder="Begynd din tekst her…"
+          oninput="onTextChange()"
+          spellcheck="true"
+          lang="da"
+        ></textarea>
+        <div class="wc-bar-wrap">
+          <div class="wc-bar-row">
+            <span class="wc-label">Antal ord</span>
+            <span class="wc-count" id="wcCount">0</span>
+          </div>
+          <div class="wc-bar-bg"><div class="wc-bar-fill" id="wcBarFill"></div></div>
+          <div class="wc-target-hint" id="wcHint">Skriv minimum 200 ord</div>
+        </div>
+      </div>
+
+      <div class="write-footer">
+        <div class="already-done" id="alreadyDone">✅ Denne del er allerede afleveret.</div>
+        <div class="submitted-notice" id="submittedNotice">
+          ✅ Svar afleveret!
+          <p>AI evaluerer din tekst. Resultater sendes på email, når hele prøven er afsluttet.</p>
+        </div>
+        <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>
+          Aflever tekst
+        </button>
+        <button class="continue-btn" id="continueBtn" onclick="PD3.goBack(simId, attemptId)" style="display:none;">
+          Fortsæt med simulering →
+        </button>
+        <p class="submit-info" id="submitInfo">Teksten vurderes af AI på B2-kriterier efter aflevering.</p>
+        <span class="skip-link" id="skipLink" onclick="skipElement()">Spring over uden at svare</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+
+const SIM_FILES = {
+  sim01: {
+    A: 'dansk3_sim01_skriftlig_delprove2A_motion.json',
+    B: 'dansk3_sim01_skriftlig_delprove2B_cykel_bil.json',
+  },
+  sim02: { A:'dansk3_sim02_skriftlig_delprove2A.json', B:'dansk3_sim02_skriftlig_delprove2B.json' },
+  sim03: { A:'dansk3_sim03_skriftlig_delprove2A.json', B:'dansk3_sim03_skriftlig_delprove2B.json' },
+  sim04: { A:'dansk3_sim04_skriftlig_delprove2A.json', B:'dansk3_sim04_skriftlig_delprove2B.json' },
+  sim05: { A:'dansk3_sim05_skriftlig_delprove2A.json', B:'dansk3_sim05_skriftlig_delprove2B.json' },
+  sim06: { A:'dansk3_sim06_skriftlig_delprove2A.json', B:'dansk3_sim06_skriftlig_delprove2B.json' },
+  sim07: { A:'dansk3_sim07_skriftlig_delprove2A.json', B:'dansk3_sim07_skriftlig_delprove2B.json' },
+  sim08: { A:'dansk3_sim08_skriftlig_delprove2A.json', B:'dansk3_sim08_skriftlig_delprove2B.json' },
+  sim09: { A:'dansk3_sim09_skriftlig_delprove2A.json', B:'dansk3_sim09_skriftlig_delprove2B.json' },
+  sim10: { A:'dansk3_sim10_skriftlig_delprove2A.json', B:'dansk3_sim10_skriftlig_delprove2B.json' },
+};
+
+
+// ─── shared state (assigned by PD3.init in DOMContentLoaded) ───
+let currentUser = null;
+let attemptId, simId, simNum, elemKey;
+
+const WC_MIN    = 200;
+const WC_TARGET = 325;
+const WC_SOFT   = 60;
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+
+let dataA = null, dataB = null;
+let chosenVariant = null;   // 'A' or 'B'
+let submitted    = false;
+let materialVisible = true;
+let wordCount    = 0;
+let taskItems    = [];
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  ({ user: currentUser, attemptId, simId, simNum, elemKey } = await PD3.init('skriftlig_del2'));
+
+  document.getElementById('backLink').href = `exam.html?sim=${simId}&attempt=${attemptId}`;
+
+  const files = SIM_FILES[simId];
+  if (!files) { PD3.showError('Ukendt simulering: ' + simId, simId, attemptId); return; }
+
+  try {
+    const [resA, resB] = await Promise.all([
+      fetch(`/dansk3/data/${simNum}/${files.A}`),
+      fetch(`/dansk3/data/${simNum}/${files.B}`),
+    ]);
+    if (!resA.ok) throw new Error(`2A HTTP ${resA.status}`);
+    if (!resB.ok) throw new Error(`2B HTTP ${resB.status}`);
+    [dataA, dataB] = await Promise.all([resA.json(), resB.json()]);
+  } catch (err) {
+    PD3.showError('Kunne ikke hente opgaverne. ' + err.message, simId, attemptId);
+    return;
+  }
+
+  // Check if already submitted (either variant)
+  const hydrateData = await PD3.hydrateData(currentUser.email, attemptId);
+  const attempt     = (hydrateData?.attempts||[]).find(a => a.id === attemptId);
+  for (const variant of ['A','B']) {
+    const key  = `skriftlig_del2${variant.toLowerCase()}`;
+    const elem = (attempt?.elements||[]).find(e => e.element_key === key);
+    if (elem?.submission_status === 'submitted' || elem?.submission_status === 'skipped') {
+      submitted = true;
+      chosenVariant = variant;
+    }
+  }
+
+  renderChoiceScreen();
+  PD3.hideLoading();
+
+  if (submitted && chosenVariant) {
+    selectVariant(chosenVariant, true);
+  } else {
+    document.getElementById('choiceScreen').style.display = '';
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// CHOICE SCREEN
+// ═══════════════════════════════════════════════════════════════
+function renderChoiceScreen() {
+  // 2A title
+  document.getElementById('cc-title-A').textContent = dataA.title;
+  // 2B title
+  document.getElementById('cc-title-B').textContent = dataB.title;
+
+  // Mini diagram for 2A
+  const preview = document.getElementById('ccDiagramPreview');
+  const maxVal = Math.max(...dataA.diagram.data.map(d => d.value));
+  preview.innerHTML = `<div class="cc-diagram-preview-title">Forhåndsvisning — ${dataA.diagram.title}</div>` +
+    dataA.diagram.data.map(d => `
+      <div class="mini-bar-row">
+        <span class="mini-bar-label">${PD3.escapeHtml(d.group)}</span>
+        <div class="mini-bar-track">
+          <div class="mini-bar-fill" style="width:${(d.value/maxVal)*100}%"></div>
+        </div>
+        <span class="mini-bar-val">${d.value}%</span>
+      </div>`).join('');
+
+  // Topic preview for 2B
+  const topicPrev = document.getElementById('ccTopicPreview');
+  const ctx = dataB.topic_context?.da || '';
+  topicPrev.textContent = ctx.length > 180 ? ctx.slice(0,177) + '…' : ctx;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SELECT VARIANT
+// ═══════════════════════════════════════════════════════════════
+function selectVariant(variant, skipConfirm = false) {
+  if (!skipConfirm && chosenVariant) return; // already chosen
+  if (!skipConfirm) {
+    const names = { A:'Opgave 2A — '+dataA.title, B:'Opgave 2B — '+dataB.title };
+    if (!confirm(`Du har valgt: ${names[variant]}\n\nEr du sikker? Du kan ikke skifte bagefter.`)) return;
+  }
+
+  chosenVariant = variant;
+  const data = variant === 'A' ? dataA : dataB;
+
+  document.getElementById('choiceScreen').style.display = 'none';
+  document.getElementById('taskScreen').style.display = '';
+  document.getElementById('wcPill').style.display = '';
+
+  const simNum = parseInt(simId.replace('sim',''), 10);
+  document.getElementById('topbarTitle').textContent = `Sim ${simNum} — Skriftlig 2${variant}`;
+
+  renderTaskScreen(data, variant);
+
+  if (submitted) {
+    lockWriteArea();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER TASK SCREEN
+// ═══════════════════════════════════════════════════════════════
+function renderTaskScreen(data, variant) {
+  const isA = variant === 'A';
+
+  // Header
+  document.getElementById('variantBadge').textContent = isA
+    ? '📊 Opgave 2A — Diagram'
+    : '✍️ Opgave 2B — Emne';
+  document.getElementById('materialTitle').textContent = data.title;
+  document.getElementById('writeTitle').textContent = isA
+    ? 'Skriv om motionsvaner i Danmark'
+    : `Skriv om: ${data.title}`;
+  document.getElementById('writeEyebrow').textContent =
+    `Skriftlig fremstilling · Del 2${variant}`;
+  if (data.evaluation_criteria?.register) {
+    document.getElementById('registerBadgeText').textContent = data.evaluation_criteria.register;
+  }
+
+  if (isA) {
+    renderDiagram(data.diagram);
+    document.getElementById('diagramSection').style.display = '';
+    // toggle label
+    document.getElementById('toggleLabel').textContent = '📊 Vis diagram';
+  } else {
+    renderTopicContext(data);
+    document.getElementById('topicSection').style.display = '';
+    document.getElementById('toggleLabel').textContent = '📋 Vis opgavemateriale';
+  }
+
+  renderTaskInstructions(data.task_instructions.da);
+  renderChecklist(data, variant);
+}
+
+function renderDiagram(diagram) {
+  document.getElementById('diagramTitle').textContent = diagram.title;
+  document.getElementById('diagramSubtitle').textContent = diagram.subtitle || '';
+  document.getElementById('diagramXLabel').textContent = diagram.x_axis || '';
+  document.getElementById('diagramSource').textContent = 'Kilde: ' + (diagram.source || '');
+
+  const maxVal = 100;
+  const anomalyGroup = '65-74 år';
+  const chart = document.getElementById('barChart');
+  chart.innerHTML = diagram.data.map(d => {
+    const isAnomaly = d.group === anomalyGroup;
+    return `
+      <div class="bar-row">
+        <div class="bar-group-label">${PD3.escapeHtml(d.group)}</div>
+        <div class="bar-track">
+          <div class="bar-fill ${isAnomaly ? 'highlight' : ''}" style="width:${d.value}%">
+            <span class="bar-fill-label">${d.value}%</span>
+          </div>
+        </div>
+        <div class="bar-value">${d.value}%</div>
+      </div>`;
+  }).join('');
+
+  // Key observations
+  const obsList = document.getElementById('keyObsList');
+  obsList.innerHTML = (diagram.key_observations || []).map((obs, i) => {
+    const isNotable = obs.includes('65-74') || obs.includes('brud');
+    return `<div class="key-obs-item ${isNotable ? 'notable' : ''}">
+      <span style="flex-shrink:0;">${isNotable ? '⚡' : '→'}</span>
+      <span>${PD3.escapeHtml(obs)}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderTopicContext(data) {
+  document.getElementById('topicContextBody').textContent = data.topic_context?.da || '';
+
+  const vocab = data.useful_vocabulary?.da;
+  if (vocab?.length) {
+    document.getElementById('vocabCard').style.display = '';
+    document.getElementById('vocabChips').innerHTML = vocab.map(v =>
+      `<span class="vocab-chip">${PD3.escapeHtml(v)}</span>`).join('');
+  }
+}
+
+function renderTaskInstructions(raw) {
+  const body = document.getElementById('taskInstBody');
+  // Parse bullet lines (•) and intro
+  const lines = raw.split('\n').filter(l => l.trim());
+  let html = '';
+  lines.forEach(line => {
+    if (line.startsWith('•')) {
+      const text = line.replace(/^•\s*/, '');
+      const isEmphasis = text.includes('50 %') || text.includes('50%');
+      html += `<div class="task-inst-item ${isEmphasis ? 'emphasis' : ''}">
+        <span class="ti-bullet">•</span>
+        <span>${PD3.escapeHtml(text)}</span>
+      </div>`;
+    } else if (line.toLowerCase().startsWith('begrund')) {
+      html += `<div class="task-inst-item emphasis">
+        <span class="ti-bullet">!</span>
+        <span>${PD3.escapeHtml(line)}</span>
+      </div>`;
+    } else if (line.includes('minimum') || line.includes('Minimum')) {
+      html += `<div class="task-min-words">📝 ${PD3.escapeHtml(line)}</div>`;
+    } else {
+      html += `<p>${PD3.escapeHtml(line)}</p>`;
+    }
+  });
+  body.innerHTML = html;
+}
+
+function renderChecklist(data, variant) {
+  const isA = variant === 'A';
+  taskItems = isA ? [
+    { id:'describe', label:'Beskriv diagrammets hovedtræk (inkl. bruddet ved 65-74 år)' },
+    { id:'causes',   label:'Forklar årsager til forskellene i diagrammet' },
+    { id:'assess',   label:'Vurdér hvad staten/kommunerne kan gøre (ca. 50% af teksten)', emphasis:true },
+    { id:'justify',  label:'Begrund dine synspunkter konkret' },
+  ] : [
+    { id:'describe', label:'Beskriv danskernes brug af cykel og bil' },
+    { id:'proCon',   label:'Forklar fordele og ulemper ved begge transportmidler' },
+    { id:'stance',   label:'Giv en klar personlig vurdering med begrundelse', emphasis:true },
+    { id:'society',  label:'Vurdér hvad der bør gøres samfundsmæssigt (ca. 50%)', emphasis:true },
+  ];
+
+  const wrap = document.getElementById('taskChecklistItems');
+  wrap.innerHTML = taskItems.map(item => `
+    <div class="task-item${item.emphasis ? ' emphasis-item' : ''}" id="titem-${item.id}">
+      <div class="task-bullet" id="tbullet-${item.id}">✓</div>
+      <span>${PD3.escapeHtml(item.label)}</span>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WRITING + WORD COUNT
+// ═══════════════════════════════════════════════════════════════
+function onTextChange() {
+  const text = document.getElementById('replyTextarea').value;
+  wordCount = text.trim().length === 0 ? 0 : PD3.countWords(text);
+  updateWcUI(wordCount);
+  updateChecklist(text);
+  document.getElementById('submitBtn').disabled = (wordCount < WC_SOFT) || submitted;
+}
+
+function updateWcUI(count) {
+  document.getElementById('wcCount').textContent = count;
+  document.getElementById('topbarWc').textContent = count;
+
+  const fill = document.getElementById('wcBarFill');
+  const hint = document.getElementById('wcHint');
+
+  if (count === 0) {
+    fill.style.width = '0%'; fill.className = 'wc-bar-fill';
+    hint.textContent = `Skriv minimum ${WC_MIN} ord`; hint.className = 'wc-target-hint';
+  } else if (count < WC_MIN) {
+    fill.style.width = (count / WC_MIN * 70) + '%'; fill.className = 'wc-bar-fill';
+    hint.textContent = `${WC_MIN - count} ord til minimum ${WC_MIN}`; hint.className = 'wc-target-hint';
+  } else if (count <= WC_TARGET) {
+    fill.style.width = (70 + ((count - WC_MIN) / (WC_TARGET - WC_MIN)) * 30) + '%';
+    fill.className = 'wc-bar-fill good';
+    hint.textContent = `✓ God længde (${count} ord)`; hint.className = 'wc-target-hint good';
+  } else {
+    fill.style.width = '100%'; fill.className = 'wc-bar-fill over';
+    hint.textContent = `${count - WC_TARGET} ord over anbefalet`; hint.className = 'wc-target-hint over';
+  }
+}
+
+function updateChecklist(text) {
+  if (submitted) return;
+  const isA = chosenVariant === 'A';
+  const checks = isA ? {
+    describe: () => /(diagram|procent|%|16-24|72|54|65-74|61|42|fald|stiger|tendens|aldersgruppe)/i.test(text) && wordCount > 30,
+    causes:   () => /(årsag|forklare|fordi|skyldes|pensionist|arbejde|tid|familie|helbred|ung|travl)/i.test(text),
+    assess:   () => /(stat|kommu|tilbud|subsidier|gratis|kampagne|fremme|arbejdsplads|tilskud|initiativ)/i.test(text),
+    justify:  () => /(fordi|da |idet|af\s+den\s+grund|ville\s+hjælpe|vil\s+have\s+effekt|fordi|derfor)/i.test(text),
+  } : {
+    describe: () => /(cykelku|cykler|danskerne|Danmark|cykelsti|biler|transport|hverdagen)/i.test(text) && wordCount > 30,
+    proCon:   () => /(fordel|ulempe|billig|dyr|miljø|forurene|motion|praktisk|fleksibel|dårligt vejr)/i.test(text),
+    stance:   () => /(jeg (mener|synes|tror|foretrækker|anbefaler)|min (mening|holdning)|efter min)/i.test(text),
+    society:  () => /(cykelvej|afgift|byplanlæg|kollektiv|offentlig trafik|kommuner|staten|subsidier|vejafgift)/i.test(text),
+  };
+
+  taskItems.forEach(item => {
+    const fn = checks[item.id];
+    const done = fn ? fn() : false;
+    document.getElementById(`titem-${item.id}`)?.classList.toggle('done', done);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MOBILE TOGGLE
+// ═══════════════════════════════════════════════════════════════
+function toggleMaterial() {
+  materialVisible = !materialVisible;
+  const col = document.getElementById('materialColumn');
+  const btn = document.getElementById('taskToggle');
+  col.classList.toggle('collapsed', !materialVisible);
+  btn.classList.toggle('collapsed', !materialVisible);
+  const label = document.getElementById('toggleLabel');
+  const isA = chosenVariant === 'A';
+  const base = isA ? '📊 diagram' : '📋 opgavemateriale';
+  label.textContent = materialVisible
+    ? `Skjul ${base}`
+    : `Vis ${base}`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════════════════
+async function submitAnswer() {
+  if (submitted) return;
+  const text = document.getElementById('replyTextarea').value.trim();
+  if (!text) return;
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Afleverer…';
+
+  const data = chosenVariant === 'A' ? dataA : dataB;
+  const actualKey = `skriftlig_del2${chosenVariant.toLowerCase()}`;
+
+  const responseJson = {
+    variant:          chosenVariant,
+    task_title:       data.title,
+    task_instructions:data.task_instructions?.da,
+    word_count:       wordCount,
+    evaluation_criteria: data.evaluation_criteria,
+    ai_prompt:        data.ai_evaluation_prompt?.da,
+    diagram_data:     chosenVariant === 'A' ? data.diagram?.data : undefined,
+    user_answer:      text,
+  };
+
+  try {
+    await PD3.submit({ attemptId, elemKey: actualKey, text, json: responseJson });
+  } catch (err) {
+    console.error('Submit error:', err);
+    btn.disabled = false;
+    btn.textContent = 'Aflever tekst';
+    PD3.toast('Noget gik galt. Prøv igen.');
+    return;
+  }
+
+  submitted = true;
+  lockWriteArea();
+  document.getElementById('submittedNotice').classList.add('visible');
+  document.getElementById('continueBtn').style.display = 'block';
+  taskItems.forEach(item => document.getElementById(`titem-${item.id}`)?.classList.add('done'));
+}
+
+function lockWriteArea() {
+  document.getElementById('replyTextarea').disabled = true;
+  document.getElementById('submitBtn').style.display = 'none';
+  document.getElementById('skipLink').style.display = 'none';
+  document.getElementById('submitInfo').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SKIP
+// ═══════════════════════════════════════════════════════════════
+async function skipElement() {
+  if (submitted) return;
+  if (!chosenVariant) {
+    if (!confirm('Vil du springe Del 2 helt over?')) return;
+  } else {
+    if (!confirm('Er du sikker på, at du vil springe denne del over? Du får 0 point.')) return;
+  }
+  document.getElementById('skipLink').style.display = 'none';
+  document.getElementById('submitBtn').disabled = true;
+  const actualKey = chosenVariant ? `skriftlig_del2${chosenVariant.toLowerCase()}` : elemKey;
+  await PD3.skip({ attemptId, elemKey: actualKey });
+  submitted = true;
+  PD3.goBack(simId, attemptId);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+</script>
+</body>
+</html>

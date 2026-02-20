@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mundtlig Del 1 — Opfølgning</title>
+  <script src="/assets/js/auth-guard-dansk3.js"></script>
+  <script src="/assets/js/pd3-engine.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --red:    #c8102e;
+      --red-dim:#f5e1e4;
+      --navy:   #0f172a;
+      --slate:  #334155;
+      --muted:  #64748b;
+      --border: #e2e8f0;
+      --surface:#ffffff;
+      --bg:     #f8f7f4;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--bg); color: var(--navy); min-height: 100vh;
+    }
+
+    /* ── TOPBAR ─────────────────────────────────────────────── */
+    .topbar {
+      background: var(--navy); border-bottom: 3px solid var(--red);
+      padding: 0 28px; height: 52px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .back-link {
+      color: #64748b; text-decoration: none; font-size: 0.8rem;
+      display: flex; align-items: center; gap: 5px; transition: color 0.15s;
+    }
+    .back-link:hover { color: #fff; }
+    .topbar-divider { width: 1px; height: 20px; background: #1e293b; }
+    .topbar-flag {
+      width: 22px; height: 16px; background: var(--red);
+      border-radius: 2px; position: relative; overflow: hidden; flex-shrink: 0;
+    }
+    .topbar-flag::before {
+      content: ''; position: absolute; left: 8px; top: 0;
+      width: 3px; height: 100%; background: white;
+    }
+    .topbar-flag::after {
+      content: ''; position: absolute; left: 0; top: 5.5px;
+      width: 100%; height: 3px; background: white;
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 10px; }
+    .topbar-title { font-family: "Fraunces", serif; font-size: 0.9rem; font-weight: 600; color: #fff; }
+    .topbar-sub   { font-size: 0.75rem; color: #64748b; }
+    .topbar-step  { font-size: 0.78rem; color: #475569; }
+
+    /* ── LOADING ─────────────────────────────────────────────── */
+    #loading-overlay {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px;
+      z-index: 9999; transition: opacity 0.35s;
+    }
+    #loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    .loading-spinner {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 3px solid var(--border); border-top-color: var(--red);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 0.9rem; color: var(--muted); }
+
+    /* ── MAIN ────────────────────────────────────────────────── */
+    main {
+      max-width: 720px; margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* ── SECTION VISIBILITY ─────────────────────────────────── */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* ══════════════════════════════════════════════════════════
+       LOCKED STATE
+    ══════════════════════════════════════════════════════════ */
+    .locked-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px 40px;
+      text-align: center;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 20px;
+    }
+    .locked-orbit {
+      position: relative; width: 72px; height: 72px;
+    }
+    .locked-core {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: #f1f5f9;
+      border: 2px solid var(--border);
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+    .locked-ring {
+      position: absolute; inset: 0; border-radius: 50%;
+      border: 2px solid transparent;
+      border-top-color: var(--red);
+      animation: spin 1.6s linear infinite;
+    }
+    .locked-title {
+      font-family: "Fraunces", serif;
+      font-size: 1.25rem; font-weight: 600; color: var(--navy);
+    }
+    .locked-body { font-size: 0.88rem; color: var(--muted); line-height: 1.6; max-width: 360px; }
+    .locked-status {
+      display: flex; align-items: center; gap: 8px;
+      background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 99px; padding: 6px 16px;
+      font-size: 0.78rem; color: var(--muted);
+    }
+    .locked-pulse {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--red);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .locked-hint {
+      font-size: 0.78rem; color: #94a3b8;
+      padding-top: 4px;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       QUESTIONS STEPPER
+    ══════════════════════════════════════════════════════════ */
+
+    /* Progress strip */
+    .stepper-progress {
+      display: flex; align-items: center; gap: 6px;
+      margin-bottom: 32px;
+    }
+    .step-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 600;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .step-dot.done    { background: var(--navy); color: white; }
+    .step-dot.current { background: var(--red); color: white; box-shadow: 0 0 0 3px var(--red-dim); }
+    .step-dot.pending { background: #f1f5f9; color: var(--muted); border: 1px solid var(--border); }
+    .step-line {
+      flex: 1; height: 2px; background: var(--border);
+      border-radius: 1px; transition: background 0.3s;
+    }
+    .step-line.done { background: var(--navy); }
+
+    /* Type badge */
+    .question-type-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .type-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); }
+
+    /* Question bubble */
+    .question-bubble {
+      background: var(--navy);
+      color: white;
+      border-radius: 4px 16px 16px 16px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .question-bubble::before {
+      content: '🎓';
+      display: block;
+      font-size: 0.75rem;
+      margin-bottom: 8px;
+      opacity: 0.7;
+    }
+    .question-text {
+      font-family: "Fraunces", serif;
+      font-size: 1.1rem; font-weight: 600; line-height: 1.4;
+      letter-spacing: -0.01em;
+    }
+
+    /* Answer area */
+    .answer-label {
+      font-size: 0.78rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .answer-textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 16px;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: var(--navy);
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      resize: vertical;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+    .answer-textarea:focus { border-color: var(--navy); }
+    .answer-textarea.has-content { border-color: #cbd5e1; }
+
+    /* Word count + hint */
+    .answer-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 6px;
+    }
+    .answer-hint { font-size: 0.75rem; color: #94a3b8; }
+    .word-count  { font-size: 0.75rem; color: var(--muted); }
+    .word-count.good { color: #16a34a; }
+
+    /* Nav buttons */
+    .step-nav {
+      display: flex; gap: 10px; margin-top: 24px;
+    }
+    .btn-prev {
+      flex: 0 0 auto;
+      background: none; color: var(--muted);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 13px 20px;
+      font-family: "DM Sans", sans-serif; font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-prev:hover { border-color: var(--slate); color: var(--slate); }
+    .btn-prev:disabled { opacity: 0.3; cursor: default; }
+    .btn-next {
+      flex: 1;
+      background: var(--navy); color: white; border: none;
+      border-radius: 10px; padding: 14px;
+      font-family: "DM Sans", sans-serif; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-next:hover { opacity: 0.84; }
+    .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-to-review {
+      flex: 1;
+      background: var(--red); color: white; border: none;
+      border-radius: 10px; padding: 14px;
+      font-family: "DM Sans", sans-serif; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-to-review:hover { opacity: 0.88; }
+    .btn-to-review:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Skip link */
+    .skip-link {
+      display: block; text-align: center; margin-top: 12px;
+      font-size: 0.78rem; color: #94a3b8; cursor: pointer;
+      text-decoration: underline; text-underline-offset: 3px;
+      transition: color 0.15s;
+    }
+    .skip-link:hover { color: var(--muted); }
+
+    /* ══════════════════════════════════════════════════════════
+       REVIEW STATE
+    ══════════════════════════════════════════════════════════ */
+    .review-header {
+      margin-bottom: 28px;
+    }
+    .review-header-eyebrow {
+      font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px;
+    }
+    .review-header h2 {
+      font-family: "Fraunces", serif;
+      font-size: 1.5rem; font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .review-header p {
+      font-size: 0.85rem; color: var(--muted); margin-top: 6px;
+    }
+
+    .review-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 28px; }
+    .review-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .review-item-q {
+      background: #f8fafc; padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .review-qnum {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--navy); color: white;
+      font-size: 0.7rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .review-qtext {
+      font-size: 0.85rem; font-weight: 600; color: var(--navy); line-height: 1.45;
+    }
+    .review-item-a {
+      padding: 14px 18px;
+    }
+    .review-answer-text {
+      font-size: 0.88rem; color: var(--slate); line-height: 1.65;
+      white-space: pre-wrap;
+    }
+    .review-answer-empty {
+      font-size: 0.83rem; color: #94a3b8; font-style: italic;
+    }
+    .review-edit-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 0.75rem; color: var(--muted); padding: 4px 0;
+      text-decoration: underline; text-underline-offset: 3px;
+      transition: color 0.15s;
+    }
+    .review-edit-btn:hover { color: var(--navy); }
+
+    .review-submit-btn {
+      width: 100%;
+      background: var(--red); color: white; border: none;
+      border-radius: 12px; padding: 18px;
+      font-family: "DM Sans", sans-serif; font-size: 1rem; font-weight: 600;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .review-submit-btn:hover { opacity: 0.88; }
+    .review-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .review-back-btn {
+      width: 100%; margin-top: 8px;
+      background: none; color: var(--muted);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 13px;
+      font-family: "DM Sans", sans-serif; font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; transition: border-color 0.15s, color 0.15s;
+    }
+    .review-back-btn:hover { border-color: var(--slate); color: var(--slate); }
+
+    /* ══════════════════════════════════════════════════════════
+       SUBMITTING & SUCCESS
+    ══════════════════════════════════════════════════════════ */
+    .center-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 48px 32px;
+      text-align: center; display: flex; flex-direction: column;
+      align-items: center; gap: 16px;
+    }
+    .center-card.success-card {
+      border-color: #bbf7d0; background: #f0fdf4;
+    }
+    .center-card .spinner {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 3px solid var(--border); border-top-color: var(--red);
+      animation: spin 0.8s linear infinite;
+    }
+    .center-card .c-title {
+      font-family: "Fraunces", serif; font-size: 1.15rem;
+      font-weight: 600; color: var(--navy);
+    }
+    .center-card.success-card .c-title { color: #166534; }
+    .center-card .c-body {
+      font-size: 0.85rem; color: var(--muted); line-height: 1.6; max-width: 340px;
+    }
+    .center-card.success-card .c-body { color: #166534; }
+    .success-icon { font-size: 2.2rem; }
+    .redirect-note { font-size: 0.75rem; color: #4ade80; }
+
+    /* ── RESPONSIVE ─────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      main { padding: 24px 14px 60px; }
+      .topbar { padding: 0 14px; }
+      .locked-card { padding: 36px 20px; }
+      .question-text { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOADING ──────────────────────────────────────────────── -->
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <p class="loading-text">Henter opfølgning…</p>
+</div>
+
+<!-- ── TOPBAR ──────────────────────────────────────────────── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" id="backLink" href="exam.html">← Tilbage</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-brand">
+      <div class="topbar-flag" aria-hidden="true"></div>
+      <div>
+        <div class="topbar-title" id="topbarTitle">Mundtlig Del 1 — Opfølgning</div>
+        <div class="topbar-sub">Prøve i Dansk 3</div>
+      </div>
+    </div>
+  </div>
+  <span class="topbar-step">💬 Eksaminatordialog</span>
+</header>
+
+<!-- ── MAIN ──────────────────────────────────────────────────── -->
+<main>
+
+  <!-- ══ 1. LOCKED ══════════════════════════════════════════ -->
+  <div class="section" id="section-locked">
+    <div class="locked-card">
+      <div class="locked-orbit">
+        <div class="locked-ring"></div>
+        <div class="locked-core">🎓</div>
+      </div>
+      <div class="locked-title">Opfølgning genereres…</div>
+      <div class="locked-body">
+        Eksaminator læser din præsentation og vælger 3–4 opfølgende spørgsmål
+        tilpasset præcis hvad du sagde. Det tager typisk 1–2 minutter.
+      </div>
+      <div class="locked-status">
+        <div class="locked-pulse"></div>
+        <span id="lockStatusText">Venter på transskription…</span>
+      </div>
+      <div class="locked-hint">Siden opdateres automatisk</div>
+    </div>
+  </div>
+
+  <!-- ══ 2. QUESTIONS ════════════════════════════════════════ -->
+  <div class="section" id="section-questions">
+
+    <!-- Eyebrow + topic -->
+    <div style="margin-bottom: 28px;">
+      <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block;"></span>
+        <span id="topicLabel">Mundtlig opfølgning</span>
+      </div>
+      <h1 style="font-family:'Fraunces',serif;font-size:clamp(1.3rem,3vw,1.8rem);font-weight:700;letter-spacing:-0.025em;line-height:1.2;">
+        Eksaminatordialog
+        <em style="font-style:italic;font-weight:300;color:var(--muted)">— del 1 opfølgning</em>
+      </h1>
+      <p style="font-size:0.83rem;color:var(--muted);margin-top:8px;">
+        Besvar hvert spørgsmål med 3–6 sætninger på dansk, som du ville gøre til den mundtlige prøve.
+      </p>
+    </div>
+
+    <!-- Progress strip -->
+    <div class="stepper-progress" id="stepperProgress"></div>
+
+    <!-- Single question + answer (rendered by JS) -->
+    <div id="questionArea"></div>
+
+    <div style="text-align:center;margin-top:24px;">
+      <span id="skipLink" onclick="skipElement()" style="font-size:0.8rem;color:#94a3b8;cursor:pointer;">Spring opfølgning over</span>
+    </div>
+
+  </div><!-- /section-questions -->
+
+  <!-- ══ 3. REVIEW ═══════════════════════════════════════════ -->
+  <div class="section" id="section-review">
+    <div class="review-header">
+      <div class="review-header-eyebrow">Gennemse dine svar</div>
+      <h2>Klar til at aflevere?</h2>
+      <p>Læs dine svar igennem. Klik på "Rediger" for at ændre et svar inden du afleverer.</p>
+    </div>
+    <div class="review-list" id="reviewList"></div>
+    <button class="review-submit-btn" id="btnReviewSubmit" onclick="submitAnswers()">
+      Aflever opfølgning
+    </button>
+    <button class="review-back-btn" onclick="goBackToQuestions()">
+      ← Gå tilbage og rediger
+    </button>
+    <div style="text-align:center;margin-top:16px;">
+      <span onclick="skipElement()" style="font-size:0.8rem;color:#94a3b8;cursor:pointer;">Spring opfølgning over</span>
+    </div>
+  </div>
+
+  <!-- ══ 4. SUBMITTING ═══════════════════════════════════════ -->
+  <div class="section" id="section-submitting">
+    <div class="center-card">
+      <div class="spinner"></div>
+      <div class="c-title">Afleverer…</div>
+      <div class="c-body">Dine svar sendes til vurdering. Et øjeblik.</div>
+    </div>
+  </div>
+
+  <!-- ══ 5. SUCCESS ══════════════════════════════════════════ -->
+  <div class="section" id="section-success">
+    <div class="center-card success-card">
+      <div class="success-icon">✅</div>
+      <div class="c-title">Opfølgning afleveret</div>
+      <div class="c-body">
+        Dine svar er modtaget. AI-bedømmelsen af det mundtlige element
+        starter nu i baggrunden.<br><br>
+        Du kan fortsætte med resten af simuleringen.
+      </div>
+      <div class="redirect-note" id="successRedirect">Videresender…</div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+
+
+const POLL_INTERVAL_MS = 15_000;   // poll every 15 seconds
+
+// Type → human-readable label
+const TYPE_LABELS = {
+  uddybning:     'Uddybning',
+  forklaring:    'Forklaring',
+  stillingtagen: 'Din holdning',
+  udvidelse:     'Ny vinkel',
+  personlig:     'Personlig erfaring',
+  sammenligning: 'Sammenligning',
+  kritisk:       'Kritisk spørgsmål',
+  fremadskuende: 'Fremadskuende',
+};
+
+// ═══════════════════════════════════════════════════════════════
+// URL PARAMS & STATE
+// ═══════════════════════════════════════════════════════════════
+
+// ─── shared state (assigned by PD3.init in DOMContentLoaded) ───
+let currentUser = null;
+let attemptId, simId, simNum, elemKey;
+
+let questions   = [];   // array of { id, type, question, reason }
+let answers     = {};   // { id: answerText }
+let currentStep = 0;
+let pollTimer   = null;
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', async () => {
+  ({ user: currentUser, attemptId, simId, simNum, elemKey } = await PD3.init('mundtlig_del1_followup'));
+
+  document.getElementById('backLink').href = `exam.html?sim=${simId}&attempt=${attemptId}`;
+  document.getElementById('topbarTitle').textContent = `Simulering ${simNum} — Opfølgning`;
+  document.getElementById('topicLabel').textContent = `Simulering ${simNum} · Mundtlig del 1 opfølgning`;
+
+  await checkAndLoad();
+  PD3.hideLoading();
+});
+
+
+
+// ═══════════════════════════════════════════════════════════════
+// HYDRATE — load attempt state
+// ═══════════════════════════════════════════════════════════════
+
+async function checkAndLoad() {
+  const email = currentUser?.email;
+  if (!email) { showSection('locked'); startPolling(); return; }
+
+  try {
+    const data = await PD3.hydrateData(email, attemptId);
+    if (!data) throw new Error('Hydrate returned null');
+
+    // Find our attempt
+    const attempt = (data.attempts || []).find(a => a.id === attemptId);
+    if (!attempt) { showSection('locked'); startPolling(); return; }
+
+    if (attempt.oral1_followup_ready && attempt.oral1_followup_questions?.questions?.length) {
+      questions = attempt.oral1_followup_questions.questions;
+      stopPolling();
+
+      // Check if element already submitted
+      const elem = (attempt.elements || []).find(e => e.element_key === elemKey);
+      if (elem?.submission_status === 'submitted' || elem?.submission_status === 'skipped') {
+        showSuccessAndRedirect();
+        return;
+      }
+
+      initQuestions();
+      showSection('questions');
+    } else {
+      updateLockStatus(attempt);
+      showSection('locked');
+      startPolling();
+    }
+  } catch (err) {
+    console.error('Hydrate error:', err);
+    showSection('locked');
+    startPolling();
+  }
+}
+
+function updateLockStatus(attempt) {
+  const el = document.getElementById('lockStatusText');
+  if (!el) return;
+  if (attempt?.oral1_followup_questions) {
+    el.textContent = 'Spørgsmål genereres…';
+  } else {
+    el.textContent = 'Venter på transskription…';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// POLLING
+// ═══════════════════════════════════════════════════════════════
+
+function startPolling() {
+  if (pollTimer) return;
+  pollTimer = setInterval(async () => {
+    await checkAndLoad();
+  }, POLL_INTERVAL_MS);
+}
+
+function stopPolling() {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// QUESTIONS UI
+// ═══════════════════════════════════════════════════════════════
+
+function initQuestions() {
+  // Pre-populate answers object
+  questions.forEach(q => { if (!(q.id in answers)) answers[q.id] = ''; });
+  currentStep = 0;
+  renderStep(currentStep);
+}
+
+function renderStep(stepIdx) {
+  renderProgress(stepIdx);
+  renderQuestion(stepIdx);
+}
+
+function renderProgress(stepIdx) {
+  const container = document.getElementById('stepperProgress');
+  const total = questions.length;
+  let html = '';
+  for (let i = 0; i < total; i++) {
+    const cls = i < stepIdx ? 'done' : i === stepIdx ? 'current' : 'pending';
+    html += `<div class="step-dot ${cls}">${i < stepIdx ? '✓' : i + 1}</div>`;
+    if (i < total - 1) {
+      const lineCls = i < stepIdx ? 'done' : '';
+      html += `<div class="step-line ${lineCls}"></div>`;
+    }
+  }
+  container.innerHTML = html;
+}
+
+function renderQuestion(stepIdx) {
+  const q = questions[stepIdx];
+  const total = questions.length;
+  const isLast = stepIdx === total - 1;
+  const savedAnswer = answers[q.id] || '';
+  const wc = wordCount(savedAnswer);
+  const wcGood = wc >= 30;
+
+  const typeLabel = TYPE_LABELS[q.type] || q.type;
+
+  document.getElementById('questionArea').innerHTML = `
+    <div class="question-type-badge">
+      <div class="type-dot"></div>
+      ${typeLabel} · Spørgsmål ${stepIdx + 1} af ${total}
+    </div>
+
+    <div class="question-bubble">
+      <div class="question-text">${PD3.escapeHtml(q.question)}</div>
+    </div>
+
+    <div class="answer-label">Dit svar</div>
+    <textarea
+      class="answer-textarea${savedAnswer ? ' has-content' : ''}"
+      id="answerTextarea"
+      placeholder="Skriv dit svar på dansk her… (3–6 sætninger)"
+      oninput="onAnswerInput(this)"
+    >${PD3.escapeHtml(savedAnswer)}</textarea>
+    <div class="answer-meta">
+      <span class="answer-hint">💡 Svar som til den mundtlige prøve — 3–6 sætninger</span>
+      <span class="word-count${wcGood ? ' good' : ''}" id="wordCount">${wc} ord</span>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn-prev" onclick="goStep(${stepIdx - 1})" ${stepIdx === 0 ? 'disabled' : ''}>← Tilbage</button>
+      ${isLast
+        ? `<button class="btn-to-review" id="btnNextOrReview" onclick="goToReview()" ${!savedAnswer.trim() ? 'disabled' : ''}>
+             Gennemse svar →
+           </button>`
+        : `<button class="btn-next" id="btnNextOrReview" onclick="goStep(${stepIdx + 1})" ${!savedAnswer.trim() ? 'disabled' : ''}>
+             Næste spørgsmål →
+           </button>`
+      }
+    </div>
+    <span class="skip-link" onclick="skipQuestion('${q.id}', ${stepIdx}, ${isLast})">Spring dette spørgsmål over</span>
+  `;
+
+  // Focus textarea
+  setTimeout(() => document.getElementById('answerTextarea')?.focus(), 80);
+}
+
+function onAnswerInput(el) {
+  const q = questions[currentStep];
+  answers[q.id] = el.value;
+  el.classList.toggle('has-content', !!el.value);
+
+  const wc = wordCount(el.value);
+  const wcEl = document.getElementById('wordCount');
+  if (wcEl) {
+    wcEl.textContent = `${wc} ord`;
+    wcEl.className = `word-count${wc >= 30 ? ' good' : ''}`;
+  }
+
+  const nextBtn = document.getElementById('btnNextOrReview');
+  if (nextBtn) nextBtn.disabled = !el.value.trim();
+}
+
+function wordCount(text) {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function goStep(idx) {
+  if (idx < 0 || idx >= questions.length) return;
+  // Save current textarea value before navigating
+  const ta = document.getElementById('answerTextarea');
+  if (ta) answers[questions[currentStep].id] = ta.value;
+  currentStep = idx;
+  renderStep(currentStep);
+}
+
+function skipQuestion(qid, stepIdx, isLast) {
+  answers[qid] = '';   // keep empty, will show as skipped in review
+  if (isLast) {
+    goToReview();
+  } else {
+    goStep(stepIdx + 1);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REVIEW
+// ═══════════════════════════════════════════════════════════════
+
+function goToReview() {
+  // Save current answer
+  const ta = document.getElementById('answerTextarea');
+  if (ta) answers[questions[currentStep].id] = ta.value;
+
+  renderReview();
+  showSection('review');
+}
+
+function goBackToQuestions() {
+  showSection('questions');
+  renderStep(currentStep);
+}
+
+function renderReview() {
+  const list = document.getElementById('reviewList');
+  list.innerHTML = questions.map((q, i) => {
+    const ans = (answers[q.id] || '').trim();
+    const typeLabel = TYPE_LABELS[q.type] || q.type;
+    return `
+      <div class="review-item">
+        <div class="review-item-q">
+          <div class="review-qnum">${i + 1}</div>
+          <div>
+            <div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px;">${typeLabel}</div>
+            <div class="review-qtext">${PD3.escapeHtml(q.question)}</div>
+          </div>
+        </div>
+        <div class="review-item-a">
+          ${ans
+            ? `<div class="review-answer-text">${PD3.escapeHtml(ans)}</div>
+               <button class="review-edit-btn" onclick="editFromReview(${i})" style="margin-top:8px;">Rediger svar</button>`
+            : `<div class="review-answer-empty">Sprunget over — intet svar</div>
+               <button class="review-edit-btn" onclick="editFromReview(${i})" style="margin-top:6px;">Skriv svar</button>`
+          }
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function editFromReview(stepIdx) {
+  currentStep = stepIdx;
+  showSection('questions');
+  renderStep(currentStep);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════════════════
+
+async function submitAnswers() {
+  if (!attemptId) { alert('Fejl: intet attempt ID.'); return; }
+
+  document.getElementById('btnReviewSubmit').disabled = true;
+  showSection('submitting');
+
+  // Build combined text + json
+  const answersArr = questions.map(q => ({
+    id: q.id,
+    type: q.type,
+    question: q.question,
+    answer: (answers[q.id] || '').trim(),
+  }));
+
+  const responseText = answersArr
+    .map((a, i) => `Spørgsmål ${i + 1} (${TYPE_LABELS[a.type] || a.type}):\n${a.question}\n\nSvar:\n${a.answer || '(intet svar)'}`)
+    .join('\n\n---\n\n');
+
+  const responseJson = { answers: answersArr };
+
+  try {
+    const data = await PD3.submit({ attemptId, elemKey, text: responseText, json: responseJson });
+
+    if (!data.success) {
+      if (data.error?.includes('already')) { showSuccessAndRedirect(); return; }
+      throw new Error(data.error || 'Submit failed');
+    }
+
+    showSuccessAndRedirect();
+  } catch (err) {
+    console.error('Submit error:', err);
+    showSection('review');
+    document.getElementById('btnReviewSubmit').disabled = false;
+    alert(`Noget gik galt: ${err.message}\n\nPrøv igen.`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════════════
+
+const SECTIONS = ['locked', 'questions', 'review', 'submitting', 'success'];
+
+async function skipElement() {
+  if (!confirm('Spring opfølgning over? Du får 0 point for denne del.')) return;
+  const skipLinks = document.querySelectorAll('#skipLink');
+  skipLinks.forEach(el => el.style.display = 'none');
+  await PD3.skip({ attemptId, elemKey });
+  window.location.href = `exam.html?sim=${simId}&attempt=${attemptId}`;
+}
+
+function showSection(name) {
+  SECTIONS.forEach(n => {
+    const el = document.getElementById(`section-${n}`);
+    if (el) el.classList.toggle('active', n === name);
+  });
+}
+
+function showSuccessAndRedirect() {
+  showSection('success');
+  let countdown = 4;
+  const el = document.getElementById('successRedirect');
+  const update = () => { el.textContent = `Videresender om ${countdown} sekund${countdown !== 1 ? 'er' : ''}…`; };
+  update();
+  const iv = setInterval(() => {
+    countdown--;
+    update();
+    if (countdown <= 0) {
+      clearInterval(iv);
+      window.location.href = `exam.html?sim=${simId}&attempt=${attemptId}`;
+    }
+  }, 1000);
+}
+
+
+</script>
+</body>
+</html>

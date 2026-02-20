@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Læseforståelse Del 2b</title>
+  <script src="/assets/js/auth-guard-dansk3.js"></script>
+  <script src="/assets/js/pd3-engine.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --red:    #c8102e;
+      --red-dim:#f5e1e4;
+      --navy:   #0f172a;
+      --slate:  #334155;
+      --muted:  #64748b;
+      --border: #e2e8f0;
+      --surface:#ffffff;
+      --bg:     #f8f7f4;
+      --correct:#166534;
+      --correct-bg:#f0fdf4;
+      --correct-border:#bbf7d0;
+      --wrong:  #991b1b;
+      --wrong-bg:#fef2f2;
+      --wrong-border:#fecaca;
+      --active: #1d4ed8;
+      --active-bg:#eff6ff;
+      --active-border:#bfdbfe;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--bg); color: var(--navy);
+      min-height: 100vh;
+    }
+
+    /* ── TOPBAR ─────────────────────────────────────────────── */
+    .topbar {
+      background: var(--navy); border-bottom: 3px solid var(--red);
+      padding: 0 28px; height: 52px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .back-link {
+      color: #64748b; text-decoration: none; font-size: 0.8rem;
+      display: flex; align-items: center; gap: 5px; transition: color 0.15s;
+    }
+    .back-link:hover { color: #fff; }
+    .topbar-divider { width: 1px; height: 20px; background: #1e293b; }
+    .topbar-flag {
+      width: 22px; height: 16px; background: var(--red);
+      border-radius: 2px; position: relative; overflow: hidden; flex-shrink: 0;
+    }
+    .topbar-flag::before { content:''; position:absolute; left:8px; top:0; width:3px; height:100%; background:white; }
+    .topbar-flag::after  { content:''; position:absolute; left:0; top:5.5px; width:100%; height:3px; background:white; }
+    .topbar-brand { display: flex; align-items: center; gap: 10px; }
+    .topbar-title { font-family:"Fraunces",serif; font-size:0.9rem; font-weight:600; color:#fff; }
+    .topbar-sub   { font-size:0.75rem; color:#64748b; }
+    .topbar-right { display:flex; align-items:center; gap:12px; }
+    .progress-pill {
+      background:#1e293b; border-radius:99px;
+      padding:4px 12px; font-size:0.75rem; color:#94a3b8;
+      display:flex; align-items:center; gap:6px;
+    }
+    .progress-fill { display:flex; gap:3px; }
+    .pip { width:7px; height:7px; border-radius:50%; background:#334155; transition:background 0.2s; }
+    .pip.assigned { background:var(--red); }
+    .pip.correct  { background:#22c55e; }
+    .pip.wrong    { background:var(--red); }
+
+    /* ── LOADING ─────────────────────────────────────────────── */
+    #loading-overlay {
+      position:fixed; inset:0; background:var(--bg);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:16px;
+      z-index:9999; transition:opacity 0.35s;
+    }
+    #loading-overlay.hidden { opacity:0; pointer-events:none; }
+    .loading-spinner {
+      width:32px; height:32px; border-radius:50%;
+      border:3px solid var(--border); border-top-color:var(--red);
+      animation:spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-text { font-size:0.9rem; color:var(--muted); }
+
+    /* ── MAIN LAYOUT ─────────────────────────────────────────── */
+    .exam-layout {
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) 400px;
+      gap:0;
+      min-height:calc(100vh - 52px);
+      max-width:1200px;
+      margin:0 auto;
+      width:100%;
+    }
+
+    /* ── LEFT: TEXT COLUMN ───────────────────────────────────── */
+    .text-column {
+      overflow-y:auto;
+    }
+    .text-inner {
+      max-width:700px;
+      padding:36px 40px 80px;
+    }
+    .text-eyebrow {
+      font-size:0.7rem; font-weight:600; text-transform:uppercase;
+      letter-spacing:0.09em; color:var(--muted);
+      display:flex; align-items:center; gap:8px;
+      margin-bottom:14px;
+    }
+    .text-eyebrow-dot { width:5px; height:5px; border-radius:50%; background:var(--red); }
+    .text-title {
+      font-family:"Fraunces",serif;
+      font-size:clamp(1.4rem,2.5vw,1.9rem);
+      font-weight:700; letter-spacing:-0.025em; line-height:1.15;
+      margin-bottom:24px;
+    }
+    .text-body {
+      font-size:0.95rem; line-height:1.8; color:var(--slate);
+    }
+    .text-body p { margin-bottom:1.1em; }
+    .text-body p:last-child { margin-bottom:0; }
+
+    /* ── GAP SLOT in text ────────────────────────────────────── */
+    .gap-slot {
+      display:inline-flex; align-items:center; gap:7px;
+      background:#f1f5f9; border:2px solid #cbd5e1;
+      border-radius:8px; padding:5px 12px;
+      cursor:pointer; vertical-align:middle;
+      transition:border-color 0.15s, background 0.15s, box-shadow 0.15s;
+      margin:2px 3px;
+      font-family:"DM Sans",sans-serif;
+      line-height:1;
+      user-select:none;
+    }
+    .gap-slot:hover:not(.locked) {
+      border-color:#94a3b8; background:#e9eef5;
+    }
+    .gap-slot.active {
+      background:var(--active-bg); border-color:var(--active);
+      box-shadow:0 0 0 3px rgba(29,78,216,0.15);
+    }
+    .gap-slot.filled {
+      background:#f8fafc; border-color:#94a3b8;
+    }
+    .gap-slot.correct {
+      background:var(--correct-bg); border-color:var(--correct-border); cursor:default;
+    }
+    .gap-slot.wrong {
+      background:var(--wrong-bg); border-color:var(--wrong-border); cursor:default;
+    }
+    .gap-num {
+      width:18px; height:18px; border-radius:50%;
+      background:var(--slate); color:white;
+      font-size:0.65rem; font-weight:700;
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0;
+    }
+    .gap-slot.active .gap-num   { background:var(--active); }
+    .gap-slot.correct .gap-num  { background:var(--correct); }
+    .gap-slot.wrong   .gap-num  { background:var(--wrong); }
+
+    .gap-letter {
+      font-size:0.82rem; font-weight:700; color:var(--slate);
+      min-width:14px; text-align:center;
+    }
+    .gap-slot.active .gap-letter   { color:var(--active); }
+    .gap-slot.correct .gap-letter  { color:var(--correct); }
+    .gap-slot.wrong   .gap-letter  { color:var(--wrong); }
+
+    .gap-preview {
+      font-size:0.72rem; color:var(--muted);
+      max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+    .gap-hint { font-size:0.75rem; color:#94a3b8; font-style:italic; }
+
+    .gap-result-icon { font-size:0.8rem; }
+
+    /* ── RIGHT: TILES COLUMN ─────────────────────────────────── */
+    .tiles-column {
+      position:sticky; top:52px;
+      align-self:start;
+      background:var(--surface);
+      display:flex; flex-direction:column;
+      border-left:1px solid var(--border);
+    }
+
+    .tiles-header {
+      padding:20px 20px 14px;
+      border-bottom:1px solid var(--border);
+      flex-shrink:0;
+    }
+    .tiles-header-eyebrow {
+      font-size:0.68rem; font-weight:600; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--muted); margin-bottom:6px;
+    }
+    .tiles-header h2 {
+      font-family:"Fraunces",serif; font-size:1rem; font-weight:600; line-height:1.3;
+    }
+    .tiles-header p {
+      font-size:0.77rem; color:var(--muted); margin-top:5px; line-height:1.5;
+    }
+
+    /* Active gap indicator */
+    .active-gap-indicator {
+      margin:10px 20px 0;
+      display:none;
+      background:var(--active-bg); border:1px solid var(--active-border);
+      border-radius:8px; padding:9px 12px;
+      font-size:0.78rem; color:var(--active); font-weight:600;
+    }
+    .active-gap-indicator.visible { display:block; }
+
+    .tiles-list {
+      padding:12px 16px 24px;
+      display:flex; flex-direction:column; gap:8px;
+    }
+
+    /* ── TILE CARD ───────────────────────────────────────────── */
+    .tile-card {
+      border:2px solid var(--border);
+      border-radius:11px; overflow:hidden;
+      transition:border-color 0.15s, background 0.15s, opacity 0.15s;
+      cursor:default;
+    }
+    .tile-card.selectable {
+      cursor:pointer;
+    }
+    .tile-card.selectable:hover {
+      border-color:#94a3b8; background:#f8fafc;
+    }
+    .tile-card.selected-for-gap {
+      border-color:var(--active);
+      background:var(--active-bg);
+    }
+    .tile-card.used {
+      opacity:0.55;
+    }
+    .tile-card.used.selected-for-gap {
+      opacity:1;
+    }
+    .tile-card.correct-tile {
+      border-color:var(--correct-border); background:var(--correct-bg); opacity:1;
+    }
+    .tile-card.wrong-tile {
+      border-color:var(--wrong-border); background:var(--wrong-bg); opacity:1;
+    }
+    .tile-card.unused-distractor {
+      opacity:0.4;
+    }
+
+    .tile-card-header {
+      display:flex; align-items:center; gap:8px;
+      padding:8px 12px;
+      background:#f8fafc;
+      border-bottom:1px solid var(--border);
+    }
+    .tile-card.selected-for-gap .tile-card-header { background:var(--active-bg); }
+    .tile-card.correct-tile .tile-card-header     { background:var(--correct-bg); }
+    .tile-card.wrong-tile   .tile-card-header     { background:var(--wrong-bg); }
+
+    .tile-letter {
+      width:24px; height:24px; border-radius:50%;
+      background:var(--navy); color:white;
+      font-size:0.72rem; font-weight:700;
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0;
+    }
+    .tile-card.selected-for-gap .tile-letter { background:var(--active); }
+    .tile-card.correct-tile .tile-letter     { background:var(--correct); }
+    .tile-card.wrong-tile   .tile-letter     { background:var(--wrong); }
+
+    .tile-status {
+      font-size:0.7rem; color:var(--muted); flex:1;
+    }
+    .tile-card.selected-for-gap .tile-status { color:var(--active); font-weight:600; }
+    .tile-card.correct-tile .tile-status     { color:var(--correct); font-weight:600; }
+    .tile-card.wrong-tile   .tile-status     { color:var(--wrong); font-weight:600; }
+
+    .tile-body {
+      padding:10px 12px;
+      font-size:0.8rem; line-height:1.6; color:var(--slate);
+    }
+    .tile-card.correct-tile .tile-body { color:var(--correct); }
+    .tile-card.wrong-tile   .tile-body { color:var(--wrong); }
+
+    /* ── ANSWER SUMMARY TABLE ─────────────────────────────────── */
+    .answer-table-wrap {
+      padding:0 16px 4px;
+      flex-shrink:0;
+    }
+    .answer-table {
+      width:100%; border-collapse:collapse;
+      font-size:0.78rem;
+    }
+    .answer-table th {
+      background:#f1f5f9; padding:6px 8px;
+      text-align:left; font-weight:600; color:var(--muted);
+      border-bottom:1px solid var(--border);
+    }
+    .answer-table td {
+      padding:6px 8px; border-bottom:1px solid #f1f5f9;
+      vertical-align:middle;
+    }
+    .answer-table tr:last-child td { border-bottom:none; }
+    .answer-cell-letter {
+      font-weight:700; font-size:0.9rem;
+      color:var(--muted);
+    }
+    .answer-cell-letter.filled { color:var(--navy); }
+    .answer-cell-letter.correct { color:var(--correct); }
+    .answer-cell-letter.wrong   { color:var(--wrong); }
+    .clear-btn {
+      background:none; border:none; cursor:pointer;
+      font-size:0.7rem; color:#94a3b8; padding:2px 4px;
+      transition:color 0.15s;
+    }
+    .clear-btn:hover { color:var(--wrong); }
+
+    /* ── FOOTER ─────────────────────────────────────────────── */
+    .tiles-footer {
+      padding:14px 16px;
+      border-top:1px solid var(--border);
+      flex-shrink:0;
+    }
+    .score-banner {
+      display:none;
+      border-radius:10px; padding:14px 16px;
+      margin-bottom:12px; text-align:center;
+    }
+    .score-banner.visible { display:block; }
+    .score-banner.passed { background:var(--correct-bg); border:1px solid var(--correct-border); }
+    .score-banner.failed { background:var(--wrong-bg); border:1px solid var(--wrong-border); }
+    .sb-score { font-family:"Fraunces",serif; font-size:1.5rem; font-weight:700; line-height:1; }
+    .score-banner.passed .sb-score { color:var(--correct); }
+    .score-banner.failed .sb-score { color:var(--wrong); }
+    .sb-label { font-size:0.78rem; color:var(--muted); margin-top:4px; }
+    .already-done {
+      display:none; background:var(--correct-bg); border:1px solid var(--correct-border);
+      border-radius:10px; padding:12px; font-size:0.82rem; color:var(--correct);
+      text-align:center; margin-bottom:10px;
+    }
+    .already-done.visible { display:block; }
+    .submit-btn {
+      width:100%;
+      background:var(--navy); color:white; border:none;
+      border-radius:10px; padding:14px;
+      font-family:"DM Sans",sans-serif; font-size:0.93rem; font-weight:600;
+      cursor:pointer; transition:opacity 0.15s;
+    }
+    .submit-btn:hover:not(:disabled) { opacity:0.84; }
+    .submit-btn:disabled { opacity:0.4; cursor:not-allowed; }
+    .continue-btn {
+      width:100%;
+      background:var(--red); color:white; border:none;
+      border-radius:10px; padding:14px;
+      font-family:"DM Sans",sans-serif; font-size:0.93rem; font-weight:600;
+      cursor:pointer; transition:opacity 0.15s;
+    }
+    .continue-btn:hover { opacity:0.88; }
+    .skip-link {
+      display:block; text-align:center; margin-top:10px;
+      font-size:0.75rem; color:#94a3b8; cursor:pointer;
+      text-decoration:underline; text-underline-offset:3px;
+      transition:color 0.15s;
+    }
+    .skip-link:hover { color:var(--muted); }
+
+    /* ── RESPONSIVE ─────────────────────────────────────────── */
+    @media (max-width:960px) {
+      .exam-layout { grid-template-columns:1fr; }
+      .text-column { border-right:none; border-bottom:1px solid var(--border); max-height:50vh; }
+      .tiles-column { position:static; height:auto; overflow-y:visible; }
+      .text-inner { padding:24px 20px 32px; }
+    }
+    @media (max-width:600px) {
+      .topbar { padding:0 14px; }
+      .text-inner { padding:20px 16px 28px; }
+      .tiles-list { padding:10px 12px; }
+      .tiles-header, .tiles-footer { padding:16px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <p class="loading-text">Henter tekst og opgave…</p>
+</div>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" id="backLink" href="exam.html">← Tilbage</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-brand">
+      <div class="topbar-flag" aria-hidden="true"></div>
+      <div>
+        <div class="topbar-title" id="topbarTitle">Læseforståelse Del 2b</div>
+        <div class="topbar-sub">Prøve i Dansk 3</div>
+      </div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="progress-pill">
+      <div class="progress-fill" id="progressPips"></div>
+      <span id="progressLabel">0 / 5</span>
+    </div>
+  </div>
+</header>
+
+<div class="exam-layout" id="examLayout" style="display:none;">
+
+  <!-- LEFT: text with gaps -->
+  <div class="text-column">
+    <div class="text-inner">
+      <div class="text-eyebrow">
+        <div class="text-eyebrow-dot"></div>
+        <span>Læseforståelse · Del 2b — Sætindskud</span>
+      </div>
+      <h1 class="text-title" id="textTitle">…</h1>
+      <div class="text-body" id="textBody"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: tiles + answer table -->
+  <div class="tiles-column">
+
+    <div class="tiles-header">
+      <div class="tiles-header-eyebrow">Tekstdele A–G</div>
+      <h2>Vælg den rigtige tekstdel</h2>
+      <p id="instructionsShort">Klik på et hul i teksten, vælg derefter den tekstdel der passer. To tekstdele passer ikke ind.</p>
+    </div>
+
+    <div class="active-gap-indicator" id="activeGapIndicator">
+      ← Klik nu på den tekstdel der passer i hul <span id="activeGapNum">?</span>
+    </div>
+
+    <!-- Answer summary table -->
+    <div class="answer-table-wrap" style="padding-top:10px;">
+      <table class="answer-table" id="answerTable">
+        <thead>
+          <tr>
+            <th>Hul</th>
+            <th>Svar</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="answerTableBody">
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paragraph tiles -->
+    <div class="tiles-list" id="tilesList"></div>
+
+    <div class="tiles-footer">
+      <div class="already-done" id="alreadyDone">✅ Denne del er allerede afleveret.</div>
+      <div class="score-banner" id="scoreBanner">
+        <div class="sb-score" id="sbScore">0 / 10</div>
+        <div class="sb-label" id="sbLabel">point</div>
+      </div>
+      <button class="submit-btn" id="submitBtn" onclick="submitAnswers()" disabled>
+        Aflever svar
+      </button>
+      <button class="continue-btn" id="continueBtn" onclick="PD3.goBack(simId, attemptId)" style="display:none;">
+        Fortsæt med simulering →
+      </button>
+      <span class="skip-link" id="skipLink" onclick="skipElement()">Spring over uden at svare</span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+
+const SIM_FILES = {
+  sim01:'dansk3_delprove2b_sim01_cykler.json',
+  sim02:'dansk3_delprove2b_sim02.json',
+  sim03:'dansk3_delprove2b_sim03.json',
+  sim04:'dansk3_delprove2b_sim04.json',
+  sim05:'dansk3_delprove2b_sim05.json',
+  sim06:'dansk3_delprove2b_sim06.json',
+  sim07:'dansk3_delprove2b_sim07.json',
+  sim08:'dansk3_delprove2b_sim08.json',
+  sim09:'dansk3_delprove2b_sim09.json',
+  sim10:'dansk3_delprove2b_sim10.json',
+};
+
+// ─── shared state (assigned by PD3.init in DOMContentLoaded) ───
+let currentUser = null;
+let attemptId, simId, simNum, elemKey;
+
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+
+let examData    = null;
+let gapCount    = 0;
+let userAnswers = {};      // { 'gap1': 'B', 'gap2': 'C', … }
+let activeGap   = null;    // currently selected gap key e.g. 'gap1'
+let submitted   = false;
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  ({ user: currentUser, attemptId, simId, simNum, elemKey } = await PD3.init('laese_del2b'));
+
+  document.getElementById('backLink').href = `exam.html?sim=${simId}&attempt=${attemptId}`;
+
+  const filename = SIM_FILES[simId];
+  if (!filename) { PD3.showError('Ukendt simulering: ' + simId, simId, attemptId); return; }
+  try {
+    const res = await fetch(`/dansk3/data/${simNum}/${filename}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    examData = await res.json();
+  } catch (err) {
+    PD3.showError('Kunne ikke hente spørgsmål. Prøv at genindlæse siden.', simId, attemptId);
+    return;
+  }
+
+  submitted = await PD3.isSubmitted(currentUser.email, attemptId, elemKey);
+  renderExam();
+  PD3.hideLoading();
+  document.getElementById('examLayout').style.display = '';
+});
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function renderExam() {
+  const { title, text_with_gaps, paragraphs } = examData;
+  const simNum = parseInt(simId.replace('sim',''), 10);
+  document.getElementById('topbarTitle').textContent = `Sim ${simNum} — Læseforståelse 2b`;
+  document.getElementById('textTitle').textContent = title;
+
+  // Count gaps from text
+  const gapMatches = (text_with_gaps || '').match(/\{\{gap\d+\}\}/g) || [];
+  gapCount = gapMatches.length;
+
+  // Init answers
+  for (let i = 1; i <= gapCount; i++) userAnswers[`gap${i}`] = null;
+
+  renderText(text_with_gaps);
+  renderTiles(paragraphs);
+  renderAnswerTable();
+  renderPips();
+
+  if (submitted) {
+    document.getElementById('alreadyDone').classList.add('visible');
+    document.getElementById('submitBtn').style.display = 'none';
+    document.getElementById('skipLink').style.display = 'none';
+    document.getElementById('continueBtn').style.display = 'block';
+  }
+}
+
+// ── Render text with clickable gap slots ──────────────────────
+function renderText(raw) {
+  // Replace {{gapN}} with a gap slot span
+  let html = raw
+    .replace(/\n\n+/g, '\n\n')
+    .split('\n\n')
+    .map(para => {
+      // Escape HTML first, then re-insert gap slots
+      let escaped = para
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\n/g,'<br>');
+      // Replace escaped gap tokens
+      escaped = escaped.replace(/\{\{(gap\d+)\}\}/g, (_, key) => {
+        const num = key.replace('gap','');
+        return `<span class="gap-slot" id="gapslot-${key}" data-gap="${key}" onclick="selectGap('${key}')">
+                  <span class="gap-num">${num}</span>
+                  <span class="gap-letter" id="gletter-${key}"> </span>
+                  <span class="gap-hint" id="ghint-${key}">klik for at vælge</span>
+                </span>`;
+      });
+      return `<p>${escaped}</p>`;
+    })
+    .join('');
+
+  document.getElementById('textBody').innerHTML = html;
+}
+
+// ── Render paragraph tiles ─────────────────────────────────────
+function renderTiles(paragraphs) {
+  const list = document.getElementById('tilesList');
+  list.innerHTML = paragraphs.map(p => `
+    <div class="tile-card${submitted ? '' : ' selectable'}" id="tile-${p.id}"
+         data-letter="${p.id}"
+         onclick="${submitted ? '' : `selectTile('${p.id}')`}">
+      <div class="tile-card-header">
+        <div class="tile-letter">${p.id}</div>
+        <div class="tile-status" id="tilestatus-${p.id}">Tekstdel ${p.id}</div>
+      </div>
+      <div class="tile-body">${PD3.escapeHtml(p.text)}</div>
+    </div>
+  `).join('');
+}
+
+// ── Render answer summary table ────────────────────────────────
+function renderAnswerTable() {
+  const tbody = document.getElementById('answerTableBody');
+  let rows = '';
+  for (let i = 1; i <= gapCount; i++) {
+    const key = `gap${i}`;
+    const letter = userAnswers[key];
+    rows += `
+      <tr id="arow-${key}">
+        <td>Hul ${i}</td>
+        <td><span class="answer-cell-letter${letter ? ' filled' : ''}" id="acell-${key}">
+          ${letter || '—'}
+        </span></td>
+        <td>${!submitted && letter ? `<button class="clear-btn" onclick="clearGap('${key}')" title="Fjern svar">✕</button>` : ''}</td>
+      </tr>`;
+  }
+  tbody.innerHTML = rows;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INTERACTION
+// ═══════════════════════════════════════════════════════════════
+
+function selectGap(gapKey) {
+  if (submitted) return;
+
+  // If clicking active gap → deselect
+  if (activeGap === gapKey) {
+    deactivateGap();
+    return;
+  }
+
+  // Deactivate previous
+  if (activeGap) deactivateGap();
+
+  activeGap = gapKey;
+  const slot = document.getElementById(`gapslot-${gapKey}`);
+  if (slot) slot.classList.add('active');
+
+  const num = gapKey.replace('gap','');
+  document.getElementById('activeGapNum').textContent = num;
+  document.getElementById('activeGapIndicator').classList.add('visible');
+
+  // Highlight already-assigned tile
+  highlightAssignedTile(gapKey);
+  updateTileSelectability();
+}
+
+function deactivateGap() {
+  if (!activeGap) return;
+  const slot = document.getElementById(`gapslot-${activeGap}`);
+  if (slot) slot.classList.remove('active');
+  activeGap = null;
+  document.getElementById('activeGapIndicator').classList.remove('visible');
+  updateTileSelectability();
+  clearTileHighlights();
+}
+
+function selectTile(letter) {
+  if (submitted) return;
+  if (!activeGap) {
+    // No gap selected — flash a hint
+    document.getElementById('activeGapIndicator').classList.add('visible');
+    document.getElementById('activeGapNum').textContent = '?';
+    setTimeout(() => {
+      if (!activeGap) document.getElementById('activeGapIndicator').classList.remove('visible');
+    }, 2000);
+    return;
+  }
+
+  // If this tile is already assigned to ANOTHER gap, clear that gap first
+  for (const [key, val] of Object.entries(userAnswers)) {
+    if (val === letter && key !== activeGap) {
+      clearGapSilently(key);
+    }
+  }
+
+  // Assign
+  userAnswers[activeGap] = letter;
+  updateGapSlot(activeGap, letter);
+  updateAnswerTable();
+  updateTileStatuses();
+  deactivateGap();
+  checkSubmitEnabled();
+}
+
+function clearGap(gapKey) {
+  if (submitted) return;
+  clearGapSilently(gapKey);
+  updateAnswerTable();
+  updateTileStatuses();
+  checkSubmitEnabled();
+}
+
+function clearGapSilently(gapKey) {
+  userAnswers[gapKey] = null;
+  const slot = document.getElementById(`gapslot-${gapKey}`);
+  if (slot) {
+    slot.classList.remove('active','filled');
+    document.getElementById(`gletter-${gapKey}`).textContent = ' ';
+    document.getElementById(`ghint-${gapKey}`).textContent = 'klik for at vælge';
+    document.getElementById(`ghint-${gapKey}`).style.display = '';
+  }
+}
+
+function updateGapSlot(gapKey, letter) {
+  const slot = document.getElementById(`gapslot-${gapKey}`);
+  if (!slot) return;
+  slot.classList.remove('active');
+  slot.classList.add('filled');
+
+  const lEl = document.getElementById(`gletter-${gapKey}`);
+  const hEl = document.getElementById(`ghint-${gapKey}`);
+  if (lEl) lEl.textContent = letter;
+
+  // Show short preview from tile text
+  const tile = examData.paragraphs.find(p => p.id === letter);
+  if (hEl && tile) {
+    const preview = tile.text.slice(0, 40) + '…';
+    hEl.className = 'gap-preview';
+    hEl.textContent = preview;
+  }
+}
+
+function updateAnswerTable() {
+  for (let i = 1; i <= gapCount; i++) {
+    const key = `gap${i}`;
+    const letter = userAnswers[key];
+    const cell = document.getElementById(`acell-${key}`);
+    const row  = document.getElementById(`arow-${key}`);
+    if (cell) {
+      cell.textContent = letter || '—';
+      cell.className = `answer-cell-letter${letter ? ' filled' : ''}`;
+    }
+    if (row) {
+      const td = row.cells[2];
+      td.innerHTML = (!submitted && letter)
+        ? `<button class="clear-btn" onclick="clearGap('${key}')" title="Fjern svar">✕</button>` : '';
+    }
+  }
+  renderPips();
+}
+
+function updateTileStatuses() {
+  const assignedMap = {};
+  for (const [gapKey, letter] of Object.entries(userAnswers)) {
+    if (letter) assignedMap[letter] = gapKey;
+  }
+  examData.paragraphs.forEach(p => {
+    const card    = document.getElementById(`tile-${p.id}`);
+    const statusEl = document.getElementById(`tilestatus-${p.id}`);
+    if (!card || !statusEl) return;
+
+    const gapKey = assignedMap[p.id];
+    if (gapKey) {
+      card.classList.add('used');
+      statusEl.textContent = `Valgt til hul ${gapKey.replace('gap','')}`;
+    } else {
+      card.classList.remove('used');
+      statusEl.textContent = `Tekstdel ${p.id}`;
+    }
+  });
+}
+
+function highlightAssignedTile(gapKey) {
+  clearTileHighlights();
+  const letter = userAnswers[gapKey];
+  if (letter) {
+    document.getElementById(`tile-${letter}`)?.classList.add('selected-for-gap');
+  }
+}
+
+function clearTileHighlights() {
+  examData?.paragraphs.forEach(p => {
+    document.getElementById(`tile-${p.id}`)?.classList.remove('selected-for-gap');
+  });
+}
+
+function updateTileSelectability() {
+  examData?.paragraphs.forEach(p => {
+    const card = document.getElementById(`tile-${p.id}`);
+    if (!card) return;
+    if (activeGap) {
+      card.classList.add('selectable');
+    } else {
+      card.classList.add('selectable'); // always clickable when not submitted
+    }
+  });
+}
+
+function renderPips() {
+  const pips = document.getElementById('progressPips');
+  const total = gapCount;
+  const answered = Object.values(userAnswers).filter(Boolean).length;
+  document.getElementById('progressLabel').textContent = `${answered} / ${total}`;
+  pips.innerHTML = Array.from({length: total}, (_, i) => {
+    const key = `gap${i+1}`;
+    const cls = userAnswers[key] ? 'assigned' : '';
+    return `<div class="pip ${cls}"></div>`;
+  }).join('');
+}
+
+function checkSubmitEnabled() {
+  const allFilled = Object.values(userAnswers).every(Boolean);
+  document.getElementById('submitBtn').disabled = !allFilled || submitted;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════════════════
+async function submitAnswers() {
+  if (submitted) return;
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Afleverer…';
+
+  // Score client-side
+  const correctAnswers = examData.correct_answers;
+  let correct = 0;
+  const pointsPerGap = examData.total_points / gapCount;
+  const details = {};
+
+  for (let i = 1; i <= gapCount; i++) {
+    const key = `gap${i}`;
+    const given = userAnswers[key];
+    const expected = correctAnswers[key];
+    const isCorrect = given === expected;
+    if (isCorrect) correct++;
+    details[key] = { given, correct: expected, is_correct: isCorrect,
+                     points: isCorrect ? pointsPerGap : 0 };
+  }
+
+  const totalPoints = examData.total_points;
+  const earned = correct * pointsPerGap;
+  const score = totalPoints > 0 ? Math.round((earned / totalPoints) * 100) : 0;
+
+  revealAnswers(details);
+
+  try {
+    await PD3.apiFetch('pd3-submit-element', {
+        attempt_id:      attemptId,
+        element_key:     elemKey,
+        answers:         userAnswers,
+        browser_correct: correct,
+        browser_total:   gapCount,
+        browser_score:   score,
+        browser_details: details,
+      });
+  } catch (err) {
+    console.error('Submit error:', err);
+  }
+
+  submitted = true;
+  showScore(earned, totalPoints, correct);
+}
+
+function revealAnswers(details) {
+  const correctAnswers = examData.correct_answers;
+
+  // Gap slots in text
+  for (let i = 1; i <= gapCount; i++) {
+    const key = `gap${i}`;
+    const d = details[key];
+    const slot = document.getElementById(`gapslot-${key}`);
+    if (!slot) continue;
+    slot.classList.remove('filled','active');
+    slot.classList.add(d.is_correct ? 'correct' : 'wrong');
+    slot.setAttribute('onclick','');
+
+    const lEl = document.getElementById(`gletter-${key}`);
+    const hEl = document.getElementById(`ghint-${key}`);
+    if (lEl) lEl.textContent = d.given || '?';
+    if (hEl) {
+      if (!d.is_correct) {
+        hEl.className = 'gap-hint';
+        hEl.textContent = `Korrekt: ${d.correct}`;
+        hEl.style.display = '';
+        hEl.style.color = 'var(--correct)';
+      } else {
+        hEl.style.display = 'none';
+      }
+    }
+
+    // Result icon
+    const icon = d.is_correct ? '✓' : '✗';
+    slot.querySelector('.gap-num').textContent = icon;
+  }
+
+  // Tile cards
+  const assignedMap = {};
+  for (const [gapKey, val] of Object.entries(userAnswers)) {
+    if (val) assignedMap[val] = gapKey;
+  }
+
+  const correctLetters = new Set(Object.values(correctAnswers));
+
+  examData.paragraphs.forEach(p => {
+    const card = document.getElementById(`tile-${p.id}`);
+    const statusEl = document.getElementById(`tilestatus-${p.id}`);
+    if (!card) return;
+    card.classList.remove('selectable','used','selected-for-gap');
+    card.setAttribute('onclick','');
+
+    const gapKey = assignedMap[p.id];
+    if (gapKey) {
+      const d = details[gapKey];
+      if (d.is_correct) {
+        card.classList.add('correct-tile');
+        if (statusEl) statusEl.textContent = `✓ Korrekt i hul ${gapKey.replace('gap','')}`;
+      } else {
+        card.classList.add('wrong-tile');
+        const correctGap = Object.entries(correctAnswers).find(([,v]) => v === p.id);
+        if (statusEl) statusEl.textContent = correctGap
+          ? `✗ Hører til i hul ${correctGap[0].replace('gap','')}`
+          : `✗ Passer ikke her`;
+      }
+    } else if (!correctLetters.has(p.id)) {
+      card.classList.add('unused-distractor');
+      if (statusEl) statusEl.textContent = 'Passer ikke i teksten';
+    } else {
+      // Correct tile but not chosen — show where it belongs
+      const correctGap = Object.entries(correctAnswers).find(([,v]) => v === p.id);
+      if (correctGap) {
+        card.classList.add('correct-tile');
+        card.style.opacity = '0.7';
+        if (statusEl) statusEl.textContent = `Skulle have været i hul ${correctGap[0].replace('gap','')}`;
+      }
+    }
+  });
+
+  // Update answer table cells
+  for (let i = 1; i <= gapCount; i++) {
+    const key = `gap${i}`;
+    const d = details[key];
+    const cell = document.getElementById(`acell-${key}`);
+    if (cell) {
+      cell.textContent = d.given || '—';
+      cell.className = `answer-cell-letter ${d.is_correct ? 'correct' : 'wrong'}`;
+    }
+    const row = document.getElementById(`arow-${key}`);
+    if (row) row.cells[2].innerHTML = '';
+  }
+
+  // Update pips
+  const pipEls = document.querySelectorAll('.pip');
+  for (let i = 0; i < gapCount; i++) {
+    const key = `gap${i+1}`;
+    const d = details[key];
+    if (pipEls[i]) pipEls[i].className = `pip ${d.is_correct ? 'correct' : 'wrong'}`;
+  }
+}
+
+function showScore(earned, total, correct) {
+  const banner = document.getElementById('scoreBanner');
+  const passed = earned >= total * 0.5;
+  banner.classList.add('visible', passed ? 'passed' : 'failed');
+  document.getElementById('sbScore').textContent = `${earned} / ${total}`;
+  document.getElementById('sbLabel').textContent =
+    `point — ${correct} af ${gapCount} huller korrekte`;
+  document.getElementById('submitBtn').style.display = 'none';
+  document.getElementById('skipLink').style.display = 'none';
+  document.getElementById('continueBtn').style.display = 'block';
+  document.getElementById('activeGapIndicator').classList.remove('visible');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SKIP
+// ═══════════════════════════════════════════════════════════════
+async function skipElement() {
+  if (submitted) return;
+  if (!confirm('Er du sikker på, at du vil springe denne del over? Du får 0 point.')) return;
+  document.getElementById('skipLink').style.display = 'none';
+  document.getElementById('submitBtn').disabled = true;
+  await PD3.skip({ attemptId, elemKey });
+  submitted = true;
+  PD3.goBack(simId, attemptId);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+</script>
+</body>
+</html>

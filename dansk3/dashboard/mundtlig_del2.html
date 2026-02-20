@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mundtlig Prøve Del 2</title>
+  <script src="/assets/js/auth-guard-dansk3.js"></script>
+  <script src="/assets/js/pd3-engine.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --red:    #c8102e;
+      --navy:   #0f172a;
+      --slate:  #334155;
+      --muted:  #64748b;
+      --border: #e2e8f0;
+      --surface:#ffffff;
+      --bg:     #f8f7f4;
+      --correct:#166534;
+      --correct-bg:#f0fdf4;
+      --correct-border:#bbf7d0;
+      --amber:  #92400e;
+      --amber-bg:#fffbeb;
+      --amber-border:#fde68a;
+
+      --timer-ok:   #16a34a;
+      --timer-warn: #d97706;
+      --timer-over: #dc2626;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+    body {
+      font-family:"DM Sans",system-ui,sans-serif;
+      background:var(--bg); color:var(--navy);
+      min-height:100vh;
+    }
+
+    /* ── TOPBAR ─────────────────────────────────────── */
+    .topbar {
+      background:var(--navy); border-bottom:3px solid var(--red);
+      padding:0 28px; height:52px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:200;
+    }
+    .topbar-left { display:flex; align-items:center; gap:12px; }
+    .back-link {
+      color:#64748b; text-decoration:none; font-size:0.8rem;
+      display:flex; align-items:center; gap:5px; transition:color 0.15s;
+    }
+    .back-link:hover { color:#fff; }
+    .topbar-divider { width:1px; height:20px; background:#1e293b; }
+    .topbar-flag {
+      width:22px; height:16px; background:var(--red);
+      border-radius:2px; position:relative; overflow:hidden; flex-shrink:0;
+    }
+    .topbar-flag::before { content:''; position:absolute; left:8px; top:0; width:3px; height:100%; background:white; }
+    .topbar-flag::after  { content:''; position:absolute; left:0; top:5.5px; width:100%; height:3px; background:white; }
+    .topbar-brand { display:flex; align-items:center; gap:10px; }
+    .topbar-title { font-family:"Fraunces",serif; font-size:0.9rem; font-weight:600; color:#fff; }
+    .topbar-sub   { font-size:0.75rem; color:#64748b; }
+    .topbar-right { display:flex; align-items:center; gap:12px; }
+    .topbar-round-pill {
+      background:#1e293b; border-radius:99px;
+      padding:4px 14px; font-size:0.75rem; color:#94a3b8;
+      display:flex; align-items:center; gap:7px;
+    }
+    .round-dot { width:7px; height:7px; border-radius:50%; background:#334155; transition:background 0.2s; }
+    .round-dot.active { background:var(--red); }
+    .round-dot.done   { background:#22c55e; }
+
+    /* ── LOADING ────────────────────────────────────── */
+    #loading-overlay {
+      position:fixed; inset:0; background:var(--bg);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:16px;
+      z-index:9999; transition:opacity 0.35s;
+    }
+    #loading-overlay.hidden { opacity:0; pointer-events:none; }
+    .loading-spinner {
+      width:32px; height:32px; border-radius:50%;
+      border:3px solid var(--border); border-top-color:var(--red);
+      animation:spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-text { font-size:0.9rem; color:var(--muted); }
+
+    /* ── SHARED PAGE WRAP ───────────────────────────── */
+    .page-wrap {
+      max-width:720px; margin:0 auto;
+      padding:48px 28px 80px;
+    }
+    .page-eyebrow {
+      font-size:0.7rem; font-weight:600; text-transform:uppercase;
+      letter-spacing:0.09em; color:var(--muted);
+      display:flex; align-items:center; gap:8px; margin-bottom:14px;
+    }
+    .page-eyebrow-dot { width:5px; height:5px; border-radius:50%; background:var(--red); }
+    .page-title {
+      font-family:"Fraunces",serif;
+      font-size:clamp(1.5rem,3vw,2.1rem);
+      font-weight:700; letter-spacing:-0.025em; line-height:1.15;
+      margin-bottom:10px;
+    }
+    .page-subtitle { font-size:0.9rem; color:var(--muted); line-height:1.6; margin-bottom:32px; }
+
+    /* ══════════════════════════════════════════════════
+       PHASE SCREENS
+    ══════════════════════════════════════════════════ */
+    .phase { display:none; }
+    .phase.active { display:block; }
+
+    /* ── INTRO ──────────────────────────────────────── */
+    .topic-card {
+      background:var(--navy); border-radius:16px;
+      padding:28px 32px; margin-bottom:28px;
+      position:relative; overflow:hidden;
+    }
+    .topic-card::before {
+      content:''; position:absolute; top:-30px; right:-30px;
+      width:120px; height:120px; border-radius:50%;
+      background:var(--red); opacity:0.12;
+    }
+    .topic-card-eyebrow {
+      font-size:0.7rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.1em; color:#64748b; margin-bottom:12px;
+    }
+    .topic-card-title {
+      font-family:"Fraunces",serif;
+      font-size:1.6rem; font-weight:700; color:white;
+      line-height:1.2; margin-bottom:14px;
+    }
+    .topic-card-body {
+      font-size:0.9rem; color:#94a3b8; line-height:1.65;
+    }
+
+    .format-info {
+      background:var(--amber-bg); border:1px solid var(--amber-border);
+      border-radius:12px; padding:16px 18px; margin-bottom:28px;
+    }
+    .format-info-title {
+      font-size:0.7rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--amber); margin-bottom:8px;
+    }
+    .format-row {
+      display:flex; align-items:center; gap:10px;
+      font-size:0.84rem; color:var(--amber); margin-bottom:5px;
+    }
+    .format-row:last-child { margin-bottom:0; }
+    .format-icon { font-size:1rem; flex-shrink:0; }
+
+    .round-preview {
+      display:grid; grid-template-columns:1fr 1fr; gap:14px;
+      margin-bottom:32px;
+    }
+    .round-preview-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:12px; padding:16px;
+    }
+    .rpc-round {
+      font-size:0.68rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--red); margin-bottom:6px;
+    }
+    .rpc-q {
+      font-size:0.84rem; font-weight:600; color:var(--navy); line-height:1.4;
+    }
+    .rpc-note { font-size:0.74rem; color:var(--muted); margin-top:5px; }
+
+    .start-btn {
+      width:100%;
+      background:var(--red); color:white; border:none;
+      border-radius:12px; padding:18px;
+      font-family:"DM Sans",sans-serif; font-size:1rem; font-weight:700;
+      cursor:pointer; transition:opacity 0.15s;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+    }
+    .start-btn:hover { opacity:0.88; }
+
+    /* ── ROUND SCREEN ───────────────────────────────── */
+    .round-header {
+      display:flex; align-items:center; gap:12px; margin-bottom:24px;
+    }
+    .round-num {
+      width:36px; height:36px; border-radius:50%;
+      background:var(--navy); color:white;
+      font-family:"Fraunces",serif; font-size:1.1rem; font-weight:700;
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0;
+    }
+    .round-meta { flex:1; }
+    .round-label {
+      font-size:0.7rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--muted);
+    }
+    .round-topic {
+      font-size:0.88rem; color:var(--navy); font-weight:600;
+    }
+
+    /* Question card */
+    .question-card {
+      background:var(--surface); border:2px solid var(--navy);
+      border-radius:14px; padding:24px 28px;
+      margin-bottom:24px;
+    }
+    .question-eyebrow {
+      font-size:0.68rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--muted); margin-bottom:10px;
+    }
+    .question-text {
+      font-family:"Fraunces",serif;
+      font-size:clamp(1.1rem,2.5vw,1.45rem);
+      font-weight:700; line-height:1.3; color:var(--navy);
+    }
+
+    /* ── RECORDER AREA ──────────────────────────────── */
+    .recorder-area {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:14px; overflow:hidden;
+      margin-bottom:20px;
+    }
+    .recorder-top {
+      padding:16px 20px;
+      border-bottom:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; flex-wrap:wrap;
+    }
+    .rec-status {
+      display:flex; align-items:center; gap:8px;
+      font-size:0.85rem; font-weight:600;
+    }
+    .rec-dot {
+      width:10px; height:10px; border-radius:50%; background:#94a3b8;
+      transition:background 0.2s;
+    }
+    .rec-dot.recording { background:var(--red); animation:pulse 1.2s ease-in-out infinite; }
+    .rec-dot.done      { background:var(--correct); animation:none; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.25)} }
+    .rec-timer { font-size:1rem; font-weight:700; color:var(--navy); font-variant-numeric:tabular-nums; }
+    .rec-timer.warn { color:var(--timer-warn); }
+    .rec-timer.over { color:var(--timer-over); }
+
+    /* Waveform */
+    .waveform-canvas {
+      display:block; width:100%; height:64px; background:#f8fafc;
+    }
+
+    .recorder-bottom {
+      padding:16px 20px;
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    }
+
+    .rec-btn {
+      display:flex; align-items:center; gap:8px;
+      border:none; border-radius:10px; padding:12px 22px;
+      font-family:"DM Sans",sans-serif; font-size:0.9rem; font-weight:600;
+      cursor:pointer; transition:opacity 0.15s;
+    }
+    .rec-btn:disabled { opacity:0.4; cursor:not-allowed; }
+    .rec-btn.start { background:var(--red); color:white; }
+    .rec-btn.stop  { background:var(--navy); color:white; }
+    .rec-btn.start:hover:not(:disabled) { opacity:0.88; }
+    .rec-btn.stop:hover:not(:disabled)  { opacity:0.84; }
+
+    /* Playback area */
+    .playback-area {
+      display:none;
+      padding:14px 20px;
+      border-top:1px solid var(--border);
+      background:#f8fafc;
+      gap:10px;
+      align-items:center; flex-wrap:wrap;
+    }
+    .playback-area.visible { display:flex; }
+    .play-btn {
+      display:flex; align-items:center; gap:7px;
+      background:var(--navy); color:white; border:none;
+      border-radius:8px; padding:9px 18px;
+      font-family:"DM Sans",sans-serif; font-size:0.83rem; font-weight:600;
+      cursor:pointer; transition:opacity 0.15s; flex-shrink:0;
+    }
+    .play-btn:hover { opacity:0.84; }
+    .audio-duration { font-size:0.78rem; color:var(--muted); }
+    .retake-link {
+      font-size:0.75rem; color:#94a3b8; cursor:pointer;
+      text-decoration:underline; text-underline-offset:3px;
+      margin-left:auto;
+    }
+    .retake-link:hover { color:var(--muted); }
+
+    /* Soft rec hint */
+    .rec-hint {
+      font-size:0.78rem; color:var(--muted); text-align:center;
+      padding:8px 20px 14px; border-top:1px solid var(--border);
+      line-height:1.5;
+    }
+
+    /* ── FOLLOW-UP PROBES ───────────────────────────── */
+    .probes-section { display:none; margin-bottom:20px; }
+    .probes-section.visible { display:block; }
+    .probes-title {
+      font-size:0.7rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--muted); margin-bottom:12px;
+    }
+    .probe-item {
+      display:flex; gap:10px;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:10px; padding:12px 16px;
+      margin-bottom:8px;
+      animation:fadeUp 0.25s ease-out;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+    .probe-icon { font-size:1rem; flex-shrink:0; }
+    .probe-text { font-size:0.88rem; color:var(--navy); line-height:1.5; font-weight:500; }
+
+    /* ── MODEL ANSWER ───────────────────────────────── */
+    .model-answer-section { display:none; margin-bottom:24px; }
+    .model-answer-section.visible { display:block; }
+    .model-answer-card {
+      background:var(--correct-bg); border:1px solid var(--correct-border);
+      border-radius:12px; overflow:hidden;
+      animation:fadeUp 0.3s ease-out;
+    }
+    .ma-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 18px; border-bottom:1px solid var(--correct-border);
+      background:#e8faf0;
+    }
+    .ma-title {
+      font-size:0.72rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--correct);
+      display:flex; align-items:center; gap:7px;
+    }
+    .ma-body {
+      padding:16px 18px;
+      font-size:0.88rem; color:var(--slate); line-height:1.75;
+    }
+    .ma-body p { margin-bottom:0.8em; }
+    .ma-body p:last-child { margin-bottom:0; }
+
+    /* B2 indicators */
+    .b2-card {
+      display:none;
+      background:#f8fafc; border:1px solid var(--border);
+      border-radius:12px; margin-top:16px;
+      overflow:hidden;
+      animation:fadeUp 0.3s ease-out;
+    }
+    .b2-card.visible { display:block; }
+    .b2-header {
+      padding:10px 16px;
+      border-bottom:1px solid var(--border);
+      font-size:0.7rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--muted);
+    }
+    .b2-items { padding:10px 14px 12px; display:flex; flex-direction:column; gap:5px; }
+    .b2-item {
+      display:flex; gap:8px;
+      font-size:0.79rem; color:var(--slate); line-height:1.45;
+    }
+    .b2-icon { flex-shrink:0; }
+
+    /* ── ACTION BUTTONS ─────────────────────────────── */
+    .action-row { display:flex; gap:12px; flex-wrap:wrap; margin-top:4px; }
+    .action-btn {
+      flex:1; min-width:140px;
+      border:none; border-radius:10px; padding:13px 18px;
+      font-family:"DM Sans",sans-serif; font-size:0.9rem; font-weight:600;
+      cursor:pointer; transition:opacity 0.15s;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .action-btn.primary { background:var(--red); color:white; }
+    .action-btn.secondary { background:var(--navy); color:white; }
+    .action-btn.outline {
+      background:var(--surface); color:var(--navy);
+      border:1.5px solid var(--border);
+    }
+    .action-btn:hover:not(:disabled) { opacity:0.88; }
+    .action-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+    /* ── DONE SCREEN ────────────────────────────────── */
+    .done-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:16px; overflow:hidden; margin-top:8px;
+    }
+    .done-top {
+      padding:32px 32px 24px; text-align:center;
+      background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+    .done-icon { font-size:2.8rem; margin-bottom:12px; }
+    .done-title {
+      font-family:"Fraunces",serif; font-size:1.6rem; font-weight:700;
+      color:white; margin-bottom:6px;
+    }
+    .done-sub { font-size:0.88rem; color:#94a3b8; }
+    .done-body { padding:24px 28px; }
+    .done-note {
+      background:var(--amber-bg); border:1px solid var(--amber-border);
+      border-radius:10px; padding:14px 16px;
+      font-size:0.84rem; color:var(--amber); line-height:1.6;
+      margin-bottom:20px;
+    }
+    .done-rounds { display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
+    .done-round-item {
+      display:flex; align-items:center; gap:12px;
+      background:#f8fafc; border:1px solid var(--border);
+      border-radius:10px; padding:12px 16px;
+    }
+    .dri-icon { font-size:1.2rem; }
+    .dri-meta { flex:1; }
+    .dri-round { font-size:0.72rem; color:var(--muted); font-weight:600; text-transform:uppercase; }
+    .dri-q { font-size:0.84rem; color:var(--navy); font-weight:600; line-height:1.3; }
+    .dri-dur { font-size:0.76rem; color:var(--muted); margin-top:3px; }
+    .continue-btn {
+      width:100%;
+      background:var(--red); color:white; border:none;
+      border-radius:12px; padding:16px;
+      font-family:"DM Sans",sans-serif; font-size:0.95rem; font-weight:700;
+      cursor:pointer; transition:opacity 0.15s;
+    }
+    .continue-btn:hover { opacity:0.88; }
+    .skip-link {
+      display:block; text-align:center; margin-top:12px;
+      font-size:0.75rem; color:#94a3b8; cursor:pointer;
+      text-decoration:underline; text-underline-offset:3px;
+    }
+    .skip-link:hover { color:var(--muted); }
+
+    /* already done */
+    .already-done-card {
+      background:var(--correct-bg); border:1px solid var(--correct-border);
+      border-radius:14px; padding:24px; text-align:center; margin:24px 0;
+    }
+    .already-done-card h2 {
+      font-family:"Fraunces",serif; font-size:1.2rem; font-weight:700;
+      color:var(--correct); margin-bottom:8px;
+    }
+    .already-done-card p { font-size:0.85rem; color:var(--muted); margin-bottom:16px; }
+
+    /* ── RESPONSIVE ─────────────────────────────────── */
+    @media (max-width:600px) {
+      .page-wrap { padding:32px 16px 60px; }
+      .topbar { padding:0 14px; }
+      .round-preview { grid-template-columns:1fr; }
+      .question-card { padding:18px 20px; }
+      .topic-card { padding:22px 20px; }
+      .done-top { padding:24px 20px 20px; }
+      .done-body { padding:18px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <p class="loading-text">Henter samtalekort…</p>
+</div>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" id="backLink" href="exam.html">← Tilbage</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-brand">
+      <div class="topbar-flag" aria-hidden="true"></div>
+      <div>
+        <div class="topbar-title" id="topbarTitle">Mundtlig Del 2</div>
+        <div class="topbar-sub">Prøve i Dansk 3</div>
+      </div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-round-pill">
+      <div class="round-dot" id="dot1"></div>
+      <div class="round-dot" id="dot2"></div>
+      <span id="roundLabel" style="margin-left:2px;">Runde 1/2</span>
+    </div>
+  </div>
+</header>
+
+<div class="page-wrap" id="pageWrap" style="display:none;">
+
+  <!-- ══ PHASE: INTRO ════════════════════════════════ -->
+  <div class="phase active" id="phaseIntro">
+    <div class="page-eyebrow">
+      <div class="page-eyebrow-dot"></div>
+      <span>Mundtlig prøve · Del 2 — Samtale</span>
+    </div>
+    <h1 class="page-title" id="introTitle">…</h1>
+    <p class="page-subtitle" id="introSubtitle"></p>
+
+    <div class="topic-card" id="topicCardEl">
+      <div class="topic-card-eyebrow">🃏 Emnekort</div>
+      <div class="topic-card-title" id="topicCardTitle"></div>
+      <div class="topic-card-body" id="topicCardBody"></div>
+    </div>
+
+    <div class="format-info">
+      <div class="format-info-title">Sådan forløber del 2</div>
+      <div class="format-row"><span class="format-icon">⚡</span><span>Ingen forberedelsestid — du går direkte i gang</span></div>
+      <div class="format-row"><span class="format-icon">🔄</span><span>To runder med ét spørgsmål og opfølgende spørgsmål hver</span></div>
+      <div class="format-row"><span class="format-icon">⏱️</span><span>Ca. 5 minutter i alt — ca. 2–3 minutter per runde</span></div>
+      <div class="format-row"><span class="format-icon">✅</span><span>Sammenlign dit svar med modelsvar efter hver runde</span></div>
+    </div>
+
+    <div class="round-preview">
+      <div class="round-preview-card">
+        <div class="rpc-round">Runde 1</div>
+        <div class="rpc-q" id="r1preview"></div>
+        <div class="rpc-note">Inkl. 3 opfølgende spørgsmål</div>
+      </div>
+      <div class="round-preview-card">
+        <div class="rpc-round">Runde 2</div>
+        <div class="rpc-q" id="r2preview"></div>
+        <div class="rpc-note">Inkl. 3 opfølgende spørgsmål</div>
+      </div>
+    </div>
+
+    <button class="start-btn" onclick="PD3.warmupTTS('da-DK'); startRound(1)">
+      <span>🎤</span> Start Runde 1
+    </button>
+    <div style="text-align:center;margin-top:12px;">
+      <span id="skipLink" onclick="skipElement()" style="font-size:0.8rem;color:#94a3b8;cursor:pointer;">Spring Del 2 over</span>
+    </div>
+  </div>
+
+  <!-- ══ PHASE: ROUND (shared template) ════════════════ -->
+  <div class="phase" id="phaseRound">
+
+    <div class="round-header">
+      <div class="round-num" id="roundNumBadge">1</div>
+      <div class="round-meta">
+        <div class="round-label" id="roundLabelBig">Runde 1 af 2</div>
+        <div class="round-topic" id="roundTopicLabel">Besvaret med din naturlige dansk</div>
+      </div>
+    </div>
+
+    <!-- Question -->
+    <div class="question-card">
+      <div class="question-eyebrow">Eksaminators spørgsmål</div>
+      <div class="question-text" id="roundQuestion"></div>
+    </div>
+
+    <!-- Recorder -->
+    <div class="recorder-area">
+      <div class="recorder-top">
+        <div class="rec-status">
+          <div class="rec-dot" id="recDot"></div>
+          <span id="recStatusText">Klar til optagelse</span>
+        </div>
+        <div class="rec-timer" id="recTimer">0:00</div>
+      </div>
+      <canvas class="waveform-canvas" id="waveformCanvas" height="64"></canvas>
+      <div class="recorder-bottom">
+        <button class="rec-btn start" id="recStartBtn" onclick="startRecording()">
+          🎤 Start optagelse
+        </button>
+        <button class="rec-btn stop" id="recStopBtn" onclick="stopRecording()" disabled>
+          ⏹ Stop
+        </button>
+      </div>
+      <div class="playback-area" id="playbackArea">
+        <button class="play-btn" id="playBtn" onclick="togglePlayback()">▶ Afspil</button>
+        <span class="audio-duration" id="audioDuration"></span>
+        <span class="retake-link" id="retakeLink" onclick="retake()">Optag igen</span>
+      </div>
+      <div class="rec-hint" id="recHint">
+        Tal naturligt og uddybende — mindst 5-6 sætninger. Du kan optage igen hvis du ønsker det.
+      </div>
+    </div>
+
+    <!-- Follow-up recorder (injected by FollowupRecorder) -->
+    <div id="followupRecorderArea" style="display:none"></div>
+
+    <!-- Model answer (hidden until follow-ups done) -->
+    <div class="model-answer-section" id="modelAnswerSection">
+      <div class="model-answer-card">
+        <div class="ma-header">
+          <div class="ma-title">
+            <span>📋</span> Eksempel på et godt B2-svar
+          </div>
+        </div>
+        <div class="ma-body" id="modelAnswerBody"></div>
+      </div>
+      <div class="b2-card" id="b2Card">
+        <div class="b2-header">Hvad gør et godt svar?</div>
+        <div class="b2-items" id="b2Items"></div>
+      </div>
+    </div>
+
+    <!-- Action row -->
+    <div class="action-row" id="roundActionRow" style="margin-top:20px; display:none">
+      <button class="action-btn primary" id="proceedBtn" onclick="proceedFromRound()">
+        Videre til Runde 2 →
+      </button>
+    </div>
+
+    <span class="skip-link" id="skipRoundLink" onclick="skipRound()" style="display:none">Spring denne runde over</span>
+
+  </div>
+
+  <!-- ══ PHASE: DONE ════════════════════════════════ -->
+  <div class="phase" id="phaseDone">
+    <div class="page-eyebrow">
+      <div class="page-eyebrow-dot"></div>
+      <span>Mundtlig prøve · Del 2 færdig</span>
+    </div>
+
+    <div class="done-card">
+      <div class="done-top">
+        <div class="done-icon">🎉</div>
+        <div class="done-title">Begge runder gennemført!</div>
+        <div class="done-sub" id="doneSubtext">Del 2 er afleveret.</div>
+      </div>
+      <div class="done-body">
+        <div class="done-note" id="doneNote">
+          Dine optagelser er gemt og sendt til AI-vurdering. Du vil modtage din samlede score når alle dele er afleveret.
+        </div>
+        <div class="done-rounds" id="doneRoundsList"></div>
+        <button class="continue-btn" id="continueBtn" disabled onclick="PD3.goBack(simId, attemptId)">
+          <span id="continueBtnLabel">Gemmer…</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Already submitted -->
+  <div class="phase" id="phaseAlreadyDone">
+    <div class="already-done-card">
+      <h2>✅ Allerede afleveret</h2>
+      <p>Denne del er allerede gennemført.</p>
+      <button class="continue-btn" style="max-width:300px;margin:0 auto;display:block;" onclick="PD3.goBack(simId, attemptId)">
+        Tilbage til simulering
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+
+const SIM_FILES = {
+  sim01:'dansk3_sim01_mundtlig_delprove2_rejser.json',
+  sim02:'dansk3_sim02_mundtlig_delprove2.json',
+  sim03:'dansk3_sim03_mundtlig_delprove2.json',
+  sim04:'dansk3_sim04_mundtlig_delprove2.json',
+  sim05:'dansk3_sim05_mundtlig_delprove2.json',
+  sim06:'dansk3_sim06_mundtlig_delprove2.json',
+  sim07:'dansk3_sim07_mundtlig_delprove2.json',
+  sim08:'dansk3_sim08_mundtlig_delprove2.json',
+  sim09:'dansk3_sim09_mundtlig_delprove2.json',
+  sim10:'dansk3_sim10_mundtlig_delprove2.json',
+};
+
+// ─── shared state (assigned by PD3.init in DOMContentLoaded) ───
+let currentUser = null;
+let attemptId, simId, simNum, elemKey;
+
+
+const ROUND_WARN_SECS  = 150;  // 2:30 — soft warning
+const ROUND_MAX_SECS   = 300;  // 5:00 — auto-stop
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+
+let examData    = null;
+let followupResults = { 1: [], 2: [] };  // FollowupRecorder results per round
+let submitted   = false;
+
+let currentRound = 0;   // 1 or 2
+let roundData    = {};  // { 1: {blob, duration}, 2: {blob, duration} }
+let roundDone    = {};  // { 1: false, 2: false }
+
+// Recorder state
+let mediaRecorder = null;
+let audioChunks   = [];
+let audioBlob     = null;
+let audioUrl      = null;
+let audioEl       = null;
+let recStartTime  = null;
+let recTimerInt   = null;
+let recSeconds    = 0;
+let isPlaying     = false;
+
+// Persistent mic stream (kept alive across rounds so round 2 auto-starts without gesture)
+let micStream     = null;
+let countdownInt  = null;
+let countdownN    = 0;
+
+// AudioContext for waveform
+let audioCtx      = null;
+let analyser      = null;
+let sourceNode    = null;
+let waveRAF       = null;
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  ({ user: currentUser, attemptId, simId, simNum, elemKey } = await PD3.init('mundtlig_del2'));
+
+  document.getElementById('backLink').href = `exam.html?sim=${simId}&attempt=${attemptId}`;
+
+  const filename = SIM_FILES[simId];
+  if (!filename) { PD3.showError('Ukendt simulering: ' + simId, simId, attemptId); return; }
+  try {
+    const res = await fetch(`/dansk3/data/${simNum}/${filename}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    examData = await res.json();
+  } catch (err) {
+    PD3.showError('Kunne ikke hente spørgsmål. Prøv at genindlæse siden.', simId, attemptId);
+    return;
+  }
+
+  submitted = await PD3.isSubmitted(currentUser.email, attemptId, elemKey);
+  renderIntro();
+  PD3.hideLoading();
+  document.getElementById('pageWrap').style.display = '';
+});
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER INTRO
+// ═══════════════════════════════════════════════════════════════
+function renderIntro() {
+  const simNum = parseInt(simId.replace('sim',''), 10);
+  document.getElementById('topbarTitle').textContent = `Sim ${simNum} — Mundtlig 2`;
+
+  document.getElementById('introTitle').textContent = `Del 2: Samtale om "${examData.title}"`;
+  document.getElementById('introSubtitle').textContent = examData.format_note || '';
+
+  // Topic card
+  const topicLines = (examData.topic_card?.da || '').split('\n\n');
+  const title = topicLines[0]?.replace('EMNE: ','') || examData.title;
+  const body  = topicLines.slice(1).join('\n\n');
+  document.getElementById('topicCardTitle').textContent = title;
+  document.getElementById('topicCardBody').textContent  = body;
+
+  document.getElementById('r1preview').textContent = examData.round1?.question || '';
+  document.getElementById('r2preview').textContent = examData.round2?.question || '';
+
+  if (submitted) {
+    showPhase('phaseAlreadyDone');
+  }
+
+  updateRoundDots(0);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ROUND FLOW
+// ═══════════════════════════════════════════════════════════════
+function startRound(num) {
+  currentRound = num;
+  const round = num === 1 ? examData.round1 : examData.round2;
+
+  showPhase('phaseRound');
+  updateRoundDots(num);
+
+  document.getElementById('roundNumBadge').textContent = num;
+  document.getElementById('roundLabelBig').textContent = `Runde ${num} af 2`;
+  document.getElementById('roundLabel').textContent = `Runde ${num}/2`;
+  document.getElementById('roundQuestion').textContent = round.question;
+
+  // Reset recorder UI
+  resetRecorderUI();
+
+  // Reset follow-up area
+  document.getElementById('followupRecorderArea').style.display = 'none';
+  document.getElementById('followupRecorderArea').innerHTML     = '';
+  document.getElementById('modelAnswerSection').classList.remove('visible');
+  document.getElementById('b2Card').classList.remove('visible');
+  document.getElementById('roundActionRow').style.display        = 'none';
+  document.getElementById('skipRoundLink').style.display         = 'none';
+
+  // Proceed button
+  const btn = document.getElementById('proceedBtn');
+  if (num === 1) {
+    btn.textContent = 'Videre til Runde 2 →';
+    btn.disabled = true;
+  } else {
+    btn.textContent = 'Afslut og aflever';
+    btn.disabled = true;
+  }
+
+  // Auto-record: round 1 must acquire stream (needs user gesture from the button click),
+  // round 2 reuses existing stream silently.
+  if (num === 1) {
+    acquireStreamThenCountdown();
+  } else if (micStream) {
+    startCountdown();
+  }
+  // If no stream at all (permission denied), manual mode remains available
+}
+
+function resetRecorderUI() {
+  stopRecording(true);
+  audioBlob = null; audioUrl = null; audioEl = null;
+
+  document.getElementById('recDot').className = 'rec-dot';
+  document.getElementById('recStatusText').textContent = 'Klar til optagelse';
+  document.getElementById('recTimer').textContent = '0:00';
+  document.getElementById('recTimer').className = 'rec-timer';
+  document.getElementById('recStartBtn').disabled = false;
+  document.getElementById('recStopBtn').disabled = true;
+  document.getElementById('playbackArea').classList.remove('visible');
+  document.getElementById('playBtn').textContent = '▶ Afspil';
+
+  // Clear waveform
+  const canvas = document.getElementById('waveformCanvas');
+  const ctx2d = canvas.getContext('2d');
+  ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+  ctx2d.fillStyle = '#f8fafc';
+  ctx2d.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+// ── Auto-record: acquire stream (round 1, needs gesture) ───────
+async function acquireStreamThenCountdown() {
+  // Show "getting mic" state
+  document.getElementById('recStatusText').textContent = 'Henter mikrofon…';
+  document.getElementById('recStartBtn').disabled = true;
+
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    setupWaveform(micStream);
+    startCountdown();
+  } catch (err) {
+    // Permission denied or no mic — fall back gracefully to manual mode
+    document.getElementById('recStatusText').textContent = 'Klar til optagelse';
+    document.getElementById('recStartBtn').disabled = false;
+    document.getElementById('recHint').textContent =
+      'Mikrofontilladelse ikke givet — klik "Start optagelse" for at starte manuelt.';
+  }
+}
+
+// ── Countdown: 3-2-1 then auto-starts recording ────────────────
+function startCountdown() {
+  countdownN = 3;
+  applyCountdownUI(countdownN);
+
+  countdownInt = setInterval(() => {
+    countdownN--;
+    if (countdownN <= 0) {
+      clearInterval(countdownInt);
+      startRecordingFromStream();
+    } else {
+      applyCountdownUI(countdownN);
+    }
+  }, 1000);
+}
+
+function applyCountdownUI(n) {
+  document.getElementById('recDot').className = 'rec-dot';
+  document.getElementById('recStatusText').textContent = `Optagelse starter om ${n}…`;
+  document.getElementById('recTimer').textContent = `${n}`;
+  document.getElementById('recStartBtn').textContent = '⏭ Start nu';
+  document.getElementById('recStartBtn').disabled = false;
+  document.getElementById('recStartBtn').onclick = skipCountdown;
+  document.getElementById('recHint').textContent =
+    'Optagelsen starter automatisk — eller klik "Start nu" for at springe nedtællingen over.';
+}
+
+function skipCountdown() {
+  clearInterval(countdownInt);
+  startRecordingFromStream();
+}
+
+// ── Core recording using existing micStream ────────────────────
+function startRecordingFromStream() {
+  if (!micStream) { startRecording(); return; } // fallback if no persistent stream
+
+  // Reset button to normal label
+  document.getElementById('recStartBtn').textContent = '🎤 Start optagelse';
+  document.getElementById('recStartBtn').onclick = startRecording;
+
+  audioChunks = [];
+  const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+    ? 'audio/webm;codecs=opus' : 'audio/webm';
+  // 16kbps sufficient for Whisper, keeps files small for storage upload
+  mediaRecorder = new MediaRecorder(micStream, { mimeType, audioBitsPerSecond: 16000 });
+  mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+  mediaRecorder.onstop = onRecordingStop;
+  mediaRecorder.start(100);
+
+  recStartTime = Date.now();
+  recSeconds   = 0;
+  recTimerInt  = setInterval(updateTimer, 1000);
+
+  document.getElementById('recDot').className = 'rec-dot recording';
+  document.getElementById('recStatusText').textContent = 'Optager…';
+  document.getElementById('recStartBtn').disabled = true;
+  document.getElementById('recStopBtn').disabled  = false;
+  document.getElementById('playbackArea').classList.remove('visible');
+  document.getElementById('retakeLink').style.display = 'none';
+  document.getElementById('recHint').textContent =
+    'Tal naturligt og uddybende — mindst 5-6 sætninger. Du kan optage igen hvis du ønsker det.';
+}
+
+// ── Manual startRecording (fallback if no persistent stream) ───
+async function startRecording() {
+  // If we already have a stream from the first round, just use it
+  // but re-init the waveform analyser since stopRecording() nulled it
+  if (micStream) { setupWaveform(micStream); startRecordingFromStream(); return; }
+
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    setupWaveform(micStream);
+    startRecordingFromStream();
+  } catch (err) {
+    alert('Kunne ikke tilgå mikrofon. Kontroller at du har givet tilladelse.\n\n' + err.message);
+  }
+}
+
+function stopRecording(silent = false) {
+  clearInterval(recTimerInt);
+  clearInterval(countdownInt);
+  cancelAnimationFrame(waveRAF);
+  if (analyser) { analyser = null; }
+  // Stop the MediaRecorder but do NOT stop micStream tracks — we reuse them for round 2
+  if (mediaRecorder?.state !== 'inactive') {
+    mediaRecorder?.stop();
+    // Do not call .stop() on stream tracks here
+  }
+  if (!silent) {
+    document.getElementById('recDot').className = 'rec-dot done';
+    document.getElementById('recStatusText').textContent = 'Optagelse færdig';
+    document.getElementById('recStopBtn').disabled = true;
+  }
+}
+
+function onRecordingStop() {
+  if (audioChunks.length === 0) return;
+
+  const mimeType = mediaRecorder?.mimeType || 'audio/webm';
+  audioBlob = new Blob(audioChunks, { type: mimeType });
+  audioUrl  = URL.createObjectURL(audioBlob);
+  audioEl   = new Audio(audioUrl);
+  audioEl.onended = () => {
+    isPlaying = false;
+    document.getElementById('playBtn').textContent = '▶ Afspil';
+  };
+
+  const dur = formatDuration(recSeconds);
+  document.getElementById('audioDuration').textContent = `${dur} optagelse`;
+  document.getElementById('playbackArea').classList.add('visible');
+  document.getElementById('retakeLink').style.display = '';
+
+  // Store for this round
+  roundData[currentRound] = { blob: audioBlob, durationSec: recSeconds, durationStr: dur };
+  roundDone[currentRound] = true;
+
+  // Launch FollowupRecorder for this round's probes
+  const round = currentRound === 1 ? examData.round1 : examData.round2;
+  const probes = round.follow_up_probes || [];
+
+  if (probes.length === 0) {
+    showModelAnswer();
+    document.getElementById('roundActionRow').style.display = '';
+    document.getElementById('skipRoundLink').style.display  = '';
+    document.getElementById('proceedBtn').disabled = false;
+    return;
+  }
+
+  document.getElementById('followupRecorderArea').style.display = '';
+
+  const recorder = PD3.FollowupRecorder({
+    container:  document.getElementById('followupRecorderArea'),
+    questions:  probes,
+    micStream:  micStream,
+    onComplete: (results) => {
+      followupResults[currentRound] = results;
+      showModelAnswer();
+      document.getElementById('roundActionRow').style.display = '';
+      document.getElementById('skipRoundLink').style.display  = '';
+      document.getElementById('proceedBtn').disabled = false;
+    },
+    onSkipAll: () => {
+      followupResults[currentRound] = [];
+      showModelAnswer();
+      document.getElementById('roundActionRow').style.display = '';
+      document.getElementById('skipRoundLink').style.display  = '';
+      document.getElementById('proceedBtn').disabled = false;
+    },
+  });
+  recorder.start();
+}
+
+function updateTimer() {
+  recSeconds = Math.floor((Date.now() - recStartTime) / 1000);
+  document.getElementById('recTimer').textContent = formatDuration(recSeconds);
+  const el = document.getElementById('recTimer');
+  if      (recSeconds >= ROUND_MAX_SECS) { el.className = 'rec-timer over'; stopRecording(); }
+  else if (recSeconds >= ROUND_WARN_SECS){ el.className = 'rec-timer warn'; }
+  else                                   { el.className = 'rec-timer'; }
+}
+
+function togglePlayback() {
+  if (!audioEl) return;
+  if (isPlaying) {
+    audioEl.pause(); isPlaying = false;
+    document.getElementById('playBtn').textContent = '▶ Afspil';
+  } else {
+    audioEl.play(); isPlaying = true;
+    document.getElementById('playBtn').textContent = '⏸ Pause';
+  }
+}
+
+function retake() {
+  if (isPlaying) { audioEl?.pause(); isPlaying = false; }
+  audioBlob = null; audioUrl = null; audioEl = null;
+  roundDone[currentRound] = false;
+  document.getElementById('proceedBtn').disabled = true;
+  document.getElementById('probesSection').classList.remove('visible');
+  document.getElementById('modelAnswerSection').classList.remove('visible');
+  resetRecorderUI();
+}
+
+// ── Waveform ───────────────────────────────────────────────────
+function setupWaveform(stream) {
+  try {
+    audioCtx  = new (window.AudioContext || window.webkitAudioContext)();
+    analyser  = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    sourceNode = audioCtx.createMediaStreamSource(stream);
+    sourceNode.connect(analyser);
+    drawWaveform();
+  } catch { /* silent fallback */ }
+}
+
+function drawWaveform() {
+  if (!analyser) return;
+  const canvas = document.getElementById('waveformCanvas');
+  const ctx2d  = canvas.getContext('2d');
+  const W = canvas.width  = canvas.offsetWidth;
+  const H = canvas.height = 64;
+  const buf = new Uint8Array(analyser.frequencyBinCount);
+
+  function frame() {
+    if (!analyser) return;
+    analyser.getByteTimeDomainData(buf);
+    ctx2d.fillStyle = '#f8fafc';
+    ctx2d.fillRect(0, 0, W, H);
+    ctx2d.strokeStyle = '#c8102e';
+    ctx2d.lineWidth   = 1.5;
+    ctx2d.beginPath();
+    const step = W / buf.length;
+    buf.forEach((v, i) => {
+      const x = i * step;
+      const y = ((v / 128) - 1) * (H * 0.38) + H / 2;
+      i === 0 ? ctx2d.moveTo(x, y) : ctx2d.lineTo(x, y);
+    });
+    ctx2d.stroke();
+    waveRAF = requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+// ── Model answer (shown after follow-up recorder completes) ────
+function showModelAnswer() {
+  const round = currentRound === 1 ? examData.round1 : examData.round2;
+  const model = round.model_answer?.da || '';
+
+  const body = document.getElementById('modelAnswerBody');
+  body.innerHTML = model.split('\n\n').map(p => `<p>${PD3.escapeHtml(p)}</p>`).join('');
+  document.getElementById('modelAnswerSection').classList.add('visible');
+
+  // Show B2 indicators on round 2 only
+  if (currentRound === 2) {
+    const indicators = examData.evaluation_criteria?.oral_b2_indicators || [];
+    if (indicators.length) {
+      const items = document.getElementById('b2Items');
+      items.innerHTML = indicators.map(ind =>
+        `<div class="b2-item"><span class="b2-icon">✓</span><span>${PD3.escapeHtml(ind)}</span></div>`
+      ).join('');
+      document.getElementById('b2Card').classList.add('visible');
+    }
+  }
+
+  document.getElementById('modelAnswerSection').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+// ── Proceed between rounds ──────────────────────────────────────
+function proceedFromRound() {
+  if (currentRound === 1) {
+    startRound(2);
+    updateRoundDots(2);
+    window.scrollTo({ top:0, behavior:'smooth' });
+  } else {
+    finalizeAndSubmit();
+  }
+}
+
+function skipRound() {
+  if (!confirm(`Spring Runde ${currentRound} over?`)) return;
+  roundDone[currentRound] = false;
+  roundData[currentRound] = { blob:null, durationSec:0, durationStr:'0:00', skipped:true };
+  followupResults[currentRound] = [];
+  if (currentRound === 1) {
+    startRound(2);
+    updateRoundDots(2);
+    window.scrollTo({ top:0, behavior:'smooth' });
+  } else {
+    finalizeAndSubmit();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// SUBMIT
+// ─────────────────────────────────────────────────────────────
+async function finalizeAndSubmit() {
+  // Release mic stream now that both rounds are done
+  if (micStream) {
+    micStream.getTracks().forEach(t => t.stop());
+    micStream = null;
+  }
+  showPhase('phaseDone');
+  updateRoundDots(3);
+
+  // Build done rounds summary
+  const list = document.getElementById('doneRoundsList');
+  const rounds = [examData.round1, examData.round2];
+  list.innerHTML = rounds.map((r, i) => {
+    const num  = i + 1;
+    const info = roundData[num];
+    const done = info && !info.skipped;
+    return `
+      <div class="done-round-item">
+        <span class="dri-icon">${done ? '🎤' : '⏭️'}</span>
+        <div class="dri-meta">
+          <div class="dri-round">Runde ${num}</div>
+          <div class="dri-q">${PD3.escapeHtml(r.question)}</div>
+          <div class="dri-dur">${done ? info.durationStr + ' optagelse' : 'Sprunget over'}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // ── Upload all audio files to Supabase Storage ──────────────────
+  // Storage path: pd3-audio/{attemptId}/{filename}
+  // Edge functions fetch from storage using service role — no size limits.
+  console.log('[del2] uploading audio to storage…');
+
+  const [r1path, r2path] = await Promise.all([
+    roundData[1]?.blob
+      ? PD3.uploadAudio(roundData[1].blob, attemptId, 'round1_main.webm')
+      : Promise.resolve(null),
+    roundData[2]?.blob
+      ? PD3.uploadAudio(roundData[2].blob, attemptId, 'round2_main.webm')
+      : Promise.resolve(null),
+  ]);
+
+  // Upload followup audios (can be null if skipped)
+  const fup1 = await Promise.all(
+    (followupResults[1] || []).map(async (f, i) => {
+      const path = f.audio_b64 && !f.skipped
+        // FollowupRecorder stores base64 — convert back to blob for upload
+        ? await PD3.uploadAudio(base64ToBlob(f.audio_b64), attemptId, `round1_followup${i+1}.webm`)
+        : null;
+      return { question: f.question, duration_sec: f.duration_sec, response_time_sec: f.response_time_sec, skipped: f.skipped, audio_path: path };
+    })
+  );
+  const fup2 = await Promise.all(
+    (followupResults[2] || []).map(async (f, i) => {
+      const path = f.audio_b64 && !f.skipped
+        ? await PD3.uploadAudio(base64ToBlob(f.audio_b64), attemptId, `round2_followup${i+1}.webm`)
+        : null;
+      return { question: f.question, duration_sec: f.duration_sec, response_time_sec: f.response_time_sec, skipped: f.skipped, audio_path: path };
+    })
+  );
+
+  console.log(`[del2] uploads done. r1=${r1path} r2=${r2path}`);
+
+  // ── Submit JSON with storage paths (tiny payload) ────────────────
+  const responseJson = {
+    topic:  examData.title,
+    round1: {
+      question:     examData.round1.question,
+      duration_sec: roundData[1]?.durationSec || 0,
+      skipped:      roundData[1]?.skipped || false,
+      audio_path:   r1path,
+      followups:    fup1,
+    },
+    round2: {
+      question:     examData.round2.question,
+      duration_sec: roundData[2]?.durationSec || 0,
+      skipped:      roundData[2]?.skipped || false,
+      audio_path:   r2path,
+      followups:    fup2,
+    },
+  };
+
+  console.log('[del2] submitting metadata…', JSON.stringify(responseJson).length, 'bytes');
+
+  try {
+    await PD3.submit({ attemptId, elemKey,
+      text: `Mundtlig Del 2 — ${examData.title}. R1: ${roundData[1]?.durationStr||'0:00'}. R2: ${roundData[2]?.durationStr||'0:00'}.`,
+      json: responseJson,
+    });
+    console.log('[del2] submit OK');
+  } catch (err) {
+    console.error('[del2] submit FAILED:', err);
+    PD3.toast('Fejl ved gemning — prøv igen eller kontakt support.');
+  }
+
+  submitted = true;
+
+  // Enable the continue button
+  const btn = document.getElementById('continueBtn');
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = 'Fortsæt med simulering →';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// SKIP WHOLE ELEMENT
+// ─────────────────────────────────────────────────────────────
+async function skipElement() {
+  if (!confirm('Spring hele Del 2 over? Du får 0 point.')) return;
+  await PD3.skip({ attemptId, elemKey });
+  submitted = true;
+  PD3.goBack(simId, attemptId);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+function showPhase(id) {
+  document.querySelectorAll('.phase').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function updateRoundDots(active) {
+  // active: 0=none, 1=r1 active, 2=r2 active, 3=both done
+  const d1 = document.getElementById('dot1');
+  const d2 = document.getElementById('dot2');
+  const lbl = document.getElementById('roundLabel');
+  if (active === 0) { d1.className = 'round-dot'; d2.className = 'round-dot'; lbl.textContent = 'Klar'; }
+  else if (active === 1) { d1.className = 'round-dot active'; d2.className = 'round-dot'; lbl.textContent = 'Runde 1/2'; }
+  else if (active === 2) { d1.className = 'round-dot done'; d2.className = 'round-dot active'; lbl.textContent = 'Runde 2/2'; }
+  else { d1.className = 'round-dot done'; d2.className = 'round-dot done'; lbl.textContent = 'Færdig'; }
+}
+
+function formatDuration(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function base64ToBlob(b64) {
+  // Convert base64 string back to Blob for storage upload
+  try {
+    const bin  = atob(b64);
+    const arr  = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: 'audio/webm' });
+  } catch (e) {
+    console.error('base64ToBlob failed:', e);
+    return null;
+  }
+}
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+    reader.onerror   = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mundtlig Del 1 — Præsentation</title>
+  <script src="/assets/js/auth-guard-dansk3.js"></script>
+  <script src="/assets/js/pd3-engine.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─── TOKENS ──────────────────────────────────────────── */
+    :root {
+      --red:       #c8102e;
+      --red-dim:   #f5e1e4;
+      --navy:      #0f172a;
+      --slate:     #334155;
+      --muted:     #64748b;
+      --border:    #e2e8f0;
+      --surface:   #ffffff;
+      --bg:        #f8f7f4;
+
+      --rec-bg:    #0a0f1e;   /* dark recording overlay */
+      --rec-red:   #ff2d55;
+      --rec-green: #34d399;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--navy);
+      min-height: 100vh;
+    }
+
+    /* ─── TOPBAR ──────────────────────────────────────────── */
+    .topbar {
+      background: var(--navy);
+      border-bottom: 3px solid var(--red);
+      padding: 0 28px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .back-link {
+      color: #64748b; text-decoration: none; font-size: 0.8rem;
+      display: flex; align-items: center; gap: 5px; transition: color 0.15s;
+    }
+    .back-link:hover { color: #fff; }
+    .topbar-divider { width: 1px; height: 20px; background: #1e293b; }
+    .topbar-brand { display: flex; align-items: center; gap: 10px; }
+    .topbar-flag {
+      width: 22px; height: 16px; background: var(--red);
+      border-radius: 2px; position: relative; overflow: hidden; flex-shrink: 0;
+    }
+    .topbar-flag::before {
+      content: ''; position: absolute; left: 8px; top: 0;
+      width: 3px; height: 100%; background: white;
+    }
+    .topbar-flag::after {
+      content: ''; position: absolute; left: 0; top: 5.5px;
+      width: 100%; height: 3px; background: white;
+    }
+    .topbar-title { font-family: "Fraunces", serif; font-size: 0.9rem; font-weight: 600; color: #fff; }
+    .topbar-sub   { font-size: 0.75rem; color: #64748b; }
+    .topbar-step  { font-size: 0.78rem; color: #475569; }
+
+    /* ─── LOADING ──────────────────────────────────────────── */
+    #loading-overlay {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 16px; z-index: 9999;
+      transition: opacity 0.35s;
+    }
+    #loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    .loading-flag {
+      width: 36px; height: 26px; background: var(--red);
+      border-radius: 3px; position: relative; overflow: hidden;
+    }
+    .loading-flag::before {
+      content: ''; position: absolute; left: 13px; top: 0;
+      width: 4px; height: 100%; background: white;
+    }
+    .loading-flag::after {
+      content: ''; position: absolute; left: 0; top: 9px;
+      width: 100%; height: 4px; background: white;
+    }
+    .loading-text { font-size: 0.9rem; color: var(--muted); }
+
+    /* ─── MAIN LAYOUT ──────────────────────────────────────── */
+    main {
+      max-width: 1060px; margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+
+    /* ─── PAGE HEADER ──────────────────────────────────────── */
+    .page-header {
+      margin-bottom: 28px;
+    }
+    .page-header-eyebrow {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px;
+    }
+    .eyebrow-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--red);
+    }
+    .page-header h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(1.5rem, 3vw, 2.1rem);
+      font-weight: 700; line-height: 1.2;
+      letter-spacing: -0.025em; color: var(--navy);
+    }
+    .page-header h1 em {
+      font-style: italic; font-weight: 300; color: var(--muted);
+    }
+    .focus-tag {
+      display: inline-block; margin-top: 10px;
+      background: #f1f5f9; color: var(--slate);
+      font-size: 0.78rem; padding: 4px 12px;
+      border-radius: 99px; border-left: 3px solid var(--red);
+    }
+
+    /* ─── TWO-COLUMN LAYOUT ────────────────────────────────── */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ─── PREP MATERIAL PANEL ──────────────────────────────── */
+    .prep-panel {
+      display: flex; flex-direction: column; gap: 16px;
+    }
+
+    .prep-briefing {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 24px;
+    }
+    .prep-briefing-title {
+      font-family: "Fraunces", serif;
+      font-size: 0.85rem; font-weight: 600;
+      color: var(--navy); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .prep-briefing p {
+      font-size: 0.88rem; color: var(--slate); line-height: 1.65;
+    }
+    .prep-briefing strong { color: var(--navy); font-weight: 600; }
+
+    /* Accordion sections */
+    .prep-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .prep-section-header {
+      width: 100%;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      background: none; border: none; cursor: pointer;
+      font-family: "DM Sans", sans-serif; text-align: left;
+      transition: background 0.15s;
+    }
+    .prep-section-header:hover { background: #f8fafc; }
+    .prep-section-label {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.88rem; font-weight: 600; color: var(--navy);
+    }
+    .prep-section-icon {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+    }
+    .icon-facts   { background: #e0f2fe; }
+    .icon-vocab   { background: #f0fdf4; }
+    .icon-struct  { background: var(--red-dim); }
+    .prep-section-chevron {
+      font-size: 0.7rem; color: var(--muted);
+      transition: transform 0.2s;
+    }
+    .prep-section.open .prep-section-chevron { transform: rotate(180deg); }
+    .prep-section-body {
+      display: none; padding: 0 20px 18px;
+    }
+    .prep-section.open .prep-section-body { display: block; }
+
+    /* Key facts */
+    .facts-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .facts-list li {
+      font-size: 0.85rem; color: var(--slate); line-height: 1.5;
+      padding-left: 18px; position: relative;
+    }
+    .facts-list li::before {
+      content: '→'; position: absolute; left: 0;
+      color: var(--red); font-size: 0.75rem; top: 1px;
+    }
+
+    /* Vocabulary */
+    .vocab-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .vocab-chip {
+      background: #f0fdf4; color: #166534;
+      border: 1px solid #bbf7d0;
+      font-size: 0.75rem; padding: 3px 10px;
+      border-radius: 99px; font-family: "DM Sans", sans-serif;
+    }
+
+    /* Structure */
+    .structure-steps { display: flex; flex-direction: column; gap: 10px; }
+    .structure-step {
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .step-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--navy); color: white;
+      font-size: 0.7rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .step-content { font-size: 0.83rem; color: var(--slate); line-height: 1.5; }
+    .step-content strong { color: var(--navy); font-weight: 600; display: block; margin-bottom: 2px; }
+
+    /* ─── RECORDING PANEL (RIGHT COLUMN) ──────────────────── */
+    .record-panel {
+      position: sticky; top: 68px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+
+    /* State cards — only one visible at a time */
+    .state-card {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .state-card.active { display: flex; flex-direction: column; }
+
+    /* ── CARD: READY ───────────────────────────────────────── */
+    #card-ready {
+      padding: 24px;
+      gap: 18px;
+    }
+    .ready-title {
+      font-family: "Fraunces", serif;
+      font-size: 1.05rem; font-weight: 600; color: var(--navy);
+    }
+    .ready-meta {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .ready-meta-row {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 0.8rem; color: var(--muted);
+    }
+    .ready-meta-val { font-weight: 600; color: var(--navy); }
+    .ready-tip {
+      background: #eff6ff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.78rem; color: #1d4ed8; line-height: 1.5;
+    }
+    .btn-record-start {
+      width: 100%;
+      background: var(--red); color: white; border: none;
+      border-radius: 10px; padding: 16px;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-record-start:hover { opacity: 0.88; }
+    .btn-record-start:active { transform: scale(0.98); }
+    .btn-record-start:disabled { opacity: 0.5; cursor: not-allowed; }
+    .rec-start-icon {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: white; flex-shrink: 0;
+    }
+
+    /* ── CARD: RECORDING ───────────────────────────────────── */
+    #card-recording {
+      background: var(--rec-bg);
+      border-color: #1e293b;
+      gap: 0;
+    }
+    .rec-header {
+      padding: 20px 20px 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .rec-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--rec-red);
+      animation: recPulse 1.4s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes recPulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255,45,85,0.5); }
+      50%       { opacity: 0.7; box-shadow: 0 0 0 6px rgba(255,45,85,0); }
+    }
+    .rec-label { font-size: 0.72rem; font-weight: 600; color: var(--rec-red); letter-spacing: 0.08em; text-transform: uppercase; }
+    .rec-timer {
+      margin-left: auto;
+      font-family: "Fraunces", serif;
+      font-size: 1.5rem; font-weight: 700;
+      color: #fff; letter-spacing: -0.02em;
+      transition: color 0.4s;
+    }
+    .rec-timer.optimal { color: var(--rec-green); }
+    .rec-timer.long    { color: #fbbf24; }
+    .rec-timer.too-long{ color: var(--rec-red); }
+
+    /* Waveform */
+    .rec-waveform {
+      padding: 0 20px;
+      height: 56px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 3px;
+    }
+    .wave-bar {
+      width: 3px; border-radius: 2px;
+      background: #334155;
+      transition: height 0.05s ease;
+      flex-shrink: 0;
+    }
+
+    /* Timer zone label */
+    .rec-zone-label {
+      padding: 0 20px 4px;
+      font-size: 0.72rem; min-height: 20px;
+      color: #475569; text-align: center;
+      transition: color 0.3s;
+    }
+    .zone-good    { color: var(--rec-green); }
+    .zone-warning { color: #fbbf24; }
+    .zone-danger  { color: var(--rec-red); }
+
+    /* Stop button */
+    .rec-footer { padding: 14px 20px 20px; }
+    .btn-stop {
+      width: 100%;
+      background: #1e293b; color: #e2e8f0; border: 1px solid #334155;
+      border-radius: 10px; padding: 14px;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-stop:hover { background: #273148; }
+    .stop-icon {
+      width: 12px; height: 12px; border-radius: 2px;
+      background: #e2e8f0; flex-shrink: 0;
+    }
+
+    /* ── CARD: REVIEW ───────────────────────────────────────── */
+    #card-review { padding: 22px; gap: 16px; }
+    .review-title {
+      font-family: "Fraunces", serif;
+      font-size: 1rem; font-weight: 600; color: var(--navy);
+    }
+    .review-duration {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .duration-badge {
+      font-family: "Fraunces", serif;
+      font-size: 1.4rem; font-weight: 700; color: var(--navy);
+    }
+    .duration-verdict {
+      font-size: 0.75rem; font-weight: 600; padding: 2px 8px;
+      border-radius: 99px;
+    }
+    .verdict-good    { background: #dcfce7; color: #166534; }
+    .verdict-short   { background: #fef9c3; color: #854d0e; }
+    .verdict-long    { background: #fef9c3; color: #854d0e; }
+
+    /* Audio player */
+    .audio-player {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .audio-play-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--navy); color: white; border: none;
+      cursor: pointer; font-size: 0.85rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: opacity 0.15s;
+    }
+    .audio-play-btn:hover { opacity: 0.82; }
+    .audio-progress-wrap { flex: 1; }
+    .audio-progress {
+      width: 100%; height: 4px; border-radius: 2px;
+      background: var(--border); cursor: pointer;
+      appearance: none; -webkit-appearance: none;
+      accent-color: var(--navy);
+    }
+    .audio-time {
+      font-size: 0.72rem; color: var(--muted);
+      margin-top: 4px; text-align: right;
+    }
+
+    /* Review actions */
+    .review-actions { display: flex; flex-direction: column; gap: 8px; }
+    .btn-submit {
+      width: 100%;
+      background: var(--red); color: white; border: none;
+      border-radius: 10px; padding: 15px;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-submit:hover  { opacity: 0.88; }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-retake {
+      width: 100%;
+      background: none; color: var(--muted); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-retake:hover { border-color: var(--slate); color: var(--slate); }
+
+    /* ── CARD: SUBMITTING ──────────────────────────────────── */
+    #card-submitting { padding: 32px 24px; align-items: center; text-align: center; gap: 16px; }
+    .submitting-spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--red);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .submitting-title { font-family: "Fraunces", serif; font-size: 1rem; font-weight: 600; color: var(--navy); }
+    .submitting-sub   { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+    /* ── CARD: SUCCESS ──────────────────────────────────────── */
+    #card-success {
+      padding: 28px 24px;
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+      align-items: center; text-align: center; gap: 14px;
+    }
+    .success-icon { font-size: 2rem; }
+    .success-title { font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; color: #166534; }
+    .success-body  { font-size: 0.82rem; color: #166534; line-height: 1.55; }
+    .success-redirect { font-size: 0.75rem; color: #4ade80; }
+
+    /* ── PERMISSION ERROR ──────────────────────────────────── */
+    #card-permission {
+      padding: 24px;
+      border-color: #fecaca;
+      background: #fef2f2;
+      gap: 14px;
+    }
+    .permission-title { font-family: "Fraunces", serif; font-size: 0.95rem; font-weight: 600; color: #991b1b; }
+    .permission-body  { font-size: 0.82rem; color: #b91c1c; line-height: 1.55; }
+    .permission-steps { list-style: decimal; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; color: #7f1d1d; }
+    .btn-retry-perm {
+      width: 100%;
+      background: #991b1b; color: white; border: none;
+      border-radius: 8px; padding: 11px;
+      font-family: "DM Sans", sans-serif; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ─── RESPONSIVE ──────────────────────────────────────── */
+    @media (max-width: 800px) {
+      .content-grid { grid-template-columns: 1fr; }
+      .record-panel { position: static; }
+      main { padding: 20px 14px 60px; }
+      .topbar { padding: 0 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOADING ──────────────────────────────────────────────── -->
+<div id="loading-overlay">
+  <div class="loading-flag" aria-hidden="true"></div>
+  <p class="loading-text">Henter opgave…</p>
+</div>
+
+<!-- ── TOPBAR ──────────────────────────────────────────────── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" id="backLink" href="exam.html">← Tilbage</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-brand">
+      <div class="topbar-flag" aria-hidden="true"></div>
+      <div>
+        <div class="topbar-title" id="topbarTitle">Mundtlig Del 1</div>
+        <div class="topbar-sub">Prøve i Dansk 3</div>
+      </div>
+    </div>
+  </div>
+  <span class="topbar-step">🎙 Præsentation</span>
+</header>
+
+<!-- ── MAIN ──────────────────────────────────────────────────── -->
+<main>
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="page-header-eyebrow">
+      <div class="eyebrow-dot"></div>
+      <span id="headerSimLabel">Simulering —</span>
+      <span>·</span>
+      <span>Mundtlig Kommunikation, Del 1</span>
+    </div>
+    <h1>
+      <span id="topicTitle">—</span>
+    </h1>
+    <div class="focus-tag" id="focusAngle">—</div>
+  </div>
+
+  <div class="content-grid">
+
+    <!-- ── LEFT: PREP MATERIAL ──────────────────────────────── -->
+    <div class="prep-panel">
+
+      <!-- Briefing -->
+      <div class="prep-briefing">
+        <div class="prep-briefing-title">📋 Din opgave</div>
+        <p id="briefingText">—</p>
+      </div>
+
+      <!-- Key Facts -->
+      <div class="prep-section open" id="section-facts">
+        <button class="prep-section-header" onclick="toggleSection('facts')" aria-expanded="true">
+          <span class="prep-section-label">
+            <span class="prep-section-icon icon-facts">📊</span>
+            Nøglefakta
+          </span>
+          <span class="prep-section-chevron">▼</span>
+        </button>
+        <div class="prep-section-body">
+          <ul class="facts-list" id="factsList"></ul>
+        </div>
+      </div>
+
+      <!-- Vocabulary -->
+      <div class="prep-section" id="section-vocab">
+        <button class="prep-section-header" onclick="toggleSection('vocab')" aria-expanded="false">
+          <span class="prep-section-label">
+            <span class="prep-section-icon icon-vocab">📚</span>
+            Nyttigt ordforråd
+          </span>
+          <span class="prep-section-chevron">▼</span>
+        </button>
+        <div class="prep-section-body">
+          <div class="vocab-grid" id="vocabGrid"></div>
+        </div>
+      </div>
+
+      <!-- Structure -->
+      <div class="prep-section" id="section-struct">
+        <button class="prep-section-header" onclick="toggleSection('struct')" aria-expanded="false">
+          <span class="prep-section-label">
+            <span class="prep-section-icon icon-struct">🗂</span>
+            Forslag til opbygning
+          </span>
+          <span class="prep-section-chevron">▼</span>
+        </button>
+        <div class="prep-section-body">
+          <div class="structure-steps" id="structureSteps"></div>
+        </div>
+      </div>
+
+    </div><!-- /prep-panel -->
+
+    <!-- ── RIGHT: RECORDING PANEL ────────────────────────────── -->
+    <div class="record-panel">
+
+      <!-- READY card -->
+      <div class="state-card active" id="card-ready">
+        <div class="ready-title">🎙 Præsentation (~2 minutter)</div>
+        <div class="ready-meta">
+          <div class="ready-meta-row">
+            <span>Mållængde</span>
+            <span class="ready-meta-val">1:50 – 2:10</span>
+          </div>
+          <div class="ready-meta-row">
+            <span>Vurdering</span>
+            <span class="ready-meta-val">AI-bedømt</span>
+          </div>
+          <div class="ready-meta-row">
+            <span>Mikrofon</span>
+            <span class="ready-meta-val" id="micStatus">Kræves</span>
+          </div>
+        </div>
+        <div class="ready-tip">
+          💡 Læs materialet grundigt, skriv et par stikord, og øv dig hurtigt højt inden du starter optagelse.
+        </div>
+        <button class="btn-record-start" id="btnStartRecord" onclick="PD3.warmupTTS('da-DK'); requestMicAndRecord()">
+          <span class="rec-start-icon"></span>
+          Start optagelse
+        </button>
+        <span class="skip-link" id="skipLink" onclick="skipElement()" style="display:block;text-align:center;margin-top:12px;font-size:0.8rem;color:#94a3b8;cursor:pointer;">Spring Del 1 over</span>
+      </div>
+
+      <!-- RECORDING card -->
+      <div class="state-card" id="card-recording">
+        <div class="rec-header">
+          <span class="rec-dot"></span>
+          <span class="rec-label">Optager</span>
+          <span class="rec-timer" id="recTimer">0:00</span>
+        </div>
+        <div class="rec-waveform" id="recWaveform">
+          <!-- bars injected by JS -->
+        </div>
+        <div class="rec-zone-label" id="recZoneLabel"></div>
+        <div class="rec-footer">
+          <button class="btn-stop" onclick="stopRecording()">
+            <span class="stop-icon"></span>
+            Stop optagelse
+          </button>
+        </div>
+      </div>
+
+      <!-- REVIEW card -->
+      <div class="state-card" id="card-review">
+        <div class="review-title">Hør din optagelse</div>
+        <div class="review-duration">
+          <span class="duration-badge" id="reviewDuration">—</span>
+          <span class="duration-verdict" id="reviewVerdict"></span>
+        </div>
+        <div class="audio-player">
+          <button class="audio-play-btn" id="playBtn" onclick="togglePlayback()" title="Afspil / Pause">▶</button>
+          <div class="audio-progress-wrap">
+            <input type="range" class="audio-progress" id="audioProgress" min="0" max="100" value="0" oninput="seekAudio(this.value)">
+            <div class="audio-time" id="audioTime">0:00 / 0:00</div>
+          </div>
+        </div>
+        <div class="review-actions">
+          <button class="btn-submit" id="btnSubmit" onclick="submitRecording()">
+            Aflever præsentation
+          </button>
+          <button class="btn-retake" onclick="retake()">
+            Tag optagelse om
+          </button>
+        </div>
+      </div>
+
+      <!-- SUBMITTING card -->
+      <div class="state-card" id="card-submitting">
+        <div class="submitting-spinner"></div>
+        <div class="submitting-title">Afleverer…</div>
+        <div class="submitting-sub">Din optagelse uploades.<br>Det tager et øjeblik.</div>
+      </div>
+
+      <!-- SUCCESS card -->
+      <div class="state-card" id="card-success">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Præsentation afleveret</div>
+        <div class="success-body">
+          Tak! Din optagelse er modtaget og vurderingen starter i baggrunden.<br><br>
+          Du kan nu fortsætte med de øvrige dele i valgfri rækkefølge.
+          Opfølgningsspørgsmål til del 1 låses op om lidt.
+        </div>
+        <div class="success-redirect" id="successRedirect">Videresender…</div>
+      </div>
+
+      <!-- PERMISSION ERROR card -->
+      <div class="state-card" id="card-permission">
+        <div class="permission-title">🎤 Mikrofonadgang nødvendig</div>
+        <div class="permission-body">
+          Browseren har blokeret mikrofonadgang. Du skal give tilladelse for at optage din præsentation.
+        </div>
+        <ol class="permission-steps">
+          <li>Klik på 🔒 eller 🎤-ikonet til venstre i adresselinjen</li>
+          <li>Vælg "Tillad" under Mikrofon</li>
+          <li>Genindlæs siden og prøv igen</li>
+        </ol>
+        <button class="btn-retry-perm" onclick="location.reload()">Prøv igen</button>
+      </div>
+
+    </div><!-- /record-panel -->
+
+  </div><!-- /content-grid -->
+
+</main>
+
+<!-- hidden audio element for playback -->
+<audio id="hiddenAudio" style="display:none;"></audio>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════════
+
+// DATA_BASE is built dynamically in loadPrepMaterial using simNum from PD3.init()
+
+// Oral topic JSON filenames per sim
+const SIM_ORAL1_FILES = {
+  sim01: 'dansk3_sim01_mundtlig_delprove1_overvaegt.json',
+  sim02: 'dansk3_sim02_mundtlig_delprove1_mobning.json',
+  sim03: 'dansk3_sim03_mundtlig_delprove1_ensomhed.json',
+  sim04: 'dansk3_sim04_mundtlig_delprove1_soevnmangel.json',
+  sim05: 'dansk3_sim05_mundtlig_delprove1_skilsmisse.json',
+  sim06: 'dansk3_sim06_mundtlig_delprove1_alkohol.json',
+  sim07: 'dansk3_sim07_mundtlig_delprove1_mental_sundhed.json',
+  sim08: 'dansk3_sim08_mundtlig_delprove1_aeldre_arbejdsmarked.json',
+  sim09: 'dansk3_sim09_mundtlig_delprove1_maend_sundhed.json',
+  sim10: 'dansk3_sim10_mundtlig_delprove1_digital_svindel.json',
+};
+
+// Timer thresholds (seconds)
+const T_OPTIMAL_START = 110;  // 1:50
+const T_OPTIMAL_END   = 130;  // 2:10
+const T_WARN_LONG     = 160;  // 2:40
+const T_TOO_LONG      = 210;  // 3:30
+
+// ═══════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════
+
+// ─── shared state (assigned by PD3.init in DOMContentLoaded) ───
+let currentUser = null;
+let attemptId, simId, simNum, elemKey;
+
+let mediaStream  = null;
+let mediaRecorder = null;
+let audioChunks  = [];
+let recordedBlob = null;
+let timerInterval = null;
+let elapsedSecs   = 0;
+let analyser      = null;
+let animFrame     = null;
+let audioCtx      = null;
+const NUM_BARS    = 28;
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', async () => {
+  ({ user: currentUser, attemptId, simId, simNum, elemKey } = await PD3.init('mundtlig_del1'));
+
+  document.getElementById('backLink').href = `exam.html?sim=${simId}&attempt=${attemptId}`;
+  document.getElementById('headerSimLabel').textContent = `Simulering ${simNum}`;
+  document.getElementById('topbarTitle').textContent = `Simulering ${simNum} — Mundtlig Del 1`;
+
+  buildWaveformBars();
+  await loadPrepMaterial();
+  PD3.hideLoading();
+});
+
+
+
+// ═══════════════════════════════════════════════════════════════════
+// LOAD PREP MATERIAL FROM JSON
+// ═══════════════════════════════════════════════════════════════════
+
+async function loadPrepMaterial() {
+  const filename = SIM_ORAL1_FILES[simId];
+  if (!filename) {
+    console.warn('No file mapping for', simId);
+    return;
+  }
+
+  try {
+    const res = await fetch(`/dansk3/data/${simNum}/${filename}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    renderPrepMaterial(data);
+  } catch (err) {
+    console.warn('Could not load prep material:', err);
+    // Graceful: show minimal UI — the topic still shows from params if passed
+  }
+}
+
+function renderPrepMaterial(data) {
+  // Header
+  const title = data.title || '—';
+  const focus = data.focus_angle || '';
+  document.getElementById('topicTitle').textContent = title;
+  document.getElementById('focusAngle').textContent = focus ? `Fokus: ${focus}` : '';
+
+  // Briefing — strip the candidate_briefing.da down to essentials
+  const briefing = data.candidate_briefing?.da || '';
+  // Trim instruction boilerplate — just show the opening task sentence
+  const cleanBriefing = briefing.replace(/\n\nEfter din præsentation[\s\S]*/i, '').trim();
+  const p = document.getElementById('briefingText');
+  p.innerHTML = cleanBriefing
+    .replace(/OVERVÆGT OG USUND KOST I DANMARK/gi, '<strong>$&</strong>')
+    .replace(/MOBNING I DEN DANSKE FOLKESKOLE/gi, '<strong>$&</strong>')
+    .replace(/ENSOMHED BLANDT ÆLDRE I DANMARK/gi, '<strong>$&</strong>')
+    .replace(/SØVNMANGEL SOM FOLKESUNDHEDSPROBLEM/gi, '<strong>$&</strong>')
+    .replace(/SKILSMISSE OG BØRN I DANMARK/gi, '<strong>$&</strong>')
+    .replace(/ALKOHOL I DANSK KULTUR/gi, '<strong>$&</strong>')
+    .replace(/UNGE OG MENTAL SUNDHED I DANMARK/gi, '<strong>$&</strong>')
+    .replace(/ÆLDRE PÅ ARBEJDSMARKEDET/gi, '<strong>$&</strong>')
+    .replace(/MÆND OG SUNDHED I DANMARK/gi, '<strong>$&</strong>')
+    .replace(/DIGITAL SVINDEL OG IT-KRIMINALITET/gi, '<strong>$&</strong>');
+
+  // Key facts
+  const facts = data.preparation_material?.key_facts || [];
+  document.getElementById('factsList').innerHTML = facts
+    .map(f => `<li>${f}</li>`).join('');
+
+  // Vocabulary
+  const vocab = data.preparation_material?.vocabulary || [];
+  document.getElementById('vocabGrid').innerHTML = vocab
+    .map(v => `<span class="vocab-chip">${v}</span>`).join('');
+
+  // Structure — parse the Danish text into steps
+  const structText = data.preparation_material?.suggested_structure?.da || '';
+  renderStructure(structText);
+}
+
+function renderStructure(text) {
+  // Parse numbered steps like "1. TITLE (time)\nBody"
+  const container = document.getElementById('structureSteps');
+  const lines = text.split('\n').filter(l => l.trim());
+  const steps = [];
+  let current = null;
+
+  for (const line of lines) {
+    const m = line.match(/^(\d+)\.\s+(.+)/);
+    if (m) {
+      if (current) steps.push(current);
+      current = { title: m[2], body: '' };
+    } else if (current && line.trim() && !line.startsWith('En god')) {
+      current.body += (current.body ? ' ' : '') + line.trim();
+    }
+  }
+  if (current) steps.push(current);
+
+  if (steps.length === 0) {
+    container.innerHTML = `<p style="font-size:0.85rem;color:var(--muted)">${text}</p>`;
+    return;
+  }
+
+  container.innerHTML = steps.map((s, i) => `
+    <div class="structure-step">
+      <div class="step-num">${i + 1}</div>
+      <div class="step-content">
+        <strong>${s.title}</strong>
+        ${s.body}
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ACCORDION
+// ═══════════════════════════════════════════════════════════════════
+
+function toggleSection(id) {
+  const el = document.getElementById(`section-${id}`);
+  el.classList.toggle('open');
+  const btn = el.querySelector('.prep-section-header');
+  btn.setAttribute('aria-expanded', el.classList.contains('open'));
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// WAVEFORM BARS
+// ═══════════════════════════════════════════════════════════════════
+
+function buildWaveformBars() {
+  const container = document.getElementById('recWaveform');
+  for (let i = 0; i < NUM_BARS; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'wave-bar';
+    bar.style.height = '4px';
+    container.appendChild(bar);
+  }
+}
+
+function startWaveformAnimation() {
+  const bars = document.querySelectorAll('.wave-bar');
+  if (!analyser) {
+    // Fallback: animated random bars when no analyser
+    animFrame = requestAnimationFrame(animateFake);
+    return;
+  }
+  const bufferLen = analyser.frequencyBinCount;
+  const dataArr = new Uint8Array(bufferLen);
+  const maxH = 48;
+
+  function draw() {
+    analyser.getByteFrequencyData(dataArr);
+    const step = Math.floor(bufferLen / NUM_BARS);
+    bars.forEach((bar, i) => {
+      const val = dataArr[i * step] / 255;
+      const h = Math.max(3, val * maxH);
+      bar.style.height = `${h}px`;
+      bar.style.background = `hsl(${220 + val * 40}, 60%, ${30 + val * 30}%)`;
+    });
+    animFrame = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+function animateFake() {
+  const bars = document.querySelectorAll('.wave-bar');
+  bars.forEach((bar, i) => {
+    const h = 3 + Math.random() * 20 + Math.sin(Date.now() / 200 + i * 0.5) * 8;
+    bar.style.height = `${Math.max(3, h)}px`;
+    bar.style.background = `hsl(220, 40%, 35%)`;
+  });
+  animFrame = requestAnimationFrame(animateFake);
+}
+
+function stopWaveformAnimation() {
+  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+  const bars = document.querySelectorAll('.wave-bar');
+  bars.forEach(b => { b.style.height = '4px'; b.style.background = '#334155'; });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MICROPHONE & RECORDING
+// ═══════════════════════════════════════════════════════════════════
+
+async function requestMicAndRecord() {
+  const btn = document.getElementById('btnStartRecord');
+  btn.disabled = true;
+  btn.textContent = 'Anmoder om mikrofonadgang…';
+
+  try {
+    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    document.getElementById('micStatus').textContent = 'Klar ✓';
+    startRecording();
+  } catch (err) {
+    console.error('Mic error:', err);
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      showCard('permission');
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="rec-start-icon"></span> Start optagelse';
+      alert('Kunne ikke få adgang til mikrofonen. Tjek dine browserindstillinger.');
+    }
+  }
+}
+
+function startRecording() {
+  audioChunks = [];
+
+  // Set up Web Audio analyser for waveform
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaStreamSource(mediaStream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+  } catch { analyser = null; }
+
+  // Pick best mime type
+  const mimeType = getSupportedMimeType();
+  const options = mimeType ? { mimeType } : {};
+
+  // 16kbps sufficient for Whisper, keeps file small for storage upload
+  if (options.mimeType || Object.keys(options).length) {
+    options.audioBitsPerSecond = 16000;
+  } else {
+    options = { audioBitsPerSecond: 16000 };
+  }
+  mediaRecorder = new MediaRecorder(mediaStream, options);
+  mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+  mediaRecorder.onstop = onRecordingStop;
+  mediaRecorder.start(100); // collect in 100ms chunks
+
+  // Start timer
+  elapsedSecs = 0;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    elapsedSecs++;
+    updateTimerDisplay();
+  }, 1000);
+
+  // Waveform
+  startWaveformAnimation();
+
+  showCard('recording');
+}
+
+function getSupportedMimeType() {
+  const types = [
+    'audio/webm;codecs=opus',
+    'audio/webm',
+    'audio/ogg;codecs=opus',
+    'audio/mp4',
+  ];
+  for (const t of types) {
+    if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) return t;
+  }
+  return null;
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(elapsedSecs / 60);
+  const s = elapsedSecs % 60;
+  const timerEl = document.getElementById('recTimer');
+  const zoneEl  = document.getElementById('recZoneLabel');
+  timerEl.textContent = `${m}:${String(s).padStart(2, '0')}`;
+
+  // Zone styling
+  timerEl.className = 'rec-timer';
+  zoneEl.className  = 'rec-zone-label';
+  if (elapsedSecs >= T_OPTIMAL_START && elapsedSecs <= T_OPTIMAL_END) {
+    timerEl.classList.add('optimal');
+    zoneEl.classList.add('zone-good');
+    zoneEl.textContent = '✓ God varighed — du kan stoppe nu';
+  } else if (elapsedSecs > T_OPTIMAL_END && elapsedSecs < T_WARN_LONG) {
+    timerEl.classList.add('optimal');
+    zoneEl.classList.add('zone-good');
+    zoneEl.textContent = 'Stadig god — afrund snart';
+  } else if (elapsedSecs >= T_WARN_LONG && elapsedSecs < T_TOO_LONG) {
+    timerEl.classList.add('long');
+    zoneEl.classList.add('zone-warning');
+    zoneEl.textContent = '⚠ Lidt lang — afrund nu';
+  } else if (elapsedSecs >= T_TOO_LONG) {
+    timerEl.classList.add('too-long');
+    zoneEl.classList.add('zone-danger');
+    zoneEl.textContent = '⛔ For lang — stop optagelsen';
+  } else {
+    zoneEl.textContent = elapsedSecs < 30
+      ? 'Begynd din præsentation…'
+      : `${Math.ceil((T_OPTIMAL_START - elapsedSecs) / 10) * 10}s til optimal varighed`;
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+  }
+  clearInterval(timerInterval);
+  stopWaveformAnimation();
+  stopMicStream();
+}
+
+function stopMicStream() {
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(t => t.stop());
+    mediaStream = null;
+  }
+  if (audioCtx) { audioCtx.close(); audioCtx = null; }
+}
+
+function onRecordingStop() {
+  const mimeType = mediaRecorder.mimeType || 'audio/webm';
+  recordedBlob = new Blob(audioChunks, { type: mimeType });
+  const duration = elapsedSecs;
+
+  // Set up audio player
+  const url = URL.createObjectURL(recordedBlob);
+  const audio = document.getElementById('hiddenAudio');
+  audio.src = url;
+  audio.load();
+
+  // Duration display + verdict
+  const m = Math.floor(duration / 60);
+  const s = duration % 60;
+  document.getElementById('reviewDuration').textContent = `${m}:${String(s).padStart(2, '0')}`;
+
+  let verdict = '', verdictClass = '';
+  if (duration < 60) {
+    verdict = 'For kort'; verdictClass = 'verdict-short';
+  } else if (duration < T_OPTIMAL_START) {
+    verdict = 'Lidt kort'; verdictClass = 'verdict-short';
+  } else if (duration <= T_WARN_LONG) {
+    verdict = 'God varighed'; verdictClass = 'verdict-good';
+  } else {
+    verdict = 'Lidt lang'; verdictClass = 'verdict-long';
+  }
+  const vEl = document.getElementById('reviewVerdict');
+  vEl.textContent = verdict;
+  vEl.className = `duration-verdict ${verdictClass}`;
+
+  // Audio progress listener
+  audio.addEventListener('timeupdate', updateAudioProgress);
+  audio.addEventListener('ended', () => {
+    document.getElementById('playBtn').textContent = '▶';
+  });
+  updateAudioProgress();
+
+  showCard('review');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// AUDIO PLAYER
+// ═══════════════════════════════════════════════════════════════════
+
+function togglePlayback() {
+  const audio = document.getElementById('hiddenAudio');
+  const btn   = document.getElementById('playBtn');
+  if (audio.paused) {
+    audio.play();
+    btn.textContent = '⏸';
+  } else {
+    audio.pause();
+    btn.textContent = '▶';
+  }
+}
+
+function seekAudio(val) {
+  const audio = document.getElementById('hiddenAudio');
+  if (audio.duration) {
+    audio.currentTime = (val / 100) * audio.duration;
+  }
+}
+
+function updateAudioProgress() {
+  const audio = document.getElementById('hiddenAudio');
+  if (!audio.duration) return;
+  const pct = (audio.currentTime / audio.duration) * 100;
+  document.getElementById('audioProgress').value = pct;
+  const cur = formatTime(audio.currentTime);
+  const dur = formatTime(audio.duration);
+  document.getElementById('audioTime').textContent = `${cur} / ${dur}`;
+}
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${String(sec).padStart(2, '0')}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RETAKE
+// ═══════════════════════════════════════════════════════════════════
+
+function retake() {
+  // Stop playback, release blob URL
+  const audio = document.getElementById('hiddenAudio');
+  audio.pause();
+  if (audio.src) { URL.revokeObjectURL(audio.src); audio.src = ''; }
+  recordedBlob = null;
+  showCard('ready');
+  const btn = document.getElementById('btnStartRecord');
+  btn.disabled = false;
+  btn.innerHTML = '<span class="rec-start-icon"></span> Start optagelse';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════════════════════
+
+async function submitRecording() {
+  if (!recordedBlob) return;
+  if (!attemptId) {
+    alert('Fejl: intet attempt ID. Gå tilbage og start forfra.');
+    return;
+  }
+
+  document.getElementById('btnSubmit').disabled = true;
+  showCard('submitting');
+
+  try {
+    // Upload audio to storage via edge function (no JWT/size issues)
+    console.log('[del1] uploading audio to storage…');
+    const audioPath = await PD3.uploadAudio(recordedBlob, attemptId, 'round1_main.webm');
+
+    if (!audioPath) {
+      throw new Error('Audio upload failed — check console for details');
+    }
+
+    console.log('[del1] upload OK:', audioPath);
+
+    const data = await PD3.apiFetch('pd3-submit-element', {
+        attempt_id:        attemptId,
+        element_key:       elemKey,
+        audio_storage_path: audioPath,
+        response_json:     { audio_path: audioPath, duration_sec: elapsedSecs },
+      });
+
+    if (!data.success) {
+      if (data.error?.includes('already submitted')) {
+        showSuccessAndRedirect();
+        return;
+      }
+      throw new Error(data.error || 'Submit failed');
+    }
+
+    showSuccessAndRedirect();
+
+  } catch (err) {
+    console.error('[del1] submit error:', err);
+    showCard('review');
+    document.getElementById('btnSubmit').disabled = false;
+    alert(`Noget gik galt: ${err.message}\n\nPrøv igen.`);
+  }
+}
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result;
+      // Strip data URL prefix: "data:audio/webm;base64,"
+      const base64 = result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function showSuccessAndRedirect() {
+  showCard('success');
+  let countdown = 4;
+  const redirectEl = document.getElementById('successRedirect');
+  const updateCountdown = () => {
+    redirectEl.textContent = `Videresender om ${countdown} sekund${countdown !== 1 ? 'er' : ''}…`;
+  };
+  updateCountdown();
+  const iv = setInterval(() => {
+    countdown--;
+    updateCountdown();
+    if (countdown <= 0) {
+      clearInterval(iv);
+      window.location.href = `exam.html?sim=${simId}&attempt=${attemptId}`;
+    }
+  }, 1000);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════════════════
+
+async function skipElement() {
+  if (!confirm('Spring Mundtlig Del 1 over? Du får 0 point for denne del.')) return;
+  document.getElementById('skipLink').style.display = 'none';
+  document.getElementById('btnStartRecord').disabled = true;
+  await PD3.skip({ attemptId, elemKey });
+  window.location.href = `exam.html?sim=${simId}&attempt=${attemptId}`;
+}
+
+function showCard(name) {
+  ['ready', 'recording', 'review', 'submitting', 'success', 'permission'].forEach(n => {
+    const el = document.getElementById(`card-${n}`);
+    if (el) el.classList.toggle('active', n === name);
+  });
+}
+
+
+</script>
+</body>
+</html>

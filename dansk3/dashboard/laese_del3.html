@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Læseforståelse Del 3</title>
+  <script src="/assets/js/auth-guard-dansk3.js"></script>
+  <script src="/assets/js/pd3-engine.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --red:    #c8102e;
+      --navy:   #0f172a;
+      --slate:  #334155;
+      --muted:  #64748b;
+      --border: #e2e8f0;
+      --surface:#ffffff;
+      --bg:     #f8f7f4;
+      --correct:#166534;
+      --correct-bg:#f0fdf4;
+      --correct-border:#bbf7d0;
+      --wrong:  #991b1b;
+      --wrong-bg:#fef2f2;
+      --wrong-border:#fecaca;
+      --active: #1d4ed8;
+      --active-bg:#eff6ff;
+      --active-border:#bfdbfe;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+    body {
+      font-family:"DM Sans",system-ui,sans-serif;
+      background:var(--bg); color:var(--navy);
+      min-height:100vh;
+    }
+
+    /* ── TOPBAR ─────────────────────────────────────────── */
+    .topbar {
+      background:var(--navy); border-bottom:3px solid var(--red);
+      padding:0 28px; height:52px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:200;
+    }
+    .topbar-left { display:flex; align-items:center; gap:12px; }
+    .back-link {
+      color:#64748b; text-decoration:none; font-size:0.8rem;
+      display:flex; align-items:center; gap:5px; transition:color 0.15s;
+    }
+    .back-link:hover { color:#fff; }
+    .topbar-divider { width:1px; height:20px; background:#1e293b; }
+    .topbar-flag {
+      width:22px; height:16px; background:var(--red);
+      border-radius:2px; position:relative; overflow:hidden; flex-shrink:0;
+    }
+    .topbar-flag::before { content:''; position:absolute; left:8px; top:0; width:3px; height:100%; background:white; }
+    .topbar-flag::after  { content:''; position:absolute; left:0; top:5.5px; width:100%; height:3px; background:white; }
+    .topbar-brand { display:flex; align-items:center; gap:10px; }
+    .topbar-title { font-family:"Fraunces",serif; font-size:0.9rem; font-weight:600; color:#fff; }
+    .topbar-sub   { font-size:0.75rem; color:#64748b; }
+    .topbar-right { display:flex; align-items:center; gap:12px; }
+    .progress-pill {
+      background:#1e293b; border-radius:99px;
+      padding:4px 12px; font-size:0.75rem; color:#94a3b8;
+      display:flex; align-items:center; gap:6px;
+    }
+    .progress-fill { display:flex; gap:3px; }
+    .pip { width:7px; height:7px; border-radius:50%; background:#334155; transition:background 0.2s; }
+    .pip.answered { background:var(--red); }
+    .pip.correct  { background:#22c55e; }
+    .pip.wrong    { background:var(--red); }
+
+    /* ── LOADING ─────────────────────────────────────────── */
+    #loading-overlay {
+      position:fixed; inset:0; background:var(--bg);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:16px;
+      z-index:9999; transition:opacity 0.35s;
+    }
+    #loading-overlay.hidden { opacity:0; pointer-events:none; }
+    .loading-spinner {
+      width:32px; height:32px; border-radius:50%;
+      border:3px solid var(--border); border-top-color:var(--red);
+      animation:spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-text { font-size:0.9rem; color:var(--muted); }
+
+    /* ── PAGE ────────────────────────────────────────────── */
+    .page-wrap {
+      max-width:760px; margin:0 auto;
+      padding:40px 32px 100px;
+    }
+
+    .page-eyebrow {
+      font-size:0.7rem; font-weight:600; text-transform:uppercase;
+      letter-spacing:0.09em; color:var(--muted);
+      display:flex; align-items:center; gap:8px;
+      margin-bottom:14px;
+    }
+    .page-eyebrow-dot { width:5px; height:5px; border-radius:50%; background:var(--red); }
+
+    .page-title {
+      font-family:"Fraunces",serif;
+      font-size:clamp(1.4rem,2.5vw,2rem);
+      font-weight:700; letter-spacing:-0.025em; line-height:1.15;
+      margin-bottom:8px;
+    }
+
+    .instructions-card {
+      background:#fffbeb; border:1px solid #fde68a;
+      border-radius:10px; padding:12px 16px;
+      font-size:0.82rem; color:#78350f; line-height:1.55;
+      margin-bottom:28px;
+    }
+    .instructions-card strong { font-weight:600; }
+
+    /* example gap styling */
+    .example-block {
+      background:#f8fafc; border:1px solid var(--border);
+      border-radius:10px; padding:12px 16px;
+      font-size:0.85rem; color:var(--slate); line-height:1.6;
+      margin-bottom:28px;
+    }
+    .example-block strong { font-weight:600; color:var(--navy); }
+
+    /* ── TEXT BODY ───────────────────────────────────────── */
+    .text-body {
+      font-size:1.0rem; line-height:2.0; color:var(--slate);
+    }
+    .text-body p, .text-para { margin-bottom:1.2em; }
+    .text-para:last-child { margin-bottom:0; }
+    .text-body p:last-child { margin-bottom:0; }
+
+    /* ── INLINE GAP CHIP ─────────────────────────────────── */
+    .gap-chip {
+      position:relative;
+      display:inline-block;
+      vertical-align:baseline;
+      margin:0 2px;
+    }
+
+    .gap-btn {
+      display:inline-flex; align-items:center; gap:5px;
+      background:#f1f5f9; border:2px solid #cbd5e1;
+      border-radius:7px; padding:2px 9px 2px 6px;
+      cursor:pointer; font-family:"DM Sans",sans-serif;
+      font-size:0.88rem; line-height:1.5;
+      transition:border-color 0.15s, background 0.15s, box-shadow 0.15s;
+      white-space:nowrap;
+      user-select:none;
+    }
+    .gap-btn:hover:not(.locked) {
+      border-color:#94a3b8; background:#e9eef5;
+    }
+    .gap-btn.open {
+      border-color:var(--active); background:var(--active-bg);
+      box-shadow:0 0 0 3px rgba(29,78,216,0.12);
+    }
+    .gap-btn.filled {
+      background:#fff; border-color:var(--navy);
+    }
+    .gap-btn.correct {
+      background:var(--correct-bg); border-color:var(--correct-border);
+      cursor:default;
+    }
+    .gap-btn.wrong {
+      background:var(--wrong-bg); border-color:var(--wrong-border);
+      cursor:default;
+    }
+    .gap-btn.locked { pointer-events:none; }
+
+    .gap-num-badge {
+      width:16px; height:16px; border-radius:50%;
+      background:var(--muted); color:white;
+      font-size:0.6rem; font-weight:700;
+      display:inline-flex; align-items:center; justify-content:center;
+      flex-shrink:0;
+    }
+    .gap-btn.open    .gap-num-badge { background:var(--active); }
+    .gap-btn.filled  .gap-num-badge { background:var(--navy); }
+    .gap-btn.correct .gap-num-badge { background:var(--correct); }
+    .gap-btn.wrong   .gap-num-badge { background:var(--wrong); }
+
+    .gap-word {
+      font-weight:600; color:var(--muted);
+      font-size:0.85rem;
+    }
+    .gap-btn.filled  .gap-word { color:var(--navy); }
+    .gap-btn.correct .gap-word { color:var(--correct); }
+    .gap-btn.wrong   .gap-word { color:var(--wrong); }
+
+    .gap-caret {
+      font-size:0.6rem; color:#94a3b8; margin-left:1px;
+    }
+    .gap-btn.filled .gap-caret  { color:#64748b; }
+    .gap-btn.open   .gap-caret  { color:var(--active); }
+
+    /* wrong → show correct answer badge */
+    .gap-correct-hint {
+      display:inline-block;
+      background:var(--correct-bg); border:1px solid var(--correct-border);
+      border-radius:5px; padding:1px 6px;
+      font-size:0.72rem; font-weight:700; color:var(--correct);
+      margin-left:4px; white-space:nowrap;
+    }
+
+    /* ── OPTION PANELS (static list below each paragraph) ───── */
+    .option-panel {
+      margin:10px 0 20px;
+      border:2px solid var(--active-border);
+      border-radius:12px;
+      overflow:hidden;
+      background:var(--surface);
+    }
+    .option-panel-header {
+      background:var(--active-bg);
+      color:var(--active);
+      font-size:0.78rem; font-weight:700;
+      padding:8px 14px;
+      border-bottom:1px solid var(--active-border);
+      letter-spacing:0.02em;
+    }
+    .option-row {
+      display:flex; align-items:center; gap:12px;
+      padding:10px 14px;
+      cursor:pointer;
+      border-top:1px solid var(--border);
+      transition:background 0.12s;
+    }
+    .option-row:first-of-type { border-top:none; }
+    .option-row:hover:not(.locked) { background:#f1f5f9; }
+    .option-row.selected { background:var(--active-bg); }
+    .option-row.correct  { background:var(--correct-bg); }
+    .option-row.wrong    { background:var(--wrong-bg); }
+    .option-row.locked   { cursor:default; pointer-events:none; }
+    .option-letter {
+      width:24px; height:24px; border-radius:50%;
+      background:#e2e8f0; color:var(--navy);
+      font-size:0.72rem; font-weight:700;
+      display:inline-flex; align-items:center; justify-content:center;
+      flex-shrink:0; transition:background 0.12s, color 0.12s;
+    }
+    .option-row:hover:not(.locked) .option-letter { background:var(--navy); color:white; }
+    .option-row.selected .option-letter { background:var(--active); color:white; }
+    .option-row.correct  .option-letter { background:var(--correct); color:white; }
+    .option-row.wrong    .option-letter { background:var(--wrong); color:white; }
+    .option-word { font-size:0.9rem; font-weight:600; color:var(--navy); }
+
+    /* ── PROGRESS STRIP ──────────────────────────────────── */
+    .progress-strip {
+      position:fixed; bottom:0; left:0; right:0;
+      background:var(--surface);
+      border-top:1px solid var(--border);
+      padding:14px 32px;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:16px; z-index:150;
+      box-shadow:0 -4px 20px rgba(0,0,0,0.06);
+    }
+
+    .progress-dots {
+      display:flex; gap:6px; align-items:center; flex-wrap:wrap;
+    }
+    .pdot {
+      width:10px; height:10px; border-radius:50%;
+      background:#e2e8f0; transition:background 0.2s, transform 0.15s;
+    }
+    .pdot.answered { background:var(--red); transform:scale(1.1); }
+    .pdot.correct  { background:#22c55e; }
+    .pdot.wrong    { background:var(--red); }
+
+    .progress-count {
+      font-size:0.82rem; color:var(--muted); white-space:nowrap;
+      flex-shrink:0;
+    }
+
+    .submit-btn {
+      background:var(--navy); color:white; border:none;
+      border-radius:10px; padding:12px 28px;
+      font-family:"DM Sans",sans-serif; font-size:0.93rem; font-weight:600;
+      cursor:pointer; transition:opacity 0.15s; white-space:nowrap; flex-shrink:0;
+    }
+    .submit-btn:hover:not(:disabled) { opacity:0.84; }
+    .submit-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+    .continue-btn {
+      background:var(--red); color:white; border:none;
+      border-radius:10px; padding:12px 28px;
+      font-family:"DM Sans",sans-serif; font-size:0.93rem; font-weight:600;
+      cursor:pointer; transition:opacity 0.15s; white-space:nowrap; flex-shrink:0;
+    }
+    .continue-btn:hover { opacity:0.88; }
+
+    .skip-link {
+      font-size:0.75rem; color:#94a3b8; cursor:pointer;
+      text-decoration:underline; text-underline-offset:3px;
+      transition:color 0.15s; white-space:nowrap; flex-shrink:0;
+    }
+    .skip-link:hover { color:var(--muted); }
+
+    /* ── SCORE OVERLAY ───────────────────────────────────── */
+    .score-card {
+      display:none;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:14px; padding:24px;
+      margin-top:32px; text-align:center;
+    }
+    .score-card.visible { display:block; }
+    .score-card.passed { background:var(--correct-bg); border-color:var(--correct-border); }
+    .score-card.failed { background:var(--wrong-bg); border-color:var(--wrong-border); }
+    .sc-score {
+      font-family:"Fraunces",serif;
+      font-size:2.5rem; font-weight:700; line-height:1;
+    }
+    .score-card.passed .sc-score { color:var(--correct); }
+    .score-card.failed .sc-score { color:var(--wrong); }
+    .sc-label { font-size:0.9rem; color:var(--muted); margin-top:6px; }
+    .sc-detail { font-size:0.82rem; color:var(--muted); margin-top:4px; }
+
+    .already-done-card {
+      display:none;
+      background:var(--correct-bg); border:1px solid var(--correct-border);
+      border-radius:14px; padding:20px; text-align:center;
+      margin-top:24px; font-size:0.88rem; color:var(--correct);
+    }
+    .already-done-card.visible { display:block; }
+
+    /* ── RESPONSIVE ──────────────────────────────────────── */
+    @media (max-width:600px) {
+      .page-wrap { padding:28px 18px 100px; }
+      .topbar { padding:0 14px; }
+      .progress-strip { padding:12px 16px; }
+      .gap-popover { min-width:180px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <p class="loading-text">Henter tekst og opgave…</p>
+</div>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" id="backLink" href="exam.html">← Tilbage</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-brand">
+      <div class="topbar-flag" aria-hidden="true"></div>
+      <div>
+        <div class="topbar-title" id="topbarTitle">Læseforståelse Del 3</div>
+        <div class="topbar-sub">Prøve i Dansk 3</div>
+      </div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="progress-pill">
+      <div class="progress-fill" id="progressPips"></div>
+      <span id="progressLabel">0 / 8</span>
+    </div>
+  </div>
+</header>
+
+<div id="pageWrap" class="page-wrap" style="display:none;">
+  <div class="page-eyebrow">
+    <div class="page-eyebrow-dot"></div>
+    <span>Læseforståelse · Del 3 — Ordforbindelser</span>
+  </div>
+  <h1 class="page-title" id="pageTitle">…</h1>
+
+  <div class="instructions-card" id="instructionsCard"></div>
+
+  <div class="example-block" id="exampleBlock" style="display:none;"></div>
+
+  <div class="text-body" id="textBody"></div>
+
+  <div class="score-card" id="scoreCard">
+    <div class="sc-score" id="scScore">0 / 8</div>
+    <div class="sc-label" id="scLabel">point</div>
+    <div class="sc-detail" id="scDetail"></div>
+  </div>
+
+  <div class="already-done-card" id="alreadyDoneCard">
+    ✅ Denne del er allerede afleveret.
+  </div>
+</div>
+
+<!-- BOTTOM PROGRESS STRIP -->
+<div class="progress-strip" id="progressStrip" style="display:none;">
+  <div class="progress-dots" id="progressDots"></div>
+  <span class="progress-count" id="progressCount">0 af 8 besvaret</span>
+  <span class="skip-link" id="skipLink" onclick="skipElement()">Spring over</span>
+  <button class="submit-btn" id="submitBtn" onclick="submitAnswers()" disabled>Aflever svar</button>
+  <button class="continue-btn" id="continueBtn" onclick="PD3.goBack(simId, attemptId)" style="display:none;">Fortsæt →</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+
+const SIM_FILES = {
+  sim01:'dansk3_sim01_delprove3_plasticforurening.json',
+  sim02:'dansk3_sim02_delprove3.json',
+  sim03:'dansk3_sim03_delprove3.json',
+  sim04:'dansk3_sim04_delprove3.json',
+  sim05:'dansk3_sim05_delprove3.json',
+  sim06:'dansk3_sim06_delprove3.json',
+  sim07:'dansk3_sim07_delprove3.json',
+  sim08:'dansk3_sim08_delprove3.json',
+  sim09:'dansk3_sim09_delprove3.json',
+  sim10:'dansk3_sim10_delprove3.json',
+};
+
+// ─── shared state (assigned by PD3.init in DOMContentLoaded) ───
+let currentUser = null;
+let attemptId, simId, simNum, elemKey;
+
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+
+let examData    = null;
+let scoredGaps  = [];        // gaps that are scored (example excluded)
+let userAnswers = {};        // { 'gap1': 'B', … }
+
+let submitted   = false;
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  ({ user: currentUser, attemptId, simId, simNum, elemKey } = await PD3.init('laese_del3'));
+
+  document.getElementById('backLink').href = `exam.html?sim=${simId}&attempt=${attemptId}`;
+
+  const filename = SIM_FILES[simId];
+  if (!filename) { PD3.showError('Ukendt simulering: ' + simId, simId, attemptId); return; }
+  try {
+    const res = await fetch(`/dansk3/data/${simNum}/${filename}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    examData = await res.json();
+  } catch (err) {
+    PD3.showError('Kunne ikke hente spørgsmål. Prøv at genindlæse siden.', simId, attemptId);
+    return;
+  }
+
+  submitted = await PD3.isSubmitted(currentUser.email, attemptId, elemKey);
+  renderExam();
+  PD3.hideLoading();
+  document.getElementById('pageWrap').style.display = '';
+  document.getElementById('progressStrip').style.display = 'flex';
+
+});
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function renderExam() {
+  const { title, text_with_gaps, gaps, instructions } = examData;
+  const simNum = parseInt(simId.replace('sim',''), 10);
+
+  document.getElementById('topbarTitle').textContent = `Sim ${simNum} — Læseforståelse 3`;
+  document.getElementById('pageTitle').textContent = title;
+  document.getElementById('instructionsCard').innerHTML =
+    `<strong>Opgave:</strong> ${PD3.escapeHtml(instructions?.da || '')}`;
+
+  // Identify scored gaps (not example)
+  scoredGaps = gaps.filter(g => !g.example);
+  scoredGaps.forEach(g => { userAnswers[`gap${g.number}`] = null; });
+
+  // Show example gap if present
+  const exampleGap = gaps.find(g => g.example);
+  if (exampleGap) {
+    const block = document.getElementById('exampleBlock');
+    block.style.display = '';
+    const correctOpt = exampleGap.options.find(o => o.letter === exampleGap.correct_answer);
+    block.innerHTML = `
+      <strong>Eksempel (hul 0):</strong> "…${PD3.escapeHtml(exampleGap.context.replace(/\(0\)\.\.\./g, ''))}"<br>
+      Korrekt svar: <strong>${exampleGap.correct_answer} — ${PD3.escapeHtml(correctOpt?.word || '')}</strong>
+    `;
+  }
+
+  renderText(text_with_gaps, gaps);
+  renderProgressDots();
+  updateProgressCount();
+
+  if (submitted) {
+    lockAll();
+    document.getElementById('submitBtn').style.display = 'none';
+    document.getElementById('skipLink').style.display = 'none';
+    document.getElementById('continueBtn').style.display = 'block';
+    document.getElementById('alreadyDoneCard').classList.add('visible');
+  }
+}
+
+function renderText(raw, gaps) {
+  const gapMap = {};
+  gaps.forEach(g => { gapMap[g.number] = g; });
+
+  // Split raw text into paragraphs first, then process each paragraph
+  const rawParas = raw.split(/\n\n+/);
+  let outputHtml = '';
+
+  for (const para of rawParas) {
+    if (!para.trim()) continue;
+
+    // Find which gaps appear in this paragraph
+    const gapTokens = [...para.matchAll(/\((\d+)\)\.\.\./g)].map(m => parseInt(m[1], 10));
+
+    // Build inline text with gap chips (all inside a single <p> — chips are <span> only)
+    const parts = para.split(/(\(\d+\)\.\.\.)/);
+
+    let paraHtml = '<p>';
+    for (const part of parts) {
+      const m = part.match(/^\((\d+)\)\.\.\./);
+      if (m) {
+        const num = parseInt(m[1], 10);
+        const g = gapMap[num];
+        if (g) {
+          if (g.example) {
+            const correct = g.options.find(o => o.letter === g.correct_answer);
+            paraHtml += `<span class="gap-chip"><span class="gap-btn filled locked" style="border-color:#94a3b8;cursor:default;"><span class="gap-num-badge" style="background:#64748b;">0</span><span class="gap-word" style="color:#64748b;">${PD3.escapeHtml(correct?.word || '')}</span><span style="font-size:0.68rem;color:#94a3b8;margin-left:3px;">✓ eksempel</span></span></span>`;
+          } else {
+            // Inline chip only (no popover inside — options rendered below)
+            paraHtml += `<span class="gap-chip" id="chip-${num}"><span class="gap-btn" id="gapbtn-${num}"><span class="gap-num-badge" id="gnbadge-${num}">${num}</span><span class="gap-word" id="gword-${num}">…</span></span></span>`;
+          }
+        }
+      } else {
+        paraHtml += part.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+      }
+    }
+    paraHtml += '</p>';
+    outputHtml += paraHtml;
+
+    // After each paragraph, render option panels for every gap in it (skip example gap 0)
+    for (const num of gapTokens) {
+      const g = gapMap[num];
+      if (!g || g.example) continue;
+      outputHtml += buildOptionPanelHtml(g);
+    }
+  }
+
+  document.getElementById('textBody').innerHTML = outputHtml;
+}
+
+function buildOptionPanelHtml(g) {
+  const n = g.number;
+  const optionsHtml = g.options.map(opt => {
+    const locked = submitted ? ' locked' : '';
+    const onclick = submitted ? '' : `onclick="selectAnswer(${n}, '${opt.letter}', event)"`;
+    return `<div class="option-row${locked}" id="orow-${n}-${opt.letter}" ${onclick}><span class="option-letter" id="oletter-${n}-${opt.letter}">${opt.letter}</span><span class="option-word">${PD3.escapeHtml(opt.word)}</span></div>`;
+  }).join('');
+  return `<div class="option-panel" id="opanel-${n}"><div class="option-panel-header">Hul ${n} — Vælg det rigtige ord</div>${optionsHtml}</div>`;
+}
+
+// (popover logic removed — using static option panels)
+
+// ═══════════════════════════════════════════════════════════════
+// ANSWER SELECTION
+// ═══════════════════════════════════════════════════════════════
+function selectAnswer(num, letter, event) {
+  if (event) event.stopPropagation();
+  if (submitted) return;
+
+  const gapKey = `gap${num}`;
+  userAnswers[gapKey] = letter;
+
+  const gap = examData.gaps.find(g => g.number === num);
+  const opt = gap?.options.find(o => o.letter === letter);
+
+  // Update inline chip
+  const btn  = document.getElementById(`gapbtn-${num}`);
+  const word = document.getElementById(`gword-${num}`);
+  if (btn)  btn.classList.add('filled');
+  if (word) word.textContent = opt?.word || letter;
+
+  // Highlight selected option row, clear others in this panel
+  const panel = document.getElementById(`opanel-${num}`);
+  if (panel) {
+    panel.querySelectorAll('.option-row').forEach(el => el.classList.remove('selected'));
+    const row = document.getElementById(`orow-${num}-${letter}`);
+    if (row) row.classList.add('selected');
+  }
+
+  renderProgressDots();
+  updateProgressCount();
+  checkSubmitEnabled();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════════════════════════════════
+function renderProgressDots() {
+  const dots = document.getElementById('progressDots');
+  dots.innerHTML = scoredGaps.map(g => {
+    const key = `gap${g.number}`;
+    const cls = userAnswers[key] ? 'answered' : '';
+    return `<div class="pip ${cls}"></div>`;
+  }).join('');
+
+  // Also update topbar pips
+  const topPips = document.getElementById('progressPips');
+  topPips.innerHTML = dots.innerHTML;
+}
+
+function updateProgressCount() {
+  const total    = scoredGaps.length;
+  const answered = Object.values(userAnswers).filter(Boolean).length;
+  document.getElementById('progressCount').textContent = `${answered} af ${total} besvaret`;
+  document.getElementById('progressLabel').textContent  = `${answered} / ${total}`;
+}
+
+function checkSubmitEnabled() {
+  const allAnswered = scoredGaps.every(g => userAnswers[`gap${g.number}`]);
+  document.getElementById('submitBtn').disabled = !allAnswered || submitted;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════════════════
+async function submitAnswers() {
+  if (submitted) return;
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Afleverer…';
+
+  // Score
+  let correct = 0;
+  const details = {};
+  const answerKey = examData.answer_key || {};
+
+  scoredGaps.forEach(g => {
+    const key = `gap${g.number}`;
+    const given = userAnswers[key];
+    const expected = g.correct_answer || answerKey[key];
+    const isCorrect = given === expected;
+    if (isCorrect) correct++;
+    details[key] = { given, correct: expected, is_correct: isCorrect, points: isCorrect ? (g.points||1) : 0 };
+  });
+
+  const totalPoints = scoredGaps.reduce((s, g) => s + (g.points||1), 0);
+  const earned = correct;
+  const score  = totalPoints > 0 ? Math.round((earned / totalPoints) * 100) : 0;
+
+  revealAnswers(details);
+
+  try {
+    await PD3.apiFetch('pd3-submit-element', {
+        attempt_id:      attemptId,
+        element_key:     elemKey,
+        answers:         userAnswers,
+        browser_correct: correct,
+        browser_total:   scoredGaps.length,
+        browser_score:   score,
+        browser_details: details,
+      });
+  } catch (err) { console.error('Submit error:', err); }
+
+  submitted = true;
+  showScore(earned, totalPoints, correct);
+}
+
+function revealAnswers(details) {
+  scoredGaps.forEach(g => {
+    const num = g.number;
+    const key = `gap${num}`;
+    const d   = details[key];
+    const btn = document.getElementById(`gapbtn-${num}`);
+    const word = document.getElementById(`gword-${num}`);
+    const caret = document.getElementById(`gcaret-${num}`);
+    const chip = document.getElementById(`chip-${num}`);
+
+    if (!btn) return;
+
+    btn.classList.remove('filled','open');
+    btn.classList.add(d.is_correct ? 'correct' : 'wrong', 'locked');
+    btn.setAttribute('onclick','');
+
+    const opt = g.options.find(o => o.letter === d.given);
+    if (word) word.textContent = opt?.word || d.given || '?';
+    if (caret) caret.textContent = d.is_correct ? ' ✓' : ' ✗';
+
+    // Colour option rows
+    const panel = document.getElementById(`opanel-${num}`);
+    if (panel) {
+      panel.querySelectorAll('.option-row').forEach(el => {
+        el.classList.remove('selected');
+        el.classList.add('locked');
+        el.setAttribute('onclick','');
+      });
+      const givenRow = document.getElementById(`orow-${num}-${d.given}`);
+      if (givenRow) givenRow.classList.add(d.is_correct ? 'correct' : 'wrong');
+      if (!d.is_correct) {
+        const correctRow = document.getElementById(`orow-${num}-${d.correct}`);
+        if (correctRow) correctRow.classList.add('correct');
+      }
+    }
+
+    // Show correct answer hint if wrong
+    if (!d.is_correct && chip) {
+      const correctOpt = g.options.find(o => o.letter === d.correct);
+      const hint = document.createElement('span');
+      hint.className = 'gap-correct-hint';
+      hint.textContent = `→ ${d.correct}: ${correctOpt?.word || d.correct}`;
+      chip.appendChild(hint);
+    }
+  });
+
+  // Update progress dots
+  const dots = document.getElementById('progressDots');
+  const topPips = document.getElementById('progressPips');
+  const pipHtml = scoredGaps.map(g => {
+    const key = `gap${g.number}`;
+    const d = details[key];
+    return `<div class="pip ${d.is_correct ? 'correct' : 'wrong'}"></div>`;
+  }).join('');
+  dots.innerHTML = pipHtml;
+  topPips.innerHTML = pipHtml;
+}
+
+function lockAll() {
+  scoredGaps.forEach(g => {
+    const btn = document.getElementById(`gapbtn-${g.number}`);
+    if (btn) { btn.classList.add('locked'); btn.setAttribute('onclick',''); }
+    // Lock option rows too
+    const panel = document.getElementById(`opanel-${g.number}`);
+    if (panel) panel.querySelectorAll('.option-row').forEach(el => {
+      el.classList.add('locked');
+      el.setAttribute('onclick','');
+    });
+  });
+}
+
+function showScore(earned, total, correct) {
+  const card = document.getElementById('scoreCard');
+  const passed = earned >= total * 0.5;
+  card.classList.add('visible', passed ? 'passed' : 'failed');
+  document.getElementById('scScore').textContent = `${earned} / ${total}`;
+  document.getElementById('scLabel').textContent = 'point';
+  document.getElementById('scDetail').textContent = `${correct} af ${scoredGaps.length} ord korrekte`;
+
+  document.getElementById('submitBtn').style.display = 'none';
+  document.getElementById('skipLink').style.display = 'none';
+  document.getElementById('continueBtn').style.display = 'block';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SKIP
+// ═══════════════════════════════════════════════════════════════
+async function skipElement() {
+  if (submitted) return;
+  if (!confirm('Er du sikker på, at du vil springe denne del over? Du får 0 point.')) return;
+  document.getElementById('skipLink').style.display = 'none';
+  document.getElementById('submitBtn').disabled = true;
+  await PD3.skip({ attemptId, elemKey });
+  submitted = true;
+  PD3.goBack(simId, attemptId);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+</script>
+</body>
+</html>

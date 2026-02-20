@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prøve i Dansk 3 — Simuleringer</title>
+  <script src="/assets/js/auth-guard-dansk3.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─── TOKENS ──────────────────────────────────────────── */
+    :root {
+      --red:       #c8102e;
+      --red-dim:   #f5e1e4;
+      --navy:      #0f172a;
+      --slate:     #334155;
+      --muted:     #64748b;
+      --border:    #e2e8f0;
+      --surface:   #ffffff;
+      --bg:        #f8f7f4;
+      --pass-bg:   #dcfce7;
+      --pass-fg:   #166534;
+      --fail-bg:   #fee2e2;
+      --fail-fg:   #991b1b;
+      --warn-bg:   #fef9c3;
+      --warn-fg:   #854d0e;
+      --idle-bg:   #f1f5f9;
+      --idle-fg:   #475569;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--navy);
+      min-height: 100vh;
+    }
+
+    /* ─── TOPBAR ──────────────────────────────────────────── */
+    .topbar {
+      background: var(--navy);
+      border-bottom: 3px solid var(--red);
+      padding: 0 32px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .topbar-flag {
+      width: 28px;
+      height: 20px;
+      background: var(--red);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .topbar-flag::before {
+      content: '';
+      position: absolute;
+      left: 10px; top: 0;
+      width: 4px; height: 100%;
+      background: white;
+    }
+    .topbar-flag::after {
+      content: '';
+      position: absolute;
+      left: 0; top: 7px;
+      width: 100%; height: 4px;
+      background: white;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+    .brand-title {
+      font-family: "Fraunces", serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.01em;
+    }
+    .brand-sub {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .topbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .topbar-nav a, .topbar-nav button {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.82rem;
+      color: #94a3b8;
+      text-decoration: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .topbar-nav a:hover, .topbar-nav button:hover { color: #fff; }
+    .topbar-user {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      padding: 4px 12px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 6px;
+    }
+
+    /* ─── MAIN ────────────────────────────────────────────── */
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+    }
+
+    .page-heading {
+      margin-bottom: 28px;
+    }
+    .page-heading h1 {
+      font-family: "Fraunces", serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+    .page-heading p {
+      margin-top: 6px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    /* ─── STAT CARDS ──────────────────────────────────────── */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .stat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--red);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .stat-card:hover::before { opacity: 1; }
+
+    .stat-label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .stat-value {
+      font-family: "Fraunces", serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.1;
+      margin: 6px 0 10px;
+    }
+    .stat-value.grade { color: var(--red); }
+
+    .bar-track {
+      width: 100%;
+      height: 5px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background: var(--red);
+      border-radius: 99px;
+      transition: width 0.7s cubic-bezier(.22,1,.36,1);
+    }
+    .bar-fill.blue {
+      background: linear-gradient(90deg, #2563eb, #0ea5e9);
+    }
+
+    /* countdown urgency tints */
+    .stat-card.urgent-high  { background: linear-gradient(135deg,#fff5f5,#ffe4e6); }
+    .stat-card.urgent-medium { background: linear-gradient(135deg,#fffbeb,#fef3c7); }
+
+    /* exam date picker */
+    .date-picker { margin-top: 10px; }
+    .date-picker select,
+    .date-picker input[type="date"] {
+      width: 100%;
+      padding: 5px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.8rem;
+      color: var(--navy);
+      background: var(--surface);
+      margin-bottom: 5px;
+    }
+    .custom-date-row { display: none; align-items: center; gap: 6px; }
+    .custom-date-row.show { display: flex; }
+    .custom-date-row input { flex: 1; margin: 0; }
+    .custom-date-row button {
+      padding: 5px 10px;
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+
+    /* info card */
+    .stat-card.info-card { display: flex; flex-direction: column; gap: 6px; }
+    .info-card .stat-label { margin-bottom: 2px; }
+    .info-card-body { font-size: 0.82rem; color: var(--slate); line-height: 1.5; }
+    .info-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; padding-top: 8px; }
+    .info-link {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 99px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .info-link.primary { background: var(--red); color: white; }
+    .info-link.ghost { background: var(--idle-bg); color: var(--slate); }
+    .info-link:hover { opacity: 0.85; }
+
+    /* ─── TABLE ───────────────────────────────────────────── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .table-header {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .table-title {
+      font-family: "Fraunces", serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--navy);
+    }
+    .table-meta {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead th {
+      background: #fafafa;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+      white-space: nowrap;
+    }
+    thead th:first-child { text-align: left; }
+    thead th .double-note {
+      font-size: 0.65rem;
+      color: var(--red);
+      font-weight: 600;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #f1f5f9;
+      transition: background 0.12s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafaf8; }
+
+    tbody td {
+      padding: 12px 14px;
+      font-size: 0.87rem;
+      text-align: center;
+      vertical-align: middle;
+      height: 60px;
+    }
+    tbody td:first-child { text-align: left; }
+
+    /* sim name + actions cell */
+    .sim-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sim-number {
+      font-family: "Fraunces", serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--navy);
+      white-space: nowrap;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .sim-number:hover { color: var(--red); }
+
+    /* grade circles */
+    .grade-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Fraunces", serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin: 0 auto;
+    }
+    .grade-circle.pass    { background: var(--pass-bg); color: var(--pass-fg); }
+    .grade-circle.fail    { background: var(--fail-bg); color: var(--fail-fg); }
+    .grade-circle.borderline { background: var(--warn-bg); color: var(--warn-fg); }
+    .grade-circle.empty   { background: var(--idle-bg); color: #9ca3af; font-size: 1.1rem; }
+
+    /* status badge */
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-done    { background: var(--pass-bg); color: var(--pass-fg); }
+    .badge-active  { background: var(--warn-bg); color: var(--warn-fg); }
+    .badge-idle    { background: var(--idle-bg); color: var(--idle-fg); }
+    .badge-waiting { background: #e0f2fe; color: #0369a1; }
+
+    /* action pills */
+    .pill {
+      font-size: 0.73rem;
+      padding: 4px 10px;
+      border-radius: 99px;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-block;
+      white-space: nowrap;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      transition: opacity 0.15s;
+    }
+    .pill:hover { opacity: 0.82; }
+    .pill-start   { background: var(--red); color: white; }
+    .pill-resume  { background: #2563eb; color: white; }
+    .pill-result  { background: var(--idle-bg); color: var(--slate); }
+    .pill-redo    { background: transparent; border: 1px solid var(--border) !important;
+                    color: var(--muted); padding: 3px 9px; }
+
+    /* progress dots — mini component section tracker */
+    .section-dots {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      align-items: center;
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+    .dot.done { background: #16a34a; }
+    .dot.active { background: #f59e0b; }
+
+    /* loading skeleton */
+    .skeleton {
+      height: 20px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      display: inline-block;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ─── EMPTY STATE ─────────────────────────────────────── */
+    .empty-row td {
+      padding: 48px 14px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    .empty-icon {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    /* ─── RESPONSIVE ──────────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .stat-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .topbar { padding: 0 16px; }
+      main { padding: 20px 12px 48px; }
+      .stat-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-value { font-size: 2rem; }
+      .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      table { min-width: 720px; }
+      .page-heading h1 { font-size: 1.4rem; }
+    }
+    @media (max-width: 480px) {
+      .stat-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOPBAR ──────────────────────────────────────────────── -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-flag" aria-hidden="true"></div>
+    <div class="brand-text">
+      <span class="brand-title">CivicLearn</span>
+      <span class="brand-sub">Prøve i Dansk 3</span>
+    </div>
+  </div>
+  <nav class="topbar-nav">
+    <span class="topbar-user" id="userEmail">—</span>
+    <a href="/dansk3/info.html">Om prøven</a>
+    <button onclick="handleLogout()">Log ud</button>
+  </nav>
+</header>
+
+<!-- ── MAIN ───────────────────────────────────────────────── -->
+<main>
+
+  <div class="page-heading">
+    <h1>Dine simuleringer</h1>
+    <p>Gennemfør alle dele af prøven og se din fremgang herunder.</p>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stat-row">
+
+    <!-- Card 1: Progress -->
+    <div class="stat-card">
+      <div class="stat-label">Gennemførte simuleringer</div>
+      <div class="stat-value" id="statDone">0/10</div>
+      <div class="bar-track">
+        <div class="bar-fill" id="barProgress" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Card 2: Best grade -->
+    <div class="stat-card">
+      <div class="stat-label">Bedste samlet karakter</div>
+      <div class="stat-value grade" id="statBest">—</div>
+      <div class="bar-track">
+        <div class="bar-fill blue" id="barBest" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Card 3: Countdown -->
+    <div class="stat-card" id="countdownCard">
+      <div class="stat-label">Næste PD3-prøve</div>
+      <div class="stat-value" id="statCountdown">—</div>
+      <div class="date-picker">
+        <select id="examDateSel" onchange="handleDateChange()">
+          <option value="2026-03-14">14 marts 2026</option>
+          <option value="2026-06-06">6 juni 2026</option>
+          <option value="2026-09-05">5 september 2026</option>
+          <option value="2026-11-28">28 november 2026</option>
+          <option value="custom">📅 Vælg dato…</option>
+        </select>
+        <div class="custom-date-row" id="customDateRow">
+          <input type="date" id="customDateInput" min="2026-01-01">
+          <button onclick="applyCustomDate()">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Info / links -->
+    <div class="stat-card info-card">
+      <div class="stat-label">Prøveinfo</div>
+      <p class="info-card-body">
+        PD3 bedømmes på 7-trinsskalaen. Mundtlig tæller dobbelt.<br>
+        Beståelse kræver et vægtet gennemsnit på min. 2,0.
+      </p>
+      <div class="info-links">
+        <a class="info-link primary" href="/dansk3/info.html">Læs mere</a>
+        <a class="info-link ghost" href="https://uim.dk/danskundervisning" target="_blank" rel="noopener">uim.dk ↗</a>
+      </div>
+    </div>
+
+  </div><!-- /stat-row -->
+
+  <!-- SIMULATIONS TABLE -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <span class="table-title">Simuleringer 1–10</span>
+      <span class="table-meta" id="tableUpdated"></span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:200px;">Simulering</th>
+          <th>Samlet</th>
+          <th>Læsning</th>
+          <th>Skriftlig</th>
+          <th>Mundtlig <span class="double-note">×2</span></th>
+          <th>Dele afleveret</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="simTbody">
+        <!-- skeleton rows while loading -->
+        <tr><td colspan="7" style="padding:32px 20px;text-align:center;color:#94a3b8;font-size:0.85rem;">
+          Henter data…
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════════════
+
+const SUPABASE_URL = 'https://htgliokekeaovdiafrgs.supabase.co';
+const HYDRATE_FN   = `${SUPABASE_URL}/functions/v1/pd3-hydrate`;
+const TOTAL_SIMS   = 10;
+
+// 7-trins scale: maps grade value to display/class/pass
+const GRADE_META = {
+  12:  { cls: 'pass',        label: '12' },
+  10:  { cls: 'pass',        label: '10' },
+  7:   { cls: 'pass',        label: '7'  },
+  4:   { cls: 'pass',        label: '4'  },
+  2:   { cls: 'borderline',  label: '02' },
+  0:   { cls: 'fail',        label: '00' },
+  '-3': { cls: 'fail',       label: '-3' },
+};
+
+// ═══════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════
+
+let attemptsMap = {}; // sim_id → attempt object
+let currentUser = null;
+
+// ═══════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // auth-guard sets window.civicUser or redirects
+  await waitForAuth();
+  currentUser = window.civicUser || {};
+  if (currentUser.email) {
+    document.getElementById('userEmail').textContent = currentUser.email;
+  }
+
+  initCountdown();
+  await loadAttempts();
+});
+
+async function waitForAuth() {
+  // auth-guard-dansk3.js attaches civicUser when ready
+  return new Promise(resolve => {
+    if (window.civicUser) return resolve();
+    const t = setInterval(() => {
+      if (window.civicUser) { clearInterval(t); resolve(); }
+    }, 80);
+    setTimeout(() => { clearInterval(t); resolve(); }, 5000);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// LOAD ATTEMPTS FROM pd3-hydrate
+// ═══════════════════════════════════════════════════════════════════════
+
+async function loadAttempts() {
+  try {
+    const token = currentUser.access_token || '';
+    const res = await fetch(HYDRATE_FN, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ email: currentUser.email }),
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    // data.attempts is array of attempt objects
+    (data.attempts || []).forEach(a => {
+      const key = a.simulation_id; // e.g. 'sim01'
+      // keep the most recent/complete for each sim
+      if (!attemptsMap[key] || isMoreComplete(a, attemptsMap[key])) {
+        attemptsMap[key] = a;
+      }
+    });
+
+  } catch (err) {
+    console.warn('Could not load attempts from server:', err.message);
+    // fall through – table renders with all sims as "Ikke startet"
+  }
+
+  renderTable();
+  renderStatCards();
+  document.getElementById('tableUpdated').textContent =
+    'Opdateret ' + new Date().toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' });
+}
+
+function isMoreComplete(a, b) {
+  const rank = { complete: 4, partial_complete: 3, processing: 2, submitted: 1, in_progress: 0 };
+  return (rank[a.status] || 0) > (rank[b.status] || 0);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// RENDER TABLE
+// ═══════════════════════════════════════════════════════════════════════
+
+function renderTable() {
+  const tbody = document.getElementById('simTbody');
+  tbody.innerHTML = '';
+
+  for (let i = 1; i <= TOTAL_SIMS; i++) {
+    const simId = 'sim' + String(i).padStart(2, '0');
+    const attempt = attemptsMap[simId] || null;
+    tbody.appendChild(buildRow(i, simId, attempt));
+  }
+}
+
+function buildRow(num, simId, attempt) {
+  const tr = document.createElement('tr');
+
+  const label = `Simulering ${String(num).padStart(2, '0')}`;
+  const examUrl = `exam.html?sim=${simId}`;
+  const resultUrl = attempt ? `results.html?attempt=${attempt.id}` : '#';
+
+  // Determine status
+  let statusBadge, pill;
+  const s = attempt?.status;
+
+  if (!attempt || s === undefined) {
+    statusBadge = `<span class="badge badge-idle">Ikke startet</span>`;
+    pill = `<a class="pill pill-start" href="${examUrl}">Start</a>`;
+  } else if (s === 'in_progress') {
+    statusBadge = `<span class="badge badge-active">I gang</span>`;
+    pill = `<a class="pill pill-resume" href="${examUrl}">Fortsæt</a>`;
+  } else if (s === 'submitted' || s === 'processing') {
+    statusBadge = `<span class="badge badge-waiting">Afventer resultat</span>`;
+    pill = `<span class="pill" style="background:var(--idle-bg);color:var(--muted);cursor:default;">Under bedømmelse</span>`;
+  } else if (s === 'complete' || s === 'partial_complete') {
+    statusBadge = `<span class="badge badge-done">Afsluttet</span>`;
+    pill = `
+      <a class="pill pill-result" href="${resultUrl}">Vis resultat</a>
+      <button class="pill pill-redo" onclick="confirmRedo('${simId}')">Lav om</button>`;
+  }
+
+  // Grade circles
+  const circleHTML = g => {
+    if (g === null || g === undefined) return `<div class="grade-circle empty">—</div>`;
+    const key = String(g);
+    const meta = GRADE_META[key] || { cls: 'empty', label: key };
+    return `<div class="grade-circle ${meta.cls}">${meta.label}</div>`;
+  };
+
+  // Weighted average for "samlet"
+  let samlet = null;
+  if (attempt?.grade_laese != null && attempt?.grade_skriftlig != null && attempt?.grade_mundtlig != null) {
+    // grades are stored as 7-trins values; average uses numeric value directly
+    const avg = (attempt.grade_laese + attempt.grade_skriftlig + 2 * attempt.grade_mundtlig) / 4;
+    samlet = snapTo7trin(avg);
+  } else if (attempt?.grade_average != null) {
+    samlet = snapTo7trin(attempt.grade_average);
+  }
+
+  // Elements submitted count (derived from elements array)
+  const doneStatuses = ['submitted', 'skipped'];
+  const elemCount = attempt?.elements
+    ? attempt.elements.filter(e => doneStatuses.includes(e.submission_status)).length + '/9'
+    : '—';
+  const dotsHTML  = buildDots(attempt);
+
+  tr.innerHTML = `
+    <td>
+      <div class="sim-cell">
+        <a class="sim-number" href="${examUrl}">${label}</a>
+        ${pill}
+      </div>
+    </td>
+    <td>${circleHTML(samlet)}</td>
+    <td>${circleHTML(attempt?.grade_laese)}</td>
+    <td>${circleHTML(attempt?.grade_skriftlig)}</td>
+    <td>${circleHTML(attempt?.grade_mundtlig)}</td>
+    <td>${dotsHTML}</td>
+    <td>${statusBadge}</td>
+  `;
+  return tr;
+}
+
+// section progress dots (9 elements total)
+function buildDots(attempt) {
+  if (!attempt) {
+    return `<div class="section-dots">${Array(9).fill('<div class="dot"></div>').join('')}</div>`;
+  }
+  const elements = attempt.elements || [];
+  const dots = Array(9).fill(null).map((_, i) => {
+    const el = elements[i];
+    if (!el) return '<div class="dot"></div>';
+    if (el.submission_status === 'submitted' || el.submission_status === 'skipped') return '<div class="dot done"></div>';
+    if (el.submission_status === 'in_progress') return '<div class="dot active"></div>';
+    return '<div class="dot"></div>';
+  }).join('');
+  return `<div class="section-dots">${dots}</div>`;
+}
+
+// Snap a weighted average to the nearest 7-trins value
+function snapTo7trin(avg) {
+  if (avg == null) return null;
+  const scale = [12, 10, 7, 4, 2, 0, -3];
+  return scale.reduce((best, v) => Math.abs(v - avg) < Math.abs(best - avg) ? v : best, scale[0]);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// STAT CARDS
+// ═══════════════════════════════════════════════════════════════════════
+
+function renderStatCards() {
+  let completed = 0;
+  let bestAvg = null;
+
+  for (let i = 1; i <= TOTAL_SIMS; i++) {
+    const simId = 'sim' + String(i).padStart(2, '0');
+    const a = attemptsMap[simId];
+    if (!a) continue;
+
+    if (a.status === 'complete' || a.status === 'partial_complete') {
+      completed++;
+      if (a.grade_average != null) {
+        if (bestAvg === null || a.grade_average > bestAvg) bestAvg = a.grade_average;
+      }
+    }
+  }
+
+  document.getElementById('statDone').textContent = `${completed}/${TOTAL_SIMS}`;
+  document.getElementById('barProgress').style.width = `${(completed / TOTAL_SIMS) * 100}%`;
+
+  if (bestAvg !== null) {
+    const snapped = snapTo7trin(bestAvg);
+    const meta = GRADE_META[String(snapped)] || { label: String(snapped), cls: 'pass' };
+    document.getElementById('statBest').textContent = meta.label;
+    // map grade to bar fill: 12→100%, 10→83%, 7→67%, 4→50%, 2→33%, 0→17%, -3→0%
+    const pct = Math.max(0, ((snapped + 3) / 15) * 100);
+    document.getElementById('barBest').style.width = `${pct}%`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// COUNTDOWN
+// ═══════════════════════════════════════════════════════════════════════
+
+function initCountdown() {
+  const saved = localStorage.getItem('pd3_exam_date');
+  const sel = document.getElementById('examDateSel');
+
+  if (saved) {
+    // try to select it; if not in list, leave as-is
+    for (const opt of sel.options) {
+      if (opt.value === saved) { sel.value = saved; break; }
+    }
+  }
+  const target = saved || sel.value;
+  updateCountdown(target);
+}
+
+function updateCountdown(dateStr) {
+  const el    = document.getElementById('statCountdown');
+  const card  = document.getElementById('countdownCard');
+  card.classList.remove('urgent-high', 'urgent-medium');
+
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const exam  = new Date(dateStr);
+  const days  = Math.round((exam - today) / 86400000);
+
+  if (isNaN(days)) { el.textContent = '—'; return; }
+  if (days === 0)   { el.textContent = 'I dag!'; card.classList.add('urgent-high'); }
+  else if (days < 0){ el.textContent = 'Passeret'; }
+  else {
+    el.textContent = `${days} dag${days !== 1 ? 'e' : ''}`;
+    if (days <= 7)  card.classList.add('urgent-high');
+    else if (days <= 30) card.classList.add('urgent-medium');
+  }
+  window._pd3UpdateCountdown = updateCountdown;
+}
+
+function handleDateChange() {
+  const sel = document.getElementById('examDateSel');
+  const row = document.getElementById('customDateRow');
+  if (sel.value === 'custom') {
+    row.classList.add('show');
+  } else {
+    row.classList.remove('show');
+    localStorage.setItem('pd3_exam_date', sel.value);
+    updateCountdown(sel.value);
+  }
+}
+
+function applyCustomDate() {
+  const input = document.getElementById('customDateInput');
+  if (!input.value) return;
+  localStorage.setItem('pd3_exam_date', input.value);
+  updateCountdown(input.value);
+  document.getElementById('customDateRow').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════════════════════════════════
+
+function confirmRedo(simId) {
+  if (!confirm(`Vil du lave simulering ${simId} om?\n\nDit tidligere resultat bevares, men du starter en ny session.`)) return;
+  // clear local reference; backend creates a new attempt on start
+  delete attemptsMap[simId];
+  renderTable();
+  window.location.href = `exam.html?sim=${simId}`;
+}
+
+function handleLogout() {
+  if (!confirm('Vil du logge ud?')) return;
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.href = '/dansk3/login.html';
+}
+</script>
+</body>
+</html>

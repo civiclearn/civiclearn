@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skriftlig Fremstilling Del 1</title>
+  <script src="/assets/js/auth-guard-dansk3.js"></script>
+  <script src="/assets/js/pd3-engine.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --red:    #c8102e;
+      --navy:   #0f172a;
+      --slate:  #334155;
+      --muted:  #64748b;
+      --border: #e2e8f0;
+      --surface:#ffffff;
+      --bg:     #f8f7f4;
+      --correct:#166534;
+      --correct-bg:#f0fdf4;
+      --correct-border:#bbf7d0;
+      --amber:  #92400e;
+      --amber-bg:#fffbeb;
+      --amber-border:#fde68a;
+      --underline-color:#fbbf24;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+    body {
+      font-family:"DM Sans",system-ui,sans-serif;
+      background:var(--bg); color:var(--navy);
+      min-height:100vh;
+    }
+
+    /* ── TOPBAR ─────────────────────────────────────── */
+    .topbar {
+      background:var(--navy); border-bottom:3px solid var(--red);
+      padding:0 28px; height:52px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:200;
+    }
+    .topbar-left { display:flex; align-items:center; gap:12px; }
+    .back-link {
+      color:#64748b; text-decoration:none; font-size:0.8rem;
+      display:flex; align-items:center; gap:5px; transition:color 0.15s;
+    }
+    .back-link:hover { color:#fff; }
+    .topbar-divider { width:1px; height:20px; background:#1e293b; }
+    .topbar-flag {
+      width:22px; height:16px; background:var(--red);
+      border-radius:2px; position:relative; overflow:hidden; flex-shrink:0;
+    }
+    .topbar-flag::before { content:''; position:absolute; left:8px; top:0; width:3px; height:100%; background:white; }
+    .topbar-flag::after  { content:''; position:absolute; left:0; top:5.5px; width:100%; height:3px; background:white; }
+    .topbar-brand { display:flex; align-items:center; gap:10px; }
+    .topbar-title { font-family:"Fraunces",serif; font-size:0.9rem; font-weight:600; color:#fff; }
+    .topbar-sub   { font-size:0.75rem; color:#64748b; }
+    .topbar-right { display:flex; align-items:center; gap:12px; }
+    .word-count-pill {
+      background:#1e293b; border-radius:99px;
+      padding:4px 12px; font-size:0.75rem; color:#94a3b8;
+    }
+    .word-count-pill span { color:#fff; font-weight:600; }
+
+    /* ── LOADING ────────────────────────────────────── */
+    #loading-overlay {
+      position:fixed; inset:0; background:var(--bg);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:16px;
+      z-index:9999; transition:opacity 0.35s;
+    }
+    #loading-overlay.hidden { opacity:0; pointer-events:none; }
+    .loading-spinner {
+      width:32px; height:32px; border-radius:50%;
+      border:3px solid var(--border); border-top-color:var(--red);
+      animation:spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-text { font-size:0.9rem; color:var(--muted); }
+
+    /* ── MOBILE TOGGLE ──────────────────────────────── */
+    .email-toggle {
+      display:none;
+      width:100%;
+      background:var(--surface); border:none; border-bottom:1px solid var(--border);
+      padding:13px 20px;
+      font-family:"DM Sans",sans-serif; font-size:0.88rem; font-weight:600;
+      color:var(--navy); cursor:pointer;
+      text-align:left;
+      display:flex; align-items:center; gap:10px;
+      position:sticky; top:52px; z-index:100;
+    }
+    .email-toggle .toggle-icon { transition:transform 0.2s; font-size:0.75rem; }
+    .email-toggle.collapsed .toggle-icon { transform:rotate(-90deg); }
+    /* show only on mobile */
+    @media (min-width:901px) { .email-toggle { display:none !important; } }
+    @media (max-width:900px) { .email-toggle { display:flex; } }
+
+    /* ── LAYOUT ─────────────────────────────────────── */
+    .exam-layout {
+      display:grid;
+      grid-template-columns:1fr 440px;
+      min-height:calc(100vh - 52px);
+    }
+
+    /* ── LEFT: INCOMING EMAIL ───────────────────────── */
+    .email-column {
+      border-right:1px solid var(--border);
+      overflow-y:auto;
+      position:sticky;
+      top:52px;
+      height:calc(100vh - 52px);
+    }
+    .email-inner {
+      max-width:640px;
+      padding:36px 40px 80px;
+    }
+
+    .scenario-card {
+      background:var(--amber-bg); border:1px solid var(--amber-border);
+      border-radius:10px; padding:14px 16px;
+      font-size:0.84rem; color:var(--amber); line-height:1.55;
+      margin-bottom:24px;
+    }
+    .scenario-card strong { font-weight:700; }
+
+    /* Email "envelope" */
+    .email-envelope {
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:14px;
+      overflow:hidden;
+      box-shadow:0 2px 12px rgba(0,0,0,0.05);
+    }
+    .email-header {
+      padding:16px 20px;
+      border-bottom:1px solid var(--border);
+      background:#f8fafc;
+    }
+    .email-meta-row {
+      display:flex; align-items:baseline; gap:8px;
+      font-size:0.8rem; color:var(--muted);
+      margin-bottom:4px;
+    }
+    .email-meta-row:last-child { margin-bottom:0; }
+    .email-meta-label { font-weight:600; width:50px; flex-shrink:0; }
+    .email-meta-value { color:var(--navy); }
+    .email-subject {
+      font-family:"Fraunces",serif;
+      font-size:1.05rem; font-weight:700;
+      margin-bottom:12px;
+    }
+
+    .email-body {
+      padding:20px 24px;
+      font-size:0.92rem; line-height:1.85; color:var(--slate);
+    }
+    .email-body p { margin-bottom:1em; }
+    .email-body p:last-child { margin-bottom:0; }
+
+    /* Underlined questions */
+    .q-underline {
+      background:linear-gradient(to bottom, transparent 60%, #fef08a 60%);
+      font-weight:600;
+      color:var(--navy);
+    }
+
+    .underlined-key {
+      margin-top:20px;
+      padding-top:16px;
+      border-top:1px solid var(--border);
+    }
+    .underlined-key-title {
+      font-size:0.7rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--muted); margin-bottom:10px;
+    }
+    .q-key-item {
+      display:flex; gap:8px;
+      font-size:0.8rem; color:var(--slate); line-height:1.5;
+      margin-bottom:6px;
+      padding:6px 10px;
+      background:var(--amber-bg); border-radius:7px;
+      border-left:3px solid var(--underline-color);
+    }
+    .q-key-num {
+      font-weight:700; color:var(--amber); flex-shrink:0;
+    }
+
+    /* ── RIGHT: WRITING PANE ────────────────────────── */
+    .write-column {
+      position:sticky; top:52px;
+      height:calc(100vh - 52px);
+      overflow-y:auto;
+      background:var(--surface);
+      display:flex; flex-direction:column;
+    }
+
+    .write-header {
+      padding:18px 22px 14px;
+      border-bottom:1px solid var(--border);
+      flex-shrink:0;
+    }
+    .write-eyebrow {
+      font-size:0.68rem; font-weight:600; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--muted); margin-bottom:6px;
+    }
+    .write-header h2 {
+      font-family:"Fraunces",serif; font-size:1.05rem; font-weight:700;
+      line-height:1.3;
+    }
+
+    /* Task checklist */
+    .task-checklist {
+      margin:14px 22px 0;
+      flex-shrink:0;
+    }
+    .task-checklist-title {
+      font-size:0.68rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--muted); margin-bottom:8px;
+    }
+    .task-item {
+      display:flex; align-items:flex-start; gap:8px;
+      font-size:0.8rem; line-height:1.45; color:var(--slate);
+      margin-bottom:5px;
+      padding:6px 10px;
+      border-radius:7px; background:#f8fafc;
+      border:1px solid var(--border);
+    }
+    .task-bullet {
+      width:16px; height:16px; border-radius:50%;
+      border:2px solid #cbd5e1;
+      flex-shrink:0; margin-top:1px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:0.6rem; color:transparent;
+      transition:all 0.15s;
+    }
+    .task-item.done .task-bullet {
+      background:var(--correct); border-color:var(--correct); color:white;
+    }
+    .task-item.done { border-color:var(--correct-border); background:var(--correct-bg); }
+
+    /* Write area */
+    .write-area {
+      flex:1;
+      padding:14px 22px;
+      display:flex; flex-direction:column; gap:10px;
+    }
+
+    .write-label {
+      font-size:0.78rem; font-weight:600; color:var(--navy);
+    }
+
+    .reply-textarea {
+      flex:1;
+      width:100%;
+      min-height:280px;
+      padding:14px 16px;
+      border:1.5px solid var(--border);
+      border-radius:10px;
+      font-family:"DM Sans",sans-serif; font-size:0.92rem;
+      line-height:1.75; color:var(--navy);
+      background:var(--surface);
+      resize:vertical;
+      outline:none;
+      transition:border-color 0.15s;
+    }
+    .reply-textarea:focus { border-color:#94a3b8; }
+    .reply-textarea:disabled {
+      background:#f8fafc; color:var(--muted); cursor:default; resize:none;
+    }
+    .reply-textarea::placeholder { color:#94a3b8; }
+
+    /* Word count bar */
+    .wc-bar-wrap {
+      flex-shrink:0;
+    }
+    .wc-bar-row {
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:5px;
+    }
+    .wc-label { font-size:0.75rem; color:var(--muted); }
+    .wc-count { font-size:0.75rem; font-weight:700; color:var(--navy); }
+    .wc-bar-bg {
+      height:5px; border-radius:3px; background:#e2e8f0;
+      overflow:hidden;
+    }
+    .wc-bar-fill {
+      height:100%; border-radius:3px;
+      background:var(--muted);
+      transition:width 0.2s, background 0.2s;
+      width:0%;
+    }
+    .wc-bar-fill.good    { background:#22c55e; }
+    .wc-bar-fill.over    { background:var(--red); }
+    .wc-target-hint {
+      font-size:0.7rem; color:var(--muted); margin-top:4px;
+    }
+    .wc-target-hint.good { color:var(--correct); font-weight:600; }
+    .wc-target-hint.over { color:var(--red); font-weight:600; }
+
+    /* Register reminder */
+    .register-badge {
+      display:inline-flex; align-items:center; gap:6px;
+      background:#f1f5f9; border:1px solid var(--border);
+      border-radius:7px; padding:5px 10px;
+      font-size:0.74rem; color:var(--muted);
+    }
+    .register-badge strong { color:var(--navy); }
+
+    /* ── FOOTER ─────────────────────────────────────── */
+    .write-footer {
+      padding:14px 22px;
+      border-top:1px solid var(--border);
+      flex-shrink:0;
+    }
+    .already-done {
+      display:none;
+      background:var(--correct-bg); border:1px solid var(--correct-border);
+      border-radius:10px; padding:12px; font-size:0.82rem;
+      color:var(--correct); text-align:center; margin-bottom:12px;
+    }
+    .already-done.visible { display:block; }
+    .submit-btn {
+      width:100%;
+      background:var(--navy); color:white; border:none;
+      border-radius:10px; padding:14px;
+      font-family:"DM Sans",sans-serif; font-size:0.93rem; font-weight:600;
+      cursor:pointer; transition:opacity 0.15s;
+    }
+    .submit-btn:hover:not(:disabled) { opacity:0.84; }
+    .submit-btn:disabled { opacity:0.4; cursor:not-allowed; }
+    .continue-btn {
+      width:100%;
+      background:var(--red); color:white; border:none;
+      border-radius:10px; padding:14px;
+      font-family:"DM Sans",sans-serif; font-size:0.93rem; font-weight:600;
+      cursor:pointer; transition:opacity 0.15s;
+    }
+    .continue-btn:hover { opacity:0.88; }
+    .submit-info {
+      font-size:0.74rem; color:var(--muted); text-align:center;
+      margin-top:8px; line-height:1.4;
+    }
+    .skip-link {
+      display:block; text-align:center; margin-top:10px;
+      font-size:0.75rem; color:#94a3b8; cursor:pointer;
+      text-decoration:underline; text-underline-offset:3px;
+    }
+    .skip-link:hover { color:var(--muted); }
+
+    /* ── SUBMITTED STATE ─────────────────────────────── */
+    .submitted-notice {
+      display:none;
+      background:var(--correct-bg); border:1px solid var(--correct-border);
+      border-radius:10px; padding:16px; text-align:center;
+      font-size:0.85rem; color:var(--correct); font-weight:600;
+      margin-bottom:12px;
+    }
+    .submitted-notice.visible { display:block; }
+    .submitted-notice p {
+      font-weight:400; font-size:0.78rem; color:var(--muted); margin-top:6px;
+    }
+
+    /* ── MOBILE ─────────────────────────────────────── */
+    @media (max-width:900px) {
+      .exam-layout {
+        grid-template-columns:1fr;
+        min-height:unset;
+      }
+      .email-column {
+        position:static; height:auto; overflow-y:visible;
+        border-right:none; border-bottom:1px solid var(--border);
+      }
+      .email-column.collapsed { display:none; }
+      .write-column {
+        position:static; height:auto; overflow-y:visible;
+      }
+      .email-inner { padding:24px 20px 32px; }
+      .write-area { flex:unset; }
+      .reply-textarea { min-height:240px; }
+    }
+    @media (max-width:600px) {
+      .topbar { padding:0 14px; }
+      .email-inner { padding:20px 14px 28px; }
+      .write-header, .task-checklist, .write-area, .write-footer { padding-left:14px; padding-right:14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <p class="loading-text">Henter opgave…</p>
+</div>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" id="backLink" href="exam.html">← Tilbage</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-brand">
+      <div class="topbar-flag" aria-hidden="true"></div>
+      <div>
+        <div class="topbar-title" id="topbarTitle">Skriftlig Del 1</div>
+        <div class="topbar-sub">Prøve i Dansk 3</div>
+      </div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="word-count-pill">Ord: <span id="topbarWc">0</span></div>
+  </div>
+</header>
+
+<!-- Mobile: collapsible email toggle -->
+<button class="email-toggle" id="emailToggle" onclick="toggleEmail()">
+  <span>📩 Vis e-mail fra Magnus</span>
+  <span class="toggle-icon">▾</span>
+</button>
+
+<div class="exam-layout" id="examLayout" style="display:none;">
+
+  <!-- LEFT: incoming email -->
+  <div class="email-column" id="emailColumn">
+    <div class="email-inner">
+
+      <div class="scenario-card" id="scenarioCard">
+        <strong>Situation:</strong> <span id="scenarioText"></span>
+      </div>
+
+      <div class="email-envelope">
+        <div class="email-header">
+          <div class="email-subject" id="emailSubject"></div>
+          <div class="email-meta-row">
+            <span class="email-meta-label">Fra:</span>
+            <span class="email-meta-value" id="emailSender"></span>
+          </div>
+          <div class="email-meta-row">
+            <span class="email-meta-label">Til:</span>
+            <span class="email-meta-value">Dig</span>
+          </div>
+        </div>
+        <div class="email-body" id="emailBody">
+          <!-- rendered by JS with highlighted questions -->
+        </div>
+      </div>
+
+      <!-- Question key -->
+      <div class="underlined-key" id="underlinedKey">
+        <div class="underlined-key-title">De understregede spørgsmål du skal besvare</div>
+        <div id="questionKeyList"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT: write pane -->
+  <div class="write-column">
+
+    <div class="write-header">
+      <div class="write-eyebrow">Skriftlig fremstilling · Del 1</div>
+      <h2 id="writeTitle">Skriv et svar til Magnus</h2>
+    </div>
+
+    <div class="task-checklist">
+      <div class="task-checklist-title">Huskeliste</div>
+      <div id="taskChecklistItems"></div>
+    </div>
+
+    <div class="write-area">
+
+      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <label class="write-label" for="replyTextarea">Dit svar</label>
+        <div class="register-badge">
+          Tone: <strong id="registerBadgeText">uformel og venlig</strong>
+        </div>
+      </div>
+
+      <textarea
+        class="reply-textarea"
+        id="replyTextarea"
+        placeholder="Hej Magnus!&#10;&#10;Sikke en overraskelse at høre fra dig!…"
+        oninput="onTextChange()"
+        spellcheck="true"
+        lang="da"
+      ></textarea>
+
+      <!-- Word count bar -->
+      <div class="wc-bar-wrap">
+        <div class="wc-bar-row">
+          <span class="wc-label">Antal ord</span>
+          <span class="wc-count" id="wcCount">0</span>
+        </div>
+        <div class="wc-bar-bg">
+          <div class="wc-bar-fill" id="wcBarFill"></div>
+        </div>
+        <div class="wc-target-hint" id="wcHint">Skriv ca. 150–250 ord</div>
+      </div>
+
+    </div>
+
+    <div class="write-footer">
+      <div class="already-done" id="alreadyDone">✅ Denne del er allerede afleveret.</div>
+      <div class="submitted-notice" id="submittedNotice">
+        ✅ Svar afleveret!
+        <p>AI evaluerer dit svar. Resultaterne sendes på email, når hele prøven er afsluttet.</p>
+      </div>
+      <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>
+        Aflever svar
+      </button>
+      <button class="continue-btn" id="continueBtn" onclick="PD3.goBack(simId, attemptId)" style="display:none;">
+        Fortsæt med simulering →
+      </button>
+      <p class="submit-info" id="submitInfo">Svaret vurderes af AI på B2-kriterier efter aflevering.</p>
+      <span class="skip-link" id="skipLink" onclick="skipElement()">Spring over uden at svare</span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+
+const SIM_FILES = {
+  sim01:'dansk3_sim01_skriftlig_delprove1_ny_by.json',
+  sim02:'dansk3_sim02_skriftlig_delprove1.json',
+  sim03:'dansk3_sim03_skriftlig_delprove1.json',
+  sim04:'dansk3_sim04_skriftlig_delprove1.json',
+  sim05:'dansk3_sim05_skriftlig_delprove1.json',
+  sim06:'dansk3_sim06_skriftlig_delprove1.json',
+  sim07:'dansk3_sim07_skriftlig_delprove1.json',
+  sim08:'dansk3_sim08_skriftlig_delprove1.json',
+  sim09:'dansk3_sim09_skriftlig_delprove1.json',
+  sim10:'dansk3_sim10_skriftlig_delprove1.json',
+};
+
+// ─── shared state (assigned by PD3.init in DOMContentLoaded) ───
+let currentUser = null;
+let attemptId, simId, simNum, elemKey;
+
+
+// Word count targets
+const WC_MIN = 150;
+const WC_TARGET = 250;
+const WC_SOFT_SUBMIT = 50; // allow submit from this many words
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+
+let examData     = null;
+let submitted    = false;
+let emailVisible = true;
+let wordCount    = 0;
+
+// Derived task items (built from JSON)
+let taskItems = [];
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  ({ user: currentUser, attemptId, simId, simNum, elemKey } = await PD3.init('skriftlig_del1'));
+
+  document.getElementById('backLink').href = `exam.html?sim=${simId}&attempt=${attemptId}`;
+
+  const filename = SIM_FILES[simId];
+  if (!filename) { PD3.showError('Ukendt simulering: ' + simId, simId, attemptId); return; }
+  try {
+    const res = await fetch(`/dansk3/data/${simNum}/${filename}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    examData = await res.json();
+  } catch (err) {
+    PD3.showError('Kunne ikke hente spørgsmål. Prøv at genindlæse siden.', simId, attemptId);
+    return;
+  }
+
+  submitted = await PD3.isSubmitted(currentUser.email, attemptId, elemKey);
+  renderExam();
+  PD3.hideLoading();
+  document.getElementById('examLayout').style.display = '';
+});
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function renderExam() {
+  const {
+    title, scenario, incoming_email,
+    underlined_questions, task_instructions,
+    evaluation_criteria
+  } = examData;
+
+  const simNum = parseInt(simId.replace('sim',''), 10);
+  document.getElementById('topbarTitle').textContent = `Sim ${simNum} — Skriftlig 1`;
+  document.getElementById('scenarioText').textContent = scenario?.da || '';
+  document.getElementById('emailSubject').textContent = incoming_email.subject;
+  document.getElementById('emailSender').textContent = incoming_email.sender;
+  document.getElementById('writeTitle').textContent = `Skriv et svar til ${incoming_email.sender}`;
+  if (evaluation_criteria?.register) {
+    document.getElementById('registerBadgeText').textContent = evaluation_criteria.register;
+  }
+
+  renderEmailBody(incoming_email.body, underlined_questions);
+  renderQuestionKey(underlined_questions);
+  renderTaskChecklist(task_instructions, underlined_questions);
+
+  if (submitted) {
+    document.getElementById('alreadyDone').classList.add('visible');
+    document.getElementById('replyTextarea').disabled = true;
+    document.getElementById('submitBtn').style.display = 'none';
+    document.getElementById('skipLink').style.display = 'none';
+    document.getElementById('submitInfo').style.display = 'none';
+    document.getElementById('continueBtn').style.display = 'block';
+  }
+}
+
+function renderEmailBody(body, underlinedQuestions) {
+  // Split body into paragraphs, highlight underlined questions within text
+  const paragraphs = body.split('\n\n');
+  let html = paragraphs.map(para => {
+    let text = PD3.escapeHtml(para.replace(/\n/g, '<br>'));
+    // Highlight each underlined question if it appears in this paragraph
+    underlinedQuestions.forEach(q => {
+      const escaped = PD3.escapeHtml(q);
+      if (text.includes(escaped)) {
+        text = text.replace(
+          escaped,
+          `<span class="q-underline">${escaped}</span>`
+        );
+      }
+    });
+    return `<p>${text}</p>`;
+  }).join('');
+  document.getElementById('emailBody').innerHTML = html;
+}
+
+function renderQuestionKey(questions) {
+  const list = document.getElementById('questionKeyList');
+  list.innerHTML = questions.map((q, i) => `
+    <div class="q-key-item">
+      <span class="q-key-num">${i+1}.</span>
+      <span>${PD3.escapeHtml(q)}</span>
+    </div>
+  `).join('');
+}
+
+function renderTaskChecklist(taskInstructions, underlinedQuestions) {
+  // Build task items: parse task instructions + add questions as sub-items
+  const raw = taskInstructions?.da || '';
+
+  // Standard items from task_instructions
+  taskItems = [];
+
+  // Line 1: thank for email
+  taskItems.push({ id:'thank', label:'Tak for e-mailen', done:false });
+
+  // Underlined questions
+  underlinedQuestions.forEach((q, i) => {
+    taskItems.push({ id:`q${i+1}`, label:`Besvar: "${q.length > 60 ? q.slice(0,57)+'…' : q}"`, done:false });
+  });
+
+  // Final: propose meeting
+  taskItems.push({ id:'meet', label:'Foreslå en konkret plan for at mødes', done:false });
+
+  const wrap = document.getElementById('taskChecklistItems');
+  wrap.innerHTML = taskItems.map(item => `
+    <div class="task-item" id="titem-${item.id}">
+      <div class="task-bullet" id="tbullet-${item.id}">✓</div>
+      <span>${PD3.escapeHtml(item.label)}</span>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WORD COUNT + LIVE CHECKLIST
+// ═══════════════════════════════════════════════════════════════
+function onTextChange() {
+  const text = document.getElementById('replyTextarea').value;
+  wordCount = text.trim().length === 0 ? 0 : PD3.countWords(text);
+
+  updateWordCountUI(wordCount);
+  updateChecklist(text);
+  checkSubmitEnabled();
+}
+
+function updateWordCountUI(count) {
+  document.getElementById('wcCount').textContent = count;
+  document.getElementById('topbarWc').textContent = count;
+
+  const fill = document.getElementById('wcBarFill');
+  const hint = document.getElementById('wcHint');
+
+  if (count === 0) {
+    fill.style.width = '0%';
+    fill.className = 'wc-bar-fill';
+    hint.textContent = `Skriv ca. ${WC_MIN}–${WC_TARGET} ord`;
+    hint.className = 'wc-target-hint';
+  } else if (count < WC_MIN) {
+    const pct = Math.min(100, (count / WC_MIN) * 70); // 70% of bar = at min
+    fill.style.width = pct + '%';
+    fill.className = 'wc-bar-fill';
+    hint.textContent = `${WC_MIN - count} ord til anbefalede ${WC_MIN}`;
+    hint.className = 'wc-target-hint';
+  } else if (count <= WC_TARGET) {
+    const pct = 70 + ((count - WC_MIN) / (WC_TARGET - WC_MIN)) * 30;
+    fill.style.width = pct + '%';
+    fill.className = 'wc-bar-fill good';
+    hint.textContent = `✓ God længde (${count} ord)`;
+    hint.className = 'wc-target-hint good';
+  } else {
+    fill.style.width = '100%';
+    fill.className = 'wc-bar-fill over';
+    hint.textContent = `${count - WC_TARGET} ord over anbefalingen`;
+    hint.className = 'wc-target-hint over';
+  }
+}
+
+// Heuristic checklist: mark items as done based on text content
+function updateChecklist(text) {
+  if (submitted) return;
+  const lower = text.toLowerCase();
+
+  const checks = {
+    'thank': () =>
+      /tak\s*(for|for\s*(din|e-mailen|mailen|at\s*skrive))|dejligt\s*(at\s*høre|at\s*få)|hold\s*(da\s*op|kæft)|sikke|overraskelse|endelig\s*(høre|skrive)/i.test(text),
+    'q1': () =>
+      /(flytte|boet|ny\s*by|nyt\s*sted|jeg\s*(har|har\s*prøvet|aldrig|selv)|erfaringer|start)/i.test(text),
+    'q2': () =>
+      /(kolleger|arbejdsplads|relationer|svært|nemt|tager\s*tid|det\s*kræver|opbygge|kollegaer)/i.test(text),
+    'q3': () =>
+      /(anbefal|forening|sport|naboer|meetup|frivillig|arrange|møde\s*nye|lære\s*nye|apps)/i.test(text),
+    'meet': () =>
+      /(besøge|besøg|mødtes|komme\s*til\s*aarhus|aftale\s*(dato|tidspunkt)|hvornår|måned|weekend|oktober|november|december|januar|februar|marts|april|maj|juni|juli|august|september)/i.test(text),
+  };
+
+  taskItems.forEach(item => {
+    const checkFn = checks[item.id];
+    if (checkFn) {
+      const done = wordCount >= 20 && checkFn();
+      item.done = done;
+      document.getElementById(`titem-${item.id}`)?.classList.toggle('done', done);
+    }
+  });
+}
+
+function checkSubmitEnabled() {
+  document.getElementById('submitBtn').disabled = (wordCount < WC_SOFT_SUBMIT) || submitted;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MOBILE EMAIL TOGGLE
+// ═══════════════════════════════════════════════════════════════
+function toggleEmail() {
+  emailVisible = !emailVisible;
+  const col = document.getElementById('emailColumn');
+  const btn = document.getElementById('emailToggle');
+  col.classList.toggle('collapsed', !emailVisible);
+  btn.classList.toggle('collapsed', !emailVisible);
+  const label = btn.querySelector('span:first-child');
+  label.textContent = emailVisible
+    ? '📩 Skjul e-mail fra Magnus'
+    : '📩 Vis e-mail fra Magnus';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════════════════
+async function submitAnswer() {
+  if (submitted) return;
+  const text = document.getElementById('replyTextarea').value.trim();
+  if (!text) return;
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Afleverer…';
+
+  const responseJson = {
+    task_title:       examData.title,
+    scenario:         examData.scenario?.da,
+    word_count:       wordCount,
+    incoming_email:   examData.incoming_email.body,
+    task_instructions:examData.task_instructions?.da,
+    underlined:       examData.underlined_questions,
+    evaluation_criteria: examData.evaluation_criteria,
+    ai_prompt:        examData.ai_evaluation_prompt?.da,
+    user_answer:      text,
+  };
+
+  try {
+    await PD3.submit({ attemptId, elemKey, text, json: responseJson });
+  } catch (err) {
+    console.error('Submit error:', err);
+    btn.disabled = false;
+    btn.textContent = 'Aflever svar';
+    PD3.toast('Noget gik galt. Prøv igen.');
+    return;
+  }
+
+  submitted = true;
+  document.getElementById('replyTextarea').disabled = true;
+  document.getElementById('submitBtn').style.display = 'none';
+  document.getElementById('skipLink').style.display = 'none';
+  document.getElementById('submitInfo').style.display = 'none';
+  document.getElementById('submittedNotice').classList.add('visible');
+  document.getElementById('continueBtn').style.display = 'block';
+
+  // Mark all checklist items as done visually
+  taskItems.forEach(item => {
+    document.getElementById(`titem-${item.id}`)?.classList.add('done');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SKIP
+// ═══════════════════════════════════════════════════════════════
+async function skipElement() {
+  if (submitted) return;
+  if (!confirm('Er du sikker på, at du vil springe denne del over? Du får 0 point.')) return;
+  document.getElementById('skipLink').style.display = 'none';
+  document.getElementById('submitBtn').disabled = true;
+  await PD3.skip({ attemptId, elemKey });
+  submitted = true;
+  PD3.goBack(simId, attemptId);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+</script>
+</body>
+</html>
