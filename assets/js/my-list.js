@@ -94,19 +94,17 @@ const resolvedOptions =
         const rawOpts = q._raw?.options?.[lang] || q._raw?.options?.en || [];
         const correctIndex = q._raw?.correctIndex ?? 0;
 
-        const opts = rawOpts.map((text, i) => ({
+        return rawOpts.map((text, i) => ({
           text,
           correct: i === correctIndex
         }));
-
-        // Shuffle so the correct answer isn't always first
-        for (let i = opts.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [opts[i], opts[j]] = [opts[j], opts[i]];
-        }
-
-        return opts;
       })();
+
+// Shuffle regardless of which branch was taken
+for (let i = resolvedOptions.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [resolvedOptions[i], resolvedOptions[j]] = [resolvedOptions[j], resolvedOptions[i]];
+}
 
 resolvedOptions.forEach(opt => {
 
