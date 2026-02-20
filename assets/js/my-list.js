@@ -86,20 +86,26 @@ card.appendChild(header);
 
   let locked = false;
 
-  const resolvedOptions =
+const resolvedOptions =
   q.options && q.options.length
     ? q.options
     : (() => {
         const lang = window.CIVICEDGE_LANG || "en";
         const rawOpts = q._raw?.options?.[lang] || q._raw?.options?.en || [];
-        const correctIndex = Number.isFinite(q._raw?.correctIndex)
-          ? q._raw.correctIndex
-          : 0;
+        const correctIndex = q._raw?.correctIndex ?? 0;
 
-        return rawOpts.map((text, i) => ({
+        const opts = rawOpts.map((text, i) => ({
           text,
           correct: i === correctIndex
         }));
+
+        // Shuffle so the correct answer isn't always first
+        for (let i = opts.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [opts[i], opts[j]] = [opts[j], opts[i]];
+        }
+
+        return opts;
       })();
 
 resolvedOptions.forEach(opt => {
