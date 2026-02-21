@@ -511,7 +511,7 @@
       <textarea
         class="reply-textarea"
         id="replyTextarea"
-        placeholder="Hej Magnus!&#10;&#10;Sikke en overraskelse at høre fra dig!…"
+        placeholder="Skriv dit svar her…"
         oninput="onTextChange()"
         spellcheck="true"
         lang="da"
@@ -564,7 +564,18 @@
 // CONFIG
 // ═══════════════════════════════════════════════════════════════
 
-// Filename computed dynamically: NN-S1.json
+const SIM_FILES = {
+  sim01:'01-S1.json',
+  sim02:'02-S1.json',
+  sim03:'03-S1.json',
+  sim04:'04-S1.json',
+  sim05:'dansk3_sim05_skriftlig_delprove1.json',
+  sim06:'dansk3_sim06_skriftlig_delprove1.json',
+  sim07:'dansk3_sim07_skriftlig_delprove1.json',
+  sim08:'dansk3_sim08_skriftlig_delprove1.json',
+  sim09:'dansk3_sim09_skriftlig_delprove1.json',
+  sim10:'dansk3_sim10_skriftlig_delprove1.json',
+};
 
 // ─── shared state (assigned by PD3.init in DOMContentLoaded) ───
 let currentUser = null;
@@ -597,7 +608,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('backLink').href = `exam.html?sim=${simId}&attempt=${attemptId}`;
 
-  const filename = `${simNum.toString().padStart(2,'0')}-S1.json`;
+  const filename = SIM_FILES[simId];
+  if (!filename) { PD3.showError('Ukendt simulering: ' + simId, simId, attemptId); return; }
   try {
     const res = await fetch(`/dansk3/data/${simNum}/${filename}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -652,7 +664,7 @@ function renderEmailBody(body, underlinedQuestions) {
   // Split body into paragraphs, highlight underlined questions within text
   const paragraphs = body.split('\n\n');
   let html = paragraphs.map(para => {
-    let text = PD3.escapeHtml(para).replace(/\n/g, '<br>');
+    let text = PD3.escapeHtml(para.replace(/\n/g, '<br>'));
     // Highlight each underlined question if it appears in this paragraph
     underlinedQuestions.forEach(q => {
       const escaped = PD3.escapeHtml(q);

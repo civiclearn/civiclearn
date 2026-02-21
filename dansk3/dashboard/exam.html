@@ -809,14 +809,14 @@
 <!-- ── PHASE COMPLETE ──────────────────────────────────────── -->
 <div id="phase-complete">
   <div class="complete-card">
-    <div class="complete-icon">🇩🇰</div>
+    <div class="complete-icon">🎉</div>
     <h2 class="complete-title">Alle dele er afleveret</h2>
     <p class="complete-body">
       Godt klaret! Vi bedømmer dine svar nu &mdash; det tager typisk et par minutter.<br><br>
-      Du modtager en <strong>e-mail</strong> med dine resultater, så snart alle dele er vurderet.
-      Du kan lukke dette vindue.
+      Du kan følge med i bedømmelsen og se dine resultater her.
     </p>
-    <a class="btn-primary" href="index.html">Tilbage til oversigten</a>
+    <a class="btn-primary" id="viewResultsBtn" href="#">📊 Se resultater</a>
+    <a class="btn-secondary" href="index.html" style="display:inline-block;margin-top:10px;font-size:0.85rem;color:var(--muted);text-decoration:underline;text-underline-offset:3px;">Tilbage til oversigten</a>
   </div>
 </div>
 
@@ -1100,6 +1100,7 @@ function showPhaseComplete() {
   document.getElementById('phase-intro').classList.remove('active');
   document.getElementById('phase-hub').classList.remove('active');
   document.getElementById('phase-complete').classList.add('active');
+  document.getElementById('viewResultsBtn').href = `results.html?sim=${simId}&attempt=${attempt.id}`;
   stopFollowupPoll();
 }
 
@@ -1108,11 +1109,21 @@ function showPhaseComplete() {
 // ═══════════════════════════════════════════════════════════════════════
 
 function renderHub() {
-  // Show oral1 banner only when actually submitted (not skipped)
+  // Show oral1 banner — adapts to followup state
   const oral1Status = elements['mundtlig_del1']?.submission_status;
+  const followupStatus = elements['mundtlig_del1_followup']?.submission_status;
+  const followupReady = attempt?.oral1_followup_ready === true;
   const banner = document.getElementById('oral1Banner');
-  if (oral1Status === 'submitted') {
+  if (oral1Status === 'submitted' && followupStatus !== 'submitted' && followupStatus !== 'skipped') {
     banner.classList.add('show');
+    const bannerContent = banner.querySelector('div');
+    if (followupReady) {
+      banner.querySelector('span').textContent = '🎯';
+      bannerContent.innerHTML = '<strong>Opfølgningsspørgsmål er klar!</strong> Du kan starte dem når du vil — find dem under Mundtlig.';
+    } else {
+      banner.querySelector('span').textContent = '✅';
+      bannerContent.innerHTML = '<strong>Mundtlig Del 1 er afleveret.</strong> Opfølgningsspørgsmål genereres i baggrunden og låses op om lidt.';
+    }
   } else {
     banner.classList.remove('show');
   }
@@ -1298,6 +1309,13 @@ async function pollFollowupReady() {
       renderProgressStrip();
       stopFollowupPoll();
 
+      // Update the oral1 banner to show "ready" state
+      const bnr = document.getElementById('oral1Banner');
+      if (bnr.classList.contains('show')) {
+        bnr.querySelector('span').textContent = '🎯';
+        bnr.querySelector('div').innerHTML = '<strong>Opfølgningsspørgsmål er klar!</strong> Du kan starte dem når du vil — find dem under Mundtlig.';
+      }
+
       // Flash the unlock
       flashCard('card-mundtlig_del1_followup');
     }
@@ -1395,7 +1413,6 @@ async function apiFetch(fnName, body) {
 
 function hideLoading() {
   const ol = document.getElementById('loading-overlay');
-  if (!ol) return;
   ol.classList.add('hidden');
   setTimeout(() => ol.remove(), 500);
 }

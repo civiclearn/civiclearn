@@ -870,6 +870,9 @@ function skipCountdown() {
 function startRecordingFromStream() {
   if (!micStream) { startRecording(); return; } // fallback if no persistent stream
 
+  // Re-init waveform if analyser was nulled by a previous stopRecording()
+  if (!analyser && micStream) setupWaveform(micStream);
+
   // Reset button to normal label
   document.getElementById('recStartBtn').textContent = '🎤 Start optagelse';
   document.getElementById('recStartBtn').onclick = startRecording;

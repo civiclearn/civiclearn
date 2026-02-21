@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PD3 — Reset Simulations</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: #0f1117;
+    color: #e0e0e0;
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  
+  h1 { font-size: 1.6rem; font-weight: 600; color: #fff; margin-bottom: 0.3rem; }
+  .subtitle { color: #888; margin-bottom: 2rem; font-size: 0.9rem; }
+  
+  .panel {
+    background: #1a1d27;
+    border: 1px solid #2a2d3a;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .panel-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #fff;
+    margin-bottom: 1rem;
+  }
+  
+  .sim-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .sim-btn {
+    background: #21262d;
+    border: 2px solid #30363d;
+    color: #8b949e;
+    border-radius: 8px;
+    padding: 0.6rem 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  
+  .sim-btn:hover { border-color: #60a5fa; color: #fff; }
+  .sim-btn.selected { border-color: #f87171; background: #dc262622; color: #f87171; }
+  
+  .reset-all-btn {
+    width: 100%;
+    background: #21262d;
+    border: 2px solid #30363d;
+    color: #8b949e;
+    border-radius: 8px;
+    padding: 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'IBM Plex Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  
+  .reset-all-btn:hover { border-color: #f87171; color: #f87171; }
+  .reset-all-btn.selected { border-color: #f87171; background: #dc262622; color: #f87171; }
+  
+  .user-input {
+    width: 100%;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 0.5rem;
+  }
+  
+  .user-input:focus { outline: none; border-color: #60a5fa; }
+  
+  label {
+    font-size: 0.8rem;
+    color: #888;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+  
+  .execute-btn {
+    width: 100%;
+    background: #dc2626;
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    padding: 0.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'IBM Plex Sans', sans-serif;
+    transition: all 0.15s;
+    margin-top: 1rem;
+  }
+  
+  .execute-btn:hover { background: #ef4444; }
+  .execute-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
+  
+  .log {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: #8b949e;
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  
+  .log .ok { color: #4ade80; }
+  .log .err { color: #f87171; }
+  .log .info { color: #60a5fa; }
+  .log .warn { color: #fbbf24; }
+  
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  
+  .checkbox-row input { accent-color: #f87171; }
+  .checkbox-row label { margin: 0; font-size: 0.85rem; color: #c9d1d9; }
+  
+  .warning {
+    background: #78350f33;
+    border: 1px solid #92400e55;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: #fbbf24;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<h1>🔄 PD3 — Reset Simulations</h1>
+<p class="subtitle">Delete attempts, elements, and audio for a clean restart.</p>
+
+<div class="warning">
+  ⚠️ This permanently deletes all data for the selected simulation(s). Results, AI evaluations, audio recordings — everything. This cannot be undone.
+</div>
+
+<div class="panel">
+  <div class="panel-title">1. User</div>
+  <label>User ID (email)</label>
+  <input type="text" class="user-input" id="userId" value="" placeholder="e.g. test@civiclearn.com">
+</div>
+
+<div class="panel">
+  <div class="panel-title">2. Select what to reset</div>
+  <div class="sim-grid">
+    <button class="sim-btn" data-sim="sim01" onclick="toggleSim(this)">SIM 01</button>
+    <button class="sim-btn" data-sim="sim02" onclick="toggleSim(this)">SIM 02</button>
+    <button class="sim-btn" data-sim="sim03" onclick="toggleSim(this)">SIM 03</button>
+    <button class="sim-btn" data-sim="sim04" onclick="toggleSim(this)">SIM 04</button>
+    <button class="sim-btn" data-sim="sim05" onclick="toggleSim(this)">SIM 05</button>
+    <button class="sim-btn" data-sim="sim06" onclick="toggleSim(this)">SIM 06</button>
+    <button class="sim-btn" data-sim="sim07" onclick="toggleSim(this)">SIM 07</button>
+    <button class="sim-btn" data-sim="sim08" onclick="toggleSim(this)">SIM 08</button>
+    <button class="sim-btn" data-sim="sim09" onclick="toggleSim(this)">SIM 09</button>
+    <button class="sim-btn" data-sim="sim10" onclick="toggleSim(this)">SIM 10</button>
+  </div>
+  <button class="reset-all-btn" id="allBtn" onclick="toggleAll()">SELECT ALL (full reset)</button>
+  
+  <div class="checkbox-row">
+    <input type="checkbox" id="clearLocal" checked>
+    <label for="clearLocal">Also clear localStorage for selected sim(s)</label>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">3. Execute</div>
+  <div id="summary" style="font-size:0.85rem; color:#888; margin-bottom:0.5rem;">No simulations selected</div>
+  <button class="execute-btn" id="execBtn" disabled onclick="executeReset()">Reset Selected</button>
+</div>
+
+<div class="panel">
+  <div class="panel-title">Log</div>
+  <div class="log" id="log">Ready.\n</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://htgliokekeaovdiafrgs.supabase.co';
+const RESET_FN = `${SUPABASE_URL}/functions/v1/pd3-reset`;
+
+let selectedSims = new Set();
+let allSelected = false;
+
+function toggleSim(btn) {
+  const sim = btn.dataset.sim;
+  if (selectedSims.has(sim)) {
+    selectedSims.delete(sim);
+    btn.classList.remove('selected');
+  } else {
+    selectedSims.add(sim);
+    btn.classList.add('selected');
+  }
+  // Deselect "all" if individual toggles
+  allSelected = false;
+  document.getElementById('allBtn').classList.remove('selected');
+  updateSummary();
+}
+
+function toggleAll() {
+  allSelected = !allSelected;
+  const allBtn = document.getElementById('allBtn');
+  const simBtns = document.querySelectorAll('.sim-btn');
+  
+  if (allSelected) {
+    allBtn.classList.add('selected');
+    simBtns.forEach(b => { b.classList.add('selected'); selectedSims.add(b.dataset.sim); });
+  } else {
+    allBtn.classList.remove('selected');
+    simBtns.forEach(b => { b.classList.remove('selected'); });
+    selectedSims.clear();
+  }
+  updateSummary();
+}
+
+function updateSummary() {
+  const summary = document.getElementById('summary');
+  const btn = document.getElementById('execBtn');
+  
+  if (selectedSims.size === 0) {
+    summary.textContent = 'No simulations selected';
+    btn.disabled = true;
+    btn.textContent = 'Reset Selected';
+  } else if (allSelected || selectedSims.size === 10) {
+    summary.innerHTML = '<span style="color:#f87171">⚠️ FULL RESET — all 10 simulations will be deleted</span>';
+    btn.disabled = false;
+    btn.textContent = 'Reset ALL Simulations';
+  } else {
+    const sims = [...selectedSims].sort().join(', ');
+    summary.textContent = `Will reset: ${sims}`;
+    btn.disabled = false;
+    btn.textContent = `Reset ${selectedSims.size} Simulation${selectedSims.size > 1 ? 's' : ''}`;
+  }
+}
+
+function log(msg, cls = '') {
+  const el = document.getElementById('log');
+  const span = document.createElement('span');
+  if (cls) span.className = cls;
+  span.textContent = msg + '\n';
+  el.appendChild(span);
+  el.scrollTop = el.scrollHeight;
+}
+
+function clearPD3LocalStorage(sims) {
+  // Scan all localStorage keys for PD3-related entries
+  const keysToDelete = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key) continue;
+    
+    // Match patterns: pd3_, PD3_, attempt_, sim01-sim10, dansk3
+    const isPD3 = /pd3|PD3|dansk3/i.test(key);
+    const isAttempt = /attempt/i.test(key);
+    
+    // Check if key contains any of the selected sim IDs
+    const matchesSim = [...sims].some(s => key.includes(s));
+    
+    if (isPD3 || isAttempt || matchesSim) {
+      // If resetting all, delete all PD3 keys
+      // If resetting specific sims, only delete if key matches a sim or is generic PD3
+      if (allSelected || selectedSims.size === 10 || matchesSim) {
+        keysToDelete.push(key);
+      }
+    }
+  }
+  
+  keysToDelete.forEach(k => {
+    localStorage.removeItem(k);
+    log(`  localStorage: removed "${k}"`, 'info');
+  });
+  
+  return keysToDelete.length;
+}
+
+async function executeReset() {
+  const userId = document.getElementById('userId').value.trim();
+  if (!userId) { log('ERROR: Enter a user ID', 'err'); return; }
+  if (selectedSims.size === 0) { log('ERROR: Select at least one simulation', 'err'); return; }
+  
+  const isAll = allSelected || selectedSims.size === 10;
+  const confirmMsg = isAll 
+    ? `FULL RESET for ${userId} — delete ALL 10 simulations?`
+    : `Reset ${[...selectedSims].sort().join(', ')} for ${userId}?`;
+  
+  if (!confirm(confirmMsg)) { log('Cancelled by user.', 'warn'); return; }
+  
+  const btn = document.getElementById('execBtn');
+  btn.disabled = true;
+  btn.textContent = 'Resetting...';
+  
+  log('─'.repeat(50));
+  log(`Starting reset for ${userId}`, 'info');
+  
+  if (isAll) {
+    // Single call for all
+    log(`Calling pd3-reset (all simulations)...`, 'info');
+    try {
+      const r = await fetch(RESET_FN, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, simulation_id: 'all' })
+      });
+      const data = await r.json();
+      if (data.success) {
+        log(`✓ Deleted ${data.deleted_attempts} attempt(s), ${data.deleted_elements} element(s), ${data.deleted_audio_files} audio file(s)`, 'ok');
+        log(`  Simulations: ${(data.simulations_reset || []).join(', ')}`, 'ok');
+      } else {
+        log(`✗ ${data.error}`, 'err');
+      }
+    } catch (e) {
+      log(`✗ Network error: ${e.message}`, 'err');
+    }
+  } else {
+    // Individual calls per sim
+    for (const sim of [...selectedSims].sort()) {
+      log(`Resetting ${sim}...`, 'info');
+      try {
+        const r = await fetch(RESET_FN, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, simulation_id: sim })
+        });
+        const data = await r.json();
+        if (data.success) {
+          log(`  ✓ ${sim}: ${data.deleted_attempts} attempt(s), ${data.deleted_elements} element(s), ${data.deleted_audio_files || 0} audio`, 'ok');
+        } else {
+          log(`  ✗ ${sim}: ${data.error}`, 'err');
+        }
+      } catch (e) {
+        log(`  ✗ ${sim}: ${e.message}`, 'err');
+      }
+    }
+  }
+  
+  // Clear localStorage if checked
+  if (document.getElementById('clearLocal').checked) {
+    log(`Clearing localStorage...`, 'info');
+    const cleared = clearPD3LocalStorage(selectedSims);
+    if (cleared > 0) {
+      log(`✓ Cleared ${cleared} localStorage key(s)`, 'ok');
+    } else {
+      log(`  No matching localStorage keys found (might need to run from same origin as PD3)`, 'warn');
+    }
+  }
+  
+  log(`Done.`, 'ok');
+  log('─'.repeat(50));
+  
+  btn.disabled = false;
+  updateSummary();
+}
+
+// Auto-detect user from URL or default
+(function init() {
+  // Try to get user from PD3's own storage
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && /pd3.*user|user.*email/i.test(key)) {
+      const val = localStorage.getItem(key);
+      if (val && val.includes('@')) {
+        document.getElementById('userId').value = val;
+        return;
+      }
+    }
+  }
+})();
+</script>
+
+</body>
+</html>

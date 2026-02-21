@@ -217,6 +217,22 @@
     .stat-card.urgent-high  { background: linear-gradient(135deg,#fff5f5,#ffe4e6); }
     .stat-card.urgent-medium { background: linear-gradient(135deg,#fffbeb,#fef3c7); }
 
+    /* countdown detail line */
+    .countdown-detail {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.45;
+      margin-top: 2px;
+    }
+    .countdown-detail .deadline-warn {
+      color: #dc2626;
+      font-weight: 600;
+    }
+    .countdown-detail .deadline-past {
+      color: var(--muted);
+      text-decoration: line-through;
+    }
+
     /* exam date picker */
     .date-picker { margin-top: 10px; }
     .date-picker select,
@@ -506,12 +522,11 @@
     <div class="stat-card" id="countdownCard">
       <div class="stat-label">Næste PD3-prøve</div>
       <div class="stat-value" id="statCountdown">—</div>
+      <div class="countdown-detail" id="countdownDetail"></div>
       <div class="date-picker">
         <select id="examDateSel" onchange="handleDateChange()">
-          <option value="2026-03-14">14 marts 2026</option>
-          <option value="2026-06-06">6 juni 2026</option>
-          <option value="2026-09-05">5 september 2026</option>
-          <option value="2026-11-28">28 november 2026</option>
+          <option value="foraar-2026">Forår 2026 — skriftlig 19. maj</option>
+          <option value="efteraar-2026">Efterår 2026 — skriftlig 10. nov</option>
           <option value="custom">📅 Vælg dato…</option>
         </select>
         <div class="custom-date-row" id="customDateRow">
@@ -814,19 +829,54 @@ function initCountdown() {
   const sel = document.getElementById('examDateSel');
 
   if (saved) {
-    // try to select it; if not in list, leave as-is
+    let found = false;
     for (const opt of sel.options) {
-      if (opt.value === saved) { sel.value = saved; break; }
+      if (opt.value === saved) { sel.value = saved; found = true; break; }
     }
+    // If saved value is a custom ISO date, switch to custom mode
+    if (!found && /^\d{4}-\d{2}-\d{2}$/.test(saved)) {
+      sel.value = 'custom';
+      document.getElementById('customDateInput').value = saved;
+      document.getElementById('customDateRow').classList.add('show');
+    }
+    updateCountdown(saved || sel.value);
+  } else {
+    // Auto-select the next upcoming session
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    let best = sel.options[0].value;
+    for (const [id, s] of Object.entries(EXAM_SESSIONS)) {
+      if (new Date(s.written) >= today) { best = id; break; }
+    }
+    sel.value = best;
+    updateCountdown(best);
   }
-  const target = saved || sel.value;
-  updateCountdown(target);
 }
 
-function updateCountdown(dateStr) {
-  const el    = document.getElementById('statCountdown');
-  const card  = document.getElementById('countdownCard');
+// ── Exam session data ─────────────────────────────────────────────────
+const EXAM_SESSIONS = {
+  'foraar-2026': {
+    written:       '2026-05-19',
+    oral:          '10.–23. juni',
+    deadline:      '2026-03-09',
+    deadlineLabel: '9. marts'
+  },
+  'efteraar-2026': {
+    written:       '2026-11-10',
+    oral:          '2.–15. december',
+    deadline:      '2026-08-31',
+    deadlineLabel: '31. august'
+  }
+};
+
+function updateCountdown(sessionOrDate) {
+  const el     = document.getElementById('statCountdown');
+  const card   = document.getElementById('countdownCard');
+  const detail = document.getElementById('countdownDetail');
   card.classList.remove('urgent-high', 'urgent-medium');
+  detail.innerHTML = '';
+
+  const session = EXAM_SESSIONS[sessionOrDate];
+  const dateStr = session ? session.written : sessionOrDate;
 
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const exam  = new Date(dateStr);
@@ -840,6 +890,24 @@ function updateCountdown(dateStr) {
     if (days <= 7)  card.classList.add('urgent-high');
     else if (days <= 30) card.classList.add('urgent-medium');
   }
+
+  // Show detail line for known sessions
+  if (session) {
+    const deadlineDate = new Date(session.deadline);
+    const deadlineDays = Math.round((deadlineDate - today) / 86400000);
+
+    let deadlineHtml = '';
+    if (deadlineDays < 0) {
+      deadlineHtml = `Tilmelding: <span class="deadline-past">${session.deadlineLabel}</span> (lukket)`;
+    } else if (deadlineDays <= 14) {
+      deadlineHtml = `Tilmelding: <span class="deadline-warn">senest ${session.deadlineLabel}!</span>`;
+    } else {
+      deadlineHtml = `Tilmelding: senest ${session.deadlineLabel}`;
+    }
+
+    detail.innerHTML = `🗣 Mundtlig: ${session.oral}<br>📝 ${deadlineHtml}`;
+  }
+
   window._pd3UpdateCountdown = updateCountdown;
 }
 

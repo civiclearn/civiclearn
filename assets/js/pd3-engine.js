@@ -489,19 +489,31 @@ FollowupRecorder: function({ container, questions = [], micStream = null, onComp
     });
   }
 
-  function speak(text) {
+  // ── Cloud TTS via OpenAI (pd3-tts edge function) ──────────────────
+  async function speakCloud(text) {
+    const r = await fetch(FN('pd3-tts'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    if (!r.ok) throw new Error(`TTS ${r.status}`);
+    const blob = await r.blob();
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.onended  = () => { URL.revokeObjectURL(url); resolve(); };
+      audio.onerror  = () => { URL.revokeObjectURL(url); reject(new Error('audio playback failed')); };
+      audio.play().catch(reject);
+    });
+  }
+
+  // ── Browser TTS fallback ──────────────────────────────────────────
+  function speakBrowser(text) {
     return new Promise(async resolve => {
       if (!window.speechSynthesis) { resolve(); return; }
       window.speechSynthesis.cancel();
 
       const voices  = await getVoices();
-
-      // Prefer: da-DK local voices first (best quality), then any Danish voice
-      // Voice name hints for good Danish voices across platforms:
-      //   macOS: "Ida" (da-DK) — excellent
-      //   Windows: "Helle" (da-DK) — decent
-      //   iOS:  "Ida" or "Caroline"
-      //   Android/Linux: may only have generic TTS
       const daVoice = voices.find(v => v.lang === 'da-DK' && v.localService)
                    || voices.find(v => v.lang === 'da-DK')
                    || voices.find(v => v.lang.startsWith('da'))
@@ -509,7 +521,7 @@ FollowupRecorder: function({ container, questions = [], micStream = null, onComp
 
       const utt = new SpeechSynthesisUtterance(text);
       utt.lang  = 'da-DK';
-      utt.rate  = 0.88;   // slightly slower = clearer for non-native listeners
+      utt.rate  = 0.88;
       utt.pitch = 1.0;
       if (daVoice) utt.voice = daVoice;
 
@@ -518,6 +530,16 @@ FollowupRecorder: function({ container, questions = [], micStream = null, onComp
       ttsUtterance = utt;
       window.speechSynthesis.speak(utt);
     });
+  }
+
+  // ── Main speak: cloud first, browser fallback ─────────────────────
+  async function speak(text) {
+    try {
+      await speakCloud(text);
+    } catch (e) {
+      console.warn('[TTS] Cloud TTS failed, falling back to browser:', e.message);
+      await speakBrowser(text);
+    }
   }
 
   // ── UI Rendering ───────────────────────────────────────────────────

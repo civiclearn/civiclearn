@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resultater — Prøve i Dansk 3</title>
+  <script src="/assets/js/auth-guard-dansk3.js"></script>
+  <script src="/assets/js/pd3-engine.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --red:    #c8102e;
+      --navy:   #0f172a;
+      --slate:  #334155;
+      --muted:  #64748b;
+      --border: #e2e8f0;
+      --surface:#ffffff;
+      --bg:     #f8f7f4;
+
+      --pass:   #166534;
+      --pass-bg:#f0fdf4;
+      --pass-border:#bbf7d0;
+      --fail:   #991b1b;
+      --fail-bg:#fef2f2;
+      --fail-border:#fecaca;
+
+      --amber:  #92400e;
+      --amber-bg:#fffbeb;
+      --amber-border:#fde68a;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+    body {
+      font-family:"DM Sans",system-ui,sans-serif;
+      background:var(--bg); color:var(--navy);
+      min-height:100vh;
+    }
+
+    /* ── TOPBAR ─────────────────────────────────────── */
+    .topbar {
+      background:var(--navy); border-bottom:3px solid var(--red);
+      padding:0 28px; height:52px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:200;
+    }
+    .topbar-left { display:flex; align-items:center; gap:12px; }
+    .back-link {
+      color:#64748b; text-decoration:none; font-size:0.8rem;
+      display:flex; align-items:center; gap:5px; transition:color 0.15s;
+    }
+    .back-link:hover { color:#fff; }
+    .topbar-divider { width:1px; height:20px; background:#1e293b; }
+    .topbar-flag {
+      width:22px; height:16px; background:var(--red);
+      border-radius:2px; position:relative; overflow:hidden; flex-shrink:0;
+    }
+    .topbar-flag::before { content:''; position:absolute; left:8px; top:0; width:3px; height:100%; background:white; }
+    .topbar-flag::after  { content:''; position:absolute; left:0; top:5.5px; width:100%; height:3px; background:white; }
+    .topbar-brand { display:flex; align-items:center; gap:10px; }
+    .topbar-title { font-family:"Fraunces",serif; font-size:0.9rem; font-weight:600; color:#fff; }
+    .topbar-sub   { font-size:0.75rem; color:#64748b; }
+
+    /* ── LOADING ────────────────────────────────────── */
+    #loading-overlay {
+      position:fixed; inset:0; background:var(--bg);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:16px;
+      z-index:9999; transition:opacity 0.35s;
+    }
+    #loading-overlay.hidden { opacity:0; pointer-events:none; }
+    .loading-spinner {
+      width:32px; height:32px; border-radius:50%;
+      border:3px solid var(--border); border-top-color:var(--red);
+      animation:spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-text { font-size:0.9rem; color:var(--muted); }
+
+    /* ── PAGE WRAP ───────────────────────────────────── */
+    .page-wrap {
+      max-width:760px; margin:0 auto;
+      padding:40px 28px 80px;
+    }
+    .page-eyebrow {
+      font-size:0.7rem; font-weight:600; text-transform:uppercase;
+      letter-spacing:0.09em; color:var(--muted);
+      display:flex; align-items:center; gap:8px; margin-bottom:14px;
+    }
+    .page-eyebrow-dot { width:5px; height:5px; border-radius:50%; background:var(--red); }
+
+    /* ── PROCESSING STATE ───────────────────────────── */
+    .processing-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:16px; padding:48px 32px; text-align:center;
+    }
+    .processing-icon { font-size:2.4rem; margin-bottom:16px; }
+    .processing-title {
+      font-family:"Fraunces",serif; font-size:1.3rem; font-weight:700;
+      color:var(--navy); margin-bottom:8px;
+    }
+    .processing-sub {
+      font-size:0.88rem; color:var(--muted); line-height:1.6; margin-bottom:20px;
+    }
+    .processing-progress { margin-top:20px; }
+    .progress-item {
+      display:flex; align-items:center; gap:10px;
+      font-size:0.84rem; padding:6px 0;
+    }
+    .progress-icon { width:20px; text-align:center; }
+    .progress-label { color:var(--slate); }
+
+    /* ── HERO GRADE CARD ────────────────────────────── */
+    .hero-card {
+      border-radius:20px; overflow:hidden; margin-bottom:28px;
+    }
+    .hero-top {
+      padding:36px 32px 28px; text-align:center;
+    }
+    .hero-card.passed .hero-top {
+      background:linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%);
+    }
+    .hero-card.failed .hero-top {
+      background:linear-gradient(135deg, #7f1d1d 0%, #991b1b 50%, #b91c1c 100%);
+    }
+    .hero-badge {
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(255,255,255,0.15); border-radius:99px;
+      padding:6px 18px; font-size:0.75rem; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.08em; color:white;
+      margin-bottom:20px;
+    }
+    .hero-grade {
+      font-family:"Fraunces",serif;
+      font-size:4rem; font-weight:700; color:white;
+      line-height:1; margin-bottom:8px;
+    }
+    .hero-grade-label {
+      font-size:0.88rem; color:rgba(255,255,255,0.7);
+    }
+    .hero-status {
+      font-family:"Fraunces",serif;
+      font-size:1.6rem; font-weight:700; color:white;
+      margin-top:16px;
+    }
+
+    .hero-sections {
+      background:var(--surface);
+      padding:24px 28px;
+      display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px;
+      border-top:1px solid var(--border);
+    }
+    .hero-section {
+      text-align:center; padding:16px 12px;
+    }
+    .hero-section:not(:last-child) {
+      border-right:1px solid var(--border);
+    }
+    .hs-label {
+      font-size:0.68rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--muted); margin-bottom:8px;
+    }
+    .hs-grade {
+      font-family:"Fraunces",serif;
+      font-size:1.8rem; font-weight:700; color:var(--navy);
+      line-height:1;
+    }
+    .hs-note {
+      font-size:0.7rem; color:var(--muted); margin-top:4px;
+    }
+
+    /* ── SECTION DETAIL CARDS ───────────────────────── */
+    .section-block { margin-bottom:24px; }
+    .section-header {
+      display:flex; align-items:center; gap:12px;
+      margin-bottom:14px; padding-left:2px;
+    }
+    .section-icon { font-size:1.2rem; }
+    .section-title {
+      font-family:"Fraunces",serif;
+      font-size:1.15rem; font-weight:700; color:var(--navy);
+    }
+    .section-grade-pill {
+      margin-left:auto;
+      background:var(--navy); color:white;
+      border-radius:99px; padding:4px 14px;
+      font-size:0.78rem; font-weight:700;
+      font-family:"Fraunces",serif;
+    }
+
+    /* Element cards */
+    .elem-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:12px; margin-bottom:10px; overflow:hidden;
+    }
+    .elem-header {
+      display:flex; align-items:center; gap:10px;
+      padding:14px 18px; cursor:pointer;
+      transition:background 0.15s;
+    }
+    .elem-header:hover { background:#f8fafc; }
+    .elem-name {
+      flex:1; font-size:0.88rem; font-weight:600; color:var(--navy);
+    }
+    .elem-score-badge {
+      font-size:0.78rem; font-weight:700; border-radius:6px;
+      padding:3px 10px;
+    }
+    .elem-score-badge.high {
+      background:var(--pass-bg); color:var(--pass); border:1px solid var(--pass-border);
+    }
+    .elem-score-badge.mid {
+      background:var(--amber-bg); color:var(--amber); border:1px solid var(--amber-border);
+    }
+    .elem-score-badge.low {
+      background:var(--fail-bg); color:var(--fail); border:1px solid var(--fail-border);
+    }
+    .elem-score-badge.skip {
+      background:#f1f5f9; color:var(--muted); border:1px solid var(--border);
+    }
+    .elem-score-badge.pending {
+      background:#f1f5f9; color:var(--muted); border:1px solid var(--border);
+    }
+    .elem-chevron {
+      font-size:0.7rem; color:var(--muted); transition:transform 0.2s;
+    }
+    .elem-card.open .elem-chevron { transform:rotate(90deg); }
+
+    .elem-detail {
+      display:none; padding:0 18px 16px;
+      border-top:1px solid var(--border);
+    }
+    .elem-card.open .elem-detail { display:block; }
+
+    .feedback-section { margin-top:14px; }
+    .feedback-label {
+      font-size:0.68rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.08em; color:var(--muted); margin-bottom:8px;
+    }
+    .feedback-summary {
+      font-size:0.88rem; color:var(--slate); line-height:1.6;
+      margin-bottom:14px;
+    }
+
+    .feedback-list { margin-bottom:14px; }
+    .feedback-item {
+      display:flex; gap:8px; font-size:0.84rem; color:var(--slate);
+      line-height:1.5; padding:4px 0;
+    }
+    .feedback-item-icon { flex-shrink:0; }
+
+    /* Mistake table */
+    .mistakes-list { margin-bottom:14px; }
+    .mistake-row {
+      display:flex; gap:10px;
+      background:#fef2f2; border-radius:8px;
+      padding:10px 14px; margin-bottom:6px;
+      font-size:0.82rem; line-height:1.45;
+    }
+    .mistake-original { color:var(--fail); text-decoration:line-through; font-weight:500; }
+    .mistake-arrow { color:var(--muted); flex-shrink:0; }
+    .mistake-correction { color:var(--pass); font-weight:600; }
+    .mistake-explanation { color:var(--slate); font-style:italic; }
+
+    /* ── BACK BUTTON ────────────────────────────────── */
+    .back-btn {
+      display:block; width:100%; max-width:400px; margin:32px auto 0;
+      background:var(--navy); color:white; border:none;
+      border-radius:12px; padding:16px;
+      font-family:"DM Sans",sans-serif; font-size:0.95rem; font-weight:700;
+      cursor:pointer; transition:opacity 0.15s; text-align:center;
+    }
+    .back-btn:hover { opacity:0.88; }
+
+    /* ── RESPONSIVE ─────────────────────────────────── */
+    @media (max-width:600px) {
+      .page-wrap { padding:28px 16px 60px; }
+      .topbar { padding:0 14px; }
+      .hero-top { padding:28px 20px 22px; }
+      .hero-grade { font-size:3rem; }
+      .hero-sections { padding:16px 14px; grid-template-columns:1fr; gap:0; }
+      .hero-section:not(:last-child) { border-right:none; border-bottom:1px solid var(--border); }
+      .hero-section { padding:12px 0; }
+      .hs-grade { font-size:1.4rem; }
+      .elem-header { padding:12px 14px; }
+      .elem-detail { padding:0 14px 14px; }
+      .mistake-row { flex-wrap:wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <p class="loading-text">Henter resultater…</p>
+</div>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" id="backLink" href="index.html">← Oversigt</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-brand">
+      <div class="topbar-flag" aria-hidden="true"></div>
+      <div>
+        <div class="topbar-title" id="topbarTitle">Resultater</div>
+        <div class="topbar-sub">Prøve i Dansk 3</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="page-wrap" id="pageWrap" style="display:none;">
+  <div class="page-eyebrow">
+    <div class="page-eyebrow-dot"></div>
+    <span id="pageEyebrow">Simulering · Resultater</span>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+const ELEMENT_LABELS = {
+  laese_del1:              'Læsning Del 1 — Notater',
+  laese_del2a:             'Læsning Del 2A — Rigtigt/Forkert',
+  laese_del2b:             'Læsning Del 2B — Multiple choice',
+  laese_del3:              'Læsning Del 3 — Sæt i rækkefølge',
+  skriftlig_del1:          'Skriftlig Del 1 — Uformel e-mail',
+  skriftlig_del2:          'Skriftlig Del 2 — Formel tekst',
+  mundtlig_del1:           'Mundtlig Del 1 — Præsentation',
+  mundtlig_del1_followup:  'Mundtlig Del 1 — Opfølgning',
+  mundtlig_del2:           'Mundtlig Del 2 — Samtale',
+};
+
+const SECTION_META = {
+  laese:     { icon: '📖', title: 'Læseforståelse',       keys: ['laese_del1','laese_del2a','laese_del2b','laese_del3'] },
+  skriftlig: { icon: '✍️', title: 'Skriftlig fremstilling', keys: ['skriftlig_del1','skriftlig_del2'] },
+  mundtlig:  { icon: '🎤', title: 'Mundtlig kommunikation', keys: ['mundtlig_del1','mundtlig_del1_followup','mundtlig_del2'] },
+};
+
+let currentUser, attemptId, simId, simNum, elemKey;
+let pollTimer = null;
+const POLL_MS = 12000;
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  ({ user: currentUser, attemptId, simId, simNum } = await PD3.init(''));
+
+  document.getElementById('topbarTitle').textContent = `Sim ${simNum} — Resultater`;
+  document.getElementById('pageEyebrow').textContent = `Simulering ${simNum} · Resultater`;
+
+  await loadResults();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// LOAD & RENDER
+// ═══════════════════════════════════════════════════════════════
+async function loadResults() {
+  try {
+    const data = await PD3.hydrateData(currentUser.email, attemptId, true);
+    if (!data) throw new Error('Ingen data');
+
+    const attempt = (data.attempts || []).find(a => a.id === attemptId);
+    if (!attempt) throw new Error('Forsøg ikke fundet');
+
+    const elements = attempt.elements || [];
+
+    PD3.hideLoading();
+    document.getElementById('pageWrap').style.display = '';
+
+    if (attempt.status === 'complete') {
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+      renderResults(attempt, elements);
+    } else {
+      renderProcessing(attempt, elements);
+      startPolling();
+    }
+  } catch (err) {
+    console.error('[results] error:', err);
+    PD3.hideLoading();
+    document.getElementById('pageWrap').style.display = '';
+    document.getElementById('content').innerHTML = `
+      <div class="processing-card">
+        <div class="processing-icon">⚠️</div>
+        <div class="processing-title">Kunne ikke hente resultater</div>
+        <div class="processing-sub">${esc(err.message)}</div>
+      </div>
+      <button class="back-btn" onclick="window.location.href='index.html'">Tilbage til oversigten</button>`;
+  }
+}
+
+function startPolling() {
+  if (pollTimer) return;
+  pollTimer = setInterval(async () => {
+    try {
+      const data = await PD3.hydrateData(currentUser.email, attemptId, true);
+      const attempt = (data?.attempts || []).find(a => a.id === attemptId);
+      if (attempt?.status === 'complete') {
+        clearInterval(pollTimer);
+        pollTimer = null;
+        renderResults(attempt, attempt.elements || []);
+      } else {
+        // Update processing view
+        renderProcessing(attempt, attempt?.elements || []);
+      }
+    } catch (e) { console.warn('[results] poll error:', e.message); }
+  }, POLL_MS);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER PROCESSING
+// ═══════════════════════════════════════════════════════════════
+function renderProcessing(attempt, elements) {
+  const items = elements.map(el => {
+    const done = el.eval_status === 'complete' || el.eval_status === 'skipped' || el.submission_status === 'skipped';
+    const pending = el.eval_status === 'pending' || el.transcription_status === 'pending';
+    const icon = done ? '✅' : pending ? '⏳' : '⬜';
+    return `<div class="progress-item">
+      <span class="progress-icon">${icon}</span>
+      <span class="progress-label">${esc(ELEMENT_LABELS[el.element_key] || el.element_key)}</span>
+    </div>`;
+  }).join('');
+
+  const doneCount = elements.filter(el =>
+    el.eval_status === 'complete' || el.eval_status === 'skipped' || el.submission_status === 'skipped'
+  ).length;
+
+  document.getElementById('content').innerHTML = `
+    <div class="processing-card">
+      <div class="processing-icon">⏳</div>
+      <div class="processing-title">Resultater beregnes…</div>
+      <div class="processing-sub">
+        Dine svar evalueres af AI. Denne side opdateres automatisk når alle dele er vurderet.
+        <br><strong>${doneCount} af ${elements.length}</strong> elementer evalueret.
+      </div>
+      <div class="loading-spinner" style="margin:0 auto;"></div>
+      <div class="processing-progress">${items}</div>
+    </div>
+    <button class="back-btn" onclick="window.location.href='index.html'">Tilbage til oversigten</button>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER RESULTS
+// ═══════════════════════════════════════════════════════════════
+function renderResults(attempt, elements) {
+  const passed = attempt.passed;
+  const gL = format7(attempt.grade_laese);
+  const gS = format7(attempt.grade_skriftlig);
+  const gM = format7(attempt.grade_mundtlig);
+  const gA = format7(attempt.grade_average);
+
+  // Build elements map
+  const elMap = {};
+  elements.forEach(el => { elMap[el.element_key] = el; });
+
+  // Hero card
+  let html = `
+    <div class="hero-card ${passed ? 'passed' : 'failed'}">
+      <div class="hero-top">
+        <div class="hero-badge">${passed ? '✅ Bestået' : '❌ Ikke bestået'}</div>
+        <div class="hero-grade">${gA}</div>
+        <div class="hero-grade-label">Samlet karakter (7-trins-skalaen)</div>
+        <div class="hero-status">${passed ? 'Tillykke!' : 'Du opnåede ikke bestået denne gang'}</div>
+      </div>
+      <div class="hero-sections">
+        <div class="hero-section">
+          <div class="hs-label">📖 Læsning</div>
+          <div class="hs-grade">${gL}</div>
+        </div>
+        <div class="hero-section">
+          <div class="hs-label">✍️ Skriftlig</div>
+          <div class="hs-grade">${gS}</div>
+        </div>
+        <div class="hero-section">
+          <div class="hs-label">🎤 Mundtlig</div>
+          <div class="hs-grade">${gM}</div>
+          <div class="hs-note">Dobbelt vægtet</div>
+        </div>
+      </div>
+    </div>`;
+
+  // Section blocks
+  for (const [sectionKey, meta] of Object.entries(SECTION_META)) {
+    const sectionGrade = sectionKey === 'laese' ? gL : sectionKey === 'skriftlig' ? gS : gM;
+
+    html += `<div class="section-block">
+      <div class="section-header">
+        <span class="section-icon">${meta.icon}</span>
+        <span class="section-title">${meta.title}</span>
+        <span class="section-grade-pill">${sectionGrade}</span>
+      </div>`;
+
+    for (const key of meta.keys) {
+      const el = elMap[key];
+      if (!el) continue;
+      html += renderElementCard(key, el);
+    }
+
+    html += `</div>`;
+  }
+
+  html += `<button class="back-btn" onclick="window.location.href='index.html'">Tilbage til oversigten</button>`;
+
+  document.getElementById('content').innerHTML = html;
+
+  // Wire toggle
+  document.querySelectorAll('.elem-header').forEach(h => {
+    h.addEventListener('click', () => {
+      h.closest('.elem-card').classList.toggle('open');
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER ELEMENT CARD
+// ═══════════════════════════════════════════════════════════════
+function renderElementCard(key, el) {
+  const label = ELEMENT_LABELS[key] || key;
+
+  // Score badge
+  let badgeHtml = '';
+  if (el.submission_status === 'skipped') {
+    badgeHtml = `<span class="elem-score-badge skip">Sprunget over</span>`;
+  } else if (el.eval_status === 'pending') {
+    badgeHtml = `<span class="elem-score-badge pending">Afventer…</span>`;
+  } else if (el.eval_status === 'failed') {
+    badgeHtml = `<span class="elem-score-badge low">Fejl</span>`;
+  } else if (el.browser_score !== null && el.browser_score !== undefined) {
+    const pct = Number(el.browser_score);
+    const cls = pct >= 80 ? 'high' : pct >= 50 ? 'mid' : 'low';
+    badgeHtml = `<span class="elem-score-badge ${cls}">${el.browser_correct}/${el.browser_total} (${Math.round(pct)}%)</span>`;
+  } else if (el.ai_score_internal !== null && el.ai_score_internal !== undefined) {
+    const score = Number(el.ai_score_internal);
+    const cls = score >= 7 ? 'high' : score >= 4 ? 'mid' : 'low';
+    badgeHtml = `<span class="elem-score-badge ${cls}">${score.toFixed(1)}/10</span>`;
+  }
+
+  // Detail content
+  let detailHtml = '';
+  const fb = el.ai_feedback;
+
+  if (el.submission_status === 'skipped') {
+    detailHtml = `<p style="color:var(--muted);font-size:0.85rem;padding-top:14px;">Denne del blev sprunget over og tæller som 0 point.</p>`;
+  } else if (fb && typeof fb === 'object') {
+    // Summary
+    if (fb.summary) {
+      detailHtml += `
+        <div class="feedback-section">
+          <div class="feedback-label">Samlet vurdering</div>
+          <div class="feedback-summary">${esc(fb.summary)}</div>
+        </div>`;
+    }
+
+    // Strengths
+    if (fb.strengths?.length) {
+      detailHtml += `
+        <div class="feedback-section">
+          <div class="feedback-label">Styrker</div>
+          <div class="feedback-list">
+            ${fb.strengths.map(s => `<div class="feedback-item"><span class="feedback-item-icon">✅</span><span>${esc(s)}</span></div>`).join('')}
+          </div>
+        </div>`;
+    }
+
+    // Weaknesses
+    if (fb.weaknesses?.length) {
+      detailHtml += `
+        <div class="feedback-section">
+          <div class="feedback-label">Forbedringsområder</div>
+          <div class="feedback-list">
+            ${fb.weaknesses.map(w => `<div class="feedback-item"><span class="feedback-item-icon">💡</span><span>${esc(w)}</span></div>`).join('')}
+          </div>
+        </div>`;
+    }
+
+    // Mistakes
+    if (fb.mistakes?.length) {
+      detailHtml += `
+        <div class="feedback-section">
+          <div class="feedback-label">Sproglige fejl</div>
+          <div class="mistakes-list">
+            ${fb.mistakes.map(m => `
+              <div class="mistake-row">
+                <span class="mistake-original">${esc(m.original || '')}</span>
+                <span class="mistake-arrow">→</span>
+                <span class="mistake-correction">${esc(m.correction || '')}</span>
+                ${m.explanation ? `<span class="mistake-explanation">— ${esc(m.explanation)}</span>` : ''}
+              </div>`).join('')}
+          </div>
+        </div>`;
+    }
+
+    // Content coverage
+    if (fb.content_coverage) {
+      detailHtml += `
+        <div class="feedback-section">
+          <div class="feedback-label">Indholdsdækning</div>
+          <div class="feedback-summary">${esc(fb.content_coverage)}</div>
+        </div>`;
+    }
+  } else if (el.browser_score !== null) {
+    detailHtml = `<p style="color:var(--muted);font-size:0.85rem;padding-top:14px;">
+      Denne del blev scoret automatisk: ${el.browser_correct} korrekte ud af ${el.browser_total} spørgsmål.
+    </p>`;
+  } else if (el.eval_status === 'pending') {
+    detailHtml = `<p style="color:var(--muted);font-size:0.85rem;padding-top:14px;">Evaluering er i gang…</p>`;
+  }
+
+  return `
+    <div class="elem-card${detailHtml ? '' : ' no-detail'}">
+      <div class="elem-header">
+        <span class="elem-name">${esc(label)}</span>
+        ${badgeHtml}
+        ${detailHtml ? '<span class="elem-chevron">▸</span>' : ''}
+      </div>
+      ${detailHtml ? `<div class="elem-detail">${detailHtml}</div>` : ''}
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+function format7(grade) {
+  if (grade === null || grade === undefined) return '—';
+  if (grade === 0) return '00';
+  return String(grade);
+}
+
+function esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>

@@ -474,6 +474,57 @@
       cursor: pointer;
     }
 
+    /* ─── OPTIONAL HELP WRAPPER ──────────────────────────── */
+    .optional-help {
+      border: 1.5px dashed #cbd5e1;
+      border-radius: 14px;
+      background: #fafaf8;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .optional-help.open {
+      border-color: var(--border);
+      border-style: solid;
+      background: transparent;
+    }
+    .optional-help-toggle {
+      width: 100%;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      background: none; border: none; cursor: pointer;
+      font-family: "DM Sans", sans-serif; text-align: left;
+      transition: background 0.15s;
+    }
+    .optional-help-toggle:hover { background: #f1f5f9; }
+    .optional-help-label {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .optional-help-icon {
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .optional-help-label strong {
+      font-size: 0.88rem; font-weight: 600; color: var(--navy);
+      display: block;
+    }
+    .optional-help-sub {
+      font-size: 0.75rem; color: var(--muted);
+      display: block; margin-top: 2px;
+    }
+    .optional-help-chevron {
+      font-size: 0.7rem; color: var(--muted);
+      transition: transform 0.2s;
+    }
+    .optional-help.open .optional-help-chevron { transform: rotate(90deg); }
+    .optional-help-body {
+      display: none;
+      padding: 0 14px 14px;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .optional-help.open .optional-help-body {
+      display: flex;
+    }
+
     /* ─── RESPONSIVE ──────────────────────────────────────── */
     @media (max-width: 800px) {
       .content-grid { grid-template-columns: 1fr; }
@@ -535,9 +586,23 @@
         <p id="briefingText">—</p>
       </div>
 
+      <!-- Optional help — collapsed by default -->
+      <div class="optional-help" id="optionalHelp">
+        <button class="optional-help-toggle" onclick="toggleOptionalHelp()" id="optionalHelpToggle">
+          <span class="optional-help-label">
+            <span class="optional-help-icon">💡</span>
+            <span>
+              <strong>Forberedelseshjælp</strong>
+              <span class="optional-help-sub">Valgfrit — i den rigtige prøve får du kun emnet</span>
+            </span>
+          </span>
+          <span class="optional-help-chevron" id="optionalHelpChevron">▶</span>
+        </button>
+        <div class="optional-help-body" id="optionalHelpBody">
+
       <!-- Key Facts -->
-      <div class="prep-section open" id="section-facts">
-        <button class="prep-section-header" onclick="toggleSection('facts')" aria-expanded="true">
+      <div class="prep-section" id="section-facts">
+        <button class="prep-section-header" onclick="toggleSection('facts')" aria-expanded="false">
           <span class="prep-section-label">
             <span class="prep-section-icon icon-facts">📊</span>
             Nøglefakta
@@ -576,6 +641,9 @@
           <div class="structure-steps" id="structureSteps"></div>
         </div>
       </div>
+
+        </div><!-- /optional-help-body -->
+      </div><!-- /optional-help -->
 
     </div><!-- /prep-panel -->
 
@@ -846,6 +914,11 @@ function toggleSection(id) {
   el.classList.toggle('open');
   const btn = el.querySelector('.prep-section-header');
   btn.setAttribute('aria-expanded', el.classList.contains('open'));
+}
+
+function toggleOptionalHelp() {
+  const el = document.getElementById('optionalHelp');
+  el.classList.toggle('open');
 }
 
 // ═══════════════════════════════════════════════════════════════════
