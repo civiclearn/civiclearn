@@ -111,13 +111,15 @@
     /* ── DESKTOP LAYOUT ─────────────────────────────── */
     .exam-layout {
       display:grid;
-      grid-template-columns:1fr 400px;
+      grid-template-columns:minmax(0, 1fr) 380px;
       min-height:calc(100vh - 52px);
+      max-width:1200px;
+      margin:0 auto;
+      width:100%;
     }
 
     /* ── LEFT: TEXT COLUMN ──────────────────────────── */
     .text-column {
-      border-right:1px solid var(--border);
       display:flex;
       overflow:hidden;
     }
@@ -206,10 +208,10 @@
     /* ── RIGHT: QUESTIONS COLUMN ────────────────────── */
     .questions-column {
       position:sticky; top:52px;
-      height:calc(100vh - 52px);
-      overflow-y:auto;
+      align-self:start;
       background:var(--surface);
       display:flex; flex-direction:column;
+      border-left:1px solid var(--border);
     }
 
     .q-column-header {
@@ -229,75 +231,87 @@
     }
 
     .questions-list {
-      flex:1; overflow-y:auto;
-      padding:14px 18px;
+      padding:14px 18px 24px;
       display:flex; flex-direction:column; gap:10px;
     }
 
     /* ── QUESTION ITEM ──────────────────────────────── */
-    .q-item {
-      border:1px solid var(--border);
-      border-radius:11px; overflow:hidden;
-      transition:border-color 0.15s;
-    }
-    .q-item.has-answer { border-color:#94a3b8; }
-    .q-item.submitted  { border-color:var(--border); }
-
-    .q-item-header {
-      display:flex; align-items:flex-start; gap:10px;
-      padding:11px 14px 8px;
-      background:#f8fafc;
+    /* ── SINGLE QUESTION VIEW ──────────────────────────────────── */
+    .q-dot-bar {
+      display:flex; flex-wrap:wrap; gap:5px;
+      padding:12px 18px 8px;
       border-bottom:1px solid var(--border);
     }
-    .q-num {
-      width:22px; height:22px; border-radius:50%;
+    .q-dot {
+      width:18px; height:18px; border-radius:50%;
+      background:#e2e8f0; border:2px solid transparent;
+      cursor:pointer; transition:background 0.12s, transform 0.1s;
+      flex-shrink:0;
+    }
+    .q-dot:hover    { transform:scale(1.2); }
+    .q-dot.answered { background:#94a3b8; }
+    .q-dot.current  { border-color:var(--navy); background:var(--navy); }
+    .q-dot.current.answered { background:var(--navy); }
+
+    .q-single {
+      flex:1;
+      padding:18px 18px 12px;
+      display:flex; flex-direction:column; gap:12px;
+    }
+    .q-single-top {
+      display:flex; align-items:flex-start; gap:10px;
+    }
+    .q-num-badge {
+      width:28px; height:28px; border-radius:50%;
       background:var(--navy); color:white;
-      font-size:0.68rem; font-weight:700;
+      font-size:0.78rem; font-weight:700;
       display:flex; align-items:center; justify-content:center;
       flex-shrink:0; margin-top:1px;
     }
-    .q-item.has-answer .q-num { background:#475569; }
-
-    .q-meta { flex:1; }
-    .q-text {
-      font-size:0.83rem; font-weight:600; line-height:1.45; color:var(--navy);
+    .q-single-text {
+      font-size:0.9rem; font-weight:600; line-height:1.5; color:var(--navy);
     }
-
-    /* Section hint button */
-    .section-hint-btn {
-      display:inline-flex; align-items:center; gap:5px;
-      margin-top:5px;
-      background:none; border:1px solid var(--border);
-      border-radius:6px; padding:3px 9px;
-      font-family:"DM Sans",sans-serif; font-size:0.7rem;
-      color:var(--muted); cursor:pointer;
-      transition:color 0.12s, border-color 0.12s, background 0.12s;
+    .q-textarea-wrap {
+      display:flex; flex-direction:column; gap:5px;
     }
-    .section-hint-btn:hover {
-      border-color:var(--red); color:var(--red); background:#fdf2f3;
-    }
-    .section-hint-btn .hint-icon { font-size:0.75rem; }
-
-    .q-input-wrap {
-      padding:10px 14px 12px;
-    }
-    .q-input {
-      width:100%;
-      padding:9px 12px;
+    .q-textarea {
+      width:100%; box-sizing:border-box;
+      padding:10px 13px;
       border:1.5px solid var(--border);
-      border-radius:8px;
-      font-family:"DM Sans",sans-serif; font-size:0.88rem;
+      border-radius:9px;
+      font-family:"DM Sans",sans-serif; font-size:0.88rem; line-height:1.6;
       color:var(--navy); background:var(--surface);
+      resize:vertical; min-height:90px;
       transition:border-color 0.15s;
       outline:none;
     }
-    .q-input:focus { border-color:#94a3b8; }
-    .q-input:disabled { background:#f8fafc; color:var(--muted); cursor:default; }
-    .q-input.has-value { border-color:#94a3b8; }
+    .q-textarea:focus   { border-color:#94a3b8; }
+    .q-textarea:disabled { background:#f8fafc; color:var(--muted); cursor:default; resize:none; }
+    .q-textarea.has-value { border-color:#94a3b8; }
+
+    /* ── NAV ─────────────────────────────────────────────────── */
+    .q-nav {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:8px 18px 12px;
+      border-top:1px solid var(--border);
+    }
+    .q-nav-btn {
+      background:var(--surface); border:1.5px solid var(--border);
+      border-radius:8px; padding:7px 14px;
+      font-family:"DM Sans",sans-serif; font-size:0.82rem; font-weight:600;
+      color:var(--navy); cursor:pointer;
+      transition:background 0.12s, border-color 0.12s;
+    }
+    .q-nav-btn:hover:not(:disabled) { background:#f1f5f9; border-color:#94a3b8; }
+    .q-nav-btn:disabled { opacity:0.35; cursor:default; }
+    .q-nav-next { background:var(--navy); color:white; border-color:var(--navy); }
+    .q-nav-next:hover:not(:disabled) { background:#1e3a5f; border-color:#1e3a5f; }
+    .q-nav-counter {
+      font-size:0.78rem; font-weight:600; color:var(--muted);
+    }
 
     .points-badge {
-      font-size:0.67rem; color:var(--muted);
-      margin-top:5px; display:block;
+      font-size:0.67rem; color:var(--muted); align-self:flex-end;
     }
 
     /* ── QUESTIONS FOOTER ───────────────────────────── */
@@ -306,13 +320,41 @@
       border-top:1px solid var(--border);
       flex-shrink:0;
     }
-    .already-done {
+    .already-done-card {
       display:none;
-      background:var(--correct-bg); border:1px solid var(--correct-border);
-      border-radius:10px; padding:12px; font-size:0.82rem;
-      color:var(--correct); text-align:center; margin-bottom:12px;
+      background:#f0fdf4; border:1px solid #bbf7d0;
+      border-radius:16px; padding:40px 32px;
+      text-align:center; max-width:500px;
+      margin:60px auto 0;
     }
-    .already-done.visible { display:block; }
+    .already-done-card.visible { display:block; }
+    .already-done-card h2 {
+      font-family:"Fraunces",serif; font-size:1.35rem; font-weight:700;
+      color:#166534; margin-bottom:10px;
+    }
+    .already-done-card p { font-size:0.9rem; color:#4b7a5e; margin-bottom:28px; }
+    .already-done-card .back-btn {
+      background:#c8102e; color:white; border:none;
+      border-radius:12px; padding:14px 28px;
+      font-family:"DM Sans",sans-serif; font-size:0.95rem; font-weight:700;
+      cursor:pointer; transition:opacity 0.15s;
+    }
+    .already-done-card .back-btn:hover { opacity:0.88; }
+    #skippedCard { background:#f8fafc; border-color:#e2e8f0; }
+    #skippedCard h2 { color:#475569; }
+    #skippedCard p  { color:#64748b; }
+    .already-done-card h2 {
+      font-family:"Fraunces",serif; font-size:1.35rem; font-weight:700;
+      color:#166534; margin-bottom:10px;
+    }
+    .already-done-card p { font-size:0.9rem; color:#4b7a5e; margin-bottom:28px; }
+    .already-done-card .back-btn {
+      background:#c8102e; color:white; border:none;
+      border-radius:12px; padding:14px 28px;
+      font-family:"DM Sans",sans-serif; font-size:0.95rem; font-weight:700;
+      cursor:pointer; transition:opacity 0.15s;
+    }
+    .already-done-card .back-btn:hover { opacity:0.88; }
     .submit-btn {
       width:100%;
       background:var(--navy); color:white; border:none;
@@ -452,16 +494,55 @@
 
     <div class="q-column-header">
       <div class="q-column-eyebrow">Læseforståelse · Del 1</div>
-      <h2>15 spørgsmål til tekstsamlingen</h2>
+      <h2 id="qPanelTitle">15 spørgsmål til tekstsamlingen</h2>
       <p id="instructionsText">Søg informationerne i tekstsamlingen og svar kort og præcist. Brug indholdsfortegnelsen. 1 point for hvert korrekt svar.</p>
     </div>
 
-    <div class="questions-list" id="questionsList">
-      <!-- rendered by JS -->
+    <!-- Dot progress bar -->
+    <div class="q-dot-bar" id="qDotBar"><!-- rendered by JS --></div>
+
+    <!-- Single question view -->
+    <div class="q-single" id="qSingle">
+      <div class="q-single-top">
+        <div class="q-num-badge" id="qNumBadge">1</div>
+        <div class="q-single-text" id="qSingleText">…</div>
+      </div>
+      <button class="section-hint-btn" id="qHintBtn" onclick="">
+        <span class="hint-icon">📍</span>
+        <span id="qHintLabel">…</span>
+      </button>
+      <div class="q-textarea-wrap">
+        <textarea
+          class="q-textarea"
+          id="qTextarea"
+          placeholder="Skriv dit svar her…"
+          autocomplete="off"
+          spellcheck="false"
+          rows="4"
+          oninput="onAnswerChange(currentQ, this.value)"
+        ></textarea>
+        <span class="points-badge">1 point</span>
+      </div>
+    </div>
+
+    <!-- Prev / Next navigation -->
+    <div class="q-nav">
+      <button class="q-nav-btn" id="qPrevBtn" onclick="navigateQ(-1)">← Forrige</button>
+      <span class="q-nav-counter" id="qNavCounter">1 / 15</span>
+      <button class="q-nav-btn q-nav-next" id="qNextBtn" onclick="navigateQ(1)">Næste →</button>
     </div>
 
     <div class="q-footer">
-      <div class="already-done" id="alreadyDone">✅ Denne del er allerede afleveret.</div>
+            <div class="already-done-card" id="alreadyDoneCard" style="display:none">
+        <h2>✅ Allerede afleveret</h2>
+        <p>Denne del er allerede gennemført.</p>
+        <button class="back-btn" onclick="PD3.goBack(simId, attemptId)">Tilbage til simulering</button>
+      </div>
+      <div class="already-done-card" id="skippedCard" style="display:none">
+        <h2>⏭ Sprunget over</h2>
+        <p>Du valgte at springe denne del over. Det er registreret i din samlede score.</p>
+        <button class="back-btn" onclick="PD3.goBack(simId, attemptId)">Tilbage til simulering</button>
+      </div>
       <button class="submit-btn" id="submitBtn" onclick="submitAnswers()" disabled>
         Aflever svar
       </button>
@@ -480,18 +561,7 @@
 // CONFIG
 // ═══════════════════════════════════════════════════════════════
 
-const SIM_FILES = {
-  sim01:'dansk3_sim01_delprove1_odense.json',
-  sim02:'dansk3_sim02_delprove1.json',
-  sim03:'dansk3_sim03_delprove1.json',
-  sim04:'dansk3_sim04_delprove1.json',
-  sim05:'dansk3_sim05_delprove1.json',
-  sim06:'dansk3_sim06_delprove1.json',
-  sim07:'dansk3_sim07_delprove1.json',
-  sim08:'dansk3_sim08_delprove1.json',
-  sim09:'dansk3_sim09_delprove1.json',
-  sim10:'dansk3_sim10_delprove1.json',
-};
+// Filename computed dynamically: NN-L1.json
 
 // ─── shared state (assigned by PD3.init in DOMContentLoaded) ───
 let currentUser = null;
@@ -504,7 +574,8 @@ let attemptId, simId, simNum, elemKey;
 
 let examData     = null;
 let userAnswers  = {};    // { 1: 'text', 2: 'text', … }
-let submitted    = false;
+let elemStatus   = 'not_started';
+let submitted    = false; // derived: elemStatus === submitted|skipped
 let currentTab   = 'text';
 
 // ═══════════════════════════════════════════════════════════════
@@ -515,8 +586,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('backLink').href = `exam.html?sim=${simId}&attempt=${attemptId}`;
 
-  const filename = SIM_FILES[simId];
-  if (!filename) { PD3.showError('Ukendt simulering: ' + simId, simId, attemptId); return; }
+  const filename = `${simNum.toString().padStart(2,'0')}-L1.json`;
   try {
     const res = await fetch(`/dansk3/data/${simNum}/${filename}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -526,7 +596,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  submitted = await PD3.isSubmitted(currentUser.email, attemptId, elemKey);
+  elemStatus = await PD3.getStatus(currentUser.email, attemptId, elemKey);
   renderExam();
   PD3.hideLoading();
   document.getElementById('examLayout').style.display = '';
@@ -548,19 +618,27 @@ function renderExam() {
     document.getElementById('instructionsText').textContent = instructions.da;
   }
 
+  submitted = (elemStatus === 'submitted' || elemStatus === 'skipped');
+  if (elemStatus === 'submitted') {
+    document.getElementById('alreadyDoneCard').classList.add('visible');
+    return;
+  }
+  if (elemStatus === 'skipped') {
+    document.getElementById('skippedCard').classList.add('visible');
+    return;
+  }
+
   renderTekstsamling(tekstsamling);
   renderTOC(tekstsamling);
   renderQuestions(questions);
-  renderPips(questions.length);
 
-  if (submitted) {
-    document.getElementById('alreadyDone').classList.add('visible');
-    document.getElementById('submitBtn').style.display = 'none';
-    document.getElementById('skipLink').style.display = 'none';
-    document.getElementById('submitInfo').style.display = 'none';
-    document.getElementById('continueBtn').style.display = 'block';
-    document.querySelectorAll('.q-input').forEach(el => el.disabled = true);
-  }
+  // Restore answered dots if answers already loaded (e.g. after submission)
+  questions.forEach(q => {
+    if (userAnswers[q.number]) {
+      const dot = document.getElementById(`qdot-${q.number}`);
+      if (dot) dot.classList.add('answered');
+    }
+  });
 }
 
 // ── Render full tekstsamling ─────────────────────────────────
@@ -599,37 +677,55 @@ function renderTOC(ts) {
 
 // ── Render questions ─────────────────────────────────────────
 function renderQuestions(questions) {
-  const list = document.getElementById('questionsList');
-  list.innerHTML = questions.map(q => `
-    <div class="q-item" id="qitem-${q.number}">
-      <div class="q-item-header">
-        <div class="q-num">${q.number}</div>
-        <div class="q-meta">
-          <div class="q-text">${PD3.escapeHtml(q.question)}</div>
-          <button class="section-hint-btn"
-                  onclick="jumpToSection('${PD3.escapeHtml(q.section_hint)}')"
-                  title="Gå til ${PD3.escapeHtml(q.section_hint)}">
-            <span class="hint-icon">📍</span>
-            ${PD3.escapeHtml(q.section_hint)}
-          </button>
-        </div>
-      </div>
-      <div class="q-input-wrap">
-        <input
-          class="q-input"
-          type="text"
-          id="qinput-${q.number}"
-          placeholder="Skriv dit svar her…"
-          autocomplete="off"
-          autocorrect="off"
-          spellcheck="false"
-          ${submitted ? 'disabled' : ''}
-          oninput="onAnswerChange(${q.number}, this.value)"
-        >
-        <span class="points-badge">1 point</span>
-      </div>
-    </div>
-  `).join('');
+  // Build dot bar
+  const dotBar = document.getElementById('qDotBar');
+  dotBar.innerHTML = questions.map(q =>
+    `<div class="q-dot" id="qdot-${q.number}" title="Spørgsmål ${q.number}" onclick="goToQuestion(${q.number})"></div>`
+  ).join('');
+
+  // Show first question
+  goToQuestion(1);
+}
+
+let currentQ = 1;
+let totalQ   = 0;
+
+function goToQuestion(num) {
+  if (!examData) return;
+  const questions = examData.questions;
+  totalQ = questions.length;
+  currentQ = num;
+
+  const q = questions.find(q => q.number === num);
+  if (!q) return;
+
+  // Update panel content
+  document.getElementById('qNumBadge').textContent  = q.number;
+  document.getElementById('qSingleText').textContent = q.question;
+  document.getElementById('qNavCounter').textContent = `${num} / ${totalQ}`;
+  document.getElementById('qHintLabel').textContent  = q.section_hint;
+  document.getElementById('qHintBtn').onclick = () => jumpToSection(q.section_hint);
+
+  // Restore saved answer into textarea
+  const ta = document.getElementById('qTextarea');
+  ta.value = userAnswers[num] || '';
+  ta.classList.toggle('has-value', !!(userAnswers[num]));
+  if (submitted) ta.disabled = true;
+
+  // Update nav buttons
+  document.getElementById('qPrevBtn').disabled = (num <= 1);
+  document.getElementById('qNextBtn').disabled = (num >= totalQ);
+
+  // Update dots
+  document.querySelectorAll('.q-dot').forEach(dot => dot.classList.remove('current'));
+  const activeDot = document.getElementById(`qdot-${num}`);
+  if (activeDot) activeDot.classList.add('current');
+}
+
+function navigateQ(delta) {
+  const next = currentQ + delta;
+  if (next < 1 || next > totalQ) return;
+  goToQuestion(next);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -724,15 +820,17 @@ function onAnswerChange(num, value) {
   const trimmed = value.trim();
   userAnswers[num] = trimmed;
 
-  const item  = document.getElementById(`qitem-${num}`);
-  const input = document.getElementById(`qinput-${num}`);
-  if (item)  item.classList.toggle('has-answer', trimmed.length > 0);
-  if (input) input.classList.toggle('has-value',  trimmed.length > 0);
+  // Update textarea style
+  const ta = document.getElementById('qTextarea');
+  if (ta) ta.classList.toggle('has-value', trimmed.length > 0);
+
+  // Update dot for this question
+  const dot = document.getElementById(`qdot-${num}`);
+  if (dot) dot.classList.toggle('answered', trimmed.length > 0);
 
   const answered = Object.values(userAnswers).filter(v => v && v.length > 0).length;
   const total = examData.questions.length;
 
-  // Update pips
   renderPips(total, answered);
   updateTabBadge(answered, total);
   checkSubmitEnabled(answered, total);

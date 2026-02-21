@@ -156,6 +156,18 @@ window.PD3 = (function () {
     },
 
     /**
+     * Returns the raw submission_status for an element:
+     * 'not_started' | 'in_progress' | 'submitted' | 'skipped'
+     */
+    async getStatus(email, attemptId, elemKey) {
+      const data = await hydrate(email, attemptId);
+      if (!data) return 'not_started';
+      const attempt = (data.attempts || []).find(a => a.id === attemptId);
+      const elem    = (attempt?.elements || []).find(e => e.element_key === elemKey);
+      return elem?.submission_status || 'not_started';
+    },
+
+    /**
      * Fetch the raw hydrate payload for pages that need deeper inspection
      * (e.g. skriftlig_del2 which needs to check both del2a and del2b keys,
      * or exam.html which needs the full elements list).

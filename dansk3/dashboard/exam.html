@@ -272,7 +272,15 @@
     }
     .pdot.done   { background: #16a34a; }
     .pdot.active { background: #f59e0b; }
-    .pdot.skip   { background: #cbd5e1; }
+    .pdot.skip   {
+      background: repeating-linear-gradient(
+        -45deg,
+        #cbd5e1,
+        #cbd5e1 2px,
+        #e2e8f0 2px,
+        #e2e8f0 5px
+      );
+    }
     .progress-fraction {
       font-family: "Fraunces", serif;
       font-size: 1rem;
@@ -520,13 +528,14 @@
       border: 1px solid #bbf7d0;
       border-radius: 10px;
       padding: 12px 18px;
-      display: flex;
+      display: none;
       align-items: center;
       gap: 12px;
       margin-bottom: 28px;
       font-size: 0.85rem;
       color: #166534;
     }
+    .oral1-done-banner.show { display: flex; }
     .oral1-done-banner strong { font-weight: 600; }
 
     /* ─── PHASE COMPLETE ──────────────────────────────────── */
@@ -738,8 +747,8 @@
 
   <!-- Oral 1 reminder -->
   <div class="oral1-done-banner" id="oral1Banner">
-    <span style="font-size:1.3rem;" id="oral1BannerIcon">✅</span>
-    <div id="oral1BannerText">
+    <span style="font-size:1.3rem;">✅</span>
+    <div>
       <strong>Mundtlig Del 1 er afleveret.</strong>
       Opfølgningsspørgsmål genereres i baggrunden og låses op om lidt.
     </div>
@@ -923,7 +932,7 @@ const ELEMENT_DEFS = [
     key:    'mundtlig_del2',
     title:  'Del 2 — Uformel samtale',
     desc:   'To runder uformel mundtlig samtale om et nyt emne.',
-    eval:   'ai',
+    eval:   'audio',
     mins:   5,
     icon:   '🗣',
     page:   'mundtlig_del2.html',
@@ -979,38 +988,13 @@ async function waitForAuth() {
 async function initAttempt() {
   // pd3-submit-test has resume support: returns full attempt object + elements
   const res = await apiFetch('pd3-submit-test', {
-    user_id:       currentUser.email,
+    user_id:       currentUser.email,   // backend uses email as user_id
     simulation_id: simId,
   });
 
-  attempt  = res.attempt;
+  attempt  = res.attempt;              // full attempt row including oral1_followup_ready
   elements = {};
   (res.elements || []).forEach(el => { elements[el.element_key] = el; });
-
-  // pd3-submit-test may return stale/default statuses — overlay with
-  // pd3-hydrate which is the authoritative source of submission_status
-  try {
-    const hydrated = await apiFetch('pd3-hydrate', { email: currentUser.email });
-    const hydratedAttempt = (hydrated.attempts || []).find(a => a.id === attempt.id);
-    if (hydratedAttempt) {
-      // Overlay real statuses onto elements
-      (hydratedAttempt.elements || []).forEach(el => {
-        if (elements[el.element_key]) {
-          elements[el.element_key].submission_status = el.submission_status;
-          elements[el.element_key].score             = el.score;
-          elements[el.element_key].ai_evaluated_at   = el.ai_evaluated_at;
-        } else {
-          elements[el.element_key] = el;
-        }
-      });
-      // Also update attempt-level fields from hydrate
-      if (hydratedAttempt.oral1_followup_ready !== undefined) {
-        attempt.oral1_followup_ready = hydratedAttempt.oral1_followup_ready;
-      }
-    }
-  } catch (err) {
-    console.warn('[exam] hydrate overlay failed (non-fatal):', err.message);
-  }
 
   // Update topbar
   const num = simId.replace('sim', '');
@@ -1108,24 +1092,6 @@ function showPhaseHub() {
   document.getElementById('phase-intro').classList.remove('active');
   document.getElementById('phase-hub').classList.add('active');
   document.getElementById('phase-complete').classList.remove('active');
-
-  // Update oral1 banner based on actual status
-  const oral1Status = elements['mundtlig_del1']?.submission_status;
-  const bannerIcon = document.getElementById('oral1BannerIcon');
-  const bannerText = document.getElementById('oral1BannerText');
-  if (oral1Status === 'skipped') {
-    bannerIcon.textContent = '⏭';
-    bannerText.innerHTML = '<strong>Mundtlig Del 1 sprunget over.</strong> Du kan fortsætte med de øvrige dele. Opfølgningsspørgsmål genereres ikke for denne simulering.';
-    document.getElementById('oral1Banner').style.background = '#f1f5f9';
-    document.getElementById('oral1Banner').style.borderColor = '#cbd5e1';
-    document.getElementById('oral1Banner').style.color = '#64748b';
-    // Hide the followup pill — no followup will come if oral1 was skipped
-    document.getElementById('followupPill').style.display = 'none';
-  } else {
-    bannerIcon.textContent = '✅';
-    bannerText.innerHTML = '<strong>Mundtlig Del 1 er afleveret.</strong> Opfølgningsspørgsmål genereres i baggrunden og låses op om lidt.';
-  }
-
   renderHub();
   startFollowupPoll();
 }
@@ -1142,6 +1108,15 @@ function showPhaseComplete() {
 // ═══════════════════════════════════════════════════════════════════════
 
 function renderHub() {
+  // Show oral1 banner only when actually submitted (not skipped)
+  const oral1Status = elements['mundtlig_del1']?.submission_status;
+  const banner = document.getElementById('oral1Banner');
+  if (oral1Status === 'submitted') {
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+
   renderProgressStrip();
   renderGrid('laese',    ['laese_del1','laese_del2a','laese_del2b','laese_del3']);
   renderGrid('skriftlig',['skriftlig_del1','skriftlig_del2']);
@@ -1152,10 +1127,12 @@ function renderHub() {
 function renderProgressStrip() {
   const dotsEl   = document.getElementById('progressDots');
   const fracEl   = document.getElementById('progressFraction');
+  const oral1Skipped = elements['mundtlig_del1']?.submission_status === 'skipped';
   let done = 0;
 
   dotsEl.innerHTML = KEY_ORDER.map(k => {
-    const s = elements[k]?.submission_status;
+    let s = elements[k]?.submission_status;
+    if (k === 'mundtlig_del1_followup' && oral1Skipped) s = 'skipped';
     let cls = '';
     if (s === 'submitted')  { cls = 'done'; done++; }
     else if (s === 'skipped') { cls = 'skip'; done++; }
@@ -1175,10 +1152,14 @@ function renderGrid(groupId, keys) {
 function buildCard(key) {
   const def = ELEMENT_DEFS.find(d => d.key === key);
   const el  = elements[key] || {};
-  const status = el.submission_status || 'not_started';
+  let status = el.submission_status || 'not_started';
   const isOral1 = key === 'mundtlig_del1';
   const isFollowup = key === 'mundtlig_del1_followup';
   const followupReady = attempt?.oral1_followup_ready === true;
+
+  // If oral1 was skipped, followup is implicitly skipped too
+  const oral1Skipped = elements['mundtlig_del1']?.submission_status === 'skipped';
+  if (isFollowup && oral1Skipped) status = 'skipped';
 
   // Locked state: only followup can be locked, and only until ready
   const locked = isFollowup && !followupReady && status !== 'submitted' && status !== 'skipped';
@@ -1261,10 +1242,12 @@ function updateFollowupPill() {
   const pill = document.getElementById('followupPill');
   const text = document.getElementById('followupPillText');
   const followupEl = elements['mundtlig_del1_followup'];
+  const oral1Skipped = elements['mundtlig_del1']?.submission_status === 'skipped';
   const ready = attempt?.oral1_followup_ready === true;
   const submitted = followupEl?.submission_status === 'submitted' || followupEl?.submission_status === 'skipped';
 
-  if (submitted || (ready && followupEl?.submission_status !== 'not_started')) {
+  // Hide pill if oral1 was skipped or followup is done
+  if (oral1Skipped || submitted || (ready && followupEl?.submission_status !== 'not_started')) {
     pill.classList.remove('show');
     return;
   }
@@ -1280,8 +1263,9 @@ function updateFollowupPill() {
 }
 
 function startFollowupPoll() {
-  // Only poll if followup isn't ready yet and not submitted
+  // Only poll if followup isn't ready yet and not submitted, and oral1 wasn't skipped
   if (attempt?.oral1_followup_ready) return;
+  if (elements['mundtlig_del1']?.submission_status === 'skipped') return;
   const followupEl = elements['mundtlig_del1_followup'];
   if (followupEl?.submission_status === 'submitted' || followupEl?.submission_status === 'skipped') return;
 
@@ -1411,6 +1395,7 @@ async function apiFetch(fnName, body) {
 
 function hideLoading() {
   const ol = document.getElementById('loading-overlay');
+  if (!ol) return;
   ol.classList.add('hidden');
   setTimeout(() => ol.remove(), 500);
 }
@@ -1437,9 +1422,8 @@ function handleLogout() {
 // Handle return navigation from element pages
 // (element pages redirect back here after submit, we re-init)
 window.addEventListener('pageshow', (e) => {
-  // Always re-fetch on return — covers both bfcache restore and normal navigation
-  // This ensures submitted elements show correct status immediately
-  if (attempt) {
+  if (e.persisted && attempt) {
+    // Page was restored from bfcache — re-fetch to get updated statuses
     initAttempt();
   }
 });

@@ -632,6 +632,11 @@
       <button class="continue-btn" style="max-width:300px;margin:0 auto;display:block;" onclick="PD3.goBack(simId, attemptId)">
         Tilbage til simulering
       </button>
+          <div class="already-done-card" id="skippedCard" style="display:none">
+        <h2>⏭ Sprunget over</h2>
+        <p>Du valgte at springe denne del over. Det er registreret i din samlede score.</p>
+        <button class="back-btn" onclick="PD3.goBack(simId, attemptId)">Tilbage til simulering</button>
+      </div>
     </div>
   </div>
 
@@ -642,18 +647,7 @@
 // CONFIG
 // ═══════════════════════════════════════════════════════════════
 
-const SIM_FILES = {
-  sim01:'dansk3_sim01_mundtlig_delprove2_rejser.json',
-  sim02:'dansk3_sim02_mundtlig_delprove2.json',
-  sim03:'dansk3_sim03_mundtlig_delprove2.json',
-  sim04:'dansk3_sim04_mundtlig_delprove2.json',
-  sim05:'dansk3_sim05_mundtlig_delprove2.json',
-  sim06:'dansk3_sim06_mundtlig_delprove2.json',
-  sim07:'dansk3_sim07_mundtlig_delprove2.json',
-  sim08:'dansk3_sim08_mundtlig_delprove2.json',
-  sim09:'dansk3_sim09_mundtlig_delprove2.json',
-  sim10:'dansk3_sim10_mundtlig_delprove2.json',
-};
+// Filename computed dynamically: NN-M2.json
 
 // ─── shared state (assigned by PD3.init in DOMContentLoaded) ───
 let currentUser = null;
@@ -669,6 +663,7 @@ const ROUND_MAX_SECS   = 300;  // 5:00 — auto-stop
 
 let examData    = null;
 let followupResults = { 1: [], 2: [] };  // FollowupRecorder results per round
+let elemStatus  = 'not_started';
 let submitted   = false;
 
 let currentRound = 0;   // 1 or 2
@@ -705,8 +700,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('backLink').href = `exam.html?sim=${simId}&attempt=${attemptId}`;
 
-  const filename = SIM_FILES[simId];
-  if (!filename) { PD3.showError('Ukendt simulering: ' + simId, simId, attemptId); return; }
+  const filename = `${simNum.toString().padStart(2,'0')}-M2.json`;
   try {
     const res = await fetch(`/dansk3/data/${simNum}/${filename}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -716,7 +710,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  submitted = await PD3.isSubmitted(currentUser.email, attemptId, elemKey);
+  elemStatus = await PD3.getStatus(currentUser.email, attemptId, elemKey);
   renderIntro();
   PD3.hideLoading();
   document.getElementById('pageWrap').style.display = '';
@@ -742,8 +736,13 @@ function renderIntro() {
   document.getElementById('r1preview').textContent = examData.round1?.question || '';
   document.getElementById('r2preview').textContent = examData.round2?.question || '';
 
-  if (submitted) {
+  submitted = (elemStatus === 'submitted' || elemStatus === 'skipped');
+  if (elemStatus === 'submitted') {
     showPhase('phaseAlreadyDone');
+  } else if (elemStatus === 'skipped') {
+    showPhase('phaseAlreadyDone');
+    document.getElementById('alreadyDoneCard')?.style.setProperty('display','none');
+    document.getElementById('skippedCard')?.classList.add('visible');
   }
 
   updateRoundDots(0);

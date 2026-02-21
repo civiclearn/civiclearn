@@ -341,12 +341,41 @@
     .score-banner.passed .sb-score { color:var(--correct); }
     .score-banner.failed .sb-score { color:var(--wrong); }
     .sb-label { font-size:0.78rem; color:var(--muted); margin-top:4px; }
-    .already-done {
-      display:none; background:var(--correct-bg); border:1px solid var(--correct-border);
-      border-radius:10px; padding:12px; font-size:0.82rem; color:var(--correct);
-      text-align:center; margin-bottom:10px;
+    .already-done-card {
+      display:none;
+      background:#f0fdf4; border:1px solid #bbf7d0;
+      border-radius:16px; padding:40px 32px;
+      text-align:center; max-width:500px;
+      margin:60px auto 0;
     }
-    .already-done.visible { display:block; }
+    .already-done-card.visible { display:block; }
+    .already-done-card h2 {
+      font-family:"Fraunces",serif; font-size:1.35rem; font-weight:700;
+      color:#166534; margin-bottom:10px;
+    }
+    .already-done-card p { font-size:0.9rem; color:#4b7a5e; margin-bottom:28px; }
+    .already-done-card .back-btn {
+      background:#c8102e; color:white; border:none;
+      border-radius:12px; padding:14px 28px;
+      font-family:"DM Sans",sans-serif; font-size:0.95rem; font-weight:700;
+      cursor:pointer; transition:opacity 0.15s;
+    }
+    .already-done-card .back-btn:hover { opacity:0.88; }
+    #skippedCard { background:#f8fafc; border-color:#e2e8f0; }
+    #skippedCard h2 { color:#475569; }
+    #skippedCard p  { color:#64748b; }
+    .already-done-card h2 {
+      font-family:"Fraunces",serif; font-size:1.35rem; font-weight:700;
+      color:#166534; margin-bottom:10px;
+    }
+    .already-done-card p { font-size:0.9rem; color:#4b7a5e; margin-bottom:28px; }
+    .already-done-card .back-btn {
+      background:#c8102e; color:white; border:none;
+      border-radius:12px; padding:14px 28px;
+      font-family:"DM Sans",sans-serif; font-size:0.95rem; font-weight:700;
+      cursor:pointer; transition:opacity 0.15s;
+    }
+    .already-done-card .back-btn:hover { opacity:0.88; }
     .submit-btn {
       width:100%;
       background:var(--navy); color:white; border:none;
@@ -460,7 +489,16 @@
     <div class="tiles-list" id="tilesList"></div>
 
     <div class="tiles-footer">
-      <div class="already-done" id="alreadyDone">✅ Denne del er allerede afleveret.</div>
+                  <div class="already-done-card" id="alreadyDoneCard" style="display:none">
+        <h2>✅ Allerede afleveret</h2>
+        <p>Denne del er allerede gennemført.</p>
+        <button class="back-btn" onclick="PD3.goBack(simId, attemptId)">Tilbage til simulering</button>
+      </div>
+      <div class="already-done-card" id="skippedCard" style="display:none">
+        <h2>⏭ Sprunget over</h2>
+        <p>Du valgte at springe denne del over. Det er registreret i din samlede score.</p>
+        <button class="back-btn" onclick="PD3.goBack(simId, attemptId)">Tilbage til simulering</button>
+      </div>
       <div class="score-banner" id="scoreBanner">
         <div class="sb-score" id="sbScore">0 / 10</div>
         <div class="sb-label" id="sbLabel">point</div>
@@ -482,18 +520,7 @@
 // CONFIG
 // ═══════════════════════════════════════════════════════════════
 
-const SIM_FILES = {
-  sim01:'dansk3_delprove2b_sim01_cykler.json',
-  sim02:'dansk3_delprove2b_sim02.json',
-  sim03:'dansk3_delprove2b_sim03.json',
-  sim04:'dansk3_delprove2b_sim04.json',
-  sim05:'dansk3_delprove2b_sim05.json',
-  sim06:'dansk3_delprove2b_sim06.json',
-  sim07:'dansk3_delprove2b_sim07.json',
-  sim08:'dansk3_delprove2b_sim08.json',
-  sim09:'dansk3_delprove2b_sim09.json',
-  sim10:'dansk3_delprove2b_sim10.json',
-};
+// Filename computed dynamically: NN-L2B.json
 
 // ─── shared state (assigned by PD3.init in DOMContentLoaded) ───
 let currentUser = null;
@@ -508,7 +535,8 @@ let examData    = null;
 let gapCount    = 0;
 let userAnswers = {};      // { 'gap1': 'B', 'gap2': 'C', … }
 let activeGap   = null;    // currently selected gap key e.g. 'gap1'
-let submitted   = false;
+let elemStatus  = 'not_started';
+let submitted   = false; // derived
 
 // ═══════════════════════════════════════════════════════════════
 // INIT
@@ -518,21 +546,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('backLink').href = `exam.html?sim=${simId}&attempt=${attemptId}`;
 
-  const filename = SIM_FILES[simId];
-  if (!filename) { PD3.showError('Ukendt simulering: ' + simId, simId, attemptId); return; }
+  const filename = `${simNum.toString().padStart(2,'0')}-L2B.json`;
   try {
     const res = await fetch(`/dansk3/data/${simNum}/${filename}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     examData = await res.json();
   } catch (err) {
+    console.error('[L2B] Load failed:', err);
     PD3.showError('Kunne ikke hente spørgsmål. Prøv at genindlæse siden.', simId, attemptId);
     return;
   }
 
-  submitted = await PD3.isSubmitted(currentUser.email, attemptId, elemKey);
-  renderExam();
-  PD3.hideLoading();
-  document.getElementById('examLayout').style.display = '';
+  try {
+    elemStatus = await PD3.getStatus(currentUser.email, attemptId, elemKey);
+    renderExam();
+    PD3.hideLoading();
+    document.getElementById('examLayout').style.display = '';
+  } catch (err) {
+    console.error('[L2B] Render failed:', err);
+    PD3.showError('Kunne ikke vise opgaven. Prøv at genindlæse siden.', simId, attemptId);
+  }
 });
 
 // ═══════════════════════════════════════════════════════════════
@@ -552,16 +585,19 @@ function renderExam() {
   for (let i = 1; i <= gapCount; i++) userAnswers[`gap${i}`] = null;
 
   renderText(text_with_gaps);
+  submitted = (elemStatus === 'submitted' || elemStatus === 'skipped');
+  if (elemStatus === 'submitted') {
+    document.getElementById('alreadyDoneCard').classList.add('visible');
+    return;
+  }
+  if (elemStatus === 'skipped') {
+    document.getElementById('skippedCard').classList.add('visible');
+    return;
+  }
+
   renderTiles(paragraphs);
   renderAnswerTable();
   renderPips();
-
-  if (submitted) {
-    document.getElementById('alreadyDone').classList.add('visible');
-    document.getElementById('submitBtn').style.display = 'none';
-    document.getElementById('skipLink').style.display = 'none';
-    document.getElementById('continueBtn').style.display = 'block';
-  }
 }
 
 // ── Render text with clickable gap slots ──────────────────────

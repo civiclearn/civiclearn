@@ -702,18 +702,7 @@
 // DATA_BASE is built dynamically in loadPrepMaterial using simNum from PD3.init()
 
 // Oral topic JSON filenames per sim
-const SIM_ORAL1_FILES = {
-  sim01: 'dansk3_sim01_mundtlig_delprove1_overvaegt.json',
-  sim02: 'dansk3_sim02_mundtlig_delprove1_mobning.json',
-  sim03: 'dansk3_sim03_mundtlig_delprove1_ensomhed.json',
-  sim04: 'dansk3_sim04_mundtlig_delprove1_soevnmangel.json',
-  sim05: 'dansk3_sim05_mundtlig_delprove1_skilsmisse.json',
-  sim06: 'dansk3_sim06_mundtlig_delprove1_alkohol.json',
-  sim07: 'dansk3_sim07_mundtlig_delprove1_mental_sundhed.json',
-  sim08: 'dansk3_sim08_mundtlig_delprove1_aeldre_arbejdsmarked.json',
-  sim09: 'dansk3_sim09_mundtlig_delprove1_maend_sundhed.json',
-  sim10: 'dansk3_sim10_mundtlig_delprove1_digital_svindel.json',
-};
+// Filename computed dynamically: NN-M1.json
 
 // Timer thresholds (seconds)
 const T_OPTIMAL_START = 110;  // 1:50
@@ -763,11 +752,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ═══════════════════════════════════════════════════════════════════
 
 async function loadPrepMaterial() {
-  const filename = SIM_ORAL1_FILES[simId];
-  if (!filename) {
-    console.warn('No file mapping for', simId);
-    return;
-  }
+  const filename = `${simNum.toString().padStart(2,'0')}-M1.json`;
 
   try {
     const res = await fetch(`/dansk3/data/${simNum}/${filename}`);
