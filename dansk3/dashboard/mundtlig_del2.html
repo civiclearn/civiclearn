@@ -773,7 +773,7 @@ function startRound(num) {
   document.getElementById('modelAnswerSection').classList.remove('visible');
   document.getElementById('b2Card').classList.remove('visible');
   document.getElementById('roundActionRow').style.display        = 'none';
-  document.getElementById('skipRoundLink').style.display         = 'none';
+  document.getElementById('skipRoundLink').style.display         = '';
 
   // Proceed button
   const btn = document.getElementById('proceedBtn');
@@ -1097,6 +1097,15 @@ function proceedFromRound() {
 
 function skipRound() {
   if (!confirm(`Spring Runde ${currentRound} over?`)) return;
+  // Stop any in-progress countdown or recording
+  clearInterval(countdownInt);
+  clearInterval(recTimerInt);
+  cancelAnimationFrame(waveRAF);
+  if (mediaRecorder?.state === 'recording') {
+    mediaRecorder.ondataavailable = null; // discard chunks
+    mediaRecorder.onstop = null;
+    mediaRecorder.stop();
+  }
   roundDone[currentRound] = false;
   roundData[currentRound] = { blob:null, durationSec:0, durationStr:'0:00', skipped:true };
   followupResults[currentRound] = [];
@@ -1118,6 +1127,27 @@ async function finalizeAndSubmit() {
     micStream.getTracks().forEach(t => t.stop());
     micStream = null;
   }
+
+  // If both rounds were skipped, treat as element skip
+  const bothSkipped = (roundData[1]?.skipped || !roundData[1]) && (roundData[2]?.skipped || !roundData[2]);
+  if (bothSkipped) {
+    showPhase('phaseDone');
+    updateRoundDots(3);
+    document.getElementById('doneRoundsList').innerHTML =
+      '<div class="done-round-item"><span class="dri-icon">⏭️</span><div class="dri-meta"><div class="dri-round">Begge runder</div><div class="dri-q">Sprunget over</div></div></div>';
+    try {
+      await PD3.skip({ attemptId, elemKey });
+      console.log('[del2] both rounds skipped — element skipped');
+    } catch (err) {
+      console.error('[del2] skip FAILED:', err);
+      PD3.toast('Fejl ved gemning — prøv igen eller kontakt support.');
+    }
+    submitted = true;
+    const btn = document.getElementById('continueBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Fortsæt med simulering →'; }
+    return;
+  }
+
   showPhase('phaseDone');
   updateRoundDots(3);
 
