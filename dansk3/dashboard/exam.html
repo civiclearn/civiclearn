@@ -1062,8 +1062,11 @@ function determinePhase() {
 
 function allDone() {
   if (!elements || Object.keys(elements).length === 0) return false;
+  const oral1Skipped = elements['mundtlig_del1']?.submission_status === 'skipped';
   return KEY_ORDER.every(k => {
-    const s = elements[k]?.submission_status;
+    let s = elements[k]?.submission_status;
+    // If oral1 was skipped, followup is implicitly skipped too
+    if (k === 'mundtlig_del1_followup' && oral1Skipped) s = 'skipped';
     return s === 'submitted' || s === 'skipped';
   });
 }
