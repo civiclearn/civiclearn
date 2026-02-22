@@ -607,34 +607,18 @@ const GRADE_META = {
 // ═══════════════════════════════════════════════════════════════════════
 
 let attemptsMap = {}; // sim_id → attempt object
-let currentUser = null;
 
 // ═══════════════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // auth-guard sets window.civicUser or redirects
-  await waitForAuth();
-  currentUser = window.civicUser || {};
-  if (currentUser.email) {
-    document.getElementById('userEmail').textContent = currentUser.email;
-  }
+  await pd3Auth.ready;
+  document.getElementById('userEmail').textContent = pd3Auth.email;
 
   initCountdown();
   await loadAttempts();
 });
-
-async function waitForAuth() {
-  // auth-guard-dansk3.js attaches civicUser when ready
-  return new Promise(resolve => {
-    if (window.civicUser) return resolve();
-    const t = setInterval(() => {
-      if (window.civicUser) { clearInterval(t); resolve(); }
-    }, 80);
-    setTimeout(() => { clearInterval(t); resolve(); }, 5000);
-  });
-}
 
 // ═══════════════════════════════════════════════════════════════════════
 // LOAD ATTEMPTS FROM pd3-hydrate
@@ -642,14 +626,14 @@ async function waitForAuth() {
 
 async function loadAttempts() {
   try {
-    const token = currentUser.access_token || '';
+    const token = pd3Auth.session.access_token;
     const res = await fetch(HYDRATE_FN, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({ email: currentUser.email }),
+      body: JSON.stringify({ email: pd3Auth.email }),
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

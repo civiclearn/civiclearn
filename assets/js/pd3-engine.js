@@ -27,24 +27,10 @@ window.PD3 = (function () {
   const FN = name => `${SUPABASE_URL}/functions/v1/${name}`;
 
   // ─── INTERNAL STATE ───────────────────────────────────────────────────
-  let _user         = null;   // window.civicUser after auth resolves
+  let _user         = null;   // populated from pd3Auth
   let _hydrateCache = null;   // cached pd3-hydrate response (keyed below)
   let _hydrateCacheKey = '';  // "email::attemptId" — invalidate if different
 
-  // ─── AUTH ─────────────────────────────────────────────────────────────
-  /**
-   * Waits up to 5 s for auth-guard to set window.civicUser.
-   * Resolves immediately if already set (i.e. returning visit).
-   */
-  function waitForAuth() {
-    return new Promise(resolve => {
-      if (window.civicUser) return resolve(window.civicUser);
-      const t = setInterval(() => {
-        if (window.civicUser) { clearInterval(t); resolve(window.civicUser); }
-      }, 80);
-      setTimeout(() => { clearInterval(t); resolve(window.civicUser || {}); }, 5000);
-    });
-  }
 
   // ─── LOW-LEVEL FETCH ──────────────────────────────────────────────────
   /**
@@ -124,7 +110,12 @@ window.PD3 = (function () {
      * @returns {{ user, attemptId, simId, simNum, elemKey }}
      */
     async init(defaultElemKey = '') {
-      _user = await waitForAuth();
+     await pd3Auth.ready;
+      _user = {
+        email: pd3Auth.email,
+        access_token: pd3Auth.session.access_token,
+        id: pd3Auth.userId,
+      };
 
       const p       = new URLSearchParams(location.search);
       const attemptId = p.get('attempt') || '';

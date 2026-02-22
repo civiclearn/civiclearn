@@ -950,7 +950,6 @@ const KEY_ORDER = ELEMENT_DEFS.map(d => d.key);
 let simId       = null;
 let attempt     = null;   // attempt object from backend
 let elements    = {};     // key → element object
-let currentUser = null;
 let pollTimer   = null;
 let pendingSkipKey = null;
 
@@ -961,8 +960,7 @@ let pendingSkipKey = null;
 document.addEventListener('DOMContentLoaded', async () => {
   simId = new URLSearchParams(location.search).get('sim') || 'sim01';
 
-  await waitForAuth();
-  currentUser = window.civicUser || {};
+  await pd3Auth.ready;
 
   try {
     await initAttempt();
@@ -972,15 +970,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-async function waitForAuth() {
-  return new Promise(resolve => {
-    if (window.civicUser) return resolve();
-    const t = setInterval(() => {
-      if (window.civicUser) { clearInterval(t); resolve(); }
-    }, 80);
-    setTimeout(() => { clearInterval(t); resolve(); }, 5000);
-  });
-}
 
 // ═══════════════════════════════════════════════════════════════════════
 // INIT ATTEMPT
@@ -989,7 +978,7 @@ async function waitForAuth() {
 async function initAttempt() {
   // pd3-submit-test has resume support: returns full attempt object + elements
   const res = await apiFetch('pd3-submit-test', {
-    user_id:       currentUser.email,   // backend uses email as user_id
+    user_id: pd3Auth.email,
     simulation_id: simId,
   });
 
@@ -1291,7 +1280,7 @@ function stopFollowupPoll() {
 async function pollFollowupReady() {
   try {
     const res = await apiFetch('pd3-hydrate', {
-      email: currentUser.email,
+      email: pd3Auth.email,
     });
 
     const fresh = (res.attempts || []).find(a => a.id === attempt.id);
@@ -1396,7 +1385,7 @@ async function confirmSkip() {
 // ═══════════════════════════════════════════════════════════════════════
 
 async function apiFetch(fnName, body) {
-  const token = currentUser?.access_token || '';
+  const token = pd3Auth.session.access_token;
   const res = await fetch(FN(fnName), {
     method:  'POST',
     headers: {
