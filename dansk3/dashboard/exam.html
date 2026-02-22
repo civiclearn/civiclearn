@@ -1198,8 +1198,9 @@ function buildCard(key) {
 
   if (locked) {
     cta = `<button class="card-btn btn-locked" disabled>🔒 Låst</button>`;
-  } else if (status === 'submitted' || status === 'skipped') {
-    // Oral 1 submitted can be reviewed; others show review link
+  } else if (status === 'skipped') {
+    cta = '';
+  } else if (status === 'submitted') {
     cta = `<a class="card-btn btn-review" href="${pageUrl}">Se svar</a>`;
   } else {
     const label = status === 'in_progress' ? 'Fortsæt' : (isOral1 ? 'Optag igen' : 'Start');
