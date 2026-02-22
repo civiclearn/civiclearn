@@ -277,6 +277,83 @@
     .info-link.primary { background: var(--red); color: white; }
     .info-link.ghost { background: var(--idle-bg); color: var(--slate); }
     .info-link:hover { opacity: 0.85; }
+	
+	/* ═══════════════════════════════════════════════
+   GUIDE MODAL
+═══════════════════════════════════════════════ */
+.guide-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.guide-overlay.open {
+  display: flex;
+}
+.guide-panel {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 680px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+}
+.guide-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid #eee;
+  flex-shrink: 0;
+}
+.guide-header h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+.guide-close {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: #888;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.guide-close:hover { background: #f3f4f6; color: #333; }
+.guide-body {
+  padding: 24px 28px 32px;
+  overflow-y: auto;
+  line-height: 1.7;
+  font-size: 0.93rem;
+  color: #4a4a5a;
+}
+.guide-body h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 28px 0 10px;
+}
+.guide-body h3:first-child { margin-top: 0; }
+.guide-body p { margin-bottom: 12px; }
+.guide-body .guide-intro {
+  font-size: 1rem;
+  color: #1a1a2e;
+  margin-bottom: 20px;
+}
+.guide-body ul, .guide-body ol {
+  margin: 0 0 16px 20px;
+}
+.guide-body li {
+  margin-bottom: 8px;
+}
 
     /* ─── TABLE ───────────────────────────────────────────── */
     .table-wrap {
@@ -483,11 +560,12 @@
       <span class="brand-sub">Prøve i Dansk 3</span>
     </div>
   </div>
-  <nav class="topbar-nav">
-    <span class="topbar-user" id="userEmail">—</span>
-    <a href="/dansk3/info.html">Om prøven</a>
-    <button onclick="handleLogout()">Log ud</button>
-  </nav>
+ <nav class="topbar-nav">
+  <span class="topbar-user" id="userEmail">—</span>
+  <a href="#" onclick="openGuide(); return false;">Guide</a>
+  <a href="mailto:admin@civiclearn.com">Kontakt</a>
+  <button onclick="handleLogout()">Log ud</button>
+</nav>
 </header>
 
 <!-- ── MAIN ───────────────────────────────────────────────── -->
@@ -538,14 +616,14 @@
     </div>
 
     <!-- Card 4: Info / links -->
-    <div class="stat-card info-card">
+   <div class="stat-card info-card">
       <div class="stat-label">Prøveinfo</div>
       <p class="info-card-body">
         PD3 bedømmes på 7-trinsskalaen. Mundtlig tæller dobbelt.<br>
         Beståelse kræver et vægtet gennemsnit på min. 2,0.
       </p>
       <div class="info-links">
-        <a class="info-link primary" href="/dansk3/info.html">Læs mere</a>
+        <a class="info-link primary" href="#" onclick="openGuide(); return false;">Sådan virker det</a>
         <a class="info-link ghost" href="https://uim.dk/danskundervisning" target="_blank" rel="noopener">uim.dk ↗</a>
       </div>
     </div>
@@ -934,6 +1012,65 @@ function handleLogout() {
   sessionStorage.clear();
   window.location.href = '/dansk3/login.html';
 }
+
+function openGuide() {
+  document.getElementById('guideOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeGuide() {
+  document.getElementById('guideOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeGuide();
+});
 </script>
+<!-- ═══════════════════════ GUIDE MODAL ═══════════════════════ -->
+<div class="guide-overlay" id="guideOverlay" onclick="if(event.target===this)closeGuide()">
+  <div class="guide-panel">
+    <div class="guide-header">
+      <h2>Sådan virker vores PD3-simulation</h2>
+      <button class="guide-close" onclick="closeGuide()" aria-label="Luk">✕</button>
+    </div>
+    <div class="guide-body">
+
+      <p class="guide-intro">Vores simulationer er et <strong>træningsprogram</strong> — ikke en kopi af prøven. Vi har bevidst tilføjet hjælpeelementer, som den rigtige prøve ikke har. Tænk på dem som træningshjul: de viser dig, hvordan god forberedelse ser ud, så du på prøvedagen selv ved, hvordan du griber hver opgave an.</p>
+
+      <h3>Hvad er det samme som den rigtige PD3?</h3>
+      <ul>
+        <li><strong>Formatet er ægte.</strong> Alle sektioner matcher den officielle PD3-struktur: Læseforståelse 1, 2A, 2B, 3, Skriftlig Del 1 og Del 2, og Mundtlig Del 1 og Del 2.</li>
+        <li><strong>Sværhedsgraden er ægte.</strong> Tekster og emner er på B2-niveau, præcis som den rigtige prøve.</li>
+        <li><strong>Karakterskalaen er ægte.</strong> Vi bruger 7-trins-skalaen (-3 til 12) og samme beståkrav: vægtet gennemsnit på mindst 02, med mundtlig dobbelt vægtet.</li>
+        <li><strong>Du skal selv præstere.</strong> I de skriftlige dele skriver du hvert ord selv. I de mundtlige dele taler du i 2 minutter uden manuskript, uden undertekster og uden hjælp.</li>
+      </ul>
+
+      <h3>📖 Læseforståelse</h3>
+      <p>Meget tæt på den rigtige prøve. Samme opgavetyper, digitalt i stedet for på papir. Ingen hjælpemidler — præcis som til prøven.</p>
+
+      <h3>✍️ Skriftlig fremstilling</h3>
+      <p>Selve opgaven er identisk — du skriver alt selv. Den store forskel: du får <strong>AI-feedback inden for minutter</strong> i stedet for en karakter efter uger. Feedbacken fortæller dig, <em>hvorfor</em> du fik den karakter, du fik — styrker, svagheder og konkrete fejl.</p>
+
+      <h3>🎤 Mundtlig Del 1 — Præsentation + interview</h3>
+      <p>Her er vi bevidst mest anderledes. Til den rigtige prøve får du <strong>kun et emne og en vinkel</strong>. I vores simulation får du emnet <strong>plus</strong> nøglefakta, nyttigt ordforråd og en foreslået struktur.</p>
+      <p>Det er med vilje. Disse ekstra elementer viser dig, hvad "godt forberedt" ser ud som. Efter 2–3 simulationer vil du automatisk selv finde fakta, lære nøgleord og bygge en struktur — uden hjælp.</p>
+      <p>Og husk: <strong>du skal stadig selv tale i 2 minutter.</strong> Ingen mængde nøglefakta på skærmen kan gøre det for dig.</p>
+
+      <h3>🎤 Mundtlig Del 2 — Samtale</h3>
+      <p>Tæt på den rigtige prøve. Du får et emne, du ikke kender, og skal tale. Ingen hjælp — præcis som til prøven.</p>
+
+      <h3>💡 Få mest ud af simulationerne</h3>
+      <ol>
+        <li><strong>Første 1–2 simulationer:</strong> Brug alt. Læs nøglefakta, studer ordforrådet, følg den foreslåede struktur. Forstå, hvad en god præsentation ser ud som.</li>
+        <li><strong>Næste simulationer:</strong> Forbered din præsentation <em>før</em> du åbner hjælpen. Tjek bagefter: dækkede du de vigtige punkter?</li>
+        <li><strong>Sidste forberedelse:</strong> Ignorer hjælpen. Læs kun emne og vinkel. Forbered dig, som var det den rigtige prøve.</li>
+        <li><strong>Tag altid den mundtlige optagelse.</strong> Mundtlig tæller dobbelt. Hver optagelse — selv en dårlig — bygger selvtillid og flydende tale.</li>
+      </ol>
+
+      <h3>Om AI-evalueringen</h3>
+      <p>Vores AI-evaluator er kalibreret til B2-niveau. Den straffer dig ikke for uformelt sprog i en uformel e-mail, og den hakker ikke på stilistiske valg, som en rigtig censor ikke ville reagere på. Brug karaktererne som en retningssnor — ikke en garanti. Hvis du konsekvent scorer 7 eller derover, er du godt rustet til den rigtige prøve.</p>
+
+    </div>
+  </div>
+</div>
 </body>
 </html>
