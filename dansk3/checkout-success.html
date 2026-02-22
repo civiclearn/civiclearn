@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Konto opsætning — Prøve i Dansk 3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --dk-red: #C8102E;
+      --dk-red-dark: #A00D24;
+      --dk-red-light: #F9E8EB;
+      --text: #1a1a2e;
+      --text-muted: #6b7280;
+      --bg: #f8f9fb;
+      --card-bg: #ffffff;
+      --border: #e2e5ea;
+      --success: #059669;
+      --success-light: #f0fdf4;
+      --error: #dc2626;
+      --radius: 10px;
+    }
+
+    body {
+      font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.06);
+      width: 100%;
+      max-width: 460px;
+      padding: 40px 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--success);
+    }
+
+    .success-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--success-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 28px;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .brand h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .brand p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .form-group input:focus {
+      border-color: var(--dk-red);
+      box-shadow: 0 0 0 3px var(--dk-red-light);
+    }
+    .form-group input::placeholder { color: #b0b5bf; }
+    .form-group .hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 13px 20px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.99); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .btn-primary {
+      background: var(--dk-red);
+      color: #fff;
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--dk-red-dark); }
+
+    .btn-success {
+      background: var(--success);
+      color: #fff;
+    }
+    .btn-success:hover:not(:disabled) { background: #047857; }
+
+    .msg {
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 0.88rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .msg.error {
+      display: block;
+      background: #fef2f2;
+      color: var(--error);
+      border: 1px solid #fecaca;
+    }
+    .msg.success {
+      display: block;
+      background: var(--success-light);
+      color: var(--success);
+      border: 1px solid #bbf7d0;
+    }
+
+    .state { display: none; }
+    .state.active { display: block; }
+
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .product-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .product-badge.pd3 {
+      background: var(--dk-red-light);
+      color: var(--dk-red);
+    }
+    .product-badge.combo {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .account-done {
+      text-align: center;
+    }
+    .account-done p {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- STATE 1: Password setup form                  -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div id="state-setup" class="state active">
+    <div class="success-icon">✓</div>
+    <div class="brand">
+      <h1>Betaling gennemført!</h1>
+      <p>Vælg nu en adgangskode til din konto</p>
+    </div>
+
+    <div id="setup-msg" class="msg"></div>
+
+    <form id="setup-form">
+      <div class="form-group">
+        <label for="setup-password">Adgangskode</label>
+        <input type="password" id="setup-password" required placeholder="Vælg en adgangskode" minlength="8" autocomplete="new-password">
+        <div class="hint">Mindst 8 tegn</div>
+      </div>
+      <div class="form-group">
+        <label for="setup-password-confirm">Bekræft adgangskode</label>
+        <input type="password" id="setup-password-confirm" required placeholder="Gentag adgangskoden" minlength="8" autocomplete="new-password">
+      </div>
+      <button type="submit" class="btn btn-primary" id="setup-btn">Opret konto</button>
+    </form>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- STATE 2: Account created — ready to go        -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div id="state-done" class="state">
+    <div class="success-icon">🎉</div>
+    <div class="account-done">
+      <h1 style="font-size:1.4rem; font-weight:700; margin-bottom:8px;">Din konto er klar!</h1>
+      <p id="done-email" style="font-size:0.95rem;"></p>
+      <div id="done-badge"></div>
+      <br>
+      <button class="btn btn-success" id="go-to-dashboard">Gå til Prøve i Dansk 3 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- STATE 3: Error — no session_id or invalid     -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div id="state-error" class="state">
+    <div class="brand">
+      <h1>Noget gik galt</h1>
+      <p id="error-detail">Vi kunne ikke finde din betalingssession. Kontakt os på admin@civiclearn.com hvis problemet fortsætter.</p>
+    </div>
+    <a href="/dansk3/" class="btn btn-primary" style="text-align:center; text-decoration:none;">Gå til forsiden</a>
+  </div>
+</div>
+
+<div class="footer">
+  <a href="https://civiclearn.com">CivicLearn</a> · Prøve i Dansk 3 Træning
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  const SUPABASE_URL = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
+  const DASHBOARD_URL = '/dansk3/';
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ── Get session_id from URL ───────────────────
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+
+  function showState(name) {
+    document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+    document.getElementById('state-' + name).classList.add('active');
+  }
+
+  if (!sessionId) {
+    showState('error');
+    return;
+  }
+
+  // ── Setup form ────────────────────────────────
+  document.getElementById('setup-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const password = document.getElementById('setup-password').value;
+    const confirm = document.getElementById('setup-password-confirm').value;
+    const msgEl = document.getElementById('setup-msg');
+    const btn = document.getElementById('setup-btn');
+
+    // Clear previous messages
+    msgEl.className = 'msg';
+    msgEl.textContent = '';
+
+    if (password !== confirm) {
+      msgEl.className = 'msg error';
+      msgEl.textContent = 'Adgangskoderne er ikke ens.';
+      return;
+    }
+    if (password.length < 8) {
+      msgEl.className = 'msg error';
+      msgEl.textContent = 'Adgangskoden skal være mindst 8 tegn.';
+      return;
+    }
+
+    // Loading state
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Opretter konto...';
+
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/pd3-setup-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: sessionId,
+          password: password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        msgEl.className = 'msg error';
+        msgEl.textContent = data.error || 'Der opstod en fejl. Prøv igen.';
+        btn.disabled = false;
+        btn.textContent = 'Opret konto';
+        return;
+      }
+
+      // Account created — now sign in automatically
+      const { error: signInError } = await sb.auth.signInWithPassword({
+        email: data.email,
+        password: password,
+      });
+
+      if (signInError) {
+        // Account was created but auto-login failed — still show success
+        console.error('Auto-login failed:', signInError);
+      }
+
+      // Show success state
+      document.getElementById('done-email').textContent =
+        'Du er logget ind som ' + data.email;
+
+      const badgeEl = document.getElementById('done-badge');
+      if (data.is_combo) {
+        badgeEl.innerHTML =
+          '<span class="product-badge combo">Dansk 3 + Indfødsretsprøven</span>';
+      } else {
+        badgeEl.innerHTML =
+          '<span class="product-badge pd3">Prøve i Dansk 3</span>';
+      }
+
+      showState('done');
+
+    } catch (err) {
+      console.error('Setup error:', err);
+      msgEl.className = 'msg error';
+      msgEl.textContent = 'Netværksfejl. Tjek din internetforbindelse og prøv igen.';
+      btn.disabled = false;
+      btn.textContent = 'Opret konto';
+    }
+  });
+
+  // ── Go to dashboard ──────────────────────────
+  document.getElementById('go-to-dashboard').addEventListener('click', () => {
+    window.location.href = DASHBOARD_URL;
+  });
+
+})();
+</script>
+</body>
+</html>

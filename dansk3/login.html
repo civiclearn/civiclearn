@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log ind — Prøve i Dansk 3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --dk-red: #C8102E;
+      --dk-red-dark: #A00D24;
+      --dk-red-light: #F9E8EB;
+      --text: #1a1a2e;
+      --text-muted: #6b7280;
+      --bg: #f8f9fb;
+      --card-bg: #ffffff;
+      --border: #e2e5ea;
+      --success: #059669;
+      --error: #dc2626;
+      --radius: 10px;
+    }
+
+    body {
+      font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.06);
+      width: 100%;
+      max-width: 420px;
+      padding: 40px 36px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--dk-red);
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .brand h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .brand p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── Form elements ──────────────────────── */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .form-group input:focus {
+      border-color: var(--dk-red);
+      box-shadow: 0 0 0 3px var(--dk-red-light);
+    }
+    .form-group input::placeholder {
+      color: #b0b5bf;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 13px 20px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.99); }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-primary {
+      background: var(--dk-red);
+      color: #fff;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--dk-red-dark);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--dk-red);
+      font-size: 0.9rem;
+      padding: 10px;
+      margin-top: 8px;
+    }
+    .btn-secondary:hover {
+      background: var(--dk-red-light);
+    }
+
+    /* ── Messages ──────────────────────── */
+    .msg {
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 0.88rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .msg.error {
+      display: block;
+      background: #fef2f2;
+      color: var(--error);
+      border: 1px solid #fecaca;
+    }
+    .msg.success {
+      display: block;
+      background: #f0fdf4;
+      color: var(--success);
+      border: 1px solid #bbf7d0;
+    }
+
+    /* ── State management ──────────────────── */
+    .state { display: none; }
+    .state.active { display: block; }
+
+    /* ── Forgot password link ──────────────── */
+    .forgot-link {
+      text-align: center;
+      margin-top: 16px;
+    }
+    .forgot-link a {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .forgot-link a:hover {
+      color: var(--dk-red);
+    }
+
+    /* ── Back link ─────────────────────────── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-decoration: none;
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--dk-red); }
+
+    /* ── PIN display ──────────────────────── */
+    .pin-display {
+      background: var(--dk-red-light);
+      border: 2px dashed var(--dk-red);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .pin-display .pin-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .pin-display .pin-value {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--dk-red);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Spinner ──────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Footer ───────────────────────────── */
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="login-card">
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- STATE 1: Normal login                         -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div id="state-login" class="state active">
+    <div class="brand">
+      <h1>Prøve i Dansk 3</h1>
+      <p>Log ind på din træningskonto</p>
+    </div>
+
+    <div id="login-msg" class="msg"></div>
+
+    <form id="login-form" autocomplete="on">
+      <div class="form-group">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" name="email" required autocomplete="email" placeholder="din@email.dk">
+      </div>
+      <div class="form-group">
+        <label for="login-password">Adgangskode</label>
+        <input type="password" id="login-password" name="password" required autocomplete="current-password" placeholder="Din adgangskode">
+      </div>
+      <button type="submit" class="btn btn-primary" id="login-btn">Log ind</button>
+    </form>
+
+    <div class="forgot-link">
+      <a href="#" id="show-forgot">Glemt adgangskode?</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- STATE 2: Forgot password — email input        -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div id="state-forgot-email" class="state">
+    <a class="back-link" id="back-to-login">← Tilbage til login</a>
+
+    <div class="brand">
+      <h1>Nulstil adgangskode</h1>
+      <p>Indtast den email, du brugte ved købet</p>
+    </div>
+
+    <div id="forgot-msg" class="msg"></div>
+
+    <form id="forgot-email-form">
+      <div class="form-group">
+        <label for="forgot-email">Email</label>
+        <input type="email" id="forgot-email" required placeholder="din@email.dk">
+      </div>
+      <button type="submit" class="btn btn-primary" id="forgot-email-btn">Fortsæt</button>
+    </form>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- STATE 3: Forgot password — PIN + new password -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div id="state-forgot-reset" class="state">
+    <a class="back-link" id="back-to-forgot-email">← Tilbage</a>
+
+    <div class="brand">
+      <h1>Nulstil adgangskode</h1>
+      <p>Indtast koden og vælg en ny adgangskode</p>
+    </div>
+
+    <div id="reset-msg" class="msg"></div>
+
+    <div class="pin-display">
+      <div class="pin-label">Din bekræftelseskode</div>
+      <div class="pin-value" id="pin-value">------</div>
+    </div>
+
+    <form id="reset-form">
+      <div class="form-group">
+        <label for="reset-pin">Bekræftelseskode</label>
+        <input type="text" id="reset-pin" required placeholder="Indtast koden ovenfor" inputmode="numeric" maxlength="6" pattern="[0-9]{6}">
+      </div>
+      <div class="form-group">
+        <label for="reset-password">Ny adgangskode</label>
+        <input type="password" id="reset-password" required placeholder="Mindst 8 tegn" minlength="8">
+      </div>
+      <div class="form-group">
+        <label for="reset-password-confirm">Bekræft adgangskode</label>
+        <input type="password" id="reset-password-confirm" required placeholder="Gentag adgangskoden" minlength="8">
+      </div>
+      <button type="submit" class="btn btn-primary" id="reset-btn">Opdater adgangskode</button>
+    </form>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- STATE 4: Success — password reset complete    -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div id="state-reset-success" class="state">
+    <div class="brand" style="margin-bottom: 16px;">
+      <h1>✓ Adgangskode opdateret</h1>
+      <p>Din adgangskode er blevet ændret. Du kan nu logge ind.</p>
+    </div>
+    <button class="btn btn-primary" id="go-to-login">Log ind</button>
+  </div>
+</div>
+
+<div class="footer">
+  <a href="https://civiclearn.com">CivicLearn</a> · Prøve i Dansk 3 Træning
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- Scripts                                         -->
+<!-- ═══════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  const SUPABASE_URL = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
+  const DASHBOARD_URL = '/dansk3/';
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // If already logged in, redirect
+  sb.auth.getSession().then(({ data: { session } }) => {
+    if (session) {
+      const returnUrl = new URLSearchParams(window.location.search).get('return');
+      window.location.href = returnUrl || DASHBOARD_URL;
+    }
+  });
+
+  // ── State management ──────────────────────────
+  const states = {
+    login:        document.getElementById('state-login'),
+    forgotEmail:  document.getElementById('state-forgot-email'),
+    forgotReset:  document.getElementById('state-forgot-reset'),
+    resetSuccess: document.getElementById('state-reset-success'),
+  };
+
+  function showState(name) {
+    Object.values(states).forEach(el => el.classList.remove('active'));
+    states[name].classList.add('active');
+  }
+
+  function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.className = 'msg ' + type;
+    el.textContent = text;
+  }
+  function clearMsg(id) {
+    const el = document.getElementById(id);
+    el.className = 'msg';
+    el.textContent = '';
+  }
+
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    if (loading) {
+      btn.disabled = true;
+      btn.dataset.originalText = btn.textContent;
+      btn.innerHTML = '<span class="spinner"></span>Vent venligst...';
+    } else {
+      btn.disabled = false;
+      btn.textContent = btn.dataset.originalText || 'OK';
+    }
+  }
+
+  // ── Navigation ──────────────────────────────
+  document.getElementById('show-forgot').addEventListener('click', (e) => {
+    e.preventDefault();
+    clearMsg('login-msg');
+    showState('forgotEmail');
+  });
+
+  document.getElementById('back-to-login').addEventListener('click', () => {
+    clearMsg('forgot-msg');
+    showState('login');
+  });
+
+  document.getElementById('back-to-forgot-email').addEventListener('click', () => {
+    clearMsg('reset-msg');
+    showState('forgotEmail');
+  });
+
+  document.getElementById('go-to-login').addEventListener('click', () => {
+    showState('login');
+  });
+
+  // ── Login form ──────────────────────────────
+  let resetEmail = ''; // shared between forgot-email and forgot-reset states
+
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMsg('login-msg');
+    setLoading('login-btn', true);
+
+    const email = document.getElementById('login-email').value.trim().toLowerCase();
+    const password = document.getElementById('login-password').value;
+
+    try {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        showMsg('login-msg', 'Forkert email eller adgangskode. Prøv igen.', 'error');
+        setLoading('login-btn', false);
+        return;
+      }
+
+      // Success — redirect
+      const returnUrl = new URLSearchParams(window.location.search).get('return');
+      window.location.href = returnUrl || DASHBOARD_URL;
+
+    } catch (err) {
+      showMsg('login-msg', 'Der opstod en fejl. Prøv igen.', 'error');
+      setLoading('login-btn', false);
+    }
+  });
+
+  // ── Forgot password: email check ─────────────
+  document.getElementById('forgot-email-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMsg('forgot-msg');
+    setLoading('forgot-email-btn', true);
+
+    resetEmail = document.getElementById('forgot-email').value.trim().toLowerCase();
+
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/pd3-reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'check_email', email: resetEmail }),
+      });
+      const data = await res.json();
+
+      if (!data.exists) {
+        showMsg('forgot-msg', data.message || 'Email ikke fundet.', 'error');
+        setLoading('forgot-email-btn', false);
+        return;
+      }
+
+      // Show PIN and move to reset state
+      document.getElementById('pin-value').textContent = data.pin;
+      showState('forgotReset');
+
+    } catch (err) {
+      showMsg('forgot-msg', 'Der opstod en fejl. Prøv igen.', 'error');
+    }
+    setLoading('forgot-email-btn', false);
+  });
+
+  // ── Forgot password: PIN + new password ──────
+  document.getElementById('reset-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMsg('reset-msg');
+
+    const pin = document.getElementById('reset-pin').value.trim();
+    const newPassword = document.getElementById('reset-password').value;
+    const confirmPassword = document.getElementById('reset-password-confirm').value;
+
+    if (newPassword !== confirmPassword) {
+      showMsg('reset-msg', 'Adgangskoderne er ikke ens.', 'error');
+      return;
+    }
+    if (newPassword.length < 8) {
+      showMsg('reset-msg', 'Adgangskoden skal være mindst 8 tegn.', 'error');
+      return;
+    }
+
+    setLoading('reset-btn', true);
+
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/pd3-reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reset',
+          email: resetEmail,
+          pin: pin,
+          new_password: newPassword,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        showState('resetSuccess');
+      } else {
+        showMsg('reset-msg', data.error || 'Fejl ved nulstilling.', 'error');
+      }
+    } catch (err) {
+      showMsg('reset-msg', 'Der opstod en fejl. Prøv igen.', 'error');
+    }
+    setLoading('reset-btn', false);
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Køb — Prøve i Dansk 3 Træning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --dk-red: #C8102E;
+      --dk-red-dark: #A00D24;
+      --dk-red-light: #F9E8EB;
+      --combo-blue: #1e40af;
+      --combo-blue-light: #dbeafe;
+      --text: #1a1a2e;
+      --text-muted: #6b7280;
+      --bg: #f8f9fb;
+      --card-bg: #ffffff;
+      --border: #e2e5ea;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 20px;
+      line-height: 1.5;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 36px;
+      max-width: 600px;
+    }
+    .page-header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .page-header p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+    }
+
+    .products {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 780px;
+      width: 100%;
+      margin-bottom: 40px;
+    }
+
+    .product-card {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      width: 100%;
+      max-width: 360px;
+      flex: 1 1 300px;
+      position: relative;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .product-card:hover {
+      border-color: var(--dk-red);
+      box-shadow: 0 4px 16px rgba(200, 16, 46, 0.1);
+    }
+    .product-card.selected {
+      border-color: var(--dk-red);
+      box-shadow: 0 4px 16px rgba(200, 16, 46, 0.15);
+    }
+    .product-card.combo:hover {
+      border-color: var(--combo-blue);
+      box-shadow: 0 4px 16px rgba(30, 64, 175, 0.1);
+    }
+    .product-card.combo.selected {
+      border-color: var(--combo-blue);
+      box-shadow: 0 4px 16px rgba(30, 64, 175, 0.15);
+    }
+
+    .product-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .product-card .product-badge {
+      background: var(--dk-red-light);
+      color: var(--dk-red);
+    }
+    .product-card.combo .product-badge {
+      background: var(--combo-blue-light);
+      color: var(--combo-blue);
+    }
+
+    .product-card h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .product-card .price {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .product-card .price-note {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .product-card .features {
+      list-style: none;
+      padding: 0;
+    }
+    .product-card .features li {
+      padding: 6px 0;
+      font-size: 0.92rem;
+      color: var(--text);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .product-card .features li::before {
+      content: '✓';
+      color: var(--dk-red);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .product-card.combo .features li::before {
+      color: var(--combo-blue);
+    }
+
+    .best-value {
+      position: absolute;
+      top: -1px; right: 20px;
+      background: var(--combo-blue);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 5px 12px;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .radio-indicator {
+      width: 22px; height: 22px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+    .radio-indicator::after {
+      content: '';
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: transparent;
+      transition: background 0.2s;
+    }
+    .product-card.selected .radio-indicator {
+      border-color: var(--dk-red);
+    }
+    .product-card.selected .radio-indicator::after {
+      background: var(--dk-red);
+    }
+    .product-card.combo.selected .radio-indicator {
+      border-color: var(--combo-blue);
+    }
+    .product-card.combo.selected .radio-indicator::after {
+      background: var(--combo-blue);
+    }
+
+    .checkout-section {
+      text-align: center;
+      width: 100%;
+      max-width: 780px;
+    }
+
+    .btn-checkout {
+      display: inline-block;
+      padding: 15px 48px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      background: var(--dk-red);
+      color: #fff;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-checkout:hover:not(:disabled) { background: var(--dk-red-dark); }
+    .btn-checkout:active { transform: scale(0.99); }
+    .btn-checkout:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .secure-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 12px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .msg {
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 0.88rem;
+      margin-bottom: 16px;
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      display: none;
+      text-align: center;
+      max-width: 780px;
+    }
+    .msg.visible { display: block; }
+
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .footer {
+      margin-top: auto;
+      padding-top: 40px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .footer a { color: var(--text-muted); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    .login-link {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+    .login-link a {
+      color: var(--dk-red);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .login-link a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .products { flex-direction: column; align-items: center; }
+      .product-card { max-width: 100%; }
+      .page-header h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Prøve i Dansk 3 — Træning</h1>
+  <p>Vælg din pakke og få adgang med det samme</p>
+</div>
+
+<div id="error-msg" class="msg"></div>
+
+<div class="products">
+  <!-- ── PD3 Standalone ───────────────────── -->
+  <div class="product-card selected" id="card-pd3" data-product="pd3">
+    <div class="radio-indicator"></div>
+    <span class="product-badge">Dansk 3</span>
+    <h2>Prøve i Dansk 3</h2>
+    <div class="price" id="price-pd3">kr. 899</div>
+    <div class="price-note">Engangsbetaling · Ubegrænset adgang</div>
+    <ul class="features">
+      <li>10 komplette prøvesimulationer</li>
+      <li>Læsning, skrivning og mundtlig</li>
+      <li>AI-evaluering med detaljeret feedback</li>
+      <li>Karakterer efter 7-trins-skalaen</li>
+      <li>Øv så mange gange du vil</li>
+    </ul>
+  </div>
+
+  <!-- ── Combo Pack ───────────────────────── -->
+  <div class="product-card combo" id="card-combo" data-product="combo">
+    <div class="best-value">Bedste tilbud</div>
+    <div class="radio-indicator"></div>
+    <span class="product-badge">Kombipakke</span>
+    <h2>Dansk 3 + Indfødsretsprøven</h2>
+    <div class="price" id="price-combo">kr. 1.099</div>
+    <div class="price-note">Engangsbetaling · Ubegrænset adgang til begge</div>
+    <ul class="features">
+      <li>Alt i Prøve i Dansk 3 pakken</li>
+      <li>+ Fuld adgang til indfødsretsprøve-træning</li>
+      <li>800+ øvespørgsmål til indfødsretsprøven</li>
+      <li>Forbered dig til begge prøver på én gang</li>
+      <li>Spar <span id="savings">kr. 299</span> i forhold til separat køb</li>
+    </ul>
+  </div>
+</div>
+
+<div class="checkout-section">
+  <button class="btn-checkout" id="checkout-btn">Gå til betaling →</button>
+  <div class="secure-note">
+    🔒 Sikker betaling via Stripe
+  </div>
+  <div class="login-link">
+    Har du allerede en konto? <a href="/dansk3/login.html">Log ind her</a>
+  </div>
+</div>
+
+<div class="footer">
+  <a href="https://civiclearn.com">CivicLearn</a> · Testrada Pte Ltd
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+
+  let selectedProduct = 'pd3';
+
+  // ── Product selection ─────────────────────────
+  const cards = document.querySelectorAll('.product-card');
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      cards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedProduct = card.dataset.product;
+    });
+  });
+
+  // ── Checkout ──────────────────────────────────
+  const checkoutBtn = document.getElementById('checkout-btn');
+  const errorMsg = document.getElementById('error-msg');
+
+  checkoutBtn.addEventListener('click', async () => {
+    errorMsg.classList.remove('visible');
+    checkoutBtn.disabled = true;
+    checkoutBtn.innerHTML = '<span class="spinner"></span>Omdirigerer til Stripe...';
+
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/pd3-create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_type: selectedProduct }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Checkout fejl');
+      }
+
+      // Redirect to Stripe
+      window.location.href = data.url;
+
+    } catch (err) {
+      console.error('Checkout error:', err);
+      errorMsg.textContent = 'Der opstod en fejl: ' + err.message + '. Prøv igen eller kontakt admin@civiclearn.com.';
+      errorMsg.classList.add('visible');
+      checkoutBtn.disabled = false;
+      checkoutBtn.textContent = 'Gå til betaling →';
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
