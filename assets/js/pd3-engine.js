@@ -523,14 +523,25 @@ FollowupRecorder: function({ container, questions = [], micStream = null, onComp
     });
   }
 
-  // ── Main speak: cloud first, browser fallback ─────────────────────
+  // ── Main speak: cloud first, browser fallback, with safety timeout ──
   async function speak(text) {
-    try {
-      await speakCloud(text);
-    } catch (e) {
-      console.warn('[TTS] Cloud TTS failed, falling back to browser:', e.message);
-      await speakBrowser(text);
-    }
+    const TTS_TIMEOUT_MS = 12000; // 12s max — question text is already visible
+    const ttsWork = (async () => {
+      try {
+        await speakCloud(text);
+      } catch (e) {
+        console.warn('[TTS] Cloud TTS failed, falling back to browser:', e.message);
+        await speakBrowser(text);
+      }
+    })();
+    const timeout = new Promise(resolve => {
+      setTimeout(() => {
+        console.warn('[TTS] Timed out after ' + TTS_TIMEOUT_MS + 'ms — proceeding without audio');
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        resolve();
+      }, TTS_TIMEOUT_MS);
+    });
+    await Promise.race([ttsWork, timeout]);
   }
 
   // ── UI Rendering ───────────────────────────────────────────────────
