@@ -12,7 +12,7 @@
   const email = localStorage.getItem("cl_email");
   if (!email) return;
 
-  // Use window.SUPABASE_KEY if available, otherwise use hardcoded CIPLE key
+  // Use window.SUPABASE_KEY if available, otherwise use hardcoded key
   const supabaseKey = window.SUPABASE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs";
 
   try {
@@ -30,12 +30,20 @@
 
     if (!res.ok) return;
 
-    const { allowed } = await res.json();
+    const data = await res.json();
 
-    if (allowed === false) {
+    // Store bundle status for dashboard banner
+    if (data.bundle) {
+      localStorage.setItem("cl_bundle", data.bundle);
+    } else {
+      localStorage.removeItem("cl_bundle");
+    }
+
+    if (data.allowed === false) {
       localStorage.removeItem("cl_auth");
       localStorage.removeItem("cl_login_at");
       localStorage.removeItem("cl_email");
+      localStorage.removeItem("cl_bundle");
       location.replace("https://civiclearn.com/access_ended.html");
     }
   } catch (_) {
