@@ -141,6 +141,43 @@
       font-size: 0.8rem; cursor: pointer; white-space: nowrap;
     }
 
+    /* ── Bundle banner ── */
+    .bundle-banner {
+      display: none;
+      align-items: center;
+      gap: 14px;
+      background: linear-gradient(135deg, #ede9fe 0%, #dbeafe 100%);
+      border: 1px solid #c4b5fd;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: #1e1b4b;
+      line-height: 1.5;
+    }
+    .bundle-banner.show { display: flex; }
+    .bundle-banner-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .bundle-banner-text { flex: 1; }
+    .bundle-banner-text strong { font-weight: 600; }
+    .bundle-banner-btn {
+      display: inline-block;
+      background: #7c3aed;
+      color: #fff;
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .bundle-banner-btn:hover { background: #6d28d9; }
+    @media (max-width: 640px) {
+      .bundle-banner { flex-direction: column; text-align: center; }
+    }
+
     @media (max-width: 1024px) {
       .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
       .dashboard-grid .stat-card { grid-row: auto; }
@@ -155,6 +192,19 @@
 <div class="wrap">
   <main>
     <div class="dashboard-wrap">
+
+      <!-- Bundle banner (hidden by default, shown via JS if user has bundle=lu) -->
+      <div class="bundle-banner" id="bundleBanner">
+        <span class="bundle-banner-icon">🎁</span>
+        <div class="bundle-banner-text">
+          <strong>Äre Pak-Offer ass aktiv!</strong>
+          Dir hutt och Zougang zu der <strong>Épreuve Vivre au Luxembourg</strong> — déiselwecht E-Mail an Passwuert.
+        </div>
+        <a href="https://vivre-ensemble.lu/login" class="bundle-banner-btn">
+          Vivre au Luxembourg öffnen →
+        </a>
+      </div>
+
       <div class="dashboard-grid">
 
         <!-- Stat Card 1: Progress -->
@@ -283,7 +333,18 @@
     generateTestsTable();
     updateStatsCards();
     updateCountdown();
+    checkBundleBanner();
   });
+
+  // ==========================================================================
+  // BUNDLE BANNER
+  // ==========================================================================
+
+  function checkBundleBanner() {
+    if (localStorage.getItem('cl_bundle') === 'lu') {
+      document.getElementById('bundleBanner').classList.add('show');
+    }
+  }
 
   // ==========================================================================
   // COUNTDOWN
