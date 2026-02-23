@@ -11,6 +11,41 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/checkout.css">
+
+  <style>
+    /* ── Plan toggle ── */
+    .plan-toggle { display:flex; gap:.75rem; margin-bottom:1.5rem; }
+    .plan-card {
+      flex:1; padding:1.1rem 1rem; border:2px solid #e5e7eb; border-radius:1rem;
+      cursor:pointer; background:#fff; transition:border-color .15s, box-shadow .15s;
+      position:relative; text-align:center;
+    }
+    .plan-card:hover { border-color:#c4b5fd; }
+    .plan-card.selected { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,.15); }
+    .plan-card-badge {
+      position:absolute; top:-.65rem; left:50%; transform:translateX(-50%);
+      background:#7c3aed; color:#fff; font-size:.68rem; font-weight:600;
+      padding:.15rem .65rem; border-radius:1rem; white-space:nowrap;
+    }
+    .plan-card-name { font-weight:600; font-size:.92rem; color:#1a1a1a; margin-bottom:.25rem; }
+    .plan-card-price { font-size:1.3rem; font-weight:700; color:#7c3aed; }
+    .plan-card-price .was { font-size:.82rem; color:#9ca3af; text-decoration:line-through; font-weight:400; margin-right:.3rem; }
+    .plan-card-save {
+      display:inline-block; margin-top:.35rem; font-size:.72rem; font-weight:600;
+      color:#059669; background:#ecfdf5; padding:.15rem .5rem; border-radius:.5rem;
+    }
+    .plan-card-sub { font-size:.75rem; color:#6b7280; margin-top:.3rem; }
+
+    /* ── Sidebar dynamic updates ── */
+    .bundle-extras { display:none; }
+    .bundle-extras.show { display:block; }
+    .bundle-extras li { color:#7c3aed; }
+    .price-update { transition:opacity .15s; }
+
+    @media(max-width:600px){
+      .plan-toggle { flex-direction:column; }
+    }
+  </style>
 </head>
 
 <body>
@@ -36,7 +71,7 @@
 
     <aside class="features">
       <h2 data-t="plan_title"></h2>
-      <div class="price">69 €</div>
+      <div class="price price-update" id="sidebarPrice">69 €</div>
       <div class="once" data-t="plan_once"></div>
 
       <div class="divider"></div>
@@ -52,6 +87,13 @@
         <li data-t="benefit_6"></li>
       </ul>
 
+      <ul class="benefits bundle-extras" id="bundleExtras">
+        <li data-t="bundle_1"></li>
+        <li data-t="bundle_2"></li>
+        <li data-t="bundle_3"></li>
+        <li data-t="bundle_4"></li>
+      </ul>
+
       <p class="recommend" data-t="social_proof"></p>
     </aside>
 
@@ -60,6 +102,22 @@
 
         <h1 data-t="checkout_title"></h1>
         <div class="secure-line" data-t="secure_line"></div>
+
+        <!-- ── Plan toggle ── -->
+        <div class="plan-toggle" id="planToggle">
+          <div class="plan-card" data-plan="solo" id="planSolo">
+            <div class="plan-card-name" data-t="toggle_solo_name"></div>
+            <div class="plan-card-price">69 €</div>
+            <div class="plan-card-sub" data-t="toggle_solo_sub"></div>
+          </div>
+          <div class="plan-card" data-plan="bundle" id="planBundle">
+            <div class="plan-card-badge" data-t="toggle_bundle_badge"></div>
+            <div class="plan-card-name" data-t="toggle_bundle_name"></div>
+            <div class="plan-card-price"><span class="was">138 €</span> 99 €</div>
+            <div class="plan-card-save" data-t="toggle_bundle_save"></div>
+            <div class="plan-card-sub" data-t="toggle_bundle_sub"></div>
+          </div>
+        </div>
 
         <div class="checkout-flow">
 
@@ -103,7 +161,7 @@ const I18N = {
 
 lb: {
   brand_title: "CivicLearn Sproochentest",
-  plan_title: "Premium Zougang Sproochentest",
+  plan_title: "Premium Zougang",
   plan_once: "Eemolbezuelung · dauerhaften Zougang",
 
   included_title: "Wat ass abegraff",
@@ -114,10 +172,22 @@ lb: {
   benefit_5: "Detailléiert Feedback pro Kompetenz",
   benefit_6: "Direkt Zougang no der Bezuelung",
 
+  bundle_1: "+ Épreuve Vivre au Luxembourg",
+  bundle_2: "+ 3 Themen: Geschicht · Institutiounen · Grondrechter",
+  bundle_3: "+ Froen op Franséisch, Englesch an Däitsch",
+  bundle_4: "+ Simulatiounen ënner Zäitdrock (60 Min.)",
+
   social_proof: "Fir Kandidaten, déi sech op de Lëtzebuerger Sproochentest virbereeden.",
 
   checkout_title: "Premium Zougang aktivéieren",
   secure_line: "100 % sécher Bezuelung iwwer Stripe",
+
+  toggle_solo_name: "Sproochentest",
+  toggle_solo_sub: "Nëmmen Sproochentest",
+  toggle_bundle_name: "Sproochentest + Vivre",
+  toggle_bundle_badge: "Populärsten",
+  toggle_bundle_save: "Spuert 39 €",
+  toggle_bundle_sub: "Béid Tester mat engem Login",
 
   cta_start: "Weider zur sécherer Bezuelung",
   note_redirect: "Dir gitt op Stripe weidergeleet.",
@@ -138,7 +208,7 @@ lb: {
 
 fr: {
   brand_title: "CivicLearn Sproochentest",
-  plan_title: "Accès Premium Sproochentest",
+  plan_title: "Accès Premium",
   plan_once: "Paiement unique · accès à vie",
 
   included_title: "Inclus",
@@ -149,10 +219,22 @@ fr: {
   benefit_5: "Feedback détaillé",
   benefit_6: "Accès immédiat après paiement",
 
+  bundle_1: "+ Épreuve Vivre au Luxembourg",
+  bundle_2: "+ 3 thèmes : Histoire · Institutions · Droits fondamentaux",
+  bundle_3: "+ Questions en français, anglais et allemand",
+  bundle_4: "+ Simulations chronométrées (60 min.)",
+
   social_proof: "Pour les candidats au Sproochentest luxembourgeois.",
 
   checkout_title: "Activer l'accès Premium",
   secure_line: "Paiement 100 % sécurisé via Stripe",
+
+  toggle_solo_name: "Sproochentest",
+  toggle_solo_sub: "Sproochentest uniquement",
+  toggle_bundle_name: "Sproochentest + Vivre",
+  toggle_bundle_badge: "Le plus populaire",
+  toggle_bundle_save: "Économisez 39 €",
+  toggle_bundle_sub: "Les deux tests avec un seul login",
 
   cta_start: "Continuer vers le paiement sécurisé",
   note_redirect: "Redirection vers Stripe.",
@@ -173,7 +255,7 @@ fr: {
 
 de: {
   brand_title: "CivicLearn Sproochentest",
-  plan_title: "Premium-Zugang Sproochentest",
+  plan_title: "Premium-Zugang",
   plan_once: "Einmalzahlung · lebenslanger Zugriff",
 
   included_title: "Enthalten",
@@ -184,10 +266,22 @@ de: {
   benefit_5: "Detailliertes Feedback",
   benefit_6: "Sofortiger Zugriff nach Zahlung",
 
+  bundle_1: "+ Épreuve Vivre au Luxembourg",
+  bundle_2: "+ 3 Themen: Geschichte · Institutionen · Grundrechte",
+  bundle_3: "+ Fragen auf Französisch, Englisch und Deutsch",
+  bundle_4: "+ Simulationen unter Zeitdruck (60 Min.)",
+
   social_proof: "Für Kandidaten des Luxemburger Sproochentests.",
 
   checkout_title: "Premium-Zugang aktivieren",
   secure_line: "100 % sichere Zahlung über Stripe",
+
+  toggle_solo_name: "Sproochentest",
+  toggle_solo_sub: "Nur Sproochentest",
+  toggle_bundle_name: "Sproochentest + Vivre",
+  toggle_bundle_badge: "Am beliebtesten",
+  toggle_bundle_save: "39 € sparen",
+  toggle_bundle_sub: "Beide Tests mit einem Login",
 
   cta_start: "Weiter zur sicheren Zahlung",
   note_redirect: "Weiterleitung zu Stripe.",
@@ -208,7 +302,7 @@ de: {
 
 en: {
   brand_title: "CivicLearn Sproochentest",
-  plan_title: "Premium Access Sproochentest",
+  plan_title: "Premium Access",
   plan_once: "One-time payment · lifetime access",
 
   included_title: "Included",
@@ -219,10 +313,22 @@ en: {
   benefit_5: "Detailed feedback",
   benefit_6: "Instant access after payment",
 
+  bundle_1: "+ Épreuve Vivre au Luxembourg",
+  bundle_2: "+ 3 themes: History · Institutions · Fundamental Rights",
+  bundle_3: "+ Questions in French, English and German",
+  bundle_4: "+ Timed simulations (60 min.)",
+
   social_proof: "For candidates preparing for the Luxembourg Sproochentest.",
 
   checkout_title: "Activate Premium Access",
   secure_line: "100% secure payment via Stripe",
+
+  toggle_solo_name: "Sproochentest",
+  toggle_solo_sub: "Sproochentest only",
+  toggle_bundle_name: "Sproochentest + Vivre",
+  toggle_bundle_badge: "Most popular",
+  toggle_bundle_save: "Save 39 €",
+  toggle_bundle_sub: "Both tests with one login",
 
   cta_start: "Continue to secure payment",
   note_redirect: "You will be redirected to Stripe.",
@@ -264,27 +370,77 @@ applyLang("lb");
 
 <script>
 (function(){
-const s1=stepInitial,s2=stepEmail,s3=stepConfirm;
-startCheckout.onclick=()=>{s1.hidden=true;s2.hidden=false;}
-continueWithEmail.onclick=()=>{
-const v=checkoutEmail.value.trim();
-if(!v)return alert(I18N[currentLang].msg_enter_email);
-if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))
-return alert(I18N[currentLang].msg_invalid_email);
-emailDisplay.textContent=v;
-s2.hidden=true;s3.hidden=false;
+
+/* ── Plan state ── */
+const PLANS = {
+  solo:   { product: "sproochentest-premium",       price: "69 €" },
+  bundle: { product: "sproochentest-vivre-bundle",   price: "99 €" }
 };
-editEmail.onclick=()=>{s3.hidden=true;s2.hidden=false;}
-confirmEmail.onclick=async()=>{
-const v=checkoutEmail.value.trim();
-const r=await fetch("https://payments.civiclearn.com/create-checkout-session",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({email:v,product:"sproochentest-premium"})
-});
-const d=await r.json();
-window.location.href=d.url;
+
+let selectedPlan = "solo";
+
+/* Read ?plan=bundle from URL */
+const urlPlan = new URLSearchParams(window.location.search).get("plan");
+if (urlPlan === "bundle") selectedPlan = "bundle";
+
+/* DOM refs */
+const cardSolo   = document.getElementById("planSolo");
+const cardBundle = document.getElementById("planBundle");
+const sidebar    = document.getElementById("sidebarPrice");
+const extras     = document.getElementById("bundleExtras");
+
+function selectPlan(plan) {
+  selectedPlan = plan;
+  cardSolo.classList.toggle("selected", plan === "solo");
+  cardBundle.classList.toggle("selected", plan === "bundle");
+  sidebar.textContent = PLANS[plan].price;
+  extras.classList.toggle("show", plan === "bundle");
+}
+
+cardSolo.onclick   = () => selectPlan("solo");
+cardBundle.onclick  = () => selectPlan("bundle");
+
+/* Init */
+selectPlan(selectedPlan);
+
+/* ── Checkout flow (email double-check) ── */
+const s1=stepInitial, s2=stepEmail, s3=stepConfirm;
+
+startCheckout.onclick = () => { s1.hidden=true; s2.hidden=false; };
+
+continueWithEmail.onclick = () => {
+  const v = checkoutEmail.value.trim();
+  if (!v) return alert(I18N[currentLang].msg_enter_email);
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))
+    return alert(I18N[currentLang].msg_invalid_email);
+  emailDisplay.textContent = v;
+  s2.hidden=true; s3.hidden=false;
 };
+
+editEmail.onclick = () => { s3.hidden=true; s2.hidden=false; };
+
+confirmEmail.onclick = async () => {
+  const v = checkoutEmail.value.trim();
+  const msg = document.getElementById("checkoutMessage");
+  msg.textContent = I18N[currentLang].msg_connecting;
+
+  try {
+    const r = await fetch("https://payments.civiclearn.com/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: v, product: PLANS[selectedPlan].product })
+    });
+    const d = await r.json();
+    if (d.url) {
+      window.location.href = d.url;
+    } else {
+      msg.textContent = d.error || I18N[currentLang].msg_error;
+    }
+  } catch (e) {
+    msg.textContent = I18N[currentLang].msg_error;
+  }
+};
+
 })();
 </script>
 
