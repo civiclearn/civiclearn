@@ -9,29 +9,47 @@
   <link rel="stylesheet" href="/assets/css/checkout.css">
 
   <style>
-    .checkout-header .lang-switch {
-      display: flex;
-      gap: 8px;
-      align-items: center;
+   /* ── Language switch ── */
+    .lang-switch { display:flex; gap:.35rem; }
+    .lang-switch button {
+      font-family:"Lexend",sans-serif; font-size:.78rem; font-weight:500;
+      padding:.3rem .55rem; border:1.5px solid rgba(0,0,0,.12); border-radius:.45rem;
+      background:transparent; color:#555; cursor:pointer; transition:all .15s;
     }
-    .checkout-header .lang-switch button {
-      min-width: 38px;
-      height: 32px;
-      padding: 0 10px;
-      border-radius: 10px;
-      border: 1px solid #d8d6e3;
-      background: #f6f5fb;
-      color: #2d2b38;
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
+    .lang-switch button:hover { border-color:#7c3aed; color:#7c3aed; }
+    .lang-switch button.active { background:#7c3aed; border-color:#7c3aed; color:#fff; }
+
+    /* ── Plan toggle ── */
+    .plan-toggle { display:flex; gap:.75rem; margin-bottom:1.5rem; }
+    .plan-card {
+      flex:1; padding:1.1rem 1rem; border:2px solid #e5e7eb; border-radius:1rem;
+      cursor:pointer; background:#fff; transition:border-color .15s, box-shadow .15s;
+      position:relative; text-align:center;
     }
-    .checkout-header .lang-switch button.active {
-      background: #6b4eff;
-      color: #fff;
-      border-color: #6b4eff;
-      box-shadow: 0 4px 12px rgba(107,78,255,.25);
+    .plan-card:hover { border-color:#c4b5fd; }
+    .plan-card.selected { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,.15); }
+    .plan-card-badge {
+      position:absolute; top:-.65rem; left:50%; transform:translateX(-50%);
+      background:#7c3aed; color:#fff; font-size:.68rem; font-weight:600;
+      padding:.15rem .65rem; border-radius:1rem; white-space:nowrap;
+    }
+    .plan-card-name { font-weight:600; font-size:.92rem; color:#1a1a1a; margin-bottom:.25rem; }
+    .plan-card-price { font-size:1.3rem; font-weight:700; color:#7c3aed; }
+    .plan-card-price .was { font-size:.82rem; color:#9ca3af; text-decoration:line-through; font-weight:400; margin-right:.3rem; }
+    .plan-card-save {
+      display:inline-block; margin-top:.35rem; font-size:.72rem; font-weight:600;
+      color:#059669; background:#ecfdf5; padding:.15rem .5rem; border-radius:.5rem;
+    }
+    .plan-card-sub { font-size:.75rem; color:#6b7280; margin-top:.3rem; }
+
+    /* ── Sidebar dynamic updates ── */
+    .bundle-extras { display:none; }
+    .bundle-extras.show { display:block; }
+    .bundle-extras li { color:#7c3aed; }
+    .price-update { transition:opacity .15s; }
+
+    @media(max-width:600px){
+      .plan-toggle { flex-direction:column; }
     }
   </style>
 </head>
@@ -44,13 +62,11 @@
       <img src="/assets/images/lu.svg" alt="Luxembourg">
       <span data-t="brand_title"></span>
     </div>
-	
-    <div class="checkout-right">
-      <div class="lang-switch">
-        <button data-lang="fr">FR</button>
-        <button data-lang="de">DE</button>
-        <button data-lang="en">EN</button>
-      </div>
+
+    <div class="lang-switch">
+      <button data-lang="fr">FR</button>
+      <button data-lang="de">DE</button>
+      <button data-lang="en">EN</button>
     </div>
   </div>
 </header>
@@ -58,10 +74,10 @@
 <main>
   <div class="layout">
 
-    <!-- LEFT CARD -->
+    <!-- LEFT SIDEBAR -->
     <aside class="features">
       <h2 data-t="plan_title"></h2>
-      <div class="price" data-t="plan_price"></div>
+      <div class="price price-update" id="sidebarPrice">69 €</div>
       <div class="once" data-t="plan_once"></div>
 
       <div class="divider"></div>
@@ -75,54 +91,62 @@
         <li data-t="benefit_4"></li>
         <li data-t="benefit_5"></li>
         <li data-t="benefit_6"></li>
-        <li data-t="benefit_7"></li>
-        <li data-t="benefit_8"></li>
-        <li data-t="benefit_9"></li>
-        <li data-t="benefit_10"></li>
-        <li data-t="benefit_11"></li>
-        <li data-t="benefit_12"></li>
+      </ul>
+
+      <ul class="benefits bundle-extras" id="bundleExtras">
+        <li data-t="bundle_1"></li>
+        <li data-t="bundle_2"></li>
+        <li data-t="bundle_3"></li>
+        <li data-t="bundle_4"></li>
       </ul>
 
       <p class="recommend" data-t="social_proof"></p>
     </aside>
 
-    <!-- RIGHT CARD -->
+    <!-- RIGHT CHECKOUT -->
     <section class="right">
       <div class="checkout-card">
 
         <h1 data-t="checkout_title"></h1>
         <div class="secure-line" data-t="secure_line"></div>
 
+        <!-- ── Plan toggle ── -->
+        <div class="plan-toggle" id="planToggle">
+          <div class="plan-card" data-plan="solo" id="planSolo">
+            <div class="plan-card-name" data-t="toggle_solo_name"></div>
+            <div class="plan-card-price">69 €</div>
+            <div class="plan-card-sub" data-t="toggle_solo_sub"></div>
+          </div>
+          <div class="plan-card" data-plan="bundle" id="planBundle">
+            <div class="plan-card-badge" data-t="toggle_bundle_badge"></div>
+            <div class="plan-card-name" data-t="toggle_bundle_name"></div>
+            <div class="plan-card-price"><span class="was">138 €</span> 99 €</div>
+            <div class="plan-card-save" data-t="toggle_bundle_save"></div>
+            <div class="plan-card-sub" data-t="toggle_bundle_sub"></div>
+          </div>
+        </div>
+
         <div class="checkout-flow">
 
-          <!-- STEP 1 -->
           <div class="checkout-step" id="stepInitial">
             <button class="pay-btn" id="startCheckout" data-t="cta_start"></button>
             <p class="small-note" data-t="note_redirect"></p>
           </div>
 
-          <!-- STEP 2 -->
           <div class="checkout-step" id="stepEmail" hidden>
-            <p class="email-instructions" data-t="email_instruction"></p>
+            <p data-t="email_instruction"></p>
 
             <div class="email-field-group">
               <label for="checkoutEmail" data-t="email_label"></label>
-              <input
-                id="checkoutEmail"
-                type="email"
-                placeholder="you@example.com"
-                autocomplete="email"
-              />
+              <input id="checkoutEmail" type="email" autocomplete="email"/>
             </div>
 
             <button class="pay-btn" id="continueWithEmail" data-t="cta_continue"></button>
           </div>
 
-          <!-- STEP 3 -->
           <div class="checkout-step" id="stepConfirm" hidden>
             <p data-t="confirm_text"></p>
             <p class="email-display" id="emailDisplay"></p>
-            <p class="confirm-warning" data-t="confirm_warning"></p>
 
             <div class="confirm-actions">
               <button class="pay-btn" id="confirmEmail" data-t="cta_confirm"></button>
@@ -131,17 +155,6 @@
           </div>
 
           <div id="checkoutMessage" class="checkout-message"></div>
-        </div>
-
-        <div class="trust">
-          <div>🔒 <span data-t="trust_secure"></span></div>
-          <div>⚡ <span data-t="trust_instant"></span></div>
-          <div>✔ <span data-t="trust_no_sub"></span></div>
-        </div>
-
-        <div class="after-text">
-          <span data-t="already_account"></span>
-          <a href="/lux/login.html" data-t="login_link"></a>
         </div>
 
       </div>
@@ -155,155 +168,147 @@
 ========================= -->
 <script>
 const I18N = {
-  fr: {
-    brand_title: "Vivre-Ensemble",
-    plan_title: "Accès Premium",
-    plan_price: "69 EUR",
-    plan_once: "Paiement unique · accès à vie",
 
-    included_title: "Inclus",
-    benefit_1: "Questions conformes au test Vivre-Ensemble",
-    benefit_2: "Institutions, droits et devoirs",
-    benefit_3: "Culture civique luxembourgeoise",
-    benefit_4: "Histoire et société du Luxembourg",
-    benefit_5: "Sessions courtes et ciblées",
-    benefit_6: "Simulations réalistes",
-    benefit_7: "Regroupement automatique des questions difficiles",
-    benefit_8: "Suivi de progression par thème",
-    benefit_9: "Statistiques détaillées",
-    benefit_10: "Historique complet",
-    benefit_11: "Rappels optionnels",
-    benefit_12: "Accès immédiat après paiement",
+fr: {
+  brand_title: "CivicLearn Vivre-Ensemble",
+  plan_title: "Accès Premium",
+  plan_once: "Paiement unique · accès à vie",
 
-    social_proof: "Utilisé par des candidats ayant réussi le test Vivre-Ensemble.",
+  included_title: "Inclus",
+  benefit_1: "Questions conformes au test Vivre-Ensemble",
+  benefit_2: "Institutions, droits et devoirs",
+  benefit_3: "Simulations chronométrées (60 min.)",
+  benefit_4: "Questions en français, anglais et allemand",
+  benefit_5: "Statistiques et suivi de progression",
+  benefit_6: "Accès immédiat après paiement",
 
-    checkout_title: "Activer l’accès Premium",
-    secure_line: "Paiement 100 % sécurisé via Stripe",
+  bundle_1: "+ 10 simulations Sproochentest",
+  bundle_2: "+ Oral : expression orale évaluée par IA",
+  bundle_3: "+ Écoute : compréhension orale",
+  bundle_4: "+ Feedback détaillé par compétence",
 
-    cta_start: "Continuer vers le paiement sécurisé",
-    note_redirect: "Vous serez redirigé vers Stripe.",
+  social_proof: "Utilisé par des candidats ayant réussi le test Vivre-Ensemble.",
 
-    email_instruction: "Entrez l’adresse e-mail utilisée pour votre compte.",
-    email_label: "Adresse e-mail",
-    cta_continue: "Continuer",
+  checkout_title: "Activer l'accès Premium",
+  secure_line: "Paiement 100 % sécurisé via Stripe",
 
-    confirm_text: "Le compte sera créé avec cette adresse :",
-    confirm_warning: "Vérifiez que l’adresse e-mail affichée est correctement écrite. Si l’adresse est correcte, cliquez sur „Oui, continuer“.",
-    cta_confirm: "Oui, continuer",
-    cta_edit: "Modifier",
+  toggle_solo_name: "Vivre-Ensemble",
+  toggle_solo_sub: "Vivre-Ensemble uniquement",
+  toggle_bundle_name: "Vivre-Ensemble + Sproochentest",
+  toggle_bundle_badge: "Le plus populaire",
+  toggle_bundle_save: "Économisez 39 €",
+  toggle_bundle_sub: "Les deux tests avec un seul login",
 
-    trust_secure: "Paiement sécurisé",
-    trust_instant: "Accès immédiat",
-    trust_no_sub: "Sans abonnement",
+  cta_start: "Continuer vers le paiement sécurisé",
+  note_redirect: "Redirection vers Stripe.",
 
-    already_account: "Déjà un compte ?",
-    login_link: "Se connecter",
+  email_instruction: "Entrez votre adresse e-mail.",
+  email_label: "E-mail",
+  cta_continue: "Continuer",
 
-    msg_enter_email: "Adresse e-mail requise.",
-    msg_invalid_email: "Adresse e-mail invalide.",
-    msg_connecting: "Connexion à Stripe…",
-    msg_error: "Une erreur est survenue."
-  },
+  confirm_text: "Le compte sera créé avec :",
+  cta_confirm: "Oui, continuer",
+  cta_edit: "Modifier",
 
-  de: {
-    brand_title: "Vivre-Ensemble",
-    plan_title: "Premium-Zugang",
-    plan_price: "69 EUR",
-    plan_once: "Einmalzahlung · lebenslanger Zugriff",
+  msg_enter_email: "Adresse e-mail requise.",
+  msg_invalid_email: "Adresse e-mail invalide.",
+  msg_connecting: "Connexion à Stripe…",
+  msg_error: "Une erreur est survenue."
+},
 
-    included_title: "Enthalten",
-    benefit_1: "Fragen gemäß Vivre-Ensemble-Test",
-    benefit_2: "Institutionen, Rechte und Pflichten",
-    benefit_3: "Staatsbürgerkunde Luxemburgs",
-    benefit_4: "Geschichte und Gesellschaft",
-    benefit_5: "Kurze Lerneinheiten",
-    benefit_6: "Realistische Simulationen",
-    benefit_7: "Automatische Sammlung schwieriger Fragen",
-    benefit_8: "Fortschritt nach Themen",
-    benefit_9: "Detaillierte Statistiken",
-    benefit_10: "Vollständiger Verlauf",
-    benefit_11: "Optionale Erinnerungen",
-    benefit_12: "Sofortiger Zugriff nach Zahlung",
+de: {
+  brand_title: "CivicLearn Vivre-Ensemble",
+  plan_title: "Premium-Zugang",
+  plan_once: "Einmalzahlung · lebenslanger Zugriff",
 
-    social_proof: "Von erfolgreichen Kandidaten genutzt.",
+  included_title: "Enthalten",
+  benefit_1: "Fragen gemäß Vivre-Ensemble-Test",
+  benefit_2: "Institutionen, Rechte und Pflichten",
+  benefit_3: "Simulationen unter Zeitdruck (60 Min.)",
+  benefit_4: "Fragen auf Französisch, Englisch und Deutsch",
+  benefit_5: "Statistiken und Fortschrittsverfolgung",
+  benefit_6: "Sofortiger Zugriff nach Zahlung",
 
-    checkout_title: "Premium-Zugang aktivieren",
-    secure_line: "100 % sichere Zahlung über Stripe",
+  bundle_1: "+ 10 Sproochentest-Simulationen",
+  bundle_2: "+ Sprechen: KI-basierte Auswertung",
+  bundle_3: "+ Hören: Hörverstehen",
+  bundle_4: "+ Detailliertes Feedback pro Kompetenz",
 
-    cta_start: "Weiter zur sicheren Zahlung",
-    note_redirect: "Weiterleitung zu Stripe.",
+  social_proof: "Von erfolgreichen Kandidaten genutzt.",
 
-    email_instruction: "E-Mail-Adresse eingeben.",
-    email_label: "E-Mail",
-    cta_continue: "Weiter",
+  checkout_title: "Premium-Zugang aktivieren",
+  secure_line: "100 % sichere Zahlung über Stripe",
 
-    confirm_text: "Das Konto wird mit dieser Adresse erstellt:",
-    confirm_warning: "Überprüfen Sie, ob die angezeigte E-Mail-Adresse korrekt geschrieben ist. Wenn die Adresse korrekt ist, klicken Sie auf „Ja, fortfahren“.",
-    cta_confirm: "Ja, fortfahren",
-    cta_edit: "Ändern",
+  toggle_solo_name: "Vivre-Ensemble",
+  toggle_solo_sub: "Nur Vivre-Ensemble",
+  toggle_bundle_name: "Vivre-Ensemble + Sproochentest",
+  toggle_bundle_badge: "Am beliebtesten",
+  toggle_bundle_save: "39 € sparen",
+  toggle_bundle_sub: "Beide Tests mit einem Login",
 
-    trust_secure: "Sichere Zahlung",
-    trust_instant: "Sofortiger Zugriff",
-    trust_no_sub: "Keine Abos",
+  cta_start: "Weiter zur sicheren Zahlung",
+  note_redirect: "Weiterleitung zu Stripe.",
 
-    already_account: "Bereits ein Konto?",
-    login_link: "Anmelden",
+  email_instruction: "E-Mail-Adresse eingeben.",
+  email_label: "E-Mail",
+  cta_continue: "Weiter",
 
-    msg_enter_email: "E-Mail erforderlich.",
-    msg_invalid_email: "Ungültige E-Mail-Adresse.",
-    msg_connecting: "Verbindung zu Stripe…",
-    msg_error: "Ein Fehler ist aufgetreten."
-  },
+  confirm_text: "Das Konto wird erstellt mit:",
+  cta_confirm: "Ja, weiter",
+  cta_edit: "Ändern",
 
-  en: {
-    brand_title: "Vivre-Ensemble",
-    plan_title: "Premium access",
-    plan_price: "69 EUR",
-    plan_once: "One-time payment · lifetime access",
+  msg_enter_email: "E-Mail erforderlich.",
+  msg_invalid_email: "Ungültige E-Mail.",
+  msg_connecting: "Verbindung zu Stripe…",
+  msg_error: "Fehler aufgetreten."
+},
 
-    included_title: "Included",
-    benefit_1: "Questions aligned with the Vivre-Ensemble test",
-    benefit_2: "Institutions, rights and duties",
-    benefit_3: "Luxembourg civic knowledge",
-    benefit_4: "History and society",
-    benefit_5: "Short focused sessions",
-    benefit_6: "Realistic simulations",
-    benefit_7: "Automatic regrouping of difficult questions",
-    benefit_8: "Progress tracking by topic",
-    benefit_9: "Detailed statistics",
-    benefit_10: "Full history",
-    benefit_11: "Optional reminders",
-    benefit_12: "Instant access after payment",
+en: {
+  brand_title: "CivicLearn Vivre-Ensemble",
+  plan_title: "Premium Access",
+  plan_once: "One-time payment · lifetime access",
 
-    social_proof: "Used by successful candidates.",
+  included_title: "Included",
+  benefit_1: "Questions aligned with the Vivre-Ensemble test",
+  benefit_2: "Institutions, rights and duties",
+  benefit_3: "Timed simulations (60 min.)",
+  benefit_4: "Questions in French, English and German",
+  benefit_5: "Statistics and progress tracking",
+  benefit_6: "Instant access after payment",
 
-    checkout_title: "Activate Premium access",
-    secure_line: "100% secure payment via Stripe",
+  bundle_1: "+ 10 Sproochentest simulations",
+  bundle_2: "+ Speaking: AI-powered evaluation",
+  bundle_3: "+ Listening: audio comprehension",
+  bundle_4: "+ Detailed feedback per skill",
 
-    cta_start: "Continue to secure payment",
-    note_redirect: "You will be redirected to Stripe.",
+  social_proof: "Used by successful candidates.",
 
-    email_instruction: "Enter the email used for your account.",
-    email_label: "Email",
-    cta_continue: "Continue",
+  checkout_title: "Activate Premium Access",
+  secure_line: "100% secure payment via Stripe",
 
-    confirm_text: "The account will be created with this email:",
-    confirm_warning: "Check that the email address shown is spelled correctly. If it is correct, click “Yes, continue.”",
-    cta_confirm: "Yes, continue",
-    cta_edit: "Edit",
+  toggle_solo_name: "Vivre-Ensemble",
+  toggle_solo_sub: "Vivre-Ensemble only",
+  toggle_bundle_name: "Vivre-Ensemble + Sproochentest",
+  toggle_bundle_badge: "Most popular",
+  toggle_bundle_save: "Save €39",
+  toggle_bundle_sub: "Both tests with one login",
 
-    trust_secure: "Secure payment",
-    trust_instant: "Instant access",
-    trust_no_sub: "No subscription",
+  cta_start: "Continue to secure payment",
+  note_redirect: "You will be redirected to Stripe.",
 
-    already_account: "Already have an account?",
-    login_link: "Log in",
+  email_instruction: "Enter your email address.",
+  email_label: "Email",
+  cta_continue: "Continue",
 
-    msg_enter_email: "Email required.",
-    msg_invalid_email: "Invalid email address.",
-    msg_connecting: "Connecting to Stripe…",
-    msg_error: "An error occurred."
-  }
+  confirm_text: "The account will be created with:",
+  cta_confirm: "Yes, continue",
+  cta_edit: "Edit",
+
+  msg_enter_email: "Email required.",
+  msg_invalid_email: "Invalid email.",
+  msg_connecting: "Connecting to Stripe…",
+  msg_error: "An error occurred."
+}
 };
 </script>
 
@@ -312,104 +317,99 @@ const I18N = {
 ========================= -->
 <script>
 let currentLang = "fr";
-
-function applyLang(lang) {
+function applyLang(lang){
   currentLang = lang;
   document.documentElement.lang = lang;
-
-  document.querySelectorAll(".lang-switch button").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.lang === lang);
+  document.querySelectorAll("[data-t]").forEach(el=>{
+    const key = el.dataset.t;
+    if(I18N[lang][key]) el.textContent = I18N[lang][key];
   });
-
-  document.querySelectorAll("[data-t]").forEach(el => {
-    const key = el.getAttribute("data-t");
-    if (I18N[lang][key]) el.textContent = I18N[lang][key];
+  document.querySelectorAll(".lang-switch button").forEach(b=>{
+    b.classList.toggle("active", b.dataset.lang===lang);
   });
 }
-
-document.querySelectorAll(".lang-switch button").forEach(btn => {
-  btn.addEventListener("click", () => applyLang(btn.dataset.lang));
+document.querySelectorAll(".lang-switch button").forEach(b=>{
+  b.onclick=()=>applyLang(b.dataset.lang);
 });
-
-applyLang(currentLang);
+applyLang("fr");
 </script>
 
 <!-- =========================
      CHECKOUT LOGIC
 ========================= -->
 <script>
-(function () {
-  const stepInitial = document.getElementById("stepInitial");
-  const stepEmail = document.getElementById("stepEmail");
-  const stepConfirm = document.getElementById("stepConfirm");
+(function(){
 
-  const startBtn = document.getElementById("startCheckout");
-  const continueBtn = document.getElementById("continueWithEmail");
-  const confirmBtn = document.getElementById("confirmEmail");
-  const editBtn = document.getElementById("editEmail");
+/* ── Plan state ── */
+const PLANS = {
+  solo:   { product: "lux-vivre-ensemble-premium",  price: "69 €" },
+  bundle: { product: "vivre-sproochentest-bundle",   price: "99 €" }
+};
 
-  const emailInput = document.getElementById("checkoutEmail");
-  const emailDisplay = document.getElementById("emailDisplay");
-  const msgBox = document.getElementById("checkoutMessage");
+let selectedPlan = "solo";
 
-  let currentEmail = "";
+/* Read ?plan=bundle from URL */
+const urlPlan = new URLSearchParams(window.location.search).get("plan");
+if (urlPlan === "bundle") selectedPlan = "bundle";
 
-  function showMessage(type, text) {
-    msgBox.className = "checkout-message " + type;
-    msgBox.textContent = text;
-    msgBox.style.display = "block";
-  }
+/* DOM refs */
+const cardSolo   = document.getElementById("planSolo");
+const cardBundle = document.getElementById("planBundle");
+const sidebar    = document.getElementById("sidebarPrice");
+const extras     = document.getElementById("bundleExtras");
 
-  function validateEmail(val) {
-    const email = val.trim();
-    if (!email) return { ok: false, msg: I18N[currentLang].msg_enter_email };
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-      return { ok: false, msg: I18N[currentLang].msg_invalid_email };
+function selectPlan(plan) {
+  selectedPlan = plan;
+  cardSolo.classList.toggle("selected", plan === "solo");
+  cardBundle.classList.toggle("selected", plan === "bundle");
+  sidebar.textContent = PLANS[plan].price;
+  extras.classList.toggle("show", plan === "bundle");
+}
+
+cardSolo.onclick   = () => selectPlan("solo");
+cardBundle.onclick  = () => selectPlan("bundle");
+
+/* Init */
+selectPlan(selectedPlan);
+
+/* ── Checkout flow (email double-check) ── */
+const s1=stepInitial, s2=stepEmail, s3=stepConfirm;
+
+startCheckout.onclick = () => { s1.hidden=true; s2.hidden=false; };
+
+continueWithEmail.onclick = () => {
+  const v = checkoutEmail.value.trim();
+  if (!v) return alert(I18N[currentLang].msg_enter_email);
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))
+    return alert(I18N[currentLang].msg_invalid_email);
+  emailDisplay.textContent = v;
+  s2.hidden=true; s3.hidden=false;
+};
+
+editEmail.onclick = () => { s3.hidden=true; s2.hidden=false; };
+
+confirmEmail.onclick = async () => {
+  const v = checkoutEmail.value.trim();
+  const msg = document.getElementById("checkoutMessage");
+  msg.textContent = I18N[currentLang].msg_connecting;
+
+  try {
+    const r = await fetch("https://payments.civiclearn.com/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: v, product: PLANS[selectedPlan].product })
+    });
+    const d = await r.json();
+    if (d.url) {
+      window.location.href = d.url;
+    } else {
+      msg.textContent = d.error || I18N[currentLang].msg_error;
     }
-    return { ok: true, email };
+  } catch (e) {
+    msg.textContent = I18N[currentLang].msg_error;
   }
+};
 
-  startBtn.onclick = () => {
-    stepInitial.hidden = true;
-    stepEmail.hidden = false;
-    emailInput.focus();
-  };
-
-  continueBtn.onclick = () => {
-    const res = validateEmail(emailInput.value);
-    if (!res.ok) return showMessage("error", res.msg);
-    currentEmail = res.email;
-    emailDisplay.textContent = currentEmail;
-    stepEmail.hidden = true;
-    stepConfirm.hidden = false;
-  };
-
-  editBtn.onclick = () => {
-    stepConfirm.hidden = true;
-    stepEmail.hidden = false;
-  };
-
-  confirmBtn.onclick = async () => {
-    showMessage("info", I18N[currentLang].msg_connecting);
-
-    try {
-      const r = await fetch("https://payments.civiclearn.com/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: currentEmail,
-          product: "lux-vivre-ensemble-premium"
-        })
-      });
-
-      if (!r.ok) throw new Error();
-      const data = await r.json();
-      window.location.href = data.url;
-
-    } catch {
-      showMessage("error", I18N[currentLang].msg_error);
-    }
-  };
 })();
 </script>
 
