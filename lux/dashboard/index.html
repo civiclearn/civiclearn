@@ -20,6 +20,43 @@
       width: 30px !important;
       height: 30px !important;
     }
+
+    /* ─── BUNDLE BANNER ─── */
+    .bundle-banner {
+      display: none;
+      align-items: center;
+      gap: 14px;
+      background: linear-gradient(135deg, #f3f0ff 0%, #ede9fe 100%);
+      border: 1px solid #ddd6fe;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+      color: #1e1b4b;
+      line-height: 1.5;
+    }
+    .bundle-banner.show { display: flex; }
+    .bundle-banner-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .bundle-banner-text { flex: 1; }
+    .bundle-banner-text strong { font-weight: 600; }
+    .bundle-banner-btn {
+      display: inline-block;
+      background: #6b4eff;
+      color: #fff;
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .bundle-banner-btn:hover { background: #5a3de6; }
+    @media (max-width: 640px) {
+      .bundle-banner { flex-direction: column; text-align: center; }
+    }
   </style>
 
   <script>
@@ -139,6 +176,13 @@
 <main class="main">
 
 <div class="db-main">
+
+  <!-- Bundle banner (hidden by default, shown via JS if user has bundle=lu) -->
+  <div class="bundle-banner" id="bundleBanner">
+    <span class="bundle-banner-icon">🎁</span>
+    <div class="bundle-banner-text" id="bundleBannerText"></div>
+    <a href="https://civiclearn.com/sproochentest/dashboard/" class="bundle-banner-btn" id="bundleBannerBtn"></a>
+  </div>
 
   <!-- TOP METRICS -->
   <div class="db-top-metrics">
@@ -448,6 +492,36 @@ CivicLearnI18n.onReady(() => {
 <script src="/assets/js/maintenance-bar.js"></script>
 <script src="/assets/js/sync-announce.js"></script>
 <script src="/assets/js/signout.js"></script>
+
+<!-- Bundle banner -->
+<script>
+(function () {
+  const bundle = localStorage.getItem('cl_bundle');
+  if (bundle !== 'lu') return;
+
+  const lang = window.CIVICEDGE_LANG || 'fr';
+
+  const texts = {
+    fr: {
+      text: '<strong>Votre offre pack est active !</strong> Vous avez également accès au <strong>Sproochentest Training</strong> — même e-mail et mot de passe.',
+      btn: 'Ouvrir Sproochentest →'
+    },
+    de: {
+      text: '<strong>Ihr Paketangebot ist aktiv!</strong> Sie haben auch Zugang zum <strong>Sproochentest Training</strong> — gleiche E-Mail und Passwort.',
+      btn: 'Sproochentest öffnen →'
+    },
+    en: {
+      text: '<strong>Your bundle offer is active!</strong> You also have access to <strong>Sproochentest Training</strong> — same email and password.',
+      btn: 'Open Sproochentest →'
+    }
+  };
+
+  const t = texts[lang] || texts.fr;
+  document.getElementById('bundleBannerText').innerHTML = t.text;
+  document.getElementById('bundleBannerBtn').textContent = t.btn;
+  document.getElementById('bundleBanner').classList.add('show');
+})();
+</script>
 </body>
 </html>
 
