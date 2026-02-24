@@ -531,6 +531,43 @@
       margin-bottom: 8px;
     }
 
+    /* ─── BUNDLE BANNER ────────────────────────────────────── */
+    .bundle-banner {
+      display: none;
+      align-items: center;
+      gap: 14px;
+      background: linear-gradient(135deg, #fef2f2 0%, #fff1f2 100%);
+      border: 1px solid #fecdd3;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: var(--navy);
+      line-height: 1.5;
+    }
+    .bundle-banner.show { display: flex; }
+    .bundle-banner-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .bundle-banner-text { flex: 1; }
+    .bundle-banner-text strong { font-weight: 600; }
+    .bundle-banner-btn {
+      display: inline-block;
+      background: var(--red);
+      color: #fff;
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .bundle-banner-btn:hover { background: #a00d24; }
+    @media (max-width: 640px) {
+      .bundle-banner { flex-direction: column; text-align: center; }
+    }
+
     /* ─── RESPONSIVE ──────────────────────────────────────── */
     @media (max-width: 1100px) {
       .stat-row { grid-template-columns: repeat(2, 1fr); }
@@ -563,13 +600,25 @@
  <nav class="topbar-nav">
   <span class="topbar-user" id="userEmail">—</span>
   <a href="#" onclick="openGuide(); return false;">Guide</a>
-  <a href="mailto:admin@civiclearn.com">Kontakt</a>
+  <a href="/cdn-cgi/l/email-protection#7617121b1f1836151f001f151a131704185815191b">Kontakt</a>
   <button onclick="handleLogout()">Log ud</button>
 </nav>
 </header>
 
 <!-- ── MAIN ───────────────────────────────────────────────── -->
 <main>
+
+  <!-- Bundle banner (hidden by default, shown via JS if user has bundle=dk) -->
+  <div class="bundle-banner" id="bundleBanner">
+    <span class="bundle-banner-icon">🎁</span>
+    <div class="bundle-banner-text">
+      <strong>Din pakkeaftale er aktiv!</strong>
+      Du har også adgang til <strong>Indfødsretsprøven</strong> — samme e-mail og adgangskode.
+    </div>
+    <a href="https://civiclearn.com/denmark/dashboard/" class="bundle-banner-btn">
+      Åbn Indfødsretsprøven →
+    </a>
+  </div>
 
   <div class="page-heading">
     <h1>Dine simuleringer</h1>
@@ -660,7 +709,7 @@
 
 </main>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ═══════════════════════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════════════════════
@@ -696,7 +745,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   initCountdown();
   await loadAttempts();
+  checkBundleBanner();
 });
+
+// ═══════════════════════════════════════════════════════════════════════
+// BUNDLE BANNER
+// ═══════════════════════════════════════════════════════════════════════
+
+async function checkBundleBanner() {
+  try {
+    const { data, error } = await pd3Auth.supabase
+      .from('users')
+      .select('bundle')
+      .eq('id', pd3Auth.userId)
+      .maybeSingle();
+
+    if (!error && data?.bundle === 'dk') {
+      document.getElementById('bundleBanner').classList.add('show');
+    }
+  } catch (_) {
+    // Silent fail
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════════════
 // LOAD ATTEMPTS FROM pd3-hydrate
@@ -1067,10 +1137,4 @@ document.addEventListener('keydown', (e) => {
       </ol>
 
       <h3>Om AI-evalueringen</h3>
-      <p>Vores AI-evaluator er kalibreret til B2-niveau. Den straffer dig ikke for uformelt sprog i en uformel e-mail, og den hakker ikke på stilistiske valg, som en rigtig censor ikke ville reagere på. Brug karaktererne som en retningssnor — ikke en garanti. Hvis du konsekvent scorer 7 eller derover, er du godt rustet til den rigtige prøve.</p>
-
-    </div>
-  </div>
-</div>
-</body>
-</html>
+      <p>Vores AI-evaluator er kalibreret til B2-niveau. Den straffer dig ikke for uformelt sprog i en uformel e-mail, og den hakker ikke på stilistiske valg, som en rigtig censor ikke ville reagere på. Brug karaktererne som en retningssnor —
