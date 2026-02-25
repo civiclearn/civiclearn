@@ -58,16 +58,16 @@ window.CELPE = (function () {
   }
 
   // ─── HYDRATE (cached) ────────────────────────────────────────────
-  async function hydrate(email, attemptId, forceRefresh = false) {
-    if (!email || !attemptId) return null;
+  async function hydrate(userId, attemptId, forceRefresh = false) {
+    if (!userId || !attemptId) return null;
 
-    const cacheKey = `${email}::${attemptId}`;
+    const cacheKey = `${userId}::${attemptId}`;
     if (!forceRefresh && _hydrateCache && _hydrateCacheKey === cacheKey) {
       return _hydrateCache;
     }
 
     try {
-      const data = await apiFetch('celpe-hydrate', { email });
+      const data = await apiFetch('celpe-hydrate', { user_id: userId });
       _hydrateCache    = data;
       _hydrateCacheKey = cacheKey;
       return data;
@@ -219,7 +219,7 @@ window.CELPE = (function () {
      * Navigate back to the exam hub.
      */
     goBack(simId, attemptId) {
-      window.location.href = `/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
+      window.location.href = `/celpe/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
     },
 
     // ─── UI HELPERS ──────────────────────────────────────────────────
@@ -243,8 +243,8 @@ window.CELPE = (function () {
         <div style="font-size:1rem;font-weight:700;color:#0f172a;">Algo deu errado</div>
         <div style="font-size:0.85rem;color:#64748b;max-width:400px;line-height:1.5;">${this.escapeHtml(msg)}</div>
         ${simId && attemptId
-          ? `<a href="/dashboard/exam.html?sim=${simId}&attempt=${attemptId}" style="margin-top:12px;font-size:0.85rem;color:#c8102e;font-weight:600;">← Voltar ao exame</a>`
-          : `<a href="/dashboard/index.html" style="margin-top:12px;font-size:0.85rem;color:#c8102e;font-weight:600;">← Voltar ao início</a>`}
+          ? `<a href="/celpe/dashboard/exam.html?sim=${simId}&attempt=${attemptId}" style="margin-top:12px;font-size:0.85rem;color:#c8102e;font-weight:600;">← Voltar ao exame</a>`
+          : `<a href="/celpe/dashboard/index.html" style="margin-top:12px;font-size:0.85rem;color:#c8102e;font-weight:600;">← Voltar ao início</a>`}
       `;
       document.body.appendChild(el);
     },
