@@ -277,12 +277,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>`;
         footerHtml = `
           <span class="sc-meta">Concluída</span>
-          <a class="sc-btn" href="/dashboard/exam.html?sim=${sim.id}&attempt=${latest.id}">Ver resultados</a>`;
+          <a class="sc-btn" href="/celpe/dashboard/exam.html?sim=${sim.id}&attempt=${latest.id}">Ver resultados</a>`;
       } else {
         statusHtml = '<span class="sc-status progress">Em andamento</span>';
         footerHtml = `
           <span class="sc-meta">Continuar de onde parou</span>
-          <a class="sc-btn resume" href="/dashboard/exam.html?sim=${sim.id}&attempt=${latest.id}">Continuar</a>`;
+          <a class="sc-btn resume" href="/celpe/dashboard/exam.html?sim=${sim.id}&attempt=${latest.id}">Continuar</a>`;
       }
     } else {
       footerHtml = `
@@ -316,10 +316,10 @@ async function startSim(simId) {
   try {
     const result = await CELPE.apiFetch('celpe-submit-test', {
       simulation_id: simId,
-      email: celpeAuth.email,
+      user_id: celpeAuth.userId,
     });
     if (result.success) {
-      window.location.href = `/dashboard/exam.html?sim=${simId}&attempt=${result.attempt.id}`;
+      window.location.href = `/celpe/dashboard/exam.html?sim=${simId}&attempt=${result.attempt.id}`;
     } else {
       throw new Error(result.error || 'Falha ao criar simulação');
     }
