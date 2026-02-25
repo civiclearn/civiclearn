@@ -276,38 +276,48 @@ let timerSeconds = TIME_LIMIT;
 let timerInterval = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const ctx = await CELPE.init('tarefa1');
-  user      = ctx.user;
-  simId     = ctx.simId;
-  attemptId = ctx.attemptId;
-  elemKey   = ctx.elemKey;
-
-  document.getElementById('backLink').href = `/celpe/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
-
-  // Check if already done
-  const status = await CELPE.getStatus(user.id, attemptId, elemKey);
-  if (status === 'submitted' || status === 'skipped') {
-    CELPE.hideLoading();
-    document.getElementById('alreadyDoneCard').classList.add('visible');
-    document.getElementById('writeFooter').style.display = 'none';
-    document.getElementById('continueBtn').style.display = 'block';
-    document.getElementById('replyTextarea').disabled = true;
-    return;
-  }
-
-  // Load task JSON
   try {
-    const res = await fetch(`/celpe/data/sim01_tarefa1.json`);
-    examData = await res.json();
-    renderTask();
-  } catch (err) {
-    console.error('[tarefa1] load error:', err);
-    CELPE.showError('Não foi possível carregar a tarefa: ' + err.message, simId, attemptId);
-    return;
-  }
+    console.log('[T1] Step 1: calling CELPE.init...');
+    const ctx = await CELPE.init('tarefa1');
+    user      = ctx.user;
+    simId     = ctx.simId;
+    attemptId = ctx.attemptId;
+    elemKey   = ctx.elemKey;
+    console.log('[T1] Step 2: init OK', { simId, attemptId, elemKey, userId: user?.id });
 
-  startTimer();
-  CELPE.hideLoading();
+    document.getElementById('backLink').href = `/celpe/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
+
+    console.log('[T1] Step 3: calling getStatus...');
+    const status = await CELPE.getStatus(user.id, attemptId, elemKey);
+    console.log('[T1] Step 4: status =', status);
+
+    if (status === 'submitted' || status === 'skipped') {
+      CELPE.hideLoading();
+      document.getElementById('alreadyDoneCard').classList.add('visible');
+      document.getElementById('writeFooter').style.display = 'none';
+      document.getElementById('continueBtn').style.display = 'block';
+      document.getElementById('replyTextarea').disabled = true;
+      return;
+    }
+
+    console.log('[T1] Step 5: fetching JSON...');
+    const res = await fetch(`/celpe/data/sim01_tarefa1.json`);
+    console.log('[T1] Step 6: fetch status =', res.status, res.ok);
+    if (!res.ok) throw new Error(`JSON fetch failed: HTTP ${res.status}`);
+    examData = await res.json();
+    console.log('[T1] Step 7: JSON parsed, keys:', Object.keys(examData));
+
+    console.log('[T1] Step 8: calling renderTask...');
+    renderTask();
+    console.log('[T1] Step 9: renderTask OK');
+
+    startTimer();
+    CELPE.hideLoading();
+    console.log('[T1] Step 10: DONE - page ready');
+  } catch (err) {
+    console.error('[T1] CRASH at:', err.message, err.stack);
+    CELPE.showError('Erro: ' + err.message, simId, attemptId);
+  }
 });
 
 function renderTask() {
@@ -329,7 +339,7 @@ function renderTask() {
 
   // Task checklist from task_actions
   const actions = examData.task_actions || [];
-  taskItems = actions.map((a, i) => ({ id: `ta${i+1}`, label: typeof a === 'string' ? a : a.description || String(a), done: false }));
+  taskItems = actions.map((a, i) => ({ id: `ta${i+1}`, label: typeof a === 'string' ? a : a.description || JSON.stringify(a), done: false }));
   document.getElementById('taskChecklistItems').innerHTML = taskItems.map(item => `
     <div class="task-item" id="titem-${item.id}">
       <div class="task-bullet"">✓</div>
