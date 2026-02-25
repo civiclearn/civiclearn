@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   activeTab = ctx.elemKey || 'tarefa2';
   if (!TASKS.includes(activeTab)) activeTab = 'tarefa2';
 
-  document.getElementById('backLink').href = `/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
+  document.getElementById('backLink').href = `/celpe/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
 
   // Restore drafts from localStorage
   TASKS.forEach(k => {
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Load JSON data
   try {
     const [d2, d3, d4] = await Promise.all(
-      TASKS.map(k => fetch(`/dashboard/data/sim01_${k}.json`).then(r => r.json()))
+      TASKS.map(k => fetch(`/celpe/dashboard/data/sim01_${k}.json`).then(r => r.json()))
     );
     examDataMap = { tarefa2: d2, tarefa3: d3, tarefa4: d4 };
   } catch (err) {
@@ -278,7 +278,7 @@ function renderSource(key) {
 
   let mediaHtml = '';
   if (data.source_type === 'audio') {
-    mediaHtml = `<div class="audio-player"><audio controls preload="metadata"><source src="/dashboard/data/audio/${src.asset}" type="audio/mpeg">Áudio não suportado</audio></div>`;
+    mediaHtml = `<div class="audio-player"><audio controls preload="metadata"><source src="/celpe/dashboard/data/audio/${src.asset}" type="audio/mpeg">Áudio não suportado</audio></div>`;
   }
 
   let textHtml = '';
@@ -350,7 +350,7 @@ function renderWritePane(key) {
       ✅ ${st === 'skipped' ? 'Tarefa pulada.' : 'Tarefa entregue! Avaliação em andamento.'}
     </div>
     <div class="all-done-banner ${allDone ? 'visible' : ''}" id="allDoneBanner">
-      <a href="/dashboard/exam.html?sim=${simId}&attempt=${attemptId}">✅ Todas as 3 tarefas concluídas — voltar ao painel →</a>
+      <a href="/celpe/dashboard/exam.html?sim=${simId}&attempt=${attemptId}">✅ Todas as 3 tarefas concluídas — voltar ao painel →</a>
     </div>
     <div class="write-footer" id="writeFooter" ${isDone ? 'style="display:none"' : ''}>
       <button class="submit-btn" id="submitBtn" ${wc < WC_SOFT ? 'disabled' : ''} onclick="submitActive()">Entregar tarefa ${TASK_LABELS[key].num}</button>
