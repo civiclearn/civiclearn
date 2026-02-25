@@ -211,11 +211,8 @@
 // ═══════════════════════════════════════════════════════════════
 // ELEMENT KEY → JSON FILE MAPPING
 // ═══════════════════════════════════════════════════════════════
-const ELEM_FILES = {
-  tarefa2: 'sim01_tarefa2.json',
-  tarefa3: 'sim01_tarefa3.json',
-  tarefa4: 'sim01_tarefa4.json',
-};
+// Valid element keys for this page
+const VALID_KEYS = ['tarefa2', 'tarefa3', 'tarefa4'];
 
 const TASK_LABELS = {
   tarefa2: 'Tarefa 2',
@@ -251,13 +248,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       '/celpe/dashboard/exam.html?sim=' + simId + '&attempt=' + attemptId;
 
     // Determine which JSON to load
-    const filename = ELEM_FILES[elemKey];
-    if (!filename) {
+    if (!VALID_KEYS.includes(elemKey)) {
       CELPE.showError('Tarefa desconhecida: ' + elemKey, simId, attemptId);
       return;
     }
 
-    const res = await fetch('/celpe/data/' + filename);
+    const res = await fetch('/celpe/data/' + simId + '_' + elemKey + '.json');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     examData = await res.json();
     console.log('[tarefas234] JSON loaded:', elemKey, Object.keys(examData));
