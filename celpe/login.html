@@ -19,7 +19,6 @@
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;}
 
-    /* ── TOPBAR ─── */
     .topbar{background:var(--navy);border-bottom:3px solid var(--green);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;}
     .topbar-brand{display:flex;align-items:center;gap:14px;}
     .topbar-flag{width:28px;height:20px;background:var(--green);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0;}
@@ -28,28 +27,14 @@
     .brand-text{display:flex;flex-direction:column;line-height:1.1;}
     .brand-title{font-family:"Fraunces",serif;font-size:1rem;font-weight:600;color:#fff;letter-spacing:0.01em;}
     .brand-sub{font-size:0.72rem;color:#64748b;}
-    .topbar-right{display:flex;align-items:center;}
-    .btn-small{padding:7px 18px;border-radius:8px;font-size:0.78rem;font-weight:600;text-decoration:none;background:var(--green);color:#fff;transition:opacity 0.15s;}
-    .btn-small:hover{opacity:0.85;}
 
-    /* ── MAIN ─── */
     .main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
     .login-card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.04);}
 
-    /* ── TAB BAR ─── */
-    .login-tabs{display:flex;border-radius:10px;overflow:hidden;border:1.5px solid var(--border);margin-bottom:24px;}
-    .login-tab{flex:1;padding:10px 6px;font-family:"DM Sans",sans-serif;font-size:0.82rem;font-weight:600;text-align:center;border:none;background:var(--bg);color:var(--muted);cursor:pointer;transition:all 0.15s;}
-    .login-tab.active{background:var(--green);color:#fff;}
-
-    /* ── VIEWS ─── */
-    .view{display:none;}
-    .view.active{display:block;}
     .view-header{text-align:center;margin-bottom:22px;}
-    .view-icon{font-size:2rem;margin-bottom:10px;}
     .view-title{font-family:"Fraunces",serif;font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px;}
     .view-subtitle{font-size:0.85rem;color:var(--muted);line-height:1.5;}
 
-    /* ── FORM ─── */
     .form-group{margin-bottom:16px;}
     .form-label{display:block;font-size:0.78rem;font-weight:600;color:var(--slate);margin-bottom:6px;}
     .form-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:"DM Sans",sans-serif;font-size:0.92rem;color:var(--navy);background:var(--bg);transition:border-color 0.15s;outline:none;}
@@ -59,27 +44,19 @@
     .pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:0.75rem;color:var(--muted);cursor:pointer;font-family:inherit;font-weight:600;}
     .pwd-toggle:hover{color:var(--navy);}
 
-    .action-btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:"DM Sans",sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;margin-top:4px;}
+    .action-btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:"DM Sans",sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;margin-top:4px;background:var(--green);color:#fff;}
     .action-btn:hover{opacity:0.85;}
     .action-btn:disabled{opacity:0.4;cursor:default;}
-    .btn-green{background:var(--green);color:#fff;}
-    .btn-navy{background:var(--navy);color:#fff;}
 
     .form-footer{text-align:center;margin-top:14px;}
     .form-link{font-size:0.8rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline;}
     .form-link:hover{color:var(--navy);}
-    .form-hint{font-size:0.72rem;color:var(--muted);text-align:center;margin-top:10px;line-height:1.4;}
 
-    /* ── MESSAGES ─── */
     .msg{display:none;border-radius:10px;padding:10px 14px;font-size:0.82rem;margin-bottom:16px;text-align:center;}
     .msg.visible{display:block;}
     .msg.error{background:#fef2f2;border:1px solid #fecaca;color:var(--red);}
     .msg.success{background:var(--green-dim);border:1px solid #bbf7d0;color:#166534;}
 
-    .spinner{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;}
-    @keyframes spin{to{transform:rotate(360deg);}}
-
-    /* ── FOOTER ─── */
     .page-footer{text-align:center;padding:20px;font-size:0.75rem;color:var(--muted);}
     .page-footer a{color:var(--green);text-decoration:none;font-weight:600;}
 
@@ -96,63 +73,33 @@
       <span class="brand-sub">Simulação do exame</span>
     </div>
   </div>
-  <div class="topbar-right">
-    <a href="/checkout.html" class="btn-small">Comprar acesso</a>
-  </div>
 </div>
 
 <div class="main">
   <div class="login-card">
-
-    <!-- TAB BAR -->
-    <div class="login-tabs" id="loginTabs">
-      <button class="login-tab active" data-tab="login" onclick="switchTab('login')">Login</button>
-      <button class="login-tab" data-tab="setup" onclick="switchTab('setup')">Primeira vez?</button>
-    </div>
-
     <div class="msg error" id="globalError"></div>
     <div class="msg success" id="globalSuccess"></div>
 
-    <!-- ═══ LOGIN VIEW ═══ -->
-    <div class="view active" id="view-login">
-      <div class="view-header">
-        <div class="view-title">Entrar</div>
-        <div class="view-subtitle">Use seu e-mail e senha</div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="loginEmail">E-mail</label>
-        <input class="form-input" id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="email">
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="loginPwd">Senha</label>
-        <div class="pwd-wrap">
-          <input class="form-input" id="loginPwd" type="password" placeholder="••••••••" autocomplete="current-password">
-          <button class="pwd-toggle" type="button" onclick="togglePwd('loginPwd', this)">Mostrar</button>
-        </div>
-      </div>
-      <button class="action-btn btn-green" id="loginBtn" onclick="handleLogin()">Entrar</button>
-      <div class="form-footer">
-        <button class="form-link" onclick="switchTab('setup')">Esqueci minha senha</button>
-      </div>
+    <div class="view-header">
+      <div class="view-title">Entrar</div>
+      <div class="view-subtitle">Use seu e-mail e senha</div>
     </div>
 
-    <!-- ═══ SETUP / FORGOT VIEW ═══ -->
-    <div class="view" id="view-setup">
-      <div class="view-header">
-        <div class="view-icon">🔑</div>
-        <div class="view-title">Primeira vez aqui?</div>
-        <div class="view-subtitle">Comprou acesso? Crie sua senha aqui. Também serve para redefinir senha esquecida.</div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="setupEmail">E-mail</label>
-        <input class="form-input" id="setupEmail" type="email" placeholder="seu@email.com" autocomplete="email">
-      </div>
-      <button class="action-btn btn-green" id="setupBtn" onclick="handleSetup()">Enviar link de configuração</button>
-      <div class="form-hint">ℹ️ Verifique também a pasta de spam.</div>
+    <div class="form-group">
+      <label class="form-label" for="loginEmail">E-mail</label>
+      <input class="form-input" id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="email">
     </div>
-
+    <div class="form-group">
+      <label class="form-label" for="loginPwd">Senha</label>
+      <div class="pwd-wrap">
+        <input class="form-input" id="loginPwd" type="password" placeholder="••••••••" autocomplete="current-password">
+        <button class="pwd-toggle" type="button" onclick="togglePwd()">Mostrar</button>
+      </div>
+    </div>
+    <button class="action-btn" id="loginBtn" onclick="handleLogin()">Entrar</button>
+    <div class="form-footer">
+      <button class="form-link" onclick="handleForgot()">Esqueci minha senha</button>
+    </div>
   </div>
 </div>
 
@@ -163,30 +110,18 @@
 <script>
   const SUPABASE_URL = 'https://htgliokekeaovdiafrgs.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
-
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const params    = new URLSearchParams(location.search);
   const returnUrl = params.get('return') || '/dashboard/index.html';
 
-  // ── Check if already logged in ─────────────────
+  // Check if already logged in
   (async () => {
     const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-      window.location.href = returnUrl;
-    }
+    if (session) window.location.href = returnUrl;
   })();
 
-  // ── TAB SWITCHING ──────────────────────────────
-  function switchTab(tab) {
-    document.querySelectorAll('.login-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    const target = document.getElementById('view-' + tab);
-    if (target) target.classList.add('active');
-    hideMessages();
-  }
-
-  // ── PASSWORD LOGIN ─────────────────────────────
+  // Password login
   async function handleLogin() {
     hideMessages();
     const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
@@ -197,48 +132,33 @@
     btn.disabled = true; btn.textContent = 'Entrando…';
 
     const { error } = await sb.auth.signInWithPassword({ email, password });
-
     if (error) {
       btn.disabled = false; btn.textContent = 'Entrar';
-      showError(translateError(error.message));
-      return;
+      return showError(translateError(error.message));
     }
 
-    // Log login
-    await sb.from('login_history').insert({ email, status: 'success', method: 'password' }).catch(() => {});
+    try { await sb.from('login_history').insert({ email, status: 'success', method: 'password' }); } catch(e) {}
     window.location.href = returnUrl;
   }
 
-  // ── SETUP / FORGOT PASSWORD ────────────────────
-  async function handleSetup() {
+  // Forgot password — uses the email already typed in the login field
+  async function handleForgot() {
     hideMessages();
-    const email = document.getElementById('setupEmail').value.trim().toLowerCase();
-    if (!email) return showError('Preencha seu e-mail.');
-
-    const btn = document.getElementById('setupBtn');
-    btn.disabled = true; btn.textContent = 'Enviando…';
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    if (!email) return showError('Preencha seu e-mail primeiro.');
 
     const { error } = await sb.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + '/set-password.html',
     });
 
-    if (error) {
-      btn.disabled = false; btn.textContent = 'Enviar link de configuração';
-      showError('Não foi possível enviar o link. Tente novamente.');
-      return;
-    }
-
-    btn.textContent = 'Verifique seu e-mail ✓';
-    showSuccess('Se o e-mail existir no sistema, um link foi enviado. Verifique também o spam.');
-    setTimeout(() => {
-      btn.disabled = false;
-      btn.textContent = 'Enviar link de configuração';
-    }, 5000);
+    if (error) return showError('Não foi possível enviar o link. Tente novamente.');
+    showSuccess('Link enviado! Verifique seu e-mail (e a pasta de spam).');
   }
 
-  // ── HELPERS ────────────────────────────────────
-  function togglePwd(inputId, btn) {
-    const el = document.getElementById(inputId);
+  // Helpers
+  function togglePwd() {
+    const el = document.getElementById('loginPwd');
+    const btn = document.querySelector('.pwd-toggle');
     if (el.type === 'password') { el.type = 'text'; btn.textContent = 'Ocultar'; }
     else { el.type = 'password'; btn.textContent = 'Mostrar'; }
   }
@@ -257,9 +177,7 @@
     return msg;
   }
 
-  // Enter key
   document.getElementById('loginPwd')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
-  document.getElementById('setupEmail')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleSetup(); });
 </script>
 </body>
 </html>
