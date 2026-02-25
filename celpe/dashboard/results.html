@@ -43,7 +43,7 @@
     @keyframes spin{to{transform:rotate(360deg)}}
 
     /* PAGE */
-    .page-wrap{max-width:740px;margin:0 auto;padding:32px 24px 80px;display:none}
+    .page-wrap{max-width:740px;margin:0 auto;padding:32px 24px 80px}
     .page-eyebrow{display:flex;align-items:center;gap:8px;font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:20px}
     .page-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
 
@@ -207,13 +207,19 @@ var POLL_MS = 12000;
 // ═══════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', async function() {
   console.log('[results] DOMContentLoaded');
+  console.log('[results] CELPE exists?', typeof CELPE);
+  console.log('[results] celpeAuth exists?', typeof celpeAuth);
   try {
+    console.log('[results] calling CELPE.init...');
     ({ user: currentUser, attemptId, simId, simNum } = await CELPE.init(''));
+    console.log('[results] init done, attemptId=', attemptId, 'simId=', simId);
 
     document.getElementById('topbarTitle').textContent = 'Sim ' + simNum + ' — Resultados';
     document.getElementById('pageEyebrow').textContent = 'Simulação ' + simNum + ' · Resultados';
 
+    console.log('[results] calling loadResults...');
     await loadResults();
+    console.log('[results] loadResults done');
   } catch (err) {
     console.error('[results] init error:', err);
     CELPE.showError('Não foi possível carregar os resultados.', simId, attemptId);
@@ -225,7 +231,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 // ═══════════════════════════════════════════════════════════════
 async function loadResults() {
   try {
+    console.log('[results] loadResults: calling hydrateData, userId=', currentUser.id, 'attemptId=', attemptId);
     var data = await CELPE.hydrateData(currentUser.id, attemptId, true);
+    console.log('[results] hydrateData returned:', data ? 'data with ' + (data.attempts||[]).length + ' attempts' : 'null');
     if (!data) throw new Error('Nenhum dado encontrado');
 
     var attempt = (data.attempts || []).find(function(a) { return a.id === attemptId; });
