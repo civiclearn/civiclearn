@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CELPE-BRAS — Tarefas 2–4</title>
+  <title>CELPE-BRAS — Tarefa</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="/assets/js/celpe-auth.js"></script>
   <script src="/assets/js/celpe-engine.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-
   <style>
     :root {
       --green:#009c3b; --green-dim:#e6f5ec; --yellow:#ffdf00; --blue:#002776;
@@ -19,117 +18,112 @@
       --pass:#166534; --pass-bg:#f0fdf4; --pass-border:#bbf7d0;
       --amber:#92400e; --amber-bg:#fffbeb; --amber-border:#fde68a;
     }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
 
-    /* ── TOPBAR ─── */
-    .topbar{background:var(--navy);border-bottom:3px solid var(--green);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
-    .topbar-left{display:flex;align-items:center;gap:12px;}
-    .back-link{color:#64748b;text-decoration:none;font-size:0.8rem;display:flex;align-items:center;gap:5px;}
-    .back-link:hover{color:#fff;}
-    .topbar-divider{width:1px;height:20px;background:#1e293b;}
-    .topbar-flag{width:22px;height:16px;background:var(--green);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0;}
-    .topbar-flag::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:14px;height:8px;background:var(--yellow);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);}
-    .topbar-flag::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:5px;height:5px;border-radius:50%;background:var(--blue);}
-    .topbar-title{font-family:"Fraunces",serif;font-size:0.9rem;font-weight:600;color:#fff;}
-    .topbar-right{display:flex;align-items:center;gap:10px;}
-    .timer-pill{background:#1e293b;border-radius:99px;padding:4px 14px;font-size:0.8rem;color:#94a3b8;font-variant-numeric:tabular-nums;}
-    .timer-pill span{color:#fff;font-weight:600;}
-    .timer-pill.warning{color:#fbbf24;}
-    .timer-pill.danger span{color:#ef4444;}
-    .wc-pill{background:#1e293b;border-radius:99px;padding:4px 12px;font-size:0.75rem;color:#94a3b8;}
-    .wc-pill span{color:#fff;font-weight:600;}
+    /* TOPBAR */
+    .topbar{background:var(--navy);border-bottom:3px solid var(--green);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+    .topbar-left{display:flex;align-items:center;gap:12px}
+    .back-link{color:#64748b;text-decoration:none;font-size:0.8rem;display:flex;align-items:center;gap:5px}
+    .back-link:hover{color:#fff}
+    .topbar-divider{width:1px;height:20px;background:#1e293b}
+    .topbar-flag{width:22px;height:16px;background:var(--green);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0}
+    .topbar-flag::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:14px;height:8px;background:var(--yellow);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%)}
+    .topbar-flag::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:5px;height:5px;border-radius:50%;background:var(--blue)}
+    .topbar-title{font-family:"Fraunces",serif;font-size:0.9rem;font-weight:600;color:#fff}
+    .topbar-right{display:flex;align-items:center;gap:12px}
+    .timer-pill{background:#1e293b;border-radius:99px;padding:4px 14px;font-size:0.8rem;color:#94a3b8;font-variant-numeric:tabular-nums}
+    .timer-pill span{color:#fff;font-weight:600}
+    .timer-pill.warning span{color:#fbbf24}
+    .timer-pill.danger span{color:#ef4444}
+    .wc-pill{background:#1e293b;border-radius:99px;padding:4px 12px;font-size:0.75rem;color:#94a3b8}
+    .wc-pill span{color:#fff;font-weight:600}
 
-    /* ── LOADING ─── */
-    #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity 0.35s;}
-    #loading-overlay.hidden{opacity:0;pointer-events:none;}
-    .loading-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--green);animation:spin 0.8s linear infinite;}
-    @keyframes spin{to{transform:rotate(360deg);}}
+    /* LOADING */
+    #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity 0.35s}
+    #loading-overlay.hidden{opacity:0;pointer-events:none}
+    .loading-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--green);animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* ── TAB BAR ─── */
-    .tab-bar{display:flex;border-bottom:2px solid var(--border);background:var(--surface);position:sticky;top:52px;z-index:150;overflow-x:auto;}
-    .tab-btn{flex:1;min-width:0;padding:13px 10px;background:none;border:none;border-bottom:3px solid transparent;
-      font-family:"DM Sans",sans-serif;font-size:0.82rem;font-weight:600;color:var(--muted);cursor:pointer;
-      text-align:center;white-space:nowrap;transition:color 0.15s,border-color 0.15s;}
-    .tab-btn:hover{color:var(--navy);}
-    .tab-btn.active{color:var(--navy);border-bottom-color:var(--green);}
-    .tab-btn .tab-badge{display:inline-block;margin-left:6px;font-size:0.65rem;padding:1px 7px;border-radius:99px;vertical-align:middle;}
-    .tab-badge.todo{background:var(--border);color:var(--muted);}
-    .tab-badge.done{background:var(--pass-bg);color:var(--pass);}
-    .tab-badge.skipped{background:#f1f5f9;color:#94a3b8;}
+    /* LAYOUT */
+    .exam-layout{display:grid;grid-template-columns:minmax(0,1fr) 420px;min-height:calc(100vh - 52px);max-width:1200px;margin:0 auto;width:100%}
 
-    /* ── LAYOUT ─── */
-    .exam-layout{display:grid;grid-template-columns:minmax(0,1fr) 420px;min-height:calc(100vh - 104px);max-width:1200px;margin:0 auto;width:100%;}
-    @media(max-width:900px){.exam-layout{grid-template-columns:1fr;}}
+    /* LEFT: SOURCE */
+    .source-column{border-right:1px solid var(--border);overflow-y:auto;position:sticky;top:52px;height:calc(100vh - 52px)}
+    .source-inner{max-width:640px;padding:28px 32px 80px}
+    .source-badge{display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:var(--yellow);border-radius:7px;padding:4px 11px;font-size:0.72rem;font-weight:700;margin-bottom:16px;text-transform:uppercase}
+    .audio-placeholder{background:#1e293b;border-radius:12px;padding:28px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.85rem;margin-bottom:20px;min-height:80px}
+    .source-title{font-family:"Fraunces",serif;font-size:1.1rem;font-weight:700;margin-bottom:8px}
+    .source-meta{font-size:0.78rem;color:var(--muted);margin-bottom:16px}
+    .enunciado-card{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:10px;padding:14px 16px;font-size:0.84rem;color:var(--amber);line-height:1.6;margin-bottom:16px}
+    .enunciado-card strong{font-weight:700}
+    .source-text-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 22px;font-size:0.84rem;color:var(--slate);line-height:1.75;margin-bottom:16px;white-space:pre-line;max-height:60vh;overflow-y:auto}
+    .key-facts{font-size:0.82rem;color:var(--slate);line-height:1.65}
+    .key-facts ul{padding-left:18px;margin-top:4px}
+    .key-facts li{margin-bottom:4px}
+    .key-facts-title{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:8px}
 
-    /* ── LEFT: SOURCE ─── */
-    .source-column{border-right:1px solid var(--border);overflow-y:auto;}
-    @media(min-width:901px){.source-column{position:sticky;top:104px;height:calc(100vh - 104px);}}
-    .source-inner{max-width:640px;padding:28px 32px 80px;}
-    .source-badge{display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:var(--yellow);border-radius:7px;padding:4px 11px;font-size:0.72rem;font-weight:700;margin-bottom:16px;}
-    .source-title{font-family:"Fraunces",serif;font-size:1.1rem;font-weight:700;margin-bottom:6px;}
-    .source-meta{font-size:0.78rem;color:var(--muted);margin-bottom:16px;}
-    .audio-player{margin-bottom:20px;}
-    .audio-player audio{width:100%;border-radius:8px;}
-    .source-text-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;font-size:0.84rem;color:var(--slate);line-height:1.7;margin-bottom:16px;white-space:pre-wrap;}
-    .enunciado-card{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:10px;padding:14px 16px;font-size:0.84rem;color:var(--amber);line-height:1.6;margin-bottom:16px;}
-    .enunciado-card strong{font-weight:700;}
-    .key-facts{font-size:0.82rem;color:var(--slate);line-height:1.65;}
-    .key-facts li{margin-bottom:4px;}
+    /* MOBILE TOGGLE */
+    .source-toggle{display:none;width:100%;background:var(--surface);border:none;border-bottom:1px solid var(--border);padding:13px 20px;font-family:"DM Sans",sans-serif;font-size:0.88rem;font-weight:600;color:var(--navy);cursor:pointer;text-align:left;align-items:center;gap:10px;position:sticky;top:52px;z-index:100}
+    .toggle-icon{transition:transform 0.2s;font-size:0.75rem}
+    .source-toggle.collapsed .toggle-icon{transform:rotate(-90deg)}
+    @media(min-width:901px){.source-toggle{display:none !important}}
+    @media(max-width:900px){
+      .source-toggle{display:flex}
+      .exam-layout{grid-template-columns:1fr}
+      .source-column{position:relative;top:auto;height:auto;border-right:none;border-bottom:1px solid var(--border)}
+      .source-column.collapsed{display:none}
+    }
 
-    /* ── RIGHT: WRITE ─── */
-    .write-column{position:sticky;top:104px;height:calc(100vh - 104px);overflow-y:auto;background:var(--surface);display:flex;flex-direction:column;}
-    @media(max-width:900px){.write-column{position:relative;top:auto;height:auto;min-height:60vh;}}
-    .write-header{padding:18px 22px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
-    .write-eyebrow{font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:6px;}
-    .write-header h2{font-family:"Fraunces",serif;font-size:1.05rem;font-weight:700;}
+    /* RIGHT: WRITE */
+    .write-column{position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;background:var(--surface);display:flex;flex-direction:column}
+    .write-header{padding:18px 22px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .write-eyebrow{font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:6px}
+    .write-header h2{font-family:"Fraunces",serif;font-size:1.05rem;font-weight:700}
+    .register-badge{font-size:0.72rem;color:var(--muted);margin-top:4px}
+    .register-badge strong{color:var(--navy)}
+    .task-checklist{margin:14px 22px 0;flex-shrink:0}
+    .task-checklist-title{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px}
+    .task-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:0.8rem;color:var(--slate);transition:color 0.2s}
+    .task-item.done{color:var(--pass)}
+    .task-bullet{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:transparent;flex-shrink:0;transition:all 0.2s}
+    .task-item.done .task-bullet{background:var(--pass);border-color:var(--pass);color:#fff}
 
-    .task-checklist{margin:14px 22px 0;flex-shrink:0;}
-    .task-checklist-title{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;}
-    .task-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:0.8rem;color:var(--slate);transition:color 0.2s;}
-    .task-item.done{color:var(--pass);}
-    .task-bullet{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:transparent;flex-shrink:0;transition:all 0.2s;}
-    .task-item.done .task-bullet{background:var(--pass);border-color:var(--pass);color:#fff;}
+    .wc-bar-wrap{padding:12px 22px 0;flex-shrink:0}
+    .wc-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+    .wc-bar-fill{height:100%;background:var(--green);border-radius:3px;transition:width 0.3s;width:0%}
+    .wc-bar-fill.good{background:var(--pass)}
+    .wc-bar-fill.over{background:#f59e0b}
+    .wc-row{display:flex;justify-content:space-between;padding:4px 22px 0}
+    .wc-count{font-size:0.75rem;color:var(--navy);font-weight:600}
+    .wc-hint{font-size:0.72rem;color:var(--muted)}
+    .wc-hint.good{color:var(--pass)}
+    .wc-hint.over{color:#f59e0b}
 
-    .wc-bar-wrap{padding:12px 22px 0;flex-shrink:0;}
-    .wc-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
-    .wc-bar-fill{height:100%;background:var(--green);border-radius:3px;transition:width 0.3s;width:0%;}
-    .wc-bar-fill.good{background:var(--pass);}
-    .wc-bar-fill.over{background:#f59e0b;}
-    .wc-row{display:flex;justify-content:space-between;padding:4px 22px 0;}
-    .wc-count{font-size:0.75rem;color:var(--navy);font-weight:600;}
-    .wc-hint{font-size:0.72rem;color:var(--muted);}
-    .wc-hint.good{color:var(--pass);}
-    .wc-hint.over{color:#f59e0b;}
+    .write-area{flex:1;display:flex;flex-direction:column;padding:0 22px}
+    #replyTextarea{flex:1;width:100%;border:none;outline:none;resize:none;font-family:"DM Sans",sans-serif;font-size:0.92rem;line-height:1.8;color:var(--navy);padding:14px 0;min-height:200px}
+    #replyTextarea::placeholder{color:#94a3b8}
 
-    .write-area{flex:1;display:flex;flex-direction:column;padding:0 22px 0;}
-    .reply-textarea{flex:1;width:100%;border:none;outline:none;resize:none;font-family:"DM Sans",sans-serif;font-size:0.92rem;line-height:1.8;color:var(--navy);padding:14px 0;min-height:200px;}
-    .reply-textarea::placeholder{color:#94a3b8;}
-
-    .write-footer{padding:14px 22px 20px;flex-shrink:0;}
-    .submit-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--green);color:#fff;font-family:"DM Sans",sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;}
-    .submit-btn:hover{opacity:0.85;}
-    .submit-btn:disabled{opacity:0.4;cursor:default;}
-    .submit-info{font-size:0.72rem;color:var(--muted);text-align:center;margin-top:8px;}
-    .skip-link{display:block;text-align:center;margin-top:8px;font-size:0.78rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;}
-    .skip-link:hover{color:var(--navy);}
-
-    .notice-card{display:none;margin:20px 22px;padding:16px;border-radius:10px;text-align:center;font-size:0.88rem;}
-    .notice-card.visible{display:block;}
-    .notice-card.done{background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass-border);}
-    .continue-btn{display:none;margin:12px 22px;padding:11px;border:none;border-radius:10px;background:var(--navy);color:#fff;width:calc(100% - 44px);font-family:"DM Sans",sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;}
-
-    /* ── ALL-DONE BANNER ─── */
-    .all-done-banner{display:none;padding:14px 22px;background:var(--pass-bg);border-top:1px solid var(--pass-border);text-align:center;flex-shrink:0;}
-    .all-done-banner.visible{display:block;}
-    .all-done-banner a{color:var(--pass);font-weight:600;font-size:0.88rem;text-decoration:none;}
+    .write-footer{padding:14px 22px 20px;flex-shrink:0}
+    .submit-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--green);color:#fff;font-family:"DM Sans",sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;transition:opacity 0.15s}
+    .submit-btn:hover{opacity:0.85}
+    .submit-btn:disabled{opacity:0.4;cursor:default}
+    .submit-info{font-size:0.72rem;color:var(--muted);text-align:center;margin-top:8px}
+    .skip-link{display:block;text-align:center;margin-top:8px;font-size:0.78rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit}
+    .skip-link:hover{color:var(--navy)}
+    .already-done-card{display:none;margin:10px 0;padding:20px;border-radius:10px;text-align:center;background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass-border)}
+    .already-done-card.visible{display:block}
+    .already-done-card h3{font-size:1rem;margin-bottom:6px}
+    .submitted-notice{display:none;margin:10px 0;padding:14px;border-radius:10px;text-align:center;background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass-border);font-size:0.88rem}
+    .submitted-notice.visible{display:block}
+    .continue-btn{display:none;width:100%;padding:11px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-family:"DM Sans",sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;margin-top:10px}
   </style>
 </head>
 <body>
 
 <div id="loading-overlay">
   <div class="loading-spinner"></div>
-  <div class="loading-text">Carregando tarefas…</div>
+  <div style="font-size:0.85rem;color:var(--muted)">Carregando tarefa…</div>
 </div>
 
 <div class="topbar">
@@ -137,416 +131,399 @@
     <a class="back-link" id="backLink" href="#">← Exame</a>
     <div class="topbar-divider"></div>
     <div class="topbar-flag"></div>
-    <span class="topbar-title">Tarefas 2–4</span>
+    <span class="topbar-title" id="topbarTitle">Tarefa</span>
   </div>
   <div class="topbar-right">
-    <div class="timer-pill" id="timerPill">⏱ <span id="timerDisplay">2:30:00</span></div>
+    <div class="timer-pill" id="timerPill">⏱ <span id="timerDisplay">30:00</span></div>
     <div class="wc-pill">Palavras: <span id="topbarWc">0</span></div>
   </div>
 </div>
 
-<!-- TAB BAR -->
-<div class="tab-bar" id="tabBar"></div>
+<button class="source-toggle" id="sourceToggle" onclick="toggleSource()">
+  <span id="toggleLabel">📄 Ver material de apoio</span>
+  <span class="toggle-icon">▼</span>
+</button>
 
-<!-- CONTENT -->
-<div class="exam-layout">
+<div class="exam-layout" id="examLayout" style="display:none;">
+
+  <!-- LEFT: Source material -->
   <div class="source-column" id="sourceColumn">
-    <div class="source-inner" id="sourceInner"></div>
+    <div class="source-inner">
+      <div class="source-badge" id="sourceBadge">📄 TEXTO</div>
+      <div class="audio-placeholder" id="audioContainer" style="display:none">
+        <span>🎧 O áudio será reproduzido aqui</span>
+      </div>
+      <h2 class="source-title" id="sourceTitle"></h2>
+      <div class="source-meta" id="sourceMeta"></div>
+      <div class="source-text-card" id="sourceTextCard" style="display:none"></div>
+      <div class="enunciado-card" id="enunciadoCard"></div>
+      <div class="key-facts" id="keyFactsWrap"></div>
+    </div>
   </div>
-  <div class="write-column" id="writeColumn"></div>
+
+  <!-- RIGHT: Write pane -->
+  <div class="write-column">
+    <div class="write-header">
+      <div class="write-eyebrow">SUA RESPOSTA</div>
+      <h2 id="writeTitle">Escreva sua resposta</h2>
+      <div class="register-badge">Tom: <strong id="registerText">—</strong></div>
+    </div>
+
+    <div class="task-checklist">
+      <div class="task-checklist-title">Checklist da tarefa</div>
+      <div id="taskChecklistItems"></div>
+    </div>
+
+    <div class="wc-bar-wrap">
+      <div class="wc-bar"><div class="wc-bar-fill" id="wcBarFill"></div></div>
+    </div>
+    <div class="wc-row">
+      <div class="wc-count"><span id="wcCount">0</span> palavras</div>
+      <div class="wc-hint" id="wcHint">Escreva entre 150–250 palavras</div>
+    </div>
+
+    <div class="write-area">
+      <textarea id="replyTextarea" placeholder="Comece a escrever aqui…" oninput="onTextChange()" spellcheck="true" lang="pt-BR"></textarea>
+    </div>
+
+    <div class="write-footer">
+      <div class="already-done-card" id="alreadyDoneCard">
+        <h3>✅ Tarefa já entregue</h3>
+        <p>Sua resposta está sendo avaliada.</p>
+      </div>
+      <div class="already-done-card" id="skippedCard">
+        <h3>⏭ Tarefa pulada</h3>
+        <p>Você optou por pular esta tarefa.</p>
+      </div>
+      <div class="submitted-notice" id="submittedNotice">
+        ✅ Resposta enviada!
+        <p>A avaliação por IA começa após a entrega de todas as tarefas.</p>
+      </div>
+      <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>Entregar resposta</button>
+      <button class="continue-btn" id="continueBtn" onclick="CELPE.goBack(simId, attemptId)">← Voltar ao painel</button>
+      <p class="submit-info" id="submitInfo">Avaliação por IA após entrega completa</p>
+      <span class="skip-link" id="skipLink" onclick="skipElement()">Pular esta tarefa</span>
+    </div>
+  </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════════════════════
-const TASKS = ['tarefa2', 'tarefa3', 'tarefa4'];
-const WC_MIN = 150, WC_TARGET = 300, WC_SOFT = 50;
-const TIME_LIMIT = 150 * 60; // 2h30 = 150 min
-
-const TASK_LABELS = {
-  tarefa2: { num: 2, icon: '🔊', label: 'Tarefa 2 — Áudio', badgeLabel: 'ÁUDIO — TAREFA 2' },
-  tarefa3: { num: 3, icon: '📄', label: 'Tarefa 3 — Texto', badgeLabel: 'TEXTO — TAREFA 3' },
-  tarefa4: { num: 4, icon: '📄', label: 'Tarefa 4 — Texto', badgeLabel: 'TEXTO — TAREFA 4' },
+// ═══════════════════════════════════════════════════════════════
+// ELEMENT KEY → JSON FILE MAPPING
+// ═══════════════════════════════════════════════════════════════
+const ELEM_FILES = {
+  tarefa2: 'sim01_tarefa2.json',
+  tarefa3: 'sim01_tarefa3.json',
+  tarefa4: 'sim01_tarefa4.json',
 };
 
-let simId, attemptId, user;
-let activeTab = 'tarefa2';
-let examDataMap = {};    // tarefa2/3/4 JSON data
-let draftMap = {};       // { tarefa2: 'text…', … }
-let statusMap = {};      // { tarefa2: 'not_started', … }
-let timerSeconds = TIME_LIMIT;
-let timerInterval = null;
+const TASK_LABELS = {
+  tarefa2: 'Tarefa 2',
+  tarefa3: 'Tarefa 3',
+  tarefa4: 'Tarefa 4',
+};
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let currentUser = null;
+let attemptId, simId, simNum, elemKey;
+let examData     = null;
+let elemStatus   = 'not_started';
+let submitted    = false;
+let wordCount    = 0;
+let taskItems    = [];
+let timerSeconds = 0;
+let timerInterval= null;
+let WC_MIN = 150, WC_TARGET = 250, WC_SOFT = 50;
+
+// ═══════════════════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', async () => {
-  const ctx = await CELPE.init('tarefa2');
-  user      = ctx.user;
-  simId     = ctx.simId;
-  attemptId = ctx.attemptId;
-  activeTab = ctx.elemKey || 'tarefa2';
-  if (!TASKS.includes(activeTab)) activeTab = 'tarefa2';
-
-  document.getElementById('backLink').href = `/celpe/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
-
-  // Restore drafts from localStorage
-  TASKS.forEach(k => {
-    draftMap[k] = localStorage.getItem(`celpe_draft_${attemptId}_${k}`) || '';
-  });
-
-  // Restore shared timer
-  const savedTimer = localStorage.getItem(`celpe_timer_${attemptId}_shared234`);
-  if (savedTimer) {
-    timerSeconds = Math.max(0, parseInt(savedTimer, 10));
-  }
-
-  // Check statuses
-  const data = await CELPE.hydrateData(user.id, attemptId);
-  const attempt = (data?.attempts || []).find(a => a.id === attemptId);
-  const elems = attempt?.elements || [];
-  TASKS.forEach(k => {
-    const el = elems.find(e => e.element_key === k);
-    statusMap[k] = el?.submission_status || 'not_started';
-  });
-
-  // Load JSON data
+  console.log('[tarefas234] DOMContentLoaded');
   try {
-    const [d2, d3, d4] = await Promise.all(
-      TASKS.map(k => fetch(`/celpe/data/sim01_${k}.json`).then(r => r.json()))
-    );
-    examDataMap = { tarefa2: d2, tarefa3: d3, tarefa4: d4 };
+    // CELPE.init will read ?key= from URL to get elemKey
+    ({ user: currentUser, attemptId, simId, simNum, elemKey } = await CELPE.init('tarefa2'));
+    console.log('[tarefas234] init OK', { simId, attemptId, elemKey, userId: currentUser?.id });
+
+    document.getElementById('backLink').href =
+      '/celpe/dashboard/exam.html?sim=' + simId + '&attempt=' + attemptId;
+
+    // Determine which JSON to load
+    const filename = ELEM_FILES[elemKey];
+    if (!filename) {
+      CELPE.showError('Tarefa desconhecida: ' + elemKey, simId, attemptId);
+      return;
+    }
+
+    const res = await fetch('/celpe/data/' + filename);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    examData = await res.json();
+    console.log('[tarefas234] JSON loaded:', elemKey, Object.keys(examData));
+
+    // Read config from JSON
+    if (examData.word_count) {
+      WC_MIN    = examData.word_count.minimum    || WC_MIN;
+      WC_TARGET = examData.word_count.target      || WC_TARGET;
+      WC_SOFT   = examData.word_count.soft_submit || WC_SOFT;
+    }
+    timerSeconds = (examData.time_limit_minutes || 30) * 60;
+
+    elemStatus = await CELPE.getStatus(currentUser.id, attemptId, elemKey);
+    console.log('[tarefas234] status:', elemStatus);
+
+    renderExam();
+    CELPE.hideLoading();
+    document.getElementById('examLayout').style.display = '';
+    console.log('[tarefas234] page ready');
   } catch (err) {
-    console.error('[tarefas234] load error:', err);
-    CELPE.showError('Não foi possível carregar as tarefas: ' + err.message, simId, attemptId);
-    return;
+    console.error('[tarefas234] FATAL:', err);
+    CELPE.showError('Não foi possível carregar a tarefa. Tente recarregar.', simId, attemptId);
   }
-
-  renderTabs();
-  try {
-    switchTab(activeTab);
-  } catch (renderErr) {
-    console.error('[tarefas234] render error:', renderErr);
-  }
-  startTimer();
-  CELPE.hideLoading();
 });
 
-// ═══════════════════════════════════════════════════════════════════
-// TABS
-// ═══════════════════════════════════════════════════════════════════
-function renderTabs() {
-  const bar = document.getElementById('tabBar');
-  bar.innerHTML = TASKS.map(k => {
-    const info = TASK_LABELS[k];
-    const st = statusMap[k];
-    let badgeCls = 'todo', badgeText = '·';
-    if (st === 'submitted') { badgeCls = 'done'; badgeText = '✓'; }
-    else if (st === 'skipped') { badgeCls = 'skipped'; badgeText = '—'; }
-    return `<button class="tab-btn ${k === activeTab ? 'active' : ''}" data-key="${k}" onclick="switchTab('${k}')">
-      ${info.icon} ${info.label}
-      <span class="tab-badge ${badgeCls}">${badgeText}</span>
-    </button>`;
-  }).join('');
-}
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function renderExam() {
+  const src = examData.source || {};
+  const sourceType = examData.source_type || 'text';
+  const label = TASK_LABELS[elemKey] || elemKey;
 
-function switchTab(key) {
-  // Save current draft
-  saveDraft();
+  // Topbar
+  document.getElementById('topbarTitle').textContent = 'Sim ' + simNum + ' — ' + label;
+  document.title = 'CELPE-BRAS — ' + label;
 
-  activeTab = key;
+  // Source badge + icon
+  const isAudio = sourceType === 'audio';
+  const icon = isAudio ? '🎧' : '📄';
+  document.getElementById('sourceBadge').textContent = icon + ' ' + sourceType.toUpperCase() + ' — ' + label.toUpperCase();
+  document.getElementById('toggleLabel').textContent = icon + ' Ver material de apoio';
 
-  // Update tab UI
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.key === key);
-  });
-
-  // Update URL without reload
-  const url = new URL(location);
-  url.searchParams.set('key', key);
-  history.replaceState(null, '', url);
-
-  renderSource(key);
-  renderWritePane(key);
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// RENDER SOURCE (left column)
-// ═══════════════════════════════════════════════════════════════════
-function renderSource(key) {
-  const data = examDataMap[key];
-  if (!data) return;
-  const info = TASK_LABELS[key];
-  const src = data.source || {};
-  const container = document.getElementById('sourceInner');
-
-  let mediaHtml = '';
-  if (data.source_type === 'audio') {
-    mediaHtml = `<div class="audio-player"><audio controls preload="metadata"><source src="/celpe/data/audio/${src.asset}" type="audio/mpeg">Áudio não suportado</audio></div>`;
+  // Audio container (only for audio type)
+  if (isAudio) {
+    document.getElementById('audioContainer').style.display = '';
   }
 
-  let textHtml = '';
+  // Source text (for text type)
   if (src.source_text) {
-    textHtml = `<div class="source-text-box">${CELPE.escapeHtml(src.source_text)}</div>`;
+    document.getElementById('sourceTextCard').style.display = '';
+    document.getElementById('sourceTextCard').textContent = src.source_text;
   }
 
+  // Title + meta
+  document.getElementById('sourceTitle').textContent = src.title || examData.title || '';
+  const meta = [src.origin, src.duration_seconds ? Math.floor(src.duration_seconds / 60) + ' min' : ''].filter(Boolean).join(' · ');
+  document.getElementById('sourceMeta').textContent = meta;
+
+  // Enunciado
+  document.getElementById('enunciadoCard').innerHTML =
+    '<strong>Enunciado:</strong> ' + CELPE.escapeHtml(examData.enunciado || '');
+
+  // Key facts
   const facts = src.key_facts || [];
-  let factsHtml = '';
   if (facts.length) {
-    factsHtml = `<div class="key-facts">
-      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:8px;">Informações-chave</div>
-      <ul style="padding-left:18px;">${facts.map(f => `<li>${CELPE.escapeHtml(f)}</li>`).join('')}</ul>
-    </div>`;
+    const factsLabel = isAudio ? 'Informações-chave do áudio' : 'Informações-chave do texto';
+    document.getElementById('keyFactsWrap').innerHTML =
+      '<div class="key-facts-title">' + factsLabel + '</div>' +
+      '<ul>' + facts.map(function(f) { return '<li>' + CELPE.escapeHtml(f) + '</li>'; }).join('') + '</ul>';
   }
 
-  container.innerHTML = `
-    <div class="source-badge">${info.icon} ${info.badgeLabel}</div>
-    ${mediaHtml}
-    <div class="source-title">${CELPE.escapeHtml(src.title || data.title || '')}</div>
-    <div class="source-meta">${CELPE.escapeHtml(src.origin || '')}${src.duration_seconds ? ' · ' + Math.floor(src.duration_seconds/60) + 'min' : ''}</div>
-    ${textHtml}
-    <div class="enunciado-card"><strong>Enunciado:</strong> ${CELPE.escapeHtml(data.enunciado || '')}</div>
-    ${factsHtml}
-  `;
-}
+  // Write header
+  document.getElementById('writeTitle').textContent =
+    'Escreva: ' + (examData.genre || 'resposta');
+  document.getElementById('registerText').textContent =
+    examData.register || '—';
 
-// ═══════════════════════════════════════════════════════════════════
-// RENDER WRITE PANE (right column)
-// ═══════════════════════════════════════════════════════════════════
-function renderWritePane(key) {
-  const data = examDataMap[key];
-  if (!data) return;
-  const st = statusMap[key];
-  const draft = draftMap[key] || '';
-  const wc = CELPE.countWords(draft);
-  const col = document.getElementById('writeColumn');
-
-  const isDone = (st === 'submitted' || st === 'skipped');
-  const allDone = TASKS.every(k => statusMap[k] === 'submitted' || statusMap[k] === 'skipped');
-
-  // Task actions checklist
-  const actions = data.task_actions || [];
-  const checklistHtml = actions.map((a, i) => {
-    const label = typeof a === 'string' ? a : a.description || String(a);
-    return `
-    <div class="task-item" id="titem-${key}-${i}">
-      <div class="task-bullet">✓</div>
-      <span>${CELPE.escapeHtml(label)}</span>
-    </div>`;
+  // Checklist
+  var actions = examData.task_actions || [];
+  taskItems = actions.map(function(a, i) {
+    return {
+      id:    a.id || ('ta' + (i + 1)),
+      label: (typeof a === 'string') ? a : (a.description || String(a)),
+      done:  false
+    };
+  });
+  document.getElementById('taskChecklistItems').innerHTML = taskItems.map(function(item) {
+    return '<div class="task-item" id="titem-' + item.id + '">' +
+      '<div class="task-bullet">✓</div>' +
+      '<span>' + CELPE.escapeHtml(item.label) + '</span>' +
+    '</div>';
   }).join('');
 
-  col.innerHTML = `
-    <div class="write-header">
-      <div class="write-eyebrow">SUA RESPOSTA</div>
-      <h2>Escreva: ${CELPE.escapeHtml(data.genre || '')}</h2>
-    </div>
-    <div class="task-checklist">
-      <div class="task-checklist-title">Checklist da tarefa</div>
-      ${checklistHtml}
-    </div>
-    <div class="wc-bar-wrap"><div class="wc-bar"><div class="wc-bar-fill" id="wcBarFill"></div></div></div>
-    <div class="wc-row">
-      <div class="wc-count"><span id="wcCount">${wc}</span> palavras</div>
-      <div class="wc-hint" id="wcHint"></div>
-    </div>
-    <div class="write-area">
-      <textarea class="reply-textarea" id="replyTextarea" placeholder="Comece a escrever aqui…"
-        oninput="onTextChange()" ${isDone ? 'disabled' : ''}>${CELPE.escapeHtml(draft)}</textarea>
-    </div>
-    <div id="doneNotice" class="notice-card done ${isDone ? 'visible' : ''}">
-      ✅ ${st === 'skipped' ? 'Tarefa pulada.' : 'Tarefa entregue! Avaliação em andamento.'}
-    </div>
-    <div class="all-done-banner ${allDone ? 'visible' : ''}" id="allDoneBanner">
-      <a href="/celpe/dashboard/exam.html?sim=${simId}&attempt=${attemptId}">✅ Todas as 3 tarefas concluídas — voltar ao painel →</a>
-    </div>
-    <div class="write-footer" id="writeFooter" ${isDone ? 'style="display:none"' : ''}>
-      <button class="submit-btn" id="submitBtn" ${wc < WC_SOFT ? 'disabled' : ''} onclick="submitActive()">Entregar tarefa ${TASK_LABELS[key].num}</button>
-      <div class="submit-info">Tempo compartilhado entre as 3 tarefas</div>
-      <button class="skip-link" onclick="skipActive()">Pular esta tarefa</button>
-    </div>
-    <button id="continueBtn" class="continue-btn" ${isDone ? '' : 'style="display:none"'} onclick="goNext()">
-      ${allDone ? '← Voltar ao painel' : 'Ir para próxima tarefa →'}
-    </button>
-  `;
+  // WC hint
+  document.getElementById('wcHint').textContent =
+    'Escreva entre ' + WC_MIN + '–' + WC_TARGET + ' palavras';
 
-  updateWcUI(wc);
-  if (!isDone) updateChecklist(draft, key);
+  // Already done?
+  submitted = (elemStatus === 'submitted' || elemStatus === 'skipped');
+  if (elemStatus === 'submitted') { showDoneState('alreadyDoneCard'); return; }
+  if (elemStatus === 'skipped')   { showDoneState('skippedCard'); return; }
+
+  startTimer();
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// TEXT INPUT
-// ═══════════════════════════════════════════════════════════════════
-function onTextChange() {
-  const text = document.getElementById('replyTextarea').value;
-  draftMap[activeTab] = text;
-  const wc = CELPE.countWords(text);
-  updateWcUI(wc);
-  updateChecklist(text, activeTab);
-  document.getElementById('topbarWc').textContent = wc;
-
-  const btn = document.getElementById('submitBtn');
-  if (btn) btn.disabled = wc < WC_SOFT;
-
-  // Auto-save draft
-  clearTimeout(window._saveTimeout);
-  window._saveTimeout = setTimeout(saveDraft, 800);
+function showDoneState(cardId) {
+  document.getElementById(cardId).classList.add('visible');
+  document.getElementById('submitBtn').style.display = 'none';
+  document.getElementById('skipLink').style.display = 'none';
+  document.getElementById('submitInfo').style.display = 'none';
+  document.getElementById('continueBtn').style.display = 'block';
+  document.getElementById('replyTextarea').disabled = true;
 }
 
-function saveDraft() {
-  TASKS.forEach(k => {
-    if (draftMap[k] !== undefined) {
-      localStorage.setItem(`celpe_draft_${attemptId}_${k}`, draftMap[k]);
-    }
-  });
-}
-
-function updateWcUI(count) {
-  document.getElementById('wcCount').textContent = count;
-  document.getElementById('topbarWc').textContent = count;
-  const fill = document.getElementById('wcBarFill');
-  const hint = document.getElementById('wcHint');
-  if (!fill || !hint) return;
-
-  if (count === 0) {
-    fill.style.width = '0%'; fill.className = 'wc-bar-fill';
-    hint.textContent = `Escreva entre ${WC_MIN}–${WC_TARGET} palavras`; hint.className = 'wc-hint';
-  } else if (count < WC_MIN) {
-    fill.style.width = (count/WC_MIN*70)+'%'; fill.className = 'wc-bar-fill';
-    hint.textContent = `Faltam ${WC_MIN-count} para o mínimo`; hint.className = 'wc-hint';
-  } else if (count <= WC_TARGET) {
-    fill.style.width = (70+((count-WC_MIN)/(WC_TARGET-WC_MIN))*30)+'%';
-    fill.className = 'wc-bar-fill good';
-    hint.textContent = `✓ Bom tamanho`; hint.className = 'wc-hint good';
-  } else {
-    fill.style.width = '100%'; fill.className = 'wc-bar-fill over';
-    hint.textContent = `${count-WC_TARGET} acima do recomendado`; hint.className = 'wc-hint over';
-  }
-}
-
-function updateChecklist(text, key) {
-  const data = examDataMap[key];
-  if (!data) return;
-  const lower = text.toLowerCase();
-  const wc = CELPE.countWords(text);
-  (data.task_actions || []).forEach((a, i) => {
-    const label = typeof a === 'string' ? a : a.description || String(a);
-    const words = label.toLowerCase().replace(/[().,!?]/g, '').split(/\s+/).filter(w => w.length > 4);
-    const matches = words.filter(w => lower.includes(w)).length;
-    const done = wc > 30 && matches >= Math.min(2, words.length);
-    const el = document.getElementById(`titem-${key}-${i}`);
-    if (el) el.classList.toggle('done', done);
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// TIMER (shared across all 3 tarefas)
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════════════════════════════
 function startTimer() {
   updateTimerDisplay();
-  timerInterval = setInterval(() => {
+  timerInterval = setInterval(function() {
     timerSeconds--;
-    localStorage.setItem(`celpe_timer_${attemptId}_shared234`, String(timerSeconds));
     updateTimerDisplay();
     if (timerSeconds <= 0) {
       clearInterval(timerInterval);
-      autoSubmitAll();
+      if (wordCount >= WC_SOFT && !submitted) submitAnswer();
     }
   }, 1000);
 }
 
 function updateTimerDisplay() {
-  const total = Math.max(0, timerSeconds);
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  const display = h > 0
-    ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
-    : `${m}:${String(s).padStart(2,'0')}`;
-  document.getElementById('timerDisplay').textContent = display;
-
-  const pill = document.getElementById('timerPill');
+  var m = Math.floor(Math.max(0, timerSeconds) / 60);
+  var s = Math.max(0, timerSeconds) % 60;
+  document.getElementById('timerDisplay').textContent =
+    m + ':' + String(s).padStart(2, '0');
+  var pill = document.getElementById('timerPill');
   pill.className = 'timer-pill';
-  if (total <= 120) pill.classList.add('danger');
-  else if (total <= 600) pill.classList.add('warning');
+  if (timerSeconds <= 120) pill.classList.add('danger');
+  else if (timerSeconds <= 300) pill.classList.add('warning');
 }
 
-async function autoSubmitAll() {
-  for (const k of TASKS) {
-    if (statusMap[k] !== 'not_started' && statusMap[k] !== 'in_progress') continue;
-    const text = draftMap[k] || '';
-    if (CELPE.countWords(text) >= WC_SOFT) {
-      await doSubmit(k, text);
-    } else {
-      await CELPE.skip({ attemptId, elemKey: k });
-      statusMap[k] = 'skipped';
-    }
+// ═══════════════════════════════════════════════════════════════
+// TEXT INPUT + WORD COUNT
+// ═══════════════════════════════════════════════════════════════
+function onTextChange() {
+  var text = document.getElementById('replyTextarea').value;
+  wordCount = text.trim().length === 0 ? 0 : CELPE.countWords(text);
+  updateWcUI(wordCount);
+  updateChecklist(text);
+  document.getElementById('submitBtn').disabled = (wordCount < WC_SOFT) || submitted;
+}
+
+function updateWcUI(count) {
+  document.getElementById('wcCount').textContent = count;
+  document.getElementById('topbarWc').textContent = count;
+  var fill = document.getElementById('wcBarFill');
+  var hint = document.getElementById('wcHint');
+
+  if (count === 0) {
+    fill.style.width = '0%'; fill.className = 'wc-bar-fill';
+    hint.textContent = 'Escreva entre ' + WC_MIN + '–' + WC_TARGET + ' palavras';
+    hint.className = 'wc-hint';
+  } else if (count < WC_MIN) {
+    fill.style.width = (count / WC_MIN * 70) + '%'; fill.className = 'wc-bar-fill';
+    hint.textContent = 'Faltam ' + (WC_MIN - count) + ' para o mínimo de ' + WC_MIN;
+    hint.className = 'wc-hint';
+  } else if (count <= WC_TARGET) {
+    fill.style.width = (70 + ((count - WC_MIN) / (WC_TARGET - WC_MIN)) * 30) + '%';
+    fill.className = 'wc-bar-fill good';
+    hint.textContent = '✓ Bom tamanho (' + count + ' palavras)';
+    hint.className = 'wc-hint good';
+  } else {
+    fill.style.width = '100%'; fill.className = 'wc-bar-fill over';
+    hint.textContent = (count - WC_TARGET) + ' acima do recomendado';
+    hint.className = 'wc-hint over';
   }
-  renderTabs();
-  renderWritePane(activeTab);
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// SUBMIT / SKIP
-// ═══════════════════════════════════════════════════════════════════
-async function submitActive() {
-  const text = (draftMap[activeTab] || '').trim();
+function updateChecklist(text) {
+  if (submitted) return;
+  var lower = text.toLowerCase();
+  taskItems.forEach(function(item) {
+    var label = (typeof item.label === 'string') ? item.label : String(item.label);
+    var words = label.toLowerCase().replace(/[().,!?]/g, '')
+      .split(/\s+/).filter(function(w) { return w.length > 4; });
+    var matches = words.filter(function(w) { return lower.includes(w); }).length;
+    var done = wordCount > 30 && matches >= Math.min(2, words.length);
+    item.done = done;
+    var el = document.getElementById('titem-' + item.id);
+    if (el) el.classList.toggle('done', done);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════════════════
+async function submitAnswer() {
+  if (submitted) return;
+  var text = document.getElementById('replyTextarea').value.trim();
   if (!text) return;
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true; btn.textContent = 'Enviando…';
+
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Enviando…';
+
+  var responseJson = {
+    task_title:           examData.title,
+    enunciado:            examData.enunciado,
+    genre:                examData.genre,
+    interlocutor:         examData.interlocutor,
+    register:             examData.register,
+    source_summary:       (examData.source || {}).transcript_summary || (examData.source || {}).source_text,
+    task_actions:         examData.task_actions,
+    evaluation_criteria:  examData.evaluation_criteria,
+    ai_evaluation_prompt: examData.ai_evaluation_prompt,
+    word_count:           wordCount,
+    time_remaining:       timerSeconds,
+    user_answer:          text,
+  };
 
   try {
-    await doSubmit(activeTab, text);
+    await CELPE.submit({ attemptId, elemKey, text, json: responseJson });
   } catch (err) {
-    console.error(err);
-    btn.disabled = false; btn.textContent = `Entregar tarefa ${TASK_LABELS[activeTab].num}`;
+    console.error('[tarefas234] submit error:', err);
+    btn.disabled = false;
+    btn.textContent = 'Entregar resposta';
     CELPE.toast('Algo deu errado. Tente novamente.');
     return;
   }
 
-  statusMap[activeTab] = 'submitted';
-  localStorage.removeItem(`celpe_draft_${attemptId}_${activeTab}`);
-  renderTabs();
-  renderWritePane(activeTab);
+  submitted = true;
+  if (timerInterval) clearInterval(timerInterval);
+  document.getElementById('replyTextarea').disabled = true;
+  document.getElementById('submitBtn').style.display = 'none';
+  document.getElementById('skipLink').style.display = 'none';
+  document.getElementById('submitInfo').style.display = 'none';
+  document.getElementById('submittedNotice').classList.add('visible');
+  document.getElementById('continueBtn').style.display = 'block';
+  taskItems.forEach(function(item) {
+    var el = document.getElementById('titem-' + item.id);
+    if (el) el.classList.add('done');
+  });
 }
 
-async function doSubmit(key, text) {
-  const data = examDataMap[key];
-  const responseJson = {
-    task_title:          data?.title,
-    enunciado:           data?.enunciado,
-    genre:               data?.genre,
-    interlocutor:        data?.interlocutor,
-    source_summary:      data?.source?.transcript_summary,
-    task_actions:        data?.task_actions,
-    evaluation_criteria: data?.evaluation_criteria,
-    ai_evaluation_prompt: data?.ai_evaluation_prompt,
-    word_count:          CELPE.countWords(text),
-    time_remaining:      timerSeconds,
-    user_answer:         text,
-  };
-
-  await CELPE.submit({ attemptId, elemKey: key, text, json: responseJson });
+// ═══════════════════════════════════════════════════════════════
+// SKIP
+// ═══════════════════════════════════════════════════════════════
+async function skipElement() {
+  if (submitted) return;
+  if (!confirm('Tem certeza que deseja pular? Você receberá nota 0.')) return;
+  document.getElementById('skipLink').style.display = 'none';
+  document.getElementById('submitBtn').disabled = true;
+  await CELPE.skip({ attemptId, elemKey });
+  submitted = true;
+  if (timerInterval) clearInterval(timerInterval);
+  CELPE.goBack(simId, attemptId);
 }
 
-async function skipActive() {
-  if (!confirm('Tem certeza? Você receberá 0 pontos nesta tarefa.')) return;
-  await CELPE.skip({ attemptId, elemKey: activeTab });
-  statusMap[activeTab] = 'skipped';
-  localStorage.removeItem(`celpe_draft_${attemptId}_${activeTab}`);
-  renderTabs();
-  renderWritePane(activeTab);
-}
-
-function goNext() {
-  const allDone = TASKS.every(k => statusMap[k] === 'submitted' || statusMap[k] === 'skipped');
-  if (allDone) {
-    CELPE.goBack(simId, attemptId);
-    return;
-  }
-  // Find next undone
-  const next = TASKS.find(k => statusMap[k] !== 'submitted' && statusMap[k] !== 'skipped');
-  if (next) switchTab(next);
+// ═══════════════════════════════════════════════════════════════
+// MOBILE TOGGLE
+// ═══════════════════════════════════════════════════════════════
+let sourceVisible = true;
+function toggleSource() {
+  sourceVisible = !sourceVisible;
+  document.getElementById('sourceColumn').classList.toggle('collapsed', !sourceVisible);
+  document.getElementById('sourceToggle').classList.toggle('collapsed', !sourceVisible);
 }
 </script>
 </body>
