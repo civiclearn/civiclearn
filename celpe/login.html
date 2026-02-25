@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — CELPE-BRAS</title>
+  <title>CELPE-BRAS — Entrar</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,208 +19,247 @@
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;}
 
-    /* ── HEADER ─── */
-    .site-header{background:var(--navy);border-bottom:3px solid var(--green);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;}
-    .header-left{display:flex;align-items:center;gap:14px;}
+    /* ── TOPBAR ─── */
+    .topbar{background:var(--navy);border-bottom:3px solid var(--green);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+    .topbar-brand{display:flex;align-items:center;gap:14px;}
     .topbar-flag{width:28px;height:20px;background:var(--green);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0;}
     .topbar-flag::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:16px;height:10px;background:var(--yellow);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);}
     .topbar-flag::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:6px;height:6px;border-radius:50%;background:var(--blue);}
-    .brand-title{font-family:"Fraunces",serif;font-size:1rem;font-weight:600;color:#fff;}
-    .header-right{display:flex;align-items:center;gap:12px;}
-    .btn-small{padding:6px 16px;border-radius:8px;font-size:0.78rem;font-weight:600;text-decoration:none;background:var(--green);color:#fff;transition:opacity 0.15s;}
+    .brand-text{display:flex;flex-direction:column;line-height:1.1;}
+    .brand-title{font-family:"Fraunces",serif;font-size:1rem;font-weight:600;color:#fff;letter-spacing:0.01em;}
+    .brand-sub{font-size:0.72rem;color:#64748b;}
+    .topbar-right{display:flex;align-items:center;}
+    .btn-small{padding:7px 18px;border-radius:8px;font-size:0.78rem;font-weight:600;text-decoration:none;background:var(--green);color:#fff;transition:opacity 0.15s;}
     .btn-small:hover{opacity:0.85;}
 
-    /* ── STATUS MSG ─── */
-    #status{display:none;max-width:920px;width:100%;margin:16px auto 0;padding:10px 16px;border-radius:10px;font-size:0.88rem;text-align:center;}
-    #status.error{display:block;background:#fef2f2;color:var(--red);border:1px solid #fecaca;}
-    #status.success{display:block;background:var(--green-dim);color:#166534;border:1px solid #bbf7d0;}
+    /* ── MAIN ─── */
+    .main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+    .login-card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.04);}
 
-    /* ── GRID ─── */
-    .login-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:720px;width:100%;margin:40px auto;padding:0 20px;}
+    /* ── TAB BAR ─── */
+    .login-tabs{display:flex;border-radius:10px;overflow:hidden;border:1.5px solid var(--border);margin-bottom:24px;}
+    .login-tab{flex:1;padding:10px 6px;font-family:"DM Sans",sans-serif;font-size:0.82rem;font-weight:600;text-align:center;border:none;background:var(--bg);color:var(--muted);cursor:pointer;transition:all 0.15s;}
+    .login-tab.active{background:var(--green);color:#fff;}
 
-    .auth-card{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:32px 28px;}
-    .auth-card h2{font-family:"Fraunces",serif;font-size:1.15rem;font-weight:700;margin-bottom:8px;}
-    .auth-card p{font-size:0.88rem;color:var(--muted);line-height:1.55;margin-bottom:18px;}
-    .auth-card label{display:block;font-size:0.78rem;font-weight:600;color:var(--slate);margin-bottom:5px;margin-top:14px;}
-    .auth-card input{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:"DM Sans",sans-serif;font-size:0.92rem;color:var(--navy);background:var(--bg);outline:none;transition:border-color 0.15s;}
-    .auth-card input:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-dim);}
-    .auth-card input::placeholder{color:#94a3b8;}
+    /* ── VIEWS ─── */
+    .view{display:none;}
+    .view.active{display:block;}
+    .view-header{text-align:center;margin-bottom:22px;}
+    .view-icon{font-size:2rem;margin-bottom:10px;}
+    .view-title{font-family:"Fraunces",serif;font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px;}
+    .view-subtitle{font-size:0.85rem;color:var(--muted);line-height:1.5;}
 
-    .pwd-container{position:relative;}
-    .pwd-container input{padding-right:60px;}
-    .toggle-pwd{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:0.75rem;color:var(--muted);cursor:pointer;font-family:inherit;font-weight:600;}
-    .toggle-pwd:hover{color:var(--navy);}
+    /* ── FORM ─── */
+    .form-group{margin-bottom:16px;}
+    .form-label{display:block;font-size:0.78rem;font-weight:600;color:var(--slate);margin-bottom:6px;}
+    .form-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:"DM Sans",sans-serif;font-size:0.92rem;color:var(--navy);background:var(--bg);transition:border-color 0.15s;outline:none;}
+    .form-input:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-dim);}
+    .form-input::placeholder{color:#94a3b8;}
+    .pwd-wrap{position:relative;}
+    .pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:0.75rem;color:var(--muted);cursor:pointer;font-family:inherit;font-weight:600;}
+    .pwd-toggle:hover{color:var(--navy);}
 
-    .btn-action{display:block;width:100%;padding:12px;border:none;border-radius:9px;font-family:"DM Sans",sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;margin-top:14px;text-align:center;}
-    .btn-action:hover{opacity:0.85;}
-    .btn-action:disabled{opacity:0.4;cursor:default;}
+    .action-btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:"DM Sans",sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;margin-top:4px;}
+    .action-btn:hover{opacity:0.85;}
+    .action-btn:disabled{opacity:0.4;cursor:default;}
     .btn-green{background:var(--green);color:#fff;}
-    .btn-black{background:var(--navy);color:#fff;}
+    .btn-navy{background:var(--navy);color:#fff;}
 
-    .forgot-link{display:block;text-align:center;margin-top:14px;font-size:0.82rem;color:var(--green);font-weight:500;text-decoration:none;cursor:pointer;}
-    .forgot-link:hover{text-decoration:underline;}
+    .form-footer{text-align:center;margin-top:14px;}
+    .form-link{font-size:0.8rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline;}
+    .form-link:hover{color:var(--navy);}
+    .form-hint{font-size:0.72rem;color:var(--muted);text-align:center;margin-top:10px;line-height:1.4;}
 
-    .hint-text{font-size:0.72rem;color:var(--green);font-weight:600;margin-top:14px;text-align:center;line-height:1.4;}
+    /* ── MESSAGES ─── */
+    .msg{display:none;border-radius:10px;padding:10px 14px;font-size:0.82rem;margin-bottom:16px;text-align:center;}
+    .msg.visible{display:block;}
+    .msg.error{background:#fef2f2;border:1px solid #fecaca;color:var(--red);}
+    .msg.success{background:var(--green-dim);border:1px solid #bbf7d0;color:#166534;}
 
     .spinner{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;}
     @keyframes spin{to{transform:rotate(360deg);}}
 
     /* ── FOOTER ─── */
-    .page-footer{margin-top:auto;text-align:center;padding:24px;font-size:0.78rem;color:var(--muted);}
-    .page-footer a{color:var(--muted);text-decoration:none;}
-    .page-footer a:hover{text-decoration:underline;}
+    .page-footer{text-align:center;padding:20px;font-size:0.75rem;color:var(--muted);}
+    .page-footer a{color:var(--green);text-decoration:none;font-weight:600;}
 
-    /* ── MOBILE ─── */
-    @media(max-width:700px){
-      .login-grid{grid-template-columns:1fr;max-width:420px;}
-    }
+    @media(max-width:480px){.login-card{padding:28px 22px;border-radius:16px;}}
   </style>
 </head>
 <body>
 
-<header class="site-header">
-  <div class="header-left">
+<div class="topbar">
+  <div class="topbar-brand">
     <div class="topbar-flag"></div>
-    <span class="brand-title">CELPE-BRAS</span>
-  </div>
-  <div class="header-right">
-    <a href="/checkout.html" class="btn-small">Comprar acesso</a>
-  </div>
-</header>
-
-<div id="status"></div>
-
-<div class="login-grid">
-
-  <!-- LEFT CARD: First time / setup -->
-  <div class="auth-card">
-    <h2 style="color:var(--green);">Primeira vez?</h2>
-    <p>Comprou acesso? Configure sua senha aqui. Também serve para redefinir uma senha esquecida.</p>
-
-    <input type="email" id="setupEmail" placeholder="seu@email.com">
-    <button type="button" id="setupBtn" onclick="handleSetup()" class="btn-action btn-green">
-      Enviar link de configuração
-    </button>
-
-    <div class="hint-text">ℹ️ Verifique também a pasta de spam.</div>
-  </div>
-
-  <!-- RIGHT CARD: Login -->
-  <div class="auth-card">
-    <h2 style="font-size:1.4rem;text-align:center;">Login</h2>
-
-    <div style="margin-top:16px;">
-      <label>E-mail</label>
-      <input type="email" id="loginEmail">
-
-      <label>Senha</label>
-      <div class="pwd-container">
-        <input type="password" id="loginPwd">
-        <button type="button" class="toggle-pwd" onclick="togglePwd()">Mostrar</button>
-      </div>
-
-      <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top:14px;">
-        Entrar com senha
-      </button>
-
-      <a href="#" class="forgot-link" onclick="event.preventDefault(); document.getElementById('setupEmail').focus(); document.getElementById('setupEmail').scrollIntoView({behavior:'smooth'});">
-        Esqueci minha senha
-      </a>
+    <div class="brand-text">
+      <span class="brand-title">CELPE-BRAS</span>
+      <span class="brand-sub">Simulação do exame</span>
     </div>
   </div>
+  <div class="topbar-right">
+    <a href="/checkout.html" class="btn-small">Comprar acesso</a>
+  </div>
+</div>
 
+<div class="main">
+  <div class="login-card">
+
+    <!-- TAB BAR -->
+    <div class="login-tabs" id="loginTabs">
+      <button class="login-tab active" data-tab="login" onclick="switchTab('login')">Login</button>
+      <button class="login-tab" data-tab="setup" onclick="switchTab('setup')">Primeira vez?</button>
+    </div>
+
+    <div class="msg error" id="globalError"></div>
+    <div class="msg success" id="globalSuccess"></div>
+
+    <!-- ═══ LOGIN VIEW ═══ -->
+    <div class="view active" id="view-login">
+      <div class="view-header">
+        <div class="view-title">Entrar</div>
+        <div class="view-subtitle">Use seu e-mail e senha</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="loginEmail">E-mail</label>
+        <input class="form-input" id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="loginPwd">Senha</label>
+        <div class="pwd-wrap">
+          <input class="form-input" id="loginPwd" type="password" placeholder="••••••••" autocomplete="current-password">
+          <button class="pwd-toggle" type="button" onclick="togglePwd('loginPwd', this)">Mostrar</button>
+        </div>
+      </div>
+      <button class="action-btn btn-green" id="loginBtn" onclick="handleLogin()">Entrar</button>
+      <div class="form-footer">
+        <button class="form-link" onclick="switchTab('setup')">Esqueci minha senha</button>
+      </div>
+    </div>
+
+    <!-- ═══ SETUP / FORGOT VIEW ═══ -->
+    <div class="view" id="view-setup">
+      <div class="view-header">
+        <div class="view-icon">🔑</div>
+        <div class="view-title">Primeira vez aqui?</div>
+        <div class="view-subtitle">Comprou acesso? Crie sua senha aqui. Também serve para redefinir senha esquecida.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="setupEmail">E-mail</label>
+        <input class="form-input" id="setupEmail" type="email" placeholder="seu@email.com" autocomplete="email">
+      </div>
+      <button class="action-btn btn-green" id="setupBtn" onclick="handleSetup()">Enviar link de configuração</button>
+      <div class="form-hint">ℹ️ Verifique também a pasta de spam.</div>
+    </div>
+
+  </div>
 </div>
 
 <div class="page-footer">
-  <a href="https://celpebras.org">celpebras.org</a> · <a href="https://civiclearn.com">CivicLearn</a> · Testrada Pte Ltd
+  <a href="https://celpebras.org">celpebras.org</a> — Simulação CELPE-BRAS com avaliação por IA
 </div>
 
 <script>
-const SUPABASE_URL = 'https://htgliokekeaovdiafrgs.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const SUPABASE_URL = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const params    = new URLSearchParams(location.search);
-const returnUrl = params.get('return') || '/dashboard/index.html';
+  const params    = new URLSearchParams(location.search);
+  const returnUrl = params.get('return') || '/dashboard/index.html';
 
-function notify(type, text) {
-  const el = document.getElementById('status');
-  el.textContent = text;
-  el.className = type;
-  setTimeout(() => el.style.display = 'none', 6000);
-}
+  // ── Check if already logged in ─────────────────
+  (async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      window.location.href = returnUrl;
+    }
+  })();
 
-// ── Check if already logged in ──────────────────
-(async () => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) {
+  // ── TAB SWITCHING ──────────────────────────────
+  function switchTab(tab) {
+    document.querySelectorAll('.login-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const target = document.getElementById('view-' + tab);
+    if (target) target.classList.add('active');
+    hideMessages();
+  }
+
+  // ── PASSWORD LOGIN ─────────────────────────────
+  async function handleLogin() {
+    hideMessages();
+    const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const password = document.getElementById('loginPwd').value;
+    if (!email || !password) return showError('Preencha e-mail e senha.');
+
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true; btn.textContent = 'Entrando…';
+
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      btn.disabled = false; btn.textContent = 'Entrar';
+      showError(translateError(error.message));
+      return;
+    }
+
+    // Log login
+    await sb.from('login_history').insert({ email, status: 'success', method: 'password' }).catch(() => {});
     window.location.href = returnUrl;
   }
-})();
 
-// ── PASSWORD SETUP (sends email with link to /set-password.html) ──
-async function handleSetup() {
-  const btn   = document.getElementById('setupBtn');
-  const email = document.getElementById('setupEmail').value.trim().toLowerCase();
+  // ── SETUP / FORGOT PASSWORD ────────────────────
+  async function handleSetup() {
+    hideMessages();
+    const email = document.getElementById('setupEmail').value.trim().toLowerCase();
+    if (!email) return showError('Preencha seu e-mail.');
 
-  if (!email) { notify('error', 'Preencha seu e-mail.'); return; }
-  if (btn.disabled) return;
+    const btn = document.getElementById('setupBtn');
+    btn.disabled = true; btn.textContent = 'Enviando…';
 
-  btn.disabled = true;
-  btn.textContent = 'Enviando…';
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/set-password.html',
+    });
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + '/set-password.html'
-  });
+    if (error) {
+      btn.disabled = false; btn.textContent = 'Enviar link de configuração';
+      showError('Não foi possível enviar o link. Tente novamente.');
+      return;
+    }
 
-  if (error) {
-    btn.disabled = false;
-    btn.textContent = 'Enviar link de configuração';
-    notify('error', 'Não foi possível enviar o link.');
-    return;
+    btn.textContent = 'Verifique seu e-mail ✓';
+    showSuccess('Se o e-mail existir no sistema, um link foi enviado. Verifique também o spam.');
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = 'Enviar link de configuração';
+    }, 5000);
   }
 
-  btn.textContent = 'Verifique seu e-mail ✓';
-  setTimeout(() => btn.remove(), 2500);
-  notify('success', 'Se o e-mail existir no sistema, um link foi enviado.');
-}
-
-// ── PASSWORD LOGIN ──────────────────────────────
-async function handleLogin() {
-  const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
-  const password = document.getElementById('loginPwd').value;
-
-  if (!email || !password) { notify('error', 'Preencha e-mail e senha.'); return; }
-
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    return notify('error', 'E-mail ou senha incorretos.');
+  // ── HELPERS ────────────────────────────────────
+  function togglePwd(inputId, btn) {
+    const el = document.getElementById(inputId);
+    if (el.type === 'password') { el.type = 'text'; btn.textContent = 'Ocultar'; }
+    else { el.type = 'password'; btn.textContent = 'Mostrar'; }
   }
 
-  // Log successful login
-  await supabase.from('login_history').insert({
-    email,
-    status: 'success',
-    method: 'password'
-  }).catch(() => {});
+  function showError(msg) { const el = document.getElementById('globalError'); el.textContent = msg; el.classList.add('visible'); }
+  function showSuccess(msg) { const el = document.getElementById('globalSuccess'); el.textContent = msg; el.classList.add('visible'); }
+  function hideMessages() { document.querySelectorAll('.msg').forEach(el => el.classList.remove('visible')); }
 
-  window.location.href = returnUrl;
-}
+  function translateError(msg) {
+    const l = msg.toLowerCase();
+    if (l.includes('invalid login'))       return 'E-mail ou senha incorretos.';
+    if (l.includes('email not confirmed')) return 'E-mail não confirmado. Verifique sua caixa de entrada.';
+    if (l.includes('too many requests'))   return 'Muitas tentativas. Aguarde e tente novamente.';
+    if (l.includes('user not found'))      return 'Nenhuma conta encontrada com esse e-mail.';
+    if (l.includes('network'))             return 'Erro de conexão. Verifique sua internet.';
+    return msg;
+  }
 
-// ── TOGGLE PASSWORD ─────────────────────────────
-function togglePwd() {
-  const pwd = document.getElementById('loginPwd');
-  const btn = document.querySelector('.toggle-pwd');
-  if (pwd.type === 'password') { pwd.type = 'text'; btn.textContent = 'Ocultar'; }
-  else { pwd.type = 'password'; btn.textContent = 'Mostrar'; }
-}
-
-// Enter key
-document.getElementById('loginPwd')?.addEventListener('keydown', e => {
-  if (e.key === 'Enter') handleLogin();
-});
+  // Enter key
+  document.getElementById('loginPwd')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+  document.getElementById('setupEmail')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleSetup(); });
 </script>
 </body>
 </html>
