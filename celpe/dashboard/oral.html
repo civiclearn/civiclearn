@@ -508,11 +508,30 @@ async function endConversation() {
       audioPaths.push({ path: result.path, duration: rec.duration, turn: i + 1 });
     }
 
+    // Build conversation_parts for transcription function
+    var conversationParts = [];
+    var recIdx = 0;
+    for (var ci = 0; ci < chatMessages.length; ci++) {
+      var cm = chatMessages[ci];
+      if (cm.role === 'ai') {
+        conversationParts.push({ role: 'ai', text: cm.text });
+      } else {
+        conversationParts.push({
+          role: 'user',
+          text: cm.text,
+          audio_path: recIdx < audioPaths.length ? audioPaths[recIdx].path : null,
+          duration:   recIdx < audioPaths.length ? audioPaths[recIdx].duration : 0
+        });
+        recIdx++;
+      }
+    }
+
     // Submit
     var responseJson = {
       selected_ep:          selectedEp,
       ep_pool:              epPool.map(function(ep) { return ep.id; }),
       conversation_log:     chatMessages,
+      conversation_parts:   conversationParts,
       audio_paths:          audioPaths,
       audio_path:           audioPaths.length > 0 ? audioPaths[0].path : null,
       total_recordings:     recordings.length,
