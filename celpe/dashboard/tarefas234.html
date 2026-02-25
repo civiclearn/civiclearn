@@ -84,8 +84,8 @@
     .register-badge strong{color:var(--navy)}
     .task-checklist{margin:14px 22px 0;flex-shrink:0}
     .task-checklist-title{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px}
-    .task-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:0.8rem;color:var(--slate);transition:color 0.2s}
-    .task-item.done{color:var(--pass)}
+    .task-item{display:flex;align-items:flex-start;gap:8px;padding:6px 10px;border-radius:7px;background:#f8fafc;font-size:0.8rem;line-height:1.45;color:var(--slate);margin-bottom:5px;transition:all 0.2s}
+    .task-item.done{color:var(--pass);background:var(--pass-bg);border-color:var(--pass-border)}
     .task-bullet{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:transparent;flex-shrink:0;transition:all 0.2s}
     .task-item.done .task-bullet{background:var(--pass);border-color:var(--pass);color:#fff}
 
@@ -100,8 +100,10 @@
     .wc-hint.good{color:var(--pass)}
     .wc-hint.over{color:#f59e0b}
 
-    .write-area{flex:1;display:flex;flex-direction:column;padding:0 22px}
-    #replyTextarea{flex:1;width:100%;border:none;outline:none;resize:none;font-family:"DM Sans",sans-serif;font-size:0.92rem;line-height:1.8;color:var(--navy);padding:14px 0;min-height:200px}
+    .write-area{flex:1;display:flex;flex-direction:column;padding:14px 22px;gap:10px}
+    #replyTextarea{flex:1;width:100%;min-height:280px;padding:14px 16px;border:1.5px solid var(--border);border-radius:10px;outline:none;resize:vertical;font-family:"DM Sans",sans-serif;font-size:0.92rem;line-height:1.8;color:var(--navy)}
+    #replyTextarea:focus{border-color:#94a3b8}
+    #replyTextarea:disabled{background:#f8fafc;color:var(--muted);cursor:default;resize:none}
     #replyTextarea::placeholder{color:#94a3b8}
 
     .write-footer{padding:14px 22px 20px;flex-shrink:0}
@@ -150,9 +152,7 @@
   <div class="source-column" id="sourceColumn">
     <div class="source-inner">
       <div class="source-badge" id="sourceBadge">📄 TEXTO</div>
-      <div class="audio-placeholder" id="audioContainer" style="display:none">
-        <span>🎧 O áudio será reproduzido aqui</span>
-      </div>
+      <div id="audioContainer" style="display:none"></div>
       <h2 class="source-title" id="sourceTitle"></h2>
       <div class="source-meta" id="sourceMeta"></div>
       <div class="source-text-card" id="sourceTextCard" style="display:none"></div>
@@ -297,9 +297,17 @@ function renderExam() {
   document.getElementById('sourceBadge').textContent = icon + ' ' + sourceType.toUpperCase() + ' — ' + label.toUpperCase();
   document.getElementById('toggleLabel').textContent = icon + ' Ver material de apoio';
 
-  // Audio container (only for audio type)
-  if (isAudio) {
+  // Audio player (for audio type)
+  if (isAudio && src.asset) {
     document.getElementById('audioContainer').style.display = '';
+    document.getElementById('audioContainer').innerHTML =
+      '<div style="background:#1e293b;border-radius:12px;padding:20px;margin-bottom:20px;">' +
+        '<div style="font-size:0.75rem;color:#94a3b8;margin-bottom:10px;">🎧 Ouça o áudio — pode reproduzir até 2 vezes</div>' +
+        '<audio controls controlslist="nodownload" style="width:100%;">' +
+          '<source src="/celpe/data/audio/' + CELPE.escapeHtml(src.asset) + '" type="audio/mpeg">' +
+          'Seu navegador não suporta áudio.' +
+        '</audio>' +
+      '</div>';
   }
 
   // Source text (for text type)
