@@ -218,12 +218,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
     examDataMap = { tarefa2: d2, tarefa3: d3, tarefa4: d4 };
   } catch (err) {
-    CELPE.showError('Não foi possível carregar as tarefas.', simId, attemptId);
+    console.error('[tarefas234] load error:', err);
+    CELPE.showError('Não foi possível carregar as tarefas: ' + err.message, simId, attemptId);
     return;
   }
 
   renderTabs();
-  switchTab(activeTab);
+  try {
+    switchTab(activeTab);
+  } catch (renderErr) {
+    console.error('[tarefas234] render error:', renderErr);
+  }
   startTimer();
   CELPE.hideLoading();
 });
@@ -322,11 +327,14 @@ function renderWritePane(key) {
 
   // Task actions checklist
   const actions = data.task_actions || [];
-  const checklistHtml = actions.map((a, i) => `
+  const checklistHtml = actions.map((a, i) => {
+    const label = typeof a === 'string' ? a : a.description || String(a);
+    return `
     <div class="task-item" id="titem-${key}-${i}">
       <div class="task-bullet">✓</div>
-      <span>${CELPE.escapeHtml(a)}</span>
-    </div>`).join('');
+      <span>${CELPE.escapeHtml(label)}</span>
+    </div>`;
+  }).join('');
 
   col.innerHTML = `
     <div class="write-header">
@@ -422,7 +430,8 @@ function updateChecklist(text, key) {
   const lower = text.toLowerCase();
   const wc = CELPE.countWords(text);
   (data.task_actions || []).forEach((a, i) => {
-    const words = a.toLowerCase().replace(/[().,!?]/g, '').split(/\s+/).filter(w => w.length > 4);
+    const label = typeof a === 'string' ? a : a.description || String(a);
+    const words = label.toLowerCase().replace(/[().,!?]/g, '').split(/\s+/).filter(w => w.length > 4);
     const matches = words.filter(w => lower.includes(w)).length;
     const done = wc > 30 && matches >= Math.min(2, words.length);
     const el = document.getElementById(`titem-${key}-${i}`);

@@ -236,7 +236,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     oralData = await res.json();
     setupEPSelection();
   } catch (err) {
-    CELPE.showError('Não foi possível carregar a parte oral.', simId, attemptId);
+    console.error('[oral] load error:', err);
+    CELPE.showError('Não foi possível carregar a parte oral: ' + err.message, simId, attemptId);
     return;
   }
 

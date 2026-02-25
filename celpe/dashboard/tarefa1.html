@@ -301,7 +301,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     examData = await res.json();
     renderTask();
   } catch (err) {
-    CELPE.showError('Não foi possível carregar a tarefa.', simId, attemptId);
+    console.error('[tarefa1] load error:', err);
+    CELPE.showError('Não foi possível carregar a tarefa: ' + err.message, simId, attemptId);
     return;
   }
 
@@ -328,7 +329,7 @@ function renderTask() {
 
   // Task checklist from task_actions
   const actions = examData.task_actions || [];
-  taskItems = actions.map((a, i) => ({ id: `ta${i}`, label: a, done: false }));
+  taskItems = actions.map((a, i) => ({ id: `ta${i+1}`, label: typeof a === 'string' ? a : a.description || String(a), done: false }));
   document.getElementById('taskChecklistItems').innerHTML = taskItems.map(item => `
     <div class="task-item" id="titem-${item.id}">
       <div class="task-bullet"">✓</div>
@@ -403,7 +404,7 @@ function updateChecklist(text) {
   if (submitted) return;
   const lower = text.toLowerCase();
   taskItems.forEach(item => {
-    const words = item.label.toLowerCase().replace(/[().,!?]/g, '').split(/\s+/).filter(w => w.length > 4);
+    const words = String(item.label).toLowerCase().replace(/[().,!?]/g, '').split(/\s+/).filter(w => w.length > 4);
     const matches = words.filter(w => lower.includes(w)).length;
     const done = wordCount > 30 && matches >= Math.min(2, words.length);
     item.done = done;
