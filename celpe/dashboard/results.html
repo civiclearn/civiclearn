@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resultados — CELPE-BRAS</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/assets/js/celpe-auth.js"></script>
+  <script src="/assets/js/celpe-engine.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green:#009c3b; --green-dim:#e6f5ec; --yellow:#ffdf00; --blue:#002776;
+      --navy:#0f172a; --slate:#334155; --muted:#64748b; --border:#e2e8f0;
+      --surface:#ffffff; --bg:#f8f7f4;
+      --pass:#166534; --pass-bg:#f0fdf4; --pass-border:#bbf7d0;
+      --fail:#991b1b; --fail-bg:#fef2f2; --fail-border:#fecaca;
+      --amber:#92400e; --amber-bg:#fffbeb; --amber-border:#fde68a;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
+
+    /* TOPBAR */
+    .topbar{background:var(--navy);border-bottom:3px solid var(--green);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+    .topbar-left{display:flex;align-items:center;gap:12px}
+    .back-link{color:#64748b;text-decoration:none;font-size:0.8rem;display:flex;align-items:center;gap:5px}
+    .back-link:hover{color:#fff}
+    .topbar-divider{width:1px;height:20px;background:#1e293b}
+    .topbar-flag{width:22px;height:16px;background:var(--green);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0}
+    .topbar-flag::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:14px;height:8px;background:var(--yellow);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%)}
+    .topbar-flag::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:5px;height:5px;border-radius:50%;background:var(--blue)}
+    .topbar-brand{display:flex;align-items:center;gap:8px}
+    .topbar-title{font-family:"Fraunces",serif;font-size:0.9rem;font-weight:600;color:#fff}
+    .topbar-sub{font-size:0.68rem;color:#64748b}
+
+    /* LOADING */
+    #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity 0.35s}
+    #loading-overlay.hidden{opacity:0;pointer-events:none}
+    .loading-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--green);animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* PAGE */
+    .page-wrap{max-width:740px;margin:0 auto;padding:32px 24px 80px;display:none}
+    .page-eyebrow{display:flex;align-items:center;gap:8px;font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:20px}
+    .page-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+    /* HERO CARD */
+    .hero-card{border-radius:14px;overflow:hidden;margin-bottom:28px;border:1px solid var(--border)}
+    .hero-card.passed{border-color:var(--pass-border)}
+    .hero-card.failed{border-color:var(--fail-border)}
+    .hero-top{text-align:center;padding:32px 24px 24px}
+    .hero-card.passed .hero-top{background:var(--pass-bg)}
+    .hero-card.failed .hero-top{background:var(--fail-bg)}
+    .hero-badge{display:inline-block;font-size:0.82rem;font-weight:700;margin-bottom:12px}
+    .hero-card.passed .hero-badge{color:var(--pass)}
+    .hero-card.failed .hero-badge{color:var(--fail)}
+    .hero-level{font-family:"Fraunces",serif;font-size:1.8rem;font-weight:700;margin-bottom:4px}
+    .hero-card.passed .hero-level{color:var(--pass)}
+    .hero-card.failed .hero-level{color:var(--fail)}
+    .hero-score{font-size:1rem;color:var(--muted);margin-bottom:4px}
+    .hero-status{font-size:0.85rem;color:var(--muted)}
+    .hero-sections{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border-top:1px solid var(--border);padding:18px 24px}
+    .hero-section{text-align:center;padding:8px 0}
+    .hero-section:first-child{border-right:1px solid var(--border)}
+    .hs-label{font-size:0.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+    .hs-grade{font-family:"Fraunces",serif;font-size:1.5rem;font-weight:700;color:var(--navy)}
+    .hs-note{font-size:0.68rem;color:var(--muted)}
+
+    /* PROCESSING */
+    .processing-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px 24px;text-align:center}
+    .processing-icon{font-size:2rem;margin-bottom:12px}
+    .processing-title{font-family:"Fraunces",serif;font-size:1.2rem;font-weight:700;margin-bottom:8px}
+    .processing-sub{font-size:0.85rem;color:var(--muted);line-height:1.6;margin-bottom:20px}
+    .processing-progress{margin-top:20px;text-align:left}
+    .progress-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.84rem}
+    .progress-icon{flex-shrink:0}
+    .progress-label{color:var(--slate)}
+
+    /* SECTION BLOCK */
+    .section-block{margin-bottom:24px}
+    .section-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:0 4px}
+    .section-icon{font-size:1rem}
+    .section-title{font-family:"Fraunces",serif;font-size:1rem;font-weight:700;flex:1}
+    .section-grade-pill{background:var(--navy);color:#fff;border-radius:99px;padding:3px 12px;font-size:0.78rem;font-weight:700}
+
+    /* ELEMENT CARD */
+    .elem-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden}
+    .elem-header{display:flex;align-items:center;gap:10px;padding:14px 18px;cursor:pointer;user-select:none}
+    .elem-card.no-detail .elem-header{cursor:default}
+    .elem-name{flex:1;font-size:0.88rem;font-weight:600}
+    .elem-score-badge{font-size:0.76rem;font-weight:700;padding:3px 10px;border-radius:99px}
+    .elem-score-badge.high{background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass-border)}
+    .elem-score-badge.mid{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+    .elem-score-badge.low{background:var(--fail-bg);color:var(--fail);border:1px solid var(--fail-border)}
+    .elem-score-badge.skip{background:#f1f5f9;color:var(--muted);border:1px solid var(--border)}
+    .elem-score-badge.pending{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+    .elem-chevron{color:var(--muted);font-size:0.7rem;transition:transform 0.2s}
+    .elem-card.open .elem-chevron{transform:rotate(90deg)}
+    .elem-detail{display:none;padding:0 18px 18px}
+    .elem-card.open .elem-detail{display:block}
+
+    /* FEEDBACK */
+    .feedback-section{margin-bottom:14px}
+    .feedback-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:6px}
+    .feedback-summary{font-size:0.85rem;color:var(--slate);line-height:1.6;background:var(--bg);border-radius:8px;padding:10px 14px}
+    .feedback-list{display:flex;flex-direction:column;gap:4px}
+    .feedback-item{display:flex;gap:8px;font-size:0.84rem;color:var(--slate);line-height:1.5;padding:4px 0}
+    .feedback-item-icon{flex-shrink:0}
+    .mistakes-list{margin-bottom:14px}
+    .mistake-row{display:flex;gap:10px;background:#fef2f2;border-radius:8px;padding:10px 14px;margin-bottom:6px;font-size:0.82rem;line-height:1.45}
+    .mistake-original{color:var(--fail);text-decoration:line-through;font-weight:500}
+    .mistake-arrow{color:var(--muted);flex-shrink:0}
+    .mistake-correction{color:var(--pass);font-weight:600}
+    .mistake-explanation{color:var(--slate);font-style:italic}
+
+    /* BACK BUTTON */
+    .back-btn{display:block;width:100%;max-width:400px;margin:32px auto 0;background:var(--navy);color:white;border:none;border-radius:12px;padding:16px;font-family:"DM Sans",sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;transition:opacity 0.15s;text-align:center}
+    .back-btn:hover{opacity:0.88}
+
+    /* RESPONSIVE */
+    @media(max-width:600px){
+      .page-wrap{padding:28px 16px 60px}
+      .topbar{padding:0 14px}
+      .hero-top{padding:28px 20px 22px}
+      .hero-level{font-size:1.4rem}
+      .hero-sections{grid-template-columns:1fr;gap:0}
+      .hero-section:first-child{border-right:none;border-bottom:1px solid var(--border)}
+      .hero-section{padding:12px 0}
+      .elem-header{padding:12px 14px}
+      .elem-detail{padding:0 14px 14px}
+      .mistake-row{flex-wrap:wrap}
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div style="font-size:0.85rem;color:var(--muted)">Carregando resultados…</div>
+</div>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" id="backLink" href="/celpe/dashboard/index.html">← Simulações</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-brand">
+      <div class="topbar-flag"></div>
+      <div>
+        <div class="topbar-title" id="topbarTitle">Resultados</div>
+        <div class="topbar-sub">CELPE-BRAS</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="page-wrap" id="pageWrap">
+  <div class="page-eyebrow">
+    <div class="page-eyebrow-dot"></div>
+    <span id="pageEyebrow">Simulação · Resultados</span>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+var ELEMENT_LABELS = {
+  tarefa1: 'Tarefa 1 — Vídeo',
+  tarefa2: 'Tarefa 2 — Áudio',
+  tarefa3: 'Tarefa 3 — Texto',
+  tarefa4: 'Tarefa 4 — Texto',
+  oral:    'Parte Oral — Conversa',
+};
+
+var SECTION_META = {
+  escrita: {
+    icon: '✍️',
+    title: 'Parte Escrita',
+    keys: ['tarefa1', 'tarefa2', 'tarefa3', 'tarefa4']
+  },
+  oral: {
+    icon: '🎤',
+    title: 'Parte Oral',
+    keys: ['oral']
+  },
+};
+
+// CELPE-BRAS certification levels
+var CERT_LABELS = {
+  'sem_certificacao':       { label: 'Sem Certificação',       color: 'var(--fail)' },
+  'intermediario':          { label: 'Intermediário',           color: 'var(--amber)' },
+  'intermediario_superior': { label: 'Intermediário Superior',  color: 'var(--green)' },
+  'avancado':               { label: 'Avançado',                color: 'var(--pass)' },
+  'avancado_superior':      { label: 'Avançado Superior',       color: 'var(--pass)' },
+};
+
+var currentUser, attemptId, simId, simNum, elemKey;
+var pollTimer = null;
+var POLL_MS = 12000;
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async function() {
+  console.log('[results] DOMContentLoaded');
+  try {
+    ({ user: currentUser, attemptId, simId, simNum } = await CELPE.init(''));
+
+    document.getElementById('topbarTitle').textContent = 'Sim ' + simNum + ' — Resultados';
+    document.getElementById('pageEyebrow').textContent = 'Simulação ' + simNum + ' · Resultados';
+
+    await loadResults();
+  } catch (err) {
+    console.error('[results] init error:', err);
+    CELPE.showError('Não foi possível carregar os resultados.', simId, attemptId);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// LOAD & RENDER
+// ═══════════════════════════════════════════════════════════════
+async function loadResults() {
+  try {
+    var data = await CELPE.hydrateData(currentUser.id, attemptId, true);
+    if (!data) throw new Error('Nenhum dado encontrado');
+
+    var attempt = (data.attempts || []).find(function(a) { return a.id === attemptId; });
+    if (!attempt) throw new Error('Tentativa não encontrada');
+
+    var elements = attempt.elements || [];
+
+    CELPE.hideLoading();
+    document.getElementById('pageWrap').style.display = '';
+
+    if (attempt.status === 'complete') {
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+      renderResults(attempt, elements);
+    } else {
+      renderProcessing(attempt, elements);
+      startPolling();
+    }
+  } catch (err) {
+    console.error('[results] error:', err);
+    CELPE.hideLoading();
+    document.getElementById('pageWrap').style.display = '';
+    document.getElementById('content').innerHTML =
+      '<div class="processing-card">' +
+        '<div class="processing-icon">⚠️</div>' +
+        '<div class="processing-title">Não foi possível carregar</div>' +
+        '<div class="processing-sub">' + esc(err.message) + '</div>' +
+      '</div>' +
+      '<button class="back-btn" onclick="window.location.href=\'/celpe/dashboard/index.html\'">Voltar às simulações</button>';
+  }
+}
+
+function startPolling() {
+  if (pollTimer) return;
+  pollTimer = setInterval(async function() {
+    try {
+      var data = await CELPE.hydrateData(currentUser.id, attemptId, true);
+      var attempt = (data?.attempts || []).find(function(a) { return a.id === attemptId; });
+      if (attempt?.status === 'complete') {
+        clearInterval(pollTimer);
+        pollTimer = null;
+        renderResults(attempt, attempt.elements || []);
+      } else {
+        renderProcessing(attempt, attempt?.elements || []);
+      }
+    } catch (e) { console.warn('[results] poll error:', e.message); }
+  }, POLL_MS);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER: PROCESSING
+// ═══════════════════════════════════════════════════════════════
+function renderProcessing(attempt, elements) {
+  var items = elements.map(function(el) {
+    var done = el.eval_status === 'complete' || el.eval_status === 'skipped' || el.submission_status === 'skipped';
+    var pending = el.eval_status === 'pending' || el.transcription_status === 'pending';
+    var icon = done ? '✅' : pending ? '⏳' : '⬜';
+    return '<div class="progress-item">' +
+      '<span class="progress-icon">' + icon + '</span>' +
+      '<span class="progress-label">' + esc(ELEMENT_LABELS[el.element_key] || el.element_key) + '</span>' +
+    '</div>';
+  }).join('');
+
+  var doneCount = elements.filter(function(el) {
+    return el.eval_status === 'complete' || el.eval_status === 'skipped' || el.submission_status === 'skipped';
+  }).length;
+
+  document.getElementById('content').innerHTML =
+    '<div class="processing-card">' +
+      '<div class="processing-icon">⏳</div>' +
+      '<div class="processing-title">Avaliação em andamento…</div>' +
+      '<div class="processing-sub">' +
+        'Suas respostas estão sendo avaliadas por IA. Esta página se atualiza automaticamente.' +
+        '<br><strong>' + doneCount + ' de ' + elements.length + '</strong> tarefas avaliadas.' +
+      '</div>' +
+      '<div class="loading-spinner" style="margin:0 auto;"></div>' +
+      '<div class="processing-progress">' + items + '</div>' +
+    '</div>' +
+    '<button class="back-btn" onclick="window.location.href=\'/celpe/dashboard/index.html\'">Voltar às simulações</button>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER: RESULTS
+// ═══════════════════════════════════════════════════════════════
+function renderResults(attempt, elements) {
+  var certKey = attempt.certification_level || 'sem_certificacao';
+  var cert = CERT_LABELS[certKey] || CERT_LABELS['sem_certificacao'];
+  var passed = certKey !== 'sem_certificacao';
+  var gE = formatScore(attempt.grade_escrita);
+  var gO = formatScore(attempt.grade_oral);
+  var gA = formatScore(attempt.grade_overall);
+
+  // Elements map
+  var elMap = {};
+  elements.forEach(function(el) { elMap[el.element_key] = el; });
+
+  // Hero card
+  var html =
+    '<div class="hero-card ' + (passed ? 'passed' : 'failed') + '">' +
+      '<div class="hero-top">' +
+        '<div class="hero-badge">' + (passed ? '✅ Certificado' : '❌ Sem Certificação') + '</div>' +
+        '<div class="hero-level" style="color:' + cert.color + '">' + cert.label + '</div>' +
+        '<div class="hero-score">' + gA + '/10 — Nota geral</div>' +
+        '<div class="hero-status">' + (passed ? 'Parabéns pelo resultado!' : 'Você não atingiu o nível mínimo desta vez') + '</div>' +
+      '</div>' +
+      '<div class="hero-sections">' +
+        '<div class="hero-section">' +
+          '<div class="hs-label">✍️ Escrita</div>' +
+          '<div class="hs-grade">' + gE + '</div>' +
+          '<div class="hs-note">Média das 4 tarefas</div>' +
+        '</div>' +
+        '<div class="hero-section">' +
+          '<div class="hs-label">🎤 Oral</div>' +
+          '<div class="hs-grade">' + gO + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  // Section blocks
+  for (var sectionKey in SECTION_META) {
+    var meta = SECTION_META[sectionKey];
+    var sectionGrade = sectionKey === 'escrita' ? gE : gO;
+
+    html += '<div class="section-block">' +
+      '<div class="section-header">' +
+        '<span class="section-icon">' + meta.icon + '</span>' +
+        '<span class="section-title">' + meta.title + '</span>' +
+        '<span class="section-grade-pill">' + sectionGrade + '</span>' +
+      '</div>';
+
+    for (var i = 0; i < meta.keys.length; i++) {
+      var key = meta.keys[i];
+      var el = elMap[key];
+      if (!el) continue;
+      html += renderElementCard(key, el);
+    }
+
+    html += '</div>';
+  }
+
+  html += '<button class="back-btn" onclick="window.location.href=\'/celpe/dashboard/index.html\'">Voltar às simulações</button>';
+
+  document.getElementById('content').innerHTML = html;
+
+  // Wire toggles
+  document.querySelectorAll('.elem-header').forEach(function(h) {
+    h.addEventListener('click', function() {
+      h.closest('.elem-card').classList.toggle('open');
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER: ELEMENT CARD
+// ═══════════════════════════════════════════════════════════════
+function renderElementCard(key, el) {
+  var label = ELEMENT_LABELS[key] || key;
+
+  // Score badge
+  var badgeHtml = '';
+  if (el.submission_status === 'skipped') {
+    badgeHtml = '<span class="elem-score-badge skip">Pulada</span>';
+  } else if (el.eval_status === 'pending') {
+    badgeHtml = '<span class="elem-score-badge pending">Avaliando…</span>';
+  } else if (el.eval_status === 'failed') {
+    badgeHtml = '<span class="elem-score-badge low">Erro</span>';
+  } else if (el.ai_score_internal !== null && el.ai_score_internal !== undefined) {
+    var score = Number(el.ai_score_internal);
+    var cls = score >= 7 ? 'high' : score >= 4 ? 'mid' : 'low';
+    badgeHtml = '<span class="elem-score-badge ' + cls + '">' + score.toFixed(1) + '/10</span>';
+  }
+
+  // Detail content
+  var detailHtml = '';
+  var fb = el.ai_feedback;
+
+  if (el.submission_status === 'skipped') {
+    detailHtml = '<p style="color:var(--muted);font-size:0.85rem;padding-top:14px;">Esta tarefa foi pulada e conta como 0 pontos.</p>';
+  } else if (fb && typeof fb === 'object') {
+    // Summary
+    if (fb.summary) {
+      detailHtml +=
+        '<div class="feedback-section">' +
+          '<div class="feedback-label">Avaliação geral</div>' +
+          '<div class="feedback-summary">' + esc(fb.summary) + '</div>' +
+        '</div>';
+    }
+
+    // Strengths
+    if (fb.strengths && fb.strengths.length) {
+      detailHtml +=
+        '<div class="feedback-section">' +
+          '<div class="feedback-label">Pontos fortes</div>' +
+          '<div class="feedback-list">' +
+            fb.strengths.map(function(s) {
+              return '<div class="feedback-item"><span class="feedback-item-icon">✅</span><span>' + esc(s) + '</span></div>';
+            }).join('') +
+          '</div>' +
+        '</div>';
+    }
+
+    // Weaknesses
+    if (fb.weaknesses && fb.weaknesses.length) {
+      detailHtml +=
+        '<div class="feedback-section">' +
+          '<div class="feedback-label">Pontos a melhorar</div>' +
+          '<div class="feedback-list">' +
+            fb.weaknesses.map(function(w) {
+              return '<div class="feedback-item"><span class="feedback-item-icon">💡</span><span>' + esc(w) + '</span></div>';
+            }).join('') +
+          '</div>' +
+        '</div>';
+    }
+
+    // Mistakes
+    if (fb.mistakes && fb.mistakes.length) {
+      detailHtml +=
+        '<div class="feedback-section">' +
+          '<div class="feedback-label">Erros linguísticos</div>' +
+          '<div class="mistakes-list">' +
+            fb.mistakes.map(function(m) {
+              return '<div class="mistake-row">' +
+                '<span class="mistake-original">' + esc(m.original || '') + '</span>' +
+                '<span class="mistake-arrow">→</span>' +
+                '<span class="mistake-correction">' + esc(m.correction || '') + '</span>' +
+                (m.explanation ? '<span class="mistake-explanation">— ' + esc(m.explanation) + '</span>' : '') +
+              '</div>';
+            }).join('') +
+          '</div>' +
+        '</div>';
+    }
+
+    // Content coverage
+    if (fb.content_coverage) {
+      detailHtml +=
+        '<div class="feedback-section">' +
+          '<div class="feedback-label">Cobertura do conteúdo</div>' +
+          '<div class="feedback-summary">' + esc(fb.content_coverage) + '</div>' +
+        '</div>';
+    }
+  } else if (el.eval_status === 'pending') {
+    detailHtml = '<p style="color:var(--muted);font-size:0.85rem;padding-top:14px;">Avaliação em andamento…</p>';
+  }
+
+  return '<div class="elem-card' + (detailHtml ? '' : ' no-detail') + '">' +
+    '<div class="elem-header">' +
+      '<span class="elem-name">' + esc(label) + '</span>' +
+      badgeHtml +
+      (detailHtml ? '<span class="elem-chevron">▸</span>' : '') +
+    '</div>' +
+    (detailHtml ? '<div class="elem-detail">' + detailHtml + '</div>' : '') +
+  '</div>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+function formatScore(val) {
+  if (val === null || val === undefined) return '—';
+  return Number(val).toFixed(1);
+}
+
+function esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
