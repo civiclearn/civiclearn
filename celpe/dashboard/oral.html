@@ -488,6 +488,12 @@ async function endConversation() {
   if (isRecording) stopRecording();
   if (timerInterval) clearInterval(timerInterval);
 
+  // Must have at least one recording
+  if (recordings.length === 0) {
+    CELPE.toast('Você precisa gravar pelo menos uma resposta antes de enviar.');
+    return;
+  }
+
   document.getElementById('endConvBtn').disabled = true;
   document.getElementById('endConvBtn').textContent = 'Enviando…';
   document.getElementById('recordBtn').style.display = 'none';
@@ -508,7 +514,9 @@ async function endConversation() {
       ep_pool:              epPool.map(function(ep) { return ep.id; }),
       conversation_log:     chatMessages,
       audio_paths:          audioPaths,
+      audio_path:           audioPaths.length > 0 ? audioPaths[0].path : null,
       total_recordings:     recordings.length,
+      duration_sec:         audioPaths.reduce(function(sum, a) { return sum + a.duration; }, 0),
       conversation_seconds: (examData.ep_selection?.conversation_time_seconds || 300) - Math.max(0, convSeconds),
       evaluation_criteria:  examData.evaluation_criteria,
       ai_evaluation_prompt: examData.ai_evaluation_oral_prompt,
