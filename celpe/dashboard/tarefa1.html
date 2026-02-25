@@ -282,10 +282,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   attemptId = ctx.attemptId;
   elemKey   = ctx.elemKey;
 
-  document.getElementById('backLink').href = `/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
+  document.getElementById('backLink').href = `/celpe/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
 
   // Check if already done
-  const status = await CELPE.getStatus(user.email, attemptId, elemKey);
+  const status = await CELPE.getStatus(user.id, attemptId, elemKey);
   if (status === 'submitted' || status === 'skipped') {
     CELPE.hideLoading();
     document.getElementById('alreadyDoneCard').classList.add('visible');
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Load task JSON
   try {
-    const res = await fetch(`/dashboard/data/sim01_tarefa1.json`);
+    const res = await fetch(`/celpe/dashboard/data/sim01_tarefa1.json`);
     examData = await res.json();
     renderTask();
   } catch (err) {
