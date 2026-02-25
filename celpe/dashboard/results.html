@@ -191,12 +191,13 @@ var SECTION_META = {
 
 // CELPE-BRAS certification levels
 var CERT_LABELS = {
-  'sem_certificacao':       { label: 'Sem Certificação',       color: 'var(--fail)' },
-  'intermediario':          { label: 'Intermediário',           color: 'var(--amber)' },
-  'intermediario_superior': { label: 'Intermediário Superior',  color: 'var(--green)' },
-  'avancado':               { label: 'Avançado',                color: 'var(--pass)' },
-  'avancado_superior':      { label: 'Avançado Superior',       color: 'var(--pass)' },
+  'Sem Certificação':       { label: 'Sem Certificação',       color: 'var(--fail)',  passed: false },
+  'Intermediário':          { label: 'Intermediário',           color: 'var(--amber)', passed: true },
+  'Intermediário Superior': { label: 'Intermediário Superior',  color: 'var(--green)', passed: true },
+  'Avançado':               { label: 'Avançado',                color: 'var(--pass)',  passed: true },
+  'Avançado Superior':      { label: 'Avançado Superior',       color: 'var(--pass)',  passed: true },
 };
+var CERT_FALLBACK = { label: 'Sem Certificação', color: 'var(--fail)', passed: false };
 
 var currentUser, attemptId, simId, simNum, elemKey;
 var pollTimer = null;
@@ -318,9 +319,9 @@ function renderProcessing(attempt, elements) {
 // RENDER: RESULTS
 // ═══════════════════════════════════════════════════════════════
 function renderResults(attempt, elements) {
-  var certKey = attempt.certification_level || 'sem_certificacao';
-  var cert = CERT_LABELS[certKey] || CERT_LABELS['sem_certificacao'];
-  var passed = certKey !== 'sem_certificacao';
+  var certKey = attempt.certification_level || '';
+  var cert = CERT_LABELS[certKey] || CERT_FALLBACK;
+  var passed = cert.passed;
   var gE = formatScore(attempt.grade_escrita);
   var gO = formatScore(attempt.grade_oral);
   var gA = formatScore(attempt.grade_overall);
@@ -335,7 +336,7 @@ function renderResults(attempt, elements) {
       '<div class="hero-top">' +
         '<div class="hero-badge">' + (passed ? '✅ Certificado' : '❌ Sem Certificação') + '</div>' +
         '<div class="hero-level" style="color:' + cert.color + '">' + cert.label + '</div>' +
-        '<div class="hero-score">' + gA + '/10 — Nota geral</div>' +
+        '<div class="hero-score">' + gA + '/25 — Nota geral</div>' +
         '<div class="hero-status">' + (passed ? 'Parabéns pelo resultado!' : 'Você não atingiu o nível mínimo desta vez') + '</div>' +
       '</div>' +
       '<div class="hero-sections">' +
@@ -401,8 +402,8 @@ function renderElementCard(key, el) {
     badgeHtml = '<span class="elem-score-badge low">Erro</span>';
   } else if (el.ai_score_internal !== null && el.ai_score_internal !== undefined) {
     var score = Number(el.ai_score_internal);
-    var cls = score >= 7 ? 'high' : score >= 4 ? 'mid' : 'low';
-    badgeHtml = '<span class="elem-score-badge ' + cls + '">' + score.toFixed(1) + '/10</span>';
+    var cls = score >= 18 ? 'high' : score >= 10 ? 'mid' : 'low';
+    badgeHtml = '<span class="elem-score-badge ' + cls + '">' + score.toFixed(1) + '/25</span>';
   }
 
   // Detail content
