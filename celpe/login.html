@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — CELPE-BRAS</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green:#009c3b; --green-dim:#e6f5ec; --green-dark:#007a2f;
+      --yellow:#ffdf00; --blue:#002776;
+      --navy:#0f172a; --slate:#334155; --muted:#64748b;
+      --border:#e2e8f0; --surface:#ffffff; --bg:#f8f7f4;
+      --red:#dc2626;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;}
+
+    /* ── HEADER ─── */
+    .site-header{background:var(--navy);border-bottom:3px solid var(--green);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+    .header-left{display:flex;align-items:center;gap:14px;}
+    .topbar-flag{width:28px;height:20px;background:var(--green);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0;}
+    .topbar-flag::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:16px;height:10px;background:var(--yellow);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);}
+    .topbar-flag::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:6px;height:6px;border-radius:50%;background:var(--blue);}
+    .brand-title{font-family:"Fraunces",serif;font-size:1rem;font-weight:600;color:#fff;}
+    .header-right{display:flex;align-items:center;gap:12px;}
+    .btn-small{padding:6px 16px;border-radius:8px;font-size:0.78rem;font-weight:600;text-decoration:none;background:var(--green);color:#fff;transition:opacity 0.15s;}
+    .btn-small:hover{opacity:0.85;}
+
+    /* ── STATUS MSG ─── */
+    #status{display:none;max-width:920px;width:100%;margin:16px auto 0;padding:10px 16px;border-radius:10px;font-size:0.88rem;text-align:center;}
+    #status.error{display:block;background:#fef2f2;color:var(--red);border:1px solid #fecaca;}
+    #status.success{display:block;background:var(--green-dim);color:#166534;border:1px solid #bbf7d0;}
+
+    /* ── GRID ─── */
+    .login-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:720px;width:100%;margin:40px auto;padding:0 20px;}
+
+    .auth-card{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:32px 28px;}
+    .auth-card h2{font-family:"Fraunces",serif;font-size:1.15rem;font-weight:700;margin-bottom:8px;}
+    .auth-card p{font-size:0.88rem;color:var(--muted);line-height:1.55;margin-bottom:18px;}
+    .auth-card label{display:block;font-size:0.78rem;font-weight:600;color:var(--slate);margin-bottom:5px;margin-top:14px;}
+    .auth-card input{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:"DM Sans",sans-serif;font-size:0.92rem;color:var(--navy);background:var(--bg);outline:none;transition:border-color 0.15s;}
+    .auth-card input:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-dim);}
+    .auth-card input::placeholder{color:#94a3b8;}
+
+    .pwd-container{position:relative;}
+    .pwd-container input{padding-right:60px;}
+    .toggle-pwd{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:0.75rem;color:var(--muted);cursor:pointer;font-family:inherit;font-weight:600;}
+    .toggle-pwd:hover{color:var(--navy);}
+
+    .btn-action{display:block;width:100%;padding:12px;border:none;border-radius:9px;font-family:"DM Sans",sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;margin-top:14px;text-align:center;}
+    .btn-action:hover{opacity:0.85;}
+    .btn-action:disabled{opacity:0.4;cursor:default;}
+    .btn-green{background:var(--green);color:#fff;}
+    .btn-black{background:var(--navy);color:#fff;}
+
+    .forgot-link{display:block;text-align:center;margin-top:14px;font-size:0.82rem;color:var(--green);font-weight:500;text-decoration:none;cursor:pointer;}
+    .forgot-link:hover{text-decoration:underline;}
+
+    .hint-text{font-size:0.72rem;color:var(--green);font-weight:600;margin-top:14px;text-align:center;line-height:1.4;}
+
+    .spinner{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* ── FOOTER ─── */
+    .page-footer{margin-top:auto;text-align:center;padding:24px;font-size:0.78rem;color:var(--muted);}
+    .page-footer a{color:var(--muted);text-decoration:none;}
+    .page-footer a:hover{text-decoration:underline;}
+
+    /* ── MOBILE ─── */
+    @media(max-width:700px){
+      .login-grid{grid-template-columns:1fr;max-width:420px;}
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-left">
+    <div class="topbar-flag"></div>
+    <span class="brand-title">CELPE-BRAS</span>
+  </div>
+  <div class="header-right">
+    <a href="/checkout.html" class="btn-small">Comprar acesso</a>
+  </div>
+</header>
+
+<div id="status"></div>
+
+<div class="login-grid">
+
+  <!-- LEFT CARD: First time / setup -->
+  <div class="auth-card">
+    <h2 style="color:var(--green);">Primeira vez?</h2>
+    <p>Comprou acesso? Configure sua senha aqui. Também serve para redefinir uma senha esquecida.</p>
+
+    <input type="email" id="setupEmail" placeholder="seu@email.com">
+    <button type="button" id="setupBtn" onclick="handleSetup()" class="btn-action btn-green">
+      Enviar link de configuração
+    </button>
+
+    <div class="hint-text">ℹ️ Verifique também a pasta de spam.</div>
+  </div>
+
+  <!-- RIGHT CARD: Login -->
+  <div class="auth-card">
+    <h2 style="font-size:1.4rem;text-align:center;">Login</h2>
+
+    <div style="margin-top:16px;">
+      <label>E-mail</label>
+      <input type="email" id="loginEmail">
+
+      <label>Senha</label>
+      <div class="pwd-container">
+        <input type="password" id="loginPwd">
+        <button type="button" class="toggle-pwd" onclick="togglePwd()">Mostrar</button>
+      </div>
+
+      <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top:14px;">
+        Entrar com senha
+      </button>
+
+      <a href="#" class="forgot-link" onclick="event.preventDefault(); document.getElementById('setupEmail').focus(); document.getElementById('setupEmail').scrollIntoView({behavior:'smooth'});">
+        Esqueci minha senha
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<div class="page-footer">
+  <a href="https://celpebras.org">celpebras.org</a> · <a href="https://civiclearn.com">CivicLearn</a> · Testrada Pte Ltd
+</div>
+
+<script>
+const SUPABASE_URL = 'https://htgliokekeaovdiafrgs.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const params    = new URLSearchParams(location.search);
+const returnUrl = params.get('return') || '/dashboard/index.html';
+
+function notify(type, text) {
+  const el = document.getElementById('status');
+  el.textContent = text;
+  el.className = type;
+  setTimeout(() => el.style.display = 'none', 6000);
+}
+
+// ── Check if already logged in ──────────────────
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    window.location.href = returnUrl;
+  }
+})();
+
+// ── PASSWORD SETUP (sends email with link to /set-password.html) ──
+async function handleSetup() {
+  const btn   = document.getElementById('setupBtn');
+  const email = document.getElementById('setupEmail').value.trim().toLowerCase();
+
+  if (!email) { notify('error', 'Preencha seu e-mail.'); return; }
+  if (btn.disabled) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Enviando…';
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/set-password.html'
+  });
+
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = 'Enviar link de configuração';
+    notify('error', 'Não foi possível enviar o link.');
+    return;
+  }
+
+  btn.textContent = 'Verifique seu e-mail ✓';
+  setTimeout(() => btn.remove(), 2500);
+  notify('success', 'Se o e-mail existir no sistema, um link foi enviado.');
+}
+
+// ── PASSWORD LOGIN ──────────────────────────────
+async function handleLogin() {
+  const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const password = document.getElementById('loginPwd').value;
+
+  if (!email || !password) { notify('error', 'Preencha e-mail e senha.'); return; }
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    return notify('error', 'E-mail ou senha incorretos.');
+  }
+
+  // Log successful login
+  await supabase.from('login_history').insert({
+    email,
+    status: 'success',
+    method: 'password'
+  }).catch(() => {});
+
+  window.location.href = returnUrl;
+}
+
+// ── TOGGLE PASSWORD ─────────────────────────────
+function togglePwd() {
+  const pwd = document.getElementById('loginPwd');
+  const btn = document.querySelector('.toggle-pwd');
+  if (pwd.type === 'password') { pwd.type = 'text'; btn.textContent = 'Ocultar'; }
+  else { pwd.type = 'password'; btn.textContent = 'Mostrar'; }
+}
+
+// Enter key
+document.getElementById('loginPwd')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+</script>
+</body>
+</html>

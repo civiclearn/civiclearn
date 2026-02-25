@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CELPE-BRAS — Tarefa 1</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/assets/js/celpe-auth.js"></script>
+  <script src="/assets/js/celpe-engine.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --green:#009c3b; --green-dim:#e6f5ec; --yellow:#ffdf00; --blue:#002776;
+      --navy:#0f172a; --slate:#334155; --muted:#64748b; --border:#e2e8f0;
+      --surface:#ffffff; --bg:#f8f7f4;
+      --pass:#166534; --pass-bg:#f0fdf4; --pass-border:#bbf7d0;
+      --amber:#92400e; --amber-bg:#fffbeb; --amber-border:#fde68a;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:"DM Sans",system-ui,sans-serif; background:var(--bg); color:var(--navy); min-height:100vh; }
+
+    /* ── TOPBAR ─── */
+    .topbar {
+      background:var(--navy); border-bottom:3px solid var(--green);
+      padding:0 28px; height:52px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:200;
+    }
+    .topbar-left { display:flex; align-items:center; gap:12px; }
+    .back-link { color:#64748b; text-decoration:none; font-size:0.8rem; display:flex; align-items:center; gap:5px; }
+    .back-link:hover { color:#fff; }
+    .topbar-divider { width:1px; height:20px; background:#1e293b; }
+    .topbar-flag {
+      width:22px; height:16px; background:var(--green); border-radius:2px;
+      position:relative; overflow:hidden; flex-shrink:0;
+    }
+    .topbar-flag::before { content:''; position:absolute; left:50%;top:50%;transform:translate(-50%,-50%); width:14px;height:8px;background:var(--yellow); clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%); }
+    .topbar-flag::after { content:''; position:absolute; left:50%;top:50%;transform:translate(-50%,-50%); width:5px;height:5px;border-radius:50%;background:var(--blue); }
+    .topbar-title { font-family:"Fraunces",serif; font-size:0.9rem; font-weight:600; color:#fff; }
+    .topbar-right { display:flex; align-items:center; gap:12px; }
+    .timer-pill { background:#1e293b; border-radius:99px; padding:4px 14px; font-size:0.8rem; color:#94a3b8; font-variant-numeric:tabular-nums; }
+    .timer-pill span { color:#fff; font-weight:600; }
+    .timer-pill.warning { color:#fbbf24; }
+    .timer-pill.danger span { color:#ef4444; }
+    .wc-pill { background:#1e293b; border-radius:99px; padding:4px 12px; font-size:0.75rem; color:#94a3b8; }
+    .wc-pill span { color:#fff; font-weight:600; }
+
+    /* ── LOADING ─── */
+    #loading-overlay {
+      position:fixed; inset:0; background:var(--bg);
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+      z-index:9999; transition:opacity 0.35s;
+    }
+    #loading-overlay.hidden { opacity:0; pointer-events:none; }
+    .loading-spinner { width:32px;height:32px;border-radius:50%; border:3px solid var(--border);border-top-color:var(--green); animation:spin 0.8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── LAYOUT ─── */
+    .exam-layout {
+      display:grid; grid-template-columns:minmax(0,1fr) 420px;
+      min-height:calc(100vh - 52px); max-width:1200px; margin:0 auto; width:100%;
+    }
+
+    /* ── LEFT: SOURCE MATERIAL ─── */
+    .source-column {
+      border-right:1px solid var(--border); overflow-y:auto;
+      position:sticky; top:52px; height:calc(100vh - 52px);
+    }
+    .source-inner { max-width:640px; padding:28px 32px 80px; }
+    .source-badge {
+      display:inline-flex; align-items:center; gap:6px;
+      background:var(--navy); color:var(--yellow); border-radius:7px;
+      padding:4px 11px; font-size:0.72rem; font-weight:700; margin-bottom:16px;
+    }
+    .video-placeholder {
+      background:#000; border-radius:12px; aspect-ratio:16/9;
+      display:flex; align-items:center; justify-content:center;
+      color:#fff; font-size:0.85rem; margin-bottom:20px; overflow:hidden;
+    }
+    .video-placeholder video { width:100%; height:100%; object-fit:cover; }
+    .source-title { font-family:"Fraunces",serif; font-size:1.1rem; font-weight:700; margin-bottom:8px; }
+    .source-meta { font-size:0.78rem; color:var(--muted); margin-bottom:16px; }
+
+    .enunciado-card {
+      background:var(--amber-bg); border:1px solid var(--amber-border);
+      border-radius:10px; padding:14px 16px;
+      font-size:0.84rem; color:var(--amber); line-height:1.6; margin-bottom:16px;
+    }
+    .enunciado-card strong { font-weight:700; }
+
+    .key-facts { font-size:0.82rem; color:var(--slate); line-height:1.65; }
+    .key-facts li { margin-bottom:4px; }
+
+    /* ── MOBILE TOGGLE ─── */
+    .source-toggle {
+      display:none; width:100%; background:var(--surface); border:none;
+      border-bottom:1px solid var(--border); padding:13px 20px;
+      font-family:"DM Sans",sans-serif; font-size:0.88rem; font-weight:600;
+      color:var(--navy); cursor:pointer; text-align:left;
+      align-items:center; gap:10px; position:sticky; top:52px; z-index:100;
+    }
+    .toggle-icon { transition:transform 0.2s; font-size:0.75rem; }
+    .source-toggle.collapsed .toggle-icon { transform:rotate(-90deg); }
+    @media (min-width:901px) { .source-toggle { display:none !important; } }
+    @media (max-width:900px) {
+      .source-toggle { display:flex; }
+      .exam-layout { grid-template-columns:1fr; }
+      .source-column { position:relative; top:auto; height:auto; border-right:none; border-bottom:1px solid var(--border); }
+      .source-column.collapsed { display:none; }
+    }
+
+    /* ── RIGHT: WRITE PANE ─── */
+    .write-column {
+      position:sticky; top:52px; height:calc(100vh - 52px);
+      overflow-y:auto; background:var(--surface);
+      display:flex; flex-direction:column;
+    }
+    .write-header { padding:18px 22px 14px; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .write-eyebrow { font-size:0.68rem; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:6px; }
+    .write-header h2 { font-family:"Fraunces",serif; font-size:1.05rem; font-weight:700; }
+
+    .task-checklist { margin:14px 22px 0; flex-shrink:0; }
+    .task-checklist-title { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:8px; }
+    .task-item { display:flex; align-items:flex-start; gap:8px; padding:5px 0; font-size:0.8rem; color:var(--slate); transition:color 0.2s; }
+    .task-item.done { color:var(--pass); }
+    .task-bullet { width:18px; height:18px; border-radius:50%; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:0.6rem; color:transparent; flex-shrink:0; transition:all 0.2s; }
+    .task-item.done .task-bullet { background:var(--pass); border-color:var(--pass); color:#fff; }
+
+    /* Word count */
+    .wc-bar-wrap { padding:12px 22px 0; flex-shrink:0; }
+    .wc-bar { height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+    .wc-bar-fill { height:100%; background:var(--green); border-radius:3px; transition:width 0.3s; width:0%; }
+    .wc-bar-fill.good { background:var(--pass); }
+    .wc-bar-fill.over { background:#f59e0b; }
+    .wc-row { display:flex; justify-content:space-between; padding:4px 22px 0; }
+    .wc-count { font-size:0.75rem; color:var(--navy); font-weight:600; }
+    .wc-hint { font-size:0.72rem; color:var(--muted); }
+    .wc-hint.good { color:var(--pass); }
+    .wc-hint.over { color:#f59e0b; }
+
+    /* Textarea */
+    .write-area { flex:1; display:flex; flex-direction:column; padding:0 22px 0; }
+    #replyTextarea {
+      flex:1; width:100%; border:none; outline:none; resize:none;
+      font-family:"DM Sans",sans-serif; font-size:0.92rem; line-height:1.8;
+      color:var(--navy); padding:14px 0; min-height:200px;
+    }
+    #replyTextarea::placeholder { color:#94a3b8; }
+
+    /* Submit */
+    .write-footer { padding:14px 22px 20px; flex-shrink:0; }
+    .submit-btn {
+      width:100%; padding:12px; border:none; border-radius:10px;
+      background:var(--green); color:#fff;
+      font-family:"DM Sans",sans-serif; font-size:0.9rem; font-weight:600;
+      cursor:pointer; transition:opacity 0.15s;
+    }
+    .submit-btn:hover { opacity:0.85; }
+    .submit-btn:disabled { opacity:0.4; cursor:default; }
+    .submit-info { font-size:0.72rem; color:var(--muted); text-align:center; margin-top:8px; }
+    .skip-link {
+      display:block; text-align:center; margin-top:8px;
+      font-size:0.78rem; color:var(--muted); cursor:pointer; background:none; border:none;
+      font-family:inherit;
+    }
+    .skip-link:hover { color:var(--navy); }
+
+    /* Notices */
+    .notice-card {
+      display:none; margin:20px 22px; padding:16px; border-radius:10px;
+      text-align:center; font-size:0.88rem;
+    }
+    .notice-card.visible { display:block; }
+    .notice-card.done { background:var(--pass-bg); color:var(--pass); border:1px solid var(--pass-border); }
+    .continue-btn {
+      display:none; margin:12px 22px; padding:11px; border:none; border-radius:10px;
+      background:var(--navy); color:#fff; width:calc(100% - 44px);
+      font-family:"DM Sans",sans-serif; font-size:0.88rem; font-weight:600; cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Carregando tarefa…</div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" id="backLink" href="#">← Exame</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-flag"></div>
+    <span class="topbar-title">Tarefa 1</span>
+  </div>
+  <div class="topbar-right">
+    <div class="timer-pill" id="timerPill">⏱ <span id="timerDisplay">30:00</span></div>
+    <div class="wc-pill">Palavras: <span id="topbarWc">0</span></div>
+  </div>
+</div>
+
+<!-- Mobile toggle -->
+<button class="source-toggle" id="sourceToggle" onclick="toggleSource()">
+  <span>🎬 Ver material de apoio</span>
+  <span class="toggle-icon">▼</span>
+</button>
+
+<div class="exam-layout">
+  <!-- LEFT: Source -->
+  <div class="source-column" id="sourceColumn">
+    <div class="source-inner">
+      <div class="source-badge">🎬 VÍDEO — TAREFA 1</div>
+
+      <div class="video-placeholder" id="videoContainer">
+        <span>O vídeo será adicionado aqui</span>
+      </div>
+
+      <div class="source-title" id="sourceTitle"></div>
+      <div class="source-meta" id="sourceMeta"></div>
+
+      <div class="enunciado-card" id="enunciado"></div>
+
+      <div class="key-facts" id="keyFacts"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Write -->
+  <div class="write-column">
+    <div class="write-header">
+      <div class="write-eyebrow">SUA RESPOSTA</div>
+      <h2 id="writeTitle">Escreva sua carta</h2>
+    </div>
+
+    <div class="task-checklist">
+      <div class="task-checklist-title">Checklist da tarefa</div>
+      <div id="taskChecklistItems"></div>
+    </div>
+
+    <div class="wc-bar-wrap">
+      <div class="wc-bar"><div class="wc-bar-fill" id="wcBarFill"></div></div>
+    </div>
+    <div class="wc-row">
+      <div class="wc-count"><span id="wcCount">0</span> palavras</div>
+      <div class="wc-hint" id="wcHint">Escreva entre 150–300 palavras</div>
+    </div>
+
+    <div class="write-area">
+      <textarea id="replyTextarea" placeholder="Comece a escrever aqui…" oninput="onTextChange()"></textarea>
+    </div>
+
+    <div id="alreadyDoneCard" class="notice-card done">✅ Tarefa já entregue! Sua resposta está sendo avaliada.</div>
+    <div id="submittedNotice" class="notice-card done">✅ Resposta enviada com sucesso!</div>
+    <button id="continueBtn" class="continue-btn" onclick="CELPE.goBack(simId, attemptId)">← Voltar ao painel do exame</button>
+
+    <div class="write-footer" id="writeFooter">
+      <button class="submit-btn" id="submitBtn" disabled onclick="submitAnswer()">Entregar resposta</button>
+      <div class="submit-info" id="submitInfo">A avaliação por IA começa após a entrega</div>
+      <button class="skip-link" id="skipLink" onclick="skipElement()">Pular esta tarefa</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const WC_MIN = 150, WC_TARGET = 300, WC_SOFT = 50;
+const TIME_LIMIT = 30 * 60; // 30 minutes in seconds
+
+let simId, attemptId, elemKey, user;
+let examData = null;
+let wordCount = 0;
+let submitted = false;
+let taskItems = [];
+let timerSeconds = TIME_LIMIT;
+let timerInterval = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const ctx = await CELPE.init('tarefa1');
+  user      = ctx.user;
+  simId     = ctx.simId;
+  attemptId = ctx.attemptId;
+  elemKey   = ctx.elemKey;
+
+  document.getElementById('backLink').href = `/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
+
+  // Check if already done
+  const status = await CELPE.getStatus(user.email, attemptId, elemKey);
+  if (status === 'submitted' || status === 'skipped') {
+    CELPE.hideLoading();
+    document.getElementById('alreadyDoneCard').classList.add('visible');
+    document.getElementById('writeFooter').style.display = 'none';
+    document.getElementById('continueBtn').style.display = 'block';
+    document.getElementById('replyTextarea').disabled = true;
+    return;
+  }
+
+  // Load task JSON
+  try {
+    const res = await fetch(`/dashboard/data/sim01_tarefa1.json`);
+    examData = await res.json();
+    renderTask();
+  } catch (err) {
+    CELPE.showError('Não foi possível carregar a tarefa.', simId, attemptId);
+    return;
+  }
+
+  startTimer();
+  CELPE.hideLoading();
+});
+
+function renderTask() {
+  document.getElementById('sourceTitle').textContent = examData.source?.title || 'Reportagem';
+  document.getElementById('sourceMeta').textContent =
+    `${examData.source?.origin || ''} · ${examData.source?.duration_seconds ? Math.floor(examData.source.duration_seconds/60) + 'min' : ''}`;
+
+  // Enunciado
+  document.getElementById('enunciado').innerHTML =
+    `<strong>Enunciado:</strong> ${CELPE.escapeHtml(examData.enunciado || '')}`;
+
+  // Key facts from source
+  const facts = examData.source?.key_facts || [];
+  if (facts.length) {
+    document.getElementById('keyFacts').innerHTML = `
+      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:8px;">Informações do vídeo</div>
+      <ul style="padding-left:18px;">${facts.map(f => `<li>${CELPE.escapeHtml(f)}</li>`).join('')}</ul>`;
+  }
+
+  // Task checklist from task_actions
+  const actions = examData.task_actions || [];
+  taskItems = actions.map((a, i) => ({ id: `ta${i}`, label: a, done: false }));
+  document.getElementById('taskChecklistItems').innerHTML = taskItems.map(item => `
+    <div class="task-item" id="titem-${item.id}">
+      <div class="task-bullet"">✓</div>
+      <span>${CELPE.escapeHtml(item.label)}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('writeTitle').textContent = `Escreva: ${examData.genre || 'carta'}`;
+}
+
+// ── TIMER ──────────────────────────────────────────────
+function startTimer() {
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timerSeconds--;
+    updateTimerDisplay();
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      // Auto-submit if there's content
+      if (wordCount >= WC_SOFT && !submitted) {
+        submitAnswer();
+      }
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(Math.max(0, timerSeconds) / 60);
+  const s = Math.max(0, timerSeconds) % 60;
+  const display = `${m}:${String(s).padStart(2, '0')}`;
+  document.getElementById('timerDisplay').textContent = display;
+
+  const pill = document.getElementById('timerPill');
+  pill.className = 'timer-pill';
+  if (timerSeconds <= 120) pill.classList.add('danger');
+  else if (timerSeconds <= 300) pill.classList.add('warning');
+}
+
+// ── TEXT INPUT ─────────────────────────────────────────
+function onTextChange() {
+  const text = document.getElementById('replyTextarea').value;
+  wordCount = text.trim().length === 0 ? 0 : CELPE.countWords(text);
+  updateWcUI(wordCount);
+  updateChecklist(text);
+  document.getElementById('submitBtn').disabled = (wordCount < WC_SOFT) || submitted;
+}
+
+function updateWcUI(count) {
+  document.getElementById('wcCount').textContent = count;
+  document.getElementById('topbarWc').textContent = count;
+
+  const fill = document.getElementById('wcBarFill');
+  const hint = document.getElementById('wcHint');
+
+  if (count === 0) {
+    fill.style.width = '0%'; fill.className = 'wc-bar-fill';
+    hint.textContent = `Escreva entre ${WC_MIN}–${WC_TARGET} palavras`; hint.className = 'wc-hint';
+  } else if (count < WC_MIN) {
+    fill.style.width = (count / WC_MIN * 70) + '%'; fill.className = 'wc-bar-fill';
+    hint.textContent = `Faltam ${WC_MIN - count} para o mínimo de ${WC_MIN}`; hint.className = 'wc-hint';
+  } else if (count <= WC_TARGET) {
+    fill.style.width = (70 + ((count - WC_MIN) / (WC_TARGET - WC_MIN)) * 30) + '%';
+    fill.className = 'wc-bar-fill good';
+    hint.textContent = `✓ Bom tamanho (${count} palavras)`; hint.className = 'wc-hint good';
+  } else {
+    fill.style.width = '100%'; fill.className = 'wc-bar-fill over';
+    hint.textContent = `${count - WC_TARGET} acima do recomendado`; hint.className = 'wc-hint over';
+  }
+}
+
+function updateChecklist(text) {
+  if (submitted) return;
+  const lower = text.toLowerCase();
+  taskItems.forEach(item => {
+    const words = item.label.toLowerCase().replace(/[().,!?]/g, '').split(/\s+/).filter(w => w.length > 4);
+    const matches = words.filter(w => lower.includes(w)).length;
+    const done = wordCount > 30 && matches >= Math.min(2, words.length);
+    item.done = done;
+    document.getElementById(`titem-${item.id}`)?.classList.toggle('done', done);
+  });
+}
+
+// ── SUBMIT ─────────────────────────────────────────────
+async function submitAnswer() {
+  if (submitted) return;
+  const text = document.getElementById('replyTextarea').value.trim();
+  if (!text) return;
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Enviando…';
+
+  const responseJson = {
+    task_title:          examData?.title,
+    enunciado:           examData?.enunciado,
+    genre:               examData?.genre,
+    interlocutor:        examData?.interlocutor,
+    source_summary:      examData?.source?.transcript_summary,
+    task_actions:        examData?.task_actions,
+    evaluation_criteria: examData?.evaluation_criteria,
+    ai_evaluation_prompt: examData?.ai_evaluation_prompt,
+    word_count:          wordCount,
+    time_remaining:      timerSeconds,
+    user_answer:         text,
+  };
+
+  try {
+    await CELPE.submit({ attemptId, elemKey, text, json: responseJson });
+  } catch (err) {
+    console.error('Submit error:', err);
+    btn.disabled = false;
+    btn.textContent = 'Entregar resposta';
+    CELPE.toast('Algo deu errado. Tente novamente.');
+    return;
+  }
+
+  submitted = true;
+  if (timerInterval) clearInterval(timerInterval);
+  document.getElementById('replyTextarea').disabled = true;
+  document.getElementById('writeFooter').style.display = 'none';
+  document.getElementById('submittedNotice').classList.add('visible');
+  document.getElementById('continueBtn').style.display = 'block';
+  taskItems.forEach(item => document.getElementById(`titem-${item.id}`)?.classList.add('done'));
+}
+
+// ── SKIP ───────────────────────────────────────────────
+async function skipElement() {
+  if (submitted) return;
+  if (!confirm('Tem certeza que deseja pular esta tarefa? Você receberá 0 pontos.')) return;
+  document.getElementById('skipLink').style.display = 'none';
+  document.getElementById('submitBtn').disabled = true;
+  await CELPE.skip({ attemptId, elemKey });
+  submitted = true;
+  if (timerInterval) clearInterval(timerInterval);
+  CELPE.goBack(simId, attemptId);
+}
+
+// ── MOBILE ─────────────────────────────────────────────
+let sourceVisible = true;
+function toggleSource() {
+  sourceVisible = !sourceVisible;
+  document.getElementById('sourceColumn').classList.toggle('collapsed', !sourceVisible);
+  document.getElementById('sourceToggle').classList.toggle('collapsed', !sourceVisible);
+}
+</script>
+</body>
+</html>

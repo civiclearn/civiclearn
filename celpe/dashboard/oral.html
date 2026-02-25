@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CELPE-BRAS — Parte Oral</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/assets/js/celpe-auth.js"></script>
+  <script src="/assets/js/celpe-engine.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --green:#009c3b; --green-dim:#e6f5ec; --yellow:#ffdf00; --blue:#002776;
+      --navy:#0f172a; --slate:#334155; --muted:#64748b; --border:#e2e8f0;
+      --surface:#ffffff; --bg:#f8f7f4;
+      --pass:#166534; --pass-bg:#f0fdf4; --pass-border:#bbf7d0;
+      --amber:#92400e; --amber-bg:#fffbeb;
+      --red:#dc2626;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;}
+
+    /* ── TOPBAR ─── */
+    .topbar{background:var(--navy);border-bottom:3px solid var(--green);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+    .topbar-left{display:flex;align-items:center;gap:12px;}
+    .back-link{color:#64748b;text-decoration:none;font-size:0.8rem;display:flex;align-items:center;gap:5px;}
+    .back-link:hover{color:#fff;}
+    .topbar-divider{width:1px;height:20px;background:#1e293b;}
+    .topbar-flag{width:22px;height:16px;background:var(--green);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0;}
+    .topbar-flag::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:14px;height:8px;background:var(--yellow);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);}
+    .topbar-flag::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:5px;height:5px;border-radius:50%;background:var(--blue);}
+    .topbar-title{font-family:"Fraunces",serif;font-size:0.9rem;font-weight:600;color:#fff;}
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+    .phase-pill{background:#1e293b;border-radius:99px;padding:4px 14px;font-size:0.78rem;color:#94a3b8;}
+    .phase-pill span{color:#fff;font-weight:600;}
+    .timer-pill{background:#1e293b;border-radius:99px;padding:4px 14px;font-size:0.8rem;color:#94a3b8;font-variant-numeric:tabular-nums;}
+    .timer-pill span{color:#fff;font-weight:600;}
+    .timer-pill.danger span{color:#ef4444;}
+
+    /* ── LOADING ─── */
+    #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity 0.35s;}
+    #loading-overlay.hidden{opacity:0;pointer-events:none;}
+    .loading-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--green);animation:spin 0.8s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* ── PHASES ─── */
+    .phase{display:none;max-width:700px;margin:0 auto;padding:40px 28px 80px;}
+    .phase.active{display:block;}
+
+    /* ── PHASE 1: EP SELECTION ─── */
+    .phase-eyebrow{font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.09em;color:var(--green);display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+    .phase-eyebrow-dot{width:5px;height:5px;border-radius:50%;background:var(--green);}
+    .phase-title{font-family:"Fraunces",serif;font-size:clamp(1.3rem,3vw,1.7rem);font-weight:700;letter-spacing:-0.02em;margin-bottom:8px;}
+    .phase-subtitle{font-size:0.88rem;color:var(--muted);line-height:1.55;margin-bottom:28px;}
+
+    .ep-card{background:var(--surface);border:2px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s,transform 0.12s;}
+    .ep-card:hover{border-color:#94a3b8;box-shadow:0 2px 12px rgba(0,0,0,0.06);transform:translateY(-1px);}
+    .ep-card.selected{border-color:var(--green);box-shadow:0 0 0 3px var(--green-dim);}
+    .ep-themes{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+    .ep-theme{background:var(--green-dim);color:var(--green);padding:2px 10px;border-radius:6px;font-size:0.7rem;font-weight:600;}
+    .ep-text{font-size:0.88rem;color:var(--slate);line-height:1.6;}
+    .ep-image-desc{font-size:0.78rem;color:var(--muted);font-style:italic;margin-bottom:8px;}
+
+    .start-btn{width:100%;padding:14px;border:none;border-radius:12px;background:var(--green);color:#fff;font-family:"DM Sans",sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;margin-top:20px;}
+    .start-btn:hover{opacity:0.85;}
+    .start-btn:disabled{opacity:0.4;cursor:default;}
+
+    /* ── PHASE 2: PREP ─── */
+    .prep-card{background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:28px;text-align:center;}
+    .prep-timer{font-family:"Fraunces",serif;font-size:3rem;font-weight:700;color:var(--navy);margin:20px 0;font-variant-numeric:tabular-nums;}
+    .prep-ep-text{font-size:0.88rem;color:var(--slate);line-height:1.6;text-align:left;margin:16px 0;padding:16px;background:var(--bg);border-radius:10px;}
+
+    /* ── PHASE 3: CONVERSATION ─── */
+    .convo-container{display:flex;flex-direction:column;height:calc(100vh - 52px);max-width:700px;margin:0 auto;padding:0 28px;}
+    .convo-messages{flex:1;overflow-y:auto;padding:20px 0;display:flex;flex-direction:column;gap:12px;}
+    .msg{max-width:85%;padding:12px 16px;border-radius:14px;font-size:0.88rem;line-height:1.55;animation:fadeIn 0.3s;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+    .msg.ai{background:var(--surface);border:1px solid var(--border);border-radius:14px 14px 14px 4px;align-self:flex-start;}
+    .msg.user{background:var(--green);color:#fff;border-radius:14px 14px 4px 14px;align-self:flex-end;}
+    .msg.system{background:var(--amber-bg);color:var(--amber);text-align:center;align-self:center;font-size:0.8rem;padding:8px 16px;border-radius:10px;}
+    .msg .typing{display:inline-flex;gap:4px;}
+    .msg .typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:bounce 1.4s infinite;}
+    .msg .typing span:nth-child(2){animation-delay:0.2s;}
+    .msg .typing span:nth-child(3){animation-delay:0.4s;}
+    @keyframes bounce{0%,80%,100%{transform:translateY(0);}40%{transform:translateY(-6px);}}
+
+    .convo-controls{padding:16px 0 24px;flex-shrink:0;display:flex;gap:10px;align-items:center;}
+    .rec-btn{width:56px;height:56px;border-radius:50%;border:3px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
+    .rec-btn.recording{border-color:var(--red);background:#fef2f2;animation:pulse 1.5s infinite;}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.3);}50%{box-shadow:0 0 0 10px rgba(220,38,38,0);}}
+    .rec-icon{width:22px;height:22px;border-radius:50%;background:var(--red);transition:border-radius 0.2s;}
+    .rec-btn.recording .rec-icon{border-radius:4px;width:18px;height:18px;}
+    .rec-status{font-size:0.8rem;color:var(--muted);flex:1;}
+    .rec-status.recording{color:var(--red);font-weight:600;}
+    .finish-convo-btn{padding:10px 20px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-family:"DM Sans",sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;flex-shrink:0;}
+
+    /* Waveform */
+    .waveform-bar{height:32px;display:flex;align-items:center;gap:2px;flex:1;}
+    .waveform-bar .bar{width:3px;background:var(--red);border-radius:2px;transition:height 0.05s;}
+
+    /* ── PHASE 4: DONE ─── */
+    .done-card{background:var(--surface);border:2px solid var(--pass-border);border-radius:16px;padding:36px;text-align:center;}
+    .done-icon{font-size:2.5rem;margin-bottom:12px;}
+    .done-title{font-family:"Fraunces",serif;font-size:1.3rem;font-weight:700;margin-bottom:8px;}
+    .done-sub{font-size:0.88rem;color:var(--muted);line-height:1.55;margin-bottom:20px;}
+    .done-link{display:inline-block;padding:11px 28px;background:var(--green);color:#fff;border-radius:10px;font-weight:600;text-decoration:none;font-size:0.9rem;}
+
+    .skip-footer{text-align:center;margin-top:16px;}
+    .skip-link{font-size:0.78rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;}
+    .skip-link:hover{color:var(--navy);}
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Carregando parte oral…</div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" id="backLink" href="#">← Exame</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-flag"></div>
+    <span class="topbar-title">Parte Oral</span>
+  </div>
+  <div class="topbar-right">
+    <div class="phase-pill" id="phasePill">Fase: <span id="phaseLabel">Seleção</span></div>
+    <div class="timer-pill" id="timerPill" style="display:none">⏱ <span id="timerDisplay">5:00</span></div>
+  </div>
+</div>
+
+<!-- ═══════ PHASE 1: EP SELECTION ═══════ -->
+<div class="phase active" id="phase1">
+  <div class="phase-eyebrow"><div class="phase-eyebrow-dot"></div>PARTE ORAL</div>
+  <h1 class="phase-title">Escolha seu Elemento Provocador</h1>
+  <p class="phase-subtitle">
+    Três temas foram sorteados. Leia cada um e escolha o que mais inspira você.
+    Após escolher, você terá 1 minuto para se preparar antes da conversa.
+  </p>
+  <div id="epChoices"></div>
+  <button class="start-btn" id="startPrepBtn" disabled onclick="startPrep()">Confirmar escolha e preparar</button>
+  <div class="skip-footer">
+    <button class="skip-link" onclick="skipOral()">Pular parte oral</button>
+  </div>
+</div>
+
+<!-- ═══════ PHASE 2: PREP ═══════ -->
+<div class="phase" id="phase2">
+  <div class="prep-card">
+    <div style="font-size:1.5rem;">📝</div>
+    <h2 style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;margin-top:12px;">Tempo de Preparação</h2>
+    <p style="font-size:0.85rem;color:var(--muted);margin-top:6px;">Organize mentalmente seus argumentos. A conversa começará automaticamente.</p>
+    <div class="prep-timer" id="prepTimer">1:00</div>
+    <div class="prep-ep-text" id="prepEpText"></div>
+    <button class="start-btn" onclick="startConversation()" style="margin-top:12px;">Estou pronto — começar agora</button>
+  </div>
+</div>
+
+<!-- ═══════ PHASE 3: CONVERSATION ═══════ -->
+<div class="phase" id="phase3" style="padding:0;">
+  <div class="convo-container">
+    <div class="convo-messages" id="convoMessages"></div>
+    <div class="convo-controls">
+      <button class="rec-btn" id="recBtn" onclick="toggleRecording()">
+        <div class="rec-icon"></div>
+      </button>
+      <div class="rec-status" id="recStatus">Clique no microfone para falar</div>
+      <button class="finish-convo-btn" id="finishBtn" onclick="finishConversation()">Encerrar conversa</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ PHASE 4: DONE ═══════ -->
+<div class="phase" id="phase4">
+  <div class="done-card">
+    <div class="done-icon">✅</div>
+    <div class="done-title">Parte Oral Concluída!</div>
+    <div class="done-sub">Sua conversa está sendo transcrita e avaliada por IA. Os resultados aparecerão no painel do exame.</div>
+    <a class="done-link" id="doneLink" href="#">← Voltar ao painel do exame</a>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════
+let simId, attemptId, user;
+let oralData = null;
+let selectedEP = null;
+let epPool = [];
+
+// Conversation
+let conversationLog = [];   // [{role:'ai'|'user', text:'…', audioPath?:'…'}]
+let turnCount = 0;
+const MAX_TURNS = 8;
+
+// Recording
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+let audioContext = null;
+let analyser = null;
+
+// Timers
+let prepSeconds = 60;
+let convoSeconds = 300;
+let timerInterval = null;
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  const ctx = await CELPE.init('oral');
+  user      = ctx.user;
+  simId     = ctx.simId;
+  attemptId = ctx.attemptId;
+
+  document.getElementById('backLink').href = `/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
+  document.getElementById('doneLink').href = `/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
+
+  // Check already done
+  const status = await CELPE.getStatus(user.email, attemptId, 'oral');
+  if (status === 'submitted' || status === 'skipped') {
+    showPhase(4);
+    CELPE.hideLoading();
+    return;
+  }
+
+  // Load oral JSON
+  try {
+    const res = await fetch('/dashboard/data/sim01_oral.json');
+    oralData = await res.json();
+    setupEPSelection();
+  } catch (err) {
+    CELPE.showError('Não foi possível carregar a parte oral.', simId, attemptId);
+    return;
+  }
+
+  CELPE.hideLoading();
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// PHASE 1: EP SELECTION
+// ═══════════════════════════════════════════════════════════════════
+function setupEPSelection() {
+  const allEPs = oralData.elementos_provocadores || [];
+  // Pick 3 random
+  const shuffled = [...allEPs].sort(() => Math.random() - 0.5);
+  epPool = shuffled.slice(0, 3);
+
+  const container = document.getElementById('epChoices');
+  container.innerHTML = epPool.map((ep, i) => `
+    <div class="ep-card" id="ep-${i}" onclick="selectEP(${i})">
+      <div class="ep-themes">${(ep.themes || []).map(t => `<span class="ep-theme">${CELPE.escapeHtml(t)}</span>`).join('')}</div>
+      ${ep.image_description ? `<div class="ep-image-desc">🖼 ${CELPE.escapeHtml(ep.image_description)}</div>` : ''}
+      <div class="ep-text">${CELPE.escapeHtml(ep.text)}</div>
+    </div>
+  `).join('');
+}
+
+function selectEP(index) {
+  selectedEP = epPool[index];
+  document.querySelectorAll('.ep-card').forEach((c, i) => {
+    c.classList.toggle('selected', i === index);
+  });
+  document.getElementById('startPrepBtn').disabled = false;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PHASE 2: PREP
+// ═══════════════════════════════════════════════════════════════════
+function startPrep() {
+  if (!selectedEP) return;
+  showPhase(2);
+  document.getElementById('phaseLabel').textContent = 'Preparação';
+  document.getElementById('prepEpText').innerHTML = `
+    <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Seu tema</div>
+    ${CELPE.escapeHtml(selectedEP.text)}
+  `;
+
+  prepSeconds = 60;
+  updatePrepTimer();
+  timerInterval = setInterval(() => {
+    prepSeconds--;
+    updatePrepTimer();
+    if (prepSeconds <= 0) {
+      clearInterval(timerInterval);
+      startConversation();
+    }
+  }, 1000);
+}
+
+function updatePrepTimer() {
+  const m = Math.floor(Math.max(0, prepSeconds) / 60);
+  const s = Math.max(0, prepSeconds) % 60;
+  document.getElementById('prepTimer').textContent = `${m}:${String(s).padStart(2, '0')}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PHASE 3: CONVERSATION
+// ═══════════════════════════════════════════════════════════════════
+function startConversation() {
+  if (timerInterval) clearInterval(timerInterval);
+  showPhase(3);
+  document.getElementById('phaseLabel').textContent = 'Conversa';
+  document.getElementById('timerPill').style.display = '';
+
+  // Start 5-min timer
+  convoSeconds = 300;
+  updateConvoTimer();
+  timerInterval = setInterval(() => {
+    convoSeconds--;
+    updateConvoTimer();
+    if (convoSeconds <= 0) {
+      clearInterval(timerInterval);
+      finishConversation();
+    }
+  }, 1000);
+
+  // First AI message — use conversation_starters
+  const starters = selectedEP.conversation_starters || [];
+  const firstMsg = starters[0] || `Olá! Vamos conversar sobre o tema: "${selectedEP.themes?.[0] || 'este assunto'}". O que você acha?`;
+  addMessage('ai', firstMsg);
+
+  // Request mic permission early
+  requestMicPermission();
+}
+
+function updateConvoTimer() {
+  const total = Math.max(0, convoSeconds);
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  document.getElementById('timerDisplay').textContent = `${m}:${String(s).padStart(2, '0')}`;
+  const pill = document.getElementById('timerPill');
+  pill.className = 'timer-pill';
+  if (total <= 30) pill.classList.add('danger');
+}
+
+// ── MESSAGES ──────────────────────────────────────────
+function addMessage(role, text) {
+  const container = document.getElementById('convoMessages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.textContent = text;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  conversationLog.push({ role, text });
+}
+
+function addTypingIndicator() {
+  const container = document.getElementById('convoMessages');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.id = 'typingIndicator';
+  div.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function removeTypingIndicator() {
+  document.getElementById('typingIndicator')?.remove();
+}
+
+// ── RECORDING ─────────────────────────────────────────
+async function requestMicPermission() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(t => t.stop());
+  } catch (err) {
+    addMessage('system', '⚠️ Precisamos de acesso ao microfone para a conversa oral.');
+  }
+}
+
+async function toggleRecording() {
+  if (isRecording) {
+    stopRecording();
+  } else {
+    await startRecording();
+  }
+}
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) audioChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      await processUserAudio(blob);
+    };
+
+    mediaRecorder.start(250);
+    isRecording = true;
+    document.getElementById('recBtn').classList.add('recording');
+    document.getElementById('recStatus').textContent = 'Gravando… clique para parar';
+    document.getElementById('recStatus').classList.add('recording');
+  } catch (err) {
+    console.error('Mic error:', err);
+    CELPE.toast('Não foi possível acessar o microfone.');
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+  }
+  isRecording = false;
+  document.getElementById('recBtn').classList.remove('recording');
+  document.getElementById('recStatus').textContent = 'Processando…';
+  document.getElementById('recStatus').classList.remove('recording');
+}
+
+async function processUserAudio(blob) {
+  turnCount++;
+  const filename = `oral_turn${turnCount}.webm`;
+
+  // Upload audio
+  try {
+    await CELPE.uploadAudio(attemptId, filename, blob);
+  } catch (err) {
+    console.warn('Audio upload failed:', err);
+  }
+
+  // Add placeholder user message
+  addMessage('user', '🎤 [Resposta gravada]');
+
+  // Get AI response
+  document.getElementById('recStatus').textContent = 'Entrevistador pensando…';
+  document.getElementById('recBtn').style.pointerEvents = 'none';
+
+  await getAIResponse();
+
+  document.getElementById('recBtn').style.pointerEvents = '';
+  document.getElementById('recStatus').textContent = 'Clique no microfone para falar';
+
+  // Check if max turns
+  if (turnCount >= MAX_TURNS) {
+    addMessage('system', 'Conversa concluída — número máximo de turnos atingido.');
+    setTimeout(() => finishConversation(), 1500);
+  }
+}
+
+async function getAIResponse() {
+  addTypingIndicator();
+
+  // Build context for AI response
+  const starters = selectedEP.conversation_starters || [];
+  const nextIdx = Math.min(conversationLog.filter(m => m.role === 'ai').length, starters.length - 1);
+
+  // Simple fallback: cycle through conversation starters and improvise
+  let aiText;
+  if (nextIdx < starters.length) {
+    aiText = starters[nextIdx];
+  } else {
+    // Generic follow-up questions
+    const followups = [
+      'Interessante! Pode me dar um exemplo concreto?',
+      'E como isso afeta a sociedade brasileira, na sua opinião?',
+      'Você acha que existem soluções práticas para isso?',
+      'Algumas pessoas discordariam. O que você diria a elas?',
+      'Como você relaciona isso com sua própria experiência?',
+      'Obrigado por compartilhar! Tem mais alguma coisa que gostaria de acrescentar?',
+    ];
+    const fIdx = (turnCount - starters.length) % followups.length;
+    aiText = followups[Math.min(fIdx, followups.length - 1)];
+  }
+
+  // Slight delay for natural feel
+  await new Promise(r => setTimeout(r, 1200 + Math.random() * 800));
+  removeTypingIndicator();
+  addMessage('ai', aiText);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FINISH
+// ═══════════════════════════════════════════════════════════════════
+async function finishConversation() {
+  if (timerInterval) clearInterval(timerInterval);
+  if (isRecording) stopRecording();
+
+  document.getElementById('recBtn').style.pointerEvents = 'none';
+  document.getElementById('finishBtn').disabled = true;
+  document.getElementById('finishBtn').textContent = 'Enviando…';
+
+  // Build conversation parts for submission
+  const conversationParts = conversationLog.map((msg, i) => ({
+    role: msg.role === 'ai' ? 'ai' : 'user',
+    text: msg.text,
+    turn: i + 1,
+  }));
+
+  const responseJson = {
+    selected_ep: {
+      id: selectedEP.id,
+      text: selectedEP.text,
+      themes: selectedEP.themes,
+    },
+    conversation_parts: conversationParts,
+    total_turns: turnCount,
+    time_used: 300 - Math.max(0, convoSeconds),
+    ai_evaluation_prompt: oralData.ai_evaluation_prompt,
+    evaluation_criteria: oralData.evaluation_criteria,
+  };
+
+  const text = conversationLog
+    .filter(m => m.role === 'user')
+    .map(m => m.text)
+    .join('\n');
+
+  try {
+    await CELPE.submit({ attemptId, elemKey: 'oral', text, json: responseJson });
+  } catch (err) {
+    console.error('Submit error:', err);
+    CELPE.toast('Erro ao enviar. Tentando novamente…');
+    try { await CELPE.submit({ attemptId, elemKey: 'oral', text, json: responseJson }); }
+    catch (e2) { console.error('Retry failed:', e2); }
+  }
+
+  showPhase(4);
+}
+
+async function skipOral() {
+  if (!confirm('Tem certeza? Você receberá 0 pontos na parte oral.')) return;
+  await CELPE.skip({ attemptId, elemKey: 'oral' });
+  showPhase(4);
+  document.querySelector('.done-title').textContent = 'Parte Oral Pulada';
+  document.querySelector('.done-sub').textContent = 'Você receberá 0 pontos nesta parte.';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PHASE MANAGEMENT
+// ═══════════════════════════════════════════════════════════════════
+function showPhase(n) {
+  [1, 2, 3, 4].forEach(i => {
+    document.getElementById(`phase${i}`).classList.toggle('active', i === n);
+  });
+  const labels = { 1: 'Seleção', 2: 'Preparação', 3: 'Conversa', 4: 'Concluída' };
+  document.getElementById('phaseLabel').textContent = labels[n] || '';
+}
+</script>
+</body>
+</html>

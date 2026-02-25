@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CELPE-BRAS — Exame</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/assets/js/celpe-auth.js"></script>
+  <script src="/assets/js/celpe-engine.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --green:     #009c3b;
+      --green-dim: #e6f5ec;
+      --yellow:    #ffdf00;
+      --blue:      #002776;
+      --navy:      #0f172a;
+      --slate:     #334155;
+      --muted:     #64748b;
+      --border:    #e2e8f0;
+      --surface:   #ffffff;
+      --bg:        #f8f7f4;
+      --pass-bg:   #dcfce7;  --pass-fg:   #166534;
+      --fail-bg:   #fee2e2;  --fail-fg:   #991b1b;
+      --warn-bg:   #fef9c3;  --warn-fg:   #854d0e;
+      --idle-bg:   #f1f5f9;  --idle-fg:   #475569;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "DM Sans", system-ui, sans-serif; background: var(--bg); color: var(--navy); min-height: 100vh; }
+
+    /* ── TOPBAR ──────────────────────────────────────── */
+    .topbar {
+      background: var(--navy); border-bottom: 3px solid var(--green);
+      padding: 0 28px; height: 52px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .back-link {
+      color: #64748b; text-decoration: none; font-size: 0.8rem;
+      display: flex; align-items: center; gap: 5px; transition: color 0.15s;
+    }
+    .back-link:hover { color: #fff; }
+    .topbar-divider { width: 1px; height: 20px; background: #1e293b; }
+    .topbar-flag {
+      width: 22px; height: 16px; background: var(--green);
+      border-radius: 2px; position: relative; overflow: hidden; flex-shrink: 0;
+    }
+    .topbar-flag::before {
+      content: ''; position: absolute;
+      left: 50%; top: 50%; transform: translate(-50%,-50%);
+      width: 14px; height: 8px; background: var(--yellow);
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    }
+    .topbar-flag::after {
+      content: ''; position: absolute;
+      left: 50%; top: 50%; transform: translate(-50%,-50%);
+      width: 5px; height: 5px; border-radius: 50%; background: var(--blue);
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 10px; }
+    .topbar-title { font-family: "Fraunces", serif; font-size: 0.9rem; font-weight: 600; color: #fff; }
+    .topbar-sub { font-size: 0.75rem; color: #64748b; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .user-pill { background: #1e293b; border-radius: 99px; padding: 4px 12px; font-size: 0.75rem; color: #94a3b8; }
+
+    /* ── LOADING ─────────────────────────────────────── */
+    #loading-overlay {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px;
+      z-index: 9999; transition: opacity 0.35s;
+    }
+    #loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    .loading-spinner {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 3px solid var(--border); border-top-color: var(--green);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 0.9rem; color: var(--muted); }
+
+    /* ── PROGRESS STRIP ──────────────────────────────── */
+    .progress-strip {
+      max-width: 800px; margin: 32px auto 0; padding: 0 28px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .ps-dot {
+      flex: 1; height: 6px; border-radius: 3px;
+      background: var(--border); transition: background 0.3s;
+    }
+    .ps-dot.done     { background: var(--green); }
+    .ps-dot.active   { background: var(--yellow); }
+    .ps-dot.skipped  { background: #94a3b8; }
+
+    /* ── MAIN CONTENT ────────────────────────────────── */
+    .hub {
+      max-width: 800px; margin: 0 auto;
+      padding: 24px 28px 80px;
+    }
+    .hub-header { margin-bottom: 32px; }
+    .hub-eyebrow {
+      font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.09em; color: var(--green);
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    }
+    .hub-eyebrow-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+    .hub-title {
+      font-family: "Fraunces", serif;
+      font-size: clamp(1.3rem, 3vw, 1.7rem);
+      font-weight: 700; letter-spacing: -0.025em; margin-bottom: 6px;
+    }
+    .hub-subtitle { font-size: 0.88rem; color: var(--muted); line-height: 1.5; }
+
+    /* ── SECTION ──────────────────────────────────────── */
+    .section { margin-bottom: 36px; }
+    .section-label {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--muted);
+      padding-bottom: 10px; border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+
+    /* ── ELEMENT CARDS ────────────────────────────────── */
+    .elem-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; padding: 16px 20px;
+      margin-bottom: 12px;
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+    }
+    .elem-card:hover {
+      border-color: #94a3b8;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    }
+    .elem-card.locked {
+      opacity: 0.55; pointer-events: none; cursor: default;
+    }
+    .ec-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+    .ec-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+      background: var(--green-dim); color: var(--green);
+    }
+    .ec-info { min-width: 0; }
+    .ec-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; }
+    .ec-desc { font-size: 0.78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .ec-badge {
+      border-radius: 99px; padding: 4px 12px;
+      font-size: 0.7rem; font-weight: 600; flex-shrink: 0;
+    }
+    .ec-badge.todo     { background: var(--idle-bg); color: var(--idle-fg); }
+    .ec-badge.done     { background: var(--pass-bg); color: var(--pass-fg); }
+    .ec-badge.skipped  { background: #f1f5f9; color: #94a3b8; }
+    .ec-badge.eval     { background: var(--warn-bg); color: var(--warn-fg); }
+    .ec-badge.failed   { background: var(--fail-bg); color: var(--fail-fg); }
+
+    /* ── RESULTS PHASE ────────────────────────────────── */
+    #resultsSection { display: none; }
+    .results-card {
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: 16px; padding: 28px; text-align: center;
+      margin-bottom: 24px;
+    }
+    .results-level {
+      font-family: "Fraunces", serif; font-size: 1.6rem;
+      font-weight: 700; margin: 12px 0 6px;
+    }
+    .results-level.pass { color: var(--pass-fg); }
+    .results-level.fail { color: var(--fail-fg); }
+    .results-scores {
+      display: flex; justify-content: center; gap: 24px;
+      margin-top: 16px; flex-wrap: wrap;
+    }
+    .rs-item { text-align: center; }
+    .rs-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .rs-value { font-family: "Fraunces", serif; font-size: 1.3rem; font-weight: 700; }
+
+    @media (max-width: 600px) {
+      .hub { padding: 20px 16px 60px; }
+      .progress-strip { padding: 0 16px; }
+      .topbar { padding: 0 16px; }
+      .ec-desc { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Carregando exame…</div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" href="/dashboard/index.html">← Simulações</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-flag"></div>
+    <div class="topbar-brand">
+      <span class="topbar-title">CELPE-BRAS</span>
+      <span class="topbar-sub" id="topbarSim"></span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="user-pill" id="userEmail"></div>
+  </div>
+</div>
+
+<!-- PROGRESS STRIP -->
+<div class="progress-strip" id="progressStrip"></div>
+
+<!-- HUB -->
+<div class="hub" id="hubPhase">
+  <div class="hub-header">
+    <div class="hub-eyebrow">
+      <div class="hub-eyebrow-dot"></div>
+      <span id="hubEyebrow">SIMULAÇÃO 1</span>
+    </div>
+    <h1 class="hub-title" id="hubTitle">Painel do Exame</h1>
+    <p class="hub-subtitle">Clique em cada parte para começar. Você pode fazer as tarefas em qualquer ordem.</p>
+  </div>
+
+  <!-- PARTE ESCRITA -->
+  <div class="section">
+    <div class="section-label">📝 Parte Escrita</div>
+    <div id="escritaCards"></div>
+  </div>
+
+  <!-- PARTE ORAL -->
+  <div class="section">
+    <div class="section-label">🎙️ Parte Oral</div>
+    <div id="oralCards"></div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="hub" id="resultsSection">
+  <div class="hub-header">
+    <div class="hub-eyebrow">
+      <div class="hub-eyebrow-dot"></div>
+      RESULTADO
+    </div>
+    <h1 class="hub-title">Resultado da Simulação</h1>
+  </div>
+
+  <div class="results-card" id="resultsCard"></div>
+
+  <!-- Element details will show feedback here -->
+  <div id="elementResults"></div>
+
+  <div style="text-align:center; margin-top:24px;">
+    <a href="/dashboard/index.html" style="color:var(--green); font-weight:600; font-size:0.9rem;">← Voltar às simulações</a>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// ELEMENT DEFINITIONS
+// ═══════════════════════════════════════════════════════════════════
+const ELEMENTS = [
+  { key: 'tarefa1', section: 'escrita', icon: '🎬', title: 'Tarefa 1 — Vídeo', desc: 'Carta ao prefeito sobre horta comunitária', page: '/dashboard/tarefa1.html', timer: '30 min' },
+  { key: 'tarefa2', section: 'escrita', icon: '🔊', title: 'Tarefa 2 — Áudio', desc: 'Artigo sobre catadores de recicláveis', page: '/dashboard/tarefas234.html', timer: '2h30 compartilhado' },
+  { key: 'tarefa3', section: 'escrita', icon: '📄', title: 'Tarefa 3 — Texto', desc: 'E-mail sobre aplicativo ColheDireto', page: '/dashboard/tarefas234.html', timer: '2h30 compartilhado' },
+  { key: 'tarefa4', section: 'escrita', icon: '📄', title: 'Tarefa 4 — Texto', desc: 'Relatório sobre projeto Livro no Barco', page: '/dashboard/tarefas234.html', timer: '2h30 compartilhado' },
+  { key: 'oral',    section: 'oral',    icon: '🎤', title: 'Parte Oral',       desc: 'Elemento Provocador + conversa com IA', page: '/dashboard/oral.html', timer: '~20 min' },
+];
+
+let simId, attemptId, user;
+let pollTimer = null;
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  const ctx = await CELPE.init();
+  user      = ctx.user;
+  simId     = ctx.simId;
+  attemptId = ctx.attemptId;
+
+  document.getElementById('userEmail').textContent = user.email;
+  document.getElementById('topbarSim').textContent = `Simulação ${ctx.simNum}`;
+  document.getElementById('hubEyebrow').textContent = `SIMULAÇÃO ${ctx.simNum}`;
+
+  await refreshHub();
+  CELPE.hideLoading();
+
+  // Poll for eval completion every 15s
+  pollTimer = setInterval(refreshHub, 15000);
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// REFRESH HUB
+// ═══════════════════════════════════════════════════════════════════
+async function refreshHub() {
+  const data = await CELPE.hydrateData(user.email, attemptId, true);
+  if (!data) return;
+
+  const attempt = (data.attempts || []).find(a => a.id === attemptId);
+  if (!attempt) return;
+
+  const elems = attempt.elements || [];
+
+  // Check if complete
+  if (attempt.status === 'complete') {
+    showResults(attempt, elems);
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    return;
+  }
+
+  // Build progress strip
+  const strip = document.getElementById('progressStrip');
+  strip.innerHTML = ELEMENTS.map(def => {
+    const el = elems.find(e => e.element_key === def.key);
+    let cls = '';
+    if (!el || el.submission_status === 'not_started') cls = '';
+    else if (el.submission_status === 'skipped') cls = 'skipped';
+    else if (el.eval_status === 'complete') cls = 'done';
+    else if (el.submission_status === 'submitted') cls = 'active';
+    return `<div class="ps-dot ${cls}"></div>`;
+  }).join('');
+
+  // Build element cards
+  const escritaHtml = [];
+  const oralHtml = [];
+
+  ELEMENTS.forEach(def => {
+    const el = elems.find(e => e.element_key === def.key);
+    const status = el?.submission_status || 'not_started';
+    const evalSt = el?.eval_status || 'pending';
+
+    let badge, locked = false;
+    if (status === 'not_started')       badge = '<span class="ec-badge todo">Pendente</span>';
+    else if (status === 'skipped')      badge = '<span class="ec-badge skipped">Pulada</span>';
+    else if (evalSt === 'complete')     badge = '<span class="ec-badge done">✓ Avaliada</span>';
+    else if (evalSt === 'failed')       badge = '<span class="ec-badge failed">Erro</span>';
+    else if (evalSt === 'evaluating')   badge = '<span class="ec-badge eval">Avaliando…</span>';
+    else                                badge = '<span class="ec-badge eval">Processando…</span>';
+
+    // Build URL with query params
+    let href = `${def.page}?sim=${simId}&attempt=${attemptId}&key=${def.key}`;
+
+    const card = `
+      <div class="elem-card ${locked ? 'locked' : ''}" onclick="window.location.href='${href}'">
+        <div class="ec-left">
+          <div class="ec-icon">${def.icon}</div>
+          <div class="ec-info">
+            <div class="ec-title">${def.title}</div>
+            <div class="ec-desc">${def.desc} · ${def.timer}</div>
+          </div>
+        </div>
+        ${badge}
+      </div>`;
+
+    if (def.section === 'escrita') escritaHtml.push(card);
+    else oralHtml.push(card);
+  });
+
+  document.getElementById('escritaCards').innerHTML = escritaHtml.join('');
+  document.getElementById('oralCards').innerHTML = oralHtml.join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RESULTS
+// ═══════════════════════════════════════════════════════════════════
+function showResults(attempt, elems) {
+  document.getElementById('hubPhase').style.display = 'none';
+  document.getElementById('resultsSection').style.display = '';
+
+  const level = attempt.certification_level || '—';
+  const isPass = level !== 'Sem Certificação' && level !== '—';
+
+  document.getElementById('resultsCard').innerHTML = `
+    <div style="font-size:2rem;">${isPass ? '🎉' : '📋'}</div>
+    <div class="results-level ${isPass ? 'pass' : 'fail'}">${CELPE.escapeHtml(level)}</div>
+    <div style="font-size:0.85rem; color:var(--muted); margin-top:4px;">
+      ${isPass ? 'Parabéns! Você alcançou esse nível.' : 'Continue praticando para melhorar seu nível.'}
+    </div>
+    <div class="results-scores">
+      <div class="rs-item">
+        <div class="rs-label">Escrita</div>
+        <div class="rs-value">${attempt.grade_escrita ?? '—'}<span style="font-size:0.7rem;color:var(--muted);">/25</span></div>
+      </div>
+      <div class="rs-item">
+        <div class="rs-label">Oral</div>
+        <div class="rs-value">${attempt.grade_oral ?? '—'}<span style="font-size:0.7rem;color:var(--muted);">/25</span></div>
+      </div>
+      <div class="rs-item">
+        <div class="rs-label">Geral</div>
+        <div class="rs-value">${attempt.grade_overall ?? '—'}<span style="font-size:0.7rem;color:var(--muted);">/25</span></div>
+      </div>
+    </div>
+  `;
+
+  // Element feedback details
+  const detailsHtml = elems.map(el => {
+    const def = ELEMENTS.find(d => d.key === el.element_key);
+    if (!def) return '';
+    const fb = el.ai_feedback || {};
+    const score = el.ai_score_internal ?? '—';
+
+    if (el.submission_status === 'skipped') {
+      return `<div class="elem-card" style="cursor:default;">
+        <div class="ec-left">
+          <div class="ec-icon" style="background:#f1f5f9;color:#94a3b8;">${def.icon}</div>
+          <div class="ec-info">
+            <div class="ec-title">${def.title}</div>
+            <div class="ec-desc">Pulada — 0 pontos</div>
+          </div>
+        </div>
+        <span class="ec-badge skipped">0/25</span>
+      </div>`;
+    }
+
+    const summary = fb.summary || fb.feedback_summary || '';
+    const scores = fb.scores || {};
+    const scoreEntries = Object.entries(scores);
+
+    return `<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.1rem;">${def.icon}</span>
+          <span style="font-weight:600;">${def.title}</span>
+        </div>
+        <span class="ec-badge done">${score}/25</span>
+      </div>
+      ${summary ? `<p style="font-size:0.85rem;color:var(--slate);line-height:1.6;margin-bottom:10px;">${CELPE.escapeHtml(summary)}</p>` : ''}
+      ${scoreEntries.length > 0 ? `
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+          ${scoreEntries.map(([k, v]) => `<span style="background:var(--green-dim);color:var(--green);padding:3px 10px;border-radius:6px;font-size:0.75rem;font-weight:600;">${k}: ${v}/5</span>`).join('')}
+        </div>` : ''}
+      ${(fb.strengths || []).length > 0 ? `
+        <div style="font-size:0.8rem;color:var(--pass-fg);margin-bottom:6px;">
+          <strong>Pontos fortes:</strong> ${fb.strengths.map(s => CELPE.escapeHtml(s)).join(' · ')}
+        </div>` : ''}
+      ${(fb.weaknesses || []).length > 0 ? `
+        <div style="font-size:0.8rem;color:var(--warn-fg);">
+          <strong>Sugestões:</strong> ${fb.weaknesses.map(s => CELPE.escapeHtml(s)).join(' · ')}
+        </div>` : ''}
+      ${(fb.mistakes || []).length > 0 ? `
+        <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px;">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Correções</div>
+          ${fb.mistakes.map(m => `
+            <div style="font-size:0.8rem;margin-bottom:8px;padding:8px 10px;background:#fef2f2;border-radius:8px;border-left:3px solid #fca5a5;">
+              <span style="text-decoration:line-through;color:var(--fail-fg);">${CELPE.escapeHtml(m.original)}</span>
+              → <span style="color:var(--pass-fg);font-weight:600;">${CELPE.escapeHtml(m.correction)}</span>
+              ${m.explanation ? `<div style="color:var(--muted);font-size:0.75rem;margin-top:3px;">${CELPE.escapeHtml(m.explanation)}</div>` : ''}
+            </div>`).join('')}
+        </div>` : ''}
+    </div>`;
+  }).join('');
+
+  document.getElementById('elementResults').innerHTML = detailsHtml;
+
+  // Update progress strip to all done
+  const strip = document.getElementById('progressStrip');
+  strip.innerHTML = ELEMENTS.map(() => '<div class="ps-dot done"></div>').join('');
+}
+</script>
+</body>
+</html>

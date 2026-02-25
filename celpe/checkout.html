@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comprar — Simulação CELPE-BRAS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green:#009c3b; --green-dim:#e6f5ec; --green-dark:#007a2f;
+      --yellow:#ffdf00; --blue:#002776;
+      --navy:#0f172a; --slate:#334155; --muted:#64748b;
+      --border:#e2e8f0; --surface:#ffffff; --bg:#f8f7f4;
+      --red:#dc2626;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 20px;line-height:1.5;}
+
+    /* ── HEADER ─── */
+    .page-header{text-align:center;margin-bottom:36px;max-width:600px;}
+    .header-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:20px;}
+    .topbar-flag{width:32px;height:22px;background:var(--green);border-radius:3px;position:relative;overflow:hidden;flex-shrink:0;}
+    .topbar-flag::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:12px;background:var(--yellow);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);}
+    .topbar-flag::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:7px;height:7px;border-radius:50%;background:var(--blue);}
+    .header-brand-text{font-family:"Fraunces",serif;font-size:1.1rem;font-weight:600;color:var(--navy);}
+    .page-header h1{font-family:"Fraunces",serif;font-size:1.8rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px;}
+    .page-header p{font-size:1.05rem;color:var(--muted);}
+
+    /* ── ERROR ─── */
+    .msg{padding:10px 14px;border-radius:10px;font-size:0.88rem;margin-bottom:16px;background:#fef2f2;color:var(--red);border:1px solid #fecaca;display:none;text-align:center;max-width:480px;width:100%;}
+    .msg.visible{display:block;}
+
+    /* ── PRODUCT CARD ─── */
+    .product-card{background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:36px 32px;width:100%;max-width:480px;position:relative;transition:border-color 0.2s,box-shadow 0.2s;}
+    .product-card:hover{border-color:var(--green);box-shadow:0 4px 20px rgba(0,156,59,0.1);}
+    .product-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:14px;background:var(--green-dim);color:var(--green);}
+    .product-card h2{font-family:"Fraunces",serif;font-size:1.3rem;font-weight:700;margin-bottom:8px;}
+    .product-price{font-family:"Fraunces",serif;font-size:2.2rem;font-weight:700;color:var(--green);margin-bottom:4px;}
+    .product-price-note{font-size:0.85rem;color:var(--muted);margin-bottom:22px;}
+    .features{list-style:none;padding:0;}
+    .features li{padding:7px 0;font-size:0.92rem;color:var(--navy);display:flex;align-items:flex-start;gap:10px;}
+    .features li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0;}
+
+    /* ── CHECKOUT ─── */
+    .checkout-section{text-align:center;width:100%;max-width:480px;margin-top:28px;}
+    .btn-checkout{display:inline-block;width:100%;padding:15px 48px;border:none;border-radius:12px;font-size:1.1rem;font-weight:700;font-family:"DM Sans",sans-serif;cursor:pointer;background:var(--green);color:#fff;transition:background 0.2s,transform 0.1s;}
+    .btn-checkout:hover:not(:disabled){background:var(--green-dark);}
+    .btn-checkout:active{transform:scale(0.99);}
+    .btn-checkout:disabled{opacity:0.5;cursor:not-allowed;}
+    .secure-note{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:0.82rem;color:var(--muted);}
+    .login-link{text-align:center;margin-top:14px;font-size:0.88rem;color:var(--muted);}
+    .login-link a{color:var(--green);text-decoration:none;font-weight:600;}
+    .login-link a:hover{text-decoration:underline;}
+
+    .spinner{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:8px;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    .footer{margin-top:auto;padding-top:40px;text-align:center;font-size:0.8rem;color:var(--muted);}
+    .footer a{color:var(--muted);text-decoration:none;}
+    .footer a:hover{text-decoration:underline;}
+
+    @media(max-width:500px){
+      .product-card{padding:28px 22px;}
+      .page-header h1{font-size:1.5rem;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="header-brand">
+    <div class="topbar-flag"></div>
+    <span class="header-brand-text">CELPE-BRAS</span>
+  </div>
+  <h1>Simulação CELPE-BRAS com IA</h1>
+  <p>Pratique para o exame com avaliação inteligente</p>
+</div>
+
+<div id="error-msg" class="msg"></div>
+
+<div class="product-card">
+  <span class="product-badge">Acesso completo</span>
+  <h2>Simulação CELPE-BRAS</h2>
+  <div class="product-price">R$ 149</div>
+  <div class="product-price-note">Pagamento único · Acesso ilimitado</div>
+  <ul class="features">
+    <li>10 simulações completas do exame</li>
+    <li>Parte Escrita — 4 tarefas com vídeo, áudio e textos</li>
+    <li>Parte Oral — conversa com IA sobre Elementos Provocadores</li>
+    <li>Avaliação por IA com os 5 critérios oficiais do CELPE-BRAS</li>
+    <li>Feedback detalhado com correções e sugestões</li>
+    <li>Resultado com nível de certificação (Intermediário a Avançado Superior)</li>
+    <li>Pratique quantas vezes quiser</li>
+  </ul>
+</div>
+
+<div class="checkout-section">
+  <button class="btn-checkout" id="checkout-btn">Comprar agora →</button>
+  <div class="secure-note">🔒 Pagamento seguro via Stripe</div>
+  <div class="login-link">
+    Já tem uma conta? <a href="/login.html">Entrar</a>
+  </div>
+</div>
+
+<div class="footer">
+  <a href="https://celpebras.org">celpebras.org</a> · <a href="https://civiclearn.com">CivicLearn</a> · Testrada Pte Ltd
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  const checkoutBtn   = document.getElementById('checkout-btn');
+  const errorMsg      = document.getElementById('error-msg');
+
+  checkoutBtn.addEventListener('click', async () => {
+    errorMsg.classList.remove('visible');
+    checkoutBtn.disabled = true;
+    checkoutBtn.innerHTML = '<span class="spinner"></span>Redirecionando para o Stripe…';
+
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/celpe-create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_type: 'celpe' }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Erro no checkout');
+      }
+
+      window.location.href = data.url;
+
+    } catch (err) {
+      console.error('Checkout error:', err);
+      errorMsg.textContent = 'Ocorreu um erro: ' + err.message + '. Tente novamente ou entre em contato: admin@civiclearn.com';
+      errorMsg.classList.add('visible');
+      checkoutBtn.disabled = false;
+      checkoutBtn.textContent = 'Comprar agora →';
+    }
+  });
+})();
+</script>
+</body>
+</html>
