@@ -261,15 +261,33 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════════════
-// ELEMENT DEFINITIONS
+// ELEMENT DEFINITIONS (dynamic per simulation)
 // ═══════════════════════════════════════════════════════════════════
-const ELEMENTS = [
-  { key: 'tarefa1', section: 'escrita', icon: '🎬', title: 'Tarefa 1 — Vídeo', desc: 'Carta ao prefeito sobre horta comunitária', page: '/celpe/dashboard/tarefa1.html', timer: '30 min' },
-  { key: 'tarefa2', section: 'escrita', icon: '🔊', title: 'Tarefa 2 — Áudio', desc: 'Artigo sobre catadores de recicláveis', page: '/celpe/dashboard/tarefas234.html', timer: '2h30 compartilhado' },
-  { key: 'tarefa3', section: 'escrita', icon: '📄', title: 'Tarefa 3 — Texto', desc: 'E-mail sobre aplicativo ColheDireto', page: '/celpe/dashboard/tarefas234.html', timer: '2h30 compartilhado' },
-  { key: 'tarefa4', section: 'escrita', icon: '📄', title: 'Tarefa 4 — Texto', desc: 'Relatório sobre projeto Livro no Barco', page: '/celpe/dashboard/tarefas234.html', timer: '2h30 compartilhado' },
-  { key: 'oral',    section: 'oral',    icon: '🎤', title: 'Parte Oral',       desc: 'Elemento Provocador + conversa com IA', page: '/celpe/dashboard/oral.html', timer: '~20 min' },
-];
+const SIM_ELEMENTS = {
+  sim01: { t1: 'Carta ao prefeito sobre horta comunitária',      t2: 'Artigo sobre catadores de recicláveis',        t3: 'E-mail sobre aplicativo ColheDireto',            t4: 'Relatório sobre projeto Livro no Barco' },
+  sim02: { t1: 'Carta ao editor sobre Parque Canela de Ema',     t2: 'Post de blog sobre ponto de ônibus de bambu',  t3: 'E-mail sobre Bike Solidária Recife',              t4: 'Texto sobre telhados verdes no Rio' },
+  sim03: { t1: 'Proposta sobre evento sustentável no lago',      t2: 'Artigo de opinião sobre mobilidade Fortaleza',  t3: 'Carta aberta sobre app VerdeVivo',                t4: 'E-mail sobre coworking comunitário Heliópolis' },
+  sim04: { t1: 'E-mail sobre disciplina Felicidade na UnB',      t2: 'Texto para site sobre cooperativa Planaltina',  t3: 'Relatório sobre app MenteCalma nas escolas',      t4: 'Carta ao editor sobre academias ao ar livre' },
+  sim05: { t1: 'Carta aberta sobre calor desigual no Rio',       t2: 'Carta de recomendação sobre inclusão digital',  t3: 'E-mail sobre projeto Acolher e Aprender',         t4: 'Artigo de opinião sobre ConectAmazônia' },
+  sim06: { t1: 'Relatório sobre agroindústria de Caruaru',       t2: 'Abaixo-assinado sobre analfabetismo no Brasil', t3: 'E-mail sobre horta escolar pedagógica',            t4: 'Folder sobre Conecta Melhor Idade' },
+  sim07: { t1: 'Carta ao editor sobre IA e mercado de trabalho', t2: 'Post de blog sobre café orgânico Campinas',     t3: 'Carta-denúncia sobre entregadores de app',         t4: 'Texto newsletter sobre Banco de Tempo' },
+  sim08: { t1: 'Texto para site sobre Império Colonial',         t2: 'Proposta sobre rios urbanos do Rio',             t3: 'Carta de leitor sobre compostagem Porto Alegre',   t4: 'E-mail sobre infraestrutura verde Recife' },
+  sim09: { t1: 'E-mail sobre vacina da dengue Butantan',         t2: 'Artigo informativo sobre Refauna Tijuca',       t3: 'Carta aberta sobre app Poliniza Brasil',           t4: 'Relatório sobre Guardiãs de Sementes' },
+  sim10: { t1: 'Proposta sobre desertificação no Nordeste',      t2: 'Crônica sobre indígenas urbanos',               t3: 'Carta ao editor sobre Rádio Quilombo',             t4: 'Abaixo-assinado sobre Museu da Memória' },
+};
+
+function buildElements(simId) {
+  const meta = SIM_ELEMENTS[simId] || SIM_ELEMENTS.sim01;
+  return [
+    { key: 'tarefa1', section: 'escrita', icon: '🎬', title: 'Tarefa 1 — Vídeo', desc: meta.t1, page: '/celpe/dashboard/tarefa1.html', timer: '30 min' },
+    { key: 'tarefa2', section: 'escrita', icon: '🔊', title: 'Tarefa 2 — Áudio', desc: meta.t2, page: '/celpe/dashboard/tarefas234.html', timer: '2h30 compartilhado' },
+    { key: 'tarefa3', section: 'escrita', icon: '📄', title: 'Tarefa 3 — Texto', desc: meta.t3, page: '/celpe/dashboard/tarefas234.html', timer: '2h30 compartilhado' },
+    { key: 'tarefa4', section: 'escrita', icon: '📄', title: 'Tarefa 4 — Texto', desc: meta.t4, page: '/celpe/dashboard/tarefas234.html', timer: '2h30 compartilhado' },
+    { key: 'oral',    section: 'oral',    icon: '🎤', title: 'Parte Oral',       desc: 'Elemento Provocador + conversa com IA', page: '/celpe/dashboard/oral.html', timer: '~20 min' },
+  ];
+}
+
+let ELEMENTS = []; // populated after init
 
 let simId, attemptId, user;
 let pollTimer = null;
@@ -282,6 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   user      = ctx.user;
   simId     = ctx.simId;
   attemptId = ctx.attemptId;
+  ELEMENTS  = buildElements(simId);
 
   document.getElementById('userEmail').textContent = user.email;
   document.getElementById('topbarSim').textContent = `Simulação ${ctx.simNum}`;
