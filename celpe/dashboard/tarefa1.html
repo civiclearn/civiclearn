@@ -112,7 +112,6 @@
     .submit-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--green);color:#fff;font-family:"DM Sans",sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;transition:opacity 0.15s}
     .submit-btn:hover{opacity:0.85}
     .submit-btn:disabled{opacity:0.4;cursor:default}
-    .submit-info{font-size:0.72rem;color:var(--muted);text-align:center;margin-top:8px}
     .skip-link{display:block;text-align:center;margin-top:8px;font-size:0.78rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit}
     .skip-link:hover{color:var(--navy)}
     .already-done-card{display:none;margin:10px 0;padding:20px;border-radius:10px;text-align:center;background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass-border)}
@@ -198,11 +197,9 @@
       </div>
       <div class="submitted-notice" id="submittedNotice">
         ✅ Resposta enviada!
-        <p>A avaliação por IA começa após a entrega de todas as tarefas.</p>
       </div>
       <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>Entregar resposta</button>
       <button class="continue-btn" id="continueBtn" onclick="CELPE.goBack(simId, attemptId)">← Voltar ao painel</button>
-      <p class="submit-info" id="submitInfo">Avaliação por IA após entrega completa</p>
       <span class="skip-link" id="skipLink" onclick="skipElement()">Pular esta tarefa</span>
     </div>
   </div>
@@ -343,7 +340,6 @@ function showDoneState(cardId) {
   document.getElementById(cardId).classList.add('visible');
   document.getElementById('submitBtn').style.display = 'none';
   document.getElementById('skipLink').style.display = 'none';
-  document.getElementById('submitInfo').style.display = 'none';
   document.getElementById('continueBtn').style.display = 'block';
   document.getElementById('replyTextarea').disabled = true;
 }
@@ -467,7 +463,6 @@ async function submitAnswer() {
   document.getElementById('replyTextarea').disabled = true;
   document.getElementById('submitBtn').style.display = 'none';
   document.getElementById('skipLink').style.display = 'none';
-  document.getElementById('submitInfo').style.display = 'none';
   document.getElementById('submittedNotice').classList.add('visible');
   document.getElementById('continueBtn').style.display = 'block';
   taskItems.forEach(item => {
