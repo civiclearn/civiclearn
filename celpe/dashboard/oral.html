@@ -62,6 +62,9 @@
     .ep-number{width:28px;height:28px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:var(--muted);flex-shrink:0}
     .ep-card.selected .ep-number{background:var(--green);color:#fff}
     .ep-image-desc{font-size:0.78rem;color:var(--muted);font-style:italic}
+    .ep-img{width:100%;border-radius:10px;margin-bottom:12px;object-fit:cover;max-height:200px}
+    .ep-img-prep{width:100%;border-radius:10px;margin-bottom:14px;object-fit:cover;max-height:240px}
+    .ep-img-conv{width:100%;border-radius:8px;margin-bottom:10px;object-fit:cover;max-height:160px}
     .ep-text{font-size:0.92rem;line-height:1.6;color:var(--navy)}
     .ep-themes{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
     .ep-theme{background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:2px 10px;font-size:0.7rem;color:var(--muted)}
@@ -138,7 +141,7 @@
   <!-- PHASE 1: EP SELECTION -->
   <div class="phase active" id="phaseSelect">
     <h1 class="phase-title">Escolha seu Elemento Provocador</h1>
-    <p class="phase-subtitle">Três opções foram sorteadas. Escolha uma para a conversa com o examinador.</p>
+    <p class="phase-subtitle">Três opções estão disponíveis. Escolha uma para a conversa com o examinador.</p>
     <div id="epCards"></div>
     <button class="confirm-btn" id="confirmEpBtn" onclick="confirmSelection()" disabled>
       Confirmar escolha
@@ -293,6 +296,7 @@ function renderEpCards() {
         '<div class="ep-number">' + (i + 1) + '</div>' +
         '<span class="ep-image-desc">📷 ' + CELPE.escapeHtml(ep.image_description || '') + '</span>' +
       '</div>' +
+      (ep.image_asset ? '<img class="ep-img" src="https://media.civiclearn.com/celpe/images/' + CELPE.escapeHtml(ep.image_asset) + '" alt="' + CELPE.escapeHtml(ep.image_description || '') + '" onerror="this.style.display=\'none\'">' : '') +
       '<div class="ep-text">' + CELPE.escapeHtml(ep.text || '') + '</div>' +
       '<div class="ep-themes">' +
         (ep.themes || []).map(function(t) { return '<span class="ep-theme">' + CELPE.escapeHtml(t) + '</span>'; }).join('') +
@@ -318,6 +322,7 @@ function confirmSelection() {
 
   // Prep card
   document.getElementById('prepEpCard').innerHTML =
+    (selectedEp.image_asset ? '<img class="ep-img-prep" src="https://media.civiclearn.com/celpe/images/' + CELPE.escapeHtml(selectedEp.image_asset) + '" alt="' + CELPE.escapeHtml(selectedEp.image_description || '') + '" onerror="this.style.display=\'none\'">' : '') +
     '<div class="ep-text">' + CELPE.escapeHtml(selectedEp.text || '') + '</div>' +
     '<div class="ep-themes" style="margin-top:10px">' +
       (selectedEp.themes || []).map(function(t) { return '<span class="ep-theme">' + t + '</span>'; }).join('') +
@@ -363,6 +368,7 @@ function startConversation() {
 
   // Show EP in conversation
   document.getElementById('convEpCard').innerHTML =
+    (selectedEp.image_asset ? '<img class="ep-img-conv" src="https://media.civiclearn.com/celpe/images/' + CELPE.escapeHtml(selectedEp.image_asset) + '" alt="' + CELPE.escapeHtml(selectedEp.image_description || '') + '" onerror="this.style.display=\'none\'">' : '') +
     '📷 <em>' + CELPE.escapeHtml(selectedEp.image_description || '') + '</em><br>' +
     CELPE.escapeHtml(selectedEp.text || '');
 
