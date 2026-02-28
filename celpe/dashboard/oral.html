@@ -238,38 +238,16 @@
 // ═══════════════════════════════════════════════════════════════
 var FOLLOWUP_POOL = [
   'Por que você pensa assim?',
-  'O que te leva a essa conclusão?',
   'Você sempre pensou assim ou mudou de opinião em algum momento?',
-  'Essa é uma posição interessante. O que te convenceu disso?',
-  'E quem pensa diferente, o que estaria dizendo?',
-  'Qual seria o argumento mais forte do lado oposto?',
-  'Se alguém discordasse de você, qual seria a melhor razão?',
-  'Tem gente que defende exatamente o contrário. Como você acha que eles argumentariam?',
-  'Se você pudesse mudar uma coisa sobre essa situação, o que seria?',
-  'Imagine que você tem o poder de decisão. O que faria primeiro?',
-  'Existe alguma solução que parece boa na teoria mas não funciona na prática?',
-  'O que precisaria acontecer para essa realidade mudar?',
-  'Pensando de forma mais ampla, o que está por trás desse problema?',
-  'Isso tem relação com outras questões que você considera importantes?',
-  'Se a gente pensar nisso de outro ângulo, o que muda?',
+  'O que te levou a essa conclusão?',
   'Como você acha que isso vai estar daqui a dez anos?',
   'Esse problema tende a melhorar ou piorar com o tempo?',
-  'As novas gerações vão lidar com isso de forma diferente?',
-  'A tecnologia pode mudar esse cenário? De que forma?',
-  'O que é mais importante nessa discussão, na sua opinião?',
-  'Quem deveria ser o principal responsável por agir nessa questão?',
-  'Qual é o maior obstáculo para avançar nesse tema?',
-  'Você acha que existe uma resposta certa ou é mais complexo do que parece?',
-  'Onde você traçaria o limite nessa questão?',
-  'Tem alguma situação em que sua opinião seria diferente?',
-  'Às vezes a teoria e a prática são bem diferentes, né? Como você vê isso aqui?',
+  'O que precisaria acontecer para essa realidade mudar?',
 ];
 
 var WRAPUP_POOL = [
-  'Tem algo que a gente não mencionou e que você acha importante?',
-  'Se você tivesse que resumir sua posição em uma frase, qual seria?',
+  'Tem algo mais que você gostaria de dizer sobre esse tema?',
   'Para encerrar esse tema, qual é a mensagem principal que você tiraria?',
-  'O que você gostaria que mais pessoas soubessem sobre esse assunto?',
   'Antes de seguir: algo mais que queira acrescentar?',
 ];
 
@@ -286,6 +264,7 @@ var currentEpIdx = 0;
 
 var part1Questions = [];
 var part1QuestionIdx = 0;
+var part1EndShown = false;
 
 var shuffledFollowUps = [];
 var followUpPtr = 0;
@@ -435,10 +414,13 @@ function showEpPrep(epIdx) {
   if (ep.image_asset) {
     html += '<img class="ep-img" src="https://media.civiclearn.com/celpe/images/' +
       CELPE.escapeHtml(ep.image_asset) + '" alt="' +
-      CELPE.escapeHtml(ep.image_description || '') + '" onerror="this.style.display=\'none\'">';
+      CELPE.escapeHtml(ep.image_description || '') + '" onerror="this.nextElementSibling.style.display=\'block\';this.style.display=\'none\'">';
+    html += '<span style="font-size:0.78rem;color:var(--muted);font-style:italic;display:none">📷 ' +
+      CELPE.escapeHtml(ep.image_description || '') + '</span>';
+  } else {
+    html += '<span style="font-size:0.78rem;color:var(--muted);font-style:italic">📷 ' +
+      CELPE.escapeHtml(ep.image_description || '') + '</span>';
   }
-  html += '<span style="font-size:0.78rem;color:var(--muted);font-style:italic">📷 ' +
-    CELPE.escapeHtml(ep.image_description || '') + '</span>';
   html += '<div class="ep-text" style="margin-top:10px">' + CELPE.escapeHtml(ep.text || '') + '</div>';
   html += '<div class="ep-themes" style="margin-top:10px">' +
     (ep.themes || []).map(function(t) { return '<span class="ep-theme">' + CELPE.escapeHtml(t) + '</span>'; }).join('') +
@@ -477,10 +459,12 @@ function startEpConv(epIdx) {
   if (ep.image_asset) {
     cardHtml += '<img class="ep-img-conv" src="https://media.civiclearn.com/celpe/images/' +
       CELPE.escapeHtml(ep.image_asset) + '" alt="' +
-      CELPE.escapeHtml(ep.image_description || '') + '" onerror="this.style.display=\'none\'">';
+      CELPE.escapeHtml(ep.image_description || '') + '" onerror="this.nextElementSibling.style.display=\'block\';this.style.display=\'none\'">';
+    cardHtml += '<div style="display:none">📷 <em>' + CELPE.escapeHtml(ep.image_description || '') + '</em><br></div>';
+  } else {
+    cardHtml += '📷 <em>' + CELPE.escapeHtml(ep.image_description || '') + '</em><br>';
   }
-  cardHtml += '📷 <em>' + CELPE.escapeHtml(ep.image_description || '') + '</em><br>' +
-    CELPE.escapeHtml(ep.text || '');
+  cardHtml += CELPE.escapeHtml(ep.text || '');
   document.getElementById('convEpCard').innerHTML = cardHtml;
 
   document.getElementById('chatArea2').innerHTML = '';
@@ -556,19 +540,25 @@ function askNextQuestion() {
   if (currentSection === 'part1') {
     if (part1QuestionIdx < part1Questions.length) {
       addChat(chatAreaId, 'ai', part1Questions[part1QuestionIdx++]);
+    } else if (!part1EndShown) {
+      part1EndShown = true;
+      addChat(chatAreaId, 'ai', 'Obrigado! Vamos agora para a segunda etapa. Clique em "Próxima etapa" quando estiver pronto(a).');
     }
     return;
   }
 
-  // EP conversation: opener already shown (turn 0)
-  // turns 1-2: follow-up from pool
-  // turn 3: wrap-up
-  // turn 4+: no more prompts
-  if (sectionTurnCount <= 2) {
-    addChat(chatAreaId, 'ai', getNextFollowUp());
-  } else if (sectionTurnCount === 3) {
+  // EP conversation: use topic-specific starters first, then generic fallbacks
+  var ep = allEPs[currentEpIdx];
+  var starters = (ep && ep.conversation_starters) || [];
+  // sectionTurnCount starts at 0; starter[0] was already shown as opener
+  var starterIdx = sectionTurnCount; // turn 1 → starter[1], turn 2 → starter[2], etc.
+  if (starterIdx < starters.length) {
+    addChat(chatAreaId, 'ai', starters[starterIdx]);
+  } else if (sectionTurnCount === starters.length) {
+    // One generic wrap-up after all starters exhausted
     addChat(chatAreaId, 'ai', getWrapUp());
   }
+  // After wrap-up: no more prompts, timer or candidate ends it
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -678,7 +668,13 @@ function clearTimer() {
 function updateTimerDisplay() {
   var m = Math.floor(Math.max(0, timerSeconds) / 60);
   var s = Math.max(0, timerSeconds) % 60;
-  document.getElementById('timerDisplay').textContent = m + ':' + String(s).padStart(2, '0');
+  var display = m + ':' + String(s).padStart(2, '0');
+  document.getElementById('timerDisplay').textContent = display;
+  // Also update large prep timer if visible
+  var prepEl = document.getElementById('prepTimer');
+  if (prepEl && document.getElementById('phaseEpPrep').classList.contains('active')) {
+    prepEl.textContent = display;
+  }
   var pill = document.getElementById('timerPill');
   pill.className = 'timer-pill';
   if (timerSeconds <= 15) pill.classList.add('danger');
