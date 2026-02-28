@@ -475,67 +475,7 @@ function showResults(attempt, elems) {
     <a href="results.html?sim=${simId}&attempt=${attemptId}" style="display:block;width:100%;margin-top:18px;padding:13px;background:var(--green);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:600;text-align:center;text-decoration:none;">Ver resultados detalhados →</a>
   `;
 
-  // Element feedback details
-  const detailsHtml = elems.map(el => {
-    const def = ELEMENTS.find(d => d.key === el.element_key);
-    if (!def) return '';
-    const fb = el.ai_feedback || {};
-    const score = el.ai_score_internal ?? '—';
-
-    if (el.submission_status === 'skipped') {
-      return `<div class="elem-card" style="cursor:default;">
-        <div class="ec-left">
-          <div class="ec-icon" style="background:#f1f5f9;color:#94a3b8;">${def.icon}</div>
-          <div class="ec-info">
-            <div class="ec-title">${def.title}</div>
-            <div class="ec-desc">Pulada — 0 pontos</div>
-          </div>
-        </div>
-        <span class="ec-badge skipped">0/25</span>
-      </div>`;
-    }
-
-    const summary = fb.summary || fb.feedback_summary || '';
-    const scores = fb.scores || {};
-    const scoreEntries = Object.entries(scores);
-
-    return `<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:1.1rem;">${def.icon}</span>
-          <span style="font-weight:600;">${def.title}</span>
-        </div>
-        <span class="ec-badge done">${score}/25</span>
-      </div>
-      ${summary ? `<p style="font-size:0.85rem;color:var(--slate);line-height:1.6;margin-bottom:10px;">${CELPE.escapeHtml(summary)}</p>` : ''}
-      ${scoreEntries.length > 0 ? `
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-          ${scoreEntries.map(([k, v]) => `<span style="background:var(--green-dim);color:var(--green);padding:3px 10px;border-radius:6px;font-size:0.75rem;font-weight:600;">${k}: ${v}/5</span>`).join('')}
-        </div>` : ''}
-      ${(fb.strengths || []).length > 0 ? `
-        <div style="font-size:0.8rem;color:var(--pass-fg);margin-bottom:6px;">
-          <strong>Pontos fortes:</strong> ${fb.strengths.map(s => CELPE.escapeHtml(s)).join(' · ')}
-        </div>` : ''}
-      ${(fb.weaknesses || []).length > 0 ? `
-        <div style="font-size:0.8rem;color:var(--warn-fg);">
-          <strong>Sugestões:</strong> ${fb.weaknesses.map(s => CELPE.escapeHtml(s)).join(' · ')}
-        </div>` : ''}
-      ${(fb.mistakes || []).length > 0 ? `
-        <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px;">
-          <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Correções</div>
-          ${fb.mistakes.map(m => `
-            <div style="font-size:0.8rem;margin-bottom:8px;padding:8px 10px;background:#fef2f2;border-radius:8px;border-left:3px solid #fca5a5;">
-              <span style="text-decoration:line-through;color:var(--fail-fg);">${CELPE.escapeHtml(m.original)}</span>
-              → <span style="color:var(--pass-fg);font-weight:600;">${CELPE.escapeHtml(m.correction)}</span>
-              ${m.explanation ? `<div style="color:var(--muted);font-size:0.75rem;margin-top:3px;">${CELPE.escapeHtml(m.explanation)}</div>` : ''}
-            </div>`).join('')}
-        </div>` : ''}
-    </div>`;
-  }).join('');
-
-  document.getElementById('elementResults').innerHTML = detailsHtml;
-
-  // Update progress strip to all done
+  // Progress strip: all done
   const strip = document.getElementById('progressStrip');
   strip.innerHTML = ELEMENTS.map(() => '<div class="ps-dot done"></div>').join('');
 }
