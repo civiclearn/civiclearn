@@ -127,6 +127,7 @@
     const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
     const password = document.getElementById('loginPwd').value;
     if (!email || !password) return showError('Preencha e-mail e senha.');
+    if (!email.includes('@') || !email.includes('.')) return showError('Digite um e-mail válido.');
 
     const btn = document.getElementById('loginBtn');
     btn.disabled = true; btn.textContent = 'Entrando…';
@@ -146,6 +147,7 @@
     hideMessages();
     const email = document.getElementById('loginEmail').value.trim().toLowerCase();
     if (!email) return showError('Preencha seu e-mail primeiro.');
+    if (!email.includes('@') || !email.includes('.')) return showError('Digite um e-mail válido para receber o link.');
 
     const { error } = await sb.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + '/set-password.html',
