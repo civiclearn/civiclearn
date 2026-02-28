@@ -322,12 +322,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     simNum = init.simNum;
     elemKey = init.elemKey;
 
-    // Create Supabase client for direct Storage uploads
-    sbClient = window.supabase.createClient(CELPE.SUPABASE_URL, CELPE.SUPABASE_ANON_KEY);
-    // Set the user's session so RLS works
-    if (init.session) {
-      await sbClient.auth.setSession(init.session);
-    }
+    // Create Supabase client for direct Storage uploads (RLS-enabled)
+    // Auth session is shared automatically via localStorage
+    sbClient = window.supabase.createClient(
+      'https://htgliokekeaovdiafrgs.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs'
+    );
 
     document.getElementById('backLink').href =
       '/celpe/dashboard/exam.html?sim=' + simId + '&attempt=' + attemptId;
