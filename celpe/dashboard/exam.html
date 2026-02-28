@@ -237,19 +237,6 @@
     <div class="section-label">🎙️ Parte Oral</div>
     <div id="oralCards"></div>
   </div>
-
-  <!-- ALL SUBMITTED BANNER -->
-  <div id="allSubmittedBanner" style="display:none;">
-    <div style="background:var(--surface);border:2px solid var(--green);border-radius:16px;padding:32px;text-align:center;margin-top:8px;">
-      <div style="font-size:2rem;margin-bottom:12px;">⏳</div>
-      <div style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;margin-bottom:8px;">Todas as tarefas foram entregues!</div>
-      <p style="font-size:0.88rem;color:var(--muted);line-height:1.6;margin-bottom:20px;">
-        A avaliação por IA está em andamento. Os resultados aparecerão automaticamente quando estiverem prontos.
-      </p>
-      <div class="loading-spinner" style="margin:0 auto 16px;border-top-color:var(--green);"></div>
-      <a href="/celpe/dashboard/index.html" style="color:var(--green);font-weight:600;font-size:0.85rem;">← Voltar às simulações</a>
-    </div>
-  </div>
 </div>
 
 <!-- RESULTS -->
@@ -330,92 +317,128 @@ document.addEventListener('DOMContentLoaded', async () => {
 // REFRESH HUB
 // ═══════════════════════════════════════════════════════════════════
 async function refreshHub() {
-  const data = await CELPE.hydrateData(user.id, attemptId, true);
-  if (!data) return;
+  try {
+    const data = await CELPE.hydrateData(user.id, attemptId, true);
+    if (!data) { console.warn('[exam] hydrateData returned null'); return; }
 
-  const attempt = (data.attempts || []).find(a => a.id === attemptId);
-  if (!attempt) return;
+    const attempt = (data.attempts || []).find(a => a.id === attemptId);
+    if (!attempt) { console.warn('[exam] attempt not found:', attemptId); return; }
 
-  const elems = attempt.elements || [];
+    const elems = attempt.elements || [];
 
-  // Check if complete
-  if (attempt.status === 'complete') {
-    showResults(attempt, elems);
-    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-    return;
-  }
+    // Check if complete
+    if (attempt.status === 'complete') {
+      try {
+        showResults(attempt, elems);
+      } catch (err) {
+        console.error('[exam] showResults crashed:', err);
+        // Fallback: show a simple completion message
+        document.getElementById('hubPhase').style.display = 'none';
+        document.getElementById('resultsSection').style.display = '';
+        document.getElementById('resultsCard').innerHTML = `
+          <div style="text-align:center;padding:40px 20px;">
+            <div style="font-size:2rem;">📋</div>
+            <h2 style="margin:12px 0 8px;">Simulação concluída</h2>
+            <p style="color:var(--muted);">Nota escrita: ${attempt.grade_escrita ?? 0}/25 · Nota oral: ${attempt.grade_oral ?? 0}/25</p>
+            <p style="color:var(--muted);margin-top:8px;">Nível: ${attempt.certification_level || 'Sem Certificação'}</p>
+            <a href="/celpe/dashboard/index.html" style="display:inline-block;margin-top:18px;padding:13px 32px;background:var(--green);color:#fff;border-radius:10px;text-decoration:none;font-weight:600;">← Voltar às simulações</a>
+          </div>`;
+      }
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+      return;
+    }
 
-  // Build progress strip
-  const strip = document.getElementById('progressStrip');
-  strip.innerHTML = ELEMENTS.map(def => {
-    const el = elems.find(e => e.element_key === def.key);
-    let cls = '';
-    if (!el || el.submission_status === 'not_started') cls = '';
-    else if (el.submission_status === 'skipped') cls = 'skipped';
-    else if (el.eval_status === 'complete') cls = 'done';
-    else if (el.submission_status === 'submitted') cls = 'active';
-    return `<div class="ps-dot ${cls}"></div>`;
-  }).join('');
+    // Check if ALL elements are submitted or skipped (waiting for processing)
+    const allDone = elems.length >= 5 && elems.every(el =>
+      el.submission_status === 'submitted' || el.submission_status === 'skipped'
+    );
 
-  // Build element cards
-  const escritaHtml = [];
-  const oralHtml = [];
+    // Build progress strip
+    const strip = document.getElementById('progressStrip');
+    strip.innerHTML = ELEMENTS.map(def => {
+      const el = elems.find(e => e.element_key === def.key);
+      let cls = '';
+      if (!el || el.submission_status === 'not_started') cls = '';
+      else if (el.submission_status === 'skipped') cls = 'skipped';
+      else if (el.eval_status === 'complete') cls = 'done';
+      else if (el.submission_status === 'submitted') cls = 'active';
+      return `<div class="ps-dot ${cls}"></div>`;
+    }).join('');
 
-  ELEMENTS.forEach(def => {
-    const el = elems.find(e => e.element_key === def.key);
-    const status = el?.submission_status || 'not_started';
-    const evalSt = el?.eval_status || 'pending';
+    // If all submitted/skipped, show waiting banner and poll faster
+    if (allDone) {
+      document.getElementById('hubPhase').style.display = '';
+      document.getElementById('resultsSection').style.display = 'none';
+      const pendingEvals = elems.filter(el =>
+        el.submission_status === 'submitted' && el.eval_status !== 'complete' && el.eval_status !== 'skipped'
+      );
 
-    let badge, locked = false;
-    if (status === 'not_started')       badge = '<span class="ec-badge todo">Pendente</span>';
-    else if (status === 'skipped')      badge = '<span class="ec-badge skipped">Pulada</span>';
-    else if (evalSt === 'complete')     badge = '<span class="ec-badge done">✓ Avaliada</span>';
-    else if (evalSt === 'failed')       badge = '<span class="ec-badge failed">Erro</span>';
-    else if (evalSt === 'evaluating')   badge = '<span class="ec-badge eval">Avaliando…</span>';
-    else                                badge = '<span class="ec-badge eval">Processando…</span>';
+      document.getElementById('escritaCards').innerHTML = '';
+      document.getElementById('oralCards').innerHTML = '';
 
-    // Build URL with query params
-    let href = `${def.page}?sim=${simId}&attempt=${attemptId}&key=${def.key}`;
+      // Show a waiting banner in the hub
+      document.getElementById('hubTitle').textContent = 'Processando resultados…';
+      document.getElementById('escritaCards').innerHTML = `
+        <div style="text-align:center;padding:40px 20px;">
+          <div class="loading-spinner" style="width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--green);animation:spin 0.8s linear infinite;margin:0 auto 16px;"></div>
+          <p style="font-weight:600;color:var(--navy);">Todas as partes foram enviadas!</p>
+          <p style="color:var(--muted);font-size:0.85rem;margin-top:6px;">
+            ${pendingEvals.length > 0
+              ? `Aguarde a avaliação de ${pendingEvals.length} parte(s)…`
+              : 'Calculando seu resultado final…'}
+          </p>
+        </div>`;
 
-    const card = `
-      <div class="elem-card ${locked ? 'locked' : ''}" onclick="window.location.href='${href}'">
-        <div class="ec-left">
-          <div class="ec-icon">${def.icon}</div>
-          <div class="ec-info">
-            <div class="ec-title">${def.title}</div>
-            <div class="ec-desc">${def.desc} · ${def.timer}</div>
+      // Poll faster when waiting for results
+      if (pollTimer) clearInterval(pollTimer);
+      pollTimer = setInterval(refreshHub, 5000);
+      return;
+    }
+
+    // Normal hub rendering
+    document.getElementById('hubTitle').textContent = 'Painel do Exame';
+
+    // Build element cards
+    const escritaHtml = [];
+    const oralHtml = [];
+
+    ELEMENTS.forEach(def => {
+      const el = elems.find(e => e.element_key === def.key);
+      const status = el?.submission_status || 'not_started';
+      const evalSt = el?.eval_status || 'pending';
+
+      let badge, locked = false;
+      if (status === 'not_started')       badge = '<span class="ec-badge todo">Pendente</span>';
+      else if (status === 'skipped')      badge = '<span class="ec-badge skipped">Pulada</span>';
+      else if (evalSt === 'complete')     badge = '<span class="ec-badge done">✓ Avaliada</span>';
+      else if (evalSt === 'failed')       badge = '<span class="ec-badge failed">Erro</span>';
+      else if (evalSt === 'evaluating')   badge = '<span class="ec-badge eval">Avaliando…</span>';
+      else                                badge = '<span class="ec-badge eval">Processando…</span>';
+
+      // Build URL with query params
+      let href = `${def.page}?sim=${simId}&attempt=${attemptId}&key=${def.key}`;
+
+      const card = `
+        <div class="elem-card ${locked ? 'locked' : ''}" onclick="window.location.href='${href}'">
+          <div class="ec-left">
+            <div class="ec-icon">${def.icon}</div>
+            <div class="ec-info">
+              <div class="ec-title">${def.title}</div>
+              <div class="ec-desc">${def.desc} · ${def.timer}</div>
+            </div>
           </div>
-        </div>
-        ${badge}
-      </div>`;
+          ${badge}
+        </div>`;
 
-    if (def.section === 'escrita') escritaHtml.push(card);
-    else oralHtml.push(card);
-  });
+      if (def.section === 'escrita') escritaHtml.push(card);
+      else oralHtml.push(card);
+    });
 
-  document.getElementById('escritaCards').innerHTML = escritaHtml.join('');
-  document.getElementById('oralCards').innerHTML = oralHtml.join('');
+    document.getElementById('escritaCards').innerHTML = escritaHtml.join('');
+    document.getElementById('oralCards').innerHTML = oralHtml.join('');
 
-  // Check if all elements are submitted/skipped (none pending)
-  const allDone = ELEMENTS.every(def => {
-    const el = elems.find(e => e.element_key === def.key);
-    return el && (el.submission_status === 'submitted' || el.submission_status === 'skipped');
-  });
-  const allEvaluated = allDone && elems.every(el =>
-    el.eval_status === 'complete' || el.eval_status === 'failed' || el.submission_status === 'skipped'
-  );
-
-  const banner = document.getElementById('allSubmittedBanner');
-  if (allDone && !allEvaluated) {
-    banner.style.display = '';
-    // Poll faster when waiting for evaluations
-    if (pollTimer) { clearInterval(pollTimer); pollTimer = setInterval(refreshHub, 8000); }
-  } else if (allEvaluated && attempt.status !== 'complete') {
-    // All evaluated but attempt not yet marked complete — show banner, poll fast
-    banner.style.display = '';
-    if (pollTimer) { clearInterval(pollTimer); pollTimer = setInterval(refreshHub, 5000); }
-  } else {
-    banner.style.display = 'none';
+  } catch (err) {
+    console.error('[exam] refreshHub error:', err);
   }
 }
 
@@ -423,35 +446,34 @@ async function refreshHub() {
 // RESULTS
 // ═══════════════════════════════════════════════════════════════════
 function showResults(attempt, elems) {
-  try {
-    document.getElementById('hubPhase').style.display = 'none';
-    document.getElementById('resultsSection').style.display = '';
+  document.getElementById('hubPhase').style.display = 'none';
+  document.getElementById('resultsSection').style.display = '';
 
-    const level = attempt.certification_level || 'Resultado';
-    const isPass = level !== 'Sem Certificação' && level !== '—' && level !== 'Resultado';
+  const level = attempt.certification_level || '—';
+  const isPass = level !== 'Sem Certificação' && level !== '—';
 
-    document.getElementById('resultsCard').innerHTML = `
-      <div style="font-size:2rem;">${isPass ? '🎉' : '📋'}</div>
-      <div class="results-level ${isPass ? 'pass' : 'fail'}">${CELPE.escapeHtml(level)}</div>
-      <div style="font-size:0.85rem; color:var(--muted); margin-top:4px;">
-        ${isPass ? 'Parabéns! Você alcançou esse nível.' : 'Continue praticando para melhorar seu nível.'}
+  document.getElementById('resultsCard').innerHTML = `
+    <div style="font-size:2rem;">${isPass ? '🎉' : '📋'}</div>
+    <div class="results-level ${isPass ? 'pass' : 'fail'}">${CELPE.escapeHtml(level)}</div>
+    <div style="font-size:0.85rem; color:var(--muted); margin-top:4px;">
+      ${isPass ? 'Parabéns! Você alcançou esse nível.' : 'Continue praticando para melhorar seu nível.'}
+    </div>
+    <div class="results-scores">
+      <div class="rs-item">
+        <div class="rs-label">Escrita</div>
+        <div class="rs-value">${attempt.grade_escrita ?? '—'}<span style="font-size:0.7rem;color:var(--muted);">/25</span></div>
       </div>
-      <div class="results-scores">
-        <div class="rs-item">
-          <div class="rs-label">Escrita</div>
-          <div class="rs-value">${attempt.grade_escrita ?? '—'}<span style="font-size:0.7rem;color:var(--muted);">/25</span></div>
-        </div>
-        <div class="rs-item">
-          <div class="rs-label">Oral</div>
-          <div class="rs-value">${attempt.grade_oral ?? '—'}<span style="font-size:0.7rem;color:var(--muted);">/25</span></div>
-        </div>
-        <div class="rs-item">
-          <div class="rs-label">Geral</div>
-          <div class="rs-value">${attempt.grade_overall ?? '—'}<span style="font-size:0.7rem;color:var(--muted);">/25</span></div>
-        </div>
+      <div class="rs-item">
+        <div class="rs-label">Oral</div>
+        <div class="rs-value">${attempt.grade_oral ?? '—'}<span style="font-size:0.7rem;color:var(--muted);">/25</span></div>
       </div>
-      <a href="results.html?sim=${simId}&attempt=${attemptId}" style="display:block;width:100%;margin-top:18px;padding:13px;background:var(--green);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:600;text-align:center;text-decoration:none;">Ver resultados detalhados →</a>
-    `;
+      <div class="rs-item">
+        <div class="rs-label">Geral</div>
+        <div class="rs-value">${attempt.grade_overall ?? '—'}<span style="font-size:0.7rem;color:var(--muted);">/25</span></div>
+      </div>
+</div>
+    <a href="results.html?sim=${simId}&attempt=${attemptId}" style="display:block;width:100%;margin-top:18px;padding:13px;background:var(--green);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:600;text-align:center;text-decoration:none;">Ver resultados detalhados →</a>
+  `;
 
   // Element feedback details
   const detailsHtml = elems.map(el => {
@@ -516,20 +538,6 @@ function showResults(attempt, elems) {
   // Update progress strip to all done
   const strip = document.getElementById('progressStrip');
   strip.innerHTML = ELEMENTS.map(() => '<div class="ps-dot done"></div>').join('');
-
-  } catch (err) {
-    console.error('[showResults] Error:', err);
-    // Fallback: show a simple results page even if rendering fails
-    document.getElementById('hubPhase').style.display = 'none';
-    document.getElementById('resultsSection').style.display = '';
-    document.getElementById('resultsCard').innerHTML = `
-      <div style="font-size:2rem;">📋</div>
-      <div style="font-family:'Fraunces',serif;font-size:1.3rem;font-weight:700;margin:12px 0;">Simulação concluída</div>
-      <p style="font-size:0.88rem;color:var(--muted);margin-bottom:20px;">Seus resultados estão disponíveis.</p>
-      <a href="results.html?sim=${simId}&attempt=${attemptId}" style="display:inline-block;padding:13px 28px;background:var(--green);color:#fff;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:600;text-decoration:none;">Ver resultados detalhados →</a>
-    `;
-    document.getElementById('elementResults').innerHTML = '';
-  }
 }
 </script>
 </body>

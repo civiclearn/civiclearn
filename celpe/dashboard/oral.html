@@ -208,7 +208,7 @@
     <div class="transition-card">
       <div class="loading-spinner" style="margin:0 auto 16px"></div>
       <h2>Enviando suas gravações…</h2>
-      <p>Isso pode levar alguns segundos.</p>
+      <p id="submitProgress">Isso pode levar alguns segundos.</p>
     </div>
   </div>
 
@@ -689,6 +689,17 @@ async function submitAll() {
   showPhase('phaseSubmitting');
   document.getElementById('phaseName').textContent = 'Enviando';
 
+  // Count total recordings for progress
+  var totalRecs = 0;
+  allSections.forEach(function(s) { totalRecs += s.recordings.length; });
+  var uploadedCount = 0;
+  var progressEl = document.getElementById('submitProgress');
+
+  // Timeout warning after 30s
+  var warnTimer = setTimeout(function() {
+    if (progressEl) progressEl.textContent = 'Isso está demorando mais que o esperado. Por favor, não feche a página.';
+  }, 30000);
+
   try {
     for (var s = 0; s < allSections.length; s++) {
       var sec = allSections[s];
@@ -697,10 +708,14 @@ async function submitAll() {
         var rec = sec.recordings[r];
         var prefix = sec.type === 'part1' ? 'part1' : ('ep' + (sec.epIndex + 1));
         var filename = prefix + '_turn' + (r + 1) + '.webm';
+        uploadedCount++;
+        if (progressEl) progressEl.textContent = 'Enviando gravação ' + uploadedCount + ' de ' + totalRecs + '…';
         var result = await CELPE.uploadAudio(attemptId, filename, rec.blob);
         sec.audioPaths.push({ path: result.path, duration: rec.duration, turn: r + 1 });
       }
     }
+
+    if (progressEl) progressEl.textContent = 'Finalizando envio…';
 
     var allConvParts = [];
     for (var s2 = 0; s2 < allSections.length; s2++) {
@@ -753,10 +768,12 @@ async function submitAll() {
 
     await CELPE.submit({ attemptId: attemptId, elemKey: elemKey, text: transcript.trim(), json: responseJson });
 
+    clearTimeout(warnTimer);
     submitted = true;
     document.getElementById('phaseName').textContent = 'Concluído';
     showPhase('phaseDone');
   } catch (err) {
+    clearTimeout(warnTimer);
     console.error('[oral] submit error:', err);
     CELPE.toast('Erro ao enviar. Tente novamente.');
     showPhase('phaseDone');
