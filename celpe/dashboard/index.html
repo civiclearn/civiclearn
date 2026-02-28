@@ -10,183 +10,112 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-
   <style>
     :root {
-      --green:     #009c3b;
-      --green-dim: #e6f5ec;
-      --yellow:    #ffdf00;
-      --blue:      #002776;
-      --navy:      #0f172a;
-      --slate:     #334155;
-      --muted:     #64748b;
-      --border:    #e2e8f0;
-      --surface:   #ffffff;
-      --bg:        #f8f7f4;
-      --pass-bg:   #dcfce7;
-      --pass-fg:   #166534;
-      --fail-bg:   #fee2e2;
-      --fail-fg:   #991b1b;
-      --idle-bg:   #f1f5f9;
-      --idle-fg:   #475569;
+      --green:#009c3b; --green-dim:#e6f5ec; --yellow:#ffdf00; --blue:#002776;
+      --navy:#0f172a; --slate:#334155; --muted:#64748b; --border:#e2e8f0;
+      --surface:#ffffff; --bg:#f8f7f4;
+      --pass:#166534; --pass-bg:#dcfce7;
+      --fail:#991b1b; --fail-bg:#fee2e2;
+      --amber:#92400e; --amber-bg:#fef9c3;
     }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: "DM Sans", system-ui, sans-serif;
-      background: var(--bg); color: var(--navy);
-      min-height: 100vh;
-    }
+    /* TOPBAR */
+    .topbar{background:var(--navy);border-bottom:3px solid var(--green);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .topbar-brand{display:flex;align-items:center;gap:14px}
+    .topbar-flag{width:28px;height:20px;background:var(--green);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0}
+    .topbar-flag::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:16px;height:10px;background:var(--yellow);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%)}
+    .topbar-flag::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:6px;height:6px;border-radius:50%;background:var(--blue)}
+    .brand-text{display:flex;flex-direction:column;line-height:1.1}
+    .brand-title{font-family:"Fraunces",serif;font-size:1rem;font-weight:600;color:#fff}
+    .brand-sub{font-size:0.72rem;color:#64748b}
+    .topbar-right{display:flex;align-items:center;gap:12px}
+    .user-pill{background:#1e293b;border-radius:99px;padding:5px 14px;font-size:0.75rem;color:#94a3b8}
+    .signout-link{background:none;border:none;color:#64748b;font-size:0.75rem;cursor:pointer;font-family:inherit}
+    .signout-link:hover{color:#fff}
 
-    /* ─── TOPBAR ─────────────────────────────────────── */
-    .topbar {
-      background: var(--navy); border-bottom: 3px solid var(--green);
-      padding: 0 32px; height: 56px;
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 100;
-    }
-    .topbar-brand { display: flex; align-items: center; gap: 14px; }
-    .topbar-flag {
-      width: 28px; height: 20px; background: var(--green);
-      border-radius: 2px; position: relative; overflow: hidden; flex-shrink: 0;
-    }
-    .topbar-flag::before {
-      content: ''; position: absolute;
-      left: 50%; top: 50%; transform: translate(-50%,-50%);
-      width: 16px; height: 10px; background: var(--yellow);
-      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-    }
-    .topbar-flag::after {
-      content: ''; position: absolute;
-      left: 50%; top: 50%; transform: translate(-50%,-50%);
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--blue);
-    }
-    .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
-    .brand-title {
-      font-family: "Fraunces", serif; font-size: 1rem;
-      font-weight: 600; color: #fff; letter-spacing: 0.01em;
-    }
-    .brand-sub { font-size: 0.72rem; color: #64748b; }
-    .topbar-right { display: flex; align-items: center; gap: 12px; }
-    .user-pill {
-      background: #1e293b; border-radius: 99px;
-      padding: 5px 14px; font-size: 0.75rem; color: #94a3b8;
-    }
-    .signout-link {
-      background: none; border: none; color: #64748b;
-      font-size: 0.75rem; cursor: pointer; font-family: inherit;
-    }
-    .signout-link:hover { color: #fff; }
+    /* LOADING */
+    #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity 0.35s}
+    #loading-overlay.hidden{opacity:0;pointer-events:none}
+    .loading-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--green);animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* ─── LOADING ─────────────────────────────────────── */
-    #loading-overlay {
-      position: fixed; inset: 0; background: var(--bg);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 16px;
-      z-index: 9999; transition: opacity 0.35s;
-    }
-    #loading-overlay.hidden { opacity: 0; pointer-events: none; }
-    .loading-spinner {
-      width: 32px; height: 32px; border-radius: 50%;
-      border: 3px solid var(--border); border-top-color: var(--green);
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { font-size: 0.9rem; color: var(--muted); }
+    /* DASHBOARD LAYOUT */
+    .dashboard-wrap{max-width:1040px;margin:0 auto;padding:32px 28px 80px}
+    .dashboard-header{margin-bottom:28px}
+    .dashboard-header h1{font-family:"Fraunces",serif;font-size:1.5rem;font-weight:700;margin-bottom:4px}
+    .dashboard-header p{font-size:0.88rem;color:var(--muted)}
 
-    /* ─── HERO ────────────────────────────────────────── */
-    .hero {
-      max-width: 860px; margin: 0 auto;
-      padding: 56px 28px 32px;
-    }
-    .hero-eyebrow {
-      font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.1em; color: var(--green);
-      display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
-    }
-    .hero-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
-    .hero h1 {
-      font-family: "Fraunces", serif;
-      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
-      font-weight: 700; letter-spacing: -0.03em; line-height: 1.1;
-      margin-bottom: 10px;
-    }
-    .hero-subtitle {
-      font-size: 0.95rem; color: var(--slate); line-height: 1.6; max-width: 600px;
-    }
+    /* STAT CARDS */
+    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+    .stat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:18px 20px}
+    .stat-label{font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:8px}
+    .stat-value{font-family:"Fraunces",serif;font-size:1.6rem;font-weight:700;line-height:1}
+    .stat-sub{font-size:0.78rem;color:var(--muted);margin-top:6px}
+    .stat-progress{height:4px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden}
+    .stat-progress-fill{height:100%;background:var(--green);border-radius:2px;transition:width 0.6s ease}
+    .stat-card select{width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:0.8rem;color:var(--navy);margin-top:8px;background:var(--bg)}
+    .custom-date-row{display:none;margin-top:6px;gap:6px;align-items:center}
+    .custom-date-row.visible{display:flex}
+    .custom-date-row input{flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:0.8rem}
+    .custom-date-row button{padding:5px 12px;border:none;border-radius:6px;background:var(--green);color:#fff;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit}
 
-    /* ─── SIM CARDS ───────────────────────────────────── */
-    .sim-grid {
-      max-width: 860px; margin: 0 auto;
-      padding: 0 28px 80px;
-      display: grid; grid-template-columns: 1fr; gap: 20px;
-    }
-    .sim-card {
-      background: var(--surface); border: 2px solid var(--border);
-      border-radius: 16px; overflow: hidden;
-      transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s;
-    }
-    .sim-card:hover {
-      border-color: #94a3b8;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-      transform: translateY(-2px);
-    }
-    .sc-header {
-      padding: 20px 24px 16px;
-      display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
-    }
-    .sc-num {
-      background: var(--navy); color: var(--yellow);
-      border-radius: 8px; padding: 5px 12px;
-      font-size: 0.72rem; font-weight: 700; flex-shrink: 0;
-    }
-    .sc-status {
-      border-radius: 99px; padding: 4px 12px;
-      font-size: 0.7rem; font-weight: 600;
-    }
-    .sc-status.idle      { background: var(--idle-bg); color: var(--idle-fg); }
-    .sc-status.progress  { background: #fef9c3; color: #854d0e; }
-    .sc-status.complete  { background: var(--pass-bg); color: var(--pass-fg); }
-    .sc-body { padding: 0 24px 20px; }
-    .sc-title {
-      font-family: "Fraunces", serif; font-size: 1.15rem;
-      font-weight: 700; margin-bottom: 6px;
-    }
-    .sc-desc { font-size: 0.84rem; color: var(--muted); line-height: 1.55; }
-    .sc-footer {
-      padding: 14px 24px; border-top: 1px solid var(--border);
-      background: #f8fafc;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .sc-meta { font-size: 0.75rem; color: var(--muted); }
-    .sc-btn {
-      background: var(--green); color: white; border: none;
-      border-radius: 8px; padding: 9px 22px;
-      font-family: "DM Sans", sans-serif; font-size: 0.83rem; font-weight: 600;
-      cursor: pointer; transition: opacity 0.15s; text-decoration: none;
-    }
-    .sc-btn:hover { opacity: 0.85; }
-    .sc-btn.resume { background: var(--navy); }
+    /* TABLE */
+    .table-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;overflow:hidden}
+    .table-title{padding:18px 22px 14px;font-family:"Fraunces",serif;font-size:1.05rem;font-weight:700;border-bottom:1px solid var(--border)}
+    .sim-table{width:100%;border-collapse:collapse;font-size:0.82rem}
+    .sim-table thead{background:#f8fafc}
+    .sim-table th{padding:10px 12px;text-align:center;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);border-bottom:1px solid var(--border)}
+    .sim-table th:first-child{text-align:left;padding-left:22px}
+    .sim-table th:last-child{text-align:right;padding-right:22px}
+    .sim-table td{padding:12px 12px;text-align:center;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+    .sim-table td:first-child{text-align:left;padding-left:22px}
+    .sim-table td:last-child{text-align:right;padding-right:22px}
+    .sim-table tbody tr{transition:background 0.1s}
+    .sim-table tbody tr:hover{background:#fafaf8}
+    .sim-table tbody tr:last-child td{border-bottom:none}
 
-    /* ─── RESULT ROW ──────────────────────────────────── */
-    .sc-result {
-      padding: 12px 24px; border-top: 1px solid var(--border);
-      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-    }
-    .result-level {
-      font-weight: 700; font-size: 0.85rem;
-      padding: 4px 12px; border-radius: 8px;
-    }
-    .result-level.pass { background: var(--pass-bg); color: var(--pass-fg); }
-    .result-level.fail { background: var(--fail-bg); color: var(--fail-fg); }
-    .result-scores { font-size: 0.78rem; color: var(--muted); }
+    /* Sim number + title */
+    .sim-id{font-weight:700;color:var(--navy);display:block;font-size:0.84rem}
+    .sim-title{font-size:0.72rem;color:var(--muted);display:block;margin-top:2px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-    @media (max-width: 600px) {
-      .hero { padding: 36px 16px 24px; }
-      .sim-grid { padding: 0 16px 60px; }
-      .topbar { padding: 0 16px; }
-      .topbar-right { gap: 8px; }
+    /* Status badges */
+    .badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:0.68rem;font-weight:600;white-space:nowrap}
+    .badge-idle{background:#f1f5f9;color:#475569}
+    .badge-progress{background:var(--amber-bg);color:var(--amber)}
+    .badge-complete{background:var(--pass-bg);color:var(--pass)}
+
+    /* Score cells */
+    .score-cell{font-weight:600;font-variant-numeric:tabular-nums}
+    .score-cell.na{color:var(--border);font-weight:400}
+    .score-cell.low{color:var(--fail)}
+    .score-cell.mid{color:var(--amber)}
+    .score-cell.high{color:var(--pass)}
+
+    /* Level badge */
+    .level-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:0.72rem;font-weight:700;white-space:nowrap}
+    .level-pass{background:var(--pass-bg);color:var(--pass)}
+    .level-fail{background:var(--fail-bg);color:var(--fail)}
+
+    /* Action buttons */
+    .table-btn{display:inline-block;padding:6px 16px;border-radius:6px;font-size:0.78rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;font-family:inherit;white-space:nowrap;transition:opacity 0.15s}
+    .table-btn:hover{opacity:0.85}
+    .table-btn-start{background:var(--green);color:#fff}
+    .table-btn-resume{background:var(--navy);color:#fff}
+    .table-btn-results{background:#f1f5f9;color:var(--navy);border:1px solid var(--border)}
+
+    @media (max-width:768px) {
+      .dashboard-wrap{padding:20px 16px 60px}
+      .stat-grid{grid-template-columns:1fr}
+      .table-card{border-radius:10px}
+      .sim-table{font-size:0.78rem}
+      .sim-table .hide-mobile{display:none}
+      .sim-table th:first-child,.sim-table td:first-child{padding-left:14px}
+      .sim-table th:last-child,.sim-table td:last-child{padding-right:14px}
+      .sim-title{display:none}
+      .topbar{padding:0 16px}
     }
   </style>
 </head>
@@ -194,10 +123,9 @@
 
 <div id="loading-overlay">
   <div class="loading-spinner"></div>
-  <div class="loading-text">Carregando…</div>
+  <div style="font-size:0.85rem;color:var(--muted)">Carregando…</div>
 </div>
 
-<!-- TOPBAR -->
 <div class="topbar">
   <div class="topbar-brand">
     <div class="topbar-flag"></div>
@@ -212,145 +140,277 @@
   </div>
 </div>
 
-<!-- HERO -->
-<div class="hero">
-  <div class="hero-eyebrow">
-    <div class="hero-dot"></div>
-    SIMULAÇÕES DISPONÍVEIS
-  </div>
-  <h1>Pratique para o CELPE-BRAS</h1>
-  <p class="hero-subtitle">
-    Cada simulação inclui a Parte Escrita (4 tarefas) e a Parte Oral, 
-    com avaliação por IA usando os critérios oficiais do exame.
-  </p>
-</div>
+<div class="dashboard-wrap">
 
-<!-- SIM CARDS -->
-<div class="sim-grid" id="simGrid">
-  <!-- Populated by JS -->
+  <div class="dashboard-header">
+    <h1>Painel de Simulações</h1>
+    <p>Pratique para o CELPE-BRAS com avaliação por IA usando os critérios oficiais.</p>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-label">Simulações concluídas</div>
+      <div class="stat-value" id="doneSims">0/10</div>
+      <div class="stat-progress"><div class="stat-progress-fill" id="progressBar" style="width:0%"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Último resultado</div>
+      <div class="stat-value" id="lastResult">—</div>
+      <div class="stat-sub" id="lastResultSub">Nenhuma simulação concluída</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Próximo exame CELPE-BRAS</div>
+      <div class="stat-value" id="examCountdown">—</div>
+      <select id="examDateSelector" onchange="handleDateSelection()">
+        <option value="">Escolha a data do exame…</option>
+        <option value="2026-04-06">6 de abril, 2026</option>
+        <option value="2026-08-23">23 de agosto, 2026</option>
+        <option value="2026-10-25">25 de outubro, 2026</option>
+        <option value="custom">📅 Outra data…</option>
+      </select>
+      <div class="custom-date-row" id="customDateRow">
+        <input type="date" id="customDateInput" min="2026-01-01">
+        <button onclick="applyCustomDate()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIMULATION TABLE -->
+  <div class="table-card">
+    <div class="table-title">Simulações</div>
+    <table class="sim-table">
+      <thead>
+        <tr>
+          <th>Simulação</th>
+          <th>Estado</th>
+          <th class="hide-mobile">T1</th>
+          <th class="hide-mobile">T2</th>
+          <th class="hide-mobile">T3</th>
+          <th class="hide-mobile">T4</th>
+          <th class="hide-mobile">Oral</th>
+          <th>Nível</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="simTableBody">
+      </tbody>
+    </table>
+  </div>
+
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-  const { user } = await CELPE.init();
-  document.getElementById('userEmail').textContent = user.email;
+// ═══════════════════════════════════════════════════════════════
+// SIMULATION DEFINITIONS
+// ═══════════════════════════════════════════════════════════════
+var SIMS = [
+  { id:'sim01', title:'Comunidade e Meio Ambiente' },
+  { id:'sim02', title:'Urbanismo e Sustentabilidade' },
+  { id:'sim03', title:'Inovação e Soluções Urbanas' },
+  { id:'sim04', title:'Saúde e Bem-estar' },
+  { id:'sim05', title:'Desigualdade e Inclusão' },
+  { id:'sim06', title:'Educação e Desenvolvimento Local' },
+  { id:'sim07', title:'Trabalho e Economia' },
+  { id:'sim08', title:'Meio Ambiente e Saúde' },
+  { id:'sim09', title:'Ciência e Conservação' },
+  { id:'sim10', title:'Território e Identidade' },
+];
 
-  // Fetch hydrate data
-  const data = await CELPE.hydrateData(user.id, 'any');
-  const attempts = data?.attempts || [];
+var ELEM_KEYS = ['tarefa1','tarefa2','tarefa3','tarefa4','oral'];
 
-  // Simulation definitions
-  const SIMS = [
-    { id: 'sim01', title: 'Simulação 1 — Comunidade e Meio Ambiente',
-      desc: 'Horta Girassol • Catadores do Rio • ColheDireto • Livro no Barco + 20 Elementos Provocadores',
-      meta: '4 tarefas escritas + parte oral' },
-    { id: 'sim02', title: 'Simulação 2 — Urbanismo e Sustentabilidade',
-      desc: 'Parque Canela de Ema • Ponto de Ônibus de Bambu • Bike Solidária • Telhados Verdes + 20 EPs',
-      meta: '4 tarefas escritas + parte oral' },
-    { id: 'sim03', title: 'Simulação 3 — Inovação e Soluções Urbanas',
-      desc: 'Napraia Sustentável • Mobilidade Fortaleza • VerdeVivo • TrabalhaJunto + 20 EPs',
-      meta: '4 tarefas escritas + parte oral' },
-    { id: 'sim04', title: 'Simulação 4 — Saúde e Bem-estar',
-      desc: 'UnB Disciplina Felicidade • Cooperativa Planaltina • MenteCalma • Academias ao Ar Livre + 20 EPs',
-      meta: '4 tarefas escritas + parte oral' },
-    { id: 'sim05', title: 'Simulação 5 — Desigualdade e Inclusão',
-      desc: 'Calor Desigual no Rio • Inclusão Digital Idosos • Acolher e Aprender • ConectAmazônia + 20 EPs',
-      meta: '4 tarefas escritas + parte oral' },
-    { id: 'sim06', title: 'Simulação 6 — Educação e Desenvolvimento Local',
-      desc: 'Agroindústria Caruaru • Analfabetismo no Brasil • Horta na Escola • Conecta Melhor Idade + 20 EPs',
-      meta: '4 tarefas escritas + parte oral' },
-    { id: 'sim07', title: 'Simulação 7 — Trabalho e Economia',
-      desc: 'IA e Mercado de Trabalho • Café Orgânico Campinas • Entregadores de App • Banco de Tempo + 20 EPs',
-      meta: '4 tarefas escritas + parte oral' },
-    { id: 'sim08', title: 'Simulação 8 — Meio Ambiente e Saúde',
-      desc: 'Império Colonial (Saúde Mental) • Rios Urbanos do Rio • Compostagem Porto Alegre • Recife Permeável + 20 EPs',
-      meta: '4 tarefas escritas + parte oral' },
-    { id: 'sim09', title: 'Simulação 9 — Ciência e Conservação',
-      desc: 'Vacina Dengue Butantan • Refauna Tijuca • Poliniza Brasil • Guardiãs de Sementes + 20 EPs',
-      meta: '4 tarefas escritas + parte oral' },
-    { id: 'sim10', title: 'Simulação 10 — Território e Identidade',
-      desc: 'Desertificação Nordeste • Indígenas Urbanos • Rádio Quilombo • Museu da Memória + 20 EPs',
-      meta: '4 tarefas escritas + parte oral' },
-  ];
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async function() {
+  var ctx = await CELPE.init();
+  document.getElementById('userEmail').textContent = ctx.user.email;
 
-  const grid = document.getElementById('simGrid');
+  var data = await CELPE.hydrateData(ctx.user.id, 'any');
+  var attempts = (data && data.attempts) || [];
 
-  SIMS.forEach(sim => {
-    // Find attempts for this simulation
-    const simAttempts = attempts.filter(a => a.simulation_id === sim.id);
-    const latest = simAttempts[0]; // hydrate returns newest first
-
-    let statusHtml = '<span class="sc-status idle">Não iniciada</span>';
-    let footerHtml = '';
-    let resultHtml = '';
-
-    if (latest) {
-      if (latest.status === 'complete') {
-        statusHtml = '<span class="sc-status complete">Concluída</span>';
-        const level = latest.certification_level || latest.grade_overall || '—';
-        const isPass = level !== 'Sem Certificação' && level !== '—';
-        resultHtml = `
-          <div class="sc-result">
-            <span class="result-level ${isPass ? 'pass' : 'fail'}">${CELPE.escapeHtml(String(level))}</span>
-            <span class="result-scores">
-              Escrita: ${latest.grade_escrita ?? '—'}/25 · 
-              Oral: ${latest.grade_oral ?? '—'}/25 · 
-              Geral: ${latest.grade_overall ?? '—'}/25
-            </span>
-          </div>`;
-        footerHtml = `
-          <span class="sc-meta">Concluída</span>
-          <a class="sc-btn" href="/celpe/dashboard/results.html?sim=${sim.id}&attempt=${latest.id}">Ver resultados</a>`;
-      } else {
-        statusHtml = '<span class="sc-status progress">Em andamento</span>';
-        footerHtml = `
-          <span class="sc-meta">Continuar de onde parou</span>
-          <a class="sc-btn resume" href="/celpe/dashboard/exam.html?sim=${sim.id}&attempt=${latest.id}">Continuar</a>`;
-      }
-    } else {
-      footerHtml = `
-        <span class="sc-meta">~3h30 no total</span>
-        <button class="sc-btn" onclick="startSim('${sim.id}')">Começar simulação</button>`;
-    }
-
-    grid.innerHTML += `
-      <div class="sim-card">
-        <div class="sc-header">
-          <span class="sc-num">${sim.id.replace('sim', 'SIM #')}</span>
-          ${statusHtml}
-        </div>
-        <div class="sc-body">
-          <div class="sc-title">${sim.title}</div>
-          <div class="sc-desc">${sim.desc}</div>
-        </div>
-        ${resultHtml}
-        <div class="sc-footer">${footerHtml}</div>
-      </div>`;
-  });
-
+  renderStats(attempts);
+  renderTable(attempts);
+  initCountdown();
   CELPE.hideLoading();
 });
 
-async function startSim(simId) {
-  const btn = event.target;
+// ═══════════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════════
+function renderStats(attempts) {
+  var completed = attempts.filter(function(a) { return a.status === 'complete'; });
+  var count = completed.length;
+
+  document.getElementById('doneSims').textContent = count + '/10';
+  document.getElementById('progressBar').style.width = (count / 10 * 100) + '%';
+
+  if (count > 0) {
+    // Find the most recent completed attempt
+    var latest = completed.sort(function(a, b) {
+      return new Date(b.completed_at || b.updated_at) - new Date(a.completed_at || a.updated_at);
+    })[0];
+    var level = latest.certification_level || '—';
+    document.getElementById('lastResult').textContent = level;
+    document.getElementById('lastResultSub').textContent =
+      'Escrita ' + (latest.grade_escrita || '—') + ' · Oral ' + (latest.grade_oral || '—') + ' · Geral ' + (latest.grade_overall || '—') + '/25';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABLE
+// ═══════════════════════════════════════════════════════════════
+function renderTable(attempts) {
+  var tbody = document.getElementById('simTableBody');
+  var html = '';
+
+  SIMS.forEach(function(sim) {
+    var simAttempts = attempts.filter(function(a) { return a.simulation_id === sim.id; });
+    var latest = simAttempts[0];
+    var num = sim.id.replace('sim', '');
+
+    // Status
+    var status, statusCls;
+    if (!latest) {
+      status = 'Não iniciada'; statusCls = 'badge-idle';
+    } else if (latest.status === 'complete') {
+      status = 'Concluída'; statusCls = 'badge-complete';
+    } else {
+      status = 'Em andamento'; statusCls = 'badge-progress';
+    }
+
+    // Per-element scores
+    var elems = (latest && latest.elements) || [];
+    var elemMap = {};
+    elems.forEach(function(e) { elemMap[e.element_key] = e; });
+
+    var scoreCells = ELEM_KEYS.map(function(key) {
+      var el = elemMap[key];
+      if (!el || el.submission_status === 'not_started') {
+        return '<td class="score-cell na hide-mobile">—</td>';
+      }
+      if (el.submission_status === 'skipped') {
+        return '<td class="score-cell low hide-mobile">0</td>';
+      }
+      if (el.eval_status !== 'complete') {
+        return '<td class="score-cell hide-mobile" style="color:var(--muted)">⏳</td>';
+      }
+      var score = Number(el.ai_score_internal) || 0;
+      var cls = score >= 15 ? 'high' : score >= 10 ? 'mid' : 'low';
+      return '<td class="score-cell ' + cls + ' hide-mobile">' + score + '</td>';
+    }).join('');
+
+    // Level
+    var levelHtml;
+    if (latest && latest.status === 'complete') {
+      var level = latest.certification_level || '—';
+      var isPass = level !== 'Sem Certificação' && level !== '—';
+      levelHtml = '<span class="level-badge ' + (isPass ? 'level-pass' : 'level-fail') + '">' +
+        CELPE.escapeHtml(level) + '</span>';
+    } else {
+      levelHtml = '<span style="color:var(--border)">—</span>';
+    }
+
+    // Action
+    var actionHtml;
+    if (!latest) {
+      actionHtml = '<button class="table-btn table-btn-start" onclick="startSim(\'' + sim.id + '\',this)">Começar</button>';
+    } else if (latest.status === 'complete') {
+      actionHtml = '<a class="table-btn table-btn-results" href="/celpe/dashboard/results.html?sim=' + sim.id + '&attempt=' + latest.id + '">Resultados</a>';
+    } else {
+      actionHtml = '<a class="table-btn table-btn-resume" href="/celpe/dashboard/exam.html?sim=' + sim.id + '&attempt=' + latest.id + '">Continuar</a>';
+    }
+
+    html += '<tr>' +
+      '<td><span class="sim-id">' + num + '</span><span class="sim-title">' + CELPE.escapeHtml(sim.title) + '</span></td>' +
+      '<td><span class="badge ' + statusCls + '">' + status + '</span></td>' +
+      scoreCells +
+      '<td>' + levelHtml + '</td>' +
+      '<td>' + actionHtml + '</td>' +
+      '</tr>';
+  });
+
+  tbody.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// START SIM
+// ═══════════════════════════════════════════════════════════════
+async function startSim(simId, btn) {
   btn.disabled = true;
   btn.textContent = 'Criando…';
-
   try {
-    const result = await CELPE.apiFetch('celpe-submit-test', {
+    var result = await CELPE.apiFetch('celpe-submit-test', {
       simulation_id: simId,
       user_id: celpeAuth.userId,
     });
     if (result.success) {
-      window.location.href = `/celpe/dashboard/exam.html?sim=${simId}&attempt=${result.attempt.id}`;
+      window.location.href = '/celpe/dashboard/exam.html?sim=' + simId + '&attempt=' + result.attempt.id;
     } else {
-      throw new Error(result.error || 'Falha ao criar simulação');
+      throw new Error(result.error || 'Falha');
     }
   } catch (err) {
     console.error('Start sim error:', err);
     btn.disabled = false;
-    btn.textContent = 'Começar simulação';
+    btn.textContent = 'Começar';
     CELPE.toast('Erro ao criar simulação. Tente novamente.');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXAM COUNTDOWN
+// ═══════════════════════════════════════════════════════════════
+function initCountdown() {
+  var saved = localStorage.getItem('celpe_exam_date');
+  if (saved) {
+    var sel = document.getElementById('examDateSelector');
+    var found = false;
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === saved) { sel.selectedIndex = i; found = true; break; }
+    }
+    if (!found) {
+      sel.value = 'custom';
+      document.getElementById('customDateRow').classList.add('visible');
+      document.getElementById('customDateInput').value = saved;
+    }
+    updateCountdown(saved);
+  }
+}
+
+function handleDateSelection() {
+  var sel = document.getElementById('examDateSelector');
+  var val = sel.value;
+  document.getElementById('customDateRow').classList.remove('visible');
+  if (val === 'custom') {
+    document.getElementById('customDateRow').classList.add('visible');
+    return;
+  }
+  if (val) {
+    localStorage.setItem('celpe_exam_date', val);
+    updateCountdown(val);
+  } else {
+    localStorage.removeItem('celpe_exam_date');
+    document.getElementById('examCountdown').textContent = '—';
+  }
+}
+
+function applyCustomDate() {
+  var val = document.getElementById('customDateInput').value;
+  if (!val) return;
+  localStorage.setItem('celpe_exam_date', val);
+  updateCountdown(val);
+}
+
+function updateCountdown(dateStr) {
+  var target = new Date(dateStr + 'T00:00:00');
+  var now = new Date();
+  var diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+  if (diff < 0) {
+    document.getElementById('examCountdown').textContent = 'Já passou';
+  } else if (diff === 0) {
+    document.getElementById('examCountdown').textContent = 'Hoje!';
+  } else {
+    document.getElementById('examCountdown').textContent = diff + ' dias';
   }
 }
 </script>
