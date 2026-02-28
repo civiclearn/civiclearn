@@ -334,7 +334,7 @@ async function refreshHub() {
         console.error('[exam] showResults crashed:', err);
         // Fallback: show a simple completion message
         document.getElementById('hubPhase').style.display = 'none';
-        document.getElementById('resultsSection').style.display = '';
+        document.getElementById('resultsSection').style.display = 'block';
         document.getElementById('resultsCard').innerHTML = `
           <div style="text-align:center;padding:40px 20px;">
             <div style="font-size:2rem;">📋</div>
@@ -367,7 +367,7 @@ async function refreshHub() {
 
     // If all submitted/skipped, show waiting banner and poll faster
     if (allDone) {
-      document.getElementById('hubPhase').style.display = '';
+      document.getElementById('hubPhase').style.display = 'block';
       document.getElementById('resultsSection').style.display = 'none';
       const pendingEvals = elems.filter(el =>
         el.submission_status === 'submitted' && el.eval_status !== 'complete' && el.eval_status !== 'skipped'
@@ -447,7 +447,7 @@ async function refreshHub() {
 // ═══════════════════════════════════════════════════════════════════
 function showResults(attempt, elems) {
   document.getElementById('hubPhase').style.display = 'none';
-  document.getElementById('resultsSection').style.display = '';
+  document.getElementById('resultsSection').style.display = 'block';
 
   const level = attempt.certification_level || '—';
   const isPass = level !== 'Sem Certificação' && level !== '—';
