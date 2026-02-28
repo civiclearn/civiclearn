@@ -22,7 +22,6 @@
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
 
-    /* TOPBAR */
     .topbar{background:var(--navy);border-bottom:3px solid var(--green);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
     .topbar-left{display:flex;align-items:center;gap:12px}
     .back-link{color:#64748b;text-decoration:none;font-size:0.8rem;display:flex;align-items:center;gap:5px}
@@ -40,40 +39,33 @@
     .phase-pill{background:#1e293b;border-radius:99px;padding:4px 12px;font-size:0.75rem;color:#94a3b8}
     .phase-pill span{color:var(--yellow);font-weight:600}
 
-    /* LOADING */
     #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity 0.35s}
     #loading-overlay.hidden{opacity:0;pointer-events:none}
     .loading-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--green);animation:spin 0.8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* CONTAINER */
     .container{max-width:720px;margin:0 auto;padding:28px 24px 80px}
 
-    /* PHASE: SELECTION */
     .phase{display:none}
     .phase.active{display:block}
     .phase-title{font-family:"Fraunces",serif;font-size:1.3rem;font-weight:700;margin-bottom:6px}
     .phase-subtitle{font-size:0.85rem;color:var(--muted);margin-bottom:24px}
 
-    .ep-card{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;cursor:pointer;transition:all 0.15s}
-    .ep-card:hover{border-color:var(--green);box-shadow:0 2px 12px rgba(0,156,59,0.1)}
-    .ep-card.selected{border-color:var(--green);background:var(--green-dim)}
+    .progress-bar{display:flex;gap:4px;margin-bottom:24px}
+    .progress-seg{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background 0.3s}
+    .progress-seg.done{background:var(--green)}
+    .progress-seg.active{background:var(--yellow)}
+
+    .ep-card{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
     .ep-card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-    .ep-number{width:28px;height:28px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:var(--muted);flex-shrink:0}
-    .ep-card.selected .ep-number{background:var(--green);color:#fff}
+    .ep-number{width:28px;height:28px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#fff;flex-shrink:0}
     .ep-image-desc{font-size:0.78rem;color:var(--muted);font-style:italic}
-    .ep-img{width:100%;border-radius:10px;margin-bottom:12px;object-fit:cover;max-height:200px}
-    .ep-img-prep{width:100%;border-radius:10px;margin-bottom:14px;object-fit:cover;max-height:240px}
+    .ep-img{width:100%;border-radius:10px;margin-bottom:12px;object-fit:cover;max-height:240px}
     .ep-img-conv{width:100%;border-radius:8px;margin-bottom:10px;object-fit:cover;max-height:160px}
     .ep-text{font-size:0.92rem;line-height:1.6;color:var(--navy)}
     .ep-themes{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
     .ep-theme{background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:2px 10px;font-size:0.7rem;color:var(--muted)}
 
-    .confirm-btn{width:100%;padding:13px;border:none;border-radius:10px;background:var(--green);color:#fff;font-family:"DM Sans",sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;margin-top:8px;transition:opacity 0.15s}
-    .confirm-btn:hover{opacity:0.85}
-    .confirm-btn:disabled{opacity:0.4;cursor:default}
-
-    /* PHASE: PREP */
     .prep-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center}
     .prep-timer{font-family:"Fraunces",serif;font-size:3rem;font-weight:700;color:var(--navy);margin:20px 0}
     .prep-ep{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;margin:16px 0;text-align:left}
@@ -82,7 +74,6 @@
     .skip-prep-btn{background:none;border:none;color:var(--muted);font-size:0.78rem;cursor:pointer;margin-top:12px;font-family:inherit}
     .skip-prep-btn:hover{color:var(--navy)}
 
-    /* PHASE: CONVERSATION */
     .conv-layout{display:flex;flex-direction:column;gap:16px}
     .conv-ep-card{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:10px;padding:14px 16px;font-size:0.84rem;color:var(--amber);line-height:1.5}
     .chat-area{background:var(--surface);border:1px solid var(--border);border-radius:12px;min-height:280px;max-height:50vh;overflow-y:auto;padding:16px}
@@ -104,10 +95,15 @@
     .record-status{font-size:0.82rem;color:var(--muted)}
     .record-status.recording{color:var(--red);font-weight:600}
 
-    .end-conv-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-family:"DM Sans",sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;margin-top:8px}
-    .end-conv-btn:disabled{opacity:0.4;cursor:default}
+    .action-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-family:"DM Sans",sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;margin-top:8px}
+    .action-btn:disabled{opacity:0.4;cursor:default}
+    .action-btn.green{background:var(--green)}
+    .action-btn.green:hover{opacity:0.85}
 
-    /* PHASE: DONE */
+    .transition-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px;text-align:center}
+    .transition-card h2{font-family:"Fraunces",serif;font-size:1.15rem;margin-bottom:8px}
+    .transition-card p{font-size:0.85rem;color:var(--muted);margin-bottom:20px}
+
     .done-card{background:var(--pass-bg);border:1px solid var(--pass-border);border-radius:12px;padding:28px;text-align:center;color:var(--pass)}
     .done-card h2{font-family:"Fraunces",serif;font-size:1.2rem;margin-bottom:8px}
     .done-card p{font-size:0.85rem;margin-bottom:16px}
@@ -131,28 +127,54 @@
     <span class="topbar-title" id="topbarTitle">Parte Oral</span>
   </div>
   <div class="topbar-right">
-    <div class="phase-pill">Fase: <span id="phaseName">Seleção</span></div>
+    <div class="phase-pill">Fase: <span id="phaseName">Etapa 1</span></div>
     <div class="timer-pill" id="timerPill">⏱ <span id="timerDisplay">—</span></div>
   </div>
 </div>
 
 <div class="container">
 
-  <!-- PHASE 1: EP SELECTION -->
-  <div class="phase active" id="phaseSelect">
-    <h1 class="phase-title">Escolha seu Elemento Provocador</h1>
-    <p class="phase-subtitle">Três opções estão disponíveis. Escolha uma para a conversa com o examinador.</p>
-    <div id="epCards"></div>
-    <button class="confirm-btn" id="confirmEpBtn" onclick="confirmSelection()" disabled>
-      Confirmar escolha
-    </button>
-    <span class="skip-link" id="skipLinkSelect" onclick="skipElement()">Pular prova oral</span>
+  <!-- INTRO -->
+  <div class="phase active" id="phaseIntro">
+    <h1 class="phase-title">Parte Oral</h1>
+    <p class="phase-subtitle">A prova oral tem duas etapas, como no exame real.</p>
+    <div class="transition-card">
+      <h2>📋 Estrutura da prova</h2>
+      <p style="text-align:left;max-width:480px;margin:0 auto 16px">
+        <strong>Etapa 1</strong> — Conversa pessoal (~5 min)<br>
+        <span style="color:var(--muted)">O examinador faz perguntas sobre você, seus interesses e experiências.</span><br><br>
+        <strong>Etapa 2</strong> — Elementos Provocadores (~15 min)<br>
+        <span style="color:var(--muted)">Três temas são apresentados, um de cada vez. Para cada um, você terá 1 minuto para ler e depois conversar com o examinador.</span>
+      </p>
+      <button class="action-btn green" onclick="startPart1()" style="max-width:360px;margin:0 auto">Começar</button>
+    </div>
+    <span class="skip-link" onclick="skipElement()">Pular prova oral</span>
   </div>
 
-  <!-- PHASE 2: PREP TIME -->
-  <div class="phase" id="phasePrep">
+  <!-- PART 1: PERSONAL CONVERSATION -->
+  <div class="phase" id="phasePart1">
+    <div class="progress-bar" id="progressBar1"></div>
+    <h2 class="phase-title">Etapa 1 — Conversa pessoal</h2>
+    <p class="phase-subtitle">O examinador quer conhecer você. Responda naturalmente.</p>
+    <div class="conv-layout">
+      <div class="chat-area" id="chatArea1"></div>
+      <div class="record-controls">
+        <span class="record-status" id="recordStatus1">Clique para gravar</span>
+        <button class="record-btn" id="recordBtn1" onclick="toggleRecording()">
+          <div class="rec-icon"></div>
+        </button>
+      </div>
+      <button class="action-btn" id="endPart1Btn" onclick="endPart1()" disabled>
+        Próxima etapa →
+      </button>
+    </div>
+  </div>
+
+  <!-- EP PREP -->
+  <div class="phase" id="phaseEpPrep">
+    <div class="progress-bar" id="progressBarPrep"></div>
     <div class="prep-card">
-      <h2 class="phase-title">Tempo de preparação</h2>
+      <h2 class="phase-title" id="prepTitle">Elemento Provocador 1 de 3</h2>
       <p style="font-size:0.85rem;color:var(--muted)">Leia o elemento provocador e organize suas ideias.</p>
       <div class="prep-timer" id="prepTimer">1:00</div>
       <div class="prep-ep" id="prepEpCard"></div>
@@ -161,26 +183,36 @@
     </div>
   </div>
 
-  <!-- PHASE 3: CONVERSATION -->
-  <div class="phase" id="phaseConv">
-    <h2 class="phase-title">Conversa com o examinador</h2>
-    <p class="phase-subtitle">Fale sobre o tema do elemento provocador. Grave suas respostas.</p>
+  <!-- EP CONVERSATION -->
+  <div class="phase" id="phaseEpConv">
+    <div class="progress-bar" id="progressBarConv"></div>
+    <h2 class="phase-title" id="convTitle">Elemento Provocador 1 de 3</h2>
+    <p class="phase-subtitle">Fale sobre o tema. Grave suas respostas.</p>
     <div class="conv-layout">
       <div class="conv-ep-card" id="convEpCard"></div>
-      <div class="chat-area" id="chatArea"></div>
+      <div class="chat-area" id="chatArea2"></div>
       <div class="record-controls">
-        <span class="record-status" id="recordStatus">Clique para gravar</span>
-        <button class="record-btn" id="recordBtn" onclick="toggleRecording()">
+        <span class="record-status" id="recordStatus2">Clique para gravar</span>
+        <button class="record-btn" id="recordBtn2" onclick="toggleRecording()">
           <div class="rec-icon"></div>
         </button>
       </div>
-      <button class="end-conv-btn" id="endConvBtn" onclick="endConversation()" disabled>
-        Encerrar conversa e enviar
+      <button class="action-btn" id="endEpBtn" onclick="endCurrentEp()" disabled>
+        Próximo tema →
       </button>
     </div>
   </div>
 
-  <!-- PHASE 4: DONE -->
+  <!-- SUBMITTING -->
+  <div class="phase" id="phaseSubmitting">
+    <div class="transition-card">
+      <div class="loading-spinner" style="margin:0 auto 16px"></div>
+      <h2>Enviando suas gravações…</h2>
+      <p>Isso pode levar alguns segundos.</p>
+    </div>
+  </div>
+
+  <!-- DONE -->
   <div class="phase" id="phaseDone">
     <div class="done-card">
       <h2>✅ Prova oral concluída</h2>
@@ -202,75 +234,119 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════════
+// FOLLOW-UP QUESTION POOL (universal, topic-independent)
+// ═══════════════════════════════════════════════════════════════
+var FOLLOWUP_POOL = [
+  'Por que você pensa assim?',
+  'O que te leva a essa conclusão?',
+  'Você sempre pensou assim ou mudou de opinião em algum momento?',
+  'Essa é uma posição interessante. O que te convenceu disso?',
+  'E quem pensa diferente, o que estaria dizendo?',
+  'Qual seria o argumento mais forte do lado oposto?',
+  'Se alguém discordasse de você, qual seria a melhor razão?',
+  'Tem gente que defende exatamente o contrário. Como você acha que eles argumentariam?',
+  'Se você pudesse mudar uma coisa sobre essa situação, o que seria?',
+  'Imagine que você tem o poder de decisão. O que faria primeiro?',
+  'Existe alguma solução que parece boa na teoria mas não funciona na prática?',
+  'O que precisaria acontecer para essa realidade mudar?',
+  'Pensando de forma mais ampla, o que está por trás desse problema?',
+  'Isso tem relação com outras questões que você considera importantes?',
+  'Se a gente pensar nisso de outro ângulo, o que muda?',
+  'Como você acha que isso vai estar daqui a dez anos?',
+  'Esse problema tende a melhorar ou piorar com o tempo?',
+  'As novas gerações vão lidar com isso de forma diferente?',
+  'A tecnologia pode mudar esse cenário? De que forma?',
+  'O que é mais importante nessa discussão, na sua opinião?',
+  'Quem deveria ser o principal responsável por agir nessa questão?',
+  'Qual é o maior obstáculo para avançar nesse tema?',
+  'Você acha que existe uma resposta certa ou é mais complexo do que parece?',
+  'Onde você traçaria o limite nessa questão?',
+  'Tem alguma situação em que sua opinião seria diferente?',
+  'Às vezes a teoria e a prática são bem diferentes, né? Como você vê isso aqui?',
+];
+
+var WRAPUP_POOL = [
+  'Tem algo que a gente não mencionou e que você acha importante?',
+  'Se você tivesse que resumir sua posição em uma frase, qual seria?',
+  'Para encerrar esse tema, qual é a mensagem principal que você tiraria?',
+  'O que você gostaria que mais pessoas soubessem sobre esse assunto?',
+  'Antes de seguir: algo mais que queira acrescentar?',
+];
+
+// ═══════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════
-let currentUser = null;
-let attemptId, simId, simNum, elemKey;
-let examData      = null;
-let elemStatus    = 'not_started';
-let submitted     = false;
+var currentUser = null;
+var attemptId, simId, simNum, elemKey;
+var examData = null;
+var submitted = false;
 
-// EP selection
-let epPool        = [];     // 3 randomly drawn EPs
-let selectedEpIdx = -1;     // index in epPool
-let selectedEp    = null;   // the chosen EP object
+var allEPs = [];
+var currentEpIdx = 0;
 
-// Timers
-let prepSeconds   = 60;
-let convSeconds   = 300;
-let timerInterval = null;
+var part1Questions = [];
+var part1QuestionIdx = 0;
 
-// Recording
-let mediaRecorder = null;
-let audioChunks   = [];
-let isRecording   = false;
-let recordings    = [];     // array of { blob, duration }
-let recordStart   = 0;
+var shuffledFollowUps = [];
+var followUpPtr = 0;
+var shuffledWrapUps = [];
+var wrapUpPtr = 0;
 
-// Chat
-let chatMessages  = [];     // { role: 'ai'|'user', text }
-let turnCount     = 0;
+var currentSection = null; // 'part1' | 'ep'
+var sectionRecordings = [];
+var sectionChat = [];
+var sectionTurnCount = 0;
+
+var allSections = [];
+
+var timerSeconds = 0;
+var timerInterval = null;
+
+var mediaRecorder = null;
+var audioChunks = [];
+var isRecording = false;
+var recordStart = 0;
+var activeStream = null;
 
 // ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', async () => {
-  console.log('[oral] DOMContentLoaded');
+document.addEventListener('DOMContentLoaded', async function() {
   try {
-    ({ user: currentUser, attemptId, simId, simNum, elemKey } = await CELPE.init('oral'));
-    console.log('[oral] init OK', { simId, attemptId, elemKey, userId: currentUser?.id });
+    var init = await CELPE.init('oral');
+    currentUser = init.user;
+    attemptId = init.attemptId;
+    simId = init.simId;
+    simNum = init.simNum;
+    elemKey = init.elemKey;
 
     document.getElementById('backLink').href =
       '/celpe/dashboard/exam.html?sim=' + simId + '&attempt=' + attemptId;
     document.getElementById('topbarTitle').textContent = 'Sim ' + simNum + ' — Parte Oral';
 
-    const res = await fetch('/celpe/data/' + simId + '_oral.json');
+    var res = await fetch('/celpe/data/' + simId + '_oral.json');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     examData = await res.json();
-    console.log('[oral] JSON loaded, EPs:', examData.elementos_provocadores?.length);
 
-    // Config
-    var epSel = examData.ep_selection || {};
-    prepSeconds = epSel.prep_time_seconds || 60;
-    convSeconds = epSel.conversation_time_seconds || 300;
-    var showCount = epSel.show_to_candidate || 3;
-
-    elemStatus = await CELPE.getStatus(currentUser.id, attemptId, elemKey);
-    console.log('[oral] status:', elemStatus);
-
+    var elemStatus = await CELPE.getStatus(currentUser.id, attemptId, elemKey);
     if (elemStatus === 'submitted' || elemStatus === 'skipped') {
       showPhase('phaseAlreadyDone');
       CELPE.hideLoading();
       return;
     }
 
-    // Draw random EPs
-    var allEPs = examData.elementos_provocadores || [];
-    epPool = shuffle(allEPs).slice(0, showCount);
-    renderEpCards();
+    allEPs = examData.elementos_provocadores || [];
+
+    part1Questions = (examData.personal_conversation && examData.personal_conversation.questions) || [
+      'Olá! Bem-vindo(a). Me conte um pouco sobre você.',
+      'E o que trouxe você ao português?',
+      'O que você mais gosta de fazer nas horas vagas?'
+    ];
+
+    shuffledFollowUps = shuffle(FOLLOWUP_POOL);
+    shuffledWrapUps = shuffle(WRAPUP_POOL);
 
     CELPE.hideLoading();
-    console.log('[oral] page ready');
   } catch (err) {
     console.error('[oral] FATAL:', err);
     CELPE.showError('Não foi possível carregar a prova oral.', simId, attemptId);
@@ -278,133 +354,229 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// PHASE MANAGEMENT
+// PHASE + PROGRESS
 // ═══════════════════════════════════════════════════════════════
 function showPhase(id) {
   document.querySelectorAll('.phase').forEach(function(p) { p.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
 }
 
-// ═══════════════════════════════════════════════════════════════
-// PHASE 1: EP SELECTION
-// ═══════════════════════════════════════════════════════════════
-function renderEpCards() {
+function renderProgress(containerId, activeIdx) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
   var html = '';
-  epPool.forEach(function(ep, i) {
-    html += '<div class="ep-card" id="ep-' + i + '" onclick="selectEp(' + i + ')">' +
-      '<div class="ep-card-header">' +
-        '<div class="ep-number">' + (i + 1) + '</div>' +
-        '<span class="ep-image-desc">📷 ' + CELPE.escapeHtml(ep.image_description || '') + '</span>' +
-      '</div>' +
-      (ep.image_asset ? '<img class="ep-img" src="https://media.civiclearn.com/celpe/images/' + CELPE.escapeHtml(ep.image_asset) + '" alt="' + CELPE.escapeHtml(ep.image_description || '') + '" onerror="this.style.display=\'none\'">' : '') +
-      '<div class="ep-text">' + CELPE.escapeHtml(ep.text || '') + '</div>' +
-      '<div class="ep-themes">' +
-        (ep.themes || []).map(function(t) { return '<span class="ep-theme">' + CELPE.escapeHtml(t) + '</span>'; }).join('') +
-      '</div>' +
-    '</div>';
-  });
-  document.getElementById('epCards').innerHTML = html;
-}
-
-function selectEp(idx) {
-  selectedEpIdx = idx;
-  selectedEp = epPool[idx];
-  epPool.forEach(function(_, i) {
-    document.getElementById('ep-' + i).classList.toggle('selected', i === idx);
-  });
-  document.getElementById('confirmEpBtn').disabled = false;
-}
-
-function confirmSelection() {
-  if (!selectedEp) return;
-  document.getElementById('phaseName').textContent = 'Preparação';
-  showPhase('phasePrep');
-
-  // Prep card
-  document.getElementById('prepEpCard').innerHTML =
-    (selectedEp.image_asset ? '<img class="ep-img-prep" src="https://media.civiclearn.com/celpe/images/' + CELPE.escapeHtml(selectedEp.image_asset) + '" alt="' + CELPE.escapeHtml(selectedEp.image_description || '') + '" onerror="this.style.display=\'none\'">' : '') +
-    '<div class="ep-text">' + CELPE.escapeHtml(selectedEp.text || '') + '</div>' +
-    '<div class="ep-themes" style="margin-top:10px">' +
-      (selectedEp.themes || []).map(function(t) { return '<span class="ep-theme">' + t + '</span>'; }).join('') +
-    '</div>';
-
-  startPrepTimer();
+  for (var i = 0; i < 4; i++) {
+    var cls = 'progress-seg';
+    if (i < activeIdx) cls += ' done';
+    else if (i === activeIdx) cls += ' active';
+    html += '<div class="' + cls + '"></div>';
+  }
+  el.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PHASE 2: PREP TIME
+// PART 1: PERSONAL CONVERSATION
 // ═══════════════════════════════════════════════════════════════
-function startPrepTimer() {
-  updatePrepDisplay();
-  timerInterval = setInterval(function() {
-    prepSeconds--;
-    updatePrepDisplay();
-    if (prepSeconds <= 0) {
-      clearInterval(timerInterval);
-      startConversation();
-    }
-  }, 1000);
+function startPart1() {
+  currentSection = 'part1';
+  sectionRecordings = [];
+  sectionChat = [];
+  sectionTurnCount = 0;
+  part1QuestionIdx = 0;
+
+  document.getElementById('phaseName').textContent = 'Etapa 1';
+  renderProgress('progressBar1', 0);
+  showPhase('phasePart1');
+
+  timerSeconds = 300;
+  updateTimerDisplay();
+
+  addChat('chatArea1', 'ai', part1Questions[0]);
+  part1QuestionIdx = 1;
+
+  startTimer(function() {
+    if (isRecording) stopRecording();
+    endPart1();
+  });
 }
 
-function updatePrepDisplay() {
-  var m = Math.floor(Math.max(0, prepSeconds) / 60);
-  var s = Math.max(0, prepSeconds) % 60;
-  var display = m + ':' + String(s).padStart(2, '0');
-  document.getElementById('prepTimer').textContent = display;
-  document.getElementById('timerDisplay').textContent = display;
+function endPart1() {
+  if (isRecording) stopRecording();
+  clearTimer();
+
+  if (sectionRecordings.length === 0) {
+    CELPE.toast('Você precisa gravar pelo menos uma resposta.');
+    return;
+  }
+
+  allSections.push({
+    type: 'part1',
+    recordings: sectionRecordings.slice(),
+    chat: sectionChat.slice()
+  });
+
+  currentEpIdx = 0;
+  showEpPrep(0);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PART 2: EP PREP
+// ═══════════════════════════════════════════════════════════════
+function showEpPrep(epIdx) {
+  var ep = allEPs[epIdx];
+  if (!ep) { submitAll(); return; }
+
+  currentSection = 'ep_prep';
+  document.getElementById('phaseName').textContent = 'EP ' + (epIdx + 1) + '/3';
+  document.getElementById('prepTitle').textContent = 'Elemento Provocador ' + (epIdx + 1) + ' de 3';
+  renderProgress('progressBarPrep', epIdx + 1);
+
+  var html = '';
+  if (ep.image_asset) {
+    html += '<img class="ep-img" src="https://media.civiclearn.com/celpe/images/' +
+      CELPE.escapeHtml(ep.image_asset) + '" alt="' +
+      CELPE.escapeHtml(ep.image_description || '') + '" onerror="this.style.display=\'none\'">';
+  }
+  html += '<span style="font-size:0.78rem;color:var(--muted);font-style:italic">📷 ' +
+    CELPE.escapeHtml(ep.image_description || '') + '</span>';
+  html += '<div class="ep-text" style="margin-top:10px">' + CELPE.escapeHtml(ep.text || '') + '</div>';
+  html += '<div class="ep-themes" style="margin-top:10px">' +
+    (ep.themes || []).map(function(t) { return '<span class="ep-theme">' + CELPE.escapeHtml(t) + '</span>'; }).join('') +
+    '</div>';
+  document.getElementById('prepEpCard').innerHTML = html;
+
+  showPhase('phaseEpPrep');
+
+  timerSeconds = 60;
+  updateTimerDisplay();
+  startTimer(function() {
+    startEpConv(epIdx);
+  });
 }
 
 function skipPrep() {
-  if (timerInterval) clearInterval(timerInterval);
-  startConversation();
+  clearTimer();
+  startEpConv(currentEpIdx);
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PHASE 3: CONVERSATION
+// PART 2: EP CONVERSATION
 // ═══════════════════════════════════════════════════════════════
-function startConversation() {
-  document.getElementById('phaseName').textContent = 'Conversa';
-  showPhase('phaseConv');
+function startEpConv(epIdx) {
+  var ep = allEPs[epIdx];
+  currentSection = 'ep';
+  sectionRecordings = [];
+  sectionChat = [];
+  sectionTurnCount = 0;
 
-  // Show EP in conversation
-  document.getElementById('convEpCard').innerHTML =
-    (selectedEp.image_asset ? '<img class="ep-img-conv" src="https://media.civiclearn.com/celpe/images/' + CELPE.escapeHtml(selectedEp.image_asset) + '" alt="' + CELPE.escapeHtml(selectedEp.image_description || '') + '" onerror="this.style.display=\'none\'">' : '') +
-    '📷 <em>' + CELPE.escapeHtml(selectedEp.image_description || '') + '</em><br>' +
-    CELPE.escapeHtml(selectedEp.text || '');
+  document.getElementById('phaseName').textContent = 'EP ' + (epIdx + 1) + '/3';
+  document.getElementById('convTitle').textContent = 'Elemento Provocador ' + (epIdx + 1) + ' de 3';
+  renderProgress('progressBarConv', epIdx + 1);
 
-  // First AI message (use conversation_starters from EP)
-  var starters = selectedEp.conversation_starters || ['Vamos conversar sobre este tema?'];
-  addChatMessage('ai', starters[0]);
+  var cardHtml = '';
+  if (ep.image_asset) {
+    cardHtml += '<img class="ep-img-conv" src="https://media.civiclearn.com/celpe/images/' +
+      CELPE.escapeHtml(ep.image_asset) + '" alt="' +
+      CELPE.escapeHtml(ep.image_description || '') + '" onerror="this.style.display=\'none\'">';
+  }
+  cardHtml += '📷 <em>' + CELPE.escapeHtml(ep.image_description || '') + '</em><br>' +
+    CELPE.escapeHtml(ep.text || '');
+  document.getElementById('convEpCard').innerHTML = cardHtml;
 
-  startConvTimer();
+  document.getElementById('chatArea2').innerHTML = '';
+
+  var btn = document.getElementById('endEpBtn');
+  btn.disabled = true;
+  btn.textContent = epIdx < 2 ? 'Próximo tema →' : 'Encerrar prova oral';
+
+  document.getElementById('recordStatus2').textContent = 'Clique para gravar';
+  document.getElementById('recordStatus2').classList.remove('recording');
+  document.getElementById('recordBtn2').classList.remove('recording');
+  document.getElementById('recordBtn2').style.display = '';
+
+  showPhase('phaseEpConv');
+
+  timerSeconds = 240;
+  updateTimerDisplay();
+
+  var starters = ep.conversation_starters || ['Vamos conversar sobre este tema. O que você acha?'];
+  addChat('chatArea2', 'ai', starters[0]);
+
+  startTimer(function() {
+    if (isRecording) stopRecording();
+    endCurrentEp();
+  });
 }
 
-function startConvTimer() {
-  updateConvDisplay();
-  timerInterval = setInterval(function() {
-    convSeconds--;
-    updateConvDisplay();
-    if (convSeconds <= 0) {
-      clearInterval(timerInterval);
-      if (isRecording) stopRecording();
-      endConversation();
+function endCurrentEp() {
+  if (isRecording) stopRecording();
+  clearTimer();
+
+  if (sectionRecordings.length === 0) {
+    CELPE.toast('Você precisa gravar pelo menos uma resposta.');
+    return;
+  }
+
+  allSections.push({
+    type: 'ep',
+    ep: allEPs[currentEpIdx],
+    epIndex: currentEpIdx,
+    recordings: sectionRecordings.slice(),
+    chat: sectionChat.slice()
+  });
+
+  currentEpIdx++;
+  if (currentEpIdx < allEPs.length) {
+    showEpPrep(currentEpIdx);
+  } else {
+    submitAll();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AI FOLLOW-UP LOGIC
+// ═══════════════════════════════════════════════════════════════
+function getNextFollowUp() {
+  if (followUpPtr < shuffledFollowUps.length) {
+    return shuffledFollowUps[followUpPtr++];
+  }
+  return 'O que mais você gostaria de dizer sobre isso?';
+}
+
+function getWrapUp() {
+  if (wrapUpPtr < shuffledWrapUps.length) {
+    return shuffledWrapUps[wrapUpPtr++];
+  }
+  return 'Algo mais que queira acrescentar?';
+}
+
+function askNextQuestion() {
+  var chatAreaId = currentSection === 'part1' ? 'chatArea1' : 'chatArea2';
+
+  if (currentSection === 'part1') {
+    if (part1QuestionIdx < part1Questions.length) {
+      addChat(chatAreaId, 'ai', part1Questions[part1QuestionIdx++]);
     }
-  }, 1000);
+    return;
+  }
+
+  // EP conversation: opener already shown (turn 0)
+  // turns 1-2: follow-up from pool
+  // turn 3: wrap-up
+  // turn 4+: no more prompts
+  if (sectionTurnCount <= 2) {
+    addChat(chatAreaId, 'ai', getNextFollowUp());
+  } else if (sectionTurnCount === 3) {
+    addChat(chatAreaId, 'ai', getWrapUp());
+  }
 }
 
-function updateConvDisplay() {
-  var m = Math.floor(Math.max(0, convSeconds) / 60);
-  var s = Math.max(0, convSeconds) % 60;
-  document.getElementById('timerDisplay').textContent = m + ':' + String(s).padStart(2, '0');
-  var pill = document.getElementById('timerPill');
-  pill.className = 'timer-pill';
-  if (convSeconds <= 30) pill.classList.add('danger');
-  else if (convSeconds <= 60) pill.classList.add('warning');
-}
-
-function addChatMessage(role, text) {
-  chatMessages.push({ role: role, text: text });
-  var area = document.getElementById('chatArea');
+// ═══════════════════════════════════════════════════════════════
+// CHAT
+// ═══════════════════════════════════════════════════════════════
+function addChat(areaId, role, text) {
+  sectionChat.push({ role: role, text: text });
+  var area = document.getElementById(areaId);
   var avatar = role === 'ai' ? '🎓' : '🎤';
   area.innerHTML += '<div class="chat-msg ' + role + '">' +
     '<div class="chat-avatar">' + avatar + '</div>' +
@@ -417,16 +589,13 @@ function addChatMessage(role, text) {
 // RECORDING
 // ═══════════════════════════════════════════════════════════════
 async function toggleRecording() {
-  if (isRecording) {
-    stopRecording();
-  } else {
-    await startRecording();
-  }
+  if (isRecording) { stopRecording(); } else { await startRecording(); }
 }
 
 async function startRecording() {
   try {
     var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    activeStream = stream;
     mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
     audioChunks = [];
     recordStart = Date.now();
@@ -438,38 +607,26 @@ async function startRecording() {
     mediaRecorder.onstop = function() {
       var blob = new Blob(audioChunks, { type: 'audio/webm' });
       var duration = Math.round((Date.now() - recordStart) / 1000);
-      recordings.push({ blob: blob, duration: duration });
-      turnCount++;
+      sectionRecordings.push({ blob: blob, duration: duration });
+      sectionTurnCount++;
 
-      // Add user message
-      addChatMessage('user', '🎤 Gravação ' + turnCount + ' (' + duration + 's)');
+      var chatAreaId = currentSection === 'part1' ? 'chatArea1' : 'chatArea2';
+      addChat(chatAreaId, 'user', '🎤 Gravação (' + duration + 's)');
 
-      // Enable end button after first recording
-      document.getElementById('endConvBtn').disabled = false;
+      var endBtn = currentSection === 'part1' ? 'endPart1Btn' : 'endEpBtn';
+      document.getElementById(endBtn).disabled = false;
 
-      // AI follow-up (use next conversation starter or generic)
-      var starters = selectedEp.conversation_starters || [];
-      if (turnCount < starters.length) {
-        addChatMessage('ai', starters[turnCount]);
-      } else {
-        var followUps = [
-          'Pode explicar melhor?',
-          'Interessante. E na sua experiência pessoal?',
-          'Você conhece algum exemplo disso no seu país?',
-          'E como isso poderia ser diferente?',
-          'Há algo mais que gostaria de acrescentar?'
-        ];
-        addChatMessage('ai', followUps[Math.min(turnCount - starters.length, followUps.length - 1)]);
+      askNextQuestion();
+
+      if (activeStream) {
+        activeStream.getTracks().forEach(function(t) { t.stop(); });
+        activeStream = null;
       }
-
-      stream.getTracks().forEach(function(t) { t.stop(); });
     };
 
     mediaRecorder.start();
     isRecording = true;
-    document.getElementById('recordBtn').classList.add('recording');
-    document.getElementById('recordStatus').textContent = 'Gravando…';
-    document.getElementById('recordStatus').classList.add('recording');
+    updateRecordUI(true);
   } catch (err) {
     console.error('[oral] mic error:', err);
     CELPE.toast('Não foi possível acessar o microfone. Verifique as permissões.');
@@ -481,87 +638,132 @@ function stopRecording() {
     mediaRecorder.stop();
   }
   isRecording = false;
-  document.getElementById('recordBtn').classList.remove('recording');
-  document.getElementById('recordStatus').textContent = 'Clique para gravar';
-  document.getElementById('recordStatus').classList.remove('recording');
+  updateRecordUI(false);
+}
+
+function updateRecordUI(recording) {
+  var suffix = currentSection === 'part1' ? '1' : '2';
+  var btn = document.getElementById('recordBtn' + suffix);
+  var status = document.getElementById('recordStatus' + suffix);
+  if (recording) {
+    btn.classList.add('recording');
+    status.textContent = 'Gravando…';
+    status.classList.add('recording');
+  } else {
+    btn.classList.remove('recording');
+    status.textContent = 'Clique para gravar';
+    status.classList.remove('recording');
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// END CONVERSATION + SUBMIT
+// TIMER
 // ═══════════════════════════════════════════════════════════════
-async function endConversation() {
+function startTimer(onExpire) {
+  clearTimer();
+  timerInterval = setInterval(function() {
+    timerSeconds--;
+    updateTimerDisplay();
+    if (timerSeconds <= 0) {
+      clearTimer();
+      if (onExpire) onExpire();
+    }
+  }, 1000);
+}
+
+function clearTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+function updateTimerDisplay() {
+  var m = Math.floor(Math.max(0, timerSeconds) / 60);
+  var s = Math.max(0, timerSeconds) % 60;
+  document.getElementById('timerDisplay').textContent = m + ':' + String(s).padStart(2, '0');
+  var pill = document.getElementById('timerPill');
+  pill.className = 'timer-pill';
+  if (timerSeconds <= 15) pill.classList.add('danger');
+  else if (timerSeconds <= 30) pill.classList.add('warning');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SUBMIT ALL
+// ═══════════════════════════════════════════════════════════════
+async function submitAll() {
   if (submitted) return;
-  if (isRecording) stopRecording();
-  if (timerInterval) clearInterval(timerInterval);
-
-  // Must have at least one recording
-  if (recordings.length === 0) {
-    CELPE.toast('Você precisa gravar pelo menos uma resposta antes de enviar.');
-    return;
-  }
-
-  document.getElementById('endConvBtn').disabled = true;
-  document.getElementById('endConvBtn').textContent = 'Enviando…';
-  document.getElementById('recordBtn').style.display = 'none';
+  showPhase('phaseSubmitting');
+  document.getElementById('phaseName').textContent = 'Enviando';
 
   try {
-    // Upload each recording
-    var audioPaths = [];
-    for (var i = 0; i < recordings.length; i++) {
-      var rec = recordings[i];
-      var filename = 'oral_turn' + (i + 1) + '.webm';
-      var result = await CELPE.uploadAudio(attemptId, filename, rec.blob);
-      audioPaths.push({ path: result.path, duration: rec.duration, turn: i + 1 });
-    }
-
-    // Build conversation_parts for transcription function
-    var conversationParts = [];
-    var recIdx = 0;
-    for (var ci = 0; ci < chatMessages.length; ci++) {
-      var cm = chatMessages[ci];
-      if (cm.role === 'ai') {
-        conversationParts.push({ role: 'ai', text: cm.text });
-      } else {
-        conversationParts.push({
-          role: 'user',
-          text: cm.text,
-          audio_path: recIdx < audioPaths.length ? audioPaths[recIdx].path : null,
-          duration:   recIdx < audioPaths.length ? audioPaths[recIdx].duration : 0
-        });
-        recIdx++;
+    for (var s = 0; s < allSections.length; s++) {
+      var sec = allSections[s];
+      sec.audioPaths = [];
+      for (var r = 0; r < sec.recordings.length; r++) {
+        var rec = sec.recordings[r];
+        var prefix = sec.type === 'part1' ? 'part1' : ('ep' + (sec.epIndex + 1));
+        var filename = prefix + '_turn' + (r + 1) + '.webm';
+        var result = await CELPE.uploadAudio(attemptId, filename, rec.blob);
+        sec.audioPaths.push({ path: result.path, duration: rec.duration, turn: r + 1 });
       }
     }
 
-    // Submit
+    var allConvParts = [];
+    for (var s2 = 0; s2 < allSections.length; s2++) {
+      var sec2 = allSections[s2];
+      var recIdx = 0;
+      var parts = [];
+      for (var ci = 0; ci < sec2.chat.length; ci++) {
+        var cm = sec2.chat[ci];
+        if (cm.role === 'ai') {
+          parts.push({ role: 'ai', text: cm.text });
+        } else {
+          parts.push({
+            role: 'user', text: cm.text,
+            audio_path: recIdx < sec2.audioPaths.length ? sec2.audioPaths[recIdx].path : null,
+            duration: recIdx < sec2.audioPaths.length ? sec2.audioPaths[recIdx].duration : 0
+          });
+          recIdx++;
+        }
+      }
+      allConvParts.push({
+        section: sec2.type === 'part1' ? 'part1' : 'ep' + (sec2.epIndex + 1),
+        ep: sec2.ep || null,
+        conversation_parts: parts,
+        audio_paths: sec2.audioPaths
+      });
+    }
+
+    var flatAudio = [];
+    allSections.forEach(function(sec3) { flatAudio = flatAudio.concat(sec3.audioPaths || []); });
+
     var responseJson = {
-      selected_ep:          selectedEp,
-      ep_pool:              epPool.map(function(ep) { return ep.id; }),
-      conversation_log:     chatMessages,
-      conversation_parts:   conversationParts,
-      audio_paths:          audioPaths,
-      audio_path:           audioPaths.length > 0 ? audioPaths[0].path : null,
-      total_recordings:     recordings.length,
-      duration_sec:         audioPaths.reduce(function(sum, a) { return sum + a.duration; }, 0),
-      conversation_seconds: (examData.ep_selection?.conversation_time_seconds || 300) - Math.max(0, convSeconds),
-      evaluation_criteria:  examData.evaluation_criteria,
+      format: 'full_oral_v2',
+      sections: allConvParts,
+      all_eps: allEPs.map(function(ep) { return ep.id; }),
+      audio_paths: flatAudio,
+      audio_path: flatAudio.length > 0 ? flatAudio[0].path : null,
+      total_recordings: flatAudio.length,
+      duration_sec: flatAudio.reduce(function(sum, a) { return sum + a.duration; }, 0),
+      evaluation_criteria: examData.evaluation_criteria,
       ai_evaluation_prompt: examData.ai_evaluation_oral_prompt,
     };
 
-    var transcript = chatMessages.map(function(m) {
-      return (m.role === 'ai' ? 'Examinador' : 'Candidato') + ': ' + m.text;
-    }).join('\n');
+    var transcript = '';
+    allConvParts.forEach(function(sec4) {
+      transcript += '\n=== ' + sec4.section.toUpperCase() + ' ===\n';
+      sec4.conversation_parts.forEach(function(p) {
+        transcript += (p.role === 'ai' ? 'Examinador' : 'Candidato') + ': ' + p.text + '\n';
+      });
+    });
 
-    await CELPE.submit({ attemptId, elemKey, text: transcript, json: responseJson });
+    await CELPE.submit({ attemptId: attemptId, elemKey: elemKey, text: transcript.trim(), json: responseJson });
 
     submitted = true;
     document.getElementById('phaseName').textContent = 'Concluído';
     showPhase('phaseDone');
   } catch (err) {
     console.error('[oral] submit error:', err);
-    document.getElementById('endConvBtn').disabled = false;
-    document.getElementById('endConvBtn').textContent = 'Encerrar conversa e enviar';
-    document.getElementById('recordBtn').style.display = '';
     CELPE.toast('Erro ao enviar. Tente novamente.');
+    showPhase('phaseDone');
   }
 }
 
@@ -571,9 +773,9 @@ async function endConversation() {
 async function skipElement() {
   if (submitted) return;
   if (!confirm('Tem certeza que deseja pular a prova oral? Você receberá nota 0.')) return;
-  await CELPE.skip({ attemptId, elemKey });
+  await CELPE.skip({ attemptId: attemptId, elemKey: elemKey });
   submitted = true;
-  if (timerInterval) clearInterval(timerInterval);
+  clearTimer();
   CELPE.goBack(simId, attemptId);
 }
 
