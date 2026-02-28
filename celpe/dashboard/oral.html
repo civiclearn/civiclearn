@@ -85,20 +85,15 @@
     .chat-msg.ai .chat-avatar{background:#e2e8f0}
     .chat-msg.user .chat-avatar{background:var(--green-dim)}
 
-    .record-controls{display:flex;align-items:center;justify-content:center;gap:16px;padding:12px 0}
-    .record-btn{width:64px;height:64px;border-radius:50%;border:3px solid var(--red);background:var(--red-bg);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s}
-    .record-btn:hover{background:var(--red);color:#fff}
-    .record-btn.recording{background:var(--red);animation:pulse 1.5s ease-in-out infinite}
-    .record-btn .rec-icon{width:20px;height:20px;border-radius:50%;background:var(--red)}
-    .record-btn.recording .rec-icon{border-radius:3px;width:16px;height:16px;background:#fff}
-    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.4)}50%{box-shadow:0 0 0 12px rgba(220,38,38,0)}}
-    .record-status{font-size:0.82rem;color:var(--muted)}
-    .record-status.recording{color:var(--red);font-weight:600}
+    .mic-badge{display:none;align-items:center;gap:6px;padding:5px 12px;background:#f8fafc;border:1px solid var(--border);border-radius:99px;font-size:0.72rem;color:var(--muted);align-self:flex-start}
+    .mic-badge.active{display:inline-flex}
+    .mic-dot{width:6px;height:6px;border-radius:50%;background:#ef4444;animation:mic-pulse 2s ease-in-out infinite}
+    @keyframes mic-pulse{0%,100%{opacity:0.6}50%{opacity:1}}
 
-    .continuous-indicator{display:none;align-items:center;gap:8px;padding:6px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin-bottom:8px;font-size:0.78rem;color:var(--red)}
-    .continuous-indicator.active{display:flex}
-    .continuous-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse-dot 1.5s ease-in-out infinite}
-    @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}
+    .next-btn{width:100%;padding:14px;border:none;border-radius:10px;background:var(--surface);border:2px solid var(--green);color:var(--green);font-family:"DM Sans",sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;transition:all 0.15s}
+    .next-btn:hover{background:var(--green);color:#fff}
+    .next-btn:disabled{opacity:0.35;cursor:default;border-color:var(--border);color:var(--muted)}
+    .next-btn:disabled:hover{background:var(--surface)}
 
     .action-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-family:"DM Sans",sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;margin-top:8px}
     .action-btn:disabled{opacity:0.4;cursor:default}
@@ -162,17 +157,14 @@
     <h2 class="phase-title">Etapa 1 — Conversa pessoal</h2>
     <p class="phase-subtitle">O examinador quer conhecer você. Responda naturalmente.</p>
     <div class="conv-layout">
-      <div class="continuous-indicator" id="contIndicator1">
-        <div class="continuous-dot"></div>
-        Gravação contínua ativa
+      <div class="mic-badge" id="micBadge1">
+        <div class="mic-dot"></div>
+        Microfone ativo
       </div>
       <div class="chat-area" id="chatArea1"></div>
-      <div class="record-controls">
-        <span class="record-status" id="recordStatus1">Clique para gravar sua resposta</span>
-        <button class="record-btn" id="recordBtn1" onclick="toggleRecording()">
-          <div class="rec-icon"></div>
-        </button>
-      </div>
+      <button class="next-btn" id="nextBtn1" onclick="advanceTurn()" disabled>
+        Já respondi ↵
+      </button>
       <button class="action-btn" id="endPart1Btn" onclick="endPart1()" disabled>
         Próxima etapa →
       </button>
@@ -199,17 +191,14 @@
     <p class="phase-subtitle">Fale sobre o tema. Grave suas respostas.</p>
     <div class="conv-layout">
       <div class="conv-ep-card" id="convEpCard"></div>
-      <div class="continuous-indicator" id="contIndicator2">
-        <div class="continuous-dot"></div>
-        Gravação contínua ativa
+      <div class="mic-badge" id="micBadge2">
+        <div class="mic-dot"></div>
+        Microfone ativo
       </div>
       <div class="chat-area" id="chatArea2"></div>
-      <div class="record-controls">
-        <span class="record-status" id="recordStatus2">Clique para gravar sua resposta</span>
-        <button class="record-btn" id="recordBtn2" onclick="toggleRecording()">
-          <div class="rec-icon"></div>
-        </button>
-      </div>
+      <button class="next-btn" id="nextBtn2" onclick="advanceTurn()" disabled>
+        Já respondi ↵
+      </button>
       <button class="action-btn" id="endEpBtn" onclick="endCurrentEp()" disabled>
         Próximo tema →
       </button>
@@ -301,10 +290,7 @@ var continuousStream = null;
 var continuousStartTime = 0;
 var continuousBlob = null; // set when section recording stops
 
-// v3: per-turn recording state (user click record/stop)
-var turnRecorder = null;
-var turnChunks = [];
-var isTurnRecording = false;
+// v3: per-turn state (no recording, just conversation flow)
 var turnStart = 0;
 
 // Supabase client for direct storage upload
@@ -407,10 +393,15 @@ async function startContinuousRecording() {
     continuousRecorder.start(1000); // collect data every second for reliability
     console.log('[oral-v3] Continuous recording started');
 
-    // Show indicator
+    // Show mic badge
     var suffix = currentSection === 'part1' ? '1' : '2';
-    var indicator = document.getElementById('contIndicator' + suffix);
-    if (indicator) indicator.classList.add('active');
+    var badge = document.getElementById('micBadge' + suffix);
+    if (badge) badge.classList.add('active');
+
+    // Enable the "next" button once mic is live
+    var nextBtn = document.getElementById('nextBtn' + suffix);
+    if (nextBtn) nextBtn.disabled = false;
+    turnStart = Date.now();
   } catch (err) {
     console.error('[oral-v3] Mic access failed:', err);
     CELPE.toast('Não foi possível acessar o microfone. Verifique as permissões.');
@@ -438,8 +429,8 @@ function stopContinuousRecording() {
       }
       continuousRecorder = null;
 
-      // Hide indicator
-      document.querySelectorAll('.continuous-indicator').forEach(function(el) { el.classList.remove('active'); });
+      // Hide mic badges
+      document.querySelectorAll('.mic-badge').forEach(function(el) { el.classList.remove('active'); });
 
       resolve({ blob: blob, duration: duration });
     };
@@ -475,13 +466,11 @@ async function startPart1() {
   part1QuestionIdx = 1;
 
   startTimer(function() {
-    if (isTurnRecording) stopTurnRecording();
     endPart1();
   });
 }
 
 async function endPart1() {
-  if (isTurnRecording) stopTurnRecording();
   clearTimer();
 
   if (sectionTurnCount === 0) {
@@ -574,14 +563,13 @@ async function startEpConv(epIdx) {
 
   document.getElementById('chatArea2').innerHTML = '';
 
-  var btn = document.getElementById('endEpBtn');
-  btn.disabled = true;
-  btn.textContent = epIdx < 2 ? 'Próximo tema →' : 'Encerrar prova oral';
+  var endBtn = document.getElementById('endEpBtn');
+  endBtn.disabled = true;
+  endBtn.textContent = epIdx < 2 ? 'Próximo tema →' : 'Encerrar prova oral';
 
-  document.getElementById('recordStatus2').textContent = 'Clique para gravar sua resposta';
-  document.getElementById('recordStatus2').classList.remove('recording');
-  document.getElementById('recordBtn2').classList.remove('recording');
-  document.getElementById('recordBtn2').style.display = '';
+  // Reset next button
+  var nextBtn = document.getElementById('nextBtn2');
+  nextBtn.disabled = true;
 
   showPhase('phaseEpConv');
 
@@ -599,13 +587,11 @@ async function startEpConv(epIdx) {
   addChat('chatArea2', 'ai', starters[0]);
 
   startTimer(function() {
-    if (isTurnRecording) stopTurnRecording();
     endCurrentEp();
   });
 }
 
 async function endCurrentEp() {
-  if (isTurnRecording) stopTurnRecording();
   clearTimer();
 
   if (sectionTurnCount === 0) {
@@ -688,51 +674,20 @@ function addChat(areaId, role, text) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PER-TURN RECORDING (UI feedback + question triggering)
-// The continuous recorder captures everything; these per-turn
-// toggles just drive the UI and conversation flow.
+// ADVANCE TURN (user signals they've finished speaking)
 // ═══════════════════════════════════════════════════════════════
-function toggleRecording() {
-  if (isTurnRecording) { stopTurnRecording(); } else { startTurnRecording(); }
-}
-
-function startTurnRecording() {
-  // The mic is already captured by the continuous recorder.
-  // This just updates UI to show the user is "speaking".
-  isTurnRecording = true;
-  turnStart = Date.now();
-  updateRecordUI(true);
-}
-
-function stopTurnRecording() {
-  if (!isTurnRecording) return;
-  isTurnRecording = false;
+function advanceTurn() {
   var duration = Math.round((Date.now() - turnStart) / 1000);
   sectionTurnCount++;
+  turnStart = Date.now();
 
   var chatAreaId = currentSection === 'part1' ? 'chatArea1' : 'chatArea2';
-  addChat(chatAreaId, 'user', '🎤 Resposta (' + duration + 's)');
+  addChat(chatAreaId, 'user', '💬 Resposta registrada');
 
   var endBtn = currentSection === 'part1' ? 'endPart1Btn' : 'endEpBtn';
   document.getElementById(endBtn).disabled = false;
 
-  updateRecordUI(false);
   askNextQuestion();
-}
-
-function updateRecordUI(recording) {
-  var suffix = currentSection === 'part1' ? '1' : '2';
-  var btn = document.getElementById('recordBtn' + suffix);
-  var status = document.getElementById('recordStatus' + suffix);
-  if (recording) {
-    btn.classList.add('recording');
-    status.textContent = 'Gravando… clique para parar';
-    status.classList.add('recording');
-  } else {
-    btn.classList.remove('recording');
-    status.textContent = 'Clique para gravar sua resposta';
-    status.classList.remove('recording');
-  }
 }
 
 // ═══════════════════════════════════════════════════════════════
