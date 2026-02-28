@@ -326,8 +326,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Auth session is shared automatically via localStorage
     sbClient = window.supabase.createClient(
       'https://htgliokekeaovdiafrgs.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs',
+      { auth: { storageKey: 'sb-oral-upload-token', autoRefreshToken: false, persistSession: false } }
     );
+    // Copy session from the main auth client
+    var mainSession = JSON.parse(localStorage.getItem('sb-htgliokekeaovdiafrgs-auth-token') || 'null');
+    if (mainSession) {
+      await sbClient.auth.setSession({ access_token: mainSession.access_token, refresh_token: mainSession.refresh_token });
+    }
 
     document.getElementById('backLink').href =
       '/celpe/dashboard/exam.html?sim=' + simId + '&attempt=' + attemptId;
