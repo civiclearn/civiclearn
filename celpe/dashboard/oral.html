@@ -95,6 +95,11 @@
     .record-status{font-size:0.82rem;color:var(--muted)}
     .record-status.recording{color:var(--red);font-weight:600}
 
+    .continuous-indicator{display:none;align-items:center;gap:8px;padding:6px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin-bottom:8px;font-size:0.78rem;color:var(--red)}
+    .continuous-indicator.active{display:flex}
+    .continuous-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse-dot 1.5s ease-in-out infinite}
+    @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}
+
     .action-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-family:"DM Sans",sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;margin-top:8px}
     .action-btn:disabled{opacity:0.4;cursor:default}
     .action-btn.green{background:var(--green)}
@@ -157,9 +162,13 @@
     <h2 class="phase-title">Etapa 1 — Conversa pessoal</h2>
     <p class="phase-subtitle">O examinador quer conhecer você. Responda naturalmente.</p>
     <div class="conv-layout">
+      <div class="continuous-indicator" id="contIndicator1">
+        <div class="continuous-dot"></div>
+        Gravação contínua ativa
+      </div>
       <div class="chat-area" id="chatArea1"></div>
       <div class="record-controls">
-        <span class="record-status" id="recordStatus1">Clique para gravar</span>
+        <span class="record-status" id="recordStatus1">Clique para gravar sua resposta</span>
         <button class="record-btn" id="recordBtn1" onclick="toggleRecording()">
           <div class="rec-icon"></div>
         </button>
@@ -190,9 +199,13 @@
     <p class="phase-subtitle">Fale sobre o tema. Grave suas respostas.</p>
     <div class="conv-layout">
       <div class="conv-ep-card" id="convEpCard"></div>
+      <div class="continuous-indicator" id="contIndicator2">
+        <div class="continuous-dot"></div>
+        Gravação contínua ativa
+      </div>
       <div class="chat-area" id="chatArea2"></div>
       <div class="record-controls">
-        <span class="record-status" id="recordStatus2">Clique para gravar</span>
+        <span class="record-status" id="recordStatus2">Clique para gravar sua resposta</span>
         <button class="record-btn" id="recordBtn2" onclick="toggleRecording()">
           <div class="rec-icon"></div>
         </button>
@@ -271,21 +284,31 @@ var followUpPtr = 0;
 var shuffledWrapUps = [];
 var wrapUpPtr = 0;
 
-var currentSection = null; // 'part1' | 'ep'
-var sectionRecordings = [];
+var currentSection = null; // 'part1' | 'ep' | 'ep_prep'
 var sectionChat = [];
 var sectionTurnCount = 0;
 
-var allSections = [];
+// v3: each completed section stored here with its continuous blob
+var completedSections = [];
 
 var timerSeconds = 0;
 var timerInterval = null;
 
-var mediaRecorder = null;
-var audioChunks = [];
-var isRecording = false;
-var recordStart = 0;
-var activeStream = null;
+// v3: continuous recording state
+var continuousRecorder = null;
+var continuousChunks = [];
+var continuousStream = null;
+var continuousStartTime = 0;
+var continuousBlob = null; // set when section recording stops
+
+// v3: per-turn recording state (user click record/stop)
+var turnRecorder = null;
+var turnChunks = [];
+var isTurnRecording = false;
+var turnStart = 0;
+
+// Supabase client for direct storage upload
+var sbClient = null;
 
 // ═══════════════════════════════════════════════════════════════
 // INIT
@@ -298,6 +321,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     simId = init.simId;
     simNum = init.simNum;
     elemKey = init.elemKey;
+
+    // Create Supabase client for direct Storage uploads
+    sbClient = window.supabase.createClient(CELPE.SUPABASE_URL, CELPE.SUPABASE_ANON_KEY);
+    // Set the user's session so RLS works
+    if (init.session) {
+      await sbClient.auth.setSession(init.session);
+    }
 
     document.getElementById('backLink').href =
       '/celpe/dashboard/exam.html?sim=' + simId + '&attempt=' + attemptId;
@@ -354,11 +384,69 @@ function renderProgress(containerId, activeIdx) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// CONTINUOUS RECORDING (one per section)
+// ═══════════════════════════════════════════════════════════════
+async function startContinuousRecording() {
+  try {
+    var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    continuousStream = stream;
+    continuousChunks = [];
+    continuousBlob = null;
+    continuousStartTime = Date.now();
+
+    continuousRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+    continuousRecorder.ondataavailable = function(e) {
+      if (e.data.size > 0) continuousChunks.push(e.data);
+    };
+    continuousRecorder.start(1000); // collect data every second for reliability
+    console.log('[oral-v3] Continuous recording started');
+
+    // Show indicator
+    var suffix = currentSection === 'part1' ? '1' : '2';
+    var indicator = document.getElementById('contIndicator' + suffix);
+    if (indicator) indicator.classList.add('active');
+  } catch (err) {
+    console.error('[oral-v3] Mic access failed:', err);
+    CELPE.toast('Não foi possível acessar o microfone. Verifique as permissões.');
+    throw err;
+  }
+}
+
+function stopContinuousRecording() {
+  return new Promise(function(resolve) {
+    if (!continuousRecorder || continuousRecorder.state === 'inactive') {
+      resolve(null);
+      return;
+    }
+
+    continuousRecorder.onstop = function() {
+      var blob = new Blob(continuousChunks, { type: 'audio/webm' });
+      var duration = Math.round((Date.now() - continuousStartTime) / 1000);
+      continuousBlob = blob;
+      console.log('[oral-v3] Continuous recording stopped: ' + (blob.size / 1024).toFixed(0) + ' KB, ' + duration + 's');
+
+      // Release mic
+      if (continuousStream) {
+        continuousStream.getTracks().forEach(function(t) { t.stop(); });
+        continuousStream = null;
+      }
+      continuousRecorder = null;
+
+      // Hide indicator
+      document.querySelectorAll('.continuous-indicator').forEach(function(el) { el.classList.remove('active'); });
+
+      resolve({ blob: blob, duration: duration });
+    };
+
+    continuousRecorder.stop();
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
 // PART 1: PERSONAL CONVERSATION
 // ═══════════════════════════════════════════════════════════════
-function startPart1() {
+async function startPart1() {
   currentSection = 'part1';
-  sectionRecordings = [];
   sectionChat = [];
   sectionTurnCount = 0;
   part1QuestionIdx = 0;
@@ -370,27 +458,39 @@ function startPart1() {
   timerSeconds = 300;
   updateTimerDisplay();
 
+  // Start continuous recording for the entire Part 1
+  try {
+    await startContinuousRecording();
+  } catch (err) {
+    return; // mic denied
+  }
+
   addChat('chatArea1', 'ai', part1Questions[0]);
   part1QuestionIdx = 1;
 
   startTimer(function() {
-    if (isRecording) stopRecording();
+    if (isTurnRecording) stopTurnRecording();
     endPart1();
   });
 }
 
-function endPart1() {
-  if (isRecording) stopRecording();
+async function endPart1() {
+  if (isTurnRecording) stopTurnRecording();
   clearTimer();
 
-  if (sectionRecordings.length === 0) {
+  if (sectionTurnCount === 0) {
     CELPE.toast('Você precisa gravar pelo menos uma resposta.');
     return;
   }
 
-  allSections.push({
-    type: 'part1',
-    recordings: sectionRecordings.slice(),
+  // Stop the continuous recording and save the blob
+  var result = await stopContinuousRecording();
+
+  completedSections.push({
+    sectionKey: 'part1',
+    ep: null,
+    blob: result ? result.blob : null,
+    duration: result ? result.duration : 0,
     chat: sectionChat.slice()
   });
 
@@ -444,10 +544,9 @@ function skipPrep() {
 // ═══════════════════════════════════════════════════════════════
 // PART 2: EP CONVERSATION
 // ═══════════════════════════════════════════════════════════════
-function startEpConv(epIdx) {
+async function startEpConv(epIdx) {
   var ep = allEPs[epIdx];
   currentSection = 'ep';
-  sectionRecordings = [];
   sectionChat = [];
   sectionTurnCount = 0;
 
@@ -473,7 +572,7 @@ function startEpConv(epIdx) {
   btn.disabled = true;
   btn.textContent = epIdx < 2 ? 'Próximo tema →' : 'Encerrar prova oral';
 
-  document.getElementById('recordStatus2').textContent = 'Clique para gravar';
+  document.getElementById('recordStatus2').textContent = 'Clique para gravar sua resposta';
   document.getElementById('recordStatus2').classList.remove('recording');
   document.getElementById('recordBtn2').classList.remove('recording');
   document.getElementById('recordBtn2').style.display = '';
@@ -483,29 +582,39 @@ function startEpConv(epIdx) {
   timerSeconds = 240;
   updateTimerDisplay();
 
+  // Start continuous recording for this EP
+  try {
+    await startContinuousRecording();
+  } catch (err) {
+    return; // mic denied
+  }
+
   var starters = ep.conversation_starters || ['Vamos conversar sobre este tema. O que você acha?'];
   addChat('chatArea2', 'ai', starters[0]);
 
   startTimer(function() {
-    if (isRecording) stopRecording();
+    if (isTurnRecording) stopTurnRecording();
     endCurrentEp();
   });
 }
 
-function endCurrentEp() {
-  if (isRecording) stopRecording();
+async function endCurrentEp() {
+  if (isTurnRecording) stopTurnRecording();
   clearTimer();
 
-  if (sectionRecordings.length === 0) {
+  if (sectionTurnCount === 0) {
     CELPE.toast('Você precisa gravar pelo menos uma resposta.');
     return;
   }
 
-  allSections.push({
-    type: 'ep',
+  // Stop continuous recording
+  var result = await stopContinuousRecording();
+
+  completedSections.push({
+    sectionKey: 'ep' + (currentEpIdx + 1),
     ep: allEPs[currentEpIdx],
-    epIndex: currentEpIdx,
-    recordings: sectionRecordings.slice(),
+    blob: result ? result.blob : null,
+    duration: result ? result.duration : 0,
     chat: sectionChat.slice()
   });
 
@@ -550,15 +659,12 @@ function askNextQuestion() {
   // EP conversation: use topic-specific starters first, then generic fallbacks
   var ep = allEPs[currentEpIdx];
   var starters = (ep && ep.conversation_starters) || [];
-  // sectionTurnCount starts at 0; starter[0] was already shown as opener
-  var starterIdx = sectionTurnCount; // turn 1 → starter[1], turn 2 → starter[2], etc.
+  var starterIdx = sectionTurnCount;
   if (starterIdx < starters.length) {
     addChat(chatAreaId, 'ai', starters[starterIdx]);
   } else if (sectionTurnCount === starters.length) {
-    // One generic wrap-up after all starters exhausted
     addChat(chatAreaId, 'ai', getWrapUp());
   }
-  // After wrap-up: no more prompts, timer or candidate ends it
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -576,59 +682,36 @@ function addChat(areaId, role, text) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// RECORDING
+// PER-TURN RECORDING (UI feedback + question triggering)
+// The continuous recorder captures everything; these per-turn
+// toggles just drive the UI and conversation flow.
 // ═══════════════════════════════════════════════════════════════
-async function toggleRecording() {
-  if (isRecording) { stopRecording(); } else { await startRecording(); }
+function toggleRecording() {
+  if (isTurnRecording) { stopTurnRecording(); } else { startTurnRecording(); }
 }
 
-async function startRecording() {
-  try {
-    var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    activeStream = stream;
-    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-    audioChunks = [];
-    recordStart = Date.now();
-
-    mediaRecorder.ondataavailable = function(e) {
-      if (e.data.size > 0) audioChunks.push(e.data);
-    };
-
-    mediaRecorder.onstop = function() {
-      var blob = new Blob(audioChunks, { type: 'audio/webm' });
-      var duration = Math.round((Date.now() - recordStart) / 1000);
-      sectionRecordings.push({ blob: blob, duration: duration });
-      sectionTurnCount++;
-
-      var chatAreaId = currentSection === 'part1' ? 'chatArea1' : 'chatArea2';
-      addChat(chatAreaId, 'user', '🎤 Gravação (' + duration + 's)');
-
-      var endBtn = currentSection === 'part1' ? 'endPart1Btn' : 'endEpBtn';
-      document.getElementById(endBtn).disabled = false;
-
-      askNextQuestion();
-
-      if (activeStream) {
-        activeStream.getTracks().forEach(function(t) { t.stop(); });
-        activeStream = null;
-      }
-    };
-
-    mediaRecorder.start();
-    isRecording = true;
-    updateRecordUI(true);
-  } catch (err) {
-    console.error('[oral] mic error:', err);
-    CELPE.toast('Não foi possível acessar o microfone. Verifique as permissões.');
-  }
+function startTurnRecording() {
+  // The mic is already captured by the continuous recorder.
+  // This just updates UI to show the user is "speaking".
+  isTurnRecording = true;
+  turnStart = Date.now();
+  updateRecordUI(true);
 }
 
-function stopRecording() {
-  if (mediaRecorder && mediaRecorder.state === 'recording') {
-    mediaRecorder.stop();
-  }
-  isRecording = false;
+function stopTurnRecording() {
+  if (!isTurnRecording) return;
+  isTurnRecording = false;
+  var duration = Math.round((Date.now() - turnStart) / 1000);
+  sectionTurnCount++;
+
+  var chatAreaId = currentSection === 'part1' ? 'chatArea1' : 'chatArea2';
+  addChat(chatAreaId, 'user', '🎤 Resposta (' + duration + 's)');
+
+  var endBtn = currentSection === 'part1' ? 'endPart1Btn' : 'endEpBtn';
+  document.getElementById(endBtn).disabled = false;
+
   updateRecordUI(false);
+  askNextQuestion();
 }
 
 function updateRecordUI(recording) {
@@ -637,11 +720,11 @@ function updateRecordUI(recording) {
   var status = document.getElementById('recordStatus' + suffix);
   if (recording) {
     btn.classList.add('recording');
-    status.textContent = 'Gravando…';
+    status.textContent = 'Gravando… clique para parar';
     status.classList.add('recording');
   } else {
     btn.classList.remove('recording');
-    status.textContent = 'Clique para gravar';
+    status.textContent = 'Clique para gravar sua resposta';
     status.classList.remove('recording');
   }
 }
@@ -670,7 +753,6 @@ function updateTimerDisplay() {
   var s = Math.max(0, timerSeconds) % 60;
   var display = m + ':' + String(s).padStart(2, '0');
   document.getElementById('timerDisplay').textContent = display;
-  // Also update large prep timer if visible
   var prepEl = document.getElementById('prepTimer');
   if (prepEl && document.getElementById('phaseEpPrep').classList.contains('active')) {
     prepEl.textContent = display;
@@ -682,86 +764,90 @@ function updateTimerDisplay() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// SUBMIT ALL
+// SUBMIT ALL (v3: direct Supabase Storage upload)
 // ═══════════════════════════════════════════════════════════════
 async function submitAll() {
   if (submitted) return;
   showPhase('phaseSubmitting');
   document.getElementById('phaseName').textContent = 'Enviando';
 
-  // Count total recordings for progress
-  var totalRecs = 0;
-  allSections.forEach(function(s) { totalRecs += s.recordings.length; });
-  var uploadedCount = 0;
   var progressEl = document.getElementById('submitProgress');
+  var totalFiles = completedSections.filter(function(s) { return s.blob; }).length;
 
-  // Timeout warning after 30s
+  // Timeout warning
   var warnTimer = setTimeout(function() {
     if (progressEl) progressEl.textContent = 'Isso está demorando mais que o esperado. Por favor, não feche a página.';
   }, 30000);
 
   try {
-    for (var s = 0; s < allSections.length; s++) {
-      var sec = allSections[s];
-      sec.audioPaths = [];
-      for (var r = 0; r < sec.recordings.length; r++) {
-        var rec = sec.recordings[r];
-        var prefix = sec.type === 'part1' ? 'part1' : ('ep' + (sec.epIndex + 1));
-        var filename = prefix + '_turn' + (r + 1) + '.webm';
-        uploadedCount++;
-        if (progressEl) progressEl.textContent = 'Enviando gravação ' + uploadedCount + ' de ' + totalRecs + '…';
-        var result = await CELPE.uploadAudio(attemptId, filename, rec.blob);
-        sec.audioPaths.push({ path: result.path, duration: rec.duration, turn: r + 1 });
-      }
-    }
+    if (progressEl) progressEl.textContent = 'Enviando ' + totalFiles + ' gravações…';
+
+    // Upload all section blobs in parallel directly to Supabase Storage
+    var uploadPromises = completedSections.map(function(sec, idx) {
+      if (!sec.blob) return Promise.resolve(null);
+      var filePath = attemptId + '/' + sec.sectionKey + '.webm';
+      if (progressEl) progressEl.textContent = 'Enviando gravação ' + (idx + 1) + ' de ' + totalFiles + '…';
+      return sbClient.storage.from('celpe-audio').upload(filePath, sec.blob, {
+        contentType: 'audio/webm',
+        upsert: true
+      }).then(function(result) {
+        if (result.error) {
+          console.error('[oral-v3] Upload failed for ' + sec.sectionKey + ':', result.error.message);
+          throw result.error;
+        }
+        console.log('[oral-v3] Uploaded ' + filePath + ' (' + (sec.blob.size / 1024).toFixed(0) + ' KB)');
+        return filePath;
+      });
+    });
+
+    var uploadedPaths = await Promise.all(uploadPromises);
 
     if (progressEl) progressEl.textContent = 'Finalizando envio…';
 
-    var allConvParts = [];
-    for (var s2 = 0; s2 < allSections.length; s2++) {
-      var sec2 = allSections[s2];
-      var recIdx = 0;
-      var parts = [];
-      for (var ci = 0; ci < sec2.chat.length; ci++) {
-        var cm = sec2.chat[ci];
-        if (cm.role === 'ai') {
-          parts.push({ role: 'ai', text: cm.text });
-        } else {
-          parts.push({
-            role: 'user', text: cm.text,
-            audio_path: recIdx < sec2.audioPaths.length ? sec2.audioPaths[recIdx].path : null,
-            duration: recIdx < sec2.audioPaths.length ? sec2.audioPaths[recIdx].duration : 0
-          });
-          recIdx++;
-        }
-      }
-      allConvParts.push({
-        section: sec2.type === 'part1' ? 'part1' : 'ep' + (sec2.epIndex + 1),
-        ep: sec2.ep || null,
-        conversation_parts: parts,
-        audio_paths: sec2.audioPaths
+    // Build response_json in full_oral_v3 format
+    var sections = [];
+    var audioPaths = [];
+
+    for (var i = 0; i < completedSections.length; i++) {
+      var sec = completedSections[i];
+      var audioPath = uploadedPaths[i];
+
+      // Build conversation_parts (text only, no per-turn audio_path)
+      var parts = sec.chat.map(function(cm) {
+        return { role: cm.role, text: cm.text };
       });
+
+      sections.push({
+        section: sec.sectionKey,
+        ep: sec.ep ? { id: sec.ep.id, text: sec.ep.text, themes: sec.ep.themes, image_description: sec.ep.image_description } : null,
+        audio_path: audioPath,
+        duration_sec: sec.duration,
+        conversation_parts: parts
+      });
+
+      if (audioPath) {
+        audioPaths.push({ path: audioPath, duration: sec.duration, section: sec.sectionKey });
+      }
     }
 
-    var flatAudio = [];
-    allSections.forEach(function(sec3) { flatAudio = flatAudio.concat(sec3.audioPaths || []); });
-
     var responseJson = {
-      format: 'full_oral_v2',
-      sections: allConvParts,
+      format: 'full_oral_v3',
+      continuous_recording: true,
+      sections: sections,
       all_eps: allEPs.map(function(ep) { return ep.id; }),
-      audio_paths: flatAudio,
-      audio_path: flatAudio.length > 0 ? flatAudio[0].path : null,
-      total_recordings: flatAudio.length,
-      duration_sec: flatAudio.reduce(function(sum, a) { return sum + a.duration; }, 0),
+      audio_paths: audioPaths,
+      audio_path: audioPaths.length > 0 ? audioPaths[0].path : null,
+      total_recordings: audioPaths.length,
+      duration_sec: completedSections.reduce(function(sum, s) { return sum + s.duration; }, 0),
       evaluation_criteria: examData.evaluation_criteria,
       ai_evaluation_prompt: examData.ai_evaluation_oral_prompt,
     };
 
+    // Build conversation transcript for the submission text field
     var transcript = '';
-    allConvParts.forEach(function(sec4) {
-      transcript += '\n=== ' + sec4.section.toUpperCase() + ' ===\n';
-      sec4.conversation_parts.forEach(function(p) {
+    sections.forEach(function(sec) {
+      transcript += '\n=== ' + sec.section.toUpperCase() + ' ===\n';
+      sec.conversation_parts.forEach(function(p) {
         transcript += (p.role === 'ai' ? 'Examinador' : 'Candidato') + ': ' + p.text + '\n';
       });
     });
@@ -774,7 +860,7 @@ async function submitAll() {
     showPhase('phaseDone');
   } catch (err) {
     clearTimeout(warnTimer);
-    console.error('[oral] submit error:', err);
+    console.error('[oral-v3] submit error:', err);
     CELPE.toast('Erro ao enviar. Tente novamente.');
     showPhase('phaseDone');
   }
@@ -786,6 +872,10 @@ async function submitAll() {
 async function skipElement() {
   if (submitted) return;
   if (!confirm('Tem certeza que deseja pular a prova oral? Você receberá nota 0.')) return;
+  // Stop any active continuous recording
+  if (continuousRecorder && continuousRecorder.state !== 'inactive') {
+    await stopContinuousRecording();
+  }
   await CELPE.skip({ attemptId: attemptId, elemKey: elemKey });
   submitted = true;
   clearTimer();
