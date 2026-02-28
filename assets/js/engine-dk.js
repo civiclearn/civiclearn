@@ -211,23 +211,19 @@ function isQuestionSaved(questionId) {
 
 function toggleSavedQuestion(questionId) {
   const map = getSavedMap();
-
-  if (map[questionId]) {
-    delete map[questionId];
+  if (map[questionId] && map[questionId] !== false) {
+    map[questionId] = false;  // mark removed, don't delete
   } else {
-    map[questionId] = true;
+    map[questionId] = Date.now();  // timestamp when saved
   }
-
   setSavedMap(map);
-   // Sync to cloud
-  if (window.CivicSync) {
-    CivicSync.push("civicedge_saved");
-  }
+  if (window.CivicSync) CivicSync.push("civicedge_saved");
   return !!map[questionId];
 }
 
 function getSavedQuestionIds() {
-  return Object.keys(getSavedMap());
+  const map = getSavedMap();
+  return Object.keys(map).filter(k => map[k] && map[k] !== false);
 }
 
 

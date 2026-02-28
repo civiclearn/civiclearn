@@ -139,10 +139,25 @@
     return { history: merged };
   }
 
-  function mergeSaved(local, remote) {
-    // Both are objects: { "questionId": true }
-    return Object.assign({}, remote || {}, local || {});
-  }
+function mergeSaved(local, remote) {
+  var merged = {};
+  var allKeys = new Set(
+    Object.keys(local || {}).concat(Object.keys(remote || {}))
+  );
+  allKeys.forEach(function (k) {
+    var l = (local || {})[k];
+    var r = (remote || {})[k];
+    // Both exist: highest timestamp wins; false (removed) beats true but loses to a newer timestamp
+    if (l === undefined || l === null) { merged[k] = r; return; }
+    if (r === undefined || r === null) { merged[k] = l; return; }
+    // Normalize: old `true` values treated as timestamp 1
+    var lv = (l === true) ? 1 : (l || 0);
+    var rv = (r === true) ? 1 : (r || 0);
+    // false = 0, so a newer save timestamp always wins over a removal
+    merged[k] = (lv >= rv) ? l : r;
+  });
+  return merged;
+}
 
   function mergeKey(key, local, remote) {
     if (key === "civicedge_progress") {
