@@ -1,11 +1,14 @@
 /**
- * CELPE-BRAS Auth Guard
- * Include on every protected celpebras.org page.
- * Checks for a valid Supabase Auth session and redirects to login if none exists.
+ * CivicAuth — Auth Guard
+ * ═══════════════════════════════════════════════════════════════
+ * Include on every protected page. Checks for a valid Supabase Auth
+ * session and redirects to login if none exists.
+ *
+ * Pattern: CivicAuth (standard across all CivicLearn products)
  *
  * Usage in HTML:
  *   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
- *   <script src="/assets/js/celpe-auth.js"></script>
+ *   <script src="/celpe/assets/js/celpe-auth.js"></script>
  *
  * After loading, the global `celpeAuth` object is available:
  *   celpeAuth.email      — the logged-in user's email
@@ -64,7 +67,7 @@
       window.dispatchEvent(new CustomEvent('celpeAuthReady', { detail: auth }));
 
     } catch (err) {
-      console.error('CELPE Auth error:', err);
+      console.error('CivicAuth guard error:', err);
       window.location.href = LOGIN_URL;
     }
   })();

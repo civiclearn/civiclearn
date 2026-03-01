@@ -111,7 +111,7 @@
       <h1>Algo deu errado</h1>
       <p id="error-detail">Não encontramos sua sessão de pagamento. Se o problema persistir, entre em contato: admin@civiclearn.com</p>
     </div>
-    <a href="/" class="btn btn-green" style="text-align:center;text-decoration:none;">Voltar ao início</a>
+    <a href="/celpe/" class="btn btn-green" style="text-align:center;text-decoration:none;">Voltar ao início</a>
   </div>
 
 </div>
@@ -122,17 +122,21 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+/**
+ * CivicAuth — Post-checkout account setup.
+ * Receives ?session_id= from Stripe, calls {product}-setup-account edge function,
+ * creates Supabase Auth user, auto-logs in, redirects to dashboard.
+ */
 (function() {
   'use strict';
 
   const SUPABASE_URL      = 'https://htgliokekeaovdiafrgs.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
   const FUNCTIONS_URL     = SUPABASE_URL + '/functions/v1';
-  const DASHBOARD_URL     = '/dashboard/index.html';
+  const DASHBOARD_URL     = '/celpe/dashboard/index.html';
 
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // Get session_id from URL
   const params    = new URLSearchParams(window.location.search);
   const sessionId = params.get('session_id');
 
@@ -192,7 +196,7 @@
         return;
       }
 
-      // Auto-login
+      // Auto-login via Supabase Auth
       const { error: signInError } = await sb.auth.signInWithPassword({
         email:    data.email,
         password: password,

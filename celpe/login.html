@@ -14,27 +14,35 @@
       --yellow:#ffdf00; --blue:#002776;
       --navy:#0f172a; --slate:#334155; --muted:#64748b;
       --border:#e2e8f0; --surface:#ffffff; --bg:#f8f7f4;
-      --red:#dc2626;
+      --red:#dc2626; --pass:#059669; --pass-light:#f0fdf4;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;}
 
+    /* TOPBAR */
     .topbar{background:var(--navy);border-bottom:3px solid var(--green);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;}
     .topbar-brand{display:flex;align-items:center;gap:14px;}
     .topbar-flag{width:28px;height:20px;background:var(--green);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0;}
     .topbar-flag::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:16px;height:10px;background:var(--yellow);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);}
     .topbar-flag::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:6px;height:6px;border-radius:50%;background:var(--blue);}
     .brand-text{display:flex;flex-direction:column;line-height:1.1;}
-    .brand-title{font-family:"Fraunces",serif;font-size:1rem;font-weight:600;color:#fff;letter-spacing:0.01em;}
+    .brand-title{font-family:"Fraunces",serif;font-size:1rem;font-weight:600;color:#fff;}
     .brand-sub{font-size:0.72rem;color:#64748b;}
 
+    /* LAYOUT */
     .main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
     .login-card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.04);}
 
+    /* STATES */
+    .state{display:none;}
+    .state.active{display:block;}
+
+    /* HEADER */
     .view-header{text-align:center;margin-bottom:22px;}
     .view-title{font-family:"Fraunces",serif;font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px;}
     .view-subtitle{font-size:0.85rem;color:var(--muted);line-height:1.5;}
 
+    /* FORM */
     .form-group{margin-bottom:16px;}
     .form-label{display:block;font-size:0.78rem;font-weight:600;color:var(--slate);margin-bottom:6px;}
     .form-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:"DM Sans",sans-serif;font-size:0.92rem;color:var(--navy);background:var(--bg);transition:border-color 0.15s;outline:none;}
@@ -44,18 +52,32 @@
     .pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:0.75rem;color:var(--muted);cursor:pointer;font-family:inherit;font-weight:600;}
     .pwd-toggle:hover{color:var(--navy);}
 
+    /* BUTTONS */
     .action-btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:"DM Sans",sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;margin-top:4px;background:var(--green);color:#fff;}
-    .action-btn:hover{opacity:0.85;}
+    .action-btn:hover:not(:disabled){opacity:0.85;}
     .action-btn:disabled{opacity:0.4;cursor:default;}
 
     .form-footer{text-align:center;margin-top:14px;}
     .form-link{font-size:0.8rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline;}
     .form-link:hover{color:var(--navy);}
 
+    /* MESSAGES */
     .msg{display:none;border-radius:10px;padding:10px 14px;font-size:0.82rem;margin-bottom:16px;text-align:center;}
     .msg.visible{display:block;}
     .msg.error{background:#fef2f2;border:1px solid #fecaca;color:var(--red);}
     .msg.success{background:var(--green-dim);border:1px solid #bbf7d0;color:#166534;}
+
+    /* PIN BOX */
+    .pin-box{background:var(--green-dim);border:2px dashed var(--green);border-radius:12px;padding:16px;text-align:center;margin-bottom:20px;}
+    .pin-label{font-size:0.78rem;font-weight:600;color:var(--green-dark);margin-bottom:6px;}
+    .pin-value{font-family:"Fraunces",serif;font-size:2rem;font-weight:700;color:var(--green);letter-spacing:0.15em;}
+
+    /* SUCCESS CHECK */
+    .success-icon{width:56px;height:56px;background:var(--pass-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;}
+
+    /* SPINNER */
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;}
+    @keyframes spin{to{transform:rotate(360deg);}}
 
     .page-footer{text-align:center;padding:20px;font-size:0.75rem;color:var(--muted);}
     .page-footer a{color:var(--green);text-decoration:none;font-weight:600;}
@@ -77,29 +99,100 @@
 
 <div class="main">
   <div class="login-card">
-    <div class="msg error" id="globalError"></div>
-    <div class="msg success" id="globalSuccess"></div>
 
-    <div class="view-header">
-      <div class="view-title">Entrar</div>
-      <div class="view-subtitle">Use seu e-mail e senha</div>
-    </div>
+    <!-- ═══ STATE 1: LOGIN ═══ -->
+    <div id="state-login" class="state active">
+      <div id="login-msg" class="msg"></div>
 
-    <div class="form-group">
-      <label class="form-label" for="loginEmail">E-mail</label>
-      <input class="form-input" id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="email">
-    </div>
-    <div class="form-group">
-      <label class="form-label" for="loginPwd">Senha</label>
-      <div class="pwd-wrap">
-        <input class="form-input" id="loginPwd" type="password" placeholder="••••••••" autocomplete="current-password">
-        <button class="pwd-toggle" type="button" onclick="togglePwd()">Mostrar</button>
+      <div class="view-header">
+        <div class="view-title">Entrar</div>
+        <div class="view-subtitle">Use seu e-mail e senha</div>
+      </div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="login-email">E-mail</label>
+          <input class="form-input" id="login-email" type="email" placeholder="seu@email.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Senha</label>
+          <div class="pwd-wrap">
+            <input class="form-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
+            <button class="pwd-toggle" type="button" id="pwd-toggle-btn">Mostrar</button>
+          </div>
+        </div>
+        <button type="submit" class="action-btn" id="login-btn">Entrar</button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="show-forgot">Esqueci minha senha</button>
       </div>
     </div>
-    <button class="action-btn" id="loginBtn" onclick="handleLogin()">Entrar</button>
-    <div class="form-footer">
-      <button class="form-link" onclick="handleForgot()">Esqueci minha senha</button>
+
+    <!-- ═══ STATE 2: FORGOT — Enter email ═══ -->
+    <div id="state-forgotEmail" class="state">
+      <div id="forgot-msg" class="msg"></div>
+
+      <div class="view-header">
+        <div class="view-title">Recuperar senha</div>
+        <div class="view-subtitle">Digite o e-mail da sua conta</div>
+      </div>
+
+      <form id="forgot-email-form">
+        <div class="form-group">
+          <label class="form-label" for="forgot-email">E-mail</label>
+          <input class="form-input" id="forgot-email" type="email" placeholder="seu@email.com" autocomplete="email">
+        </div>
+        <button type="submit" class="action-btn" id="forgot-email-btn">Continuar</button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="back-to-login">← Voltar para o login</button>
+      </div>
     </div>
+
+    <!-- ═══ STATE 3: FORGOT — PIN + new password ═══ -->
+    <div id="state-forgotReset" class="state">
+      <div id="reset-msg" class="msg"></div>
+
+      <div class="view-header">
+        <div class="view-title">Nova senha</div>
+        <div class="view-subtitle">Digite o código abaixo e escolha uma nova senha</div>
+      </div>
+
+      <div class="pin-box">
+        <div class="pin-label">Código de confirmação</div>
+        <div class="pin-value" id="pin-value">------</div>
+      </div>
+
+      <form id="reset-form">
+        <div class="form-group">
+          <label class="form-label" for="reset-pin">Código</label>
+          <input class="form-input" id="reset-pin" type="text" placeholder="Digite o código acima" inputmode="numeric" maxlength="6" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reset-password">Nova senha</label>
+          <input class="form-input" id="reset-password" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reset-password-confirm">Confirmar senha</label>
+          <input class="form-input" id="reset-password-confirm" type="password" placeholder="Repita a senha" autocomplete="new-password">
+        </div>
+        <button type="submit" class="action-btn" id="reset-btn">Salvar nova senha</button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="back-to-forgot-email">← Voltar</button>
+      </div>
+    </div>
+
+    <!-- ═══ STATE 4: RESET SUCCESS ═══ -->
+    <div id="state-resetSuccess" class="state">
+      <div class="success-icon">✅</div>
+      <div class="view-header">
+        <div class="view-title">Senha atualizada!</div>
+        <div class="view-subtitle">Sua nova senha foi salva com sucesso. Faça login para continuar.</div>
+      </div>
+      <button class="action-btn" id="go-to-login">Fazer login</button>
+    </div>
+
   </div>
 </div>
 
@@ -108,67 +201,209 @@
 </div>
 
 <script>
-  const SUPABASE_URL = 'https://htgliokekeaovdiafrgs.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+/**
+ * CivicAuth — Standard authentication pattern for CivicLearn products.
+ *
+ * Features:
+ *   - Supabase Auth email+password login
+ *   - Integrated PIN-based password reset (no emails, no external pages)
+ *   - Deterministic hourly PIN via edge function
+ *   - Auto-redirect if already logged in
+ *
+ * Pattern name: CivicAuth
+ * Reference implementation: CELPE-BRAS (celpe-reset-password edge function)
+ * Also used by: PD3 / Dansk3 (pd3-reset-password edge function)
+ */
+(function() {
+  'use strict';
+
+  const SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
+  const DASHBOARD_URL = '/celpe/dashboard/index.html';
+
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const params    = new URLSearchParams(location.search);
-  const returnUrl = params.get('return') || '/celpe/dashboard/index.html';
+  const returnUrl = params.get('return') || DASHBOARD_URL;
 
-  // Check if already logged in
+  // Auto-redirect if already logged in
   (async () => {
     const { data: { session } } = await sb.auth.getSession();
     if (session) window.location.href = returnUrl;
   })();
 
-  // Password login
-  async function handleLogin() {
-    hideMessages();
-    const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
-    const password = document.getElementById('loginPwd').value;
-    if (!email || !password) return showError('Preencha e-mail e senha.');
-    if (!email.includes('@') || !email.includes('.')) return showError('Digite um e-mail válido.');
+  // ── State management ──────────────────────────
+  function showState(name) {
+    document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+    document.getElementById('state-' + name).classList.add('active');
+  }
 
-    const btn = document.getElementById('loginBtn');
-    btn.disabled = true; btn.textContent = 'Entrando…';
+  function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'msg visible ' + type;
+  }
 
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) {
-      btn.disabled = false; btn.textContent = 'Entrar';
-      return showError(translateError(error.message));
+  function clearMsg(id) {
+    const el = document.getElementById(id);
+    el.className = 'msg';
+    el.textContent = '';
+  }
+
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    if (loading) {
+      btn.disabled = true;
+      btn.dataset.originalText = btn.textContent;
+      btn.innerHTML = '<span class="spinner"></span>Aguarde…';
+    } else {
+      btn.disabled = false;
+      btn.textContent = btn.dataset.originalText || btn.textContent;
     }
-
-    try { await sb.from('login_history').insert({ email, status: 'success', method: 'password' }); } catch(e) {}
-    window.location.href = returnUrl;
   }
 
-  // Forgot password — uses the email already typed in the login field
-  async function handleForgot() {
-    hideMessages();
-    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-    if (!email) return showError('Preencha seu e-mail primeiro.');
-    if (!email.includes('@') || !email.includes('.')) return showError('Digite um e-mail válido para receber o link.');
+  // ── Navigation ────────────────────────────────
+  document.getElementById('show-forgot').addEventListener('click', (e) => {
+    e.preventDefault();
+    clearMsg('login-msg');
+    // Pre-fill forgot email from login email if available
+    const loginEmail = document.getElementById('login-email').value.trim();
+    if (loginEmail) document.getElementById('forgot-email').value = loginEmail;
+    showState('forgotEmail');
+  });
 
-    const { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/set-password.html',
-    });
+  document.getElementById('back-to-login').addEventListener('click', () => {
+    clearMsg('forgot-msg');
+    showState('login');
+  });
 
-    if (error) return showError('Não foi possível enviar o link. Tente novamente.');
-    showSuccess('Link enviado! Verifique seu e-mail (e a pasta de spam).');
-  }
+  document.getElementById('back-to-forgot-email').addEventListener('click', () => {
+    clearMsg('reset-msg');
+    showState('forgotEmail');
+  });
 
-  // Helpers
-  function togglePwd() {
-    const el = document.getElementById('loginPwd');
-    const btn = document.querySelector('.pwd-toggle');
+  document.getElementById('go-to-login').addEventListener('click', () => {
+    showState('login');
+  });
+
+  // ── Password toggle ───────────────────────────
+  document.getElementById('pwd-toggle-btn').addEventListener('click', () => {
+    const el = document.getElementById('login-password');
+    const btn = document.getElementById('pwd-toggle-btn');
     if (el.type === 'password') { el.type = 'text'; btn.textContent = 'Ocultar'; }
     else { el.type = 'password'; btn.textContent = 'Mostrar'; }
-  }
+  });
 
-  function showError(msg) { const el = document.getElementById('globalError'); el.textContent = msg; el.classList.add('visible'); }
-  function showSuccess(msg) { const el = document.getElementById('globalSuccess'); el.textContent = msg; el.classList.add('visible'); }
-  function hideMessages() { document.querySelectorAll('.msg').forEach(el => el.classList.remove('visible')); }
+  // ── LOGIN form ────────────────────────────────
+  let resetEmail = '';
 
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMsg('login-msg');
+
+    const email    = document.getElementById('login-email').value.trim().toLowerCase();
+    const password = document.getElementById('login-password').value;
+
+    if (!email || !password) return showMsg('login-msg', 'Preencha e-mail e senha.', 'error');
+    if (!email.includes('@') || !email.includes('.')) return showMsg('login-msg', 'Digite um e-mail válido.', 'error');
+
+    setLoading('login-btn', true);
+
+    try {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        showMsg('login-msg', translateError(error.message), 'error');
+        setLoading('login-btn', false);
+        return;
+      }
+
+      try { await sb.from('login_history').insert({ email, status: 'success', method: 'password' }); } catch(e) {}
+      window.location.href = returnUrl;
+
+    } catch (err) {
+      showMsg('login-msg', 'Ocorreu um erro. Tente novamente.', 'error');
+      setLoading('login-btn', false);
+    }
+  });
+
+  // ── FORGOT: email check ───────────────────────
+  document.getElementById('forgot-email-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMsg('forgot-msg');
+
+    resetEmail = document.getElementById('forgot-email').value.trim().toLowerCase();
+    if (!resetEmail || !resetEmail.includes('@')) {
+      return showMsg('forgot-msg', 'Digite um e-mail válido.', 'error');
+    }
+
+    setLoading('forgot-email-btn', true);
+
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/celpe-reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'check_email', email: resetEmail }),
+      });
+      const data = await res.json();
+
+      if (!data.exists) {
+        showMsg('forgot-msg', data.message || 'E-mail não encontrado.', 'error');
+        setLoading('forgot-email-btn', false);
+        return;
+      }
+
+      // Show PIN and move to reset state
+      document.getElementById('pin-value').textContent = data.pin;
+      showState('forgotReset');
+
+    } catch (err) {
+      showMsg('forgot-msg', 'Ocorreu um erro. Tente novamente.', 'error');
+    }
+    setLoading('forgot-email-btn', false);
+  });
+
+  // ── FORGOT: PIN + new password ────────────────
+  document.getElementById('reset-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMsg('reset-msg');
+
+    const pin             = document.getElementById('reset-pin').value.trim();
+    const newPassword     = document.getElementById('reset-password').value;
+    const confirmPassword = document.getElementById('reset-password-confirm').value;
+
+    if (!pin) return showMsg('reset-msg', 'Digite o código de confirmação.', 'error');
+    if (newPassword.length < 6) return showMsg('reset-msg', 'A senha deve ter pelo menos 6 caracteres.', 'error');
+    if (newPassword !== confirmPassword) return showMsg('reset-msg', 'As senhas não coincidem.', 'error');
+
+    setLoading('reset-btn', true);
+
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/celpe-reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reset',
+          email: resetEmail,
+          pin: pin,
+          new_password: newPassword,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        showState('resetSuccess');
+      } else {
+        showMsg('reset-msg', data.error || 'Erro ao redefinir senha.', 'error');
+      }
+    } catch (err) {
+      showMsg('reset-msg', 'Ocorreu um erro. Tente novamente.', 'error');
+    }
+    setLoading('reset-btn', false);
+  });
+
+  // ── Helpers ───────────────────────────────────
   function translateError(msg) {
     const l = msg.toLowerCase();
     if (l.includes('invalid login'))       return 'E-mail ou senha incorretos.';
@@ -179,7 +414,12 @@
     return msg;
   }
 
-  document.getElementById('loginPwd')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+  // Enter key on password field
+  document.getElementById('login-password')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('login-form').requestSubmit();
+  });
+
+})();
 </script>
 </body>
 </html>
