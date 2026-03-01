@@ -146,24 +146,48 @@
         <strong>Etapa 2</strong> — Elementos Provocadores (~15 min)<br>
         <span style="color:var(--muted)">Três temas são apresentados, um de cada vez. Para cada um, você terá 1 minuto para ler e depois conversar com o examinador.</span>
       </p>
-      <button class="action-btn green" onclick="startPart1()" style="max-width:360px;margin:0 auto">Começar</button>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:16px;margin:16px auto;max-width:480px;text-align:left">
+        <div style="font-weight:700;font-size:0.88rem;color:#92400e;margin-bottom:8px">🎤 Antes de começar:</div>
+        <ul style="font-size:0.84rem;color:#92400e;line-height:1.7;padding-left:18px;margin:0">
+          <li>Esteja em um <strong>ambiente silencioso</strong></li>
+          <li>Use <strong>fones de ouvido com microfone</strong> se possível</li>
+          <li>O navegador vai pedir <strong>permissão para usar o microfone</strong> — clique em "Permitir"</li>
+          <li>A gravação começa assim que a primeira pergunta aparecer</li>
+        </ul>
+      </div>
+      <button class="action-btn green" onclick="checkMicAndStart()" id="startBtn" style="max-width:360px;margin:0 auto">Preparar microfone e começar →</button>
     </div>
     <span class="skip-link" onclick="skipElement()">Pular prova oral</span>
+  </div>
+
+  <!-- MIC CHECK -->
+  <div class="phase" id="phaseMicCheck">
+    <div class="transition-card">
+      <div style="font-size:2.5rem;margin-bottom:12px">🎤</div>
+      <h2>Microfone conectado!</h2>
+      <p style="color:var(--pass);font-weight:600;margin-bottom:8px">✓ Tudo pronto para gravar</p>
+      <p style="font-size:0.84rem;color:var(--muted);max-width:400px;margin:0 auto 20px">
+        Na próxima tela, o examinador fará uma pergunta.<br>
+        <strong>Leia a pergunta em voz alta e responda em português.</strong><br>
+        Quando terminar de falar, clique em <strong>"Já respondi"</strong>.
+      </p>
+      <button class="action-btn green" onclick="proceedToConversation()" style="max-width:360px;margin:0 auto">Iniciar conversa →</button>
+    </div>
   </div>
 
   <!-- PART 1: PERSONAL CONVERSATION -->
   <div class="phase" id="phasePart1">
     <div class="progress-bar" id="progressBar1"></div>
     <h2 class="phase-title">Etapa 1 — Conversa pessoal</h2>
-    <p class="phase-subtitle">O examinador quer conhecer você. Responda naturalmente.</p>
+    <p class="phase-subtitle">O examinador quer conhecer você. Responda naturalmente, em voz alta.</p>
     <div class="conv-layout">
       <div class="mic-badge" id="micBadge1">
         <div class="mic-dot"></div>
-        Microfone ativo
+        🔴 Gravando — fale agora
       </div>
       <div class="chat-area" id="chatArea1"></div>
       <button class="next-btn" id="nextBtn1" onclick="advanceTurn()" disabled>
-        Já respondi ↵
+        ✓ Já respondi — próxima pergunta
       </button>
       <button class="action-btn" id="endPart1Btn" onclick="endPart1()" disabled>
         Próxima etapa →
@@ -176,10 +200,10 @@
     <div class="progress-bar" id="progressBarPrep"></div>
     <div class="prep-card">
       <h2 class="phase-title" id="prepTitle">Elemento Provocador 1 de 3</h2>
-      <p style="font-size:0.85rem;color:var(--muted)">Leia o elemento provocador e organize suas ideias.</p>
+      <p style="font-size:0.85rem;color:var(--muted)">📖 Leia o elemento provocador e organize suas ideias. <strong>O microfone está desligado.</strong></p>
       <div class="prep-timer" id="prepTimer">1:00</div>
       <div class="prep-ep" id="prepEpCard"></div>
-      <p class="prep-hint">A conversa começará automaticamente quando o tempo acabar.</p>
+      <p class="prep-hint">Quando o tempo acabar, o microfone será ligado e a conversa começará.</p>
       <button class="skip-prep-btn" onclick="skipPrep()">Estou pronto(a), começar agora →</button>
     </div>
   </div>
@@ -188,16 +212,16 @@
   <div class="phase" id="phaseEpConv">
     <div class="progress-bar" id="progressBarConv"></div>
     <h2 class="phase-title" id="convTitle">Elemento Provocador 1 de 3</h2>
-    <p class="phase-subtitle">Fale sobre o tema. Grave suas respostas.</p>
+    <p class="phase-subtitle">Leia a pergunta e responda em voz alta. Clique em "Já respondi" quando terminar.</p>
     <div class="conv-layout">
       <div class="conv-ep-card" id="convEpCard"></div>
       <div class="mic-badge" id="micBadge2">
         <div class="mic-dot"></div>
-        Microfone ativo
+        🔴 Gravando — fale agora
       </div>
       <div class="chat-area" id="chatArea2"></div>
       <button class="next-btn" id="nextBtn2" onclick="advanceTurn()" disabled>
-        Já respondi ↵
+        ✓ Já respondi — próxima pergunta
       </button>
       <button class="action-btn" id="endEpBtn" onclick="endCurrentEp()" disabled>
         Próximo tema →
@@ -440,6 +464,31 @@ function stopContinuousRecording() {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// MIC CHECK (pre-flight before starting)
+// ═══════════════════════════════════════════════════════════════
+async function checkMicAndStart() {
+  var btn = document.getElementById('startBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-right:6px;border-width:2px"></span>Verificando microfone…';
+
+  try {
+    var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // Permission granted — stop the test stream immediately
+    stream.getTracks().forEach(function(t) { t.stop(); });
+    showPhase('phaseMicCheck');
+  } catch (err) {
+    console.error('[oral] Mic check failed:', err);
+    btn.disabled = false;
+    btn.textContent = 'Preparar microfone e começar →';
+    CELPE.toast('Não foi possível acessar o microfone. Clique no ícone do cadeado na barra de endereço e permita o acesso ao microfone.');
+  }
+}
+
+function proceedToConversation() {
+  startPart1();
+}
+
+// ═══════════════════════════════════════════════════════════════
 // PART 1: PERSONAL CONVERSATION
 // ═══════════════════════════════════════════════════════════════
 async function startPart1() {
@@ -461,6 +510,10 @@ async function startPart1() {
   } catch (err) {
     return; // mic denied
   }
+
+  // Instruction hint (not part of sectionChat — just visual)
+  var hintHtml = '<div style="text-align:center;padding:8px 12px;margin-bottom:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:0.78rem;color:#92400e">🎤 <strong>Gravação iniciada.</strong> Leia a pergunta abaixo e responda em voz alta. Quando terminar, clique em "Já respondi".</div>';
+  document.getElementById('chatArea1').innerHTML = hintHtml;
 
   addChat('chatArea1', 'ai', part1Questions[0]);
   part1QuestionIdx = 1;
@@ -582,6 +635,10 @@ async function startEpConv(epIdx) {
   } catch (err) {
     return; // mic denied
   }
+
+  // Instruction hint
+  var hintHtml = '<div style="text-align:center;padding:8px 12px;margin-bottom:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:0.78rem;color:#92400e">🎤 <strong>Gravação iniciada.</strong> Responda em voz alta e clique em "Já respondi" quando terminar.</div>';
+  document.getElementById('chatArea2').innerHTML = hintHtml;
 
   var starters = ep.conversation_starters || ['Vamos conversar sobre este tema. O que você acha?'];
   addChat('chatArea2', 'ai', starters[0]);
