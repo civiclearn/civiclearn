@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesskilningur — Ríkisborgarapróf</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --blue: #003897;
+    --blue-light: #e8eef8;
+    --blue-hover: #002a73;
+    --red: #d72828;
+    --green: #1a7a3a;
+    --green-light: #e6f4ea;
+    --red-light: #fde8e8;
+    --gray-50: #f8f9fa;
+    --gray-100: #f1f3f5;
+    --gray-200: #e2e5e9;
+    --gray-400: #8b95a5;
+    --gray-600: #4a5568;
+    --gray-800: #1e2a3a;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,.1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-800);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Top bar */
+  .topbar {
+    background: var(--blue);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .topbar-flag { font-size: 1.4rem; }
+  .topbar-title { font-weight: 600; font-size: 0.95rem; letter-spacing: 0.01em; }
+  .topbar-section { font-size: 0.85rem; opacity: 0.85; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .topbar-sim {
+    background: rgba(255,255,255,0.15);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  .topbar-back {
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.85rem;
+    opacity: 0.8;
+    transition: opacity .2s;
+  }
+  .topbar-back:hover { opacity: 1; }
+
+  /* Progress bar */
+  .progress-wrap {
+    background: var(--gray-200);
+    height: 4px;
+    width: 100%;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--blue);
+    transition: width .4s ease;
+    width: 0%;
+  }
+
+  /* Main content */
+  .main { max-width: 780px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  /* Section heading */
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--blue-light);
+    color: var(--blue);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+
+  /* Text card */
+  .text-card {
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .text-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .text-number {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+  .text-title {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-800);
+  }
+  .text-passage {
+    padding: 20px 24px;
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--gray-600);
+    white-space: pre-line;
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  /* Questions */
+  .questions-wrap { padding: 20px 24px 24px; }
+  .questions-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 16px;
+  }
+
+  .question-block { margin-bottom: 24px; }
+  .question-block:last-child { margin-bottom: 0; }
+  .question-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--gray-800);
+  }
+  .question-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background: var(--blue);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-right: 8px;
+    flex-shrink: 0;
+    vertical-align: middle;
+  }
+
+  /* Option styling */
+  .option-group { display: flex; flex-direction: column; gap: 6px; }
+  .option-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all .15s ease;
+    font-size: 0.92rem;
+  }
+  .option-label:hover { border-color: var(--blue); background: var(--blue-light); }
+  .option-label input { display: none; }
+  .option-letter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--gray-100);
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    flex-shrink: 0;
+    transition: all .15s ease;
+  }
+  .option-label.selected { border-color: var(--blue); background: var(--blue-light); }
+  .option-label.selected .option-letter { background: var(--blue); color: #fff; }
+
+  /* Result states */
+  .option-label.correct { border-color: var(--green); background: var(--green-light); pointer-events: none; }
+  .option-label.correct .option-letter { background: var(--green); color: #fff; }
+  .option-label.incorrect { border-color: var(--red); background: var(--red-light); pointer-events: none; }
+  .option-label.incorrect .option-letter { background: var(--red); color: #fff; }
+  .option-label.was-correct { border-color: var(--green); background: var(--green-light); pointer-events: none; }
+  .option-label.was-correct .option-letter { background: var(--green); color: #fff; }
+  .option-label.locked { pointer-events: none; opacity: 0.6; }
+
+  /* Submit / Next buttons */
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 36px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 32px;
+    border-radius: var(--radius);
+    border: none;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: var(--blue-hover); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+  .btn-primary:disabled { background: var(--gray-400); cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-outline { background: #fff; color: var(--blue); border: 2px solid var(--blue); }
+  .btn-outline:hover { background: var(--blue-light); }
+
+  /* Results panel */
+  .results-panel {
+    display: none;
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 28px 24px;
+    margin-top: 28px;
+    text-align: center;
+  }
+  .results-panel.visible { display: block; animation: fadeIn .4s ease; }
+  .results-icon { font-size: 2.4rem; margin-bottom: 12px; }
+  .results-score {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 4px;
+  }
+  .results-pct { font-size: 1.1rem; color: var(--gray-600); margin-bottom: 16px; }
+  .results-bar-wrap {
+    background: var(--gray-200);
+    height: 10px;
+    border-radius: 5px;
+    max-width: 300px;
+    margin: 0 auto 20px;
+    overflow: hidden;
+  }
+  .results-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width .6s ease;
+  }
+  .results-bar-fill.pass { background: var(--green); }
+  .results-bar-fill.fail { background: var(--red); }
+  .results-msg { font-size: 0.9rem; color: var(--gray-600); margin-bottom: 20px; }
+
+  /* Loading / error */
+  .loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--gray-400);
+    font-size: 0.95rem;
+  }
+  .loading-spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--gray-200);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    margin: 0 auto 16px;
+  }
+  .error-msg { color: var(--red); text-align: center; padding: 40px; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+    .main { padding: 20px 14px 60px; }
+    .text-header, .text-passage, .questions-wrap { padding-left: 16px; padding-right: 16px; }
+    .text-passage { font-size: 0.98rem; }
+    .btn { padding: 12px 24px; font-size: 0.88rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-flag">🇮🇸</span>
+    <span class="topbar-title">Ríkisborgarapróf</span>
+    <span class="topbar-section">· Lesskilningur</span>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-sim" id="simLabel">Sim 01</span>
+    <a href="index.html" class="topbar-back">← Til baka</a>
+  </div>
+</div>
+<div class="progress-wrap"><div class="progress-fill" id="progressBar"></div></div>
+
+<div class="main" id="mainContent">
+  <div class="loading" id="loadingState">
+    <div class="loading-spinner"></div>
+    Hleð lesskilningi…
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ── Config ── */
+  const DATA_BASE = 'data';          // relative path to data folder
+  const AUDIO_BASE = 'https://media.civiclearn.com/rikisborgaraprof/audio';
+
+  /* ── State ── */
+  let examData = null;
+  let answers = {};       // { "les-01-q01": "B", ... }
+  let submitted = false;
+  let simId = 'sim-01';
+
+  /* ── URL params ── */
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('sim')) simId = params.get('sim');
+  document.getElementById('simLabel').textContent = 'Sim ' + simId.replace('sim-', '');
+
+  /* ── Load JSON ── */
+  const jsonPath = `${DATA_BASE}/${simId}/lestur.json`;
+
+  fetch(jsonPath)
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(data => { examData = data; render(); })
+    .catch(err => {
+      document.getElementById('loadingState').innerHTML =
+        `<div class="error-msg">Gat ekki hlaðið gögnum.<br><small>${jsonPath} — ${err.message}</small></div>`;
+    });
+
+  /* ── Render ── */
+  function render() {
+    const main = document.getElementById('mainContent');
+    const totalQ = examData.texts.reduce((s, t) => s + t.questions.length, 0);
+
+    let html = '<div class="section-label">📖 Lesskilningur — Lesið textana og svarið spurningunum</div>';
+
+    examData.texts.forEach((text, ti) => {
+      html += `
+        <div class="text-card">
+          <div class="text-header">
+            <div class="text-number">Texti ${ti + 1} af ${examData.texts.length}</div>
+            <div class="text-title">${esc(text.title)}</div>
+          </div>
+          <div class="text-passage">${esc(text.passage)}</div>
+          <div class="questions-wrap">
+            <div class="questions-label">Spurningar</div>
+            ${text.questions.map(q => renderQuestion(q)).join('')}
+          </div>
+        </div>`;
+    });
+
+    html += `
+      <div class="actions">
+        <button class="btn btn-primary" id="btnSubmit" disabled onclick="window._submit()">
+          Senda svör
+        </button>
+      </div>
+      <div class="results-panel" id="resultsPanel"></div>
+      <div class="actions" id="navActions" style="display:none">
+        <button class="btn btn-outline" onclick="window._restart()">Reyna aftur</button>
+        <button class="btn btn-primary" onclick="window._next()">Áfram í hlustun →</button>
+      </div>`;
+
+    main.innerHTML = html;
+    updateProgress();
+  }
+
+  function renderQuestion(q) {
+    return `
+      <div class="question-block" id="qblock-${q.questionId}">
+        <div class="question-text">
+          <span class="question-num">${q.questionNumber}</span>${esc(q.question)}
+        </div>
+        <div class="option-group">
+          ${q.options.map(o => `
+            <label class="option-label" id="opt-${q.questionId}-${o.label}"
+                   onclick="window._select('${q.questionId}','${o.label}')">
+              <input type="radio" name="${q.questionId}" value="${o.label}">
+              <span class="option-letter">${o.label}</span>
+              <span>${esc(o.text)}</span>
+            </label>
+          `).join('')}
+        </div>
+      </div>`;
+  }
+
+  /* ── Select answer ── */
+  window._select = function(qId, label) {
+    if (submitted) return;
+    answers[qId] = label;
+
+    // Clear previous selection for this question
+    document.querySelectorAll(`#qblock-${qId} .option-label`).forEach(el => {
+      el.classList.remove('selected');
+    });
+    document.getElementById(`opt-${qId}-${label}`).classList.add('selected');
+
+    updateProgress();
+
+    // Enable submit if all answered
+    const totalQ = examData.texts.reduce((s, t) => s + t.questions.length, 0);
+    document.getElementById('btnSubmit').disabled = Object.keys(answers).length < totalQ;
+  };
+
+  /* ── Submit ── */
+  window._submit = function() {
+    if (submitted) return;
+    submitted = true;
+
+    let correct = 0;
+    let total = 0;
+
+    examData.texts.forEach(text => {
+      text.questions.forEach(q => {
+        total++;
+        const chosen = answers[q.questionId];
+        const isCorrect = chosen === q.correctAnswer;
+        if (isCorrect) correct++;
+
+        // Mark options
+        document.querySelectorAll(`#qblock-${q.questionId} .option-label`).forEach(el => {
+          el.classList.add('locked');
+          el.classList.remove('selected');
+        });
+
+        const chosenEl = document.getElementById(`opt-${q.questionId}-${chosen}`);
+        if (isCorrect) {
+          chosenEl.classList.remove('locked');
+          chosenEl.classList.add('correct');
+        } else {
+          chosenEl.classList.remove('locked');
+          chosenEl.classList.add('incorrect');
+          // Show correct answer
+          const correctEl = document.getElementById(`opt-${q.questionId}-${q.correctAnswer}`);
+          correctEl.classList.remove('locked');
+          correctEl.classList.add('was-correct');
+        }
+      });
+    });
+
+    const pct = Math.round((correct / total) * 100);
+    const pass = pct >= 60;
+
+    const panel = document.getElementById('resultsPanel');
+    panel.innerHTML = `
+      <div class="results-icon">${pass ? '✅' : '⚠️'}</div>
+      <div class="results-score">${correct} / ${total}</div>
+      <div class="results-pct">${pct}%</div>
+      <div class="results-bar-wrap">
+        <div class="results-bar-fill ${pass ? 'pass' : 'fail'}" style="width:${pct}%"></div>
+      </div>
+      <div class="results-msg">${pass
+        ? 'Vel gert! Þú nærð lágmarkskröfunni í lesskilningi.'
+        : 'Þú náðir ekki 60% í þetta skipti. Reyndu aftur eða æfðu þig meira.'}</div>`;
+    panel.classList.add('visible');
+
+    document.getElementById('btnSubmit').style.display = 'none';
+    document.getElementById('navActions').style.display = 'flex';
+
+    // Save to localStorage
+    saveResult(correct, total, pct);
+
+    // Scroll to results
+    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  /* ── Restart ── */
+  window._restart = function() {
+    answers = {};
+    submitted = false;
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  /* ── Next section ── */
+  window._next = function() {
+    window.location.href = `hlustun.html?sim=${simId}`;
+  };
+
+  /* ── Progress ── */
+  function updateProgress() {
+    const totalQ = examData ? examData.texts.reduce((s, t) => s + t.questions.length, 0) : 0;
+    const answered = Object.keys(answers).length;
+    const pct = totalQ > 0 ? (answered / totalQ) * 100 : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+  }
+
+  /* ── Save ── */
+  function saveResult(correct, total, pct) {
+    try {
+      const key = `rikisborgaraprof-${simId}`;
+      const existing = JSON.parse(localStorage.getItem(key) || '{}');
+      existing.lestur = { correct, total, pct, ts: Date.now() };
+      localStorage.setItem(key, JSON.stringify(existing));
+    } catch(e) { /* silently fail */ }
+  }
+
+  /* ── Util ── */
+  function esc(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+})();
+</script>
+
+</body>
+</html>

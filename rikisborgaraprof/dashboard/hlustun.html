@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hlustun — Ríkisborgarapróf</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --blue: #003897;
+    --blue-light: #e8eef8;
+    --blue-hover: #002a73;
+    --red: #d72828;
+    --green: #1a7a3a;
+    --green-light: #e6f4ea;
+    --red-light: #fde8e8;
+    --gray-50: #f8f9fa;
+    --gray-100: #f1f3f5;
+    --gray-200: #e2e5e9;
+    --gray-400: #8b95a5;
+    --gray-600: #4a5568;
+    --gray-800: #1e2a3a;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,.1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-800);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Topbar ── */
+  .topbar {
+    background: var(--blue);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .topbar-flag { font-size: 1.4rem; }
+  .topbar-title { font-weight: 600; font-size: 0.95rem; }
+  .topbar-section { font-size: 0.85rem; opacity: 0.85; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .topbar-sim {
+    background: rgba(255,255,255,0.15);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  .topbar-back {
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.85rem;
+    opacity: 0.8;
+    transition: opacity .2s;
+  }
+  .topbar-back:hover { opacity: 1; }
+
+  .progress-wrap { background: var(--gray-200); height: 4px; width: 100%; }
+  .progress-fill { height: 100%; background: var(--blue); transition: width .4s ease; width: 0%; }
+
+  .main { max-width: 780px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--blue-light);
+    color: var(--blue);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .section-instructions {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  /* ── Segment card ── */
+  .segment-card {
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .segment-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .segment-info { flex: 1; min-width: 200px; }
+  .segment-number {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+  .segment-title {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--gray-800);
+  }
+  .segment-type {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: var(--gray-100);
+    color: var(--gray-600);
+  }
+  .segment-type.dialogue { background: #ede9fe; color: #5b21b6; }
+  .segment-type.text { background: #e0f2fe; color: #0369a1; }
+
+  /* ── Audio player ── */
+  .audio-section {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--gray-50);
+  }
+  .audio-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 12px;
+  }
+  .audio-player-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #fff;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+  }
+  .play-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background .15s, transform .1s;
+    font-size: 1.1rem;
+  }
+  .play-btn:hover { background: var(--blue-hover); transform: scale(1.05); }
+  .play-btn:active { transform: scale(0.97); }
+  .play-btn.playing { background: var(--red); }
+
+  .audio-track {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .audio-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--gray-200);
+    border-radius: 3px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+  }
+  .audio-progress-fill {
+    height: 100%;
+    background: var(--blue);
+    border-radius: 3px;
+    width: 0%;
+    transition: width .1s linear;
+  }
+  .audio-time {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--gray-400);
+    font-variant-numeric: tabular-nums;
+  }
+  .audio-plays {
+    font-size: 0.78rem;
+    color: var(--gray-400);
+    margin-top: 6px;
+  }
+  .audio-plays strong { color: var(--gray-600); }
+
+  /* ── Questions (same styles as reading) ── */
+  .questions-wrap { padding: 20px 24px 24px; }
+  .questions-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 16px;
+  }
+  .questions-locked-msg {
+    text-align: center;
+    padding: 24px;
+    color: var(--gray-400);
+    font-size: 0.9rem;
+  }
+
+  .question-block { margin-bottom: 24px; }
+  .question-block:last-child { margin-bottom: 0; }
+  .question-text { font-size: 0.95rem; font-weight: 600; margin-bottom: 10px; color: var(--gray-800); }
+  .question-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; background: var(--blue); color: #fff;
+    border-radius: 50%; font-size: 0.7rem; font-weight: 700;
+    margin-right: 8px; flex-shrink: 0; vertical-align: middle;
+  }
+
+  .option-group { display: flex; flex-direction: column; gap: 6px; }
+  .option-label {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border: 2px solid var(--gray-200);
+    border-radius: var(--radius); cursor: pointer;
+    transition: all .15s ease; font-size: 0.92rem;
+  }
+  .option-label:hover { border-color: var(--blue); background: var(--blue-light); }
+  .option-label input { display: none; }
+  .option-letter {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--gray-100); font-weight: 700; font-size: 0.8rem;
+    color: var(--gray-600); flex-shrink: 0; transition: all .15s ease;
+  }
+  .option-label.selected { border-color: var(--blue); background: var(--blue-light); }
+  .option-label.selected .option-letter { background: var(--blue); color: #fff; }
+  .option-label.correct { border-color: var(--green); background: var(--green-light); pointer-events: none; }
+  .option-label.correct .option-letter { background: var(--green); color: #fff; }
+  .option-label.incorrect { border-color: var(--red); background: var(--red-light); pointer-events: none; }
+  .option-label.incorrect .option-letter { background: var(--red); color: #fff; }
+  .option-label.was-correct { border-color: var(--green); background: var(--green-light); pointer-events: none; }
+  .option-label.was-correct .option-letter { background: var(--green); color: #fff; }
+  .option-label.locked { pointer-events: none; opacity: 0.6; }
+
+  /* ── Buttons ── */
+  .actions { display: flex; justify-content: center; gap: 12px; margin-top: 36px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 32px; border-radius: var(--radius); border: none;
+    font-family: inherit; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: all .15s ease;
+  }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: var(--blue-hover); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+  .btn-primary:disabled { background: var(--gray-400); cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-outline { background: #fff; color: var(--blue); border: 2px solid var(--blue); }
+  .btn-outline:hover { background: var(--blue-light); }
+
+  /* ── Results panel ── */
+  .results-panel {
+    display: none; background: #fff; border-radius: var(--radius);
+    box-shadow: var(--shadow-lg); padding: 28px 24px; margin-top: 28px; text-align: center;
+  }
+  .results-panel.visible { display: block; animation: fadeIn .4s ease; }
+  .results-icon { font-size: 2.4rem; margin-bottom: 12px; }
+  .results-score {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 2rem; font-weight: 700; color: var(--gray-800); margin-bottom: 4px;
+  }
+  .results-pct { font-size: 1.1rem; color: var(--gray-600); margin-bottom: 16px; }
+  .results-bar-wrap {
+    background: var(--gray-200); height: 10px; border-radius: 5px;
+    max-width: 300px; margin: 0 auto 20px; overflow: hidden;
+  }
+  .results-bar-fill { height: 100%; border-radius: 5px; transition: width .6s ease; }
+  .results-bar-fill.pass { background: var(--green); }
+  .results-bar-fill.fail { background: var(--red); }
+  .results-msg { font-size: 0.9rem; color: var(--gray-600); margin-bottom: 20px; }
+
+  .loading { text-align: center; padding: 60px 20px; color: var(--gray-400); font-size: 0.95rem; }
+  .loading-spinner {
+    width: 32px; height: 32px; border: 3px solid var(--gray-200);
+    border-top-color: var(--blue); border-radius: 50%;
+    animation: spin .7s linear infinite; margin: 0 auto 16px;
+  }
+  .error-msg { color: var(--red); text-align: center; padding: 40px; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 600px) {
+    .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+    .main { padding: 20px 14px 60px; }
+    .segment-header, .audio-section, .questions-wrap { padding-left: 16px; padding-right: 16px; }
+    .btn { padding: 12px 24px; font-size: 0.88rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-flag">🇮🇸</span>
+    <span class="topbar-title">Ríkisborgarapróf</span>
+    <span class="topbar-section">· Hlustun</span>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-sim" id="simLabel">Sim 01</span>
+    <a href="index.html" class="topbar-back">← Til baka</a>
+  </div>
+</div>
+<div class="progress-wrap"><div class="progress-fill" id="progressBar"></div></div>
+
+<div class="main" id="mainContent">
+  <div class="loading" id="loadingState">
+    <div class="loading-spinner"></div>
+    Hleð hlustunarprófi…
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ── Config ── */
+  const DATA_BASE = 'data';
+  const AUDIO_BASE = 'https://media.civiclearn.com/rikisborgaraprof/audio';
+  const MAX_PLAYS = 2;  // exam allows audio to play twice
+
+  /* ── State ── */
+  let examData = null;
+  let answers = {};
+  let submitted = false;
+  let simId = 'sim-01';
+  let audioPlayers = {};  // segmentId → { audio, plays }
+
+  /* ── URL params ── */
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('sim')) simId = params.get('sim');
+  document.getElementById('simLabel').textContent = 'Sim ' + simId.replace('sim-', '');
+
+  /* ── Sim number for audio files ── */
+  const simNum = simId.replace('sim-', '');  // "01"
+
+  /* ── Load JSON ── */
+  const jsonPath = `${DATA_BASE}/${simId}/hlustun.json`;
+
+  fetch(jsonPath)
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(data => { examData = data; render(); })
+    .catch(err => {
+      document.getElementById('loadingState').innerHTML =
+        `<div class="error-msg">Gat ekki hlaðið gögnum.<br><small>${jsonPath} — ${err.message}</small></div>`;
+    });
+
+  /* ── Render ── */
+  function render() {
+    const main = document.getElementById('mainContent');
+    const totalQ = examData.segments.reduce((s, seg) => s + seg.questions.length, 0);
+
+    let html = `
+      <div class="section-label">🎧 Hlustun — Hlustaðu og svarið spurningunum</div>
+      <div class="section-instructions">
+        Þú munt heyra 3 hljóðskrár. Eftir hverja hljóðskrá skaltu svara spurningum.
+        Spurningarnar eru á skjánum — engin hljóðskrá fyrir spurningarnar.
+        Þú mátt spila hverja hljóðskrá tvisvar.
+      </div>`;
+
+    examData.segments.forEach((seg, si) => {
+      const segTypeLabel = seg.type === 'dialogue' ? 'Samtal' : 'Texti';
+      const segTypeClass = seg.type === 'dialogue' ? 'dialogue' : 'text';
+
+      // Audio file: simXX-hlY.mp3 where Y = segment index + 1
+      const audioFile = `${AUDIO_BASE}/sim${simNum}-hl${si + 1}.mp3`;
+
+      html += `
+        <div class="segment-card" id="seg-${seg.segmentId}">
+          <div class="segment-header">
+            <div class="segment-info">
+              <div class="segment-number">Hluti ${si + 1} af ${examData.segments.length}</div>
+              <div class="segment-title">${esc(seg.title)}</div>
+            </div>
+            <span class="segment-type ${segTypeClass}">${segTypeLabel}</span>
+          </div>
+
+          <div class="audio-section">
+            <div class="audio-label">Hljóðskrá</div>
+            <div class="audio-player-wrap" id="player-${seg.segmentId}">
+              <button class="play-btn" id="playbtn-${seg.segmentId}"
+                      onclick="window._playAudio('${seg.segmentId}')">▶</button>
+              <div class="audio-track">
+                <div class="audio-progress-bar" id="trackbar-${seg.segmentId}"
+                     onclick="window._seekAudio(event, '${seg.segmentId}')">
+                  <div class="audio-progress-fill" id="trackfill-${seg.segmentId}"></div>
+                </div>
+                <div class="audio-time">
+                  <span id="time-cur-${seg.segmentId}">0:00</span>
+                  <span id="time-dur-${seg.segmentId}">—</span>
+                </div>
+              </div>
+            </div>
+            <div class="audio-plays" id="plays-${seg.segmentId}">
+              Spilanir: <strong>0</strong> / ${MAX_PLAYS}
+            </div>
+          </div>
+
+          <div class="questions-wrap" id="questions-${seg.segmentId}">
+            <div class="questions-label">Spurningar</div>
+            ${seg.questions.map(q => renderQuestion(q)).join('')}
+          </div>
+        </div>`;
+
+      // Initialize audio player state
+      audioPlayers[seg.segmentId] = { audio: null, plays: 0, loaded: false };
+    });
+
+    html += `
+      <div class="actions">
+        <button class="btn btn-primary" id="btnSubmit" disabled onclick="window._submit()">
+          Senda svör
+        </button>
+      </div>
+      <div class="results-panel" id="resultsPanel"></div>
+      <div class="actions" id="navActions" style="display:none">
+        <button class="btn btn-outline" onclick="window._restart()">Reyna aftur</button>
+        <button class="btn btn-primary" onclick="window._next()">Áfram í ritun →</button>
+      </div>`;
+
+    main.innerHTML = html;
+    updateProgress();
+  }
+
+  function renderQuestion(q) {
+    return `
+      <div class="question-block" id="qblock-${q.questionId}">
+        <div class="question-text">
+          <span class="question-num">${q.questionNumber}</span>${esc(q.question)}
+        </div>
+        <div class="option-group">
+          ${q.options.map(o => `
+            <label class="option-label" id="opt-${q.questionId}-${o.label}"
+                   onclick="window._select('${q.questionId}','${o.label}')">
+              <input type="radio" name="${q.questionId}" value="${o.label}">
+              <span class="option-letter">${o.label}</span>
+              <span>${esc(o.text)}</span>
+            </label>
+          `).join('')}
+        </div>
+      </div>`;
+  }
+
+  /* ── Audio controls ── */
+  window._playAudio = function(segId) {
+    const state = audioPlayers[segId];
+    const btn = document.getElementById(`playbtn-${segId}`);
+
+    // Create audio element on first play
+    if (!state.audio) {
+      const simNum = simId.replace('sim-', '');
+      const segIdx = examData.segments.findIndex(s => s.segmentId === segId) + 1;
+      const audioUrl = `${AUDIO_BASE}/sim${simNum}-hl${segIdx}.mp3`;
+
+      state.audio = new Audio(audioUrl);
+      state.audio.preload = 'auto';
+
+      state.audio.addEventListener('loadedmetadata', () => {
+        document.getElementById(`time-dur-${segId}`).textContent = formatTime(state.audio.duration);
+        state.loaded = true;
+      });
+
+      state.audio.addEventListener('timeupdate', () => {
+        const fill = document.getElementById(`trackfill-${segId}`);
+        const cur = document.getElementById(`time-cur-${segId}`);
+        if (state.audio.duration) {
+          fill.style.width = (state.audio.currentTime / state.audio.duration * 100) + '%';
+          cur.textContent = formatTime(state.audio.currentTime);
+        }
+      });
+
+      state.audio.addEventListener('ended', () => {
+        btn.textContent = '▶';
+        btn.classList.remove('playing');
+        document.getElementById(`trackfill-${segId}`).style.width = '100%';
+        // Check if max plays reached
+        if (state.plays >= MAX_PLAYS) {
+          btn.disabled = true;
+          btn.style.opacity = '0.4';
+          btn.style.cursor = 'not-allowed';
+        }
+      });
+
+      state.audio.addEventListener('error', () => {
+        btn.textContent = '✕';
+        btn.style.background = 'var(--red)';
+        document.getElementById(`plays-${segId}`).textContent = 'Villa: hljóðskrá fannst ekki';
+      });
+    }
+
+    // Toggle play/pause
+    if (state.audio.paused || state.audio.ended) {
+      // Check max plays — only count a new "play" if audio is at beginning or ended
+      if (state.audio.ended || state.audio.currentTime === 0) {
+        if (state.plays >= MAX_PLAYS) return;
+        state.plays++;
+        document.getElementById(`plays-${segId}`).innerHTML =
+          `Spilanir: <strong>${state.plays}</strong> / ${MAX_PLAYS}`;
+      }
+
+      // Pause all other audio first
+      Object.entries(audioPlayers).forEach(([id, s]) => {
+        if (id !== segId && s.audio && !s.audio.paused) {
+          s.audio.pause();
+          document.getElementById(`playbtn-${id}`).textContent = '▶';
+          document.getElementById(`playbtn-${id}`).classList.remove('playing');
+        }
+      });
+
+      if (state.audio.ended) state.audio.currentTime = 0;
+      state.audio.play();
+      btn.textContent = '⏸';
+      btn.classList.add('playing');
+    } else {
+      state.audio.pause();
+      btn.textContent = '▶';
+      btn.classList.remove('playing');
+    }
+  };
+
+  window._seekAudio = function(e, segId) {
+    const state = audioPlayers[segId];
+    if (!state.audio || !state.loaded) return;
+    const bar = e.currentTarget;
+    const rect = bar.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    state.audio.currentTime = pct * state.audio.duration;
+  };
+
+  function formatTime(sec) {
+    if (!sec || isNaN(sec)) return '0:00';
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  /* ── Select answer ── */
+  window._select = function(qId, label) {
+    if (submitted) return;
+    answers[qId] = label;
+    document.querySelectorAll(`#qblock-${qId} .option-label`).forEach(el => el.classList.remove('selected'));
+    document.getElementById(`opt-${qId}-${label}`).classList.add('selected');
+    updateProgress();
+
+    const totalQ = examData.segments.reduce((s, seg) => s + seg.questions.length, 0);
+    document.getElementById('btnSubmit').disabled = Object.keys(answers).length < totalQ;
+  };
+
+  /* ── Submit ── */
+  window._submit = function() {
+    if (submitted) return;
+    submitted = true;
+
+    // Stop all audio
+    Object.values(audioPlayers).forEach(s => {
+      if (s.audio && !s.audio.paused) s.audio.pause();
+    });
+
+    let correct = 0, total = 0;
+    examData.segments.forEach(seg => {
+      seg.questions.forEach(q => {
+        total++;
+        const chosen = answers[q.questionId];
+        const isCorrect = chosen === q.correctAnswer;
+        if (isCorrect) correct++;
+
+        document.querySelectorAll(`#qblock-${q.questionId} .option-label`).forEach(el => {
+          el.classList.add('locked');
+          el.classList.remove('selected');
+        });
+
+        const chosenEl = document.getElementById(`opt-${q.questionId}-${chosen}`);
+        if (isCorrect) {
+          chosenEl.classList.remove('locked');
+          chosenEl.classList.add('correct');
+        } else {
+          chosenEl.classList.remove('locked');
+          chosenEl.classList.add('incorrect');
+          const correctEl = document.getElementById(`opt-${q.questionId}-${q.correctAnswer}`);
+          correctEl.classList.remove('locked');
+          correctEl.classList.add('was-correct');
+        }
+      });
+    });
+
+    const pct = Math.round((correct / total) * 100);
+    const pass = pct >= 60;
+
+    const panel = document.getElementById('resultsPanel');
+    panel.innerHTML = `
+      <div class="results-icon">${pass ? '✅' : '⚠️'}</div>
+      <div class="results-score">${correct} / ${total}</div>
+      <div class="results-pct">${pct}%</div>
+      <div class="results-bar-wrap">
+        <div class="results-bar-fill ${pass ? 'pass' : 'fail'}" style="width:${pct}%"></div>
+      </div>
+      <div class="results-msg">${pass
+        ? 'Vel gert! Þú nærð lágmarkskröfunni í hlustun.'
+        : 'Þú náðir ekki 60% í þetta skipti. Reyndu aftur eða æfðu þig meira.'}</div>`;
+    panel.classList.add('visible');
+
+    document.getElementById('btnSubmit').style.display = 'none';
+    document.getElementById('navActions').style.display = 'flex';
+
+    saveResult(correct, total, pct);
+    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  /* ── Restart ── */
+  window._restart = function() {
+    answers = {};
+    submitted = false;
+    audioPlayers = {};
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  /* ── Next section ── */
+  window._next = function() {
+    window.location.href = `ritun.html?sim=${simId}`;
+  };
+
+  /* ── Progress ── */
+  function updateProgress() {
+    const totalQ = examData ? examData.segments.reduce((s, seg) => s + seg.questions.length, 0) : 0;
+    const answered = Object.keys(answers).length;
+    document.getElementById('progressBar').style.width = (totalQ > 0 ? (answered / totalQ) * 100 : 0) + '%';
+  }
+
+  /* ── Save ── */
+  function saveResult(correct, total, pct) {
+    try {
+      const key = `rikisborgaraprof-${simId}`;
+      const existing = JSON.parse(localStorage.getItem(key) || '{}');
+      existing.hlustun = { correct, total, pct, ts: Date.now() };
+      localStorage.setItem(key, JSON.stringify(existing));
+    } catch(e) {}
+  }
+
+  /* ── Util ── */
+  function esc(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+})();
+</script>
+
+</body>
+</html>

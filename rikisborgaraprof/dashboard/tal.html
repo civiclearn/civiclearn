@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tal — Ríkisborgarapróf</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --blue: #003897;
+    --blue-light: #e8eef8;
+    --blue-hover: #002a73;
+    --red: #d72828;
+    --red-dark: #a61e1e;
+    --green: #1a7a3a;
+    --green-light: #e6f4ea;
+    --red-light: #fde8e8;
+    --amber: #b45309;
+    --amber-light: #fef3c7;
+    --gray-50: #f8f9fa;
+    --gray-100: #f1f3f5;
+    --gray-200: #e2e5e9;
+    --gray-400: #8b95a5;
+    --gray-600: #4a5568;
+    --gray-800: #1e2a3a;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,.1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-800);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    background: var(--blue); color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .topbar-flag { font-size: 1.4rem; }
+  .topbar-title { font-weight: 600; font-size: 0.95rem; }
+  .topbar-section { font-size: 0.85rem; opacity: 0.85; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .topbar-sim { background: rgba(255,255,255,0.15); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
+  .topbar-back { color: #fff; text-decoration: none; font-size: 0.85rem; opacity: 0.8; }
+  .topbar-back:hover { opacity: 1; }
+
+  .progress-wrap { background: var(--gray-200); height: 4px; width: 100%; }
+  .progress-fill { height: 100%; background: var(--blue); transition: width .4s ease; width: 0%; }
+
+  .main { max-width: 780px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  .section-label {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--blue-light); color: var(--blue);
+    font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;
+  }
+  .section-instructions { font-size: 0.9rem; color: var(--gray-600); margin-bottom: 24px; line-height: 1.5; }
+
+  /* ── Part card ── */
+  .part-card {
+    background: #fff; border-radius: var(--radius);
+    box-shadow: var(--shadow); margin-bottom: 28px; overflow: hidden;
+  }
+  .part-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--gray-200); }
+  .part-number { font-size: 0.75rem; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .part-title {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.15rem; font-weight: 600; color: var(--gray-800); margin-bottom: 8px;
+  }
+  .part-instructions { font-size: 0.9rem; color: var(--gray-600); line-height: 1.5; }
+
+  /* ── Picture items ── */
+  .picture-list { padding: 0; }
+  .picture-item {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex; gap: 16px; align-items: flex-start;
+  }
+  .picture-item:last-child { border-bottom: none; }
+
+  .picture-thumb {
+    width: 120px; height: 90px; flex-shrink: 0;
+    background: var(--gray-100); border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; color: var(--gray-400); text-align: center;
+    padding: 8px; overflow: hidden;
+  }
+  .picture-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+
+  .picture-content { flex: 1; min-width: 0; }
+  .picture-label {
+    font-size: 0.75rem; font-weight: 600; color: var(--gray-400);
+    text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;
+  }
+  .picture-desc { font-size: 0.85rem; color: var(--gray-600); margin-bottom: 10px; line-height: 1.4; }
+
+  /* ── Recording controls ── */
+  .record-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .record-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 24px; border: 2px solid var(--gray-200);
+    background: #fff; font-family: inherit; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; transition: all .15s ease; color: var(--gray-800);
+  }
+  .record-btn:hover { border-color: var(--red); background: var(--red-light); }
+  .record-btn.recording {
+    border-color: var(--red); background: var(--red);
+    color: #fff; animation: pulse 1.2s infinite;
+  }
+  .record-btn .rec-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--red); flex-shrink: 0;
+  }
+  .record-btn.recording .rec-dot { background: #fff; }
+
+  .record-timer { font-size: 0.82rem; color: var(--gray-400); font-variant-numeric: tabular-nums; min-width: 40px; }
+
+  .playback-wrap {
+    display: none; align-items: center; gap: 8px; margin-top: 8px;
+  }
+  .playback-wrap.visible { display: flex; }
+  .playback-btn {
+    padding: 5px 12px; border-radius: 16px; border: 1px solid var(--gray-200);
+    background: #fff; font-family: inherit; font-size: 0.78rem;
+    cursor: pointer; color: var(--gray-600);
+  }
+  .playback-btn:hover { background: var(--gray-100); }
+  .playback-status { font-size: 0.78rem; color: var(--green); }
+
+  .record-status {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.78rem; color: var(--green); font-weight: 500;
+  }
+  .record-status .check { color: var(--green); }
+
+  /* ── Topic speaking ── */
+  .topic-section { padding: 20px 24px 24px; }
+  .topic-prompt {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.1rem; font-weight: 600; color: var(--gray-800);
+    margin-bottom: 6px;
+  }
+  .topic-hint { font-size: 0.85rem; color: var(--gray-600); margin-bottom: 16px; }
+
+  /* ── Text fallback ── */
+  .text-fallback {
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid var(--gray-200);
+  }
+  .text-fallback-toggle {
+    font-size: 0.78rem; color: var(--blue); cursor: pointer;
+    background: none; border: none; font-family: inherit; font-weight: 500;
+    padding: 0;
+  }
+  .text-fallback-toggle:hover { text-decoration: underline; }
+  .text-fallback-area {
+    display: none; margin-top: 8px;
+  }
+  .text-fallback-area.visible { display: block; }
+  .text-fallback-input {
+    width: 100%; min-height: 80px; padding: 10px 12px;
+    border: 2px solid var(--gray-200); border-radius: var(--radius);
+    font-family: 'Source Serif 4', Georgia, serif; font-size: 0.95rem;
+    line-height: 1.6; color: var(--gray-800); resize: vertical;
+  }
+  .text-fallback-input:focus { outline: none; border-color: var(--blue); }
+  .text-fallback-note { font-size: 0.75rem; color: var(--gray-400); margin-top: 4px; }
+
+  /* ── Feedback ── */
+  .feedback-panel {
+    display: none; margin: 16px 24px 24px; padding: 20px;
+    border-radius: var(--radius); border: 1px solid var(--gray-200);
+  }
+  .feedback-panel.visible { display: block; animation: fadeIn .4s ease; }
+  .feedback-panel.pass { border-color: var(--green); background: var(--green-light); }
+  .feedback-panel.fail { border-color: var(--red); background: var(--red-light); }
+  .feedback-panel.pending { border-color: var(--amber); background: var(--amber-light); }
+  .feedback-score { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
+  .feedback-label { font-size: 0.82rem; color: var(--gray-600); margin-bottom: 8px; }
+  .feedback-text { font-size: 0.9rem; color: var(--gray-800); line-height: 1.6; }
+
+  /* ── Buttons ── */
+  .actions { display: flex; justify-content: center; gap: 12px; margin-top: 36px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 32px; border-radius: var(--radius); border: none;
+    font-family: inherit; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: all .15s ease;
+  }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: var(--blue-hover); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+  .btn-primary:disabled { background: var(--gray-400); cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-outline { background: #fff; color: var(--blue); border: 2px solid var(--blue); }
+  .btn-outline:hover { background: var(--blue-light); }
+  .submit-status { text-align: center; margin-top: 12px; font-size: 0.85rem; color: var(--gray-400); }
+  .submit-status.error { color: var(--red); }
+
+  .loading { text-align: center; padding: 60px 20px; color: var(--gray-400); font-size: 0.95rem; }
+  .loading-spinner { width: 32px; height: 32px; border: 3px solid var(--gray-200); border-top-color: var(--blue); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 16px; }
+  .inline-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 6px; }
+  .error-msg { color: var(--red); text-align: center; padding: 40px; }
+
+  /* Mic permission banner */
+  .mic-banner {
+    background: var(--amber-light); border: 1px solid var(--amber);
+    border-radius: var(--radius); padding: 14px 20px; margin-bottom: 20px;
+    font-size: 0.88rem; color: var(--amber); display: none;
+  }
+  .mic-banner.visible { display: block; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
+
+  @media (max-width: 600px) {
+    .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+    .main { padding: 20px 14px 60px; }
+    .picture-item { flex-direction: column; }
+    .picture-thumb { width: 100%; height: 120px; }
+    .part-header, .topic-section { padding-left: 16px; padding-right: 16px; }
+    .picture-item { padding-left: 16px; padding-right: 16px; }
+    .feedback-panel { margin-left: 16px; margin-right: 16px; }
+    .btn { padding: 12px 24px; font-size: 0.88rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-flag">🇮🇸</span>
+    <span class="topbar-title">Ríkisborgarapróf</span>
+    <span class="topbar-section">· Tal</span>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-sim" id="simLabel">Sim 01</span>
+    <a href="index.html" class="topbar-back">← Til baka</a>
+  </div>
+</div>
+<div class="progress-wrap"><div class="progress-fill" id="progressBar"></div></div>
+
+<div class="main" id="mainContent">
+  <div class="loading" id="loadingState">
+    <div class="loading-spinner"></div>
+    Hleð talprófi…
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const DATA_BASE = 'data';
+  const IMAGE_BASE = 'https://media.civiclearn.com/rikisborgaraprof/images';
+  const EVAL_ENDPOINT = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/rik-evaluate-speaking';
+
+  let examData = null;
+  let submitted = false;
+  let simId = 'sim-01';
+
+  // Recording state per item
+  let recordings = {};  // id → { blob, url, duration }
+  let activeRecorder = null;
+  let activeRecordId = null;
+  let recordTimer = null;
+  let recordStartTime = 0;
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('sim')) simId = params.get('sim');
+  document.getElementById('simLabel').textContent = 'Sim ' + simId.replace('sim-', '');
+
+  const jsonPath = `${DATA_BASE}/${simId}/tal.json`;
+
+  fetch(jsonPath)
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(data => { examData = data; render(); })
+    .catch(err => {
+      document.getElementById('loadingState').innerHTML =
+        `<div class="error-msg">Gat ekki hlaðið gögnum.<br><small>${jsonPath} — ${err.message}</small></div>`;
+    });
+
+  /* ── Render ── */
+  function render() {
+    const main = document.getElementById('mainContent');
+
+    let html = `
+      <div class="section-label">🎤 Tal — Talaðu á íslensku</div>
+      <div class="section-instructions">
+        Hér eru tveir hlutar. Í hluta 1 lýsirðu fimm myndum. Í hluta 2 talarðu um gefið efni.
+        Notaðu hljóðnemann til að taka upp svörin þín. Ef hljóðnemi virkar ekki geturðu skrifað svörin.
+      </div>
+      <div class="mic-banner" id="micBanner">
+        ⚠️ Hljóðnemi er ekki aðgengilegur. Þú getur notað textasvæðið í staðinn.
+      </div>`;
+
+    // Part 1: Picture descriptions
+    const part1 = examData.parts[0];
+    html += `
+      <div class="part-card" id="part-${part1.partId}">
+        <div class="part-header">
+          <div class="part-number">Hluti 1 af 2</div>
+          <div class="part-title">Myndalýsingar</div>
+          <div class="part-instructions">${esc(part1.instructions)}</div>
+        </div>
+        <div class="picture-list">
+          ${part1.pictures.map((pic, pi) => renderPicture(pic, pi)).join('')}
+        </div>
+        <div class="feedback-panel" id="feedback-${part1.partId}"></div>
+      </div>`;
+
+    // Part 2: Topic speaking
+    const part2 = examData.parts[1];
+    html += `
+      <div class="part-card" id="part-${part2.partId}">
+        <div class="part-header">
+          <div class="part-number">Hluti 2 af 2</div>
+          <div class="part-title">Tala um efni</div>
+          <div class="part-instructions">${esc(part2.instructions)}</div>
+        </div>
+        <div class="topic-section">
+          <div class="topic-prompt">${esc(part2.topic)}</div>
+          <div class="topic-hint">Minnst ${part2.minimumSentences} setningar.</div>
+
+          <div class="record-controls" id="rec-${part2.partId}">
+            <button class="record-btn" id="recbtn-${part2.partId}" onclick="window._toggleRecord('${part2.partId}')">
+              <span class="rec-dot"></span> Taka upp
+            </button>
+            <span class="record-timer" id="timer-${part2.partId}">0:00</span>
+            <span class="record-status" id="status-${part2.partId}"></span>
+          </div>
+          <div class="playback-wrap" id="playback-${part2.partId}">
+            <button class="playback-btn" onclick="window._playRecording('${part2.partId}')">▶ Hlusta</button>
+            <button class="playback-btn" onclick="window._deleteRecording('${part2.partId}')">✕ Eyða</button>
+          </div>
+
+          <div class="text-fallback" id="fallback-${part2.partId}">
+            <button class="text-fallback-toggle" onclick="window._toggleFallback('${part2.partId}')">
+              📝 Viltu frekar skrifa svarið?
+            </button>
+            <div class="text-fallback-area" id="fallback-area-${part2.partId}">
+              <textarea class="text-fallback-input" id="fallback-text-${part2.partId}"
+                        placeholder="Skrifaðu svarið þitt hér…"></textarea>
+              <div class="text-fallback-note">Textasvar verður metið, en hljóðupptaka gefur betri æfingu.</div>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-panel" id="feedback-${part2.partId}"></div>
+      </div>`;
+
+    html += `
+      <div class="actions">
+        <button class="btn btn-primary" id="btnSubmit" onclick="window._submit()">
+          Senda svör til yfirferðar
+        </button>
+      </div>
+      <div class="submit-status" id="submitStatus"></div>
+      <div class="actions" id="navActions" style="display:none">
+        <button class="btn btn-outline" onclick="window._restart()">Reyna aftur</button>
+        <button class="btn btn-primary" onclick="window._next()">Sjá niðurstöður →</button>
+      </div>`;
+
+    main.innerHTML = html;
+
+    // Check mic permission
+    checkMic();
+    updateProgress();
+  }
+
+  function renderPicture(pic, index) {
+    const id = pic.pictureId;
+    const hasImage = pic.imageRef && pic.imageRef.length > 0;
+
+    return `
+      <div class="picture-item" id="pic-${id}">
+        <div class="picture-thumb">
+          ${hasImage
+            ? `<img src="${pic.imageRef}" alt="Mynd ${index + 1}">`
+            : `🖼️ Mynd ${index + 1}`
+          }
+        </div>
+        <div class="picture-content">
+          <div class="picture-label">Mynd ${index + 1} af 5</div>
+          <div class="picture-desc">${esc(pic.imageDescription)}</div>
+
+          <div class="record-controls" id="rec-${id}">
+            <button class="record-btn" id="recbtn-${id}" onclick="window._toggleRecord('${id}')">
+              <span class="rec-dot"></span> Taka upp
+            </button>
+            <span class="record-timer" id="timer-${id}">0:00</span>
+            <span class="record-status" id="status-${id}"></span>
+          </div>
+          <div class="playback-wrap" id="playback-${id}">
+            <button class="playback-btn" onclick="window._playRecording('${id}')">▶ Hlusta</button>
+            <button class="playback-btn" onclick="window._deleteRecording('${id}')">✕ Eyða</button>
+          </div>
+
+          <div class="text-fallback" id="fallback-${id}">
+            <button class="text-fallback-toggle" onclick="window._toggleFallback('${id}')">
+              📝 Skrifa í staðinn
+            </button>
+            <div class="text-fallback-area" id="fallback-area-${id}">
+              <textarea class="text-fallback-input" id="fallback-text-${id}"
+                        placeholder="Lýstu myndinni hér…" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  /* ── Mic check ── */
+  async function checkMic() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(t => t.stop());
+    } catch(e) {
+      document.getElementById('micBanner').classList.add('visible');
+    }
+  }
+
+  /* ── Recording ── */
+  window._toggleRecord = async function(id) {
+    // If currently recording this item, stop
+    if (activeRecordId === id && activeRecorder && activeRecorder.state === 'recording') {
+      activeRecorder.stop();
+      return;
+    }
+
+    // If recording something else, stop it first
+    if (activeRecorder && activeRecorder.state === 'recording') {
+      activeRecorder.stop();
+      await new Promise(r => setTimeout(r, 100));
+    }
+
+    // Start new recording
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+      const chunks = [];
+
+      recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+      recorder.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        clearInterval(recordTimer);
+
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        const url = URL.createObjectURL(blob);
+        const duration = (Date.now() - recordStartTime) / 1000;
+
+        recordings[id] = { blob, url, duration };
+
+        const btn = document.getElementById(`recbtn-${id}`);
+        btn.classList.remove('recording');
+        btn.innerHTML = '<span class="rec-dot"></span> Taka upp aftur';
+
+        document.getElementById(`status-${id}`).innerHTML =
+          `<span class="check">✓</span> ${formatTime(duration)} tekið upp`;
+        document.getElementById(`playback-${id}`).classList.add('visible');
+
+        activeRecorder = null;
+        activeRecordId = null;
+        updateProgress();
+      };
+
+      recorder.onerror = () => {
+        document.getElementById(`status-${id}`).textContent = 'Villa við upptöku';
+      };
+
+      activeRecorder = recorder;
+      activeRecordId = id;
+      recordStartTime = Date.now();
+      recorder.start();
+
+      const btn = document.getElementById(`recbtn-${id}`);
+      btn.classList.add('recording');
+      btn.innerHTML = '<span class="rec-dot"></span> Stöðva';
+
+      document.getElementById(`status-${id}`).textContent = '';
+      document.getElementById(`playback-${id}`).classList.remove('visible');
+
+      // Timer
+      clearInterval(recordTimer);
+      recordTimer = setInterval(() => {
+        const elapsed = (Date.now() - recordStartTime) / 1000;
+        document.getElementById(`timer-${id}`).textContent = formatTime(elapsed);
+      }, 200);
+
+    } catch(e) {
+      document.getElementById('micBanner').classList.add('visible');
+      document.getElementById(`status-${id}`).textContent = 'Hljóðnemi ekki aðgengilegur';
+    }
+  };
+
+  /* ── Playback ── */
+  window._playRecording = function(id) {
+    if (!recordings[id]) return;
+    const audio = new Audio(recordings[id].url);
+    audio.play();
+  };
+
+  window._deleteRecording = function(id) {
+    if (recordings[id]) {
+      URL.revokeObjectURL(recordings[id].url);
+      delete recordings[id];
+    }
+    document.getElementById(`playback-${id}`).classList.remove('visible');
+    document.getElementById(`status-${id}`).textContent = '';
+    document.getElementById(`timer-${id}`).textContent = '0:00';
+    const btn = document.getElementById(`recbtn-${id}`);
+    btn.classList.remove('recording');
+    btn.innerHTML = '<span class="rec-dot"></span> Taka upp';
+    updateProgress();
+  };
+
+  /* ── Text fallback toggle ── */
+  window._toggleFallback = function(id) {
+    const area = document.getElementById(`fallback-area-${id}`);
+    area.classList.toggle('visible');
+  };
+
+  /* ── Submit ── */
+  window._submit = function() {
+    if (submitted) return;
+
+    // Check that each item has either recording or text
+    const allItems = getAllItemIds();
+    let allValid = true;
+
+    allItems.forEach(id => {
+      const hasRecording = recordings[id] && recordings[id].blob;
+      const fallbackText = document.getElementById(`fallback-text-${id}`);
+      const hasText = fallbackText && fallbackText.value.trim().length > 5;
+      if (!hasRecording && !hasText) allValid = false;
+    });
+
+    if (!allValid) {
+      document.getElementById('submitStatus').textContent =
+        'Vinsamlegast taktu upp eða skrifaðu svar fyrir alla hluta.';
+      document.getElementById('submitStatus').className = 'submit-status error';
+      return;
+    }
+
+    submitted = true;
+    const btn = document.getElementById('btnSubmit');
+    btn.innerHTML = '<span class="inline-spinner"></span> Sendir…';
+    btn.disabled = true;
+
+    // Disable all record buttons
+    document.querySelectorAll('.record-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
+    document.querySelectorAll('.text-fallback-input').forEach(t => { t.disabled = true; });
+
+    // No endpoint yet — show pending
+    if (!EVAL_ENDPOINT) {
+      showPendingResults();
+      return;
+    }
+
+    // Build FormData with audio blobs + text fallbacks
+    const formData = new FormData();
+    formData.append('simulationId', simId);
+    formData.append('section', 'tal');
+
+    allItems.forEach(id => {
+      if (recordings[id]) {
+        formData.append(`audio_${id}`, recordings[id].blob, `${id}.webm`);
+      }
+      const fallbackText = document.getElementById(`fallback-text-${id}`);
+      if (fallbackText && fallbackText.value.trim()) {
+        formData.append(`text_${id}`, fallbackText.value.trim());
+      }
+    });
+
+    fetch(EVAL_ENDPOINT, { method: 'POST', body: formData })
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(result => showResults(result))
+      .catch(err => {
+        document.getElementById('submitStatus').textContent =
+          'Ekki tókst að senda. Svörin hafa verið vistuð.';
+        document.getElementById('submitStatus').className = 'submit-status error';
+        showPendingResults();
+      });
+  };
+
+  function showPendingResults() {
+    examData.parts.forEach(part => {
+      const panel = document.getElementById(`feedback-${part.partId}`);
+      const recorded = part.type === 'picture_descriptions'
+        ? part.pictures.filter(p => recordings[p.pictureId] || hasFallbackText(p.pictureId)).length
+        : (recordings[part.partId] || hasFallbackText(part.partId) ? 1 : 0);
+
+      const total = part.type === 'picture_descriptions' ? 5 : 1;
+
+      panel.className = 'feedback-panel visible pending';
+      panel.innerHTML = `
+        <div class="feedback-score">—</div>
+        <div class="feedback-label">⏳ Bíður yfirferðar</div>
+        <div class="feedback-text">
+          ${recorded}/${total} svör móttekin. AI-mat verður tengt í næsta skrefi.
+        </div>`;
+    });
+
+    // Save state
+    try {
+      const key = `rikisborgaraprof-${simId}`;
+      const existing = JSON.parse(localStorage.getItem(key) || '{}');
+      existing.tal = { status: 'pending', ts: Date.now() };
+      localStorage.setItem(key, JSON.stringify(existing));
+    } catch(e) {}
+
+    document.getElementById('btnSubmit').style.display = 'none';
+    document.getElementById('submitStatus').textContent = '';
+    document.getElementById('navActions').style.display = 'flex';
+  }
+
+  function showResults(result) {
+    // Show per-part feedback
+    (result.parts || []).forEach(function(partResult) {
+      const panel = document.getElementById('feedback-' + partResult.partId);
+      if (!panel) return;
+      const pct = partResult.score;
+      const pass = pct >= 60;
+
+      panel.className = 'feedback-panel visible ' + (pass ? 'pass' : 'fail');
+
+      let criteriaHtml = '';
+      if (partResult.criteria) {
+        const labels = {
+          taskCompletion: 'Verkefni', vocabulary: 'Orðaforði',
+          grammar: 'Málfræði', fluency: 'Flæði', comprehensibility: 'Skiljanleiki'
+        };
+        criteriaHtml = '<div style="margin-top:12px">';
+        for (const [key, val] of Object.entries(partResult.criteria)) {
+          const v = typeof val === 'number' ? val : 0;
+          criteriaHtml += '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.82rem">' +
+            '<span style="flex:1;color:var(--gray-600)">' + (labels[key] || key) + '</span>' +
+            '<div style="width:100px;height:5px;background:var(--gray-200);border-radius:3px;overflow:hidden">' +
+            '<div style="height:100%;width:' + v + '%;background:var(--blue);border-radius:3px"></div></div>' +
+            '<span style="width:32px;text-align:right;font-weight:600;font-size:0.78rem">' + v + '%</span>' +
+            '</div>';
+        }
+        criteriaHtml += '</div>';
+      }
+
+      let mistakesHtml = '';
+      if (partResult.mistakes && partResult.mistakes.length > 0) {
+        mistakesHtml = '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-200)">' +
+          '<div style="font-size:0.78rem;font-weight:600;color:var(--gray-400);margin-bottom:6px">VILLUR:</div>';
+        partResult.mistakes.forEach(function(m) {
+          mistakesHtml += '<div style="font-size:0.82rem;margin-bottom:6px;color:var(--gray-600)">' +
+            '<span style="color:var(--red);text-decoration:line-through">' + esc(m.original || '') + '</span> → ' +
+            '<span style="color:var(--green);font-weight:500">' + esc(m.correction || '') + '</span>' +
+            (m.explanation ? ' <span style="color:var(--gray-400)">(' + esc(m.explanation) + ')</span>' : '') +
+            '</div>';
+        });
+        mistakesHtml += '</div>';
+      }
+
+      panel.innerHTML =
+        '<div class="feedback-score" style="color:' + (pass ? 'var(--green)' : 'var(--red)') + '">' + pct + '%</div>' +
+        '<div class="feedback-label">' + (pass ? '✅ Samþykkt' : '⚠️ Ekki samþykkt') + '</div>' +
+        '<div class="feedback-text">' + esc(partResult.feedback || '') + '</div>' +
+        criteriaHtml + mistakesHtml;
+    });
+
+    // Show transcriptions if available
+    if (result.transcriptions) {
+      result.transcriptions.forEach(function(t) {
+        const statusEl = document.getElementById('status-' + t.id);
+        if (statusEl && t.text) {
+          statusEl.innerHTML = '<span class="check">✓</span> Umritað: "' + esc(t.text.substring(0, 50)) + (t.text.length > 50 ? '…' : '') + '"';
+        }
+      });
+    }
+
+    // Save to localStorage
+    const avgPct = result.overallScore || 0;
+    try {
+      const key = 'rikisborgaraprof-' + simId;
+      const existing = JSON.parse(localStorage.getItem(key) || '{}');
+      existing.tal = { pct: avgPct, status: 'complete', ts: Date.now() };
+      localStorage.setItem(key, JSON.stringify(existing));
+    } catch(e) {}
+
+    document.getElementById('btnSubmit').style.display = 'none';
+    document.getElementById('submitStatus').textContent = '';
+    document.getElementById('navActions').style.display = 'flex';
+  }
+
+  function hasFallbackText(id) {
+    const el = document.getElementById(`fallback-text-${id}`);
+    return el && el.value.trim().length > 5;
+  }
+
+  function getAllItemIds() {
+    const ids = [];
+    const part1 = examData.parts[0];
+    part1.pictures.forEach(p => ids.push(p.pictureId));
+    ids.push(examData.parts[1].partId);
+    return ids;
+  }
+
+  /* ── Restart ── */
+  window._restart = function() {
+    submitted = false;
+    Object.values(recordings).forEach(r => { if (r.url) URL.revokeObjectURL(r.url); });
+    recordings = {};
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  /* ── Next ── */
+  window._next = function() {
+    window.location.href = `nidurstodur.html?sim=${simId}`;
+  };
+
+  /* ── Progress ── */
+  function updateProgress() {
+    const allItems = getAllItemIds();
+    let done = 0;
+    allItems.forEach(id => {
+      if (recordings[id] || hasFallbackText(id)) done++;
+    });
+    document.getElementById('progressBar').style.width = (done / allItems.length * 100) + '%';
+  }
+
+  function formatTime(sec) {
+    if (!sec || isNaN(sec)) return '0:00';
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+})();
+</script>
+
+</body>
+</html>

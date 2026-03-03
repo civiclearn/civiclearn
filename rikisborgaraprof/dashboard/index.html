@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ríkisborgarapróf — Sýnipróf</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue:#003897; --blue-dim:#e8eef8; --red:#d72828;
+      --navy:#0f172a; --slate:#334155; --muted:#64748b; --border:#e2e5e9;
+      --surface:#ffffff; --bg:#f8f9fa;
+      --pass:#166534; --pass-bg:#dcfce7;
+      --fail:#991b1b; --fail-bg:#fee2e2;
+      --amber:#92400e; --amber-bg:#fef9c3;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
+
+    /* TOPBAR */
+    .topbar{background:var(--navy);border-bottom:3px solid var(--blue);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .topbar-brand{display:flex;align-items:center;gap:14px}
+    .topbar-flag{font-size:1.5rem;line-height:1}
+    .brand-text{display:flex;flex-direction:column;line-height:1.1}
+    .brand-title{font-family:"Source Serif 4",serif;font-size:1rem;font-weight:600;color:#fff}
+    .brand-sub{font-size:0.72rem;color:#64748b}
+    .topbar-right{display:flex;align-items:center;gap:12px}
+    .user-pill{background:#1e293b;border-radius:99px;padding:5px 14px;font-size:0.75rem;color:#94a3b8}
+    .signout-link{background:none;border:none;color:#64748b;font-size:0.75rem;cursor:pointer;font-family:inherit}
+    .signout-link:hover{color:#fff}
+
+    /* DASHBOARD */
+    .dashboard-wrap{max-width:1080px;margin:0 auto;padding:32px 28px 80px}
+    .dashboard-header{margin-bottom:28px}
+    .dashboard-header h1{font-family:"Source Serif 4",serif;font-size:1.5rem;font-weight:700;margin-bottom:4px}
+    .dashboard-header p{font-size:0.88rem;color:var(--muted)}
+
+    /* STAT CARDS */
+    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+    .stat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:18px 20px}
+    .stat-label{font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:8px}
+    .stat-value{font-family:"Source Serif 4",serif;font-size:1.6rem;font-weight:700;line-height:1}
+    .stat-sub{font-size:0.78rem;color:var(--muted);margin-top:6px}
+    .stat-progress{height:4px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden}
+    .stat-progress-fill{height:100%;background:var(--blue);border-radius:2px;transition:width 0.6s ease}
+    .stat-card select{width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:0.8rem;color:var(--navy);margin-top:8px;background:var(--bg)}
+    .custom-date-row{display:none;margin-top:6px;gap:6px;align-items:center}
+    .custom-date-row.visible{display:flex}
+    .custom-date-row input{flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:0.8rem}
+    .custom-date-row button{padding:5px 12px;border:none;border-radius:6px;background:var(--blue);color:#fff;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit}
+
+    /* TABLE */
+    .table-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;overflow:hidden}
+    .table-title{padding:18px 22px 14px;font-family:"Source Serif 4",serif;font-size:1.05rem;font-weight:700;border-bottom:1px solid var(--border)}
+    .sim-table{width:100%;border-collapse:collapse;font-size:0.82rem}
+    .sim-table thead{background:#f8fafc}
+    .sim-table th{padding:10px 12px;text-align:center;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);border-bottom:1px solid var(--border)}
+    .sim-table th:first-child{text-align:left;padding-left:22px}
+    .sim-table th:last-child{text-align:right;padding-right:22px}
+    .sim-table td{padding:12px 12px;text-align:center;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+    .sim-table td:first-child{text-align:left;padding-left:22px}
+    .sim-table td:last-child{text-align:right;padding-right:22px}
+    .sim-table tbody tr{transition:background 0.1s}
+    .sim-table tbody tr:hover{background:#fafaf8}
+    .sim-table tbody tr:last-child td{border-bottom:none}
+
+    .sim-id{font-weight:700;color:var(--navy);display:block;font-size:0.84rem}
+    .sim-topics{font-size:0.72rem;color:var(--muted);display:block;margin-top:2px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    /* Badges */
+    .badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:0.68rem;font-weight:600;white-space:nowrap}
+    .badge-idle{background:#f1f5f9;color:#475569}
+    .badge-progress{background:var(--amber-bg);color:var(--amber)}
+    .badge-complete{background:var(--pass-bg);color:var(--pass)}
+    .badge-locked{background:#f1f5f9;color:#cbd5e1}
+
+    /* Score cells */
+    .score-cell{font-weight:600;font-variant-numeric:tabular-nums}
+    .score-cell.na{color:var(--border);font-weight:400}
+    .score-cell.low{color:var(--fail)}
+    .score-cell.mid{color:var(--amber)}
+    .score-cell.high{color:var(--pass)}
+    .score-cell.pending{color:var(--muted)}
+
+    /* Result badge */
+    .result-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:0.72rem;font-weight:700;white-space:nowrap}
+    .result-pass{background:var(--pass-bg);color:var(--pass)}
+    .result-fail{background:var(--fail-bg);color:var(--fail)}
+
+    /* Action buttons */
+    .table-btn{display:inline-block;padding:6px 16px;border-radius:6px;font-size:0.78rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;font-family:inherit;white-space:nowrap;transition:opacity 0.15s}
+    .table-btn:hover{opacity:0.85}
+    .table-btn-start{background:var(--blue);color:#fff}
+    .table-btn-resume{background:var(--navy);color:#fff}
+    .table-btn-results{background:#f1f5f9;color:var(--navy);border:1px solid var(--border)}
+    .table-btn-locked{background:#f1f5f9;color:#cbd5e1;cursor:not-allowed}
+
+    /* Footer note */
+    .footer-note{text-align:center;margin-top:20px;font-size:0.78rem;color:var(--muted)}
+    .footer-note a{color:var(--blue);text-decoration:none}
+    .footer-note a:hover{text-decoration:underline}
+
+    @media (max-width:768px) {
+      .dashboard-wrap{padding:20px 16px 60px}
+      .stat-grid{grid-template-columns:1fr}
+      .table-card{border-radius:10px}
+      .sim-table{font-size:0.78rem}
+      .sim-table .hide-mobile{display:none}
+      .sim-table th:first-child,.sim-table td:first-child{padding-left:14px}
+      .sim-table th:last-child,.sim-table td:last-child{padding-right:14px}
+      .sim-topics{display:none}
+      .topbar{padding:0 16px}
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <span class="topbar-flag">🇮🇸</span>
+    <div class="brand-text">
+      <span class="brand-title">Ríkisborgarapróf</span>
+      <span class="brand-sub">Sýnipróf · A2</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="user-pill" id="userEmail">Gestur</div>
+    <!-- Auth wired in Chat 8 -->
+  </div>
+</div>
+
+<div class="dashboard-wrap">
+
+  <div class="dashboard-header">
+    <h1>Sýnipróf</h1>
+    <p>Undirbúðu þig fyrir ríkisborgaraprófið með AI-mati samkvæmt opinberum kröfum.</p>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-label">Lokið sýniprófum</div>
+      <div class="stat-value" id="doneSims">0 / 20</div>
+      <div class="stat-progress"><div class="stat-progress-fill" id="progressBar" style="width:0%"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Síðasta niðurstaða</div>
+      <div class="stat-value" id="lastResult">—</div>
+      <div class="stat-sub" id="lastResultSub">Ekkert sýnipróf lokið</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Næsta próf</div>
+      <div class="stat-value" id="examCountdown">—</div>
+      <select id="examDateSelector" onchange="handleDateSelection()">
+        <option value="">Veldu prófdag…</option>
+        <option value="2026-05-15">Vor 2026</option>
+        <option value="2026-11-15">Haust 2026</option>
+        <option value="custom">📅 Annað dagsetning…</option>
+      </select>
+      <div class="custom-date-row" id="customDateRow">
+        <input type="date" id="customDateInput" min="2026-01-01">
+        <button onclick="applyCustomDate()">Í lagi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIMULATIONS TABLE -->
+  <div class="table-card">
+    <div class="table-title">20 sýnipróf</div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+      <table class="sim-table">
+        <thead>
+          <tr>
+            <th>Sýnipróf</th>
+            <th>Staða</th>
+            <th class="hide-mobile">📖</th>
+            <th class="hide-mobile">🎧</th>
+            <th class="hide-mobile">✍️</th>
+            <th class="hide-mobile">🎤</th>
+            <th>Niðurstaða</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="simTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Vandamál? <a href="mailto:admin@civiclearn.com">admin@civiclearn.com</a>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ═══════════════════════════════════════════════════════════════
+  // SIMULATION DEFINITIONS
+  // ═══════════════════════════════════════════════════════════════
+  var SIMS = [
+    { id: 'sim-01', title: 'Fjölskylda og dagleg líf', free: true },
+    { id: 'sim-02', title: 'Verslun og vinna', free: false },
+    { id: 'sim-03', title: 'Læknir og heilsa', free: false },
+    { id: 'sim-04', title: 'Skóli og menntun', free: false },
+    { id: 'sim-05', title: 'Áhugamál og frítími', free: false },
+    { id: 'sim-06', title: 'Banki og póstur', free: false },
+    { id: 'sim-07', title: 'Ferðalög og leiðir', free: false },
+    { id: 'sim-08', title: 'Siðir og hefðir', free: false },
+    { id: 'sim-09', title: 'Matur og veitingahús', free: false },
+    { id: 'sim-10', title: 'Neyðarþjónusta', free: false },
+    { id: 'sim-11', title: 'Atvinnuumsókn', free: false },
+    { id: 'sim-12', title: 'Fjölmiðlar og fréttir', free: false },
+    { id: 'sim-13', title: 'Klæðnaður og útlit', free: false },
+    { id: 'sim-14', title: 'Húsnæði og leigusamningar', free: false },
+    { id: 'sim-15', title: 'Börn og foreldrar', free: false },
+    { id: 'sim-16', title: 'Landafræði og náttúra', free: false },
+    { id: 'sim-17', title: 'Íþróttir og hreyfing', free: false },
+    { id: 'sim-18', title: 'Skattar og fjármál', free: false },
+    { id: 'sim-19', title: 'Félagslíf og vinir', free: false },
+    { id: 'sim-20', title: 'Blandað yfirlit', free: false }
+  ];
+
+  var SECTION_KEYS = ['lestur', 'hlustun', 'ritun', 'tal'];
+
+  // ═══════════════════════════════════════════════════════════════
+  // LOAD STATE FROM LOCALSTORAGE
+  // ═══════════════════════════════════════════════════════════════
+  function getSimState(simId) {
+    try {
+      return JSON.parse(localStorage.getItem('rikisborgaraprof-' + simId) || '{}');
+    } catch(e) { return {}; }
+  }
+
+  function getStatus(state) {
+    var sections = SECTION_KEYS.filter(function(k) { return state[k]; });
+    if (sections.length === 0) return 'idle';
+    var allComplete = sections.length === 4 && sections.every(function(k) {
+      var s = state[k];
+      return s.pct != null || s.status === 'complete';
+    });
+    if (allComplete) return 'complete';
+    return 'progress';
+  }
+
+  function getSectionScore(state, key) {
+    if (!state[key]) return null;
+    if (state[key].status === 'pending') return 'pending';
+    if (state[key].pct != null) return state[key].pct;
+    return null;
+  }
+
+  function getOverallPct(state) {
+    var scores = SECTION_KEYS.map(function(k) { return getSectionScore(state, k); })
+      .filter(function(s) { return typeof s === 'number'; });
+    if (scores.length === 0) return null;
+    return Math.round(scores.reduce(function(a, b) { return a + b; }, 0) / scores.length);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // RENDER STAT CARDS
+  // ═══════════════════════════════════════════════════════════════
+  function renderStats() {
+    var completed = 0;
+    var latestSim = null;
+    var latestTs = 0;
+
+    SIMS.forEach(function(sim) {
+      var state = getSimState(sim.id);
+      if (getStatus(state) === 'complete') {
+        completed++;
+        // Find most recent
+        SECTION_KEYS.forEach(function(k) {
+          if (state[k] && state[k].ts && state[k].ts > latestTs) {
+            latestTs = state[k].ts;
+            latestSim = { id: sim.id, state: state };
+          }
+        });
+      }
+    });
+
+    document.getElementById('doneSims').textContent = completed + ' / 20';
+    document.getElementById('progressBar').style.width = (completed / 20 * 100) + '%';
+
+    if (latestSim) {
+      var pct = getOverallPct(latestSim.state);
+      var pass = pct != null && pct >= 60;
+      document.getElementById('lastResult').textContent = pct != null ? pct + '%' : '—';
+      document.getElementById('lastResult').style.color = pass ? 'var(--pass)' : 'var(--fail)';
+
+      var parts = SECTION_KEYS.map(function(k) {
+        var s = getSectionScore(latestSim.state, k);
+        var labels = { lestur: '📖', hlustun: '🎧', ritun: '✍️', tal: '🎤' };
+        return labels[k] + ' ' + (typeof s === 'number' ? s + '%' : '⏳');
+      }).join(' · ');
+      document.getElementById('lastResultSub').textContent = parts;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // RENDER TABLE
+  // ═══════════════════════════════════════════════════════════════
+  function renderTable() {
+    var tbody = document.getElementById('simTableBody');
+    var html = '';
+
+    SIMS.forEach(function(sim) {
+      var state = getSimState(sim.id);
+      var status = getStatus(state);
+      var num = sim.id.replace('sim-', '');
+      var isAvailable = sim.free; // Will check payment in Chat 8
+
+      // Status badge
+      var statusLabel, statusCls;
+      if (!isAvailable && status === 'idle') {
+        statusLabel = 'Læst'; statusCls = 'badge-locked';
+      } else if (status === 'idle') {
+        statusLabel = 'Ekki byrjað'; statusCls = 'badge-idle';
+      } else if (status === 'complete') {
+        statusLabel = 'Lokið'; statusCls = 'badge-complete';
+      } else {
+        statusLabel = 'Í vinnslu'; statusCls = 'badge-progress';
+      }
+
+      // Per-section scores
+      var scoreCells = SECTION_KEYS.map(function(key) {
+        var score = getSectionScore(state, key);
+        if (score === null) return '<td class="score-cell na hide-mobile">—</td>';
+        if (score === 'pending') return '<td class="score-cell pending hide-mobile">⏳</td>';
+        var cls = score >= 60 ? 'high' : score >= 40 ? 'mid' : 'low';
+        return '<td class="score-cell ' + cls + ' hide-mobile">' + score + '%</td>';
+      }).join('');
+
+      // Overall result
+      var resultHtml;
+      if (status === 'complete') {
+        var pct = getOverallPct(state);
+        var allPass = SECTION_KEYS.every(function(k) {
+          var s = getSectionScore(state, k);
+          return typeof s === 'number' && s >= 60;
+        });
+        var pass = allPass && pct >= 60;
+        resultHtml = '<span class="result-badge ' + (pass ? 'result-pass' : 'result-fail') + '">' +
+          (pass ? 'Staðist' : 'Ekki staðist') + '</span>';
+      } else {
+        resultHtml = '<span style="color:var(--border)">—</span>';
+      }
+
+      // Action button
+      var actionHtml;
+      if (!isAvailable && status === 'idle') {
+        actionHtml = '<span class="table-btn table-btn-locked">🔒</span>';
+      } else if (status === 'idle') {
+        actionHtml = '<a class="table-btn table-btn-start" href="lesskilningur.html?sim=' + sim.id + '">Byrja</a>';
+      } else if (status === 'complete') {
+        actionHtml = '<a class="table-btn table-btn-results" href="nidurstodur.html?sim=' + sim.id + '">Niðurstöður</a>';
+      } else {
+        // Find next incomplete section
+        var nextSection = 'lesskilningur';
+        var sectionPages = { lestur: 'lesskilningur', hlustun: 'hlustun', ritun: 'ritun', tal: 'tal' };
+        for (var i = 0; i < SECTION_KEYS.length; i++) {
+          if (!state[SECTION_KEYS[i]]) {
+            nextSection = sectionPages[SECTION_KEYS[i]];
+            break;
+          }
+        }
+        actionHtml = '<a class="table-btn table-btn-resume" href="' + nextSection + '.html?sim=' + sim.id + '">Halda áfram</a>';
+      }
+
+      html += '<tr>' +
+        '<td><span class="sim-id">' + num + '</span><span class="sim-topics">' + escHtml(sim.title) + '</span></td>' +
+        '<td><span class="badge ' + statusCls + '">' + statusLabel + '</span></td>' +
+        scoreCells +
+        '<td>' + resultHtml + '</td>' +
+        '<td>' + actionHtml + '</td>' +
+        '</tr>';
+    });
+
+    tbody.innerHTML = html;
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // EXAM COUNTDOWN
+  // ═══════════════════════════════════════════════════════════════
+  function initCountdown() {
+    var saved = localStorage.getItem('rik_exam_date');
+    if (saved) {
+      var sel = document.getElementById('examDateSelector');
+      var found = false;
+      for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === saved) { sel.selectedIndex = i; found = true; break; }
+      }
+      if (!found) {
+        sel.value = 'custom';
+        document.getElementById('customDateRow').classList.add('visible');
+        document.getElementById('customDateInput').value = saved;
+      }
+      updateCountdown(saved);
+    }
+  }
+
+  window.handleDateSelection = function() {
+    var sel = document.getElementById('examDateSelector');
+    var val = sel.value;
+    document.getElementById('customDateRow').classList.remove('visible');
+    if (val === 'custom') {
+      document.getElementById('customDateRow').classList.add('visible');
+      return;
+    }
+    if (val) {
+      localStorage.setItem('rik_exam_date', val);
+      updateCountdown(val);
+    } else {
+      localStorage.removeItem('rik_exam_date');
+      document.getElementById('examCountdown').textContent = '—';
+    }
+  };
+
+  window.applyCustomDate = function() {
+    var val = document.getElementById('customDateInput').value;
+    if (!val) return;
+    localStorage.setItem('rik_exam_date', val);
+    updateCountdown(val);
+  };
+
+  function updateCountdown(dateStr) {
+    var target = new Date(dateStr + 'T00:00:00');
+    var now = new Date();
+    var diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+    var el = document.getElementById('examCountdown');
+    if (diff < 0) {
+      el.textContent = 'Þegar liðið';
+    } else if (diff === 0) {
+      el.textContent = 'Í dag!';
+    } else {
+      el.textContent = diff + (diff === 1 ? ' dagur' : ' dagar');
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // UTILS
+  // ═══════════════════════════════════════════════════════════════
+  function escHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // INIT
+  // ═══════════════════════════════════════════════════════════════
+  renderStats();
+  renderTable();
+  initCountdown();
+
+})();
+</script>
+</body>
+</html>

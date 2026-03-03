@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Niðurstöður — Ríkisborgarapróf</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --blue: #003897;
+    --blue-light: #e8eef8;
+    --blue-hover: #002a73;
+    --red: #d72828;
+    --green: #1a7a3a;
+    --green-light: #e6f4ea;
+    --red-light: #fde8e8;
+    --amber: #b45309;
+    --amber-light: #fef3c7;
+    --gray-50: #f8f9fa;
+    --gray-100: #f1f3f5;
+    --gray-200: #e2e5e9;
+    --gray-400: #8b95a5;
+    --gray-600: #4a5568;
+    --gray-800: #1e2a3a;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,.1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-800);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    background: var(--blue); color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .topbar-flag { font-size: 1.4rem; }
+  .topbar-title { font-weight: 600; font-size: 0.95rem; }
+  .topbar-section { font-size: 0.85rem; opacity: 0.85; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .topbar-sim { background: rgba(255,255,255,0.15); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
+  .topbar-back { color: #fff; text-decoration: none; font-size: 0.85rem; opacity: 0.8; }
+  .topbar-back:hover { opacity: 1; }
+
+  .main { max-width: 680px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  /* ── Hero result ── */
+  .result-hero {
+    text-align: center; padding: 40px 24px;
+    background: #fff; border-radius: var(--radius);
+    box-shadow: var(--shadow-lg); margin-bottom: 28px;
+  }
+  .result-icon { font-size: 3.5rem; margin-bottom: 12px; }
+  .result-verdict {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.8rem; font-weight: 700; margin-bottom: 8px;
+  }
+  .result-verdict.pass { color: var(--green); }
+  .result-verdict.fail { color: var(--red); }
+  .result-verdict.pending { color: var(--amber); }
+  .result-subtitle { font-size: 1rem; color: var(--gray-600); margin-bottom: 20px; }
+
+  .overall-score-wrap {
+    display: inline-flex; flex-direction: column; align-items: center;
+    background: var(--gray-50); border-radius: var(--radius);
+    padding: 16px 32px;
+  }
+  .overall-score-label { font-size: 0.78rem; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.04em; }
+  .overall-score-val {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 2.4rem; font-weight: 700;
+  }
+  .overall-score-val.pass { color: var(--green); }
+  .overall-score-val.fail { color: var(--red); }
+  .overall-score-val.pending { color: var(--amber); }
+
+  /* ── Section cards ── */
+  .sections-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin-bottom: 28px;
+  }
+  .section-card {
+    background: #fff; border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px;
+    position: relative; overflow: hidden;
+  }
+  .section-card::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%;
+  }
+  .section-card.pass::before { background: var(--green); }
+  .section-card.fail::before { background: var(--red); }
+  .section-card.pending::before { background: var(--amber); }
+
+  .section-card-icon { font-size: 1.3rem; margin-bottom: 8px; }
+  .section-card-name { font-size: 0.82rem; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .section-card-score {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.6rem; font-weight: 700;
+  }
+  .section-card-score.pass { color: var(--green); }
+  .section-card-score.fail { color: var(--red); }
+  .section-card-score.pending { color: var(--amber); }
+  .section-card-detail { font-size: 0.82rem; color: var(--gray-600); margin-top: 4px; }
+
+  .section-card-bar {
+    height: 6px; background: var(--gray-200);
+    border-radius: 3px; margin-top: 10px; overflow: hidden;
+  }
+  .section-card-bar-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
+  .section-card-bar-fill.pass { background: var(--green); }
+  .section-card-bar-fill.fail { background: var(--red); }
+  .section-card-bar-fill.pending { background: var(--amber); }
+
+  /* ── Pass criteria note ── */
+  .criteria-note {
+    background: #fff; border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px 24px;
+    font-size: 0.88rem; color: var(--gray-600);
+    margin-bottom: 28px; line-height: 1.6;
+  }
+  .criteria-note strong { color: var(--gray-800); }
+
+  /* ── Buttons ── */
+  .actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 32px; border-radius: var(--radius); border: none;
+    font-family: inherit; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: all .15s ease; text-decoration: none;
+  }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: var(--blue-hover); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+  .btn-outline { background: #fff; color: var(--blue); border: 2px solid var(--blue); }
+  .btn-outline:hover { background: var(--blue-light); }
+
+  @media (max-width: 600px) {
+    .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+    .main { padding: 24px 14px 60px; }
+    .sections-grid { grid-template-columns: 1fr; }
+    .result-hero { padding: 28px 16px; }
+    .result-verdict { font-size: 1.4rem; }
+    .overall-score-val { font-size: 2rem; }
+    .btn { padding: 12px 24px; font-size: 0.88rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-flag">🇮🇸</span>
+    <span class="topbar-title">Ríkisborgarapróf</span>
+    <span class="topbar-section">· Niðurstöður</span>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-sim" id="simLabel">Sim 01</span>
+    <a href="index.html" class="topbar-back">← Til baka</a>
+  </div>
+</div>
+
+<div class="main" id="mainContent"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  let simId = 'sim-01';
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('sim')) simId = params.get('sim');
+  document.getElementById('simLabel').textContent = 'Sim ' + simId.replace('sim-', '');
+
+  const PASS_THRESHOLD = 60;
+
+  const sections = [
+    { key: 'lestur',  name: 'Lesskilningur', icon: '📖', link: 'lesskilningur.html' },
+    { key: 'hlustun', name: 'Hlustun',       icon: '🎧', link: 'hlustun.html' },
+    { key: 'ritun',   name: 'Ritun',         icon: '✍️', link: 'ritun.html' },
+    { key: 'tal',     name: 'Tal',           icon: '🎤', link: 'tal.html' }
+  ];
+
+  // Load from localStorage
+  let data = {};
+  try {
+    data = JSON.parse(localStorage.getItem(`rikisborgaraprof-${simId}`) || '{}');
+  } catch(e) {}
+
+  render(data);
+
+  function render(data) {
+    const main = document.getElementById('mainContent');
+
+    // Compute section scores
+    const results = sections.map(sec => {
+      const d = data[sec.key];
+      if (!d) return { ...sec, pct: null, status: 'missing', detail: 'Ekki lokið' };
+      if (d.status === 'pending') return { ...sec, pct: null, status: 'pending', detail: 'Bíður yfirferðar' };
+      const pct = d.pct != null ? d.pct : null;
+      if (pct === null) return { ...sec, pct: null, status: 'pending', detail: 'Bíður yfirferðar' };
+      return {
+        ...sec,
+        pct,
+        status: pct >= PASS_THRESHOLD ? 'pass' : 'fail',
+        detail: d.correct != null ? `${d.correct} / ${d.total} rétt` : `${pct}%`
+      };
+    });
+
+    // Overall
+    const scoredSections = results.filter(r => r.pct !== null);
+    const hasPending = results.some(r => r.status === 'pending');
+    const hasMissing = results.some(r => r.status === 'missing');
+
+    let overallPct = null;
+    let overallStatus = 'pending';
+    let allSectionsPass = false;
+
+    if (scoredSections.length === 4) {
+      overallPct = Math.round(scoredSections.reduce((s, r) => s + r.pct, 0) / 4);
+      allSectionsPass = scoredSections.every(r => r.pct >= PASS_THRESHOLD);
+      overallStatus = (allSectionsPass && overallPct >= PASS_THRESHOLD) ? 'pass' : 'fail';
+    } else if (scoredSections.length > 0) {
+      overallPct = Math.round(scoredSections.reduce((s, r) => s + r.pct, 0) / scoredSections.length);
+    }
+
+    // Verdict text
+    let verdictText, verdictSub;
+    if (overallStatus === 'pass') {
+      verdictText = 'Staðist!';
+      verdictSub = 'Þú hefur náð lágmarkskröfum í öllum hlutum prófsins.';
+    } else if (overallStatus === 'fail' && scoredSections.length === 4) {
+      verdictText = 'Ekki staðist';
+      const failedNames = results.filter(r => r.status === 'fail').map(r => r.name).join(', ');
+      verdictSub = `Þú náðir ekki 60% í: ${failedNames}. Reyndu aftur!`;
+    } else {
+      verdictText = 'Ólokið';
+      verdictSub = hasPending
+        ? 'Sum svör bíða yfirferðar. Niðurstöður uppfærast sjálfkrafa.'
+        : 'Ljúktu við alla hluta til að sjá heildarniðurstöðu.';
+    }
+
+    let html = `
+      <div class="result-hero">
+        <div class="result-icon">${overallStatus === 'pass' ? '🎉' : overallStatus === 'fail' ? '📋' : '⏳'}</div>
+        <div class="result-verdict ${overallStatus}">${verdictText}</div>
+        <div class="result-subtitle">${verdictSub}</div>
+        <div class="overall-score-wrap">
+          <span class="overall-score-label">Heildareinkunn</span>
+          <span class="overall-score-val ${overallStatus}">
+            ${overallPct !== null ? overallPct + '%' : '—'}
+          </span>
+        </div>
+      </div>
+
+      <div class="sections-grid">
+        ${results.map(r => renderSectionCard(r)).join('')}
+      </div>
+
+      <div class="criteria-note">
+        <strong>Kröfur til að standast:</strong> Minnst 60% í hverjum hluta
+        (lesskilningur, hlustun, ritun, tal) og minnst 60% í heildina.
+        Allir fjórir hlutar vega jafnt (25% hver).
+      </div>
+
+      <div class="actions">
+        <a class="btn btn-outline" href="index.html">← Til baka á yfirlit</a>
+        ${hasMissing ? renderMissingLink(results) : ''}
+        ${overallStatus === 'fail' ? `<a class="btn btn-primary" href="lesskilningur.html?sim=${simId}">Reyna aftur</a>` : ''}
+      </div>`;
+
+    main.innerHTML = html;
+  }
+
+  function renderSectionCard(r) {
+    const pctDisplay = r.pct !== null ? r.pct + '%' : '—';
+    const statusClass = r.status === 'missing' ? 'pending' : r.status;
+
+    return `
+      <div class="section-card ${statusClass}">
+        <div class="section-card-icon">${r.icon}</div>
+        <div class="section-card-name">${r.name}</div>
+        <div class="section-card-score ${statusClass}">${pctDisplay}</div>
+        <div class="section-card-detail">${r.detail}</div>
+        <div class="section-card-bar">
+          <div class="section-card-bar-fill ${statusClass}" style="width:${r.pct || 0}%"></div>
+        </div>
+      </div>`;
+  }
+
+  function renderMissingLink(results) {
+    const first = results.find(r => r.status === 'missing');
+    if (!first) return '';
+    return `<a class="btn btn-primary" href="${first.link}?sim=${simId}">Halda áfram →</a>`;
+  }
+})();
+</script>
+
+</body>
+</html>
