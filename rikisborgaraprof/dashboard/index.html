@@ -452,7 +452,16 @@
   window._confirmRedo = function(simId) {
     var num = simId.replace('sim-', '');
     if (!confirm('Viltu endurtaka hermiprufu ' + num + '?\n\nFyrri nidurstodur hverfa.')) return;
-    try { localStorage.removeItem('rikisborgaraprof-' + simId); } catch(e) {}
+    try {
+      localStorage.removeItem('rikisborgaraprof-' + simId);
+      // Clear drafts (rik-draft-sim-XX-taskId)
+      var toRemove = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf('rik-draft-' + simId) === 0) toRemove.push(k);
+      }
+      toRemove.forEach(function(k) { localStorage.removeItem(k); });
+    } catch(e) {}
     renderStats();
     renderTable();
     window.location.href = 'lesskilningur.html?sim=' + simId;
