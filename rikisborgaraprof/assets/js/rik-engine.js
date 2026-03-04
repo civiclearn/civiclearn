@@ -15,9 +15,10 @@ const RIKEngine = {
   // ---------------------------------------------------------------------------
   // Runtime state
   // ---------------------------------------------------------------------------
-  currentSimId: null,
-  currentTest:  null,
-  _recordings:  {},   // in-memory only — base64 audio is too large for localStorage
+  currentSimId:    null,
+  currentTest:     null,
+  currentAttemptId: null,   // DB row in rik_attempts — set by startAttempt()
+  _recordings:     {},      // in-memory only — base64 audio is too large for localStorage
 
   // ---------------------------------------------------------------------------
   // INITIALIZATION
@@ -26,6 +27,9 @@ const RIKEngine = {
   init(simId) {
     this.currentSimId = simId;
     this.currentTest  = this.getTestState(simId) || this.createNewTestState(simId);
+
+    // Restore attempt_id if already stored
+    this.currentAttemptId = this.currentTest._attemptId || null;
 
     // Clear stale recording flags — actual audio lives in memory and is lost on reload
     const tal = this.currentTest.tal;
@@ -37,8 +41,60 @@ const RIKEngine = {
       if (cleared) this._save();
     }
 
+    // Register/resume DB attempt (non-blocking — runs in background)
+    this.startAttempt().catch(e => console.warn('[RIKEngine] startAttempt failed (offline?):', e.message));
+
     console.log('[RIKEngine] Initialized for:', simId);
     return this;
+  },
+
+  // ---------------------------------------------------------------------------
+  // AUTH helpers
+  // ---------------------------------------------------------------------------
+
+  getSession() {
+    try {
+      const email = localStorage.getItem('cl_email');
+      const token = localStorage.getItem('cl_token');
+      return (email && token) ? { email, token } : null;
+    } catch(e) { return null; }
+  },
+
+  // ---------------------------------------------------------------------------
+  // DB ATTEMPT — create or resume row in rik_attempts
+  // Called automatically from init(). Pages don't need to call this directly.
+  // ---------------------------------------------------------------------------
+
+  async startAttempt() {
+    const session = this.getSession();
+    if (!session) return;   // Not logged in — localStorage-only mode
+
+    if (this.currentAttemptId) {
+      console.log('[RIKEngine] Resuming attempt:', this.currentAttemptId);
+      return;
+    }
+
+    const res = await fetch(`${this.SUPABASE_URL}/functions/v1/rik-submit-test`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.SUPABASE_KEY}`
+      },
+      body: JSON.stringify({
+        user_id: session.email,
+        simulation_id: this.currentSimId
+      })
+    });
+
+    if (!res.ok) throw new Error(`rik-submit-test HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'rik-submit-test failed');
+
+    this.currentAttemptId = data.attempt.id;
+    this.currentTest._attemptId = data.attempt.id;
+    this._save();
+
+    console.log('[RIKEngine] Attempt', data.resumed ? 'resumed' : 'created', ':', data.attempt.id);
   },
 
   // ---------------------------------------------------------------------------
@@ -231,13 +287,16 @@ const RIKEngine = {
       taskId: r.taskId, taskNumber: r.taskNumber, type: r.type, text: r.text
     }));
 
+    const payload = { simulationId: this.currentSimId, section: 'ritun', responses };
+    if (this.currentAttemptId) payload.attempt_id = this.currentAttemptId;
+
     const res = await fetch(`${this.SUPABASE_URL}/functions/v1/rik-evaluate-writing`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${this.SUPABASE_KEY}`
       },
-      body: JSON.stringify({ simulationId: this.currentSimId, section: 'ritun', responses })
+      body: JSON.stringify(payload)
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -267,17 +326,16 @@ const RIKEngine = {
       else speaking_responses[id] = item.data;
     });
 
+    const payload2 = { simulationId: this.currentSimId, speaking_recordings, speaking_responses };
+    if (this.currentAttemptId) payload2.attempt_id = this.currentAttemptId;
+
     const res = await fetch(`${this.SUPABASE_URL}/functions/v1/rik-evaluate-speaking`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${this.SUPABASE_KEY}`
       },
-      body: JSON.stringify({
-        simulationId: this.currentSimId,
-        speaking_recordings,
-        speaking_responses
-      })
+      body: JSON.stringify(payload2)
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -353,8 +411,9 @@ const RIKEngine = {
       }
       toRemove.forEach(k => localStorage.removeItem(k));
     } catch(e) {}
-    this._recordings = {};
-    this.currentTest  = null;
+    this._recordings      = {};
+    this.currentTest      = null;
+    this.currentAttemptId = null;
     console.log('[RIKEngine] Test reset for:', id);
   },
 

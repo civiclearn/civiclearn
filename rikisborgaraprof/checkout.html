@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kaupa aðgang — Ríkisborgarapróf</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --blue: #003897; --blue-hover: #002a73; --blue-light: #e8eef8;
+    --green: #1a7a3a; --green-light: #e6f4ea;
+    --gray-50: #f8f9fa; --gray-100: #f1f3f5; --gray-200: #e2e5e9;
+    --gray-400: #8b95a5; --gray-600: #4a5568; --gray-800: #1e2a3a;
+    --radius: 8px; --shadow-lg: 0 4px 12px rgba(0,0,0,.1);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--gray-50); color: var(--gray-800); min-height: 100vh; }
+
+  .topbar { background: var(--blue); color: #fff; padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
+  .topbar-flag  { font-size: 1.4rem; }
+  .topbar-title { font-weight: 600; font-size: 0.95rem; }
+
+  .page-wrap { max-width: 600px; margin: 0 auto; padding: 48px 16px; }
+
+  .hero { text-align: center; margin-bottom: 36px; }
+  .hero-flag  { font-size: 3rem; margin-bottom: 12px; }
+  .hero-title { font-family: 'Source Serif 4', serif; font-size: 2rem; font-weight: 700; margin-bottom: 10px; }
+  .hero-sub   { font-size: 1rem; color: var(--gray-600); max-width: 440px; margin: 0 auto; line-height: 1.6; }
+
+  .card {
+    background: #fff; border-radius: 12px;
+    box-shadow: var(--shadow-lg); padding: 36px;
+    margin-bottom: 20px;
+  }
+
+  .price-row {
+    display: flex; align-items: baseline; justify-content: center;
+    gap: 8px; margin: 20px 0;
+  }
+  .price-amount { font-size: 3rem; font-weight: 800; color: var(--blue); }
+  .price-currency { font-size: 1.2rem; color: var(--gray-600); }
+
+  .features { list-style: none; margin: 20px 0; }
+  .features li {
+    padding: 8px 0; font-size: 0.95rem;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .features li:last-child { border-bottom: none; }
+
+  .btn-buy {
+    width: 100%; padding: 16px;
+    background: var(--blue); color: #fff;
+    border: none; border-radius: var(--radius);
+    font-family: inherit; font-size: 1.1rem; font-weight: 700;
+    cursor: pointer; transition: background .2s; margin-top: 8px;
+  }
+  .btn-buy:hover    { background: var(--blue-hover); }
+  .btn-buy:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .trust {
+    text-align: center; margin-top: 16px;
+    font-size: 0.82rem; color: var(--gray-400);
+  }
+
+  .already-account { text-align: center; margin-top: 24px; font-size: 0.9rem; color: var(--gray-600); }
+  .already-account a { color: var(--blue); text-decoration: none; }
+  .already-account a:hover { text-decoration: underline; }
+
+  .error-msg {
+    margin-top: 12px; padding: 10px 14px;
+    background: #fde8e8; color: #d72828;
+    border-radius: var(--radius); font-size: 0.9rem;
+    text-align: center; display: none;
+  }
+
+  .spinner {
+    display: inline-block; width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,.4);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin .7s linear infinite; vertical-align: middle; margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-flag">🇮🇸</span>
+  <span class="topbar-title">Ríkisborgarapróf</span>
+</div>
+
+<div class="page-wrap">
+
+  <div class="hero">
+    <div class="hero-flag">🇮🇸</div>
+    <div class="hero-title">Ríkisborgarapróf — Æfingarpróf</div>
+    <div class="hero-sub">20 líkar hermipróf með gervigreindarmati. Undirbúðu þig fyrir raunverulegt próf með sömu hlutum: lesskilning, hlustun, ritun og tal.</div>
+  </div>
+
+  <div class="card">
+    <div style="text-align:center; font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--gray-400); margin-bottom:4px;">Fullt aðgangspakki</div>
+
+    <div class="price-row">
+      <span class="price-amount" id="priceAmount">…</span>
+      <span class="price-currency" id="priceCurrency"></span>
+    </div>
+
+    <ul class="features">
+      <li>✅ 20 hermanipróf — öll hlutasvið</li>
+      <li>✅ Gervigreindarevaluering á ritun og tal</li>
+      <li>✅ Villuleiðrétting og ráðleggingar</li>
+      <li>✅ Hlustunarpróf með hljóðskrám</li>
+      <li>✅ Engin tímamörk — æfðu þig á þínum hraða</li>
+      <li>✅ Aðgangur í 12 mánuði</li>
+    </ul>
+
+    <button class="btn-buy" id="btnBuy" onclick="startCheckout()">
+      Kaupa aðgang →
+    </button>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="trust">🔒 Öruggt greiðsluferli í gegnum Stripe · Engin sjálfvirk endurnýjun</div>
+  </div>
+
+  <div class="already-account">
+    Ertu nú þegar með aðgang? <a href="login.html">Skrá þig inn</a>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const SUPABASE_URL = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const FN_CHECKOUT  = SUPABASE_URL + '/functions/v1/rik-create-checkout';
+
+  // Show placeholder price until we know the real one from Stripe
+  // (once RIK_STRIPE_PRICE_ID is set, actual price will be fetched)
+  document.getElementById('priceAmount').textContent   = '—';
+  document.getElementById('priceCurrency').textContent = '';
+
+  window.startCheckout = async function () {
+    const btn = document.getElementById('btnBuy');
+    const err = document.getElementById('errorMsg');
+    err.style.display = 'none';
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Beið…';
+
+    try {
+      const res  = await fetch(FN_CHECKOUT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+        body: JSON.stringify({ product_type: 'rik' })
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.url) {
+        err.textContent = data.error || 'Villa við greiðsluferli. Reyndu aftur.';
+        err.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Kaupa aðgang →';
+        return;
+      }
+
+      window.location.href = data.url;
+
+    } catch (e) {
+      err.textContent = 'Tengivillar. Athugaðu nettenginguna og reyndu aftur.';
+      err.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Kaupa aðgang →';
+    }
+  };
+
+})();
+</script>
+
+</body>
+</html>

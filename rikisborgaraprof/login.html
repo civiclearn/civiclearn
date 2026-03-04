@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Innskráning — Ríkisborgarapróf</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --blue: #003897;
+    --blue-light: #e8eef8;
+    --blue-hover: #002a73;
+    --red: #d72828;
+    --green: #1a7a3a;
+    --green-light: #e6f4ea;
+    --red-light: #fde8e8;
+    --gray-50: #f8f9fa;
+    --gray-100: #f1f3f5;
+    --gray-200: #e2e5e9;
+    --gray-400: #8b95a5;
+    --gray-600: #4a5568;
+    --gray-800: #1e2a3a;
+    --radius: 8px;
+    --shadow-lg: 0 4px 12px rgba(0,0,0,.1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-800);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topbar {
+    background: var(--blue);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .topbar-left  { display: flex; align-items: center; gap: 12px; }
+  .topbar-flag  { font-size: 1.4rem; }
+  .topbar-title { font-weight: 600; font-size: 0.95rem; }
+
+  .page-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .card-icon  { font-size: 2.5rem; text-align: center; margin-bottom: 12px; }
+  .card-title { font-size: 1.5rem; font-weight: 700; text-align: center; margin-bottom: 6px; }
+  .card-sub   { font-size: 0.9rem; color: var(--gray-600); text-align: center; margin-bottom: 28px; }
+
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+  .field input {
+    width: 100%; padding: 11px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-family: inherit; font-size: 1rem;
+    transition: border-color .2s;
+    outline: none;
+  }
+  .field input:focus { border-color: var(--blue); }
+
+  .btn {
+    width: 100%; padding: 13px;
+    background: var(--blue); color: #fff;
+    border: none; border-radius: var(--radius);
+    font-family: inherit; font-size: 1rem; font-weight: 600;
+    cursor: pointer; transition: background .2s;
+  }
+  .btn:hover    { background: var(--blue-hover); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .msg {
+    margin-top: 14px; padding: 10px 14px;
+    border-radius: var(--radius);
+    font-size: 0.9rem; text-align: center; display: none;
+  }
+  .msg.error   { background: var(--red-light);   color: var(--red);   display: block; }
+  .msg.success { background: var(--green-light);  color: var(--green); display: block; }
+
+  .links {
+    margin-top: 20px; text-align: center;
+    font-size: 0.85rem; color: var(--gray-600);
+  }
+  .links a { color: var(--blue); text-decoration: none; }
+  .links a:hover { text-decoration: underline; }
+
+  /* Tabs */
+  .tabs { display: flex; border-bottom: 2px solid var(--gray-200); margin-bottom: 24px; }
+  .tab {
+    flex: 1; padding: 10px; text-align: center;
+    font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    color: var(--gray-400); border-bottom: 2px solid transparent;
+    margin-bottom: -2px; transition: color .2s, border-color .2s;
+  }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .spinner {
+    display: inline-block; width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,.4);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin .7s linear infinite; vertical-align: middle; margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-flag">🇮🇸</span>
+    <span class="topbar-title">Ríkisborgarapróf</span>
+  </div>
+</div>
+
+<div class="page-wrap">
+  <div class="card">
+    <div class="card-icon">🔐</div>
+    <div class="card-title">Innskráning</div>
+    <div class="card-sub">Skráðu þig inn með netfangi og lykilorði</div>
+
+    <!-- Tabs: Login / Reset -->
+    <div class="tabs">
+      <div class="tab active" id="tabLogin"    onclick="showTab('login')">Innskráning</div>
+      <div class="tab"       id="tabReset"    onclick="showTab('reset')">Gleymt lykilorð</div>
+    </div>
+
+    <!-- LOGIN PANEL -->
+    <div class="tab-panel active" id="panelLogin">
+      <div class="field">
+        <label for="loginEmail">Netfang</label>
+        <input type="email" id="loginEmail" autocomplete="email" placeholder="þitt@netfang.is">
+      </div>
+      <div class="field">
+        <label for="loginPass">Lykilorð</label>
+        <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button class="btn" id="btnLogin" onclick="doLogin()">Skrá inn</button>
+      <div class="msg" id="loginMsg"></div>
+    </div>
+
+    <!-- RESET PANEL -->
+    <div class="tab-panel" id="panelReset">
+      <div id="resetStep1">
+        <div class="field">
+          <label for="resetEmail">Netfang</label>
+          <input type="email" id="resetEmail" placeholder="þitt@netfang.is">
+        </div>
+        <button class="btn" id="btnResetStep1" onclick="doResetStep1()">Senda kóða</button>
+        <div class="msg" id="resetMsg1"></div>
+      </div>
+      <div id="resetStep2" style="display:none">
+        <div class="field">
+          <label for="resetPin">Staðfestingarkóði</label>
+          <input type="text" id="resetPin" placeholder="6 stafa kóði" maxlength="6">
+        </div>
+        <div class="field">
+          <label for="resetNewPass">Nýtt lykilorð</label>
+          <input type="password" id="resetNewPass" placeholder="Minnst 6 stafir">
+        </div>
+        <button class="btn" id="btnResetStep2" onclick="doResetStep2()">Uppfæra lykilorð</button>
+        <div class="msg" id="resetMsg2"></div>
+      </div>
+    </div>
+
+    <div class="links">
+      Ertu ekki með aðgang? <a href="checkout.html">Kaupa aðgang</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const FN_BASE       = SUPABASE_URL + '/functions/v1';
+
+  // Redirect if already logged in
+  const existingEmail = localStorage.getItem('cl_email');
+  const existingToken = localStorage.getItem('cl_token');
+  if (existingEmail && existingToken) {
+    const params     = new URLSearchParams(window.location.search);
+    const returnUrl  = params.get('return') || 'index.html';
+    window.location.replace(returnUrl);
+  }
+
+  /* ── Tabs ── */
+  window.showTab = function (tab) {
+    document.getElementById('panelLogin').classList.toggle('active', tab === 'login');
+    document.getElementById('panelReset').classList.toggle('active', tab === 'reset');
+    document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+    document.getElementById('tabReset').classList.toggle('active', tab === 'reset');
+  };
+
+  /* ── Login ── */
+  window.doLogin = async function () {
+    const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const password = document.getElementById('loginPass').value;
+    const btn      = document.getElementById('btnLogin');
+    const msg      = document.getElementById('loginMsg');
+
+    msg.className = 'msg';
+    if (!email || !password) { msg.className = 'msg error'; msg.textContent = 'Fylltu inn netfang og lykilorð.'; return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Skrá inn…';
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.access_token) {
+        msg.className = 'msg error';
+        msg.textContent = 'Rangt netfang eða lykilorð.';
+        btn.disabled = false; btn.textContent = 'Skrá inn';
+        return;
+      }
+
+      // Store session
+      localStorage.setItem('cl_email', email);
+      localStorage.setItem('cl_token', data.access_token);
+
+      // Log login
+      fetch(`${FN_BASE}/check-user-exists`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+        body: JSON.stringify({ email, action: 'login_log', method: 'password' })
+      }).catch(() => {});
+
+      const params   = new URLSearchParams(window.location.search);
+      const returnUrl = params.get('return') || 'index.html';
+      window.location.replace(returnUrl);
+
+    } catch (e) {
+      msg.className = 'msg error';
+      msg.textContent = 'Villa við innskráningu. Reyndu aftur.';
+      btn.disabled = false; btn.textContent = 'Skrá inn';
+    }
+  };
+
+  // Enter key on password field
+  document.getElementById('loginPass').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') window.doLogin();
+  });
+
+  /* ── Reset Step 1: get PIN ── */
+  let resetEmail = '';
+  window.doResetStep1 = async function () {
+    const email = document.getElementById('resetEmail').value.trim().toLowerCase();
+    const btn   = document.getElementById('btnResetStep1');
+    const msg   = document.getElementById('resetMsg1');
+    msg.className = 'msg';
+    if (!email) { msg.className = 'msg error'; msg.textContent = 'Sláðu inn netfang.'; return; }
+
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Sæki…';
+
+    const res  = await fetch(`${FN_BASE}/rik-reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      body: JSON.stringify({ action: 'check_email', email })
+    });
+    const data = await res.json();
+
+    if (!data.exists) {
+      msg.className = 'msg error'; msg.textContent = data.message || 'Netfang finnst ekki.';
+      btn.disabled = false; btn.textContent = 'Senda kóða'; return;
+    }
+
+    resetEmail = email;
+    document.getElementById('resetPin').value = data.pin || '';
+    document.getElementById('resetStep1').style.display = 'none';
+    document.getElementById('resetStep2').style.display = 'block';
+  };
+
+  /* ── Reset Step 2: set new password ── */
+  window.doResetStep2 = async function () {
+    const pin      = document.getElementById('resetPin').value.trim();
+    const newPass  = document.getElementById('resetNewPass').value;
+    const btn      = document.getElementById('btnResetStep2');
+    const msg      = document.getElementById('resetMsg2');
+    msg.className  = 'msg';
+    if (!pin || !newPass) { msg.className = 'msg error'; msg.textContent = 'Fylltu inn kóða og nýtt lykilorð.'; return; }
+
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Uppfæri…';
+
+    const res  = await fetch(`${FN_BASE}/rik-reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      body: JSON.stringify({ action: 'reset', email: resetEmail, pin, new_password: newPass })
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      msg.className = 'msg error'; msg.textContent = data.error || 'Villa. Reyndu aftur.';
+      btn.disabled = false; btn.textContent = 'Uppfæra lykilorð'; return;
+    }
+
+    msg.className = 'msg success'; msg.textContent = data.message;
+    setTimeout(() => { window.showTab('login'); }, 2000);
+  };
+
+})();
+</script>
+
+</body>
+</html>
