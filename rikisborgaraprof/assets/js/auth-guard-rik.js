@@ -29,9 +29,8 @@
 
   async function verifyAccess(email, token) {
     try {
-      // Check entitlement via Supabase users table
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email)}&select=access_path`,
+        `${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email)}&select=access_path,role`,
         {
           headers: {
             'apikey': SUPABASE_KEY,
@@ -44,10 +43,12 @@
       const data = await res.json();
       if (!data || data.length === 0) return false;
 
+      // Admins always have access
+      if (data[0].role === 'admin') return true;
+
       const ap = data[0].access_path || '';
       return ap === ACCESS_PATH || ap.startsWith('/rikisborgaraprof');
     } catch (e) {
-      // On network error, allow through — don't lock out users
       return true;
     }
   }
