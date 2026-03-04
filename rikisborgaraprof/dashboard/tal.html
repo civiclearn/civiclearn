@@ -285,7 +285,6 @@
 
   const DATA_BASE = '/rikisborgaraprof/data';
   const IMAGE_BASE = 'https://media.civiclearn.com/rikisborgaraprof/images';
-  const EVAL_ENDPOINT = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/rik-evaluate-speaking';
 
   let examData = null;
   let submitted = false;
@@ -588,149 +587,58 @@
 
     submitted = true;
     const btn = document.getElementById('btnSubmit');
-    btn.innerHTML = '<span class="inline-spinner"></span> Sendir…';
+    btn.innerHTML = '<span class="inline-spinner"></span> Vistar…';
     btn.disabled = true;
 
-    // Disable all record buttons
+    // Disable all controls
     document.querySelectorAll('.record-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
     document.querySelectorAll('.text-fallback-input').forEach(t => { t.disabled = true; });
 
-    // No endpoint yet — show pending
-    if (!EVAL_ENDPOINT) {
-      showPendingResults();
-      return;
-    }
-
-    // Build FormData with audio blobs + text fallbacks
-    const formData = new FormData();
-    formData.append('simulationId', simId);
-    formData.append('section', 'tal');
-
-    allItems.forEach(id => {
-      if (recordings[id]) {
-        formData.append(`audio_${id}`, recordings[id].blob, `${id}.webm`);
-      }
-      const fallbackText = document.getElementById(`fallback-text-${id}`);
-      if (fallbackText && fallbackText.value.trim()) {
-        formData.append(`text_${id}`, fallbackText.value.trim());
-      }
+    // Convert audio blobs to base64 and save to localStorage
+    const savePromises = allItems.map(id => {
+      return new Promise(resolve => {
+        if (recordings[id] && recordings[id].blob) {
+          const reader = new FileReader();
+          reader.onloadend = function() {
+            resolve({ id: id, type: 'audio', data: reader.result });
+          };
+          reader.readAsDataURL(recordings[id].blob);
+        } else {
+          const fallbackText = document.getElementById(`fallback-text-${id}`);
+          const text = (fallbackText && fallbackText.value.trim()) || '';
+          resolve({ id: id, type: 'text', data: text });
+        }
+      });
     });
 
-    fetch(EVAL_ENDPOINT, { method: 'POST', body: formData })
-      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(result => showResults(result))
-      .catch(err => {
-        document.getElementById('submitStatus').textContent =
-          'Ekki tókst að senda. Svörin hafa verið vistuð.';
-        document.getElementById('submitStatus').className = 'submit-status error';
-        showPendingResults();
+    Promise.all(savePromises).then(items => {
+      const responses = {};
+      items.forEach(item => {
+        responses[item.id] = { type: item.type, data: item.data };
       });
+
+      try {
+        const key = `rikisborgaraprof-${simId}`;
+        const existing = JSON.parse(localStorage.getItem(key) || '{}');
+        existing.tal = { responses: responses, status: 'submitted', ts: Date.now() };
+        localStorage.setItem(key, JSON.stringify(existing));
+      } catch(e) { console.error('localStorage save error:', e); }
+
+      // Show confirmation
+      btn.style.display = 'none';
+      document.getElementById('submitStatus').textContent = '';
+
+      examData.parts.forEach(part => {
+        const panel = document.getElementById(`feedback-${part.partId}`);
+        panel.className = 'feedback-panel visible pending';
+        panel.innerHTML = `
+          <div class="feedback-label">✅ Sent í yfirferð</div>
+          <div class="feedback-text">Svörin þín hafa verið vistuð. Niðurstöður birtast á niðurstöðusíðunni.</div>`;
+      });
+
+      document.getElementById('navActions').style.display = 'flex';
+    });
   };
-
-  function showPendingResults() {
-    examData.parts.forEach(part => {
-      const panel = document.getElementById(`feedback-${part.partId}`);
-      const recorded = part.type === 'picture_descriptions'
-        ? part.pictures.filter(p => recordings[p.pictureId] || hasFallbackText(p.pictureId)).length
-        : (recordings[part.partId] || hasFallbackText(part.partId) ? 1 : 0);
-
-      const total = part.type === 'picture_descriptions' ? 5 : 1;
-
-      panel.className = 'feedback-panel visible pending';
-      panel.innerHTML = `
-        <div class="feedback-score">—</div>
-        <div class="feedback-label">⏳ Bíður yfirferðar</div>
-        <div class="feedback-text">
-          ${recorded}/${total} svör móttekin. AI-mat verður tengt í næsta skrefi.
-        </div>`;
-    });
-
-    // Save state
-    try {
-      const key = `rikisborgaraprof-${simId}`;
-      const existing = JSON.parse(localStorage.getItem(key) || '{}');
-      existing.tal = { status: 'pending', ts: Date.now() };
-      localStorage.setItem(key, JSON.stringify(existing));
-    } catch(e) {}
-
-    document.getElementById('btnSubmit').style.display = 'none';
-    document.getElementById('submitStatus').textContent = '';
-    document.getElementById('navActions').style.display = 'flex';
-  }
-
-  function showResults(result) {
-    // Show per-part feedback
-    (result.parts || []).forEach(function(partResult) {
-      const panel = document.getElementById('feedback-' + partResult.partId);
-      if (!panel) return;
-      const pct = partResult.score;
-      const pass = pct >= 60;
-
-      panel.className = 'feedback-panel visible ' + (pass ? 'pass' : 'fail');
-
-      let criteriaHtml = '';
-      if (partResult.criteria) {
-        const labels = {
-          taskCompletion: 'Verkefni', vocabulary: 'Orðaforði',
-          grammar: 'Málfræði', fluency: 'Flæði', comprehensibility: 'Skiljanleiki'
-        };
-        criteriaHtml = '<div style="margin-top:12px">';
-        for (const [key, val] of Object.entries(partResult.criteria)) {
-          const v = typeof val === 'number' ? val : 0;
-          criteriaHtml += '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.82rem">' +
-            '<span style="flex:1;color:var(--gray-600)">' + (labels[key] || key) + '</span>' +
-            '<div style="width:100px;height:5px;background:var(--gray-200);border-radius:3px;overflow:hidden">' +
-            '<div style="height:100%;width:' + v + '%;background:var(--blue);border-radius:3px"></div></div>' +
-            '<span style="width:32px;text-align:right;font-weight:600;font-size:0.78rem">' + v + '%</span>' +
-            '</div>';
-        }
-        criteriaHtml += '</div>';
-      }
-
-      let mistakesHtml = '';
-      if (partResult.mistakes && partResult.mistakes.length > 0) {
-        mistakesHtml = '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-200)">' +
-          '<div style="font-size:0.78rem;font-weight:600;color:var(--gray-400);margin-bottom:6px">VILLUR:</div>';
-        partResult.mistakes.forEach(function(m) {
-          mistakesHtml += '<div style="font-size:0.82rem;margin-bottom:6px;color:var(--gray-600)">' +
-            '<span style="color:var(--red);text-decoration:line-through">' + esc(m.original || '') + '</span> → ' +
-            '<span style="color:var(--green);font-weight:500">' + esc(m.correction || '') + '</span>' +
-            (m.explanation ? ' <span style="color:var(--gray-400)">(' + esc(m.explanation) + ')</span>' : '') +
-            '</div>';
-        });
-        mistakesHtml += '</div>';
-      }
-
-      panel.innerHTML =
-        '<div class="feedback-score" style="color:' + (pass ? 'var(--green)' : 'var(--red)') + '">' + pct + '%</div>' +
-        '<div class="feedback-label">' + (pass ? '✅ Samþykkt' : '⚠️ Ekki samþykkt') + '</div>' +
-        '<div class="feedback-text">' + esc(partResult.feedback || '') + '</div>' +
-        criteriaHtml + mistakesHtml;
-    });
-
-    // Show transcriptions if available
-    if (result.transcriptions) {
-      result.transcriptions.forEach(function(t) {
-        const statusEl = document.getElementById('status-' + t.id);
-        if (statusEl && t.text) {
-          statusEl.innerHTML = '<span class="check">✓</span> Umritað: "' + esc(t.text.substring(0, 50)) + (t.text.length > 50 ? '…' : '') + '"';
-        }
-      });
-    }
-
-    // Save to localStorage
-    const avgPct = result.overallScore || 0;
-    try {
-      const key = 'rikisborgaraprof-' + simId;
-      const existing = JSON.parse(localStorage.getItem(key) || '{}');
-      existing.tal = { pct: avgPct, status: 'complete', ts: Date.now() };
-      localStorage.setItem(key, JSON.stringify(existing));
-    } catch(e) {}
-
-    document.getElementById('btnSubmit').style.display = 'none';
-    document.getElementById('submitStatus').textContent = '';
-    document.getElementById('navActions').style.display = 'flex';
-  }
 
   function hasFallbackText(id) {
     const el = document.getElementById(`fallback-text-${id}`);

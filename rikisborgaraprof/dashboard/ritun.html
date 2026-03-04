@@ -243,8 +243,6 @@
 
   const DATA_BASE = '/rikisborgaraprof/data';
   const IMAGE_BASE = 'https://media.civiclearn.com/rikisborgaraprof/images';
-  // Edge Function URL — configured in Chat 4
-  const EVAL_ENDPOINT = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/rik-evaluate-writing';
 
   let examData = null;
   let submitted = false;
@@ -396,7 +394,6 @@
 
     submitted = true;
     const btn = document.getElementById('btnSubmit');
-    btn.innerHTML = '<span class="inline-spinner"></span> Sendir…';
     btn.disabled = true;
 
     // Disable textareas
@@ -404,152 +401,38 @@
       document.getElementById(`text-${task.taskId}`).disabled = true;
     });
 
-    // Collect responses
-    const responses = examData.tasks.map(task => ({
-      taskId: task.taskId,
-      taskNumber: task.taskNumber,
-      type: task.type,
-      text: document.getElementById(`text-${task.taskId}`).value.trim()
-    }));
-
-    // If no endpoint configured, show pending state (Edge Functions come in Chat 4)
-    if (!EVAL_ENDPOINT) {
-      showPendingResults(responses);
-      return;
-    }
-
-    // Submit to Edge Function
-    fetch(EVAL_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        simulationId: simId,
-        section: 'ritun',
-        responses: responses,
-        evaluationCriteria: examData.tasks.map(t => t.evaluationCriteria)
-      })
-    })
-    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(result => showResults(result))
-    .catch(err => {
-      // Fallback: show pending
-      document.getElementById('submitStatus').textContent =
-        'Ekki tókst að senda til yfirferðar. Svörin þín hafa verið vistuð.';
-      document.getElementById('submitStatus').className = 'submit-status error';
-      showPendingResults(responses);
-    });
-  };
-
-  /* ── Show results from Edge Function ── */
-  function showResults(result) {
-    result.tasks.forEach(taskResult => {
-      const panel = document.getElementById(`feedback-${taskResult.taskId}`);
-      const pct = taskResult.score;
-      const pass = pct >= 60;
-
-      let mistakesHtml = '';
-      if (taskResult.mistakes && taskResult.mistakes.length > 0) {
-        mistakesHtml = '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-200)">' +
-          '<div style="font-size:0.78rem;font-weight:600;color:var(--gray-400);margin-bottom:6px">VILLUR:</div>';
-        taskResult.mistakes.forEach(m => {
-          mistakesHtml += `<div style="font-size:0.82rem;margin-bottom:6px;color:var(--gray-600)">` +
-            `<span style="color:var(--red);text-decoration:line-through">${esc(m.original || '')}</span> → ` +
-            `<span style="color:var(--green);font-weight:500">${esc(m.correction || '')}</span>` +
-            (m.explanation ? ` <span style="color:var(--gray-400)">(${esc(m.explanation)})</span>` : '') +
-            `</div>`;
-        });
-        mistakesHtml += '</div>';
-      }
-
-      panel.className = `feedback-panel visible ${pass ? 'pass' : 'fail'}`;
-      panel.innerHTML = `
-        <div class="feedback-score" style="color:${pass ? 'var(--green)' : 'var(--red)'}">${pct}%</div>
-        <div class="feedback-label">${pass ? '✅ Samþykkt' : '⚠️ Ekki samþykkt'}</div>
-        <div class="feedback-text">${esc(taskResult.feedback)}</div>
-        ${renderCriteria(taskResult.criteria || {})}
-        ${mistakesHtml}`;
-    });
-
-    finishSubmission(result);
-  }
-
-  /* ── Pending state (no Edge Function yet) ── */
-  function showPendingResults(responses) {
+    // Collect and save responses to localStorage
+    const responses = {};
     examData.tasks.forEach(task => {
-      const panel = document.getElementById(`feedback-${task.taskId}`);
-      const text = document.getElementById(`text-${task.taskId}`).value.trim();
-      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 2).length;
-      const words = text.split(/\s+/).filter(w => w.length > 0).length;
-
-      panel.className = 'feedback-panel visible pending';
-      panel.innerHTML = `
-        <div class="feedback-score">—</div>
-        <div class="feedback-label">⏳ Bíður yfirferðar</div>
-        <div class="feedback-text">
-          Svarið þitt hefur verið vistað (${sentences} setningar, ${words} orð).
-          AI-mat verður tengt í næsta skrefi.
-        </div>`;
-    });
-
-    // Save to localStorage
-    const scores = {};
-    examData.tasks.forEach(task => {
-      scores[task.taskId] = {
-        text: document.getElementById(`text-${task.taskId}`).value.trim(),
-        status: 'pending'
+      responses[task.taskId] = {
+        taskId: task.taskId,
+        taskNumber: task.taskNumber,
+        type: task.type,
+        text: document.getElementById(`text-${task.taskId}`).value.trim()
       };
     });
 
     try {
       const key = `rikisborgaraprof-${simId}`;
       const existing = JSON.parse(localStorage.getItem(key) || '{}');
-      existing.ritun = { responses: scores, pct: null, status: 'pending', ts: Date.now() };
+      existing.ritun = { responses: responses, status: 'submitted', ts: Date.now() };
       localStorage.setItem(key, JSON.stringify(existing));
-    } catch(e) {}
+    } catch(e) { console.error('localStorage save error:', e); }
 
-    document.getElementById('btnSubmit').style.display = 'none';
+    // Show confirmation
+    btn.style.display = 'none';
     document.getElementById('submitStatus').textContent = '';
+
+    examData.tasks.forEach(task => {
+      const panel = document.getElementById(`feedback-${task.taskId}`);
+      panel.className = 'feedback-panel visible pending';
+      panel.innerHTML = `
+        <div class="feedback-label">✅ Sent í yfirferð</div>
+        <div class="feedback-text">Svarið þitt hefur verið vistað. Niðurstöður birtast á niðurstöðusíðunni.</div>`;
+    });
+
     document.getElementById('navActions').style.display = 'flex';
-  }
-
-  function renderCriteria(criteria) {
-    if (!criteria || Object.keys(criteria).length === 0) return '';
-    const labels = {
-      taskCompletion: 'Verkefni', vocabulary: 'Orðaforði',
-      grammar: 'Málfræði', coherence: 'Samhengi'
-    };
-    let html = '<div class="feedback-criteria">';
-    for (const [key, val] of Object.entries(criteria)) {
-      const pct = typeof val === 'number' ? val : (val.score || 0);
-      html += `
-        <div class="criteria-row">
-          <span class="criteria-name">${labels[key] || key}</span>
-          <div class="criteria-bar-wrap">
-            <div class="criteria-bar-fill" style="width:${pct}%"></div>
-          </div>
-          <span class="criteria-score">${pct}%</span>
-        </div>`;
-    }
-    html += '</div>';
-    return html;
-  }
-
-  function finishSubmission(result) {
-    const avgPct = result.overallScore || Math.round(
-      result.tasks.reduce((s, t) => s + t.score, 0) / result.tasks.length
-    );
-
-    try {
-      const key = `rikisborgaraprof-${simId}`;
-      const existing = JSON.parse(localStorage.getItem(key) || '{}');
-      existing.ritun = { pct: avgPct, status: 'complete', ts: Date.now() };
-      localStorage.setItem(key, JSON.stringify(existing));
-    } catch(e) {}
-
-    document.getElementById('btnSubmit').style.display = 'none';
-    document.getElementById('submitStatus').textContent = '';
-    document.getElementById('navActions').style.display = 'flex';
-  }
+  };
 
   /* ── Restart ── */
   window._restart = function() {
