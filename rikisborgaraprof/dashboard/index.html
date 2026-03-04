@@ -260,12 +260,18 @@
     } catch(e) { return {}; }
   }
 
+  function isSectionDone(s) {
+    if (!s) return false;
+    if (s.pct != null) return true;                        // auto-scored or AI-evaluated
+    if (s.status && s.status !== 'not_started') return true; // submitted/evaluating/complete/failed/skipped
+    return false;
+  }
+
   function getStatus(state) {
     var sections = SECTION_KEYS.filter(function(k) { return state[k]; });
     if (sections.length === 0) return 'idle';
     var allComplete = sections.length === 4 && sections.every(function(k) {
-      var s = state[k];
-      return s.pct != null || s.status === 'complete';
+      return isSectionDone(state[k]);
     });
     if (allComplete) return 'complete';
     return 'progress';
@@ -335,7 +341,14 @@
           stored.hlustun.ts      = stored.hlustun.ts || Date.now();
           changed = true;
         }
-        // Merge writing score
+        // Merge writing — sync score when available, but ALWAYS sync status so
+        // failed/evaluating/skipped states are reflected after reload/other devices
+        if (attempt.writing_status && (!stored.ritun || !stored.ritun.status)) {
+          stored.ritun = stored.ritun || {};
+          stored.ritun.status = attempt.writing_status;
+          stored.ritun.ts     = stored.ritun.ts || Date.now();
+          changed = true;
+        }
         if (attempt.writing_score != null && (!stored.ritun || stored.ritun.pct == null)) {
           stored.ritun = stored.ritun || {};
           stored.ritun.pct    = attempt.writing_score;
@@ -343,7 +356,13 @@
           stored.ritun.ts     = stored.ritun.ts || Date.now();
           changed = true;
         }
-        // Merge speaking score
+        // Merge speaking — same pattern
+        if (attempt.speaking_status && (!stored.tal || !stored.tal.status)) {
+          stored.tal = stored.tal || {};
+          stored.tal.status = attempt.speaking_status;
+          stored.tal.ts     = stored.tal.ts || Date.now();
+          changed = true;
+        }
         if (attempt.speaking_score != null && (!stored.tal || stored.tal.pct == null)) {
           stored.tal = stored.tal || {};
           stored.tal.pct    = attempt.speaking_score;
@@ -460,11 +479,11 @@
         actionHtml = '<a class="table-btn table-btn-results" href="nidurstodur.html?sim=' + sim.id + '">Niðurstöður</a>' +
           '<button class="table-btn table-btn-redo" onclick="window._confirmRedo(\'' + sim.id + '\')">Endurtaka</button>';
       } else {
-        // Find next incomplete section
+        // Find next undone section
         var nextSection = 'lesskilningur';
         var sectionPages = { lestur: 'lesskilningur', hlustun: 'hlustun', ritun: 'ritun', tal: 'tal' };
         for (var i = 0; i < SECTION_KEYS.length; i++) {
-          if (!state[SECTION_KEYS[i]]) {
+          if (!isSectionDone(state[SECTION_KEYS[i]])) {
             nextSection = sectionPages[SECTION_KEYS[i]];
             break;
           }
