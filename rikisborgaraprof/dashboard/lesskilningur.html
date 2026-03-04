@@ -389,9 +389,9 @@
       </div>
       <div class="results-panel" id="resultsPanel"></div>
       <div class="actions" id="navActions" style="display:none">
-        <button class="btn btn-outline" onclick="window._restart()">Reyna aftur</button>
         <button class="btn btn-primary" onclick="window._next()">Áfram í hlustun →</button>
-      </div>`;
+      </div>
+      <span class="skip-link" id="skipLink" onclick="window._skip()">Sleppa og halda áfram</span>`;
 
     main.innerHTML = html;
     updateProgress();
@@ -487,6 +487,7 @@
     panel.classList.add('visible');
 
     document.getElementById('btnSubmit').style.display = 'none';
+    document.getElementById('skipLink').style.display = 'none';
     document.getElementById('navActions').style.display = 'flex';
 
     // Save to localStorage
@@ -496,12 +497,15 @@
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
-  /* ── Restart ── */
-  window._restart = function() {
-    answers = {};
-    submitted = false;
-    render();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  /* ── Skip ── */
+  window._skip = function() {
+    if (submitted) return;
+    if (!confirm('Sleppa lesskilningi? Þú færð 0 stig.')) return;
+    submitted = true;
+    document.getElementById('skipLink').style.display = 'none';
+    document.getElementById('btnSubmit').style.display = 'none';
+    saveResult(0, 1, 0);
+    document.getElementById('navActions').style.display = 'flex';
   };
 
   /* ── Next section ── */
