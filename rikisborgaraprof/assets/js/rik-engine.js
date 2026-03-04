@@ -26,7 +26,17 @@ const RIKEngine = {
 
   init(simId) {
     this.currentSimId = simId;
-    this.currentTest  = this.getTestState(simId) || this.createNewTestState(simId);
+    const saved = this.getTestState(simId);
+    if (saved) {
+      // Ensure all section keys exist — partial state from DB hydration may be missing some
+      if (!saved.lestur)  saved.lestur  = { answers: {}, pct: null, correct: null, total: null, ts: null };
+      if (!saved.hlustun) saved.hlustun = { answers: {}, pct: null, correct: null, total: null, ts: null };
+      if (!saved.ritun)   saved.ritun   = { responses: {}, status: null, pct: null, evaluation: null, error: null, ts: null };
+      if (!saved.tal)     saved.tal     = { recordings: {}, responses: {}, status: null, pct: null, evaluation: null, error: null, ts: null };
+      this.currentTest = saved;
+    } else {
+      this.createNewTestState(simId);
+    }
 
     // Restore attempt_id if already stored
     this.currentAttemptId = this.currentTest._attemptId || null;
