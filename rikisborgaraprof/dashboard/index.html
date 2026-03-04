@@ -203,26 +203,26 @@
   // SIMULATION DEFINITIONS
   // ═══════════════════════════════════════════════════════════════
   var SIMS = [
-    { id: 'sim-01', title: 'Fjölskylda og dagleg líf', free: true },
-    { id: 'sim-02', title: 'Verslun og vinna', free: false },
-    { id: 'sim-03', title: 'Læknir og heilsa', free: false },
-    { id: 'sim-04', title: 'Skóli og menntun', free: false },
-    { id: 'sim-05', title: 'Áhugamál og frítími', free: false },
-    { id: 'sim-06', title: 'Banki og póstur', free: false },
-    { id: 'sim-07', title: 'Ferðalög og leiðir', free: false },
-    { id: 'sim-08', title: 'Siðir og hefðir', free: false },
-    { id: 'sim-09', title: 'Matur og veitingahús', free: false },
-    { id: 'sim-10', title: 'Neyðarþjónusta', free: false },
-    { id: 'sim-11', title: 'Atvinnuumsókn', free: false },
-    { id: 'sim-12', title: 'Fjölmiðlar og fréttir', free: false },
-    { id: 'sim-13', title: 'Klæðnaður og útlit', free: false },
-    { id: 'sim-14', title: 'Húsnæði og leigusamningar', free: false },
-    { id: 'sim-15', title: 'Börn og foreldrar', free: false },
-    { id: 'sim-16', title: 'Landafræði og náttúra', free: false },
-    { id: 'sim-17', title: 'Íþróttir og hreyfing', free: false },
-    { id: 'sim-18', title: 'Skattar og fjármál', free: false },
-    { id: 'sim-19', title: 'Félagslíf og vinir', free: false },
-    { id: 'sim-20', title: 'Blandað yfirlit', free: false }
+    { id: 'sim-01', title: 'Fjölskylda og dagleg líf' },
+    { id: 'sim-02', title: 'Verslun og vinna' },
+    { id: 'sim-03', title: 'Læknir og heilsa' },
+    { id: 'sim-04', title: 'Skóli og menntun' },
+    { id: 'sim-05', title: 'Áhugamál og frítími' },
+    { id: 'sim-06', title: 'Banki og póstur' },
+    { id: 'sim-07', title: 'Ferðalög og leiðir' },
+    { id: 'sim-08', title: 'Siðir og hefðir' },
+    { id: 'sim-09', title: 'Matur og veitingahús' },
+    { id: 'sim-10', title: 'Neyðarþjónusta' },
+    { id: 'sim-11', title: 'Atvinnuumsókn' },
+    { id: 'sim-12', title: 'Fjölmiðlar og fréttir' },
+    { id: 'sim-13', title: 'Klæðnaður og útlit' },
+    { id: 'sim-14', title: 'Húsnæði og leigusamningar' },
+    { id: 'sim-15', title: 'Börn og foreldrar' },
+    { id: 'sim-16', title: 'Landafræði og náttúra' },
+    { id: 'sim-17', title: 'Íþróttir og hreyfing' },
+    { id: 'sim-18', title: 'Skattar og fjármál' },
+    { id: 'sim-19', title: 'Félagslíf og vinir' },
+    { id: 'sim-20', title: 'Blandað yfirlit' }
   ];
 
   var SECTION_KEYS = ['lestur', 'hlustun', 'ritun', 'tal'];
@@ -312,13 +312,10 @@
       var state = getSimState(sim.id);
       var status = getStatus(state);
       var num = sim.id.replace('sim-', '');
-      var isAvailable = sim.free; // Will check payment in Chat 8
 
       // Status badge
       var statusLabel, statusCls;
-      if (!isAvailable && status === 'idle') {
-        statusLabel = 'Læst'; statusCls = 'badge-locked';
-      } else if (status === 'idle') {
+      if (status === 'idle') {
         statusLabel = 'Ekki byrjað'; statusCls = 'badge-idle';
       } else if (status === 'complete') {
         statusLabel = 'Lokið'; statusCls = 'badge-complete';
@@ -352,9 +349,7 @@
 
       // Action button
       var actionHtml;
-      if (!isAvailable && status === 'idle') {
-        actionHtml = '<span class="table-btn table-btn-locked">🔒</span>';
-      } else if (status === 'idle') {
+      if (status === 'idle') {
         actionHtml = '<a class="table-btn table-btn-start" href="lesskilningur.html?sim=' + sim.id + '">Byrja</a>';
       } else if (status === 'complete') {
         actionHtml = '<a class="table-btn table-btn-results" href="nidurstodur.html?sim=' + sim.id + '">Niðurstöður</a>' +
