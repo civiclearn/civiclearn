@@ -281,6 +281,14 @@
   .btn-primary:disabled { background: var(--gray-400); cursor: not-allowed; transform: none; box-shadow: none; }
   .btn-outline { background: #fff; color: var(--blue); border: 2px solid var(--blue); }
   .btn-outline:hover { background: var(--blue-light); }
+  .skip-link {
+    font-size: 0.82rem;
+    color: var(--gray-400);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .skip-link:hover { color: var(--gray-600); }
 
   /* ── Results panel ── */
   .results-panel {
@@ -442,7 +450,6 @@
       <p style="text-align:center; margin-top:8px;"><span class="skip-link" id="skipLink" onclick="window._skip()">Sleppa og halda áfram</span></p>
       <div class="results-panel" id="resultsPanel"></div>
       <div class="actions" id="navActions" style="display:none">
-        <button class="btn btn-outline" onclick="window._restart()">Reyna aftur</button>
         <button class="btn btn-primary" onclick="window._next()">Áfram í ritun →</button>
       </div>`;
 
@@ -616,17 +623,6 @@
     document.getElementById('skipLink').style.display  = 'none';
     document.getElementById('btnSubmit').style.display = 'none';
     document.getElementById('navActions').style.display = 'flex';
-  };
-
-  /* ── Restart ── */
-  window._restart = function() {
-    submitted    = false;
-    audioPlayers = {};
-    RIKEngine.currentTest.hlustun.answers = {};
-    RIKEngine.currentTest.hlustun.pct     = null;
-    RIKEngine._save();
-    render();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   /* ── Next section ── */

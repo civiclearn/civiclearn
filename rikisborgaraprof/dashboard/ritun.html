@@ -322,7 +322,6 @@
       <p style="text-align:center; margin-top:8px;"><span class="skip-link" id="skipLink" onclick="window._skip()">Sleppa og halda áfram</span></p>
       <div class="submit-status" id="submitStatus"></div>
       <div class="actions" id="navActions" style="display:none">
-        <button class="btn btn-outline" onclick="window._restart()">Reyna aftur</button>
         <button class="btn btn-primary" onclick="window._next()">Áfram í tal →</button>
       </div>`;
 
@@ -439,17 +438,6 @@
     document.getElementById('btnSubmit').style.display = 'none';
     document.getElementById('submitStatus').textContent = '';
     document.getElementById('navActions').style.display = 'flex';
-  };
-
-  /* ── Restart ── */
-  window._restart = function() {
-    submitted = false;
-    examData.tasks.forEach(task => { RIKEngine.clearDraft(task.taskId); });
-    RIKEngine.currentTest.ritun.responses = {};
-    RIKEngine.currentTest.ritun.status    = null;
-    RIKEngine._save();
-    render();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   /* ── Next section ── */

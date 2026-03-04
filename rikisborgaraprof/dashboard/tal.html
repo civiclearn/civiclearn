@@ -398,7 +398,6 @@
       <p style="text-align:center; margin-top:8px;"><span class="skip-link" id="skipLink" onclick="window._skip()">Sleppa og halda áfram</span></p>
       <div class="submit-status" id="submitStatus"></div>
       <div class="actions" id="navActions" style="display:none">
-        <button class="btn btn-outline" onclick="window._restart()">Reyna aftur</button>
         <button class="btn btn-primary" onclick="window._next()">Sjá niðurstöður →</button>
       </div>`;
 
@@ -626,17 +625,6 @@
     document.getElementById('navActions').style.display = 'flex';
   };
 
-  /* ── Restart ── */
-  window._restart = function() {
-    submitted = false;
-    Object.values(recordings).forEach(r => { if (r.url) URL.revokeObjectURL(r.url); });
-    recordings = {};
-    RIKEngine.currentTest.tal.recordings = {};
-    RIKEngine.currentTest.tal.status     = null;
-    RIKEngine._save();
-    render();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   /* ── Next section ── */
   window._next = function() { window.location.href = `nidurstodur.html?sim=${simId}`; };

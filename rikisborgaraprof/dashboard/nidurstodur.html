@@ -189,6 +189,8 @@
       var meta    = SECTION_META[key];
       if (!section) {
         sectionStatus[key] = 'missing';
+      } else if (section.status === 'skipped') {
+        sectionStatus[key] = 'complete';  // skipped = 0%, no AI eval needed
       } else if (section.status === 'complete' && section.evaluation) {
         sectionStatus[key] = 'complete';
       } else if (meta.evalType === 'auto' && section.pct !== undefined && section.pct !== null) {
