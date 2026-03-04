@@ -95,6 +95,7 @@
     .table-btn-start{background:var(--blue);color:#fff}
     .table-btn-resume{background:var(--navy);color:#fff}
     .table-btn-results{background:#f1f5f9;color:var(--navy);border:1px solid var(--border)}
+    .table-btn-redo{background:transparent;color:var(--muted);border:1px solid var(--border);font-size:0.72rem;padding:4px 10px;margin-left:6px}
     .table-btn-locked{background:#f1f5f9;color:#cbd5e1;cursor:not-allowed}
 
     /* Footer note */
@@ -189,12 +190,12 @@
   </div>
 
   <div class="footer-note">
-    Vandamál? <a href="mailto:admin@civiclearn.com">admin@civiclearn.com</a>
+    Vandamál? <a href="/cdn-cgi/l/email-protection#28494c454146684b415e414b444d495a46064b4745"><span class="__cf_email__" data-cfemail="1071747d797e5073796679737c7571627e3e737f7d">[email&#160;protected]</span></a>
   </div>
 
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 (function() {
   'use strict';
 
@@ -356,7 +357,8 @@
       } else if (status === 'idle') {
         actionHtml = '<a class="table-btn table-btn-start" href="lesskilningur.html?sim=' + sim.id + '">Byrja</a>';
       } else if (status === 'complete') {
-        actionHtml = '<a class="table-btn table-btn-results" href="nidurstodur.html?sim=' + sim.id + '">Niðurstöður</a>';
+        actionHtml = '<a class="table-btn table-btn-results" href="nidurstodur.html?sim=' + sim.id + '">Niðurstöður</a>' +
+          '<button class="table-btn table-btn-redo" onclick="window._confirmRedo(\'' + sim.id + '\')">Endurtaka</button>';
       } else {
         // Find next incomplete section
         var nextSection = 'lesskilningur';
@@ -449,11 +451,21 @@
     return d.innerHTML;
   }
 
-  // ═══════════════════════════════════════════════════════════════
+  // =================================================================
+  // REDO
+  // =================================================================
+  window._confirmRedo = function(simId) {
+    var num = simId.replace('sim-', '');
+    if (!confirm('Viltu endurtaka hermiprufu ' + num + '?\n\nFyrri nidurstodur hverfa.')) return;
+    try { localStorage.removeItem('rikisborgaraprof-' + simId); } catch(e) {}
+    renderDashboard();
+    window.location.href = 'lesskilningur.html?sim=' + simId;
+  };
+
+  // =================================================================
   // INIT
-  // ═══════════════════════════════════════════════════════════════
-  renderStats();
-  renderTable();
+  // =================================================================
+  renderDashboard();
   initCountdown();
 
 })();
