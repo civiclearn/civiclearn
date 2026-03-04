@@ -159,6 +159,7 @@ const RIKEngine = {
     const pct = Math.round((correct / total) * 100);
     Object.assign(this.currentTest.lestur, { pct, correct, total, ts: Date.now() });
     this._save();
+    this._persistAutoScores();
     return { pct, correct, total };
   },
 
@@ -191,6 +192,7 @@ const RIKEngine = {
     const pct = Math.round((correct / total) * 100);
     Object.assign(this.currentTest.hlustun, { pct, correct, total, ts: Date.now() });
     this._save();
+    this._persistAutoScores();
     return { pct, correct, total };
   },
 
@@ -259,6 +261,39 @@ const RIKEngine = {
   },
 
   // ---------------------------------------------------------------------------
+  // PERSIST AUTO SCORES to DB (non-blocking, best-effort)
+  // ---------------------------------------------------------------------------
+
+  _persistAutoScores() {
+    if (!this.currentAttemptId) return;
+    const l = this.currentTest.lestur;
+    const h = this.currentTest.hlustun;
+    const update = { updated_at: new Date().toISOString() };
+    if (l && l.pct !== null) {
+      update.reading_score   = l.pct;
+      update.reading_correct = l.correct;
+      update.reading_total   = l.total;
+      update.reading_answers = l.answers || {};
+    }
+    if (h && h.pct !== null) {
+      update.listening_score   = h.pct;
+      update.listening_correct = h.correct;
+      update.listening_total   = h.total;
+      update.listening_answers = h.answers || {};
+    }
+    fetch(`${this.SUPABASE_URL}/rest/v1/rik_attempts?id=eq.${this.currentAttemptId}`, {
+      method:  'PATCH',
+      headers: {
+        'Content-Type':  'application/json',
+        'apikey':         this.SUPABASE_KEY,
+        'Authorization':  `Bearer ${this.SUPABASE_KEY}`,
+        'Prefer':         'return=minimal'
+      },
+      body: JSON.stringify(update)
+    }).catch(e => console.warn('[RIKEngine] _persistAutoScores failed:', e.message));
+  },
+
+  // ---------------------------------------------------------------------------
   // SKIP any section (saves 0 score, marks complete, allows navigation forward)
   // ---------------------------------------------------------------------------
 
@@ -268,9 +303,10 @@ const RIKEngine = {
     } else if (sectionKey === 'hlustun') {
       Object.assign(this.currentTest.hlustun, { pct: 0, correct: 0, total: 1, ts: Date.now() });
     } else if (sectionKey === 'ritun') {
-      Object.assign(this.currentTest.ritun,   { pct: 0, status: 'complete', evaluation: null, ts: Date.now() });
+      // 'skipped' — not 'complete' — so nidurstodur short-circuits before checking section.responses
+      Object.assign(this.currentTest.ritun,   { pct: 0, status: 'skipped', evaluation: null, ts: Date.now() });
     } else if (sectionKey === 'tal') {
-      Object.assign(this.currentTest.tal,     { pct: 0, status: 'complete', evaluation: null, ts: Date.now() });
+      Object.assign(this.currentTest.tal,     { pct: 0, status: 'skipped', evaluation: null, ts: Date.now() });
     }
     this._save();
   },
@@ -287,7 +323,12 @@ const RIKEngine = {
       taskId: r.taskId, taskNumber: r.taskNumber, type: r.type, text: r.text
     }));
 
-    const payload = { simulationId: this.currentSimId, section: 'ritun', responses };
+    const payload = {
+      simulationId:      this.currentSimId,
+      section:           'ritun',
+      writing_responses: responses,  // edge fn reads from body and saves to DB for retries
+      responses                      // legacy fallback
+    };
     if (this.currentAttemptId) payload.attempt_id = this.currentAttemptId;
 
     const res = await fetch(`${this.SUPABASE_URL}/functions/v1/rik-evaluate-writing`, {
