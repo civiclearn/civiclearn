@@ -8,7 +8,7 @@
   'use strict';
 
   const LOGIN_URL    = '/rikisborgaraprof/login.html';
-  const DASHBOARD_URL = '/rikisborgaraprof/index.html';
+  const DASHBOARD_URL = '/rikisborgaraprof/dashboard/index.html';
   const ACCESS_PATH  = '/rikisborgaraprof/dashboard';
 
   const SUPABASE_URL = 'https://htgliokekeaovdiafrgs.supabase.co';
