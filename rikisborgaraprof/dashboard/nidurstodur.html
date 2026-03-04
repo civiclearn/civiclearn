@@ -271,38 +271,28 @@
     updateProgressIcon('tal', '\u23F3', 'Mat \u00ED gangi\u2026');
     try {
       var responses = data.tal.responses;
-      var items = [];
+
+      // Send base64 audio directly as JSON — never convert to blobs (causes stack overflow)
+      var speaking_recordings = {};
+      var speaking_responses = {};
       for (var id in responses) {
         var item = responses[id];
-        items.push({ id: id, type: item.type, data: item.data });
-      }
-
-      var hasAudio = items.some(function(i) { return i.type === 'audio'; });
-      var res;
-
-      if (hasAudio) {
-        var formData = new FormData();
-        formData.append('simulationId', simId);
-        formData.append('section', 'tal');
-
-        for (var i = 0; i < items.length; i++) {
-          var it = items[i];
-          if (it.type === 'audio') {
-            var blobRes = await fetch(it.data);
-            var blob = await blobRes.blob();
-            formData.append('audio_' + it.id, blob, it.id + '.webm');
-          } else {
-            formData.append('text_' + it.id, it.data);
-          }
+        if (item.type === 'audio') {
+          speaking_recordings[id] = item.data; // already base64 data URL
+        } else {
+          speaking_responses[id] = item.data;
         }
-        res = await fetch(EVAL_SPEAKING, { method: 'POST', body: formData });
-      } else {
-        res = await fetch(EVAL_SPEAKING, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ simulationId: simId, responses: items.map(function(i) { return { id: i.id, text: i.data }; }) })
-        });
       }
+
+      var res = await fetch(EVAL_SPEAKING, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          simulationId: simId,
+          speaking_recordings: speaking_recordings,
+          speaking_responses: speaking_responses
+        })
+      });
 
       if (!res.ok) throw new Error('HTTP ' + res.status);
       var result = await res.json();
