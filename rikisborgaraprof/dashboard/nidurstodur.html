@@ -21,12 +21,15 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--gray-50); color: var(--gray-800); line-height: 1.6; min-height: 100vh; }
 
-  .topbar { background: var(--blue); padding: 0 24px; height: 52px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
-  .topbar-flag { width: 28px; height: 20px; background: linear-gradient(#003897 32%,#fff 32% 40%,#d72828 40% 60%,#fff 60% 68%,#003897 68%); border-radius: 3px; flex-shrink: 0; }
-  .topbar-title { color: #fff; font-weight: 600; font-size: 0.92rem; }
-  .topbar-sub { color: rgba(255,255,255,.6); font-size: 0.72rem; }
-  .topbar-back { color: rgba(255,255,255,.8); text-decoration: none; font-size: 0.82rem; }
-  .topbar-back:hover { color: #fff; }
+  .topbar { background: var(--blue); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .topbar-flag { font-size: 1.4rem; }
+  .topbar-title { font-weight: 600; font-size: 0.95rem; color: #fff; }
+  .topbar-section { font-size: 0.85rem; opacity: 0.85; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .topbar-sim { background: rgba(255,255,255,0.15); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
+  .topbar-back { color: #fff; text-decoration: none; font-size: 0.85rem; opacity: 0.8; transition: opacity .2s; }
+  .topbar-back:hover { color: #fff; opacity: 1; }
 
   .main { max-width: 720px; margin: 0 auto; padding: 28px 20px 60px; }
   .loading { text-align: center; padding: 80px 20px; color: var(--gray-400); }
@@ -131,11 +134,14 @@
 <body>
 
 <div class="topbar">
-  <a href="index.html" class="topbar-back">&#8592; Til baka</a>
-  <div class="topbar-flag"></div>
-  <div>
-    <div class="topbar-title" id="topbarTitle">Nidurstodur</div>
-    <div class="topbar-sub">Rikisborgaraprof</div>
+  <div class="topbar-left">
+    <span class="topbar-flag">🇮🇸</span>
+    <span class="topbar-title">Ríkisborgarapróf</span>
+    <span class="topbar-section">· Niðurstöður</span>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-sim" id="simLabel">Sim 01</span>
+    <a href="index.html" class="topbar-back">← Til baka</a>
   </div>
 </div>
 
@@ -146,43 +152,40 @@
   </div>
 </div>
 
+<script src="/rikisborgaraprof/assets/js/rik-engine.js"></script>
 <script>
 (function() {
   'use strict';
 
-  var EVAL_WRITING = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/rik-evaluate-writing';
-  var EVAL_SPEAKING = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/rik-evaluate-speaking';
   var PASS_THRESHOLD = 60;
 
   var SECTION_META = {
-    lestur:  { icon: '\uD83D\uDCD6', title: 'Lesskilningur',  evalType: 'auto' },
-    hlustun: { icon: '\uD83C\uDFA7', title: 'Hlustun',        evalType: 'auto' },
-    ritun:   { icon: '\u270D\uFE0F', title: 'Ritun',           evalType: 'ai' },
-    tal:     { icon: '\uD83C\uDFA4', title: 'Tal',             evalType: 'ai' }
+    lestur:  { icon: '📖', title: 'Lesskilningur', evalType: 'auto' },
+    hlustun: { icon: '🎧', title: 'Hlustun',       evalType: 'auto' },
+    ritun:   { icon: '✍️', title: 'Ritun',          evalType: 'ai' },
+    tal:     { icon: '🎤', title: 'Tal',            evalType: 'ai' }
   };
 
-  var simId = 'sim-01';
+  var simId  = 'sim-01';
   var params = new URLSearchParams(window.location.search);
   if (params.get('sim')) simId = params.get('sim');
+  document.getElementById('simLabel').textContent = 'Sim ' + simId.replace('sim-', '');
 
-  var storageKey = 'rikisborgaraprof-' + simId;
-  var simNum = simId.replace('sim-', '');
-
-  document.getElementById('topbarTitle').textContent = 'Sim ' + simNum + ' \u2014 Ni\u00F0urst\u00F6\u00F0ur';
+  // Engine owns all state — init before using
+  RIKEngine.init(simId);
 
   loadResults();
 
   /* =========================================================
-     LOAD RESULTS
+     LOAD RESULTS — reads from engine, not raw localStorage
      ========================================================= */
   async function loadResults() {
-    var data;
-    try { data = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch(e) { data = {}; }
-
+    var data          = RIKEngine.currentTest;
     var sectionStatus = {};
+
     for (var key in SECTION_META) {
       var section = data[key];
-      var meta = SECTION_META[key];
+      var meta    = SECTION_META[key];
       if (!section) {
         sectionStatus[key] = 'missing';
       } else if (section.status === 'complete' && section.evaluation) {
@@ -202,126 +205,63 @@
 
     if (hasPending) {
       renderProcessing(data, sectionStatus);
-      await evaluatePending(data, sectionStatus);
-      try { data = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch(e) {}
+      await evaluatePending(sectionStatus);
+      // Re-read state after evaluations complete
+      data = RIKEngine.currentTest;
       for (var k in SECTION_META) {
         var s = data[k];
-        if (s && s.status === 'complete' && (s.evaluation || (SECTION_META[k].evalType === 'auto' && s.pct !== undefined))) sectionStatus[k] = 'complete';
-        else if (s && s.status === 'failed') sectionStatus[k] = 'failed';
+        if (s && s.status === 'complete' && (s.evaluation || (SECTION_META[k].evalType === 'auto' && s.pct !== undefined)))
+          sectionStatus[k] = 'complete';
+        else if (s && s.status === 'failed')
+          sectionStatus[k] = 'failed';
       }
     }
 
     var allComplete = Object.values(sectionStatus).every(function(s) { return s === 'complete'; });
-    if (allComplete) {
-      renderResults(data);
-    } else {
-      renderPartial(data, sectionStatus);
-    }
+    if (allComplete) renderResults(data);
+    else renderPartial(data, sectionStatus);
   }
 
   /* =========================================================
-     EVALUATE PENDING
+     EVALUATE PENDING — delegates to engine methods
      ========================================================= */
-  async function evaluatePending(data, sectionStatus) {
+  async function evaluatePending(sectionStatus) {
     var promises = [];
-    if (sectionStatus.ritun === 'pending' && data.ritun && data.ritun.responses) {
-      promises.push(evaluateWriting(data));
-    }
-    if (sectionStatus.tal === 'pending' && data.tal && data.tal.responses) {
-      promises.push(evaluateSpeaking(data));
-    }
+    if (sectionStatus.ritun === 'pending') promises.push(runWritingEval());
+    if (sectionStatus.tal  === 'pending') promises.push(runSpeakingEval());
     await Promise.allSettled(promises);
   }
 
-  async function evaluateWriting(data) {
-    updateProgressIcon('ritun', '\u23F3', 'Mat \u00ED gangi\u2026');
+  async function runWritingEval() {
+    updateProgressIcon('ritun', '⏳', 'Mat í gangi…');
     try {
-      var responses = [];
-      for (var tid in data.ritun.responses) {
-        var r = data.ritun.responses[tid];
-        responses.push({ taskId: r.taskId, taskNumber: r.taskNumber, type: r.type, text: r.text });
-      }
-
-      var res = await fetch(EVAL_WRITING, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ simulationId: simId, section: 'ritun', responses: responses })
-      });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      var result = await res.json();
-      if (!result.success) throw new Error(result.error || 'Evaluation failed');
-
-      var stored = JSON.parse(localStorage.getItem(storageKey) || '{}');
-      stored.ritun.status = 'complete';
-      stored.ritun.pct = result.overallScore;
-      stored.ritun.evaluation = result;
-      localStorage.setItem(storageKey, JSON.stringify(stored));
-      updateProgressIcon('ritun', '\u2705', 'Loki\u00F0');
+      await RIKEngine.evaluateWriting();
+      updateProgressIcon('ritun', '✅', 'Lokið');
     } catch(err) {
       console.error('[results] Writing eval failed:', err.message);
-      var stored2 = JSON.parse(localStorage.getItem(storageKey) || '{}');
-      stored2.ritun.status = 'failed';
-      stored2.ritun.error = err.message;
-      localStorage.setItem(storageKey, JSON.stringify(stored2));
-      updateProgressIcon('ritun', '\u274C', 'Villa');
+      RIKEngine.markEvalFailed('ritun', err.message);
+      updateProgressIcon('ritun', '❌', 'Villa');
     }
   }
 
-  async function evaluateSpeaking(data) {
-    updateProgressIcon('tal', '\u23F3', 'Mat \u00ED gangi\u2026');
+  async function runSpeakingEval() {
+    updateProgressIcon('tal', '⏳', 'Mat í gangi…');
     try {
-      var responses = data.tal.responses;
-
-      // Send base64 audio directly as JSON — never convert to blobs (causes stack overflow)
-      var speaking_recordings = {};
-      var speaking_responses = {};
-      for (var id in responses) {
-        var item = responses[id];
-        if (item.type === 'audio') {
-          speaking_recordings[id] = item.data; // already base64 data URL
-        } else {
-          speaking_responses[id] = item.data;
-        }
-      }
-
-      var res = await fetch(EVAL_SPEAKING, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          simulationId: simId,
-          speaking_recordings: speaking_recordings,
-          speaking_responses: speaking_responses
-        })
-      });
-
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      var result = await res.json();
-      if (!result.success) throw new Error(result.error || 'Evaluation failed');
-
-      var stored = JSON.parse(localStorage.getItem(storageKey) || '{}');
-      stored.tal.status = 'complete';
-      stored.tal.pct = result.overallScore;
-      stored.tal.evaluation = result;
-      delete stored.tal.responses;
-      localStorage.setItem(storageKey, JSON.stringify(stored));
-      updateProgressIcon('tal', '\u2705', 'Loki\u00F0');
+      await RIKEngine.evaluateSpeaking();
+      updateProgressIcon('tal', '✅', 'Lokið');
     } catch(err) {
       console.error('[results] Speaking eval failed:', err.message);
-      var stored2 = JSON.parse(localStorage.getItem(storageKey) || '{}');
-      stored2.tal.status = 'failed';
-      stored2.tal.error = err.message;
-      localStorage.setItem(storageKey, JSON.stringify(stored2));
-      updateProgressIcon('tal', '\u274C', 'Villa');
+      RIKEngine.markEvalFailed('tal', err.message);
+      updateProgressIcon('tal', '❌', 'Villa');
     }
   }
 
-  function updateProgressIcon(sectionKey, icon, label) {
-    var el = document.getElementById('progress-' + sectionKey);
+  function updateProgressIcon(key, icon, label) {
+    var el = document.getElementById('progress-' + key);
     if (!el) return;
-    var iconEl = el.querySelector('.progress-icon');
-    var statusEl = el.querySelector('.progress-status');
-    if (iconEl) iconEl.textContent = icon;
-    if (statusEl) statusEl.textContent = label;
+    var ic = el.querySelector('.progress-icon'), st = el.querySelector('.progress-status');
+    if (ic) ic.textContent = icon;
+    if (st) st.textContent = label;
   }
 
   /* =========================================================
@@ -330,27 +270,23 @@
   function renderProcessing(data, sectionStatus) {
     var items = '';
     for (var key in SECTION_META) {
-      var meta = SECTION_META[key];
+      var meta   = SECTION_META[key];
       var status = sectionStatus[key];
-      var icon = status === 'complete' ? '\u2705' : status === 'pending' ? '\u23F3' : '\u2B1C';
-      var statusText = status === 'complete' ? 'Loki\u00F0' : status === 'pending' ? 'B\u00ED\u00F0ur\u2026' : '';
+      var icon   = status === 'complete' ? '✅' : status === 'pending' ? '⏳' : '⬜';
+      var text   = status === 'complete' ? 'Lokið' : status === 'pending' ? 'Bíður…' : '';
       items += '<div class="progress-item" id="progress-' + key + '">' +
         '<span class="progress-icon">' + icon + '</span>' +
         '<span class="progress-label">' + meta.icon + ' ' + meta.title + '</span>' +
-        '<span class="progress-status">' + statusText + '</span>' +
+        '<span class="progress-status">' + text + '</span>' +
         '</div>';
     }
-
     var doneCount = Object.values(sectionStatus).filter(function(s) { return s === 'complete'; }).length;
-
     document.getElementById('mainContent').innerHTML =
       '<div class="processing-card">' +
-        '<div class="processing-icon">\u23F3</div>' +
-        '<div class="processing-title">Ni\u00F0urst\u00F6\u00F0ur reikna\u00F0ar\u2026</div>' +
-        '<div class="processing-sub">' +
-          'Sv\u00F6rin \u00FE\u00EDn eru metin af gervigreind. \u00DEessi s\u00ED\u00F0a uppf\u00E6rist sj\u00E1lfkrafa.' +
-          '<br><strong>' + doneCount + ' af 4</strong> hlutar metnar.' +
-        '</div>' +
+        '<div class="processing-icon">⏳</div>' +
+        '<div class="processing-title">Niðurstöður reiknaðar…</div>' +
+        '<div class="processing-sub">Svörin þín eru metin af gervigreind. Þessi síða uppfærist sjálfkrafa.' +
+          '<br><strong>' + doneCount + ' af 4</strong> hlutar metnar.</div>' +
         '<div class="loading-spinner" style="margin:0 auto"></div>' +
         '<div class="processing-progress">' + items + '</div>' +
       '</div>';
@@ -361,23 +297,20 @@
      ========================================================= */
   function renderResults(data) {
     var scores = {
-      lestur: data.lestur ? (data.lestur.pct || 0) : 0,
+      lestur:  data.lestur  ? (data.lestur.pct  || 0) : 0,
       hlustun: data.hlustun ? (data.hlustun.pct || 0) : 0,
-      ritun: data.ritun ? (data.ritun.pct || 0) : 0,
-      tal: data.tal ? (data.tal.pct || 0) : 0
+      ritun:   data.ritun   ? (data.ritun.pct   || 0) : 0,
+      tal:     data.tal     ? (data.tal.pct     || 0) : 0
     };
-
-    var overall = Math.round((scores.lestur + scores.hlustun + scores.ritun + scores.tal) / 4);
-    var allPass = scores.lestur >= PASS_THRESHOLD && scores.hlustun >= PASS_THRESHOLD && scores.ritun >= PASS_THRESHOLD && scores.tal >= PASS_THRESHOLD;
-    var passed = allPass && overall >= PASS_THRESHOLD;
+    var overall  = Math.round((scores.lestur + scores.hlustun + scores.ritun + scores.tal) / 4);
+    var allPass  = Object.values(scores).every(function(p) { return p >= PASS_THRESHOLD; });
+    var passed   = allPass && overall >= PASS_THRESHOLD;
 
     var html = renderHero(passed, overall, scores);
-    html += '<div class="pass-note">Til a\u00F0 standast \u00FEarf minnst ' + PASS_THRESHOLD + '% \u00ED hverjum hluta og ' + PASS_THRESHOLD + '% \u00ED heild.</div>';
-
+    html += '<div class="pass-note">Til að standast þarf minnst ' + PASS_THRESHOLD + '% í hverjum hluta og ' + PASS_THRESHOLD + '% í heild.</div>';
     for (var key in SECTION_META) {
       html += renderSectionBlock(key, SECTION_META[key], data, scores[key]);
     }
-
     html += '<div class="actions">' +
       '<button class="btn btn-outline" onclick="window.location.href=\'index.html\'">Til baka</button>' +
       '<button class="btn btn-primary" onclick="window.retrySimulation()">Reyna aftur</button>' +
@@ -388,7 +321,7 @@
   }
 
   /* =========================================================
-     RENDER PARTIAL (some failed/missing)
+     RENDER PARTIAL
      ========================================================= */
   function renderPartial(data, sectionStatus) {
     var scores = {};
@@ -396,37 +329,28 @@
       var s = data[key];
       scores[key] = (s && s.pct !== undefined && s.pct !== null) ? s.pct : null;
     }
-
-    var hasFailed = Object.values(sectionStatus).includes('failed');
-    var validSum = 0; var validCount = 0;
+    var hasFailed  = Object.values(sectionStatus).includes('failed');
+    var validSum   = 0, validCount = 0;
     for (var k in scores) { if (scores[k] !== null) { validSum += scores[k]; validCount++; } }
     var overall = validCount > 0 ? Math.round(validSum / 4) : null;
 
     var html = '<div class="hero-card partial">' +
       '<div class="hero-top">' +
-        '<div class="hero-badge">' + (hasFailed ? '\u26A0\uFE0F Villa vi\u00F0 mat' : '\u23F3 \u00D3loki\u00F0') + '</div>' +
-        '<div class="hero-score">' + (overall !== null ? overall + '%' : '\u2014') + '</div>' +
+        '<div class="hero-badge">' + (hasFailed ? '⚠️ Villa við mat' : '⏳ Ólokið') + '</div>' +
+        '<div class="hero-score">' + (overall !== null ? overall + '%' : '—') + '</div>' +
         '<div class="hero-score-label">Heildareinkunn</div>' +
-        '<div class="hero-status">' + (hasFailed ? 'Sumir hlutar mist\u00F3kust vi\u00F0 mat.' : 'Sumir hlutar vantar.') + '</div>' +
-      '</div>' +
-      renderHeroSections(scores) +
-    '</div>';
+        '<div class="hero-status">' + (hasFailed ? 'Sumir hlutar mistókust við mat.' : 'Sumir hlutar vantar.') + '</div>' +
+      '</div>' + renderHeroSections(scores) + '</div>';
 
     if (hasFailed) {
       html += '<div class="pass-note" style="background:var(--amber-light);border:1px solid var(--amber-border)">' +
-        '\u26A0\uFE0F AI-mat mist\u00F3kst fyrir einhverja hluta. Smelltu \u00E1 <strong>Reyna aftur</strong> til a\u00F0 meta aftur.' +
-        '</div>';
+        '⚠️ AI-mat mistókst fyrir einhverja hluta. Smelltu á <strong>Reyna aftur</strong> til að meta aftur.</div>';
     }
-
     for (var key2 in SECTION_META) {
       html += renderSectionBlock(key2, SECTION_META[key2], data, scores[key2], sectionStatus[key2]);
     }
-
-    html += '<div class="actions">' +
-      '<button class="btn btn-outline" onclick="window.location.href=\'index.html\'">Til baka</button>';
-    if (hasFailed) {
-      html += '<button class="btn btn-retry" onclick="window.retryFailed()">\uD83D\uDD04 Reyna aftur (mat)</button>';
-    }
+    html += '<div class="actions"><button class="btn btn-outline" onclick="window.location.href=\'index.html\'">Til baka</button>';
+    if (hasFailed) html += '<button class="btn btn-retry" onclick="window.retryFailed()">🔄 Reyna aftur (mat)</button>';
     html += '</div>';
 
     document.getElementById('mainContent').innerHTML = html;
@@ -439,25 +363,23 @@
   function renderHero(passed, overall, scores) {
     return '<div class="hero-card ' + (passed ? 'passed' : 'failed') + '">' +
       '<div class="hero-top">' +
-        '<div class="hero-badge">' + (passed ? '\u2705 Sta\u00F0ist' : '\u274C Ekki sta\u00F0ist') + '</div>' +
+        '<div class="hero-badge">' + (passed ? '✅ Staðist' : '❌ Ekki staðist') + '</div>' +
         '<div class="hero-score">' + overall + '%</div>' +
         '<div class="hero-score-label">Heildareinkunn</div>' +
-        '<div class="hero-status">' + (passed ? 'Til hamingju!' : '\u00DE\u00FA n\u00E1\u00F0ir ekki l\u00E1gmarki \u00ED \u00FEetta sinn.') + '</div>' +
-      '</div>' +
-      renderHeroSections(scores) +
-    '</div>';
+        '<div class="hero-status">' + (passed ? 'Til hamingju!' : 'Þú náðir ekki lágmarki í þetta sinn.') + '</div>' +
+      '</div>' + renderHeroSections(scores) + '</div>';
   }
 
   function renderHeroSections(scores) {
     var html = '<div class="hero-sections">';
     for (var key in SECTION_META) {
       var meta = SECTION_META[key];
-      var pct = scores[key];
-      var cls = pct === null ? 'hs-pending' : pct >= PASS_THRESHOLD ? 'hs-pass' : 'hs-fail';
+      var pct  = scores[key];
+      var cls  = pct === null ? 'hs-pending' : pct >= PASS_THRESHOLD ? 'hs-pass' : 'hs-fail';
       html += '<div class="hero-section">' +
         '<div class="hs-icon">' + meta.icon + '</div>' +
         '<div class="hs-label">' + meta.title + '</div>' +
-        '<div class="hs-score ' + cls + '">' + (pct !== null ? pct + '%' : '\u2014') + '</div>' +
+        '<div class="hs-score ' + cls + '">' + (pct !== null ? pct + '%' : '—') + '</div>' +
         '</div>';
     }
     html += '</div>';
@@ -469,12 +391,10 @@
      ========================================================= */
   function renderSectionBlock(key, meta, data, score, status) {
     var section = data[key];
-    var pct = (score !== null && score !== undefined) ? score : null;
-
-    var html = '<div class="section-block">' +
-      '<div class="section-header">' +
-        '<span>' + meta.icon + ' ' + meta.title + '</span>' +
-        '<span class="section-score">' + (pct !== null ? pct + '%' : '') + '</span>' +
+    var pct     = (score !== null && score !== undefined) ? score : null;
+    var html    = '<div class="section-block"><div class="section-header">' +
+      '<span>' + meta.icon + ' ' + meta.title + '</span>' +
+      '<span class="section-score">' + (pct !== null ? pct + '%' : '') + '</span>' +
       '</div>';
 
     if (meta.evalType === 'auto') {
@@ -483,125 +403,106 @@
       html += renderAICards(section.evaluation);
     } else if (status === 'failed') {
       html += '<div class="elem-card"><div class="elem-header">' +
-        '<span class="elem-name">Mat mist\u00F3kst' + (section && section.error ? ': ' + esc(section.error) : '') + '</span>' +
+        '<span class="elem-name">Mat mistókst' + (section && section.error ? ': ' + esc(section.error) : '') + '</span>' +
         '<span class="elem-score-badge low">Villa</span></div></div>';
     } else {
-      html += '<div class="elem-card"><div class="elem-header">' +
-        '<span class="elem-name">Engin g\u00F6gn</span>' +
-        '<span class="elem-score-badge skip">\u2014</span></div></div>';
+      html += '<div class="elem-card"><div class="elem-header"><span class="elem-name">Engin gögn</span>' +
+        '<span class="elem-score-badge skip">—</span></div></div>';
     }
-
     html += '</div>';
     return html;
   }
 
   function renderAutoCard(section) {
     if (!section || section.pct === undefined) {
-      return '<div class="elem-card"><div class="elem-header"><span class="elem-name">Ekki loki\u00F0</span><span class="elem-score-badge skip">\u2014</span></div></div>';
+      return '<div class="elem-card"><div class="elem-header"><span class="elem-name">Ekki lokið</span>' +
+        '<span class="elem-score-badge skip">—</span></div></div>';
     }
-    var pct = section.pct;
-    var correct = section.correct || 0;
-    var total = section.total || 0;
+    var pct = section.pct, correct = section.correct || 0, total = section.total || 0;
     var cls = pct >= 80 ? 'high' : pct >= PASS_THRESHOLD ? 'mid' : 'low';
     return '<div class="elem-card"><div class="elem-header">' +
-      '<span class="elem-name">Sj\u00E1lfvirkt mat</span>' +
+      '<span class="elem-name">Sjálfvirkt mat</span>' +
       '<span class="elem-score-badge ' + cls + '">' + correct + '/' + total + ' (' + pct + '%)</span>' +
       '</div></div>';
   }
 
   function renderAICards(evaluation) {
-    var html = '';
+    var CRIT_LABELS = {
+      taskCompletion: 'Verkefni', vocabulary: 'Orðaforði',
+      grammar: 'Málfræði', coherence: 'Samhengi',
+      fluency: 'Flæði', comprehensibility: 'Skiljanleiki'
+    };
+    var html  = '';
     var items = evaluation.tasks || evaluation.parts || [];
 
-    var CRIT_LABELS = {
-      taskCompletion: 'Verkefni', vocabulary: 'Or\u00F0afor\u00F0i',
-      grammar: 'M\u00E1lfr\u00E6\u00F0i', coherence: 'Samhengi',
-      fluency: 'Fl\u00E6\u00F0i', comprehensibility: 'Skiljanleiki'
-    };
-
-    for (var i = 0; i < items.length; i++) {
-      var item = items[i];
-      var name = item.taskId || item.partId || ('Hluti ' + (i + 1));
+    items.forEach(function(item, i) {
+      var name  = item.taskId || item.partId || ('Hluti ' + (i + 1));
       var score = item.score || 0;
-      var cls = score >= 80 ? 'high' : score >= PASS_THRESHOLD ? 'mid' : 'low';
+      var cls   = score >= 80 ? 'high' : score >= PASS_THRESHOLD ? 'mid' : 'low';
+      var detail = '';
 
-      var detailHtml = '';
-
-      // Feedback
-      if (item.feedback) {
-        detailHtml += '<div class="feedback-section">' +
-          '<div class="feedback-label">Ums\u00F6gn</div>' +
+      if (item.feedback)
+        detail += '<div class="feedback-section"><div class="feedback-label">Umöngn</div>' +
           '<div class="feedback-summary">' + esc(item.feedback) + '</div></div>';
-      }
 
-      // Strengths
       if (item.strengths && item.strengths.length) {
-        detailHtml += '<div class="feedback-section"><div class="feedback-label">Styrkur</div><div class="feedback-list">';
-        for (var si = 0; si < item.strengths.length; si++) {
-          detailHtml += '<div style="display:flex;gap:6px;align-items:start;font-size:0.85rem;color:var(--gray-600);margin-bottom:4px"><span>\u2705</span><span>' + esc(item.strengths[si]) + '</span></div>';
-        }
-        detailHtml += '</div></div>';
+        detail += '<div class="feedback-section"><div class="feedback-label">Styrkur</div><div class="feedback-list">';
+        item.strengths.forEach(function(s) {
+          detail += '<div style="display:flex;gap:6px;align-items:start;font-size:0.85rem;color:var(--gray-600);margin-bottom:4px"><span>✅</span><span>' + esc(s) + '</span></div>';
+        });
+        detail += '</div></div>';
       }
 
-      // Weaknesses
       if (item.weaknesses && item.weaknesses.length) {
-        detailHtml += '<div class="feedback-section"><div class="feedback-label">Til \u00FAb\u00F3ta</div><div class="feedback-list">';
-        for (var wi = 0; wi < item.weaknesses.length; wi++) {
-          detailHtml += '<div style="display:flex;gap:6px;align-items:start;font-size:0.85rem;color:var(--gray-600);margin-bottom:4px"><span>\uD83D\uDCA1</span><span>' + esc(item.weaknesses[wi]) + '</span></div>';
-        }
-        detailHtml += '</div></div>';
+        detail += '<div class="feedback-section"><div class="feedback-label">Til úbóta</div><div class="feedback-list">';
+        item.weaknesses.forEach(function(w) {
+          detail += '<div style="display:flex;gap:6px;align-items:start;font-size:0.85rem;color:var(--gray-600);margin-bottom:4px"><span>💡</span><span>' + esc(w) + '</span></div>';
+        });
+        detail += '</div></div>';
       }
 
-      // Criteria
       if (item.criteria) {
-        detailHtml += '<div class="feedback-section"><div class="feedback-label">Vi\u00F0mi\u00F0</div>';
+        detail += '<div class="feedback-section"><div class="feedback-label">Viðmið</div>';
         for (var ck in item.criteria) {
           var cv = typeof item.criteria[ck] === 'number' ? item.criteria[ck] : 0;
-          detailHtml += '<div class="criteria-row">' +
+          detail += '<div class="criteria-row">' +
             '<span class="criteria-name">' + (CRIT_LABELS[ck] || ck) + '</span>' +
             '<div class="criteria-bar-wrap"><div class="criteria-bar-fill" style="width:' + cv + '%"></div></div>' +
             '<span class="criteria-score">' + cv + '%</span></div>';
         }
-        detailHtml += '</div>';
+        detail += '</div>';
       }
 
-      // Mistakes
-      if (item.mistakes && item.mistakes.length > 0) {
-        detailHtml += '<div class="feedback-section"><div class="feedback-label">Villur</div><div class="mistakes-list">';
-        for (var m = 0; m < item.mistakes.length; m++) {
-          var mk = item.mistakes[m];
-          detailHtml += '<div class="mistake-row">' +
+      if (item.mistakes && item.mistakes.length) {
+        detail += '<div class="feedback-section"><div class="feedback-label">Villur</div><div class="mistakes-list">';
+        item.mistakes.forEach(function(mk) {
+          detail += '<div class="mistake-row">' +
             '<span class="mistake-original">' + esc(mk.original || '') + '</span>' +
-            '<span class="mistake-arrow">\u2192</span>' +
+            '<span class="mistake-arrow">→</span>' +
             '<span class="mistake-correction">' + esc(mk.correction || '') + '</span>' +
-            (mk.explanation ? '<span class="mistake-explanation">\u2014 ' + esc(mk.explanation) + '</span>' : '') +
+            (mk.explanation ? '<span class="mistake-explanation">— ' + esc(mk.explanation) + '</span>' : '') +
             '</div>';
-        }
-        detailHtml += '</div></div>';
+        });
+        detail += '</div></div>';
       }
 
-      html += '<div class="elem-card' + (detailHtml ? '' : ' no-detail') + '">' +
+      html += '<div class="elem-card' + (detail ? '' : ' no-detail') + '">' +
         '<div class="elem-header">' +
           '<span class="elem-name">' + esc(name) + '</span>' +
           '<span class="elem-score-badge ' + cls + '">' + score + '%</span>' +
-          (detailHtml ? '<span class="elem-chevron">\u25B8</span>' : '') +
+          (detail ? '<span class="elem-chevron">▸</span>' : '') +
         '</div>' +
-        (detailHtml ? '<div class="elem-detail">' + detailHtml + '</div>' : '') +
+        (detail ? '<div class="elem-detail">' + detail + '</div>' : '') +
         '</div>';
-    }
+    });
 
-    // Overall feedback
     if (evaluation.overallFeedback) {
-      html += '<div class="elem-card">' +
-        '<div class="elem-header">' +
-          '<span class="elem-name">Heildarums\u00F6gn</span>' +
-          '<span class="elem-chevron">\u25B8</span>' +
-        '</div>' +
+      html += '<div class="elem-card"><div class="elem-header">' +
+        '<span class="elem-name">Heildarumöngn</span><span class="elem-chevron">▸</span></div>' +
         '<div class="elem-detail"><div class="feedback-section">' +
           '<div class="feedback-summary">' + esc(evaluation.overallFeedback) + '</div>' +
         '</div></div></div>';
     }
-
     return html;
   }
 
@@ -611,35 +512,21 @@
   function wireToggles() {
     document.querySelectorAll('.elem-header').forEach(function(h) {
       if (h.querySelector('.elem-chevron')) {
-        h.addEventListener('click', function() {
-          h.closest('.elem-card').classList.toggle('open');
-        });
+        h.addEventListener('click', function() { h.closest('.elem-card').classList.toggle('open'); });
       }
     });
   }
 
   /* =========================================================
-     RETRY
+     RETRY — delegates to engine
      ========================================================= */
   window.retryFailed = function() {
-    var data;
-    try { data = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch(e) { data = {}; }
-    if (data.ritun && data.ritun.status === 'failed') { data.ritun.status = 'submitted'; delete data.ritun.error; }
-    if (data.tal && data.tal.status === 'failed') { data.tal.status = 'submitted'; delete data.tal.error; }
-    localStorage.setItem(storageKey, JSON.stringify(data));
+    RIKEngine.retryFailed();
     loadResults();
   };
 
   window.retrySimulation = function() {
-    try {
-      localStorage.removeItem(storageKey);
-      var toRemove = [];
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        if (k && k.indexOf('rik-draft-' + simId) === 0) toRemove.push(k);
-      }
-      toRemove.forEach(function(k) { localStorage.removeItem(k); });
-    } catch(e) {}
+    RIKEngine.resetTest(simId);
     window.location.href = 'lesskilningur.html?sim=' + simId;
   };
 
@@ -652,6 +539,7 @@
     d.textContent = String(s);
     return d.innerHTML;
   }
+
 })();
 </script>
 </body>

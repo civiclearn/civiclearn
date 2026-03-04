@@ -179,6 +179,15 @@
   .btn-outline { background: #fff; color: var(--blue); border: 2px solid var(--blue); }
   .btn-outline:hover { background: var(--blue-light); }
 
+  .skip-link {
+    font-size: 0.82rem;
+    color: var(--gray-400);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .skip-link:hover { color: var(--gray-600); }
+
   .submit-status { text-align: center; margin-top: 12px; font-size: 0.85rem; color: var(--gray-400); }
   .submit-status.error { color: var(--red); }
 
@@ -237,20 +246,21 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
+<script src="/rikisborgaraprof/assets/js/rik-engine.js"></script>
 <script>
 (function() {
   'use strict';
 
-  const DATA_BASE = '/rikisborgaraprof/data';
-  const IMAGE_BASE = 'https://media.civiclearn.com/rikisborgaraprof/images';
+  const DATA_BASE  = '/rikisborgaraprof/data';
 
-  let examData = null;
+  let examData  = null;
   let submitted = false;
-  let simId = 'sim-01';
+  let simId     = 'sim-01';
 
   const params = new URLSearchParams(window.location.search);
   if (params.get('sim')) simId = params.get('sim');
   document.getElementById('simLabel').textContent = 'Sim ' + simId.replace('sim-', '');
+  RIKEngine.init(simId);
 
   const jsonPath = `${DATA_BASE}/${simId}/ritun.json`;
 
@@ -308,6 +318,7 @@
           Senda svör til yfirferðar
         </button>
       </div>
+      <p style="text-align:center; margin-top:8px;"><span class="skip-link" id="skipLink" onclick="window._skip()">Sleppa og halda áfram</span></p>
       <div class="submit-status" id="submitStatus"></div>
       <div class="actions" id="navActions" style="display:none">
         <button class="btn btn-outline" onclick="window._restart()">Reyna aftur</button>
@@ -316,9 +327,9 @@
 
     main.innerHTML = html;
 
-    // Restore drafts from localStorage
+    // Restore drafts — engine owns draft storage
     examData.tasks.forEach(task => {
-      const saved = getDraft(task.taskId);
+      const saved = RIKEngine.getDraft(task.taskId);
       if (saved) {
         document.getElementById(`text-${task.taskId}`).value = saved;
         window._updateCounter(task.taskId, task.minimumSentences);
@@ -333,7 +344,6 @@
           <img class="image-actual" src="${task.imageRef}" alt="${esc(task.imageDescription)}">
         </div>`;
     }
-    // Placeholder with description (image to be added later)
     return `
       <div class="image-section">
         <div class="image-placeholder">
@@ -343,85 +353,68 @@
       </div>`;
   }
 
-  /* ── Sentence counter ── */
+  /* ── Sentence counter + autosave draft ── */
   window._updateCounter = function(taskId, minSentences) {
     const textarea = document.getElementById(`text-${taskId}`);
-    const text = textarea.value.trim();
+    const text     = textarea.value.trim();
 
-    // Count sentences (rough: split on . ! ? followed by space or end)
     const sentences = text.length > 0
       ? text.split(/[.!?]+/).filter(s => s.trim().length > 2).length
       : 0;
-
-    // Count words
     const words = text.length > 0 ? text.split(/\s+/).filter(w => w.length > 0).length : 0;
 
     const counter = document.getElementById(`counter-${taskId}`);
     counter.textContent = `${sentences} / ${minSentences} setningar`;
-    counter.className = 'sentence-counter ' + (sentences >= minSentences ? 'ok' : 'low');
-
+    counter.className   = 'sentence-counter ' + (sentences >= minSentences ? 'ok' : 'low');
     document.getElementById(`words-${taskId}`).textContent = `${words} orð`;
 
-    // Save draft
-    saveDraft(taskId, textarea.value);
-
-    // Update progress
+    // Engine owns draft storage
+    RIKEngine.saveDraft(taskId, textarea.value);
     updateProgress();
   };
 
-  /* ── Submit ── */
+  /* ── Submit — engine owns state ── */
   window._submit = function() {
     if (submitted) return;
 
-    // Validate minimum content
     let allValid = true;
     examData.tasks.forEach(task => {
       const text = document.getElementById(`text-${task.taskId}`).value.trim();
       if (text.length < 20) {
         allValid = false;
         document.getElementById(`text-${task.taskId}`).style.borderColor = 'var(--red)';
-        setTimeout(() => {
-          document.getElementById(`text-${task.taskId}`).style.borderColor = '';
-        }, 2000);
+        setTimeout(() => { document.getElementById(`text-${task.taskId}`).style.borderColor = ''; }, 2000);
       }
     });
 
     if (!allValid) {
-      document.getElementById('submitStatus').textContent = 'Vinsamlegast skrifaðu í öll verkefni.';
-      document.getElementById('submitStatus').className = 'submit-status error';
+      const s = document.getElementById('submitStatus');
+      s.textContent = 'Vinsamlegast skrifaðu í öll verkefni.';
+      s.className   = 'submit-status error';
       return;
     }
 
     submitted = true;
-    const btn = document.getElementById('btnSubmit');
-    btn.disabled = true;
+    document.getElementById('btnSubmit').disabled = true;
+    examData.tasks.forEach(task => { document.getElementById(`text-${task.taskId}`).disabled = true; });
 
-    // Disable textareas
-    examData.tasks.forEach(task => {
-      document.getElementById(`text-${task.taskId}`).disabled = true;
-    });
-
-    // Collect and save responses to localStorage
+    // Collect responses and hand to engine
     const responses = {};
     examData.tasks.forEach(task => {
       responses[task.taskId] = {
-        taskId: task.taskId,
-        taskNumber: task.taskNumber,
-        type: task.type,
-        text: document.getElementById(`text-${task.taskId}`).value.trim()
+        taskId:      task.taskId,
+        taskNumber:  task.taskNumber,
+        type:        task.type,
+        text:        document.getElementById(`text-${task.taskId}`).value.trim()
       };
+      RIKEngine.clearDraft(task.taskId);
     });
+    RIKEngine.submitRitun(responses);
 
-    try {
-      const key = `rikisborgaraprof-${simId}`;
-      const existing = JSON.parse(localStorage.getItem(key) || '{}');
-      existing.ritun = { responses: responses, status: 'submitted', ts: Date.now() };
-      localStorage.setItem(key, JSON.stringify(existing));
-    } catch(e) { console.error('localStorage save error:', e); }
-
-    // Show confirmation
-    btn.style.display = 'none';
+    // DOM feedback
+    document.getElementById('btnSubmit').style.display = 'none';
     document.getElementById('submitStatus').textContent = '';
+    document.getElementById('skipLink').style.display  = 'none';
 
     examData.tasks.forEach(task => {
       const panel = document.getElementById(`feedback-${task.taskId}`);
@@ -434,47 +427,50 @@
     document.getElementById('navActions').style.display = 'flex';
   };
 
+  /* ── Skip — engine owns state ── */
+  window._skip = function() {
+    if (submitted) return;
+    if (!confirm('Sleppa ritun? Þú færð 0 stig.')) return;
+    submitted = true;
+    examData.tasks.forEach(task => { RIKEngine.clearDraft(task.taskId); });
+    RIKEngine.skipSection('ritun');
+    document.getElementById('skipLink').style.display  = 'none';
+    document.getElementById('btnSubmit').style.display = 'none';
+    document.getElementById('submitStatus').textContent = '';
+    document.getElementById('navActions').style.display = 'flex';
+  };
+
   /* ── Restart ── */
   window._restart = function() {
     submitted = false;
-    examData.tasks.forEach(task => {
-      clearDraft(task.taskId);
-    });
+    examData.tasks.forEach(task => { RIKEngine.clearDraft(task.taskId); });
+    RIKEngine.currentTest.ritun.responses = {};
+    RIKEngine.currentTest.ritun.status    = null;
+    RIKEngine._save();
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   /* ── Next section ── */
-  window._next = function() {
-    window.location.href = `tal.html?sim=${simId}`;
-  };
+  window._next = function() { window.location.href = `tal.html?sim=${simId}`; };
 
   /* ── Progress ── */
   function updateProgress() {
     const total = examData.tasks.length;
     let done = 0;
     examData.tasks.forEach(task => {
-      const text = document.getElementById(`text-${task.taskId}`);
-      if (text && text.value.trim().length > 20) done++;
+      const el = document.getElementById(`text-${task.taskId}`);
+      if (el && el.value.trim().length > 20) done++;
     });
     document.getElementById('progressBar').style.width = (done / total * 100) + '%';
   }
 
-  /* ── Draft save/load ── */
-  function saveDraft(taskId, text) {
-    try { localStorage.setItem(`rik-draft-${simId}-${taskId}`, text); } catch(e) {}
-  }
-  function getDraft(taskId) {
-    try { return localStorage.getItem(`rik-draft-${simId}-${taskId}`) || ''; } catch(e) { return ''; }
-  }
-  function clearDraft(taskId) {
-    try { localStorage.removeItem(`rik-draft-${simId}-${taskId}`); } catch(e) {}
-  }
-
   /* ── Util ── */
   function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
 })();
 </script>
+
 
 <script>
 window._openLightbox=function(s){document.getElementById("lightboxImg").src=s;document.getElementById("lightbox").classList.add("open")};

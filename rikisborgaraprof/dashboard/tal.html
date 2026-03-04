@@ -220,6 +220,16 @@
   .btn-primary:disabled { background: var(--gray-400); cursor: not-allowed; transform: none; box-shadow: none; }
   .btn-outline { background: #fff; color: var(--blue); border: 2px solid var(--blue); }
   .btn-outline:hover { background: var(--blue-light); }
+
+  .skip-link {
+    font-size: 0.82rem;
+    color: var(--gray-400);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .skip-link:hover { color: var(--gray-600); }
+
   .submit-status { text-align: center; margin-top: 12px; font-size: 0.85rem; color: var(--gray-400); }
   .submit-status.error { color: var(--red); }
 
@@ -279,27 +289,28 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
+<script src="/rikisborgaraprof/assets/js/rik-engine.js"></script>
 <script>
 (function() {
   'use strict';
 
   const DATA_BASE = '/rikisborgaraprof/data';
-  const IMAGE_BASE = 'https://media.civiclearn.com/rikisborgaraprof/images';
 
-  let examData = null;
-  let submitted = false;
-  let simId = 'sim-01';
+  let examData       = null;
+  let submitted      = false;
+  let simId          = 'sim-01';
 
-  // Recording state per item
-  let recordings = {};  // id → { blob, url, duration }
+  // Page-level recording state (blob/url/duration — for DOM playback)
+  let recordings     = {};  // id → { blob, url, duration }
   let activeRecorder = null;
   let activeRecordId = null;
-  let recordTimer = null;
+  let recordTimer    = null;
   let recordStartTime = 0;
 
   const params = new URLSearchParams(window.location.search);
   if (params.get('sim')) simId = params.get('sim');
   document.getElementById('simLabel').textContent = 'Sim ' + simId.replace('sim-', '');
+  RIKEngine.init(simId);
 
   const jsonPath = `${DATA_BASE}/${simId}/tal.json`;
 
@@ -325,7 +336,6 @@
         ⚠️ Hljóðnemi er ekki aðgengilegur. Þú getur notað textasvæðið í staðinn.
       </div>`;
 
-    // Part 1: Picture descriptions
     const part1 = examData.parts[0];
     html += `
       <div class="part-card" id="part-${part1.partId}">
@@ -340,7 +350,6 @@
         <div class="feedback-panel" id="feedback-${part1.partId}"></div>
       </div>`;
 
-    // Part 2: Topic speaking
     const part2 = examData.parts[1];
     html += `
       <div class="part-card" id="part-${part2.partId}">
@@ -385,6 +394,7 @@
           Senda svör til yfirferðar
         </button>
       </div>
+      <p style="text-align:center; margin-top:8px;"><span class="skip-link" id="skipLink" onclick="window._skip()">Sleppa og halda áfram</span></p>
       <div class="submit-status" id="submitStatus"></div>
       <div class="actions" id="navActions" style="display:none">
         <button class="btn btn-outline" onclick="window._restart()">Reyna aftur</button>
@@ -392,23 +402,17 @@
       </div>`;
 
     main.innerHTML = html;
-
-    // Check mic permission
     checkMic();
     updateProgress();
   }
 
   function renderPicture(pic, index) {
-    const id = pic.pictureId;
+    const id       = pic.pictureId;
     const hasImage = pic.imageRef && pic.imageRef.length > 0;
-
     return `
       <div class="picture-item" id="pic-${id}">
         <div class="picture-thumb" ${hasImage ? `onclick="window._openLightbox('${pic.imageRef}')"` : ''}>
-          ${hasImage
-            ? `<img src="${pic.imageRef}" alt="Mynd ${index + 1}">`
-            : `🖼️ Mynd ${index + 1}`
-          }
+          ${hasImage ? `<img src="${pic.imageRef}" alt="Mynd ${index + 1}">` : `🖼️ Mynd ${index + 1}`}
         </div>
         <div class="picture-content">
           <div class="picture-label">Mynd ${index + 1} af 5</div>
@@ -448,9 +452,7 @@
     document.getElementById('lightbox').classList.remove('open');
     document.getElementById('lightboxImg').src = '';
   };
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') window._closeLightbox();
-  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') window._closeLightbox(); });
 
   /* ── Mic check ── */
   async function checkMic() {
@@ -462,25 +464,20 @@
     }
   }
 
-  /* ── Recording ── */
+  /* ── Recording — page owns DOM, engine owns base64 memory ── */
   window._toggleRecord = async function(id) {
-    // If currently recording this item, stop
     if (activeRecordId === id && activeRecorder && activeRecorder.state === 'recording') {
-      activeRecorder.stop();
-      return;
+      activeRecorder.stop(); return;
     }
-
-    // If recording something else, stop it first
     if (activeRecorder && activeRecorder.state === 'recording') {
       activeRecorder.stop();
       await new Promise(r => setTimeout(r, 100));
     }
 
-    // Start new recording
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream   = await navigator.mediaDevices.getUserMedia({ audio: true });
       const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
-      const chunks = [];
+      const chunks   = [];
 
       recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
 
@@ -488,11 +485,15 @@
         stream.getTracks().forEach(t => t.stop());
         clearInterval(recordTimer);
 
-        const blob = new Blob(chunks, { type: 'audio/webm' });
-        const url = URL.createObjectURL(blob);
+        const blob     = new Blob(chunks, { type: 'audio/webm' });
+        const url      = URL.createObjectURL(blob);
         const duration = (Date.now() - recordStartTime) / 1000;
 
+        // Page keeps blob/url for playback
         recordings[id] = { blob, url, duration };
+
+        // Engine stores base64 in memory for submission
+        RIKEngine.saveRecording(id, blob);
 
         const btn = document.getElementById(`recbtn-${id}`);
         btn.classList.remove('recording');
@@ -502,8 +503,8 @@
           `<span class="check">✓</span> ${formatTime(duration)} tekið upp`;
         document.getElementById(`playback-${id}`).classList.add('visible');
 
-        activeRecorder = null;
-        activeRecordId = null;
+        activeRecorder  = null;
+        activeRecordId  = null;
         updateProgress();
       };
 
@@ -511,23 +512,20 @@
         document.getElementById(`status-${id}`).textContent = 'Villa við upptöku';
       };
 
-      activeRecorder = recorder;
-      activeRecordId = id;
+      activeRecorder  = recorder;
+      activeRecordId  = id;
       recordStartTime = Date.now();
       recorder.start();
 
       const btn = document.getElementById(`recbtn-${id}`);
       btn.classList.add('recording');
       btn.innerHTML = '<span class="rec-dot"></span> Stöðva';
-
-      document.getElementById(`status-${id}`).textContent = '';
+      document.getElementById(`status-${id}`).textContent   = '';
       document.getElementById(`playback-${id}`).classList.remove('visible');
 
-      // Timer
       clearInterval(recordTimer);
       recordTimer = setInterval(() => {
-        const elapsed = (Date.now() - recordStartTime) / 1000;
-        document.getElementById(`timer-${id}`).textContent = formatTime(elapsed);
+        document.getElementById(`timer-${id}`).textContent = formatTime((Date.now() - recordStartTime) / 1000);
       }, 200);
 
     } catch(e) {
@@ -536,157 +534,141 @@
     }
   };
 
-  /* ── Playback ── */
   window._playRecording = function(id) {
     if (!recordings[id]) return;
-    const audio = new Audio(recordings[id].url);
-    audio.play();
+    new Audio(recordings[id].url).play();
   };
 
   window._deleteRecording = function(id) {
-    if (recordings[id]) {
-      URL.revokeObjectURL(recordings[id].url);
-      delete recordings[id];
-    }
+    if (recordings[id]) { URL.revokeObjectURL(recordings[id].url); delete recordings[id]; }
+    delete RIKEngine._recordings[id];
     document.getElementById(`playback-${id}`).classList.remove('visible');
     document.getElementById(`status-${id}`).textContent = '';
-    document.getElementById(`timer-${id}`).textContent = '0:00';
+    document.getElementById(`timer-${id}`).textContent  = '0:00';
     const btn = document.getElementById(`recbtn-${id}`);
     btn.classList.remove('recording');
     btn.innerHTML = '<span class="rec-dot"></span> Taka upp';
     updateProgress();
   };
 
-  /* ── Text fallback toggle ── */
   window._toggleFallback = function(id) {
-    const area = document.getElementById(`fallback-area-${id}`);
-    area.classList.toggle('visible');
+    document.getElementById(`fallback-area-${id}`).classList.toggle('visible');
   };
 
-  /* ── Submit ── */
+  /* ── Submit — engine owns state ── */
   window._submit = function() {
     if (submitted) return;
 
-    // Check that each item has either recording or text
     const allItems = getAllItemIds();
-    let allValid = true;
-
+    let allValid   = true;
     allItems.forEach(id => {
-      const hasRecording = recordings[id] && recordings[id].blob;
-      const fallbackText = document.getElementById(`fallback-text-${id}`);
-      const hasText = fallbackText && fallbackText.value.trim().length > 5;
-      if (!hasRecording && !hasText) allValid = false;
+      const hasRecording = RIKEngine.getRecording(id);
+      const fallbackEl   = document.getElementById(`fallback-text-${id}`);
+      if (!hasRecording && !(fallbackEl && fallbackEl.value.trim().length > 5)) allValid = false;
     });
 
     if (!allValid) {
-      document.getElementById('submitStatus').textContent =
-        'Vinsamlegast taktu upp eða skrifaðu svar fyrir alla hluta.';
-      document.getElementById('submitStatus').className = 'submit-status error';
+      const s = document.getElementById('submitStatus');
+      s.textContent = 'Vinsamlegast taktu upp eða skrifaðu svar fyrir alla hluta.';
+      s.className   = 'submit-status error';
       return;
     }
 
     submitted = true;
     const btn = document.getElementById('btnSubmit');
     btn.innerHTML = '<span class="inline-spinner"></span> Vistar…';
-    btn.disabled = true;
-
-    // Disable all controls
+    btn.disabled  = true;
     document.querySelectorAll('.record-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
     document.querySelectorAll('.text-fallback-input').forEach(t => { t.disabled = true; });
 
-    // Convert audio blobs to base64 and save to localStorage
-    const savePromises = allItems.map(id => {
-      return new Promise(resolve => {
-        if (recordings[id] && recordings[id].blob) {
-          const reader = new FileReader();
-          reader.onloadend = function() {
-            resolve({ id: id, type: 'audio', data: reader.result });
-          };
-          reader.readAsDataURL(recordings[id].blob);
-        } else {
-          const fallbackText = document.getElementById(`fallback-text-${id}`);
-          const text = (fallbackText && fallbackText.value.trim()) || '';
-          resolve({ id: id, type: 'text', data: text });
-        }
-      });
+    // Build responses: engine already has audio in memory; collect fallback texts
+    const responses = {};
+    allItems.forEach(id => {
+      const audioData = RIKEngine.getRecording(id);
+      if (audioData) {
+        responses[id] = { type: 'audio', data: audioData };
+      } else {
+        const fallbackEl = document.getElementById(`fallback-text-${id}`);
+        responses[id]    = { type: 'text', data: fallbackEl ? fallbackEl.value.trim() : '' };
+      }
     });
 
-    Promise.all(savePromises).then(items => {
-      const responses = {};
-      items.forEach(item => {
-        responses[item.id] = { type: item.type, data: item.data };
-      });
+    // Engine owns state
+    RIKEngine.submitTal(responses);
 
-      try {
-        const key = `rikisborgaraprof-${simId}`;
-        const existing = JSON.parse(localStorage.getItem(key) || '{}');
-        existing.tal = { responses: responses, status: 'submitted', ts: Date.now() };
-        localStorage.setItem(key, JSON.stringify(existing));
-      } catch(e) { console.error('localStorage save error:', e); }
+    // DOM confirmation
+    btn.style.display = 'none';
+    document.getElementById('submitStatus').textContent = '';
+    document.getElementById('skipLink').style.display   = 'none';
 
-      // Show confirmation
-      btn.style.display = 'none';
-      document.getElementById('submitStatus').textContent = '';
-
-      examData.parts.forEach(part => {
-        const panel = document.getElementById(`feedback-${part.partId}`);
-        panel.className = 'feedback-panel visible pending';
-        panel.innerHTML = `
-          <div class="feedback-label">✅ Sent í yfirferð</div>
-          <div class="feedback-text">Svörin þín hafa verið vistuð. Niðurstöður birtast á niðurstöðusíðunni.</div>`;
-      });
-
-      document.getElementById('navActions').style.display = 'flex';
+    examData.parts.forEach(part => {
+      const panel = document.getElementById(`feedback-${part.partId}`);
+      panel.className = 'feedback-panel visible pending';
+      panel.innerHTML = `
+        <div class="feedback-label">✅ Sent í yfirferð</div>
+        <div class="feedback-text">Svörin þín hafa verið vistuð. Niðurstöður birtast á niðurstöðusíðunni.</div>`;
     });
+
+    document.getElementById('navActions').style.display = 'flex';
   };
 
-  function hasFallbackText(id) {
-    const el = document.getElementById(`fallback-text-${id}`);
-    return el && el.value.trim().length > 5;
-  }
-
-  function getAllItemIds() {
-    const ids = [];
-    const part1 = examData.parts[0];
-    part1.pictures.forEach(p => ids.push(p.pictureId));
-    ids.push(examData.parts[1].partId);
-    return ids;
-  }
+  /* ── Skip — engine owns state ── */
+  window._skip = function() {
+    if (submitted) return;
+    if (!confirm('Sleppa tal? Þú færð 0 stig.')) return;
+    submitted = true;
+    if (activeRecorder && activeRecorder.state === 'recording') activeRecorder.stop();
+    RIKEngine.skipSection('tal');
+    document.getElementById('skipLink').style.display   = 'none';
+    document.getElementById('btnSubmit').style.display  = 'none';
+    document.getElementById('submitStatus').textContent = '';
+    document.getElementById('navActions').style.display = 'flex';
+  };
 
   /* ── Restart ── */
   window._restart = function() {
     submitted = false;
     Object.values(recordings).forEach(r => { if (r.url) URL.revokeObjectURL(r.url); });
     recordings = {};
+    RIKEngine.currentTest.tal.recordings = {};
+    RIKEngine.currentTest.tal.status     = null;
+    RIKEngine._save();
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  /* ── Next ── */
-  window._next = function() {
-    window.location.href = `nidurstodur.html?sim=${simId}`;
-  };
+  /* ── Next section ── */
+  window._next = function() { window.location.href = `nidurstodur.html?sim=${simId}`; };
 
   /* ── Progress ── */
+  function getAllItemIds() {
+    const ids  = [];
+    examData.parts[0].pictures.forEach(p => ids.push(p.pictureId));
+    ids.push(examData.parts[1].partId);
+    return ids;
+  }
+
   function updateProgress() {
     const allItems = getAllItemIds();
     let done = 0;
     allItems.forEach(id => {
-      if (recordings[id] || hasFallbackText(id)) done++;
+      const hasRecording = RIKEngine.getRecording(id) || (recordings[id] && recordings[id].blob);
+      const fallbackEl   = document.getElementById(`fallback-text-${id}`);
+      if (hasRecording || (fallbackEl && fallbackEl.value.trim().length > 5)) done++;
     });
     document.getElementById('progressBar').style.width = (done / allItems.length * 100) + '%';
   }
 
   function formatTime(sec) {
     if (!sec || isNaN(sec)) return '0:00';
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return m + ':' + String(s).padStart(2, '0');
+    return Math.floor(sec / 60) + ':' + String(Math.floor(sec % 60)).padStart(2, '0');
   }
 
   function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
 })();
 </script>
+
 
 </body>
 </html>

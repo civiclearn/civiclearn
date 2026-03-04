@@ -344,31 +344,26 @@
   </div>
 </div>
 
+<script src="/rikisborgaraprof/assets/js/rik-engine.js"></script>
 <script>
 (function() {
   'use strict';
 
-  /* ── Config ── */
-  const DATA_BASE = '/rikisborgaraprof/data';
+  const DATA_BASE  = '/rikisborgaraprof/data';
   const AUDIO_BASE = 'https://media.civiclearn.com/rikisborgaraprof/audio';
-  const MAX_PLAYS = 2;  // exam allows audio to play twice
+  const MAX_PLAYS  = 2;
 
-  /* ── State ── */
-  let examData = null;
-  let answers = {};
-  let submitted = false;
-  let simId = 'sim-01';
-  let audioPlayers = {};  // segmentId → { audio, plays }
+  let examData    = null;
+  let submitted   = false;
+  let simId       = 'sim-01';
+  let audioPlayers = {};  // segmentId → { audio, plays, loaded }
 
-  /* ── URL params ── */
   const params = new URLSearchParams(window.location.search);
   if (params.get('sim')) simId = params.get('sim');
   document.getElementById('simLabel').textContent = 'Sim ' + simId.replace('sim-', '');
+  RIKEngine.init(simId);
 
-  /* ── Sim number for audio files ── */
-  const simNum = simId.replace('sim-', '');  // "01"
-
-  /* ── Load JSON ── */
+  const simNum   = simId.replace('sim-', '');
   const jsonPath = `${DATA_BASE}/${simId}/hlustun.json`;
 
   fetch(jsonPath)
@@ -381,7 +376,7 @@
 
   /* ── Render ── */
   function render() {
-    const main = document.getElementById('mainContent');
+    const main   = document.getElementById('mainContent');
     const totalQ = examData.segments.reduce((s, seg) => s + seg.questions.length, 0);
 
     let html = `
@@ -395,9 +390,7 @@
     examData.segments.forEach((seg, si) => {
       const segTypeLabel = seg.type === 'dialogue' ? 'Samtal' : 'Texti';
       const segTypeClass = seg.type === 'dialogue' ? 'dialogue' : 'text';
-
-      // Audio file: simXX-hlY.mp3 where Y = segment index + 1
-      const audioFile = `${AUDIO_BASE}/sim${simNum}-hl${si + 1}.mp3`;
+      const audioFile    = `${AUDIO_BASE}/sim${simNum}-hl${si + 1}.mp3`;
 
       html += `
         <div class="segment-card" id="seg-${seg.segmentId}">
@@ -436,7 +429,6 @@
           </div>
         </div>`;
 
-      // Initialize audio player state
       audioPlayers[seg.segmentId] = { audio: null, plays: 0, loaded: false };
     });
 
@@ -446,6 +438,7 @@
           Senda svör
         </button>
       </div>
+      <p style="text-align:center; margin-top:8px;"><span class="skip-link" id="skipLink" onclick="window._skip()">Sleppa og halda áfram</span></p>
       <div class="results-panel" id="resultsPanel"></div>
       <div class="actions" id="navActions" style="display:none">
         <button class="btn btn-outline" onclick="window._restart()">Reyna aftur</button>
@@ -478,43 +471,32 @@
   /* ── Audio controls ── */
   window._playAudio = function(segId) {
     const state = audioPlayers[segId];
-    const btn = document.getElementById(`playbtn-${segId}`);
+    const btn   = document.getElementById(`playbtn-${segId}`);
 
-    // Create audio element on first play
     if (!state.audio) {
-      const simNum = simId.replace('sim-', '');
-      const segIdx = examData.segments.findIndex(s => s.segmentId === segId) + 1;
+      const segIdx  = examData.segments.findIndex(s => s.segmentId === segId) + 1;
       const audioUrl = `${AUDIO_BASE}/sim${simNum}-hl${segIdx}.mp3`;
-
-      state.audio = new Audio(audioUrl);
+      state.audio   = new Audio(audioUrl);
       state.audio.preload = 'auto';
 
       state.audio.addEventListener('loadedmetadata', () => {
         document.getElementById(`time-dur-${segId}`).textContent = formatTime(state.audio.duration);
         state.loaded = true;
       });
-
       state.audio.addEventListener('timeupdate', () => {
         const fill = document.getElementById(`trackfill-${segId}`);
-        const cur = document.getElementById(`time-cur-${segId}`);
+        const cur  = document.getElementById(`time-cur-${segId}`);
         if (state.audio.duration) {
           fill.style.width = (state.audio.currentTime / state.audio.duration * 100) + '%';
-          cur.textContent = formatTime(state.audio.currentTime);
+          cur.textContent  = formatTime(state.audio.currentTime);
         }
       });
-
       state.audio.addEventListener('ended', () => {
         btn.textContent = '▶';
         btn.classList.remove('playing');
         document.getElementById(`trackfill-${segId}`).style.width = '100%';
-        // Check if max plays reached
-        if (state.plays >= MAX_PLAYS) {
-          btn.disabled = true;
-          btn.style.opacity = '0.4';
-          btn.style.cursor = 'not-allowed';
-        }
+        if (state.plays >= MAX_PLAYS) { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.cursor = 'not-allowed'; }
       });
-
       state.audio.addEventListener('error', () => {
         btn.textContent = '✕';
         btn.style.background = 'var(--red)';
@@ -522,17 +504,13 @@
       });
     }
 
-    // Toggle play/pause
     if (state.audio.paused || state.audio.ended) {
-      // Check max plays — only count a new "play" if audio is at beginning or ended
       if (state.audio.ended || state.audio.currentTime === 0) {
         if (state.plays >= MAX_PLAYS) return;
         state.plays++;
         document.getElementById(`plays-${segId}`).innerHTML =
           `Spilanir: <strong>${state.plays}</strong> / ${MAX_PLAYS}`;
       }
-
-      // Pause all other audio first
       Object.entries(audioPlayers).forEach(([id, s]) => {
         if (id !== segId && s.audio && !s.audio.paused) {
           s.audio.pause();
@@ -540,7 +518,6 @@
           document.getElementById(`playbtn-${id}`).classList.remove('playing');
         }
       });
-
       if (state.audio.ended) state.audio.currentTime = 0;
       state.audio.play();
       btn.textContent = '⏸';
@@ -555,29 +532,26 @@
   window._seekAudio = function(e, segId) {
     const state = audioPlayers[segId];
     if (!state.audio || !state.loaded) return;
-    const bar = e.currentTarget;
+    const bar  = e.currentTarget;
     const rect = bar.getBoundingClientRect();
-    const pct = (e.clientX - rect.left) / rect.width;
-    state.audio.currentTime = pct * state.audio.duration;
+    state.audio.currentTime = ((e.clientX - rect.left) / rect.width) * state.audio.duration;
   };
 
   function formatTime(sec) {
     if (!sec || isNaN(sec)) return '0:00';
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
+    const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
     return m + ':' + String(s).padStart(2, '0');
   }
 
-  /* ── Select answer ── */
+  /* ── Select answer — engine owns the answer, page owns the DOM ── */
   window._select = function(qId, label) {
     if (submitted) return;
-    answers[qId] = label;
+    RIKEngine.saveHlustunAnswer(qId, label);
     document.querySelectorAll(`#qblock-${qId} .option-label`).forEach(el => el.classList.remove('selected'));
     document.getElementById(`opt-${qId}-${label}`).classList.add('selected');
     updateProgress();
-
     const totalQ = examData.segments.reduce((s, seg) => s + seg.questions.length, 0);
-    document.getElementById('btnSubmit').disabled = Object.keys(answers).length < totalQ;
+    document.getElementById('btnSubmit').disabled = RIKEngine.getAnsweredCountHlustun() < totalQ;
   };
 
   /* ── Submit ── */
@@ -585,40 +559,32 @@
     if (submitted) return;
     submitted = true;
 
-    // Stop all audio
-    Object.values(audioPlayers).forEach(s => {
-      if (s.audio && !s.audio.paused) s.audio.pause();
-    });
+    Object.values(audioPlayers).forEach(s => { if (s.audio && !s.audio.paused) s.audio.pause(); });
 
-    let correct = 0, total = 0;
+    const { correct, total, pct } = RIKEngine.completeHlustun(examData);
+    const pass = pct >= 60;
+
     examData.segments.forEach(seg => {
       seg.questions.forEach(q => {
-        total++;
-        const chosen = answers[q.questionId];
+        const chosen    = RIKEngine.getSavedHlustunAnswer(q.questionId);
         const isCorrect = chosen === q.correctAnswer;
-        if (isCorrect) correct++;
 
         document.querySelectorAll(`#qblock-${q.questionId} .option-label`).forEach(el => {
           el.classList.add('locked');
           el.classList.remove('selected');
         });
 
-        const chosenEl = document.getElementById(`opt-${q.questionId}-${chosen}`);
-        if (isCorrect) {
+        if (chosen) {
+          const chosenEl = document.getElementById(`opt-${q.questionId}-${chosen}`);
           chosenEl.classList.remove('locked');
-          chosenEl.classList.add('correct');
-        } else {
-          chosenEl.classList.remove('locked');
-          chosenEl.classList.add('incorrect');
+          chosenEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+        if (!isCorrect) {
           const correctEl = document.getElementById(`opt-${q.questionId}-${q.correctAnswer}`);
-          correctEl.classList.remove('locked');
-          correctEl.classList.add('was-correct');
+          if (correctEl) { correctEl.classList.remove('locked'); correctEl.classList.add('was-correct'); }
         }
       });
     });
-
-    const pct = Math.round((correct / total) * 100);
-    const pass = pct >= 60;
 
     const panel = document.getElementById('resultsPanel');
     panel.innerHTML = `
@@ -634,51 +600,50 @@
     panel.classList.add('visible');
 
     document.getElementById('btnSubmit').style.display = 'none';
+    document.getElementById('skipLink').style.display  = 'none';
     document.getElementById('navActions').style.display = 'flex';
-
-    saveResult(correct, total, pct);
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  /* ── Skip ── */
+  window._skip = function() {
+    if (submitted) return;
+    if (!confirm('Sleppa hlustun? Þú færð 0 stig.')) return;
+    submitted = true;
+    Object.values(audioPlayers).forEach(s => { if (s.audio && !s.audio.paused) s.audio.pause(); });
+    RIKEngine.skipSection('hlustun');
+    document.getElementById('skipLink').style.display  = 'none';
+    document.getElementById('btnSubmit').style.display = 'none';
+    document.getElementById('navActions').style.display = 'flex';
   };
 
   /* ── Restart ── */
   window._restart = function() {
-    answers = {};
-    submitted = false;
+    submitted    = false;
     audioPlayers = {};
+    RIKEngine.currentTest.hlustun.answers = {};
+    RIKEngine.currentTest.hlustun.pct     = null;
+    RIKEngine._save();
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   /* ── Next section ── */
-  window._next = function() {
-    window.location.href = `ritun.html?sim=${simId}`;
-  };
+  window._next = function() { window.location.href = `ritun.html?sim=${simId}`; };
 
   /* ── Progress ── */
   function updateProgress() {
-    const totalQ = examData ? examData.segments.reduce((s, seg) => s + seg.questions.length, 0) : 0;
-    const answered = Object.keys(answers).length;
+    const totalQ   = examData ? examData.segments.reduce((s, seg) => s + seg.questions.length, 0) : 0;
+    const answered = RIKEngine.getAnsweredCountHlustun();
     document.getElementById('progressBar').style.width = (totalQ > 0 ? (answered / totalQ) * 100 : 0) + '%';
   }
 
-  /* ── Save ── */
-  function saveResult(correct, total, pct) {
-    try {
-      const key = `rikisborgaraprof-${simId}`;
-      const existing = JSON.parse(localStorage.getItem(key) || '{}');
-      existing.hlustun = { correct, total, pct, ts: Date.now() };
-      localStorage.setItem(key, JSON.stringify(existing));
-    } catch(e) {}
-  }
-
   /* ── Util ── */
-  function esc(s) {
-    const d = document.createElement('div');
-    d.textContent = s;
-    return d.innerHTML;
-  }
+  function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
 })();
 </script>
+
 
 </body>
 </html>

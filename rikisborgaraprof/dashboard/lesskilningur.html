@@ -329,24 +329,24 @@
   </div>
 </div>
 
+<script src="/rikisborgaraprof/assets/js/rik-engine.js"></script>
 <script>
 (function() {
   'use strict';
 
   /* ── Config ── */
-  const DATA_BASE = '/rikisborgaraprof/data';          // relative path to data folder
-  const AUDIO_BASE = 'https://media.civiclearn.com/rikisborgaraprof/audio';
+  const DATA_BASE = '/rikisborgaraprof/data';
 
   /* ── State ── */
-  let examData = null;
-  let answers = {};       // { "les-01-q01": "B", ... }
-  let submitted = false;
-  let simId = 'sim-01';
+  let examData  = null;
+  let submitted = false;   // page-level guard; engine owns persistent state
+  let simId     = 'sim-01';
 
-  /* ── URL params ── */
+  /* ── Init ── */
   const params = new URLSearchParams(window.location.search);
   if (params.get('sim')) simId = params.get('sim');
   document.getElementById('simLabel').textContent = 'Sim ' + simId.replace('sim-', '');
+  RIKEngine.init(simId);
 
   /* ── Load JSON ── */
   const jsonPath = `${DATA_BASE}/${simId}/lestur.json`;
@@ -361,7 +361,7 @@
 
   /* ── Render ── */
   function render() {
-    const main = document.getElementById('mainContent');
+    const main  = document.getElementById('mainContent');
     const totalQ = examData.texts.reduce((s, t) => s + t.questions.length, 0);
 
     let html = '<div class="section-label">📖 Lesskilningur — Lesið textana og svarið spurningunum</div>';
@@ -387,11 +387,12 @@
           Senda svör
         </button>
       </div>
+      <p style="text-align:center; margin-top:8px;"><span class="skip-link" id="skipLink" onclick="window._skip()">Sleppa og halda áfram</span></p>
       <div class="results-panel" id="resultsPanel"></div>
       <div class="actions" id="navActions" style="display:none">
+        <button class="btn btn-outline" onclick="window._restart()">Reyna aftur</button>
         <button class="btn btn-primary" onclick="window._next()">Áfram í hlustun →</button>
-      </div>
-      <p style="text-align:center; margin-top:8px;"><span class="skip-link" id="skipLink" onclick="window._skip()">Sleppa og halda áfram</span></p>`;
+      </div>`;
 
     main.innerHTML = html;
     updateProgress();
@@ -416,22 +417,17 @@
       </div>`;
   }
 
-  /* ── Select answer ── */
+  /* ── Select answer — engine owns the answer, page owns the DOM ── */
   window._select = function(qId, label) {
     if (submitted) return;
-    answers[qId] = label;
+    RIKEngine.saveLesskilningurAnswer(qId, label);
 
-    // Clear previous selection for this question
-    document.querySelectorAll(`#qblock-${qId} .option-label`).forEach(el => {
-      el.classList.remove('selected');
-    });
+    document.querySelectorAll(`#qblock-${qId} .option-label`).forEach(el => el.classList.remove('selected'));
     document.getElementById(`opt-${qId}-${label}`).classList.add('selected');
 
     updateProgress();
-
-    // Enable submit if all answered
     const totalQ = examData.texts.reduce((s, t) => s + t.questions.length, 0);
-    document.getElementById('btnSubmit').disabled = Object.keys(answers).length < totalQ;
+    document.getElementById('btnSubmit').disabled = RIKEngine.getAnsweredCountLestur() < totalQ;
   };
 
   /* ── Submit ── */
@@ -439,39 +435,32 @@
     if (submitted) return;
     submitted = true;
 
-    let correct = 0;
-    let total = 0;
+    // Engine scores and saves to localStorage
+    const { correct, total, pct } = RIKEngine.completeLesskilningur(examData);
+    const pass = pct >= 60;
 
+    // Mark DOM correct / incorrect using engine's saved answers
     examData.texts.forEach(text => {
       text.questions.forEach(q => {
-        total++;
-        const chosen = answers[q.questionId];
+        const chosen    = RIKEngine.getSavedLesskilningurAnswer(q.questionId);
         const isCorrect = chosen === q.correctAnswer;
-        if (isCorrect) correct++;
 
-        // Mark options
         document.querySelectorAll(`#qblock-${q.questionId} .option-label`).forEach(el => {
           el.classList.add('locked');
           el.classList.remove('selected');
         });
 
-        const chosenEl = document.getElementById(`opt-${q.questionId}-${chosen}`);
-        if (isCorrect) {
+        if (chosen) {
+          const chosenEl = document.getElementById(`opt-${q.questionId}-${chosen}`);
           chosenEl.classList.remove('locked');
-          chosenEl.classList.add('correct');
-        } else {
-          chosenEl.classList.remove('locked');
-          chosenEl.classList.add('incorrect');
-          // Show correct answer
+          chosenEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+        if (!isCorrect) {
           const correctEl = document.getElementById(`opt-${q.questionId}-${q.correctAnswer}`);
-          correctEl.classList.remove('locked');
-          correctEl.classList.add('was-correct');
+          if (correctEl) { correctEl.classList.remove('locked'); correctEl.classList.add('was-correct'); }
         }
       });
     });
-
-    const pct = Math.round((correct / total) * 100);
-    const pass = pct >= 60;
 
     const panel = document.getElementById('resultsPanel');
     panel.innerHTML = `
@@ -487,13 +476,8 @@
     panel.classList.add('visible');
 
     document.getElementById('btnSubmit').style.display = 'none';
-    document.getElementById('skipLink').style.display = 'none';
+    document.getElementById('skipLink').style.display  = 'none';
     document.getElementById('navActions').style.display = 'flex';
-
-    // Save to localStorage
-    saveResult(correct, total, pct);
-
-    // Scroll to results
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
@@ -502,10 +486,20 @@
     if (submitted) return;
     if (!confirm('Sleppa lesskilningi? Þú færð 0 stig.')) return;
     submitted = true;
-    document.getElementById('skipLink').style.display = 'none';
+    RIKEngine.skipSection('lestur');
+    document.getElementById('skipLink').style.display  = 'none';
     document.getElementById('btnSubmit').style.display = 'none';
-    saveResult(0, 1, 0);
     document.getElementById('navActions').style.display = 'flex';
+  };
+
+  /* ── Restart ── */
+  window._restart = function() {
+    submitted = false;
+    RIKEngine.currentTest.lestur.answers = {};
+    RIKEngine.currentTest.lestur.pct     = null;
+    RIKEngine._save();
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   /* ── Next section ── */
@@ -513,32 +507,19 @@
     window.location.href = `hlustun.html?sim=${simId}`;
   };
 
-  /* ── Progress ── */
+  /* ── Progress bar ── */
   function updateProgress() {
-    const totalQ = examData ? examData.texts.reduce((s, t) => s + t.questions.length, 0) : 0;
-    const answered = Object.keys(answers).length;
-    const pct = totalQ > 0 ? (answered / totalQ) * 100 : 0;
-    document.getElementById('progressBar').style.width = pct + '%';
-  }
-
-  /* ── Save ── */
-  function saveResult(correct, total, pct) {
-    try {
-      const key = `rikisborgaraprof-${simId}`;
-      const existing = JSON.parse(localStorage.getItem(key) || '{}');
-      existing.lestur = { correct, total, pct, ts: Date.now() };
-      localStorage.setItem(key, JSON.stringify(existing));
-    } catch(e) { /* silently fail */ }
+    const totalQ   = examData ? examData.texts.reduce((s, t) => s + t.questions.length, 0) : 0;
+    const answered = RIKEngine.getAnsweredCountLestur();
+    document.getElementById('progressBar').style.width = (totalQ > 0 ? (answered / totalQ) * 100 : 0) + '%';
   }
 
   /* ── Util ── */
-  function esc(s) {
-    const d = document.createElement('div');
-    d.textContent = s;
-    return d.innerHTML;
-  }
+  function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
 })();
 </script>
+
 
 </body>
 </html>
