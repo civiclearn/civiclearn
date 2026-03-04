@@ -114,7 +114,16 @@
       .sim-topics{display:none}
       .topbar{padding:0 16px}
     }
-  </style>
+    .logout-btn {
+    background: rgba(255,255,255,0.15);
+    border: none; color: #fff;
+    padding: 5px 12px; border-radius: 20px;
+    font-family: inherit; font-size: 0.8rem; font-weight: 500;
+    cursor: pointer; transition: background .2s;
+  }
+  .logout-btn:hover { background: rgba(255,255,255,0.28); }
+</style>
+<script src="/rikisborgaraprof/assets/js/auth-guard-rik.js"></script>
 </head>
 <body>
 
@@ -127,8 +136,8 @@
     </div>
   </div>
   <div class="topbar-right">
-    <div class="user-pill" id="userEmail">Gestur</div>
-    <!-- Auth wired in Chat 8 -->
+    <div class="user-pill" id="userEmail"></div>
+    <button class="logout-btn" onclick="window._logout()">Útskrá</button>
   </div>
 </div>
 
@@ -199,6 +208,9 @@
 (function() {
   'use strict';
 
+  var SUPABASE_URL = 'https://htgliokekeaovdiafrgs.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+
   // ═══════════════════════════════════════════════════════════════
   // SIMULATION DEFINITIONS
   // ═══════════════════════════════════════════════════════════════
@@ -226,6 +238,18 @@
   ];
 
   var SECTION_KEYS = ['lestur', 'hlustun', 'ritun', 'tal'];
+
+  // ═══════════════════════════════════════════════════════════════
+  // AUTH
+  // ═══════════════════════════════════════════════════════════════
+  var currentEmail = localStorage.getItem('cl_email') || '';
+  document.getElementById('userEmail').textContent = currentEmail;
+
+  window._logout = function() {
+    localStorage.removeItem('cl_email');
+    localStorage.removeItem('cl_token');
+    window.location.replace('login.html');
+  };
 
   // ═══════════════════════════════════════════════════════════════
   // LOAD STATE FROM LOCALSTORAGE
@@ -259,6 +283,87 @@
       .filter(function(s) { return typeof s === 'number'; });
     if (scores.length === 0) return null;
     return Math.round(scores.reduce(function(a, b) { return a + b; }, 0) / scores.length);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // HYDRATE FROM DB — merge server state into localStorage
+  // Ensures completed results survive across devices / browsers.
+  // Only overwrites a section if the DB has a score and localStorage doesn't.
+  // ═══════════════════════════════════════════════════════════════
+  function hydrateFromDB() {
+    var email = localStorage.getItem('cl_email');
+    var token = localStorage.getItem('cl_token');
+    if (!email || !token) return;
+
+    fetch(SUPABASE_URL + '/functions/v1/rik-hydrate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
+      body: JSON.stringify({ user_id: email })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.attempts || !data.attempts.length) return;
+
+      data.attempts.forEach(function(attempt) {
+        var simId = attempt.simulation_id;
+        if (!simId) return;
+
+        var stored = getSimState(simId);
+        var changed = false;
+
+        // Store attempt_id so rik-engine can resume correctly
+        if (attempt.id && !stored._attemptId) {
+          stored._attemptId = attempt.id;
+          changed = true;
+        }
+
+        // Merge reading score
+        if (attempt.reading_score != null && (!stored.lestur || stored.lestur.pct == null)) {
+          stored.lestur = stored.lestur || {};
+          stored.lestur.pct     = attempt.reading_score;
+          stored.lestur.correct = attempt.reading_correct;
+          stored.lestur.total   = attempt.reading_total;
+          stored.lestur.ts      = stored.lestur.ts || Date.now();
+          changed = true;
+        }
+        // Merge listening score
+        if (attempt.listening_score != null && (!stored.hlustun || stored.hlustun.pct == null)) {
+          stored.hlustun = stored.hlustun || {};
+          stored.hlustun.pct     = attempt.listening_score;
+          stored.hlustun.correct = attempt.listening_correct;
+          stored.hlustun.total   = attempt.listening_total;
+          stored.hlustun.ts      = stored.hlustun.ts || Date.now();
+          changed = true;
+        }
+        // Merge writing score
+        if (attempt.writing_score != null && (!stored.ritun || stored.ritun.pct == null)) {
+          stored.ritun = stored.ritun || {};
+          stored.ritun.pct    = attempt.writing_score;
+          stored.ritun.status = attempt.writing_status || 'complete';
+          stored.ritun.ts     = stored.ritun.ts || Date.now();
+          changed = true;
+        }
+        // Merge speaking score
+        if (attempt.speaking_score != null && (!stored.tal || stored.tal.pct == null)) {
+          stored.tal = stored.tal || {};
+          stored.tal.pct    = attempt.speaking_score;
+          stored.tal.status = attempt.speaking_status || 'complete';
+          stored.tal.ts     = stored.tal.ts || Date.now();
+          changed = true;
+        }
+
+        if (changed) {
+          localStorage.setItem('rikisborgaraprof-' + simId, JSON.stringify(stored));
+        }
+      });
+
+      // Re-render with merged data
+      renderStats();
+      renderTable();
+    })
+    .catch(function(e) {
+      console.warn('[Dashboard] rik-hydrate failed (offline?):', e.message);
+    });
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -446,15 +551,14 @@
     return d.innerHTML;
   }
 
-  // =================================================================
-  // REDO
-  // =================================================================
+  // ═══════════════════════════════════════════════════════════════
+  // REDO — clears localStorage + _attemptId so engine creates fresh DB row
+  // ═══════════════════════════════════════════════════════════════
   window._confirmRedo = function(simId) {
     var num = simId.replace('sim-', '');
     if (!confirm('Viltu endurtaka hermiprufu ' + num + '?\n\nFyrri nidurstodur hverfa.')) return;
     try {
       localStorage.removeItem('rikisborgaraprof-' + simId);
-      // Clear drafts (rik-draft-sim-XX-taskId)
       var toRemove = [];
       for (var i = 0; i < localStorage.length; i++) {
         var k = localStorage.key(i);
@@ -467,7 +571,16 @@
     window.location.href = 'lesskilningur.html?sim=' + simId;
   };
 
-  // =================================================================
+  // ═══════════════════════════════════════════════════════════════
+  // INIT
+  // ═══════════════════════════════════════════════════════════════
+  renderStats();
+  renderTable();
+  initCountdown();
+  hydrateFromDB();   // merge DB state into localStorage (background, non-blocking)
+
+})();
+</script>
   // INIT
   // =================================================================
   renderStats();
