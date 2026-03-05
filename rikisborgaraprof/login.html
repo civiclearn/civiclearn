@@ -127,6 +127,7 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -201,14 +202,18 @@
   const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
   const FN_BASE       = SUPABASE_URL + '/functions/v1';
 
-  // Redirect if already logged in
-  const existingEmail = localStorage.getItem('cl_email');
-  const existingToken = localStorage.getItem('cl_token');
-  if (existingEmail && existingToken) {
-    const params     = new URLSearchParams(window.location.search);
-    const returnUrl  = params.get('return') || '/rikisborgaraprof/dashboard/index.html';
-    window.location.replace(returnUrl);
-  }
+  // Initialize Supabase JS client (same client rik-auth.js uses)
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Check for existing Supabase session — redirect if already logged in
+  (async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      const params    = new URLSearchParams(window.location.search);
+      const returnUrl = params.get('return') || '/rikisborgaraprof/dashboard/index.html';
+      window.location.replace(returnUrl);
+    }
+  })();
 
   /* ── Tabs ── */
   window.showTab = function (tab) {
@@ -218,7 +223,7 @@
     document.getElementById('tabReset').classList.toggle('active', tab === 'reset');
   };
 
-  /* ── Login ── */
+  /* ── Login (uses Supabase JS client — creates a real session) ── */
   window.doLogin = async function () {
     const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
     const password = document.getElementById('loginPass').value;
@@ -232,33 +237,23 @@
     btn.innerHTML = '<span class="spinner"></span>Skrá inn…';
 
     try {
-      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-        method: 'POST',
-        headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
 
-      const data = await res.json();
-
-      if (!res.ok || !data.access_token) {
+      if (error || !data.session) {
         msg.className = 'msg error';
         msg.textContent = 'Rangt netfang eða lykilorð.';
         btn.disabled = false; btn.textContent = 'Skrá inn';
         return;
       }
 
-      // Store session
-      localStorage.setItem('cl_email', email);
-      localStorage.setItem('cl_token', data.access_token);
-
-      // Log login
+      // Log login (fire-and-forget)
       fetch(`${FN_BASE}/check-user-exists`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
         body: JSON.stringify({ email, action: 'login_log', method: 'password' })
       }).catch(() => {});
 
-      const params   = new URLSearchParams(window.location.search);
+      const params    = new URLSearchParams(window.location.search);
       const returnUrl = params.get('return') || '/rikisborgaraprof/dashboard/index.html';
       window.location.replace(returnUrl);
 

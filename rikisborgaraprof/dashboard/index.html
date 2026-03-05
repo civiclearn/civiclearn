@@ -123,7 +123,8 @@
   }
   .logout-btn:hover { background: rgba(255,255,255,0.28); }
 </style>
-<script src="/rikisborgaraprof/assets/js/auth-guard-rik.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/rikisborgaraprof/assets/js/rik-auth.js"></script>
 </head>
 <body>
 
@@ -242,13 +243,17 @@
   // ═══════════════════════════════════════════════════════════════
   // AUTH
   // ═══════════════════════════════════════════════════════════════
-  var currentEmail = localStorage.getItem('cl_email') || '';
-  document.getElementById('userEmail').textContent = currentEmail;
+  // AUTH — uses rikAuth (set by rik-auth.js after Supabase session check)
+  var currentEmail = '';
+  rikAuth.ready.then(function() {
+    currentEmail = rikAuth.email || '';
+    document.getElementById('userEmail').textContent = currentEmail;
+    hydrateFromDB();
+    renderTable();
+  });
 
   window._logout = function() {
-    localStorage.removeItem('cl_email');
-    localStorage.removeItem('cl_token');
-    window.location.replace('/rikisborgaraprof/login.html');
+    rikAuth.signOut();
   };
 
   // ═══════════════════════════════════════════════════════════════
@@ -297,13 +302,13 @@
   // Only overwrites a section if the DB has a score and localStorage doesn't.
   // ═══════════════════════════════════════════════════════════════
   function hydrateFromDB() {
-    var email = localStorage.getItem('cl_email');
-    var token = localStorage.getItem('cl_token');
+    var email = rikAuth.email;
+    var token = rikAuth.session ? rikAuth.session.access_token : '';
     if (!email || !token) return;
 
     fetch(SUPABASE_URL + '/functions/v1/rik-hydrate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify({ user_id: email })
     })
     .then(function(r) { return r.json(); })
@@ -579,7 +584,8 @@
     );
 
     // STEP 1 — Delete ALL rik_attempts rows for this user+sim from DB
-    var email = localStorage.getItem('cl_email');
+    var email = rikAuth.email || '';
+    var token = rikAuth.session ? rikAuth.session.access_token : SUPABASE_KEY;
     if (email) {
       try {
         await fetch(
@@ -588,7 +594,7 @@
             method: 'DELETE',
             headers: {
               'apikey': SUPABASE_KEY,
-              'Authorization': 'Bearer ' + SUPABASE_KEY,
+              'Authorization': 'Bearer ' + token,
               'Prefer': 'return=minimal'
             }
           }
@@ -620,7 +626,7 @@
   renderStats();
   renderTable();
   initCountdown();
-  hydrateFromDB();   // merge DB state into localStorage (background, non-blocking)
+  // hydrateFromDB runs inside rikAuth.ready.then() after session is available
 
 })();
 </script>
