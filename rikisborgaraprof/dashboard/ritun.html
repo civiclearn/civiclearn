@@ -388,21 +388,7 @@
       text:       document.getElementById(`text-${task.taskId}`).value.trim()
     }));
 
-    // Show submitted notice
-    examData.tasks.forEach(task => {
-      const panel = document.getElementById(`feedback-${task.taskId}`);
-      panel.className = 'feedback-panel visible pending';
-      panel.innerHTML = `
-        <div class="feedback-label">✅ Sent í yfirferð</div>
-        <div class="feedback-text">Svarið þitt hefur verið vistað. Niðurstöður birtast á yfirlitssíðunni.</div>`;
-    });
-
-    document.getElementById('btnSubmit').style.display  = 'none';
-    document.getElementById('submitStatus').textContent = '';
-    document.getElementById('skipLink').style.display   = 'none';
-    document.getElementById('navActions').style.display = 'flex';
-
-    // Submit to server (fire and forget — eval runs server-side)
+    // Submit to server then go back to exam hub
     try {
       await RIK.submit({
         attemptId,
@@ -410,6 +396,8 @@
         json: { responses }
       });
     } catch(e) { console.warn('[ritun] submit error:', e.message); }
+
+    RIK.goBack(simId, attemptId);
   };
 
   window._skip = async function() {

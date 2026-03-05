@@ -570,22 +570,7 @@
       }
     });
 
-    // Show submitted notice
-    btn.style.display = 'none';
-    document.getElementById('submitStatus').textContent = '';
-    document.getElementById('skipLink').style.display   = 'none';
-
-    examData.parts.forEach(part => {
-      const panel = document.getElementById(`feedback-${part.partId}`);
-      panel.className = 'feedback-panel visible pending';
-      panel.innerHTML = `
-        <div class="feedback-label">✅ Sent í yfirferð</div>
-        <div class="feedback-text">Svörin þín hafa verið vistuð. Niðurstöður birtast á yfirlitssíðunni.</div>`;
-    });
-
-    document.getElementById('navActions').style.display = 'flex';
-
-    // Submit to server (fire and forget — eval runs server-side)
+    // Submit to server then go back to exam hub
     try {
       await RIK.submit({
         attemptId,
@@ -593,6 +578,8 @@
         json: { recordings: speaking_recordings, responses: speaking_responses }
       });
     } catch(e) { console.warn('[tal] submit error:', e.message); }
+
+    RIK.goBack(simId, attemptId);
   };
 
   window._skip = async function() {
