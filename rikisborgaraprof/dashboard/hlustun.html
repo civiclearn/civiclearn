@@ -340,7 +340,7 @@
   </div>
   <div class="topbar-right">
     <span class="topbar-sim" id="simLabel">Sim 01</span>
-    <a href="index.html" class="topbar-back">← Til baka</a>
+    <a href="#" class="topbar-back" id="backLink">← Til baka</a>
   </div>
 </div>
 <div class="progress-wrap"><div class="progress-fill" id="progressBar"></div></div>
@@ -378,6 +378,7 @@
     attemptId = ctx.attemptId;
 
     document.getElementById('simLabel').textContent = 'Sim ' + ctx.simNum;
+    document.getElementById('backLink').href = 'exam.html?sim=' + simId + '&attempt=' + attemptId;
 
     const jsonPath = `${DATA_BASE}/${simId}/hlustun.json`;
     fetch(jsonPath)
@@ -451,7 +452,7 @@
       <p style="text-align:center; margin-top:8px;"><span class="skip-link" id="skipLink" onclick="window._skip()">Sleppa og halda áfram</span></p>
       <div class="results-panel" id="resultsPanel"></div>
       <div class="actions" id="navActions" style="display:none">
-        <button class="btn btn-outline" onclick="RIK.goBack(simId, attemptId)">← Til baka í próf</button>
+        <button class="btn btn-outline" onclick="window._goBack()">← Til baka í próf</button>
       </div>`;
 
     main.innerHTML = html;
@@ -592,6 +593,10 @@
     submitted = true;
     Object.values(audioPlayers).forEach(s => { if (s.audio && !s.audio.paused) s.audio.pause(); });
     try { await RIK.skip({ attemptId, elemKey: 'hlustun' }); } catch(e) {}
+    RIK.goBack(simId, attemptId);
+  };
+
+  window._goBack = function() {
     RIK.goBack(simId, attemptId);
   };
 
