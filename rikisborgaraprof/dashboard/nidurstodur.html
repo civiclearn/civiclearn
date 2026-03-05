@@ -152,398 +152,276 @@
   </div>
 </div>
 
-<script src="/rikisborgaraprof/assets/js/auth-guard-rik.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/rikisborgaraprof/assets/js/rik-auth.js"></script>
 <script src="/rikisborgaraprof/assets/js/rik-engine.js"></script>
 <script>
 (function() {
   'use strict';
 
-  var PASS_THRESHOLD = 60;
+  // Poll-only results page. NO eval triggering — that happens server-side.
+  // Polls rik-hydrate every 8s until attempt.status === 'complete'.
 
-  var SECTION_META = {
-    lestur:  { icon: '📖', title: 'Lesskilningur', evalType: 'auto' },
-    hlustun: { icon: '🎧', title: 'Hlustun',       evalType: 'auto' },
-    ritun:   { icon: '✍️', title: 'Ritun',          evalType: 'ai' },
-    tal:     { icon: '🎤', title: 'Tal',            evalType: 'ai' }
-  };
+  const POLL_INTERVAL = 8000;
+  let simId, attemptId, user;
+  let pollTimer = null;
 
-  var simId  = 'sim-01';
-  var params = new URLSearchParams(window.location.search);
-  if (params.get('sim')) simId = params.get('sim');
-  document.getElementById('simLabel').textContent = 'Sim ' + simId.replace('sim-', '');
+  document.addEventListener('DOMContentLoaded', async () => {
+    const ctx = await RIK.init();
+    user      = ctx.user;
+    simId     = ctx.simId;
+    attemptId = ctx.attemptId;
 
-  // Engine owns all state — init before using
-  RIKEngine.init(simId);
-
-  loadResults();
-
-  /* =========================================================
-     LOAD RESULTS — reads from engine, not raw localStorage
-     ========================================================= */
-  async function loadResults() {
-    var data          = RIKEngine.currentTest;
-    var sectionStatus = {};
-
-    for (var key in SECTION_META) {
-      var section = data[key];
-      var meta    = SECTION_META[key];
-      if (!section) {
-        sectionStatus[key] = 'missing';
-      } else if (section.status === 'skipped') {
-        sectionStatus[key] = 'complete';  // skipped = 0%, no AI eval needed
-      } else if (section.status === 'complete' && section.evaluation) {
-        sectionStatus[key] = 'complete';
-      } else if (meta.evalType === 'auto' && section.pct !== undefined && section.pct !== null) {
-        sectionStatus[key] = 'complete';
-      } else if (section.status === 'submitted' || section.responses) {
-        sectionStatus[key] = 'pending';
-      } else if (section.pct !== undefined && section.pct !== null) {
-        sectionStatus[key] = 'complete';
-      } else {
-        sectionStatus[key] = 'missing';
-      }
+    if (!attemptId) {
+      showError('Engin próftilraun fannst.');
+      return;
     }
 
-    var hasPending = Object.values(sectionStatus).includes('pending');
+    document.getElementById('simLabel').textContent = 'Hermipróf ' + ctx.simNum;
+    await poll();
+  });
 
-    if (hasPending) {
-      renderProcessing(data, sectionStatus);
-      await evaluatePending(sectionStatus);
-      // Re-read state after evaluations complete
-      data = RIKEngine.currentTest;
-      for (var k in SECTION_META) {
-        var s = data[k];
-        if (s && s.status === 'complete' && (s.evaluation || (SECTION_META[k].evalType === 'auto' && s.pct !== undefined)))
-          sectionStatus[k] = 'complete';
-        else if (s && s.status === 'failed')
-          sectionStatus[k] = 'failed';
-      }
-    }
-
-    var allComplete = Object.values(sectionStatus).every(function(s) { return s === 'complete'; });
-    if (allComplete) renderResults(data);
-    else renderPartial(data, sectionStatus);
-  }
-
-  /* =========================================================
-     EVALUATE PENDING — delegates to engine methods
-     ========================================================= */
-  async function evaluatePending(sectionStatus) {
-    var promises = [];
-    if (sectionStatus.ritun === 'pending') promises.push(runWritingEval());
-    if (sectionStatus.tal  === 'pending') promises.push(runSpeakingEval());
-    await Promise.allSettled(promises);
-  }
-
-  async function runWritingEval() {
-    updateProgressIcon('ritun', '⏳', 'Mat í gangi…');
+  async function poll() {
     try {
-      await RIKEngine.evaluateWriting();
-      updateProgressIcon('ritun', '✅', 'Lokið');
+      const data    = await RIK.hydrateData(user.email, attemptId, true);
+      const attempt = (data?.attempts || []).find(a => a.id === attemptId);
+
+      if (!attempt) { showError('Próftilraun fannst ekki.'); return; }
+
+      if (attempt.status === 'complete') {
+        if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+        renderResults(attempt);
+        return;
+      }
+
+      // Still processing — show waiting state
+      renderWaiting(attempt);
+
+      if (!pollTimer) {
+        pollTimer = setInterval(poll, POLL_INTERVAL);
+      }
     } catch(err) {
-      console.error('[results] Writing eval failed:', err.message);
-      RIKEngine.markEvalFailed('ritun', err.message);
-      updateProgressIcon('ritun', '❌', 'Villa');
+      console.error('[nidurstodur] poll error:', err);
     }
   }
 
-  async function runSpeakingEval() {
-    updateProgressIcon('tal', '⏳', 'Mat í gangi…');
-    try {
-      await RIKEngine.evaluateSpeaking();
-      updateProgressIcon('tal', '✅', 'Lokið');
-    } catch(err) {
-      console.error('[results] Speaking eval failed:', err.message);
-      RIKEngine.markEvalFailed('tal', err.message);
-      updateProgressIcon('tal', '❌', 'Villa');
-    }
+  function renderWaiting(attempt) {
+    const elems = attempt.elements || [];
+    const pending = elems.filter(e =>
+      e.submission_status === 'submitted' &&
+      e.eval_status !== 'complete' && e.eval_status !== 'skipped'
+    );
+
+    document.getElementById('mainContent').innerHTML = `
+      <div class="results-loading">
+        <div class="loading-spinner"></div>
+        <h2>Reiknar niðurstöður…</h2>
+        <p>
+          ${pending.length > 0
+            ? `Bíður eftir mati á ${pending.length} hluta (ritun og/eða tal).`
+            : 'Niðurstöður eru að vera unnar…'}
+        </p>
+        <p class="poll-note">Síðan uppfærist sjálfkrafa.</p>
+      </div>`;
   }
 
-  function updateProgressIcon(key, icon, label) {
-    var el = document.getElementById('progress-' + key);
-    if (!el) return;
-    var ic = el.querySelector('.progress-icon'), st = el.querySelector('.progress-status');
-    if (ic) ic.textContent = icon;
-    if (st) st.textContent = label;
-  }
+  function renderResults(attempt) {
+    const elems   = attempt.elements || [];
+    const overall = attempt.overall_score ?? 0;
+    const passed  = attempt.passed;
 
-  /* =========================================================
-     RENDER PROCESSING
-     ========================================================= */
-  function renderProcessing(data, sectionStatus) {
-    var items = '';
-    for (var key in SECTION_META) {
-      var meta   = SECTION_META[key];
-      var status = sectionStatus[key];
-      var icon   = status === 'complete' ? '✅' : status === 'pending' ? '⏳' : '⬜';
-      var text   = status === 'complete' ? 'Lokið' : status === 'pending' ? 'Bíður…' : '';
-      items += '<div class="progress-item" id="progress-' + key + '">' +
-        '<span class="progress-icon">' + icon + '</span>' +
-        '<span class="progress-label">' + meta.icon + ' ' + meta.title + '</span>' +
-        '<span class="progress-status">' + text + '</span>' +
-        '</div>';
-    }
-    var doneCount = Object.values(sectionStatus).filter(function(s) { return s === 'complete'; }).length;
-    document.getElementById('mainContent').innerHTML =
-      '<div class="processing-card">' +
-        '<div class="processing-icon">⏳</div>' +
-        '<div class="processing-title">Niðurstöður reiknaðar…</div>' +
-        '<div class="processing-sub">Svörin þín eru metin af gervigreind. Þessi síða uppfærist sjálfkrafa.' +
-          '<br><strong>' + doneCount + ' af 4</strong> hlutar metnar.</div>' +
-        '<div class="loading-spinner" style="margin:0 auto"></div>' +
-        '<div class="processing-progress">' + items + '</div>' +
-      '</div>';
-  }
-
-  /* =========================================================
-     RENDER FULL RESULTS
-     ========================================================= */
-  function renderResults(data) {
-    var scores = {
-      lestur:  data.lestur  ? (data.lestur.pct  || 0) : 0,
-      hlustun: data.hlustun ? (data.hlustun.pct || 0) : 0,
-      ritun:   data.ritun   ? (data.ritun.pct   || 0) : 0,
-      tal:     data.tal     ? (data.tal.pct     || 0) : 0
+    // Section scores
+    const get = (key) => {
+      const el = elems.find(e => e.element_key === key);
+      return el?.score ?? attempt[`${key === 'lestur' ? 'reading' : key === 'hlustun' ? 'listening' : key === 'ritun' ? 'writing' : 'speaking'}_score`] ?? null;
     };
-    var overall  = Math.round((scores.lestur + scores.hlustun + scores.ritun + scores.tal) / 4);
-    var allPass  = Object.values(scores).every(function(p) { return p >= PASS_THRESHOLD; });
-    var passed   = allPass && overall >= PASS_THRESHOLD;
+    const scores = {
+      lestur:  attempt.reading_score  ?? null,
+      hlustun: attempt.listening_score ?? null,
+      ritun:   attempt.writing_score  ?? null,
+      tal:     attempt.speaking_score ?? null,
+    };
 
-    var html = renderHero(passed, overall, scores);
-    html += '<div class="pass-note">Til að standast þarf minnst ' + PASS_THRESHOLD + '% í hverjum hluta og ' + PASS_THRESHOLD + '% í heild.</div>';
-    for (var key in SECTION_META) {
-      html += renderSectionBlock(key, SECTION_META[key], data, scores[key]);
+    // Build feedback sections
+    const wFeedback = attempt.writing_feedback;
+    const sFeedback = attempt.speaking_feedback;
+
+    let html = `
+      <div class="result-hero ${passed ? 'pass' : 'fail'}">
+        <div class="hero-icon">${passed ? '🎉' : '📋'}</div>
+        <h1 class="hero-title">${passed ? 'Staðist!' : 'Ekki staðist'}</h1>
+        <p class="hero-sub">${passed
+          ? 'Til hamingju! Þú standast ríkisborgaraprófið.'
+          : 'Þú náðir ekki 60% í öllum hlutum. Haltu áfram að æfa.'}</p>
+        <div class="overall-score">${overall}<span class="score-unit">%</span></div>
+        <div class="score-label">Heildareinkunnin</div>
+      </div>
+
+      <div class="section-scores">
+        ${renderScoreCard('📖', 'Lesskilningur', scores.lestur, 'Sjálfvirkt metið')}
+        ${renderScoreCard('🎧', 'Hlustun', scores.hlustun, 'Sjálfvirkt metið')}
+        ${renderScoreCard('✍️', 'Ritun', scores.ritun, 'Gervigreind mat')}
+        ${renderScoreCard('🎤', 'Tal', scores.tal, 'Gervigreind mat')}
+      </div>`;
+
+    // Writing feedback
+    if (wFeedback && wFeedback.tasks) {
+      html += `<div class="feedback-section">
+        <h2 class="fb-heading">✍️ Ritun — nákvæm endurgjöf</h2>
+        ${wFeedback.tasks.map(task => `
+          <div class="fb-task">
+            <div class="fb-task-header">
+              <span>Verkefni ${task.taskNumber}</span>
+              <span class="fb-score">${task.score ?? 0}%</span>
+            </div>
+            <p class="fb-text">${esc(task.feedback || '')}</p>
+            ${renderCriteria(task.criteria)}
+            ${renderMistakes(task.mistakes)}
+          </div>`).join('')}
+        ${wFeedback.overallFeedback ? `<div class="fb-overall"><strong>Heildarumsögn:</strong> ${esc(wFeedback.overallFeedback)}</div>` : ''}
+      </div>`;
     }
-    html += '<div class="actions">' +
-      '<button class="btn btn-outline" onclick="window.location.href=\'index.html\'">Til baka</button>' +
-      '<button class="btn btn-primary" onclick="window.retrySimulation()">Reyna aftur</button>' +
-      '</div>';
+
+    // Speaking feedback
+    if (sFeedback && sFeedback.parts) {
+      html += `<div class="feedback-section">
+        <h2 class="fb-heading">🎤 Tal — nákvæm endurgjöf</h2>
+        ${sFeedback.parts.map(part => `
+          <div class="fb-task">
+            <div class="fb-task-header">
+              <span>Hluti ${part.partNumber}</span>
+              <span class="fb-score">${part.score ?? 0}%</span>
+            </div>
+            <p class="fb-text">${esc(part.feedback || '')}</p>
+            ${renderCriteria(part.criteria)}
+            ${renderMistakes(part.mistakes)}
+          </div>`).join('')}
+        ${sFeedback.overallFeedback ? `<div class="fb-overall"><strong>Heildarumsögn:</strong> ${esc(sFeedback.overallFeedback)}</div>` : ''}
+      </div>`;
+    }
+
+    html += `
+      <div class="actions-footer">
+        <a href="/rikisborgaraprof/dashboard/index.html" class="btn btn-outline">← Til baka í yfirlit</a>
+      </div>`;
 
     document.getElementById('mainContent').innerHTML = html;
-    wireToggles();
   }
 
-  /* =========================================================
-     RENDER PARTIAL
-     ========================================================= */
-  function renderPartial(data, sectionStatus) {
-    var scores = {};
-    for (var key in SECTION_META) {
-      var s = data[key];
-      scores[key] = (s && s.pct !== undefined && s.pct !== null) ? s.pct : null;
-    }
-    var hasFailed  = Object.values(sectionStatus).includes('failed');
-    var validSum   = 0, validCount = 0;
-    for (var k in scores) { if (scores[k] !== null) { validSum += scores[k]; validCount++; } }
-    var overall = validCount > 0 ? Math.round(validSum / 4) : null;
-
-    var html = '<div class="hero-card partial">' +
-      '<div class="hero-top">' +
-        '<div class="hero-badge">' + (hasFailed ? '⚠️ Villa við mat' : '⏳ Ólokið') + '</div>' +
-        '<div class="hero-score">' + (overall !== null ? overall + '%' : '—') + '</div>' +
-        '<div class="hero-score-label">Heildareinkunn</div>' +
-        '<div class="hero-status">' + (hasFailed ? 'Sumir hlutar mistókust við mat.' : 'Sumir hlutar vantar.') + '</div>' +
-      '</div>' + renderHeroSections(scores) + '</div>';
-
-    if (hasFailed) {
-      html += '<div class="pass-note" style="background:var(--amber-light);border:1px solid var(--amber-border)">' +
-        '⚠️ AI-mat mistókst fyrir einhverja hluta. Smelltu á <strong>Reyna aftur</strong> til að meta aftur.</div>';
-    }
-    for (var key2 in SECTION_META) {
-      html += renderSectionBlock(key2, SECTION_META[key2], data, scores[key2], sectionStatus[key2]);
-    }
-    html += '<div class="actions"><button class="btn btn-outline" onclick="window.location.href=\'index.html\'">Til baka</button>';
-    if (hasFailed) html += '<button class="btn btn-retry" onclick="window.retryFailed()">🔄 Reyna aftur (mat)</button>';
-    html += '</div>';
-
-    document.getElementById('mainContent').innerHTML = html;
-    wireToggles();
+  function renderScoreCard(icon, label, score, method) {
+    const pct   = score ?? null;
+    const pass  = pct !== null && pct >= 60;
+    const cls   = pct === null ? 'pending' : pass ? 'pass' : 'fail';
+    const disp  = pct !== null ? pct + '%' : '—';
+    return `
+      <div class="score-card ${cls}">
+        <div class="sc-icon">${icon}</div>
+        <div class="sc-label">${label}</div>
+        <div class="sc-score">${disp}</div>
+        <div class="sc-method">${method}</div>
+      </div>`;
   }
 
-  /* =========================================================
-     HERO
-     ========================================================= */
-  function renderHero(passed, overall, scores) {
-    return '<div class="hero-card ' + (passed ? 'passed' : 'failed') + '">' +
-      '<div class="hero-top">' +
-        '<div class="hero-badge">' + (passed ? '✅ Staðist' : '❌ Ekki staðist') + '</div>' +
-        '<div class="hero-score">' + overall + '%</div>' +
-        '<div class="hero-score-label">Heildareinkunn</div>' +
-        '<div class="hero-status">' + (passed ? 'Til hamingju!' : 'Þú náðir ekki lágmarki í þetta sinn.') + '</div>' +
-      '</div>' + renderHeroSections(scores) + '</div>';
-  }
-
-  function renderHeroSections(scores) {
-    var html = '<div class="hero-sections">';
-    for (var key in SECTION_META) {
-      var meta = SECTION_META[key];
-      var pct  = scores[key];
-      var cls  = pct === null ? 'hs-pending' : pct >= PASS_THRESHOLD ? 'hs-pass' : 'hs-fail';
-      html += '<div class="hero-section">' +
-        '<div class="hs-icon">' + meta.icon + '</div>' +
-        '<div class="hs-label">' + meta.title + '</div>' +
-        '<div class="hs-score ' + cls + '">' + (pct !== null ? pct + '%' : '—') + '</div>' +
-        '</div>';
-    }
-    html += '</div>';
-    return html;
-  }
-
-  /* =========================================================
-     SECTION BLOCK
-     ========================================================= */
-  function renderSectionBlock(key, meta, data, score, status) {
-    var section = data[key];
-    var pct     = (score !== null && score !== undefined) ? score : null;
-    var html    = '<div class="section-block"><div class="section-header">' +
-      '<span>' + meta.icon + ' ' + meta.title + '</span>' +
-      '<span class="section-score">' + (pct !== null ? pct + '%' : '') + '</span>' +
-      '</div>';
-
-    if (meta.evalType === 'auto') {
-      html += renderAutoCard(section);
-    } else if (section && section.evaluation) {
-      html += renderAICards(section.evaluation);
-    } else if (status === 'failed') {
-      html += '<div class="elem-card"><div class="elem-header">' +
-        '<span class="elem-name">Mat mistókst' + (section && section.error ? ': ' + esc(section.error) : '') + '</span>' +
-        '<span class="elem-score-badge low">Villa</span></div></div>';
-    } else {
-      html += '<div class="elem-card"><div class="elem-header"><span class="elem-name">Engin gögn</span>' +
-        '<span class="elem-score-badge skip">—</span></div></div>';
-    }
-    html += '</div>';
-    return html;
-  }
-
-  function renderAutoCard(section) {
-    if (!section || section.pct === undefined) {
-      return '<div class="elem-card"><div class="elem-header"><span class="elem-name">Ekki lokið</span>' +
-        '<span class="elem-score-badge skip">—</span></div></div>';
-    }
-    var pct = section.pct, correct = section.correct || 0, total = section.total || 0;
-    var cls = pct >= 80 ? 'high' : pct >= PASS_THRESHOLD ? 'mid' : 'low';
-    return '<div class="elem-card"><div class="elem-header">' +
-      '<span class="elem-name">Sjálfvirkt mat</span>' +
-      '<span class="elem-score-badge ' + cls + '">' + correct + '/' + total + ' (' + pct + '%)</span>' +
-      '</div></div>';
-  }
-
-  function renderAICards(evaluation) {
-    var CRIT_LABELS = {
-      taskCompletion: 'Verkefni', vocabulary: 'Orðaforði',
+  function renderCriteria(criteria) {
+    if (!criteria || !Object.keys(criteria).length) return '';
+    const labels = {
+      taskCompletion: 'Verkefnaefni', vocabulary: 'Orðaforði',
       grammar: 'Málfræði', coherence: 'Samhengi',
       fluency: 'Flæði', comprehensibility: 'Skiljanleiki'
     };
-    var html  = '';
-    var items = evaluation.tasks || evaluation.parts || [];
-
-    items.forEach(function(item, i) {
-      var name  = item.taskId || item.partId || ('Hluti ' + (i + 1));
-      var score = item.score || 0;
-      var cls   = score >= 80 ? 'high' : score >= PASS_THRESHOLD ? 'mid' : 'low';
-      var detail = '';
-
-      if (item.feedback)
-        detail += '<div class="feedback-section"><div class="feedback-label">Umöngn</div>' +
-          '<div class="feedback-summary">' + esc(item.feedback) + '</div></div>';
-
-      if (item.strengths && item.strengths.length) {
-        detail += '<div class="feedback-section"><div class="feedback-label">Styrkur</div><div class="feedback-list">';
-        item.strengths.forEach(function(s) {
-          detail += '<div style="display:flex;gap:6px;align-items:start;font-size:0.85rem;color:var(--gray-600);margin-bottom:4px"><span>✅</span><span>' + esc(s) + '</span></div>';
-        });
-        detail += '</div></div>';
-      }
-
-      if (item.weaknesses && item.weaknesses.length) {
-        detail += '<div class="feedback-section"><div class="feedback-label">Til úbóta</div><div class="feedback-list">';
-        item.weaknesses.forEach(function(w) {
-          detail += '<div style="display:flex;gap:6px;align-items:start;font-size:0.85rem;color:var(--gray-600);margin-bottom:4px"><span>💡</span><span>' + esc(w) + '</span></div>';
-        });
-        detail += '</div></div>';
-      }
-
-      if (item.criteria) {
-        detail += '<div class="feedback-section"><div class="feedback-label">Viðmið</div>';
-        for (var ck in item.criteria) {
-          var cv = typeof item.criteria[ck] === 'number' ? item.criteria[ck] : 0;
-          detail += '<div class="criteria-row">' +
-            '<span class="criteria-name">' + (CRIT_LABELS[ck] || ck) + '</span>' +
-            '<div class="criteria-bar-wrap"><div class="criteria-bar-fill" style="width:' + cv + '%"></div></div>' +
-            '<span class="criteria-score">' + cv + '%</span></div>';
-        }
-        detail += '</div>';
-      }
-
-      if (item.mistakes && item.mistakes.length) {
-        detail += '<div class="feedback-section"><div class="feedback-label">Villur</div><div class="mistakes-list">';
-        item.mistakes.forEach(function(mk) {
-          detail += '<div class="mistake-row">' +
-            '<span class="mistake-original">' + esc(mk.original || '') + '</span>' +
-            '<span class="mistake-arrow">→</span>' +
-            '<span class="mistake-correction">' + esc(mk.correction || '') + '</span>' +
-            (mk.explanation ? '<span class="mistake-explanation">— ' + esc(mk.explanation) + '</span>' : '') +
-            '</div>';
-        });
-        detail += '</div></div>';
-      }
-
-      html += '<div class="elem-card' + (detail ? '' : ' no-detail') + '">' +
-        '<div class="elem-header">' +
-          '<span class="elem-name">' + esc(name) + '</span>' +
-          '<span class="elem-score-badge ' + cls + '">' + score + '%</span>' +
-          (detail ? '<span class="elem-chevron">▸</span>' : '') +
-        '</div>' +
-        (detail ? '<div class="elem-detail">' + detail + '</div>' : '') +
-        '</div>';
-    });
-
-    if (evaluation.overallFeedback) {
-      html += '<div class="elem-card"><div class="elem-header">' +
-        '<span class="elem-name">Heildarumöngn</span><span class="elem-chevron">▸</span></div>' +
-        '<div class="elem-detail"><div class="feedback-section">' +
-          '<div class="feedback-summary">' + esc(evaluation.overallFeedback) + '</div>' +
-        '</div></div></div>';
-    }
-    return html;
+    return `<div class="criteria-grid">
+      ${Object.entries(criteria).map(([k, v]) => `
+        <div class="criteria-item">
+          <span class="ci-label">${labels[k] || k}</span>
+          <span class="ci-val">${v}/10</span>
+        </div>`).join('')}
+    </div>`;
   }
 
-  /* =========================================================
-     WIRE TOGGLES
-     ========================================================= */
-  function wireToggles() {
-    document.querySelectorAll('.elem-header').forEach(function(h) {
-      if (h.querySelector('.elem-chevron')) {
-        h.addEventListener('click', function() { h.closest('.elem-card').classList.toggle('open'); });
-      }
-    });
+  function renderMistakes(mistakes) {
+    if (!mistakes || !mistakes.length) return '';
+    return `<div class="mistakes-list">
+      <div class="mistakes-heading">Villur og leiðréttingar</div>
+      ${mistakes.map(m => `
+        <div class="mistake-item">
+          <span class="mistake-orig">${esc(m.original)}</span>
+          <span class="mistake-arrow">→</span>
+          <span class="mistake-fix">${esc(m.correction)}</span>
+          ${m.explanation ? `<div class="mistake-exp">${esc(m.explanation)}</div>` : ''}
+        </div>`).join('')}
+    </div>`;
   }
 
-  /* =========================================================
-     RETRY — delegates to engine
-     ========================================================= */
-  window.retryFailed = function() {
-    RIKEngine.retryFailed();
-    loadResults();
-  };
-
-  window.retrySimulation = function() {
-    RIKEngine.resetTest(simId);
-    window.location.href = 'lesskilningur.html?sim=' + simId;
-  };
-
-  /* =========================================================
-     UTILS
-     ========================================================= */
-  function esc(s) {
-    if (!s) return '';
-    var d = document.createElement('div');
-    d.textContent = String(s);
-    return d.innerHTML;
+  function showError(msg) {
+    document.getElementById('mainContent').innerHTML =
+      `<div class="error-msg">⚠️ ${esc(msg)}<br><a href="/rikisborgaraprof/dashboard/index.html">← Til baka</a></div>`;
   }
 
+  function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 })();
 </script>
+
+<style>
+  .results-loading { text-align:center; padding:80px 20px; }
+  .results-loading h2 { font-size:1.3rem; margin:16px 0 8px; }
+  .results-loading p { color:#64748b; font-size:0.9rem; }
+  .poll-note { font-size:0.78rem; color:#94a3b8; margin-top:8px; }
+
+  .result-hero { text-align:center; padding:40px 24px 32px; border-radius:16px; margin-bottom:28px; }
+  .result-hero.pass { background:#dcfce7; }
+  .result-hero.fail { background:#fee2e2; }
+  .hero-icon { font-size:2.5rem; margin-bottom:10px; }
+  .hero-title { font-family:"Fraunces",serif; font-size:1.8rem; font-weight:700; margin-bottom:6px; }
+  .result-hero.pass .hero-title { color:#166534; }
+  .result-hero.fail .hero-title { color:#991b1b; }
+  .hero-sub { font-size:0.9rem; color:#475569; margin-bottom:20px; }
+  .overall-score { font-family:"Fraunces",serif; font-size:3.5rem; font-weight:700; line-height:1; }
+  .result-hero.pass .overall-score { color:#166534; }
+  .result-hero.fail .overall-score { color:#991b1b; }
+  .score-unit { font-size:1.5rem; }
+  .score-label { font-size:0.78rem; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; margin-top:4px; }
+
+  .section-scores { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:28px; }
+  @media(min-width:600px) { .section-scores { grid-template-columns:repeat(4,1fr); } }
+  .score-card { background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:16px; text-align:center; }
+  .score-card.pass { border-color:#86efac; }
+  .score-card.fail { border-color:#fca5a5; }
+  .score-card.pending { opacity:0.6; }
+  .sc-icon { font-size:1.4rem; margin-bottom:6px; }
+  .sc-label { font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#64748b; margin-bottom:4px; }
+  .sc-score { font-family:"Fraunces",serif; font-size:1.6rem; font-weight:700; }
+  .score-card.pass .sc-score { color:#166534; }
+  .score-card.fail .sc-score { color:#991b1b; }
+  .sc-method { font-size:0.68rem; color:#94a3b8; margin-top:4px; }
+
+  .feedback-section { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:24px; margin-bottom:20px; }
+  .fb-heading { font-family:"Fraunces",serif; font-size:1.1rem; font-weight:700; margin-bottom:18px; }
+  .fb-task { border-bottom:1px solid #f1f5f9; padding-bottom:18px; margin-bottom:18px; }
+  .fb-task:last-of-type { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+  .fb-task-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-weight:600; }
+  .fb-score { background:#003897; color:#fff; padding:2px 10px; border-radius:99px; font-size:0.8rem; }
+  .fb-text { font-size:0.88rem; color:#334155; line-height:1.6; margin-bottom:10px; }
+  .fb-overall { font-size:0.88rem; color:#334155; padding:12px; background:#f8f7f4; border-radius:8px; margin-top:12px; }
+
+  .criteria-grid { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+  .criteria-item { background:#f1f5f9; border-radius:8px; padding:6px 10px; display:flex; gap:8px; align-items:center; font-size:0.78rem; }
+  .ci-label { color:#64748b; }
+  .ci-val { font-weight:700; color:#0f172a; }
+
+  .mistakes-list { margin-top:10px; }
+  .mistakes-heading { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#94a3b8; margin-bottom:8px; }
+  .mistake-item { display:flex; flex-wrap:wrap; align-items:baseline; gap:6px; padding:6px 0; border-bottom:1px solid #f1f5f9; font-size:0.83rem; }
+  .mistake-orig { background:#fee2e2; color:#991b1b; padding:1px 6px; border-radius:4px; text-decoration:line-through; }
+  .mistake-arrow { color:#94a3b8; }
+  .mistake-fix { background:#dcfce7; color:#166534; padding:1px 6px; border-radius:4px; font-weight:600; }
+  .mistake-exp { width:100%; color:#64748b; font-size:0.78rem; padding-left:4px; }
+
+  .actions-footer { text-align:center; margin-top:32px; }
+  .btn { display:inline-flex; align-items:center; padding:12px 28px; border-radius:8px; font-family:inherit; font-size:0.9rem; font-weight:600; cursor:pointer; text-decoration:none; border:2px solid #003897; color:#003897; background:#fff; transition:background .15s; }
+  .btn:hover { background:#e6ecf8; }
+  .error-msg { text-align:center; padding:60px 20px; color:#d72828; }
+  .error-msg a { color:#003897; display:block; margin-top:12px; }
+</style>
 </body>
 </html>

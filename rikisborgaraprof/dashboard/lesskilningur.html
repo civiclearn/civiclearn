@@ -337,40 +337,43 @@
   </div>
 </div>
 
-<script src="/rikisborgaraprof/assets/js/auth-guard-rik.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/rikisborgaraprof/assets/js/rik-auth.js"></script>
 <script src="/rikisborgaraprof/assets/js/rik-engine.js"></script>
 <script>
 (function() {
   'use strict';
 
-  /* ── Config ── */
   const DATA_BASE = '/rikisborgaraprof/data';
 
-  /* ── State ── */
   let examData  = null;
-  let submitted = false;   // page-level guard; engine owns persistent state
-  let simId     = 'sim-01';
+  let submitted = false;
+  let simId, attemptId, user;
 
-  /* ── Init ── */
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('sim')) simId = params.get('sim');
-  document.getElementById('simLabel').textContent = 'Sim ' + simId.replace('sim-', '');
-  RIKEngine.init(simId);
+  // Answer store (page-level, no localStorage needed)
+  const answers = {};
 
-  /* ── Load JSON ── */
-  const jsonPath = `${DATA_BASE}/${simId}/lestur.json`;
+  document.addEventListener('DOMContentLoaded', async () => {
+    const ctx = await RIK.init('lestur');
+    user      = ctx.user;
+    simId     = ctx.simId;
+    attemptId = ctx.attemptId;
 
-  fetch(jsonPath)
-    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(data => { examData = data; render(); })
-    .catch(err => {
-      document.getElementById('loadingState').innerHTML =
-        `<div class="error-msg">Gat ekki hlaðið gögnum.<br><small>${jsonPath} — ${err.message}</small></div>`;
-    });
+    document.getElementById('simLabel').textContent = 'Sim ' + ctx.simNum;
 
-  /* ── Render ── */
+    const jsonPath = `${DATA_BASE}/${simId}/lestur.json`;
+    fetch(jsonPath)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(data => { examData = data; render(); })
+      .catch(err => {
+        document.getElementById('loadingState').innerHTML =
+          `<div class="error-msg">Gat ekki hlaðið gögnum.<br><small>${jsonPath} — ${err.message}</small></div>`;
+      });
+  });
+
   function render() {
-    const main  = document.getElementById('mainContent');
+    const main   = document.getElementById('mainContent');
     const totalQ = examData.texts.reduce((s, t) => s + t.questions.length, 0);
 
     let html = '<div class="section-label">📖 Lesskilningur — Lesið textana og svarið spurningunum</div>';
@@ -399,7 +402,7 @@
       <p style="text-align:center; margin-top:8px;"><span class="skip-link" id="skipLink" onclick="window._skip()">Sleppa og halda áfram</span></p>
       <div class="results-panel" id="resultsPanel"></div>
       <div class="actions" id="navActions" style="display:none">
-        <button class="btn btn-primary" onclick="window._next()">Áfram í hlustun →</button>
+        <button class="btn btn-outline" onclick="RIK.goBack(simId, attemptId)">← Til baka í próf</button>
       </div>`;
 
     main.innerHTML = html;
@@ -425,39 +428,66 @@
       </div>`;
   }
 
-  /* ── Select answer — engine owns the answer, page owns the DOM ── */
   window._select = function(qId, label) {
     if (submitted) return;
-    RIKEngine.saveLesskilningurAnswer(qId, label);
-
+    answers[qId] = label;
     document.querySelectorAll(`#qblock-${qId} .option-label`).forEach(el => el.classList.remove('selected'));
     document.getElementById(`opt-${qId}-${label}`).classList.add('selected');
-
     updateProgress();
     const totalQ = examData.texts.reduce((s, t) => s + t.questions.length, 0);
-    document.getElementById('btnSubmit').disabled = RIKEngine.getAnsweredCountLestur() < totalQ;
+    document.getElementById('btnSubmit').disabled = Object.keys(answers).length < totalQ;
   };
 
-  /* ── Submit ── */
-  window._submit = function() {
+  window._submit = async function() {
     if (submitted) return;
     submitted = true;
+    document.getElementById('btnSubmit').disabled = true;
 
-    // Engine scores and saves to localStorage
-    const { correct, total, pct } = RIKEngine.completeLesskilningur(examData);
-    const pass = pct >= 60;
-
-    // Mark DOM correct / incorrect using engine's saved answers
+    // Score client-side
+    let correct = 0, total = 0;
     examData.texts.forEach(text => {
       text.questions.forEach(q => {
-        const chosen    = RIKEngine.getSavedLesskilningurAnswer(q.questionId);
+        total++;
+        if (answers[q.questionId] === q.correctAnswer) correct++;
+      });
+    });
+    const pct = Math.round((correct / total) * 100);
+
+    // Show inline results
+    showResults(correct, total, pct);
+
+    // Submit to server (fire and go back after brief delay)
+    try {
+      await RIK.submit({
+        attemptId,
+        elemKey: 'lestur',
+        json: { pct, correct, total, answers }
+      });
+    } catch(e) { console.warn('[lestur] submit error:', e.message); }
+
+    document.getElementById('btnSubmit').style.display   = 'none';
+    document.getElementById('skipLink').style.display    = 'none';
+    document.getElementById('navActions').style.display  = 'flex';
+  };
+
+  window._skip = async function() {
+    if (submitted) return;
+    if (!confirm('Sleppa lesskilningi? Þú færð 0 stig.')) return;
+    submitted = true;
+    try { await RIK.skip({ attemptId, elemKey: 'lestur' }); } catch(e) {}
+    RIK.goBack(simId, attemptId);
+  };
+
+  function showResults(correct, total, pct) {
+    const pass  = pct >= 60;
+
+    examData.texts.forEach(text => {
+      text.questions.forEach(q => {
+        const chosen    = answers[q.questionId];
         const isCorrect = chosen === q.correctAnswer;
-
         document.querySelectorAll(`#qblock-${q.questionId} .option-label`).forEach(el => {
-          el.classList.add('locked');
-          el.classList.remove('selected');
+          el.classList.add('locked'); el.classList.remove('selected');
         });
-
         if (chosen) {
           const chosenEl = document.getElementById(`opt-${q.questionId}-${chosen}`);
           chosenEl.classList.remove('locked');
@@ -480,44 +510,19 @@
       </div>
       <div class="results-msg">${pass
         ? 'Vel gert! Þú nærð lágmarkskröfunni í lesskilningi.'
-        : 'Þú náðir ekki 60% í þetta skipti. Reyndu aftur eða æfðu þig meira.'}</div>`;
+        : 'Þú náðir ekki 60% í þetta skipti. Haltu áfram að æfa.'}</div>`;
     panel.classList.add('visible');
-
-    document.getElementById('btnSubmit').style.display = 'none';
-    document.getElementById('skipLink').style.display  = 'none';
-    document.getElementById('navActions').style.display = 'flex';
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  };
+  }
 
-  /* ── Skip ── */
-  window._skip = function() {
-    if (submitted) return;
-    if (!confirm('Sleppa lesskilningi? Þú færð 0 stig.')) return;
-    submitted = true;
-    RIKEngine.skipSection('lestur');
-    document.getElementById('skipLink').style.display  = 'none';
-    document.getElementById('btnSubmit').style.display = 'none';
-    document.getElementById('navActions').style.display = 'flex';
-  };
-
-  /* ── Next section ── */
-  window._next = function() {
-    window.location.href = `hlustun.html?sim=${simId}`;
-  };
-
-  /* ── Progress bar ── */
   function updateProgress() {
     const totalQ   = examData ? examData.texts.reduce((s, t) => s + t.questions.length, 0) : 0;
-    const answered = RIKEngine.getAnsweredCountLestur();
+    const answered = Object.keys(answers).length;
     document.getElementById('progressBar').style.width = (totalQ > 0 ? (answered / totalQ) * 100 : 0) + '%';
   }
 
-  /* ── Util ── */
   function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-
 })();
 </script>
-
-
 </body>
 </html>

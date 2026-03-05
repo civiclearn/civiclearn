@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ríkisborgarapróf — Próf</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/rikisborgaraprof/assets/js/rik-auth.js"></script>
+  <script src="/rikisborgaraprof/assets/js/rik-engine.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --blue:      #003897;
+      --blue-dim:  #e6ecf8;
+      --red:       #d72828;
+      --navy:      #0f172a;
+      --slate:     #334155;
+      --muted:     #64748b;
+      --border:    #e2e8f0;
+      --surface:   #ffffff;
+      --bg:        #f8f7f4;
+      --pass-bg:   #dcfce7;  --pass-fg:   #166534;
+      --fail-bg:   #fee2e2;  --fail-fg:   #991b1b;
+      --warn-bg:   #fef9c3;  --warn-fg:   #854d0e;
+      --idle-bg:   #f1f5f9;  --idle-fg:   #475569;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "DM Sans", system-ui, sans-serif; background: var(--bg); color: var(--navy); min-height: 100vh; }
+
+    /* ── TOPBAR ──────────────────────────────────────── */
+    .topbar {
+      background: var(--navy); border-bottom: 3px solid var(--blue);
+      padding: 0 28px; height: 52px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .back-link {
+      color: #64748b; text-decoration: none; font-size: 0.8rem;
+      display: flex; align-items: center; gap: 5px; transition: color 0.15s;
+    }
+    .back-link:hover { color: #fff; }
+    .topbar-divider { width: 1px; height: 20px; background: #1e293b; }
+    .topbar-flag {
+      font-size: 1.3rem; line-height: 1;
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 10px; }
+    .topbar-title { font-family: "Fraunces", serif; font-size: 0.9rem; font-weight: 600; color: #fff; }
+    .topbar-sub { font-size: 0.75rem; color: #64748b; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .user-pill { background: #1e293b; border-radius: 99px; padding: 4px 12px; font-size: 0.75rem; color: #94a3b8; }
+
+    /* ── LOADING ─────────────────────────────────────── */
+    #loading-overlay {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px;
+      z-index: 9999; transition: opacity 0.35s;
+    }
+    #loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    .loading-spinner {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 3px solid var(--border); border-top-color: var(--blue);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 0.9rem; color: var(--muted); }
+
+    /* ── PROGRESS STRIP ──────────────────────────────── */
+    .progress-strip {
+      max-width: 800px; margin: 32px auto 0; padding: 0 28px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .ps-dot {
+      flex: 1; height: 6px; border-radius: 3px;
+      background: var(--border); transition: background 0.3s;
+    }
+    .ps-dot.done     { background: var(--blue); }
+    .ps-dot.active   { background: #facc15; }
+    .ps-dot.skipped  { background: #94a3b8; }
+
+    /* ── MAIN CONTENT ────────────────────────────────── */
+    .hub {
+      max-width: 800px; margin: 0 auto;
+      padding: 24px 28px 80px;
+    }
+    .hub-header { margin-bottom: 32px; }
+    .hub-eyebrow {
+      font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.09em; color: var(--blue);
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    }
+    .hub-eyebrow-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--blue); }
+    .hub-title {
+      font-family: "Fraunces", serif;
+      font-size: clamp(1.3rem, 3vw, 1.7rem);
+      font-weight: 700; letter-spacing: -0.025em; margin-bottom: 6px;
+    }
+    .hub-subtitle { font-size: 0.88rem; color: var(--muted); line-height: 1.5; }
+
+    /* ── SECTION ──────────────────────────────────────── */
+    .section { margin-bottom: 36px; }
+    .section-label {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--muted);
+      padding-bottom: 10px; border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+
+    /* ── ELEMENT CARDS ────────────────────────────────── */
+    .elem-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; padding: 16px 20px;
+      margin-bottom: 12px;
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+      text-decoration: none; color: inherit;
+    }
+    .elem-card:hover {
+      border-color: #94a3b8;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    }
+    .elem-card.locked {
+      opacity: 0.55; pointer-events: none; cursor: default;
+    }
+    .ec-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+    .ec-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+      background: var(--blue-dim); color: var(--blue);
+    }
+    .ec-info { min-width: 0; }
+    .ec-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; }
+    .ec-desc { font-size: 0.78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .ec-badge {
+      border-radius: 99px; padding: 4px 12px;
+      font-size: 0.7rem; font-weight: 600; flex-shrink: 0;
+    }
+    .ec-badge.todo     { background: var(--idle-bg); color: var(--idle-fg); }
+    .ec-badge.done     { background: var(--pass-bg); color: var(--pass-fg); }
+    .ec-badge.skipped  { background: #f1f5f9; color: #94a3b8; }
+    .ec-badge.eval     { background: var(--warn-bg); color: var(--warn-fg); }
+    .ec-badge.failed   { background: var(--fail-bg); color: var(--fail-fg); }
+
+    /* ── RESULTS PHASE ────────────────────────────────── */
+    #resultsSection { display: none; }
+    .results-card {
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: 16px; padding: 28px; text-align: center;
+      margin-bottom: 24px;
+    }
+    .results-title {
+      font-family: "Fraunces", serif; font-size: 1.6rem;
+      font-weight: 700; margin: 12px 0 6px;
+    }
+    .results-title.pass { color: var(--pass-fg); }
+    .results-title.fail { color: var(--fail-fg); }
+    .results-scores {
+      display: flex; justify-content: center; gap: 24px;
+      margin-top: 16px; flex-wrap: wrap;
+    }
+    .rs-item { text-align: center; }
+    .rs-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .rs-value { font-family: "Fraunces", serif; font-size: 1.3rem; font-weight: 700; }
+
+    @media (max-width: 600px) {
+      .hub { padding: 20px 16px 60px; }
+      .progress-strip { padding: 0 16px; }
+      .topbar { padding: 0 16px; }
+      .ec-desc { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Hleður próf…</div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" href="/rikisborgaraprof/dashboard/index.html">← Yfirlit</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-flag">🇮🇸</div>
+    <div class="topbar-brand">
+      <span class="topbar-title">Ríkisborgarapróf</span>
+      <span class="topbar-sub" id="topbarSim"></span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="user-pill" id="userEmail"></div>
+  </div>
+</div>
+
+<!-- PROGRESS STRIP -->
+<div class="progress-strip" id="progressStrip"></div>
+
+<!-- HUB -->
+<div class="hub" id="hubPhase">
+  <div class="hub-header">
+    <div class="hub-eyebrow">
+      <div class="hub-eyebrow-dot"></div>
+      <span id="hubEyebrow">HERMIPRÓF 1</span>
+    </div>
+    <h1 class="hub-title" id="hubTitle">Yfirlitssíða prófs</h1>
+    <p class="hub-subtitle">Smelltu á hvern hluta til að hefja. Þú getur gert hlutana í hvaða röð sem er.</p>
+  </div>
+
+  <!-- LESSKILNINGUR + HLUSTUN -->
+  <div class="section">
+    <div class="section-label">📖 Skilningur</div>
+    <div id="skilningurCards"></div>
+  </div>
+
+  <!-- RITUN + TAL -->
+  <div class="section">
+    <div class="section-label">✍️ Framleiðni</div>
+    <div id="framleidniCards"></div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="hub" id="resultsSection">
+  <div class="hub-header">
+    <div class="hub-eyebrow">
+      <div class="hub-eyebrow-dot"></div>
+      NIÐURSTAÐA
+    </div>
+    <h1 class="hub-title">Niðurstaða hermiprófs</h1>
+  </div>
+
+  <div class="results-card" id="resultsCard"></div>
+
+  <div style="text-align:center; margin-top:24px;">
+    <a href="/rikisborgaraprof/dashboard/index.html" style="color:var(--blue); font-weight:600; font-size:0.9rem;">← Til baka í yfirlit</a>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// ELEMENT DEFINITIONS
+// ═══════════════════════════════════════════════════════════════════
+const ELEMENTS = [
+  { key: 'lestur',  section: 'skilningur', icon: '📖', title: 'Lesskilningur',  desc: 'Lestur og skilningur — 10 spurningar',  page: 'lesskilningur.html', timer: '~25 mín' },
+  { key: 'hlustun', section: 'skilningur', icon: '🎧', title: 'Hlustun',         desc: 'Hlustaðu og svaraðu — 10 spurningar',   page: 'hlustun.html',      timer: '~20 mín' },
+  { key: 'ritun',   section: 'framleidni', icon: '✍️', title: 'Ritun',           desc: 'Mynd og ritgerð — 2 verkefni',          page: 'ritun.html',        timer: '~30 mín' },
+  { key: 'tal',     section: 'framleidni', icon: '🎤', title: 'Tal',             desc: 'Myndalýsingar og umræðuefni — 2 hlutar', page: 'tal.html',          timer: '~20 mín' },
+];
+
+let simId, attemptId, user;
+let pollTimer = null;
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  const ctx = await RIK.init();
+  user      = ctx.user;
+  simId     = ctx.simId;
+  attemptId = ctx.attemptId;
+
+  // If no attemptId, create one via rik-submit-test
+  if (!attemptId) {
+    try {
+      const data = await RIK.apiFetch('rik-submit-test', {
+        user_id: user.email,
+        simulation_id: simId,
+      });
+      attemptId = data.attempt?.id;
+      if (!attemptId) throw new Error('No attempt id returned');
+      // Redirect to self with attempt param
+      const url = new URL(window.location.href);
+      url.searchParams.set('attempt', attemptId);
+      window.location.replace(url.toString());
+      return;
+    } catch (err) {
+      RIK.showError('Ekki tókst að búa til próftilraun: ' + err.message);
+      return;
+    }
+  }
+
+  document.getElementById('userEmail').textContent = user.email;
+  document.getElementById('topbarSim').textContent = `Hermipróf ${ctx.simNum}`;
+  document.getElementById('hubEyebrow').textContent = `HERMIPRÓF ${ctx.simNum}`;
+
+  await refreshHub();
+  RIK.hideLoading();
+
+  // Poll every 15s for eval completion
+  pollTimer = setInterval(refreshHub, 15000);
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// REFRESH HUB
+// ═══════════════════════════════════════════════════════════════════
+async function refreshHub() {
+  try {
+    const data = await RIK.hydrateData(user.email, attemptId, true);
+    if (!data) { console.warn('[exam] hydrateData null'); return; }
+
+    const attempt = (data.attempts || []).find(a => a.id === attemptId);
+    if (!attempt) { console.warn('[exam] attempt not found:', attemptId); return; }
+
+    const elems = attempt.elements || [];
+
+    // Complete?
+    if (attempt.status === 'complete') {
+      showResults(attempt);
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+      return;
+    }
+
+    // Progress strip
+    const strip = document.getElementById('progressStrip');
+    strip.innerHTML = ELEMENTS.map(def => {
+      const el = elems.find(e => e.element_key === def.key);
+      let cls = '';
+      if (!el || el.submission_status === 'not_started') cls = '';
+      else if (el.submission_status === 'skipped')       cls = 'skipped';
+      else if (el.eval_status === 'complete')             cls = 'done';
+      else if (el.submission_status === 'submitted')      cls = 'active';
+      return `<div class="ps-dot ${cls}"></div>`;
+    }).join('');
+
+    // All submitted/skipped — show waiting banner
+    const allDone = elems.length >= 4 && elems.every(el =>
+      el.submission_status === 'submitted' || el.submission_status === 'skipped'
+    );
+
+    if (allDone) {
+      const pendingEvals = elems.filter(el =>
+        el.submission_status === 'submitted' &&
+        el.eval_status !== 'complete' && el.eval_status !== 'skipped'
+      );
+      document.getElementById('hubTitle').textContent = 'Vinnsla niðurstaðna…';
+      document.getElementById('skilningurCards').innerHTML = `
+        <div style="text-align:center;padding:40px 20px;">
+          <div class="loading-spinner" style="margin:0 auto 16px;"></div>
+          <p style="font-weight:600;color:var(--navy);">Allir hlutar hafa verið sendir inn!</p>
+          <p style="color:var(--muted);font-size:0.85rem;margin-top:6px;">
+            ${pendingEvals.length > 0
+              ? `Bíður eftir mati á ${pendingEvals.length} hluta…`
+              : 'Reiknar lokaeinkunn…'}
+          </p>
+        </div>`;
+      document.getElementById('framleidniCards').innerHTML = '';
+      if (pollTimer) clearInterval(pollTimer);
+      pollTimer = setInterval(refreshHub, 5000);
+      return;
+    }
+
+    // Normal rendering
+    document.getElementById('hubTitle').textContent = 'Yfirlitssíða prófs';
+
+    const skilningurHtml = [];
+    const framleidniHtml = [];
+
+    ELEMENTS.forEach(def => {
+      const el     = elems.find(e => e.element_key === def.key);
+      const status = el?.submission_status || 'not_started';
+      const evalSt = el?.eval_status       || 'pending';
+
+      let badge;
+      if (status === 'not_started')       badge = '<span class="ec-badge todo">Óklárað</span>';
+      else if (status === 'skipped')      badge = '<span class="ec-badge skipped">Sleppt</span>';
+      else if (evalSt === 'complete')     badge = '<span class="ec-badge done">✓ Metið</span>';
+      else if (evalSt === 'failed')       badge = '<span class="ec-badge failed">Villa</span>';
+      else if (evalSt === 'evaluating')   badge = '<span class="ec-badge eval">Metur…</span>';
+      else                                badge = '<span class="ec-badge eval">Í vinnslu…</span>';
+
+      const href = `${def.page}?sim=${simId}&attempt=${attemptId}&key=${def.key}`;
+      const card = `
+        <a class="elem-card" href="${href}">
+          <div class="ec-left">
+            <div class="ec-icon">${def.icon}</div>
+            <div class="ec-info">
+              <div class="ec-title">${def.title}</div>
+              <div class="ec-desc">${def.desc} · ${def.timer}</div>
+            </div>
+          </div>
+          ${badge}
+        </a>`;
+
+      if (def.section === 'skilningur') skilningurHtml.push(card);
+      else framleidniHtml.push(card);
+    });
+
+    document.getElementById('skilningurCards').innerHTML = skilningurHtml.join('');
+    document.getElementById('framleidniCards').innerHTML = framleidniHtml.join('');
+
+  } catch (err) {
+    console.error('[exam] refreshHub error:', err);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RESULTS
+// ═══════════════════════════════════════════════════════════════════
+function showResults(attempt) {
+  document.getElementById('hubPhase').style.display = 'none';
+  document.getElementById('resultsSection').style.display = 'block';
+
+  const overall = attempt.overall_score ?? 0;
+  const passed  = attempt.passed;
+
+  // Progress strip: all done
+  document.getElementById('progressStrip').innerHTML =
+    ELEMENTS.map(() => '<div class="ps-dot done"></div>').join('');
+
+  document.getElementById('resultsCard').innerHTML = `
+    <div style="font-size:2rem;">${passed ? '🎉' : '📋'}</div>
+    <div class="results-title ${passed ? 'pass' : 'fail'}">${passed ? 'Staðist' : 'Ekki staðist'}</div>
+    <div style="font-size:0.85rem; color:var(--muted); margin-top:4px;">
+      ${passed ? 'Til hamingju! Þú standast ríkisborgaraprófið.' : 'Haltu áfram að æfa til að ná yfir 60%.'}
+    </div>
+    <div class="results-scores">
+      <div class="rs-item">
+        <div class="rs-label">Lesskilningur</div>
+        <div class="rs-value">${attempt.reading_score ?? '—'}<span style="font-size:0.7rem;color:var(--muted);">%</span></div>
+      </div>
+      <div class="rs-item">
+        <div class="rs-label">Hlustun</div>
+        <div class="rs-value">${attempt.listening_score ?? '—'}<span style="font-size:0.7rem;color:var(--muted);">%</span></div>
+      </div>
+      <div class="rs-item">
+        <div class="rs-label">Ritun</div>
+        <div class="rs-value">${attempt.writing_score ?? '—'}<span style="font-size:0.7rem;color:var(--muted);">%</span></div>
+      </div>
+      <div class="rs-item">
+        <div class="rs-label">Tal</div>
+        <div class="rs-value">${attempt.speaking_score ?? '—'}<span style="font-size:0.7rem;color:var(--muted);">%</span></div>
+      </div>
+      <div class="rs-item">
+        <div class="rs-label">Heild</div>
+        <div class="rs-value">${overall}<span style="font-size:0.7rem;color:var(--muted);">%</span></div>
+      </div>
+    </div>
+    <a href="nidurstodur.html?sim=${simId}&attempt=${attemptId}"
+       style="display:block;width:100%;margin-top:18px;padding:13px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:600;text-align:center;text-decoration:none;">
+      Sjá nákvæmar niðurstöður →
+    </a>
+  `;
+}
+</script>
+</body>
+</html>

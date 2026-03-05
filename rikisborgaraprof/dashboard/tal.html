@@ -289,7 +289,9 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<script src="/rikisborgaraprof/assets/js/auth-guard-rik.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/rikisborgaraprof/assets/js/rik-auth.js"></script>
 <script src="/rikisborgaraprof/assets/js/rik-engine.js"></script>
 <script>
 (function() {
@@ -299,31 +301,35 @@
 
   let examData       = null;
   let submitted      = false;
-  let simId          = 'sim-01';
+  let simId, attemptId, user;
 
-  // Page-level recording state (blob/url/duration — for DOM playback)
-  let recordings     = {};  // id → { blob, url, duration }
+  let recordings     = {};
   let activeRecorder = null;
   let activeRecordId = null;
   let recordTimer    = null;
   let recordStartTime = 0;
 
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('sim')) simId = params.get('sim');
-  document.getElementById('simLabel').textContent = 'Sim ' + simId.replace('sim-', '');
-  RIKEngine.init(simId);
+  // In-memory audio base64 store (replaces RIKEngine._recordings)
+  const audioStore = {};
 
-  const jsonPath = `${DATA_BASE}/${simId}/tal.json`;
+  document.addEventListener('DOMContentLoaded', async () => {
+    const ctx = await RIK.init('tal');
+    user      = ctx.user;
+    simId     = ctx.simId;
+    attemptId = ctx.attemptId;
 
-  fetch(jsonPath)
-    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(data => { examData = data; render(); })
-    .catch(err => {
-      document.getElementById('loadingState').innerHTML =
-        `<div class="error-msg">Gat ekki hlaðið gögnum.<br><small>${jsonPath} — ${err.message}</small></div>`;
-    });
+    document.getElementById('simLabel').textContent = 'Sim ' + ctx.simNum;
 
-  /* ── Render ── */
+    const jsonPath = `${DATA_BASE}/${simId}/tal.json`;
+    fetch(jsonPath)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(data => { examData = data; render(); })
+      .catch(err => {
+        document.getElementById('loadingState').innerHTML =
+          `<div class="error-msg">Gat ekki hlaðið gögnum.<br><small>${jsonPath} — ${err.message}</small></div>`;
+      });
+  });
+
   function render() {
     const main = document.getElementById('mainContent');
 
@@ -362,7 +368,6 @@
         <div class="topic-section">
           <div class="topic-prompt">${esc(part2.topic)}</div>
           <div class="topic-hint">Minnst ${part2.minimumSentences} setningar.</div>
-
           <div class="record-controls" id="rec-${part2.partId}">
             <button class="record-btn" id="recbtn-${part2.partId}" onclick="window._toggleRecord('${part2.partId}')">
               <span class="rec-dot"></span> Taka upp
@@ -374,7 +379,6 @@
             <button class="playback-btn" onclick="window._playRecording('${part2.partId}')">▶ Hlusta</button>
             <button class="playback-btn" onclick="window._deleteRecording('${part2.partId}')">✕ Eyða</button>
           </div>
-
           <div class="text-fallback" id="fallback-${part2.partId}">
             <button class="text-fallback-toggle" onclick="window._toggleFallback('${part2.partId}')">
               📝 Viltu frekar skrifa svarið?
@@ -398,7 +402,7 @@
       <p style="text-align:center; margin-top:8px;"><span class="skip-link" id="skipLink" onclick="window._skip()">Sleppa og halda áfram</span></p>
       <div class="submit-status" id="submitStatus"></div>
       <div class="actions" id="navActions" style="display:none">
-        <button class="btn btn-primary" onclick="window._next()">Sjá niðurstöður →</button>
+        <button class="btn btn-outline" onclick="RIK.goBack(simId, attemptId)">← Til baka í próf</button>
       </div>`;
 
     main.innerHTML = html;
@@ -417,7 +421,6 @@
         <div class="picture-content">
           <div class="picture-label">Mynd ${index + 1} af 5</div>
           ${hasImage ? '' : `<div class="picture-desc">${esc(pic.imageDescription)}</div>`}
-
           <div class="record-controls" id="rec-${id}">
             <button class="record-btn" id="recbtn-${id}" onclick="window._toggleRecord('${id}')">
               <span class="rec-dot"></span> Taka upp
@@ -429,7 +432,6 @@
             <button class="playback-btn" onclick="window._playRecording('${id}')">▶ Hlusta</button>
             <button class="playback-btn" onclick="window._deleteRecording('${id}')">✕ Eyða</button>
           </div>
-
           <div class="text-fallback" id="fallback-${id}">
             <button class="text-fallback-toggle" onclick="window._toggleFallback('${id}')">
               📝 Skrifa í staðinn
@@ -443,18 +445,6 @@
       </div>`;
   }
 
-  /* ── Lightbox ── */
-  window._openLightbox = function(src) {
-    document.getElementById('lightboxImg').src = src;
-    document.getElementById('lightbox').classList.add('open');
-  };
-  window._closeLightbox = function() {
-    document.getElementById('lightbox').classList.remove('open');
-    document.getElementById('lightboxImg').src = '';
-  };
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') window._closeLightbox(); });
-
-  /* ── Mic check ── */
   async function checkMic() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -464,7 +454,6 @@
     }
   }
 
-  /* ── Recording — page owns DOM, engine owns base64 memory ── */
   window._toggleRecord = async function(id) {
     if (activeRecordId === id && activeRecorder && activeRecorder.state === 'recording') {
       activeRecorder.stop(); return;
@@ -480,7 +469,6 @@
       const chunks   = [];
 
       recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-
       recorder.onstop = () => {
         stream.getTracks().forEach(t => t.stop());
         clearInterval(recordTimer);
@@ -489,38 +477,30 @@
         const url      = URL.createObjectURL(blob);
         const duration = (Date.now() - recordStartTime) / 1000;
 
-        // Page keeps blob/url for playback
         recordings[id] = { blob, url, duration };
 
-        // Engine stores base64 in memory for submission
-        RIKEngine.saveRecording(id, blob);
+        // Store base64 for submission
+        const reader = new FileReader();
+        reader.onloadend = () => { audioStore[id] = reader.result; };
+        reader.readAsDataURL(blob);
 
         const btn = document.getElementById(`recbtn-${id}`);
         btn.classList.remove('recording');
         btn.innerHTML = '<span class="rec-dot"></span> Taka upp aftur';
-
         document.getElementById(`status-${id}`).innerHTML =
           `<span class="check">✓</span> ${formatTime(duration)} tekið upp`;
         document.getElementById(`playback-${id}`).classList.add('visible');
-
-        activeRecorder  = null;
-        activeRecordId  = null;
+        activeRecorder = null; activeRecordId = null;
         updateProgress();
       };
 
-      recorder.onerror = () => {
-        document.getElementById(`status-${id}`).textContent = 'Villa við upptöku';
-      };
-
-      activeRecorder  = recorder;
-      activeRecordId  = id;
-      recordStartTime = Date.now();
+      activeRecorder = recorder; activeRecordId = id; recordStartTime = Date.now();
       recorder.start();
 
       const btn = document.getElementById(`recbtn-${id}`);
       btn.classList.add('recording');
       btn.innerHTML = '<span class="rec-dot"></span> Stöðva';
-      document.getElementById(`status-${id}`).textContent   = '';
+      document.getElementById(`status-${id}`).textContent = '';
       document.getElementById(`playback-${id}`).classList.remove('visible');
 
       clearInterval(recordTimer);
@@ -534,14 +514,10 @@
     }
   };
 
-  window._playRecording = function(id) {
-    if (!recordings[id]) return;
-    new Audio(recordings[id].url).play();
-  };
-
-  window._deleteRecording = function(id) {
+  window._playRecording    = function(id) { if (recordings[id]) new Audio(recordings[id].url).play(); };
+  window._deleteRecording  = function(id) {
     if (recordings[id]) { URL.revokeObjectURL(recordings[id].url); delete recordings[id]; }
-    delete RIKEngine._recordings[id];
+    delete audioStore[id];
     document.getElementById(`playback-${id}`).classList.remove('visible');
     document.getElementById(`status-${id}`).textContent = '';
     document.getElementById(`timer-${id}`).textContent  = '0:00';
@@ -550,21 +526,23 @@
     btn.innerHTML = '<span class="rec-dot"></span> Taka upp';
     updateProgress();
   };
-
-  window._toggleFallback = function(id) {
-    document.getElementById(`fallback-area-${id}`).classList.toggle('visible');
+  window._toggleFallback   = function(id) { document.getElementById(`fallback-area-${id}`).classList.toggle('visible'); };
+  window._openLightbox     = function(src) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:9999;cursor:zoom-out;';
+    overlay.innerHTML = `<img src="${src}" style="max-width:90vw;max-height:90vh;border-radius:8px;">`;
+    overlay.onclick = () => overlay.remove();
+    document.body.appendChild(overlay);
   };
 
-  /* ── Submit — engine owns state ── */
-  window._submit = function() {
+  window._submit = async function() {
     if (submitted) return;
 
     const allItems = getAllItemIds();
-    let allValid   = true;
+    let allValid = true;
     allItems.forEach(id => {
-      const hasRecording = RIKEngine.getRecording(id);
-      const fallbackEl   = document.getElementById(`fallback-text-${id}`);
-      if (!hasRecording && !(fallbackEl && fallbackEl.value.trim().length > 5)) allValid = false;
+      const fallbackEl = document.getElementById(`fallback-text-${id}`);
+      if (!audioStore[id] && !(fallbackEl && fallbackEl.value.trim().length > 5)) allValid = false;
     });
 
     if (!allValid) {
@@ -581,22 +559,17 @@
     document.querySelectorAll('.record-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
     document.querySelectorAll('.text-fallback-input').forEach(t => { t.disabled = true; });
 
-    // Build responses: engine already has audio in memory; collect fallback texts
-    const responses = {};
+    const speaking_recordings = {};
+    const speaking_responses  = {};
     allItems.forEach(id => {
-      const audioData = RIKEngine.getRecording(id);
-      if (audioData) {
-        responses[id] = { type: 'audio', data: audioData };
-      } else {
+      if (audioStore[id]) speaking_recordings[id] = audioStore[id];
+      else {
         const fallbackEl = document.getElementById(`fallback-text-${id}`);
-        responses[id]    = { type: 'text', data: fallbackEl ? fallbackEl.value.trim() : '' };
+        speaking_responses[id] = fallbackEl ? fallbackEl.value.trim() : '';
       }
     });
 
-    // Engine owns state
-    RIKEngine.submitTal(responses);
-
-    // DOM confirmation
+    // Show submitted notice
     btn.style.display = 'none';
     document.getElementById('submitStatus').textContent = '';
     document.getElementById('skipLink').style.display   = 'none';
@@ -606,32 +579,32 @@
       panel.className = 'feedback-panel visible pending';
       panel.innerHTML = `
         <div class="feedback-label">✅ Sent í yfirferð</div>
-        <div class="feedback-text">Svörin þín hafa verið vistuð. Niðurstöður birtast á niðurstöðusíðunni.</div>`;
+        <div class="feedback-text">Svörin þín hafa verið vistuð. Niðurstöður birtast á yfirlitssíðunni.</div>`;
     });
 
     document.getElementById('navActions').style.display = 'flex';
+
+    // Submit to server (fire and forget — eval runs server-side)
+    try {
+      await RIK.submit({
+        attemptId,
+        elemKey: 'tal',
+        json: { recordings: speaking_recordings, responses: speaking_responses }
+      });
+    } catch(e) { console.warn('[tal] submit error:', e.message); }
   };
 
-  /* ── Skip — engine owns state ── */
-  window._skip = function() {
+  window._skip = async function() {
     if (submitted) return;
     if (!confirm('Sleppa tal? Þú færð 0 stig.')) return;
     submitted = true;
     if (activeRecorder && activeRecorder.state === 'recording') activeRecorder.stop();
-    RIKEngine.skipSection('tal');
-    document.getElementById('skipLink').style.display   = 'none';
-    document.getElementById('btnSubmit').style.display  = 'none';
-    document.getElementById('submitStatus').textContent = '';
-    document.getElementById('navActions').style.display = 'flex';
+    try { await RIK.skip({ attemptId, elemKey: 'tal' }); } catch(e) {}
+    RIK.goBack(simId, attemptId);
   };
 
-
-  /* ── Next section ── */
-  window._next = function() { window.location.href = `nidurstodur.html?sim=${simId}`; };
-
-  /* ── Progress ── */
   function getAllItemIds() {
-    const ids  = [];
+    const ids = [];
     examData.parts[0].pictures.forEach(p => ids.push(p.pictureId));
     ids.push(examData.parts[1].partId);
     return ids;
@@ -641,9 +614,8 @@
     const allItems = getAllItemIds();
     let done = 0;
     allItems.forEach(id => {
-      const hasRecording = RIKEngine.getRecording(id) || (recordings[id] && recordings[id].blob);
-      const fallbackEl   = document.getElementById(`fallback-text-${id}`);
-      if (hasRecording || (fallbackEl && fallbackEl.value.trim().length > 5)) done++;
+      const fallbackEl = document.getElementById(`fallback-text-${id}`);
+      if (audioStore[id] || (fallbackEl && fallbackEl.value.trim().length > 5)) done++;
     });
     document.getElementById('progressBar').style.width = (done / allItems.length * 100) + '%';
   }
@@ -654,10 +626,7 @@
   }
 
   function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-
 })();
 </script>
-
-
 </body>
 </html>

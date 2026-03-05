@@ -472,23 +472,16 @@
       }
 
       // Action button
+      var attemptId = state._attemptId || '';
+      var attemptParam = attemptId ? '&attempt=' + attemptId : '';
       var actionHtml;
       if (status === 'idle') {
-        actionHtml = '<a class="table-btn table-btn-start" href="lesskilningur.html?sim=' + sim.id + '">Byrja</a>';
+        actionHtml = '<a class="table-btn table-btn-start" href="exam.html?sim=' + sim.id + '">Byrja</a>';
       } else if (status === 'complete') {
-        actionHtml = '<a class="table-btn table-btn-results" href="nidurstodur.html?sim=' + sim.id + '">Niðurstöður</a>' +
+        actionHtml = '<a class="table-btn table-btn-results" href="nidurstodur.html?sim=' + sim.id + attemptParam + '">Niðurstöður</a>' +
           '<button class="table-btn table-btn-redo" onclick="window._confirmRedo(\'' + sim.id + '\')">Endurtaka</button>';
       } else {
-        // Find next undone section
-        var nextSection = 'lesskilningur';
-        var sectionPages = { lestur: 'lesskilningur', hlustun: 'hlustun', ritun: 'ritun', tal: 'tal' };
-        for (var i = 0; i < SECTION_KEYS.length; i++) {
-          if (!isSectionDone(state[SECTION_KEYS[i]])) {
-            nextSection = sectionPages[SECTION_KEYS[i]];
-            break;
-          }
-        }
-        actionHtml = '<a class="table-btn table-btn-resume" href="' + nextSection + '.html?sim=' + sim.id + '">Halda áfram</a>';
+        actionHtml = '<a class="table-btn table-btn-resume" href="exam.html?sim=' + sim.id + attemptParam + '">Halda áfram</a>';
       }
 
       html += '<tr>' +
@@ -618,7 +611,7 @@
     } catch(e) {}
 
     // STEP 3 — Navigate only now — DB is clean, localStorage is clean
-    window.location.href = 'lesskilningur.html?sim=' + simId;
+    window.location.href = 'exam.html?sim=' + simId;
   };
 
   // ═══════════════════════════════════════════════════════════════

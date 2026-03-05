@@ -352,7 +352,9 @@
   </div>
 </div>
 
-<script src="/rikisborgaraprof/assets/js/auth-guard-rik.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/rikisborgaraprof/assets/js/rik-auth.js"></script>
 <script src="/rikisborgaraprof/assets/js/rik-engine.js"></script>
 <script>
 (function() {
@@ -362,44 +364,45 @@
   const AUDIO_BASE = 'https://media.civiclearn.com/rikisborgaraprof/audio';
   const MAX_PLAYS  = 2;
 
-  let examData    = null;
-  let submitted   = false;
-  let simId       = 'sim-01';
-  let audioPlayers = {};  // segmentId → { audio, plays, loaded }
+  let examData     = null;
+  let submitted    = false;
+  let simId, attemptId, user;
+  let audioPlayers = {};
 
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('sim')) simId = params.get('sim');
-  document.getElementById('simLabel').textContent = 'Sim ' + simId.replace('sim-', '');
-  RIKEngine.init(simId);
+  const answers = {};
 
-  const simNum   = simId.replace('sim-', '');
-  const jsonPath = `${DATA_BASE}/${simId}/hlustun.json`;
+  document.addEventListener('DOMContentLoaded', async () => {
+    const ctx = await RIK.init('hlustun');
+    user      = ctx.user;
+    simId     = ctx.simId;
+    attemptId = ctx.attemptId;
 
-  fetch(jsonPath)
-    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(data => { examData = data; render(); })
-    .catch(err => {
-      document.getElementById('loadingState').innerHTML =
-        `<div class="error-msg">Gat ekki hlaðið gögnum.<br><small>${jsonPath} — ${err.message}</small></div>`;
-    });
+    document.getElementById('simLabel').textContent = 'Sim ' + ctx.simNum;
 
-  /* ── Render ── */
+    const jsonPath = `${DATA_BASE}/${simId}/hlustun.json`;
+    fetch(jsonPath)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(data => { examData = data; render(); })
+      .catch(err => {
+        document.getElementById('loadingState').innerHTML =
+          `<div class="error-msg">Gat ekki hlaðið gögnum.<br><small>${jsonPath} — ${err.message}</small></div>`;
+      });
+  });
+
   function render() {
     const main   = document.getElementById('mainContent');
-    const totalQ = examData.segments.reduce((s, seg) => s + seg.questions.length, 0);
+    const simNum = simId.replace('sim-', '');
 
     let html = `
       <div class="section-label">🎧 Hlustun — Hlustaðu og svarið spurningunum</div>
       <div class="section-instructions">
         Þú munt heyra 3 hljóðskrár. Eftir hverja hljóðskrá skaltu svara spurningum.
-        Spurningarnar eru á skjánum — engin hljóðskrá fyrir spurningarnar.
         Þú mátt spila hverja hljóðskrá tvisvar.
       </div>`;
 
     examData.segments.forEach((seg, si) => {
       const segTypeLabel = seg.type === 'dialogue' ? 'Samtal' : 'Texti';
       const segTypeClass = seg.type === 'dialogue' ? 'dialogue' : 'text';
-      const audioFile    = `${AUDIO_BASE}/sim${simNum}-hl${si + 1}.mp3`;
 
       html += `
         <div class="segment-card" id="seg-${seg.segmentId}">
@@ -410,7 +413,6 @@
             </div>
             <span class="segment-type ${segTypeClass}">${segTypeLabel}</span>
           </div>
-
           <div class="audio-section">
             <div class="audio-label">Hljóðskrá</div>
             <div class="audio-player-wrap" id="player-${seg.segmentId}">
@@ -431,14 +433,13 @@
               Spilanir: <strong>0</strong> / ${MAX_PLAYS}
             </div>
           </div>
-
           <div class="questions-wrap" id="questions-${seg.segmentId}">
             <div class="questions-label">Spurningar</div>
             ${seg.questions.map(q => renderQuestion(q)).join('')}
           </div>
         </div>`;
 
-      audioPlayers[seg.segmentId] = { audio: null, plays: 0, loaded: false };
+      audioPlayers[seg.segmentId] = { audio: null, plays: 0, loaded: false, idx: si + 1 };
     });
 
     html += `
@@ -450,7 +451,7 @@
       <p style="text-align:center; margin-top:8px;"><span class="skip-link" id="skipLink" onclick="window._skip()">Sleppa og halda áfram</span></p>
       <div class="results-panel" id="resultsPanel"></div>
       <div class="actions" id="navActions" style="display:none">
-        <button class="btn btn-primary" onclick="window._next()">Áfram í ritun →</button>
+        <button class="btn btn-outline" onclick="RIK.goBack(simId, attemptId)">← Til baka í próf</button>
       </div>`;
 
     main.innerHTML = html;
@@ -476,17 +477,15 @@
       </div>`;
   }
 
-  /* ── Audio controls ── */
   window._playAudio = function(segId) {
-    const state = audioPlayers[segId];
-    const btn   = document.getElementById(`playbtn-${segId}`);
+    const state  = audioPlayers[segId];
+    const btn    = document.getElementById(`playbtn-${segId}`);
+    const simNum = simId.replace('sim-', '');
 
     if (!state.audio) {
-      const segIdx  = examData.segments.findIndex(s => s.segmentId === segId) + 1;
-      const audioUrl = `${AUDIO_BASE}/sim${simNum}-hl${segIdx}.mp3`;
-      state.audio   = new Audio(audioUrl);
+      const audioUrl = `${AUDIO_BASE}/sim${simNum}-hl${state.idx}.mp3`;
+      state.audio = new Audio(audioUrl);
       state.audio.preload = 'auto';
-
       state.audio.addEventListener('loadedmetadata', () => {
         document.getElementById(`time-dur-${segId}`).textContent = formatTime(state.audio.duration);
         state.loaded = true;
@@ -500,14 +499,12 @@
         }
       });
       state.audio.addEventListener('ended', () => {
-        btn.textContent = '▶';
-        btn.classList.remove('playing');
+        btn.textContent = '▶'; btn.classList.remove('playing');
         document.getElementById(`trackfill-${segId}`).style.width = '100%';
         if (state.plays >= MAX_PLAYS) { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.cursor = 'not-allowed'; }
       });
       state.audio.addEventListener('error', () => {
-        btn.textContent = '✕';
-        btn.style.background = 'var(--red)';
+        btn.textContent = '✕'; btn.style.background = 'var(--red)';
         document.getElementById(`plays-${segId}`).textContent = 'Villa: hljóðskrá fannst ekki';
       });
     }
@@ -528,20 +525,16 @@
       });
       if (state.audio.ended) state.audio.currentTime = 0;
       state.audio.play();
-      btn.textContent = '⏸';
-      btn.classList.add('playing');
+      btn.textContent = '⏸'; btn.classList.add('playing');
     } else {
-      state.audio.pause();
-      btn.textContent = '▶';
-      btn.classList.remove('playing');
+      state.audio.pause(); btn.textContent = '▶'; btn.classList.remove('playing');
     }
   };
 
   window._seekAudio = function(e, segId) {
     const state = audioPlayers[segId];
     if (!state.audio || !state.loaded) return;
-    const bar  = e.currentTarget;
-    const rect = bar.getBoundingClientRect();
+    const rect = e.currentTarget.getBoundingClientRect();
     state.audio.currentTime = ((e.clientX - rect.left) / rect.width) * state.audio.duration;
   };
 
@@ -551,37 +544,66 @@
     return m + ':' + String(s).padStart(2, '0');
   }
 
-  /* ── Select answer — engine owns the answer, page owns the DOM ── */
   window._select = function(qId, label) {
     if (submitted) return;
-    RIKEngine.saveHlustunAnswer(qId, label);
+    answers[qId] = label;
     document.querySelectorAll(`#qblock-${qId} .option-label`).forEach(el => el.classList.remove('selected'));
     document.getElementById(`opt-${qId}-${label}`).classList.add('selected');
     updateProgress();
     const totalQ = examData.segments.reduce((s, seg) => s + seg.questions.length, 0);
-    document.getElementById('btnSubmit').disabled = RIKEngine.getAnsweredCountHlustun() < totalQ;
+    document.getElementById('btnSubmit').disabled = Object.keys(answers).length < totalQ;
   };
 
-  /* ── Submit ── */
-  window._submit = function() {
+  window._submit = async function() {
     if (submitted) return;
     submitted = true;
-
+    document.getElementById('btnSubmit').disabled = true;
     Object.values(audioPlayers).forEach(s => { if (s.audio && !s.audio.paused) s.audio.pause(); });
 
-    const { correct, total, pct } = RIKEngine.completeHlustun(examData);
-    const pass = pct >= 60;
-
+    // Score client-side
+    let correct = 0, total = 0;
     examData.segments.forEach(seg => {
       seg.questions.forEach(q => {
-        const chosen    = RIKEngine.getSavedHlustunAnswer(q.questionId);
+        total++;
+        if (answers[q.questionId] === q.correctAnswer) correct++;
+      });
+    });
+    const pct = Math.round((correct / total) * 100);
+
+    // Show inline results
+    showResults(correct, total, pct);
+
+    try {
+      await RIK.submit({
+        attemptId,
+        elemKey: 'hlustun',
+        json: { pct, correct, total, answers }
+      });
+    } catch(e) { console.warn('[hlustun] submit error:', e.message); }
+
+    document.getElementById('btnSubmit').style.display  = 'none';
+    document.getElementById('skipLink').style.display   = 'none';
+    document.getElementById('navActions').style.display = 'flex';
+  };
+
+  window._skip = async function() {
+    if (submitted) return;
+    if (!confirm('Sleppa hlustun? Þú færð 0 stig.')) return;
+    submitted = true;
+    Object.values(audioPlayers).forEach(s => { if (s.audio && !s.audio.paused) s.audio.pause(); });
+    try { await RIK.skip({ attemptId, elemKey: 'hlustun' }); } catch(e) {}
+    RIK.goBack(simId, attemptId);
+  };
+
+  function showResults(correct, total, pct) {
+    const pass = pct >= 60;
+    examData.segments.forEach(seg => {
+      seg.questions.forEach(q => {
+        const chosen    = answers[q.questionId];
         const isCorrect = chosen === q.correctAnswer;
-
         document.querySelectorAll(`#qblock-${q.questionId} .option-label`).forEach(el => {
-          el.classList.add('locked');
-          el.classList.remove('selected');
+          el.classList.add('locked'); el.classList.remove('selected');
         });
-
         if (chosen) {
           const chosenEl = document.getElementById(`opt-${q.questionId}-${chosen}`);
           chosenEl.classList.remove('locked');
@@ -593,7 +615,6 @@
         }
       });
     });
-
     const panel = document.getElementById('resultsPanel');
     panel.innerHTML = `
       <div class="results-icon">${pass ? '✅' : '⚠️'}</div>
@@ -604,43 +625,19 @@
       </div>
       <div class="results-msg">${pass
         ? 'Vel gert! Þú nærð lágmarkskröfunni í hlustun.'
-        : 'Þú náðir ekki 60% í þetta skipti. Reyndu aftur eða æfðu þig meira.'}</div>`;
+        : 'Þú náðir ekki 60% í þetta skipti. Haltu áfram að æfa.'}</div>`;
     panel.classList.add('visible');
-
-    document.getElementById('btnSubmit').style.display = 'none';
-    document.getElementById('skipLink').style.display  = 'none';
-    document.getElementById('navActions').style.display = 'flex';
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  };
+  }
 
-  /* ── Skip ── */
-  window._skip = function() {
-    if (submitted) return;
-    if (!confirm('Sleppa hlustun? Þú færð 0 stig.')) return;
-    submitted = true;
-    Object.values(audioPlayers).forEach(s => { if (s.audio && !s.audio.paused) s.audio.pause(); });
-    RIKEngine.skipSection('hlustun');
-    document.getElementById('skipLink').style.display  = 'none';
-    document.getElementById('btnSubmit').style.display = 'none';
-    document.getElementById('navActions').style.display = 'flex';
-  };
-
-  /* ── Next section ── */
-  window._next = function() { window.location.href = `ritun.html?sim=${simId}`; };
-
-  /* ── Progress ── */
   function updateProgress() {
     const totalQ   = examData ? examData.segments.reduce((s, seg) => s + seg.questions.length, 0) : 0;
-    const answered = RIKEngine.getAnsweredCountHlustun();
+    const answered = Object.keys(answers).length;
     document.getElementById('progressBar').style.width = (totalQ > 0 ? (answered / totalQ) * 100 : 0) + '%';
   }
 
-  /* ── Util ── */
   function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-
 })();
 </script>
-
-
 </body>
 </html>

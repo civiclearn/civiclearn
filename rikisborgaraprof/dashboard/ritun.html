@@ -246,34 +246,38 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<script src="/rikisborgaraprof/assets/js/auth-guard-rik.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/rikisborgaraprof/assets/js/rik-auth.js"></script>
 <script src="/rikisborgaraprof/assets/js/rik-engine.js"></script>
 <script>
 (function() {
   'use strict';
 
-  const DATA_BASE  = '/rikisborgaraprof/data';
+  const DATA_BASE = '/rikisborgaraprof/data';
 
   let examData  = null;
   let submitted = false;
-  let simId     = 'sim-01';
+  let simId, attemptId, user;
 
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('sim')) simId = params.get('sim');
-  document.getElementById('simLabel').textContent = 'Sim ' + simId.replace('sim-', '');
-  RIKEngine.init(simId);
+  document.addEventListener('DOMContentLoaded', async () => {
+    const ctx = await RIK.init('ritun');
+    user      = ctx.user;
+    simId     = ctx.simId;
+    attemptId = ctx.attemptId;
 
-  const jsonPath = `${DATA_BASE}/${simId}/ritun.json`;
+    document.getElementById('simLabel').textContent = 'Sim ' + ctx.simNum;
 
-  fetch(jsonPath)
-    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(data => { examData = data; render(); })
-    .catch(err => {
-      document.getElementById('loadingState').innerHTML =
-        `<div class="error-msg">Gat ekki hlaðið gögnum.<br><small>${jsonPath} — ${err.message}</small></div>`;
-    });
+    const jsonPath = `${DATA_BASE}/${simId}/ritun.json`;
+    fetch(jsonPath)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(data => { examData = data; render(); })
+      .catch(err => {
+        document.getElementById('loadingState').innerHTML =
+          `<div class="error-msg">Gat ekki hlaðið gögnum.<br><small>${jsonPath} — ${err.message}</small></div>`;
+      });
+  });
 
-  /* ── Render ── */
   function render() {
     const main = document.getElementById('mainContent');
 
@@ -295,9 +299,7 @@
             <span class="task-type-badge ${typeClass}">${typeLabel}</span>
             <div class="task-prompt">${esc(task.prompt)}</div>
           </div>
-
           ${isPicture ? renderImageSection(task) : ''}
-
           <div class="writing-section">
             <div class="writing-label">Svarið þitt</div>
             <textarea class="writing-area" id="text-${task.taskId}"
@@ -308,7 +310,6 @@
               <span class="word-counter" id="words-${task.taskId}">0 orð</span>
             </div>
           </div>
-
           <div class="feedback-panel" id="feedback-${task.taskId}"></div>
         </div>`;
     });
@@ -322,19 +323,11 @@
       <p style="text-align:center; margin-top:8px;"><span class="skip-link" id="skipLink" onclick="window._skip()">Sleppa og halda áfram</span></p>
       <div class="submit-status" id="submitStatus"></div>
       <div class="actions" id="navActions" style="display:none">
-        <button class="btn btn-primary" onclick="window._next()">Áfram í tal →</button>
+        <button class="btn btn-outline" onclick="RIK.goBack(simId, attemptId)">← Til baka í próf</button>
       </div>`;
 
     main.innerHTML = html;
-
-    // Restore drafts — engine owns draft storage
-    examData.tasks.forEach(task => {
-      const saved = RIKEngine.getDraft(task.taskId);
-      if (saved) {
-        document.getElementById(`text-${task.taskId}`).value = saved;
-        window._updateCounter(task.taskId, task.minimumSentences);
-      }
-    });
+    updateProgress();
   }
 
   function renderImageSection(task) {
@@ -353,28 +346,18 @@
       </div>`;
   }
 
-  /* ── Sentence counter + autosave draft ── */
   window._updateCounter = function(taskId, minSentences) {
-    const textarea = document.getElementById(`text-${taskId}`);
-    const text     = textarea.value.trim();
-
-    const sentences = text.length > 0
-      ? text.split(/[.!?]+/).filter(s => s.trim().length > 2).length
-      : 0;
-    const words = text.length > 0 ? text.split(/\s+/).filter(w => w.length > 0).length : 0;
-
-    const counter = document.getElementById(`counter-${taskId}`);
+    const text      = document.getElementById(`text-${taskId}`).value.trim();
+    const sentences = text.length > 0 ? text.split(/[.!?]+/).filter(s => s.trim().length > 2).length : 0;
+    const words     = text.length > 0 ? text.split(/\s+/).filter(w => w.length > 0).length : 0;
+    const counter   = document.getElementById(`counter-${taskId}`);
     counter.textContent = `${sentences} / ${minSentences} setningar`;
     counter.className   = 'sentence-counter ' + (sentences >= minSentences ? 'ok' : 'low');
     document.getElementById(`words-${taskId}`).textContent = `${words} orð`;
-
-    // Engine owns draft storage
-    RIKEngine.saveDraft(taskId, textarea.value);
     updateProgress();
   };
 
-  /* ── Submit — engine owns state ── */
-  window._submit = function() {
+  window._submit = async function() {
     if (submitted) return;
 
     let allValid = true;
@@ -386,7 +369,6 @@
         setTimeout(() => { document.getElementById(`text-${task.taskId}`).style.borderColor = ''; }, 2000);
       }
     });
-
     if (!allValid) {
       const s = document.getElementById('submitStatus');
       s.textContent = 'Vinsamlegast skrifaðu í öll verkefni.';
@@ -398,73 +380,67 @@
     document.getElementById('btnSubmit').disabled = true;
     examData.tasks.forEach(task => { document.getElementById(`text-${task.taskId}`).disabled = true; });
 
-    // Collect responses and hand to engine
-    const responses = {};
-    examData.tasks.forEach(task => {
-      responses[task.taskId] = {
-        taskId:      task.taskId,
-        taskNumber:  task.taskNumber,
-        type:        task.type,
-        text:        document.getElementById(`text-${task.taskId}`).value.trim()
-      };
-      RIKEngine.clearDraft(task.taskId);
-    });
-    RIKEngine.submitRitun(responses);
+    const responses = examData.tasks.map(task => ({
+      taskId:     task.taskId,
+      taskNumber: task.taskNumber,
+      type:       task.type,
+      text:       document.getElementById(`text-${task.taskId}`).value.trim()
+    }));
 
-    // DOM feedback
-    document.getElementById('btnSubmit').style.display = 'none';
-    document.getElementById('submitStatus').textContent = '';
-    document.getElementById('skipLink').style.display  = 'none';
-
+    // Show submitted notice
     examData.tasks.forEach(task => {
       const panel = document.getElementById(`feedback-${task.taskId}`);
       panel.className = 'feedback-panel visible pending';
       panel.innerHTML = `
         <div class="feedback-label">✅ Sent í yfirferð</div>
-        <div class="feedback-text">Svarið þitt hefur verið vistað. Niðurstöður birtast á niðurstöðusíðunni.</div>`;
+        <div class="feedback-text">Svarið þitt hefur verið vistað. Niðurstöður birtast á yfirlitssíðunni.</div>`;
     });
 
+    document.getElementById('btnSubmit').style.display  = 'none';
+    document.getElementById('submitStatus').textContent = '';
+    document.getElementById('skipLink').style.display   = 'none';
     document.getElementById('navActions').style.display = 'flex';
+
+    // Submit to server (fire and forget — eval runs server-side)
+    try {
+      await RIK.submit({
+        attemptId,
+        elemKey: 'ritun',
+        json: { responses }
+      });
+    } catch(e) { console.warn('[ritun] submit error:', e.message); }
   };
 
-  /* ── Skip — engine owns state ── */
-  window._skip = function() {
+  window._skip = async function() {
     if (submitted) return;
     if (!confirm('Sleppa ritun? Þú færð 0 stig.')) return;
     submitted = true;
-    examData.tasks.forEach(task => { RIKEngine.clearDraft(task.taskId); });
-    RIKEngine.skipSection('ritun');
-    document.getElementById('skipLink').style.display  = 'none';
-    document.getElementById('btnSubmit').style.display = 'none';
-    document.getElementById('submitStatus').textContent = '';
-    document.getElementById('navActions').style.display = 'flex';
+    try { await RIK.skip({ attemptId, elemKey: 'ritun' }); } catch(e) {}
+    RIK.goBack(simId, attemptId);
   };
 
-  /* ── Next section ── */
-  window._next = function() { window.location.href = `tal.html?sim=${simId}`; };
+  window._openLightbox = function(src) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:9999;cursor:zoom-out;';
+    overlay.innerHTML = `<img src="${src}" style="max-width:90vw;max-height:90vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,0.5);">`;
+    overlay.onclick = () => overlay.remove();
+    document.body.appendChild(overlay);
+  };
 
-  /* ── Progress ── */
   function updateProgress() {
-    const total = examData.tasks.length;
-    let done = 0;
-    examData.tasks.forEach(task => {
-      const el = document.getElementById(`text-${task.taskId}`);
-      if (el && el.value.trim().length > 20) done++;
-    });
-    document.getElementById('progressBar').style.width = (done / total * 100) + '%';
+    const total = examData ? examData.tasks.length : 0;
+    let filled = 0;
+    if (examData) {
+      examData.tasks.forEach(task => {
+        const text = document.getElementById(`text-${task.taskId}`);
+        if (text && text.value.trim().length > 10) filled++;
+      });
+    }
+    document.getElementById('progressBar').style.width = (total > 0 ? (filled / total) * 100 : 0) + '%';
   }
 
-  /* ── Util ── */
   function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-
 })();
-</script>
-
-
-<script>
-window._openLightbox=function(s){document.getElementById("lightboxImg").src=s;document.getElementById("lightbox").classList.add("open")};
-window._closeLightbox=function(){document.getElementById("lightbox").classList.remove("open");document.getElementById("lightboxImg").src=""};
-document.addEventListener("keydown",function(e){if(e.key==="Escape")window._closeLightbox()});
 </script>
 </body>
 </html>
