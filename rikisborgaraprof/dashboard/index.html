@@ -575,7 +575,16 @@
   // ═══════════════════════════════════════════════════════════════
   window._confirmRedo = function(simId) {
     var num = simId.replace('sim-', '');
-    if (!confirm('Viltu endurtaka hermiprufu ' + num + '?\n\nFyrri nidurstodur hverfa.')) return;
+    if (!confirm('Viltu endurtaka hermiprufu ' + num + '?\n\nFyrri niðurstöður hverfa endanlega.')) return;
+
+    // Grab the attempt ID from localStorage BEFORE clearing it
+    var attemptId = null;
+    try {
+      var stored = JSON.parse(localStorage.getItem('rikisborgaraprof-' + simId) || '{}');
+      attemptId = stored._attemptId || null;
+    } catch(e) {}
+
+    // Clear localStorage immediately so the UI resets at once
     try {
       localStorage.removeItem('rikisborgaraprof-' + simId);
       var toRemove = [];
@@ -585,9 +594,29 @@
       }
       toRemove.forEach(function(k) { localStorage.removeItem(k); });
     } catch(e) {}
+
     renderStats();
     renderTable();
-    window.location.href = 'lesskilningur.html?sim=' + simId;
+
+    // Delete the DB attempt row (best-effort — navigate regardless)
+    function goStart() {
+      window.location.href = 'lesskilningur.html?sim=' + simId;
+    }
+
+    if (attemptId) {
+      fetch(SUPABASE_URL + '/rest/v1/rik_attempts?id=eq.' + attemptId, {
+        method: 'DELETE',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Prefer': 'return=minimal'
+        }
+      })
+      .catch(function(e) { console.warn('[Redo] DB delete failed (offline?):', e.message); })
+      .finally(goStart);
+    } else {
+      goStart();
+    }
   };
 
   // ═══════════════════════════════════════════════════════════════
