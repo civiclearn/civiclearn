@@ -1,278 +1,145 @@
 <!DOCTYPE html>
-<html lang="fr-FR">
+<html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Accès Premium – Examen civique (France)</title>
-
-  <!-- SEO -->
-  <meta name="description"
-        content="Activez l’accès Premium pour la préparation à l’examen civique en France. Contenu structuré, entraînements ciblés, accès immédiat. Paiement unique." />
+  <meta name="description" content="Activez l'accès Premium pour la préparation à l'examen civique en France. Contenu structuré, entraînements ciblés, accès immédiat. Paiement unique.">
   <link rel="canonical" href="https://civiclearn.com/france/checkout.html">
-
-  <meta property="og:title" content="Accès Premium – Examen civique (France)">
-  <meta property="og:description"
-        content="Préparation complète à l’examen civique pour carte de séjour pluriannuelle ou carte de résident. Paiement unique, accès immédiat.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://civiclearn.com/france/checkout.html">
-
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/checkout.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--blue:#002395;--blue-dim:#e8ecf7;--blue-dark:#001a6e;--red:#ED2939;--navy:#0f172a;--muted:#64748b;--border:#e2e8f0;--surface:#ffffff;--bg:#f8f7f4;--error:#dc2626;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 20px;line-height:1.5;}
+    .page-header{text-align:center;margin-bottom:36px;max-width:600px;}
+    .header-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:20px;}
+    .topbar-flag{width:32px;height:22px;border-radius:3px;overflow:hidden;display:flex;}
+    .topbar-flag span{flex:1;}
+    .topbar-flag span:nth-child(1){background:#002395;}
+    .topbar-flag span:nth-child(2){background:#fff;}
+    .topbar-flag span:nth-child(3){background:#ED2939;}
+    .header-brand-text{font-family:"Fraunces",serif;font-size:1.1rem;font-weight:600;color:var(--navy);}
+    .page-header h1{font-family:"Fraunces",serif;font-size:1.8rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px;}
+    .page-header p{font-size:1.05rem;color:var(--muted);}
+    .msg{padding:10px 14px;border-radius:10px;font-size:0.88rem;margin-bottom:16px;background:#fef2f2;color:var(--error);border:1px solid #fecaca;display:none;text-align:center;max-width:520px;width:100%;}
+    .msg.visible{display:block;}
+    .product-card{background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:36px 32px;width:100%;max-width:520px;position:relative;}
+    .product-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:14px;background:var(--blue-dim);color:var(--blue);}
+    .product-card h2{font-family:"Fraunces",serif;font-size:1.3rem;font-weight:700;margin-bottom:8px;}
+    .product-price{font-family:"Fraunces",serif;font-size:2.2rem;font-weight:700;color:var(--blue);margin-bottom:4px;}
+    .product-price-note{font-size:0.85rem;color:var(--muted);margin-bottom:22px;}
+    .features{list-style:none;padding:0;}
+    .features li{padding:7px 0;font-size:0.92rem;color:var(--navy);display:flex;align-items:flex-start;gap:10px;}
+    .features li::before{content:'✓';color:var(--blue);font-weight:700;flex-shrink:0;}
+    .recommend{margin-top:18px;padding:12px 14px;background:#eff6ff;border-radius:10px;font-size:0.85rem;color:#1e40af;border:1px solid #bfdbfe;}
+    .product-selection{width:100%;max-width:520px;margin-top:28px;}
+    .product-selection h3{font-family:"Fraunces",serif;font-size:1.1rem;font-weight:700;margin-bottom:14px;text-align:center;}
+    .product-options{display:flex;flex-direction:column;gap:12px;}
+    .product-btn{padding:18px 20px;border-radius:14px;border:2px solid var(--border);background:#fff;text-align:left;cursor:pointer;font-family:inherit;transition:border-color 0.2s,box-shadow 0.2s;}
+    .product-btn:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(0,35,149,0.1);}
+    .product-btn strong{display:block;font-size:1rem;margin-bottom:4px;color:var(--navy);}
+    .product-btn span{font-size:0.88rem;color:var(--muted);}
+    .product-btn:disabled{opacity:0.5;cursor:not-allowed;}
+    .secure-note{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:0.82rem;color:var(--muted);}
+    .login-link{text-align:center;margin-top:14px;font-size:0.88rem;color:var(--muted);}
+    .login-link a{color:var(--blue);text-decoration:none;font-weight:600;}
+    .login-link a:hover{text-decoration:underline;}
+    .spinner{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:8px;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .footer{margin-top:auto;padding-top:40px;text-align:center;font-size:0.8rem;color:var(--muted);}
+    .footer a{color:var(--muted);text-decoration:none;}.footer a:hover{text-decoration:underline;}
+    @media(max-width:500px){.product-card{padding:28px 22px;}.page-header h1{font-size:1.5rem;}}
+  </style>
 </head>
-
 <body>
-
-<header class="checkout-header">
-  <div class="checkout-header-inner">
-    <div class="checkout-brand">
-      <img src="/assets/images/fr.svg" alt="France">
-      CivicLearn – Examen civique
-    </div>
-    <div class="checkout-powered">
-      <small>propulsé par</small>
-      <a href="https://civiclearn.com">CivicLearn</a>
-    </div>
+<div class="page-header">
+  <div class="header-brand">
+    <div class="topbar-flag"><span></span><span></span><span></span></div>
+    <span class="header-brand-text">CivicLearn – Examen civique</span>
   </div>
-</header>
-
-<main>
-  <div class="layout">
-
-    <!-- LEFT COLUMN -->
-    <aside class="features">
-      <h2>Accès Premium</h2>
-      <div class="price">49 EUR</div>
-      <div class="once">Paiement unique · accès à vie</div>
-
-      <div class="divider"></div>
-
-      <h3>Ce qui est inclus</h3>
-      <ul class="benefits">
-        <li>Questions conformes au format officiel de l’examen civique</li>
-        <li>Entraînements ciblés selon votre démarche administrative</li>
-        <li>Sessions courtes et efficaces (5–10 minutes)</li>
-        <li>Questions difficiles regroupées automatiquement</li>
-        <li>Statistiques détaillées et suivi de progression</li>
-        <li>Historique complet de vos entraînements</li>
-        <li>Fait du jour pour un apprentissage régulier</li>
-        <li>Rappels pour maintenir la régularité</li>
-        <li>Optimisé pour mobile, tablette et ordinateur</li>
-        <li>Accès immédiat après paiement</li>
-        <li>Mises à jour gratuites</li>
-        <li>Accès à vie à la plateforme</li>
-      </ul>
-
-      <p class="recommend">
-        Recommandé par des candidats à la carte de séjour et à la carte de résident.
-      </p>
-    </aside>
-
-    <!-- RIGHT COLUMN -->
-    <section class="right">
-      <div class="checkout-card">
-
-        <!-- PRODUCT CHOICE -->
-        <div id="productChoice">
-          <h1>Choisissez votre accès Premium</h1>
-          <p class="secure-line">
-            Sélectionnez la démarche administrative correspondant à votre situation.
-          </p>
-
-          <div class="product-options">
-            <button type="button" class="product-btn" data-product="france-sejour-premium">
-              <strong>Accès Premium – Carte de séjour pluriannuelle</strong>
-              <span>
-                Préparation à l’examen civique requis pour la carte de séjour pluriannuelle.
-              </span>
-            </button>
-
-            <button type="button" class="product-btn" data-product="france-resident-premium">
-              <strong>Accès Premium – Carte de résident</strong>
-              <span>
-                Préparation renforcée, conforme aux exigences de la carte de résident.
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <!-- CHECKOUT FLOW -->
-        <div id="checkoutFlow" hidden>
-
-          <h1 id="selectedTitle"></h1>
-          <div class="secure-line">Paiement 100% sécurisé via Stripe</div>
-
-          <div class="checkout-step" id="stepInitial">
-            <button type="button" class="pay-btn" id="startCheckout">
-              Continuer vers le paiement sécurisé
-            </button>
-            <p class="small-note">
-              Vous serez redirigé vers Stripe pour finaliser le paiement.
-            </p>
-          </div>
-
-          <div class="checkout-step" id="stepEmail" hidden>
-            <p class="email-instructions">
-              Entrez l’adresse email que vous souhaitez utiliser pour votre compte CivicLearn.
-            </p>
-
-            <div class="email-field-group">
-              <label for="checkoutEmail">Email</label>
-              <input
-                type="email"
-                id="checkoutEmail"
-                autocomplete="email"
-                placeholder="exemple@domaine.com"
-                inputmode="email"
-              />
-            </div>
-
-            <button type="button" class="pay-btn" id="continueWithEmail">
-              Continuer
-            </button>
-          </div>
-
-          <div class="checkout-step" id="stepConfirm" hidden>
-            <p class="confirm-text">Votre compte sera créé avec cette adresse :</p>
-            <p class="email-display" id="emailDisplay"></p>
-            <p class="confirm-warning">
-              Vérifiez attentivement. Vous recevrez votre lien de connexion à cette adresse.
-            </p>
-
-            <div class="confirm-actions">
-              <button type="button" class="pay-btn" id="confirmEmail">
-                Oui, continuer vers le paiement sécurisé
-              </button>
-              <button type="button" class="link-btn" id="editEmail">
-                Modifier l’adresse email
-              </button>
-            </div>
-          </div>
-
-          <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
-
-          <div class="after-text">
-            <a href="#" id="changeProduct">Modifier le choix de l’accès</a>
-          </div>
-
-        </div>
-
-      </div>
-    </section>
-
+  <h1>Accès Premium</h1>
+  <p>Préparation complète à l'examen civique obligatoire depuis 2026</p>
+</div>
+<div id="error-msg" class="msg"></div>
+<div class="product-card">
+  <span class="product-badge">Accès complet</span>
+  <h2>Préparation Examen civique</h2>
+  <div class="product-price">49 €</div>
+  <div class="product-price-note">Paiement unique · Accès à vie</div>
+  <ul class="features">
+    <li>Questions conformes au format officiel de l'examen civique</li>
+    <li>Entraînements ciblés selon votre démarche administrative</li>
+    <li>Sessions courtes et efficaces (5–10 minutes)</li>
+    <li>Questions difficiles regroupées automatiquement</li>
+    <li>Statistiques détaillées et suivi de progression</li>
+    <li>Historique complet de vos entraînements</li>
+    <li>Fait du jour pour un apprentissage régulier</li>
+    <li>Rappels pour maintenir la régularité</li>
+    <li>Optimisé pour mobile, tablette et ordinateur</li>
+    <li>Accès immédiat après paiement</li>
+    <li>Mises à jour gratuites</li>
+    <li>Accès à vie à la plateforme</li>
+  </ul>
+  <div class="recommend">Recommandé par des candidats à la carte de séjour et à la carte de résident.</div>
+</div>
+<div class="product-selection">
+  <h3>Choisissez votre démarche</h3>
+  <div class="product-options">
+    <button type="button" class="product-btn" id="btn-cr">
+      <strong>Carte de résident (CR)</strong>
+      <span>Préparation renforcée, conforme aux exigences de la carte de résident.</span>
+    </button>
+    <button type="button" class="product-btn" id="btn-csp">
+      <strong>Carte de séjour pluriannuelle (CSP)</strong>
+      <span>Préparation à l'examen civique requis pour la carte de séjour pluriannuelle.</span>
+    </button>
   </div>
-</main>
-
+  <div class="secure-note">🔒 Paiement 100% sécurisé via Stripe</div>
+  <div class="login-link">
+    Déjà un compte ? <a href="/france/login.html">Se connecter</a>
+  </div>
+</div>
+<div class="footer">
+  <a href="https://preparer-examen-civique.fr">preparer-examen-civique.fr</a> · <a href="https://civiclearn.com">CivicLearn</a> · Testrada Pte Ltd
+</div>
 <script>
-(function () {
+(function() {
+  'use strict';
+  const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  const errorMsg = document.getElementById('error-msg');
+  const btnCR = document.getElementById('btn-cr');
+  const btnCSP = document.getElementById('btn-csp');
 
-  let selectedProduct = null;
-
-  const productChoice = document.getElementById("productChoice");
-  const checkoutFlow  = document.getElementById("checkoutFlow");
-  const selectedTitle = document.getElementById("selectedTitle");
-  const changeProduct = document.getElementById("changeProduct");
-
-  const stepInitial = document.getElementById("stepInitial");
-  const stepEmail   = document.getElementById("stepEmail");
-  const stepConfirm = document.getElementById("stepConfirm");
-
-  const startBtn     = document.getElementById("startCheckout");
-  const continueBtn  = document.getElementById("continueWithEmail");
-  const confirmBtn   = document.getElementById("confirmEmail");
-  const editEmailBtn = document.getElementById("editEmail");
-
-  const emailInput   = document.getElementById("checkoutEmail");
-  const emailDisplay = document.getElementById("emailDisplay");
-
-  const PRODUCT_LABELS = {
-    "france-sejour-premium": "Accès Premium – Carte de séjour pluriannuelle",
-    "france-resident-premium": "Accès Premium – Carte de résident"
-  };
-
-  document.querySelectorAll(".product-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      selectedProduct = btn.dataset.product;
-      selectedTitle.textContent = PRODUCT_LABELS[selectedProduct];
-      productChoice.hidden = true;
-      checkoutFlow.hidden = false;
-    });
-  });
-
-  changeProduct.addEventListener("click", (e) => {
-    e.preventDefault();
-    selectedProduct = null;
-    checkoutFlow.hidden = true;
-    productChoice.hidden = false;
-  });
-
-  function showStep(id) {
-    stepInitial.hidden = id !== "initial";
-    stepEmail.hidden   = id !== "email";
-    stepConfirm.hidden = id !== "confirm";
+  async function startCheckout(productType, btn) {
+    errorMsg.classList.remove('visible');
+    btnCR.disabled = true;
+    btnCSP.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Redirection vers Stripe…';
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/france-create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_type: productType }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Erreur checkout');
+      window.location.href = data.url;
+    } catch (err) {
+      console.error('Checkout error:', err);
+      errorMsg.textContent = 'Une erreur est survenue : ' + err.message + '. Réessayez ou contactez : admin@civiclearn.com';
+      errorMsg.classList.add('visible');
+      btnCR.disabled = false;
+      btnCSP.disabled = false;
+      btnCR.innerHTML = '<strong>Carte de résident (CR)</strong><span>Préparation renforcée, conforme aux exigences de la carte de résident.</span>';
+      btnCSP.innerHTML = '<strong>Carte de séjour pluriannuelle (CSP)</strong><span>Préparation à l\'examen civique requis pour la carte de séjour pluriannuelle.</span>';
+    }
   }
 
-  function validEmail(v) {
-    return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.trim()) ? v.trim() : null;
-  }
-
-  startBtn.addEventListener("click", () => showStep("email"));
-
-  continueBtn.addEventListener("click", () => {
-    const email = validEmail(emailInput.value);
-    if (!email) return;
-    emailDisplay.textContent = email;
-    showStep("confirm");
-  });
-
-  editEmailBtn.addEventListener("click", () => showStep("email"));
-
-  confirmBtn.addEventListener("click", async () => {
-    const email = validEmail(emailInput.value);
-    if (!email || !selectedProduct) return;
-
-    const res = await fetch("https://payments.civiclearn.com/create-checkout-session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, product: selectedProduct })
-    });
-
-    const data = await res.json();
-    if (data && data.url) window.location.href = data.url;
-  });
-
+  btnCR.addEventListener('click', () => startCheckout('france-cr', btnCR));
+  btnCSP.addEventListener('click', () => startCheckout('france-csp', btnCSP));
 })();
 </script>
-
-<style>
-.product-options {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 20px;
-}
-.product-btn {
-  padding: 18px;
-  border-radius: 14px;
-  border: 1px solid #e5dfd2;
-  background: #fff;
-  text-align: left;
-  cursor: pointer;
-  font-family: inherit;
-}
-.product-btn strong {
-  display: block;
-  font-size: 1rem;
-  margin-bottom: 6px;
-}
-.product-btn span {
-  font-size: 0.9rem;
-  color: #555;
-}
-.product-btn:hover {
-  border-color: #7c4dff;
-  background: #faf7ff;
-}
-</style>
-
 </body>
 </html>

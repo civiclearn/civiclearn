@@ -1,134 +1,162 @@
 <!DOCTYPE html>
-<html lang="fr-FR">
+<html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Connexion – Examen civique France | CivicLearn</title>
-
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Shared layout styles (header, card, background) -->
-  <link rel="stylesheet" href="/assets/css/login.css">
-
-  <!-- FRANCE-ONLY OVERRIDES -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Se connecter – Examen civique</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* isolate everything */
-    .fr-login-card * {
-      box-sizing: border-box;
-      font-family: "Lexend", sans-serif;
-    }
-
-    .fr-choice-group {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin: 28px auto 0;
-      max-width: 320px;
-    }
-
-    .fr-choice-btn {
-      display: block;
-      padding: 16px 18px;
-      border-radius: 14px;
-      text-decoration: none !important;
-      text-align: center;
-      font-weight: 600;
-      font-size: 1.05rem;
-      line-height: 1.25;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .fr-choice-btn.primary {
-      background: var(--brand);
-      color: #fff !important;
-    }
-
-    .fr-choice-btn.primary:hover {
-      background: var(--brand-dark);
-    }
-
-    .fr-choice-btn.secondary {
-      background: #ffffff;
-      color: var(--brand) !important;
-      border: 2px solid var(--brand);
-    }
-
-    .fr-choice-btn.secondary:hover {
-      background: rgba(124, 58, 237, 0.06);
-    }
-
-    .fr-choice-sub {
-      display: block;
-      margin-top: 6px;
-      font-size: 0.9rem;
-      font-weight: 400;
-      opacity: 0.9;
-    }
-
-    .fr-login-hint {
-      margin-top: 22px;
-      text-align: center;
-      font-size: 0.95rem;
-      color: var(--muted);
-    }
-
-    .fr-login-hint a {
-      color: var(--brand);
-      font-weight: 600;
-      text-decoration: none;
-    }
+    :root{--blue:#002395;--blue-dim:#e8ecf7;--blue-dark:#001a6e;--navy:#0f172a;--muted:#64748b;--border:#e2e8f0;--surface:#ffffff;--bg:#f8f7f4;--pass:#059669;--pass-light:#f0fdf4;--red:#dc2626;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;line-height:1.5;}
+    .card{background:var(--surface);border-radius:20px;box-shadow:0 1px 3px rgba(0,0,0,0.06),0 8px 24px rgba(0,0,0,0.06);width:100%;max-width:440px;padding:40px 36px;position:relative;overflow:hidden;}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--blue);}
+    .brand{text-align:center;margin-bottom:28px;}
+    .header-brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;}
+    .topbar-flag{width:28px;height:20px;border-radius:3px;overflow:hidden;display:flex;}
+    .topbar-flag span{flex:1;}
+    .topbar-flag span:nth-child(1){background:#002395;}
+    .topbar-flag span:nth-child(2){background:#fff;}
+    .topbar-flag span:nth-child(3){background:#ED2939;}
+    .brand h1{font-family:"Fraunces",serif;font-size:1.4rem;font-weight:700;color:var(--navy);letter-spacing:-0.02em;}
+    .brand p{font-size:0.9rem;color:var(--muted);margin-top:4px;}
+    .form-group{margin-bottom:18px;}
+    .form-group label{display:block;font-size:0.85rem;font-weight:600;color:var(--navy);margin-bottom:6px;}
+    .form-group input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:1rem;font-family:"DM Sans",sans-serif;color:var(--navy);background:#fff;transition:border-color 0.2s,box-shadow 0.2s;outline:none;}
+    .form-group input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim);}
+    .form-group input::placeholder{color:#b0b5bf;}
+    .btn{display:block;width:100%;padding:13px 20px;border:none;border-radius:10px;font-size:1rem;font-weight:600;font-family:"DM Sans",sans-serif;cursor:pointer;transition:background 0.2s,transform 0.1s;}
+    .btn:active{transform:scale(0.99);}.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+    .btn-primary{background:var(--blue);color:#fff;}.btn-primary:hover:not(:disabled){background:var(--blue-dark);}
+    .msg{padding:10px 14px;border-radius:10px;font-size:0.88rem;margin-bottom:16px;display:none;}
+    .msg.error{display:block;background:#fef2f2;color:var(--red);border:1px solid #fecaca;}
+    .msg.success{display:block;background:var(--pass-light);color:var(--pass);border:1px solid #bbf7d0;}
+    .view{display:none;}.view.active{display:block;}
+    .link-row{text-align:center;margin-top:16px;font-size:0.88rem;}
+    .link-row a,.link-row button{color:var(--blue);text-decoration:none;font-weight:600;background:none;border:none;cursor:pointer;font-family:inherit;font-size:inherit;}
+    .link-row a:hover,.link-row button:hover{text-decoration:underline;}
+    .pin-display{text-align:center;margin:16px 0;padding:14px;background:var(--blue-dim);border-radius:10px;font-size:1.6rem;font-weight:700;letter-spacing:0.15em;color:var(--blue);}
+    .spinner{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:8px;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .footer{text-align:center;margin-top:24px;font-size:0.8rem;color:var(--muted);}.footer a{color:var(--muted);text-decoration:none;}.footer a:hover{text-decoration:underline;}
+    @media(max-width:480px){.card{padding:32px 24px;border-radius:16px;}}
   </style>
 </head>
-
 <body>
-
-<header class="site-header">
-  <div class="header-inner">
-    <div class="header-left">
-      <div class="brand-main">
-        <img src="/assets/images/fr.svg" alt="France">
-        <div class="brand-title">Examen civique – France</div>
+<div class="card">
+  <div id="view-login" class="view active">
+    <div class="brand">
+      <div class="header-brand">
+        <div class="topbar-flag"><span></span><span></span><span></span></div>
+        <span style="font-family:'Fraunces',serif;font-weight:600;font-size:1rem;">Examen civique</span>
       </div>
-      <div class="brand-powered">
-        propulsé par <span>CivicLearn</span>
-      </div>
+      <h1>Se connecter</h1>
+      <p>Accédez à votre espace de préparation</p>
     </div>
-
-    <a href="/france/checkout.html" class="btn-small-purple">Je m’inscris</a>
+    <div id="login-msg" class="msg"></div>
+    <form id="login-form">
+      <div class="form-group"><label for="login-email">E-mail</label><input type="email" id="login-email" required placeholder="Votre adresse e-mail" autocomplete="email"></div>
+      <div class="form-group"><label for="login-password">Mot de passe</label><input type="password" id="login-password" required placeholder="Votre mot de passe" autocomplete="current-password"></div>
+      <button type="submit" class="btn btn-primary" id="login-btn">Se connecter</button>
+    </form>
+    <div class="link-row"><button id="show-reset">Mot de passe oublié ?</button></div>
+    <div class="link-row" style="margin-top:8px;color:var(--muted);">Pas encore de compte ? <a href="/france/checkout.html">Acheter l'accès</a></div>
   </div>
-</header>
-
-<div class="login-wrapper">
-  <div class="card fr-login-card">
-
-    <h1>Connexion</h1>
-
-
-    <p class="subtitle">
-      Vous avez déjà un accès&nbsp;?<br>
-      Choisissez la formation correspondant à votre situation.
-    </p>
-
-    <div class="fr-choice-group">
-      <a href="/france/csp/login.html" class="fr-choice-btn primary">
-        Carte de séjour pluriannuelle
-      </a>
-
-      <a href="/france/cr/login.html" class="fr-choice-btn secondary">
-        Carte de résident
-      </a>
+  <div id="view-reset-email" class="view">
+    <div class="brand"><h1>Réinitialiser le mot de passe</h1><p>Entrez votre adresse e-mail</p></div>
+    <div id="reset-email-msg" class="msg"></div>
+    <form id="reset-email-form">
+      <div class="form-group"><label for="reset-email">E-mail</label><input type="email" id="reset-email" required placeholder="Votre adresse e-mail" autocomplete="email"></div>
+      <button type="submit" class="btn btn-primary" id="reset-email-btn">Continuer</button>
+    </form>
+    <div class="link-row"><button id="back-to-login-1">← Retour</button></div>
+  </div>
+  <div id="view-reset-pin" class="view">
+    <div class="brand"><h1>Nouveau mot de passe</h1><p>Entrez le code ci-dessous et choisissez un nouveau mot de passe</p></div>
+    <div id="reset-pin-display" class="pin-display"></div>
+    <div id="reset-pin-msg" class="msg"></div>
+    <form id="reset-pin-form">
+      <div class="form-group"><label for="reset-pin">Code de confirmation</label><input type="text" id="reset-pin" required placeholder="Code à 6 chiffres" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="off"></div>
+      <div class="form-group"><label for="reset-new-password">Nouveau mot de passe</label><input type="password" id="reset-new-password" required placeholder="Nouveau mot de passe" minlength="6" autocomplete="new-password"></div>
+      <div class="form-group"><label for="reset-new-password-confirm">Confirmer le mot de passe</label><input type="password" id="reset-new-password-confirm" required placeholder="Répétez le mot de passe" minlength="6" autocomplete="new-password"></div>
+      <button type="submit" class="btn btn-primary" id="reset-pin-btn">Mettre à jour le mot de passe</button>
+    </form>
+    <div class="link-row"><button id="back-to-login-2">← Retour</button></div>
+  </div>
+  <div id="view-reset-done" class="view">
+    <div class="brand" style="margin-bottom:16px;">
+      <div style="font-size:2rem;margin-bottom:12px;">✓</div>
+      <h1>Mot de passe mis à jour !</h1>
+      <p>Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.</p>
     </div>
-
-    <div class="fr-login-hint">
-      Vous ne savez pas laquelle choisir ?
-      <a href="/france/checkout.html">Voir les formations</a>
-    </div>
-
+    <button class="btn btn-primary" id="go-to-login">Se connecter →</button>
   </div>
 </div>
-
+<div class="footer">
+  <a href="https://preparer-examen-civique.fr">preparer-examen-civique.fr</a> · <a href="https://civiclearn.com">CivicLearn</a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function(){
+  'use strict';
+  const SUPABASE_URL='https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const FUNCTIONS_URL=SUPABASE_URL+'/functions/v1';
+  const DEFAULT_DASHBOARD='/france/cr/dashboard/index.html';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  let resetEmail='';
+  function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');}
+  function getReturnUrl(){const p=new URLSearchParams(window.location.search);return p.get('return')||DEFAULT_DASHBOARD;}
+  document.getElementById('login-form').addEventListener('submit',async(e)=>{
+    e.preventDefault();
+    const email=document.getElementById('login-email').value.trim().toLowerCase();
+    const password=document.getElementById('login-password').value;
+    const msgEl=document.getElementById('login-msg');
+    const btn=document.getElementById('login-btn');
+    msgEl.className='msg';btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Connexion…';
+    const{error}=await sb.auth.signInWithPassword({email,password});
+    if(error){msgEl.className='msg error';msgEl.textContent='E-mail ou mot de passe incorrect.';btn.disabled=false;btn.textContent='Se connecter';return;}
+    await sb.from('login_history').insert({email,status:'success',method:'password'}).catch(()=>{});
+    window.location.href=getReturnUrl();
+  });
+  document.getElementById('show-reset').addEventListener('click',()=>showView('view-reset-email'));
+  document.getElementById('back-to-login-1').addEventListener('click',()=>showView('view-login'));
+  document.getElementById('back-to-login-2').addEventListener('click',()=>showView('view-login'));
+  document.getElementById('go-to-login').addEventListener('click',()=>showView('view-login'));
+  document.getElementById('reset-email-form').addEventListener('submit',async(e)=>{
+    e.preventDefault();
+    const email=document.getElementById('reset-email').value.trim().toLowerCase();
+    const msgEl=document.getElementById('reset-email-msg');
+    const btn=document.getElementById('reset-email-btn');
+    msgEl.className='msg';btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Vérification…';
+    try{
+      const res=await fetch(FUNCTIONS_URL+'/france-reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'check_email',email})});
+      const data=await res.json();
+      if(!data.exists){msgEl.className='msg error';msgEl.textContent=data.message||'E-mail non trouvé.';btn.disabled=false;btn.textContent='Continuer';return;}
+      resetEmail=email;document.getElementById('reset-pin-display').textContent=data.pin;showView('view-reset-pin');
+    }catch(err){msgEl.className='msg error';msgEl.textContent='Erreur de connexion. Réessayez.';}
+    btn.disabled=false;btn.textContent='Continuer';
+  });
+  document.getElementById('reset-pin-form').addEventListener('submit',async(e)=>{
+    e.preventDefault();
+    const pin=document.getElementById('reset-pin').value.trim();
+    const newPassword=document.getElementById('reset-new-password').value;
+    const confirm=document.getElementById('reset-new-password-confirm').value;
+    const msgEl=document.getElementById('reset-pin-msg');
+    const btn=document.getElementById('reset-pin-btn');
+    msgEl.className='msg';
+    if(newPassword!==confirm){msgEl.className='msg error';msgEl.textContent='Les mots de passe ne correspondent pas.';return;}
+    btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Mise à jour…';
+    try{
+      const res=await fetch(FUNCTIONS_URL+'/france-reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'reset',email:resetEmail,pin,new_password:newPassword})});
+      const data=await res.json();
+      if(data.error){msgEl.className='msg error';msgEl.textContent=data.error;btn.disabled=false;btn.textContent='Mettre à jour le mot de passe';return;}
+      showView('view-reset-done');
+    }catch(err){msgEl.className='msg error';msgEl.textContent='Erreur de connexion. Réessayez.';btn.disabled=false;btn.textContent='Mettre à jour le mot de passe';}
+  });
+})();
+</script>
 </body>
 </html>
-
