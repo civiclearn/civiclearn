@@ -410,7 +410,9 @@ async function startContinuousRecording() {
     continuousBlob = null;
     continuousStartTime = Date.now();
 
-    continuousRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+    var preferredMime = ['audio/webm', 'audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4']
+    .find(function(t) { return MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t); }) || '';
+continuousRecorder = new MediaRecorder(stream, preferredMime ? { mimeType: preferredMime } : {});
     continuousRecorder.ondataavailable = function(e) {
       if (e.data.size > 0) continuousChunks.push(e.data);
     };
@@ -441,7 +443,7 @@ function stopContinuousRecording() {
     }
 
     continuousRecorder.onstop = function() {
-      var blob = new Blob(continuousChunks, { type: 'audio/webm' });
+      var blob = new Blob(continuousChunks, { type: continuousRecorder.mimeType || 'audio/webm' });
       var duration = Math.round((Date.now() - continuousStartTime) / 1000);
       continuousBlob = blob;
       console.log('[oral-v3] Continuous recording stopped: ' + (blob.size / 1024).toFixed(0) + ' KB, ' + duration + 's');
@@ -806,7 +808,7 @@ async function submitAll() {
       var filePath = attemptId + '/' + sec.sectionKey + '.webm';
       if (progressEl) progressEl.textContent = 'Enviando gravação ' + (idx + 1) + ' de ' + totalFiles + '…';
       return sbClient.storage.from('celpe-audio').upload(filePath, sec.blob, {
-        contentType: 'audio/webm',
+        contentType: sec.blob.type || 'audio/webm',
         upsert: true
       }).then(function(result) {
         if (result.error) {
