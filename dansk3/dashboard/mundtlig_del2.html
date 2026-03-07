@@ -879,8 +879,8 @@ function startRecordingFromStream() {
   document.getElementById('recStartBtn').onclick = startRecording;
 
   audioChunks = [];
-  const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-    ? 'audio/webm;codecs=opus' : 'audio/webm';
+const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4']
+    .find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
   // 16kbps sufficient for Whisper, keeps files small for storage upload
   mediaRecorder = new MediaRecorder(micStream, { mimeType, audioBitsPerSecond: 16000 });
   mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
@@ -1287,7 +1287,8 @@ function base64ToBlob(b64) {
     const bin  = atob(b64);
     const arr  = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-    return new Blob([arr], { type: 'audio/webm' });
+    const isMP4 = arr.length > 7 && arr[4] === 0x66 && arr[5] === 0x74 && arr[6] === 0x79 && arr[7] === 0x70;
+return new Blob([arr], { type: isMP4 ? 'audio/mp4' : 'audio/webm' });
   } catch (e) {
     console.error('base64ToBlob failed:', e);
     return null;

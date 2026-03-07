@@ -624,7 +624,8 @@ function base64ToBlob(b64) {
     const bin = atob(b64);
     const arr = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-    return new Blob([arr], { type: 'audio/webm' });
+    const isMP4 = arr.length > 7 && arr[4] === 0x66 && arr[5] === 0x74 && arr[6] === 0x79 && arr[7] === 0x70;
+return new Blob([arr], { type: isMP4 ? 'audio/mp4' : 'audio/webm' });
   } catch (e) {
     console.error('base64ToBlob failed:', e);
     return null;
