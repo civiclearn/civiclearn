@@ -9,12 +9,473 @@
   <meta name="description" content="CivicLearn develops specialised preparation programs for civic knowledge, citizenship, residency, and language-related tests. Trusted by thousands of candidates since 2005.">
   <link rel="canonical" href="https://civiclearn.com/">
 
-  <!-- Lexend font -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap">
-  <link rel="stylesheet" href="/assets/css/clhome.css">
+  <!-- Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap">
+
+  <style>
+    :root {
+      --brand: #7c3aed;
+      --brand-dark: #5b21b6;
+      --brand-light: #ede9fe;
+      --bg-soft: #f7f2e8;
+      --text-main: #101013;
+      --muted: #6b6575;
+      --radius-lg: 1.4rem;
+      --radius-md: 1rem;
+      --max-w: 1080px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Lexend", system-ui, sans-serif;
+      background: var(--bg-soft);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    /* ─── HEADER ──────────────────────────── */
+
+    .site-header {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(247,242,232,0.92);
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+    .header-inner {
+      max-width: var(--max-w); margin: 0 auto;
+      padding: 0.85rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: center; gap: 0.7rem; }
+    .brand-main { display: flex; align-items: center; gap: 0.55rem; }
+    .brand-mark {
+      width: 28px; height: 28px; border-radius: 9px;
+      background: radial-gradient(circle at 20% 10%, #a855f7, #4f46e5);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 0.7rem; font-weight: 700;
+      box-shadow: 0 2px 8px rgba(124,58,237,0.3);
+    }
+    .brand-title { font-weight: 600; font-size: 1.05rem; letter-spacing: -0.01em; }
+    .brand-sub {
+      font-size: 0.76rem; color: var(--muted);
+      border-left: 1px solid rgba(0,0,0,0.08);
+      padding-left: 0.7rem; margin-left: 0.15rem;
+    }
+    .header-right { display: flex; align-items: center; gap: 0.75rem; }
+    .btn-ghost {
+      font-size: 0.85rem; font-weight: 500; color: var(--muted);
+      transition: color 0.2s;
+    }
+    .btn-ghost:hover { color: var(--brand); }
+    .btn-small-purple {
+      font-size: 0.82rem; padding: 0.5rem 1.1rem; border-radius: 999px;
+      background: var(--brand); color: #fff; font-weight: 500;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-small-purple:hover { background: var(--brand-dark); transform: translateY(-1px); }
+
+    /* ─── HERO ─────────────────────────────── */
+
+    .hero {
+      max-width: var(--max-w); margin: 0 auto;
+      padding: 4.5rem 2rem 3rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+    .hero-kicker {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-size: 0.72rem; text-transform: uppercase;
+      letter-spacing: 0.12em; font-weight: 600;
+      color: var(--brand-dark);
+      margin-bottom: 1.3rem;
+    }
+    .badge {
+      background: var(--brand-light);
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+    }
+    .hero-title {
+      font-family: "Lora", Georgia, serif;
+      font-size: 2.6rem;
+      font-weight: 700;
+      line-height: 1.18;
+      letter-spacing: -0.025em;
+      margin-bottom: 1.2rem;
+    }
+    .hero-highlight {
+      font-style: italic;
+      color: var(--brand);
+    }
+    .hero-subtitle {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 460px;
+      margin-bottom: 1.8rem;
+    }
+    .hero-ctas { display: flex; gap: 0.75rem; align-items: center; }
+    .btn-primary {
+      font-size: 0.85rem; padding: 0.6rem 1.3rem; border-radius: 999px;
+      background: var(--brand); color: #fff; font-weight: 500;
+      transition: background 0.2s, transform 0.15s;
+      display: inline-block; border: none; cursor: pointer;
+      font-family: "Lexend", sans-serif;
+    }
+    .btn-primary:hover { background: var(--brand-dark); transform: translateY(-1px); }
+    .btn-secondary {
+      font-size: 0.85rem; padding: 0.55rem 1.2rem; border-radius: 999px;
+      border: 1.5px solid rgba(0,0,0,0.12); background: transparent;
+      font-weight: 500; color: var(--text-main);
+      transition: all 0.2s; display: inline-block;
+    }
+    .btn-secondary:hover { border-color: var(--brand); color: var(--brand); }
+
+    /* hero stats */
+    .hero-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.9rem;
+    }
+    .stat-tile {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 1.4rem 1.3rem;
+      border: 1px solid rgba(0,0,0,0.05);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+      transition: transform 0.2s;
+    }
+    .stat-tile:hover { transform: translateY(-2px); }
+    .stat-num {
+      font-family: "Lora", Georgia, serif;
+      font-size: 1.9rem; font-weight: 700;
+      color: var(--brand-dark);
+      margin-bottom: 0.3rem;
+    }
+    .stat-label {
+      font-size: 0.78rem; color: var(--muted); line-height: 1.4;
+    }
+
+    /* ─── SECTIONS ────────────────────────── */
+
+    .section {
+      max-width: var(--max-w); margin: 0 auto;
+      padding: 0 2rem;
+    }
+    .section-header { padding: 3rem 0 1.5rem; }
+    .section-kicker {
+      font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.12em; font-weight: 600;
+      color: var(--brand-dark); margin-bottom: 0.5rem;
+    }
+    .section-title {
+      font-family: "Lora", Georgia, serif;
+      font-size: 1.8rem; font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .section-subtitle {
+      font-size: 0.92rem; color: var(--muted);
+      margin-top: 0.4rem; line-height: 1.55;
+    }
+
+    /* ─── COUNTRY CARDS ───────────────────── */
+
+    .group-label {
+      font-size: 0.72rem; text-transform: uppercase;
+      letter-spacing: 0.1em; font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 0.8rem;
+      padding-left: 0.2rem;
+    }
+    .countries-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 2.2rem;
+    }
+    .country-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(0,0,0,0.05);
+      padding: 1.2rem 1.4rem;
+      display: flex; flex-direction: column;
+      transition: transform 0.22s, box-shadow 0.22s, border-color 0.22s;
+      position: relative;
+      overflow: hidden;
+    }
+    .country-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--brand), #a855f7);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .country-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(124,58,237,0.08);
+      border-color: rgba(124,58,237,0.15);
+    }
+    .country-card:hover::before { opacity: 1; }
+
+    .country-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.7rem;
+    }
+    .country-pill {
+      font-size: 0.65rem; text-transform: uppercase;
+      letter-spacing: 0.1em; font-weight: 600;
+      color: var(--brand-dark);
+    }
+    .country-flag img {
+      width: 24px; height: auto;
+      border-radius: 2px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+    }
+    .country-title {
+      font-family: "Lora", Georgia, serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      line-height: 1.3;
+      margin-bottom: 0.4rem;
+    }
+    .country-tagline {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.5;
+      flex: 1;
+      margin-bottom: 0.8rem;
+    }
+    .country-bottom {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 0.7rem;
+      border-top: 1px solid rgba(0,0,0,0.04);
+    }
+    .country-domain {
+      font-size: 0.72rem; color: #999;
+    }
+    .country-arrow {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--brand-light);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--brand);
+      font-size: 0.75rem;
+      transition: background 0.2s, color 0.2s;
+    }
+    .country-card:hover .country-arrow {
+      background: var(--brand);
+      color: #fff;
+    }
+    .new-badge {
+      position: absolute;
+      top: 0.8rem; right: 0.8rem;
+      font-size: 0.6rem; text-transform: uppercase;
+      letter-spacing: 0.08em; font-weight: 700;
+      background: #10b981;
+      color: #fff;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      z-index: 1;
+    }
+
+    /* ─── INSIGHTS BANNER ─────────────────── */
+
+    .insights-banner { padding: 0 0 2.5rem; }
+    .insights-link {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 1.5rem;
+      background: #fff;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(0,0,0,0.05);
+      padding: 1.4rem 1.8rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .insights-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+    }
+    .insights-icon {
+      width: 44px; height: 44px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+    .insights-text h3 {
+      font-family: "Lora", Georgia, serif;
+      font-weight: 700; font-size: 1.05rem;
+      margin-bottom: 0.15rem;
+    }
+    .insights-text p {
+      font-size: 0.8rem; color: var(--muted); line-height: 1.4;
+    }
+    .insights-action {
+      font-size: 0.82rem; font-weight: 600;
+      color: var(--brand); white-space: nowrap;
+    }
+
+    /* ─── ABOUT CARDS ─────────────────────── */
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      padding: 2rem 0 3rem;
+    }
+    .about-card {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(0,0,0,0.05);
+      padding: 2.2rem 2.4rem;
+    }
+    .about-card .section-kicker { margin-bottom: 0.5rem; }
+    .about-card h3 {
+      font-family: "Lora", Georgia, serif;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 0.7rem;
+    }
+    .about-card p {
+      font-size: 0.88rem; line-height: 1.65; color: var(--muted);
+    }
+
+    /* ─── CONTACT SECTION ─────────────────── */
+
+    .contact-section {
+      background: linear-gradient(135deg, #1e1b2e 0%, #2d1b4e 50%, #1e1b2e 100%);
+      padding: 4rem 2rem;
+      margin-top: 1rem;
+    }
+    .contact-inner {
+      max-width: var(--max-w); margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+    .contact-text { color: #fff; }
+    .contact-text .ct-kicker {
+      font-size: 0.68rem; text-transform: uppercase;
+      letter-spacing: 0.12em; font-weight: 600;
+      color: #a78bfa; margin-bottom: 0.7rem;
+    }
+    .contact-text h2 {
+      font-family: "Lora", Georgia, serif;
+      font-size: 1.8rem; font-weight: 700;
+      margin-bottom: 0.8rem; line-height: 1.2;
+    }
+    .contact-text p {
+      font-size: 0.88rem; line-height: 1.7;
+      color: rgba(255,255,255,0.6); max-width: 380px;
+    }
+    .contact-form-wrap {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-lg);
+      padding: 2rem 2.2rem;
+      backdrop-filter: blur(10px);
+    }
+    .form-row { margin-bottom: 0.85rem; }
+    .form-row input,
+    .form-row textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.6rem;
+      padding: 0.7rem 0.9rem;
+      color: #fff;
+      font-size: 0.88rem;
+      font-family: "Lexend", sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-row input::placeholder,
+    .form-row textarea::placeholder {
+      color: rgba(255,255,255,0.3);
+    }
+    .form-row input:focus,
+    .form-row textarea:focus {
+      border-color: rgba(124,58,237,0.6);
+    }
+    .form-row textarea { resize: vertical; min-height: 100px; }
+    .contact-form-wrap .btn-primary {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-top: 0.3rem;
+    }
+    .contact-success {
+      display: none;
+      margin-top: 1rem;
+      padding: 1rem 1.3rem;
+      border-radius: 10px;
+      background: rgba(38,103,63,0.15);
+      border: 1px solid rgba(38,103,63,0.3);
+      color: #86efac;
+      font-size: 0.9rem;
+    }
+    .contact-error {
+      display: none;
+      margin-top: 1rem;
+      padding: 1rem 1.3rem;
+      border-radius: 10px;
+      background: rgba(143,47,47,0.15);
+      border: 1px solid rgba(143,47,47,0.3);
+      color: #fca5a5;
+      font-size: 0.9rem;
+    }
+
+    /* ─── FOOTER ──────────────────────────── */
+
+    .site-footer {
+      max-width: var(--max-w); margin: 0 auto;
+      padding: 2rem 2rem 2.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 0.76rem; color: var(--muted);
+    }
+    .footer-links { display: flex; gap: 1.2rem; }
+    .footer-links a { transition: color 0.2s; }
+    .footer-links a:hover { color: var(--brand); }
+
+    /* ─── RESPONSIVE ──────────────────────── */
+
+    @media (max-width: 768px) {
+      .hero { grid-template-columns: 1fr; padding: 3rem 1.4rem 2rem; gap: 2rem; }
+      .hero-title { font-size: 2rem; }
+      .about-grid { grid-template-columns: 1fr; }
+      .contact-inner { grid-template-columns: 1fr; gap: 2rem; }
+      .contact-section { padding: 3rem 1.4rem; }
+      .section { padding: 0 1.4rem; }
+      .insights-link { grid-template-columns: 1fr; gap: 0.8rem; padding: 1.2rem; }
+      .insights-action { justify-self: start; }
+      .site-footer { flex-direction: column; gap: 0.8rem; text-align: center; padding: 1.5rem 1.4rem; }
+      .brand-sub { display: none; }
+      .countries-grid { grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+    }
+
+    @media (max-width: 480px) {
+      .countries-grid { grid-template-columns: 1fr; }
+      .hero-stats { gap: 0.6rem; }
+      .stat-tile { padding: 1rem; }
+      .stat-num { font-size: 1.5rem; }
+    }
+  </style>
 </head>
 
 <body>
+
 <div id="authErrorBanner" style="
   display:none;
   background:#fdeaea;
@@ -23,10 +484,9 @@
   padding:14px 18px;
   font-size:0.95rem;
   text-align:center;
-">
-</div>
+"></div>
 
-
+<!-- ════════════════════════ HEADER ════════════════════════ -->
 <header class="site-header">
   <div class="header-inner">
     <div class="header-left">
@@ -34,11 +494,8 @@
         <div class="brand-mark">CL</div>
         <div class="brand-title">CivicLearn</div>
       </div>
-      <div class="brand-sub">
-        Civic, citizenship and language test preparation
-      </div>
+      <div class="brand-sub">Civic, citizenship and language test preparation</div>
     </div>
-
     <div class="header-right">
       <a href="#contact" class="btn-ghost">Contact</a>
       <a href="#projects" class="btn-small-purple">Our projects</a>
@@ -48,462 +505,432 @@
 
 <main>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div>
-      <div class="hero-kicker">
-        Trusted educational programs
-        <span class="badge">Since 2005</span>
-      </div>
-
-      <h1 class="hero-title">
-        Preparation for civic, citizenship and language tests
-        <span class="hero-highlight">focused on real exam requirements</span>.
-      </h1>
-
-      <p class="hero-subtitle">
-        CivicLearn develops specialised training programs for candidates preparing for
-        civic knowledge tests, citizenship interviews, residency procedures, and
-        language-related assessments. Our resources are used by thousands of learners
-        across multiple countries.
-      </p>
-
-      <div class="hero-ctas">
-        <a href="#contact" class="btn-primary">Contact us</a>
-        <a href="#projects" class="btn-secondary">Explore our platforms</a>
-      </div>
+<!-- ════════════════════════ HERO ═════════════════════════ -->
+<section class="hero">
+  <div>
+    <div class="hero-kicker">
+      Trusted educational programs
+      <span class="badge">Since 2005</span>
     </div>
 
-    <div class="hero-right">
-      <div class="hero-card">
-        <div class="hero-card-title">Designed for real candidates</div>
+    <h1 class="hero-title">
+      Preparation for civic, citizenship and language tests
+      <span class="hero-highlight">focused on real exam requirements.</span>
+    </h1>
 
-        <div style="
-          width: 100%;
-          height: 180px;
-          background: #e9e9e9;
-          border-radius: 12px;
-          margin: 1rem 0;
-          overflow: hidden;">
-          <img src="/assets/images/civiclearn.webp" alt="CivicLearn training platforms" style="width:100%; height:100%; object-fit:cover;">
-        </div>
-
-        <div class="hero-card-foot">
-          Each platform focuses on a specific national context, with clear explanations,
-          realistic practice questions, and structures aligned with official guidelines
-          and interview formats.
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PROJECTS -->
-  <section class="section" id="projects">
-    <div class="section-header">
-      <div class="section-kicker">Projects</div>
-      <h2 class="section-title">Current CivicLearn platforms</h2>
-      <p class="section-subtitle">
-        Each website below is dedicated to a specific country and exam context,
-        offering focused preparation for civic integration, residency, or citizenship.
-      </p>
-    </div>
-
-<div class="countries-grid">
-
-  <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/ca.svg" alt="Canada flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Canada (FR)</div>
-    </div>
-    <h3 class="country-title">Examen de citoyenneté du Canada</h3>
-    <p class="country-tagline">
-      Francophone preparation based on the official Discover Canada guide.
+    <p class="hero-subtitle">
+      CivicLearn develops specialised training programs for candidates preparing for
+      civic knowledge tests, citizenship interviews, residency procedures, and
+      language-related assessments. Our resources are used by thousands of learners
+      across multiple countries.
     </p>
-    <p class="country-domain">examendecitoyennete.ca</p>
-    <a href="https://examendecitoyennete.ca/" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
 
-  <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/ro.svg" alt="Romania flag">
+    <div class="hero-ctas">
+      <a href="#contact" class="btn-primary">Contact us</a>
+      <a href="#projects" class="btn-secondary">Explore our platforms</a>
     </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Romania</div>
-    </div>
-    <h3 class="country-title">Interviu pentru cetățenie</h3>
-    <p class="country-tagline">
-      Structured preparation for the Romanian citizenship interview.
-    </p>
-    <p class="country-domain">interviucetatenie.ro</p>
-    <a href="https://interviucetatenie.ro/" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-
-  <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/dk.svg" alt="Denmark flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Denmark</div>
-    </div>
-    <h3 class="country-title">Medborgerskabsprøven</h3>
-    <p class="country-tagline">
-      Preparation for the Danish permanent residency test.
-    </p>
-    <p class="country-domain">medborgerskabsprove.dk</p>
-    <a href="https://medborgerskabsprove.dk/" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-
-  <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/ch.svg" alt="Switzerland flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Switzerland</div>
-    </div>
-    <h3 class="country-title">Naturalisation Genève</h3>
-    <p class="country-tagline">
-      Local preparation for the Geneva naturalisation process.
-    </p>
-    <p class="country-domain">naturalisationgeneve.ch</p>
-    <a href="https://naturalisationgeneve.ch/" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-
-  <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/lu.svg" alt="Luxembourg flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Luxembourg</div>
-    </div>
-    <h3 class="country-title">Vivre-ensemble</h3>
-    <p class="country-tagline">
-      Preparation for the Luxembourg civic integration course.
-    </p>
-    <p class="country-domain">vivre-ensemble.lu</p>
-    <a href="https://vivre-ensemble.lu/" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-
-  <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/fr.svg" alt="France flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">France</div>
-    </div>
-    <h3 class="country-title">Examen civique (France)</h3>
-    <p class="country-tagline">
-      Training resources for the French civic knowledge examination.
-    </p>
-    <p class="country-domain">preparer-examen-civique.fr</p>
-    <a href="https://preparer-examen-civique.fr/" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-  
-    <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/au.svg" alt="Australia flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Australia</div>
-    </div>
-    <h3 class="country-title">Citizenship Test</h3>
-    <p class="country-tagline">
-      Online Training for the Australian citizenship test.
-    </p>
-    <p class="country-domain">australian-citizenship-test.com</p>
-    <a href="https://australian-citizenship-test.com/" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-
-  <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/uk.svg" alt="UK flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">United Kingdom</div>
-    </div>
-    <h3 class="country-title">Life in the UK Test</h3>
-    <p class="country-tagline">
-      Preparation for the Life in the UK test.
-    </p>
-    <p class="country-domain">lifeintheUKtestsupport.co.uk</p>
-    <a href="https://lifeintheuktestsupport.co.uk/" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-
-  <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/at.svg" alt="Austria flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Austria</div>
-    </div>
-    <h3 class="country-title">Staatsbürgerschaftstest</h3>
-    <p class="country-tagline">
-      Training resources for the Austrian citizenship examination.
-    </p>
-    <p class="country-domain">staatsburgerschaftstest.at</p>
-    <a href="https://staatsburgerschaftstest.at/" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-  
-    <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/fi.svg" alt="Finland flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Finland</div>
-    </div>
-    <h3 class="country-title">YKI Test (Swedish)</h3>
-    <p class="country-tagline">
-      Training resources for the Swedish YKI Test.
-    </p>
-    <p class="country-domain">ykisvenska.fi</p>
-    <a href="https://ykisvenska.fi" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-  
-    <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/es.svg" alt="Spain flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Spain</div>
-    </div>
-    <h3 class="country-title">Prueba CCSE</h3>
-    <p class="country-tagline">
-      Online Training for the Spanish citizenship test.
-    </p>
-    <p class="country-domain">pruebaccse.com</p>
-    <a href="https://pruebaccse.com" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-
-  <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/fi.svg" alt="Finland flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Finland</div>
-    </div>
-    <h3 class="country-title">YKI Test</h3>
-    <p class="country-tagline">
-      Preparation for the YKI (Finnish) test.
-    </p>
-    <p class="country-domain">ykifinnish.fi</p>
-    <a href="https://ykifinnish.fi" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-
-  <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/pt.svg" alt="Portugal flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Portugal</div>
-    </div>
-    <h3 class="country-title">CIPLE</h3>
-    <p class="country-tagline">
-      Training resources for the Portuguese language test.
-    </p>
-    <p class="country-domain">cipleonline.pt</p>
-    <a href="https://cipleonline.pt/" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-  
-    <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/lu.svg" alt="Luxembourg flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Luxembourg</div>
-    </div>
-    <h3 class="country-title">Sproochentest</h3>
-    <p class="country-tagline">
-      Preparation for the Luxembourgish language test.
-    </p>
-    <p class="country-domain">sproochentest.org</p>
-    <a href="https://sproochentest.org" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-
-  <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/it.svg" alt="Italy flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Italy</div>
-    </div>
-    <h3 class="country-title">CILS B1</h3>
-    <p class="country-tagline">
-      Simulations of the Italian CILS language test.
-    </p>
-    <p class="country-domain">cilsb1.it</p>
-    <a href="https://cilsb1.it/" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-  
-    <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/dk.svg" alt="Denmark flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Denmark</div>
-    </div>
-    <h3 class="country-title">Indfødsretsprøve</h3>
-    <p class="country-tagline">
-      Training program for the Danish citizenship test.
-    </p>
-    <p class="country-domain">indfodsretsprove.dk</p>
-    <a href="https://indfodsretsprove.dk" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-  
-    <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/lt.svg" alt="Lithuania flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Lithuania</div>
-    </div>
-    <h3 class="country-title">Pilietybės egzaminas</h3>
-    <p class="country-tagline">
-      Preparation for the Lithuanian citizenship test.
-    </p>
-    <p class="country-domain">lithuania-citizenship-test.com</p>
-    <a href="https://lithuania-citizenship-test.com" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-
-  <article class="country-card">
-    <div class="country-flag">
-      <img src="/assets/images/se.svg" alt="Sweden flag">
-    </div>
-    <div class="country-pill-row">
-      <div class="country-pill">Sweden</div>
-    </div>
-    <h3 class="country-title">Svenska Prov</h3>
-    <p class="country-tagline">
-      Preparation for the upcoming Swedish citizenship test.
-    </p>
-    <p class="country-domain">svenskaprov.se</p>
-    <a href="https://svenskaprov.se" class="country-link">
-      <span>Visit website</span> →
-    </a>
-  </article>
-
-</div>
-
-  </section>
-
-  <!-- EXPERTISE + ABOUT + CONTACT -->
-  <section class="section engine-about-grid">
-
-    <div class="left-column">
-
-      <div class="left-block">
-        <div class="section-header">
-          <div class="section-kicker">Expertise</div>
-          <h2 class="section-title">Focused exam preparation</h2>
-          <p class="section-subtitle">
-            We specialise in preparation for civic knowledge tests, citizenship interviews,
-            residency exams, and language-related assessments. Our programs are designed to
-            help candidates understand expectations, practise effectively, and approach
-            official procedures with confidence.
-          </p>
-        </div>
-      </div>
-
-      <div class="left-block">
-        <div class="section-header">
-          <div class="section-kicker">About</div>
-          <h2 class="section-title">Developed by Testrada</h2>
-          <p class="section-subtitle">
-            CivicLearn is developed by Testrada, an educational company creating preparation
-            programs since 2005. Over the years, our materials have supported thousands of
-            learners preparing for official exams and interviews across multiple countries.
-          </p>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- CONTACT -->
-    <div id="contact" class="contact-card">
-
-      <form id="contactForm">
-
-  <!-- Honeypot -->
-  <input type="text" name="company" tabindex="-1" autocomplete="off" style="display:none">
-
-  <div class="form-row">
-    <input type="text" name="name" placeholder="Your name" required>
   </div>
 
-  <div class="form-row">
-    <input type="email" name="email" placeholder="Your email" required>
-  </div>
-
-  <div class="form-row">
-    <textarea name="message" placeholder="Your message" rows="4" required></textarea>
-  </div>
-
-  <button type="submit" class="btn-primary" style="margin-top:0.4rem;">
-    Send message
-  </button>
-
-</form>
-
-
-      <div id="contactSuccess" style="display:none; margin-top:1rem; padding:1rem 1.3rem; border-radius:10px; background:#e7f8ee; border:1px solid #b5eacb; color:#26673f; font-size:1rem;">
-        Thank you — your message has been sent.
-      </div>
-
-      <div id="contactError" style="display:none; margin-top:1rem; padding:1rem 1.3rem; border-radius:10px; background:#fdeaea; border:1px solid #f5b5b5; color:#8f2f2f; font-size:1rem;">
-        Something went wrong. Please try again later.
-      </div>
-
+  <div class="hero-stats">
+    <div class="stat-tile">
+      <div class="stat-num">20+</div>
+      <div class="stat-label">Dedicated platforms across countries</div>
     </div>
+    <div class="stat-tile">
+      <div class="stat-num">20</div>
+      <div class="stat-label">Years of test preparation experience</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-num">15+</div>
+      <div class="stat-label">Countries and exam contexts covered</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Aligned with official exam formats</div>
+    </div>
+  </div>
+</section>
 
-  </section>
+<!-- ════════════════════════ PROJECTS ════════════════════ -->
+<section class="section" id="projects">
+  <div class="section-header">
+    <div class="section-kicker">Projects</div>
+    <h2 class="section-title">Current CivicLearn platforms</h2>
+    <p class="section-subtitle">
+      Each website below is dedicated to a specific country and exam context,
+      offering focused preparation for civic integration, residency, or citizenship.
+    </p>
+  </div>
+
+  <div class="group-label">Citizenship &amp; Civic Tests</div>
+  <div class="countries-grid">
+
+    <a href="https://examendecitoyennete.ca/" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Canada (FR)</span>
+        <div class="country-flag"><img src="/assets/images/ca.svg" alt="Canada flag"></div>
+      </div>
+      <h3 class="country-title">Examen de citoyenneté du Canada</h3>
+      <p class="country-tagline">Francophone preparation based on the official Discover Canada guide.</p>
+      <div class="country-bottom">
+        <span class="country-domain">examendecitoyennete.ca</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://interviucetatenie.ro/" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Romania</span>
+        <div class="country-flag"><img src="/assets/images/ro.svg" alt="Romania flag"></div>
+      </div>
+      <h3 class="country-title">Interviu pentru cetățenie</h3>
+      <p class="country-tagline">Structured preparation for the Romanian citizenship interview.</p>
+      <div class="country-bottom">
+        <span class="country-domain">interviucetatenie.ro</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://medborgerskabsprove.dk/" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Denmark</span>
+        <div class="country-flag"><img src="/assets/images/dk.svg" alt="Denmark flag"></div>
+      </div>
+      <h3 class="country-title">Medborgerskabsprøven</h3>
+      <p class="country-tagline">Preparation for the Danish permanent residency test.</p>
+      <div class="country-bottom">
+        <span class="country-domain">medborgerskabsprove.dk</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://naturalisationgeneve.ch/" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Switzerland</span>
+        <div class="country-flag"><img src="/assets/images/ch.svg" alt="Switzerland flag"></div>
+      </div>
+      <h3 class="country-title">Naturalisation Genève</h3>
+      <p class="country-tagline">Local preparation for the Geneva naturalisation process.</p>
+      <div class="country-bottom">
+        <span class="country-domain">naturalisationgeneve.ch</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://vivre-ensemble.lu/" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Luxembourg</span>
+        <div class="country-flag"><img src="/assets/images/lu.svg" alt="Luxembourg flag"></div>
+      </div>
+      <h3 class="country-title">Vivre-ensemble</h3>
+      <p class="country-tagline">Preparation for the Luxembourg civic integration course.</p>
+      <div class="country-bottom">
+        <span class="country-domain">vivre-ensemble.lu</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://preparer-examen-civique.fr/" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">France</span>
+        <div class="country-flag"><img src="/assets/images/fr.svg" alt="France flag"></div>
+      </div>
+      <h3 class="country-title">Examen civique (France)</h3>
+      <p class="country-tagline">Training resources for the French civic knowledge examination.</p>
+      <div class="country-bottom">
+        <span class="country-domain">preparer-examen-civique.fr</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://australian-citizenship-test.com/" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Australia</span>
+        <div class="country-flag"><img src="/assets/images/au.svg" alt="Australia flag"></div>
+      </div>
+      <h3 class="country-title">Citizenship Test</h3>
+      <p class="country-tagline">Online Training for the Australian citizenship test.</p>
+      <div class="country-bottom">
+        <span class="country-domain">australian-citizenship-test.com</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://lifeintheuktestsupport.co.uk/" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">United Kingdom</span>
+        <div class="country-flag"><img src="/assets/images/uk.svg" alt="UK flag"></div>
+      </div>
+      <h3 class="country-title">Life in the UK Test</h3>
+      <p class="country-tagline">Preparation for the Life in the UK test.</p>
+      <div class="country-bottom">
+        <span class="country-domain">lifeintheUKtestsupport.co.uk</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://staatsburgerschaftstest.at/" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Austria</span>
+        <div class="country-flag"><img src="/assets/images/at.svg" alt="Austria flag"></div>
+      </div>
+      <h3 class="country-title">Staatsbürgerschaftstest</h3>
+      <p class="country-tagline">Training resources for the Austrian citizenship examination.</p>
+      <div class="country-bottom">
+        <span class="country-domain">staatsburgerschaftstest.at</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://pruebaccse.com" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Spain</span>
+        <div class="country-flag"><img src="/assets/images/es.svg" alt="Spain flag"></div>
+      </div>
+      <h3 class="country-title">Prueba CCSE</h3>
+      <p class="country-tagline">Online Training for the Spanish citizenship test.</p>
+      <div class="country-bottom">
+        <span class="country-domain">pruebaccse.com</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://indfodsretsprove.dk" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Denmark</span>
+        <div class="country-flag"><img src="/assets/images/dk.svg" alt="Denmark flag"></div>
+      </div>
+      <h3 class="country-title">Indfødsretsprøve</h3>
+      <p class="country-tagline">Training program for the Danish citizenship test.</p>
+      <div class="country-bottom">
+        <span class="country-domain">indfodsretsprove.dk</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://lithuania-citizenship-test.com" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Lithuania</span>
+        <div class="country-flag"><img src="/assets/images/lt.svg" alt="Lithuania flag"></div>
+      </div>
+      <h3 class="country-title">Pilietybės egzaminas</h3>
+      <p class="country-tagline">Preparation for the Lithuanian citizenship test.</p>
+      <div class="country-bottom">
+        <span class="country-domain">lithuania-citizenship-test.com</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://svenskaprov.se" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Sweden</span>
+        <div class="country-flag"><img src="/assets/images/se.svg" alt="Sweden flag"></div>
+      </div>
+      <h3 class="country-title">Svenska Prov</h3>
+      <p class="country-tagline">Preparation for the upcoming Swedish citizenship test.</p>
+      <div class="country-bottom">
+        <span class="country-domain">svenskaprov.se</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://rikisborgaraprof.is" class="country-card">
+      <span class="new-badge">New</span>
+      <div class="country-top">
+        <span class="country-pill">Iceland</span>
+        <div class="country-flag"><img src="/assets/images/is.svg" alt="Iceland flag"></div>
+      </div>
+      <h3 class="country-title">Ríkisborgararapróf</h3>
+      <p class="country-tagline">Preparation for the Icelandic citizenship examination.</p>
+      <div class="country-bottom">
+        <span class="country-domain">rikisborgaraprof.is</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="group-label">Language Exam Preparation</div>
+  <div class="countries-grid">
+
+    <a href="https://ykisvenska.fi" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Finland</span>
+        <div class="country-flag"><img src="/assets/images/fi.svg" alt="Finland flag"></div>
+      </div>
+      <h3 class="country-title">YKI Test (Swedish)</h3>
+      <p class="country-tagline">Training resources for the Swedish YKI Test.</p>
+      <div class="country-bottom">
+        <span class="country-domain">ykisvenska.fi</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://ykifinnish.fi" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Finland</span>
+        <div class="country-flag"><img src="/assets/images/fi.svg" alt="Finland flag"></div>
+      </div>
+      <h3 class="country-title">YKI Test</h3>
+      <p class="country-tagline">Preparation for the YKI (Finnish) test.</p>
+      <div class="country-bottom">
+        <span class="country-domain">ykifinnish.fi</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://cipleonline.pt/" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Portugal</span>
+        <div class="country-flag"><img src="/assets/images/pt.svg" alt="Portugal flag"></div>
+      </div>
+      <h3 class="country-title">CIPLE</h3>
+      <p class="country-tagline">Training resources for the Portuguese language test.</p>
+      <div class="country-bottom">
+        <span class="country-domain">cipleonline.pt</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://sproochentest.org" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Luxembourg</span>
+        <div class="country-flag"><img src="/assets/images/lu.svg" alt="Luxembourg flag"></div>
+      </div>
+      <h3 class="country-title">Sproochentest</h3>
+      <p class="country-tagline">Preparation for the Luxembourgish language test.</p>
+      <div class="country-bottom">
+        <span class="country-domain">sproochentest.org</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://cilsb1.it/" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Italy</span>
+        <div class="country-flag"><img src="/assets/images/it.svg" alt="Italy flag"></div>
+      </div>
+      <h3 class="country-title">CILS B1</h3>
+      <p class="country-tagline">Simulations of the Italian CILS language test.</p>
+      <div class="country-bottom">
+        <span class="country-domain">cilsb1.it</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://dansk3.dk" class="country-card">
+      <div class="country-top">
+        <span class="country-pill">Denmark</span>
+        <div class="country-flag"><img src="/assets/images/dk.svg" alt="Denmark flag"></div>
+      </div>
+      <h3 class="country-title">PD3 — Prøve i Dansk 3</h3>
+      <p class="country-tagline">Full simulation training for the Danish PD3 language exam.</p>
+      <div class="country-bottom">
+        <span class="country-domain">dansk3.dk</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="https://celpebras.org" class="country-card">
+      <span class="new-badge">New</span>
+      <div class="country-top">
+        <span class="country-pill">Brazil</span>
+        <div class="country-flag"><img src="/assets/images/br.svg" alt="Brazil flag"></div>
+      </div>
+      <h3 class="country-title">CELPE-BRAS</h3>
+      <p class="country-tagline">Simulation training for the Brazilian Portuguese proficiency exam.</p>
+      <div class="country-bottom">
+        <span class="country-domain">celpebras.org</span>
+        <span class="country-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+</section>
+
+<!-- ════════════════════════ INSIGHTS + ABOUT ═════════════ -->
+<section class="section">
+
+  <div class="insights-banner">
+    <a href="/insights" class="insights-link">
+      <div class="insights-icon">📊</div>
+      <div class="insights-text">
+        <h3>CivicLearn Insights</h3>
+        <p>Research, analysis, and interactive tools exploring what citizenship tests reveal about the countries that write them.</p>
+      </div>
+      <span class="insights-action">Read Insights →</span>
+    </a>
+  </div>
+
+  <div class="about-grid">
+    <div class="about-card">
+      <div class="section-kicker">Expertise</div>
+      <h3>Focused exam preparation</h3>
+      <p>We specialise in preparation for civic knowledge tests, citizenship interviews,
+        residency exams, and language-related assessments. Our programs are designed to
+        help candidates understand expectations, practise effectively, and approach
+        official procedures with confidence.</p>
+    </div>
+    <div class="about-card">
+      <div class="section-kicker">About</div>
+      <h3>Developed by Testrada</h3>
+      <p>CivicLearn is developed by Testrada, an educational company creating preparation
+        programs since 2005. Over the years, our materials have supported thousands of
+        learners preparing for official exams and interviews across multiple countries.</p>
+    </div>
+  </div>
+
+</section>
 
 </main>
 
-<footer class="site-footer">
-  <div class="footer-inner">
-    <div>© 2025 CivicLearn · All rights reserved.</div>
-    <div class="footer-links">
-      <a href="/legal.html">Legal</a>
-      <a href="/privacy.html">Privacy</a>
-      <a href="/contact.html">Contact</a>
+<!-- ════════════════════════ CONTACT ══════════════════════ -->
+<section class="contact-section" id="contact">
+  <div class="contact-inner">
+    <div class="contact-text">
+      <div class="ct-kicker">Get in touch</div>
+      <h2>Questions about our platforms?</h2>
+      <p>Whether you need help with your account, have questions about a specific exam, or want to explore a partnership — we'd love to hear from you.</p>
     </div>
+    <div class="contact-form-wrap">
+      <form id="contactForm">
+        <!-- Honeypot -->
+        <input type="text" name="company" tabindex="-1" autocomplete="off" style="display:none">
+
+        <div class="form-row">
+          <input type="text" name="name" placeholder="Your name" required>
+        </div>
+        <div class="form-row">
+          <input type="email" name="email" placeholder="Your email" required>
+        </div>
+        <div class="form-row">
+          <textarea name="message" placeholder="Your message" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn-primary">Send message</button>
+      </form>
+
+      <div id="contactSuccess" class="contact-success">
+        Thank you — your message has been sent.
+      </div>
+      <div id="contactError" class="contact-error">
+        Something went wrong. Please try again later.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════ FOOTER ═══════════════════════ -->
+<footer class="site-footer">
+  <div>© 2025 CivicLearn · All rights reserved.</div>
+  <div class="footer-links">
+    <a href="/legal.html">Legal</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/contact.html">Contact</a>
   </div>
 </footer>
 
+<!-- ════════════════════════ SCRIPTS ══════════════════════ -->
 <script>
 document.getElementById("contactForm").addEventListener("submit", async function(e) {
   e.preventDefault();
@@ -588,7 +1015,7 @@ document.getElementById("contactForm").addEventListener("submit", async function
     This access link is no longer valid. Please use the most recent email or request a new one.
     <br><br>
     <strong>Lien expiré</strong><br>
-    Ce lien d’accès n’est plus valide. Veuillez utiliser le message le plus récent ou demander un nouvel envoi.
+    Ce lien d'accès n'est plus valide. Veuillez utiliser le message le plus récent ou demander un nouvel envoi.
     <br><br>
     <strong>Enlace caducado</strong><br>
     Este enlace de acceso ya no es válido. Utiliza el correo más reciente o solicita uno nuevo.
@@ -601,8 +1028,6 @@ document.getElementById("contactForm").addEventListener("submit", async function
   history.replaceState(null, "", window.location.pathname);
 })();
 </script>
-
-
 
 </body>
 </html>
