@@ -1,438 +1,168 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Acesso – CivicLearn CIPLE</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <script>
-    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
-    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-  </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
-  <link rel="stylesheet" href="/assets/css/newlogin.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sessão — CIPLE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* === MOBILE LOGIN TABS === */
-    .login-tabs {
-      display: none;
-    }
-
-    @media (max-width: 768px) {
-
-      /* Fix header overflow */
-      .header-inner {
-        padding: 10px 12px;
-        gap: 8px;
-      }
-      .header-nav { display: none; }
-      .brand-powered { display: none; }
-      .btn-small-purple {
-        font-size: 12px;
-        padding: 6px 12px;
-        white-space: nowrap;
-        flex-shrink: 0;
-      }
-      .brand-title {
-        font-size: 15px;
-      }
-
-      /* Tab bar */
-      .login-tabs {
-        display: flex;
-        justify-content: center;
-        gap: 0;
-        margin: 16px auto 0;
-        max-width: 400px;
-        padding: 0 16px;
-      }
-
-      .login-tab {
-        flex: 1;
-        padding: 10px 6px;
-        font-family: 'Lexend', sans-serif;
-        font-size: 13px;
-        font-weight: 500;
-        text-align: center;
-        border: none;
-        background: #f0eef5;
-        color: #777;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-
-      .login-tab:first-child {
-        border-radius: 10px 0 0 10px;
-      }
-      .login-tab:last-child {
-        border-radius: 0 10px 10px 0;
-      }
-
-      .login-tab.active {
-        background: #6c5ce7;
-        color: #fff;
-        font-weight: 600;
-      }
-
-      /* Hide inactive cards */
-      .login-grid {
-        display: block !important;
-        padding: 0 16px;
-      }
-
-      .auth-card {
-        display: none;
-        max-width: 400px;
-        margin: 16px auto 0;
-      }
-
-      .auth-card.tab-active {
-        display: block;
-        box-sizing: border-box;
-        overflow: hidden;
-      }
-
-      .auth-card input,
-      .auth-card button,
-      .auth-card .pwd-container {
-        max-width: 100%;
-        box-sizing: border-box;
-      }
-    }
+    :root{--green:#006600;--green-dim:#e6f2e6;--green-dark:#004d00;--navy:#0f172a;--muted:#64748b;--border:#e2e8f0;--surface:#ffffff;--bg:#f8f7f4;--pass:#059669;--pass-light:#f0fdf4;--red:#dc2626;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;line-height:1.5;}
+    .card{background:var(--surface);border-radius:20px;box-shadow:0 1px 3px rgba(0,0,0,0.06),0 8px 24px rgba(0,0,0,0.06);width:100%;max-width:440px;padding:40px 36px;position:relative;overflow:hidden;}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--green);}
+    .brand{text-align:center;margin-bottom:28px;}
+    .header-brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;}
+    .topbar-flag{width:28px;height:20px;border-radius:3px;overflow:hidden;display:flex;}
+    .topbar-flag span:first-child{flex:2;background:#006600;}
+    .topbar-flag span:last-child{flex:3;background:#FF0000;}
+    .brand h1{font-family:"Fraunces",serif;font-size:1.4rem;font-weight:700;color:var(--navy);letter-spacing:-0.02em;}
+    .brand p{font-size:0.9rem;color:var(--muted);margin-top:4px;}
+    .form-group{margin-bottom:18px;}
+    .form-group label{display:block;font-size:0.85rem;font-weight:600;color:var(--navy);margin-bottom:6px;}
+    .form-group input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:1rem;font-family:"DM Sans",sans-serif;color:var(--navy);background:#fff;transition:border-color 0.2s,box-shadow 0.2s;outline:none;}
+    .form-group input:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-dim);}
+    .form-group input::placeholder{color:#b0b5bf;}
+    .btn{display:block;width:100%;padding:13px 20px;border:none;border-radius:10px;font-size:1rem;font-weight:600;font-family:"DM Sans",sans-serif;cursor:pointer;transition:background 0.2s,transform 0.1s;}
+    .btn:active{transform:scale(0.99);}.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+    .btn-primary{background:var(--green);color:#fff;}.btn-primary:hover:not(:disabled){background:var(--green-dark);}
+    .msg{padding:10px 14px;border-radius:10px;font-size:0.88rem;margin-bottom:16px;display:none;}
+    .msg.error{display:block;background:#fef2f2;color:var(--red);border:1px solid #fecaca;}
+    .msg.success{display:block;background:var(--pass-light);color:var(--pass);border:1px solid #bbf7d0;}
+    .view{display:none;}.view.active{display:block;}
+    .link-row{text-align:center;margin-top:16px;font-size:0.88rem;}
+    .link-row a,.link-row button{color:var(--green);text-decoration:none;font-weight:600;background:none;border:none;cursor:pointer;font-family:inherit;font-size:inherit;}
+    .link-row a:hover,.link-row button:hover{text-decoration:underline;}
+    .pin-display{text-align:center;margin:16px 0;padding:14px;background:var(--green-dim);border-radius:10px;font-size:1.6rem;font-weight:700;letter-spacing:0.15em;color:var(--green);}
+    .spinner{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:8px;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .footer{text-align:center;margin-top:24px;font-size:0.8rem;color:var(--muted);}.footer a{color:var(--muted);text-decoration:none;}.footer a:hover{text-decoration:underline;}
+    @media(max-width:480px){.card{padding:32px 24px;border-radius:16px;}}
   </style>
 </head>
-
 <body>
-
-<header class="site-header">
-  <div class="header-inner">
-
-    <div class="header-left">
-      <a href="/ciple/" class="brand-link">
-        <img src="/assets/images/pt.svg" alt="PT">
-        <div class="brand-title">CivicLearn CIPLE</div>
-      </a>
-    </div>
-
-    <div class="header-center">
-      <nav class="header-nav">
-        <a href="https://cipleonline.pt/ajuda/">Contacto</a>
-      </nav>
-    </div>
-
-    <div class="header-right">
-      <div class="brand-powered">powered by <span>CivicLearn</span></div>
-      <a href="/ciple/checkout.html" class="btn-small-purple">Comprar acesso</a>
-    </div>
-
-  </div>
-</header>
-
-<div id="status" class="status-msg"></div>
-
-<div class="login-tabs">
-  <button class="login-tab" data-tab="setup">Novo aqui?</button>
-  <button class="login-tab active" data-tab="login">Acesso</button>
-  <button class="login-tab" data-tab="pin">PIN</button>
-</div>
-
-<div class="login-grid">
-
-  <!-- LEFT CARD -->
-  <div class="auth-card card-left" data-card="setup">
-    <h2 style="color: var(--purple);">Primeira vez aqui?</h2>
-    <p>
-      Acabou de comprar o seu acesso? Crie a sua palavra-passe aqui.
-    </p>
-
-    <input type="email" id="setupEmail" placeholder="nome@exemplo.pt">
-    <button
-      type="button"
-      id="setupBtn"
-      onclick="handleSetup()"
-      class="btn-action btn-purple">
-      Enviar link de configuração
-    </button>
-
-    <div style="font-size:10px;color:var(--purple);font-weight:600;margin-top:15px;text-align:center;line-height:1.4;">
-      ℹ️ Verifique também a pasta de spam.
-    </div>
-  </div>
-
-  <!-- CENTER CARD -->
-  <div class="auth-card card-center tab-active" data-card="login">
-    <h2 style="font-size:28px;text-align:center;">Acesso</h2>
-
-    <div style="margin-top:20px;">
-      <label>E-mail</label>
-      <input type="email" id="loginEmail">
-
-      <label>Palavra-passe</label>
-      <div class="pwd-container">
-        <input type="password" id="loginPwd">
-        <button type="button" class="toggle-pwd" onclick="toggleMainPwd()">Mostrar</button>
+<div class="card">
+  <!-- LOGIN -->
+  <div id="view-login" class="view active">
+    <div class="brand">
+      <div class="header-brand">
+        <div class="topbar-flag"><span></span><span></span></div>
+        <span style="font-family:'Fraunces',serif;font-weight:600;font-size:1rem;">CIPLE</span>
       </div>
-
-      <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top:10px;">
-        Entrar com palavra-passe
-      </button>
-
-      <div style="text-align:center;margin-top:14px;">
-        <a href="#" id="forgotLink" style="font-size:13px;color:var(--purple);font-weight:500;text-decoration:none;">
-          Esqueceu a palavra-passe?
-        </a>
-      </div>
+      <h1>Iniciar sessão</h1>
+      <p>Aceda à sua conta de treino CIPLE</p>
     </div>
+    <div id="login-msg" class="msg"></div>
+    <form id="login-form">
+      <div class="form-group"><label for="login-email">E-mail</label><input type="email" id="login-email" required placeholder="O seu e-mail" autocomplete="email"></div>
+      <div class="form-group"><label for="login-password">Palavra-passe</label><input type="password" id="login-password" required placeholder="A sua palavra-passe" autocomplete="current-password"></div>
+      <button type="submit" class="btn btn-primary" id="login-btn">Iniciar sessão</button>
+    </form>
+    <div class="link-row"><button id="show-reset">Esqueceu a palavra-passe?</button></div>
+    <div class="link-row" style="margin-top:8px;color:var(--muted);">Ainda não tem conta? <a href="/ciple/checkout.html">Comprar agora</a></div>
   </div>
-
-  <!-- RIGHT CARD — PIN -->
-  <div class="auth-card card-right" data-card="pin">
-    <h2 style="color:#856404;">Problemas?</h2>
-    <p>
-      Use um PIN temporário se o acesso com palavra-passe não funcionar.
-      O PIN não é enviado por e-mail.
-    </p>
-
-    <label>E-mail</label>
-    <input type="email" id="pinEmail" placeholder="nome@exemplo.pt">
-
-    <button class="btn-action btn-yellow" onclick="showPin()">
-      Mostrar PIN de acesso
-    </button>
-
-    <div id="pinArea" style="display:none;margin-top:15px;">
-      <div id="pinShown" style="text-align:center;font-size:28px;letter-spacing:6px;font-weight:700;color:var(--purple);margin-bottom:10px;">0000</div>
-
-      <label>Introduza o PIN</label>
-      <input type="text" id="pinEnter" maxlength="4" inputmode="numeric" style="text-align:center;letter-spacing:2px;">
-
-      <button class="btn-action btn-black" onclick="pinLogin()">
-        Continuar
-      </button>
+  <!-- RESET STEP 1 -->
+  <div id="view-reset-email" class="view">
+    <div class="brand"><h1>Repor palavra-passe</h1><p>Introduza o seu e-mail</p></div>
+    <div id="reset-email-msg" class="msg"></div>
+    <form id="reset-email-form">
+      <div class="form-group"><label for="reset-email">E-mail</label><input type="email" id="reset-email" required placeholder="O seu e-mail" autocomplete="email"></div>
+      <button type="submit" class="btn btn-primary" id="reset-email-btn">Continuar</button>
+    </form>
+    <div class="link-row"><button id="back-to-login-1">← Voltar</button></div>
+  </div>
+  <!-- RESET STEP 2 -->
+  <div id="view-reset-pin" class="view">
+    <div class="brand"><h1>Nova palavra-passe</h1><p>Introduza o código abaixo e escolha uma nova palavra-passe</p></div>
+    <div id="reset-pin-display" class="pin-display"></div>
+    <div id="reset-pin-msg" class="msg"></div>
+    <form id="reset-pin-form">
+      <div class="form-group"><label for="reset-pin">Código de confirmação</label><input type="text" id="reset-pin" required placeholder="Código de 6 dígitos" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="off"></div>
+      <div class="form-group"><label for="reset-new-password">Nova palavra-passe</label><input type="password" id="reset-new-password" required placeholder="Nova palavra-passe" minlength="6" autocomplete="new-password"></div>
+      <div class="form-group"><label for="reset-new-password-confirm">Confirmar palavra-passe</label><input type="password" id="reset-new-password-confirm" required placeholder="Repita a palavra-passe" minlength="6" autocomplete="new-password"></div>
+      <button type="submit" class="btn btn-primary" id="reset-pin-btn">Atualizar palavra-passe</button>
+    </form>
+    <div class="link-row"><button id="back-to-login-2">← Voltar</button></div>
+  </div>
+  <!-- RESET DONE -->
+  <div id="view-reset-done" class="view">
+    <div class="brand" style="margin-bottom:16px;">
+      <div style="font-size:2rem;margin-bottom:12px;">✓</div>
+      <h1>Palavra-passe atualizada!</h1>
+      <p>Já pode iniciar sessão com a nova palavra-passe.</p>
     </div>
+    <button class="btn btn-primary" id="go-to-login">Iniciar sessão →</button>
   </div>
-
 </div>
-
+<div class="footer">
+  <a href="https://cipleonline.pt">cipleonline.pt</a> · <a href="https://civiclearn.com">CivicLearn</a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-const supabase = window.supabase.createClient(
-  window.SUPABASE_URL,
-  window.SUPABASE_KEY
-);
-
-function notify(type, text) {
-  const el = document.getElementById("status");
-  el.textContent = text;
-  el.className = "status-msg " + type;
-  el.style.display = "block";
-  setTimeout(() => el.style.display = "none", 6000);
-}
-
-/* Return URL: preserves ?return= param so users land back where they came from */
-function getReturnUrl() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const returnUrl = urlParams.get("return");
-  if (returnUrl) {
-    return decodeURIComponent(returnUrl);
-  }
-  return "/ciple/dashboard/index.html";
-}
-
-/* ---------- PASSWORD SETUP ---------- */
-async function handleSetup() {
-  const btn = document.getElementById("setupBtn");
-  const email = setupEmail.value.trim().toLowerCase();
-
-  if (!email) {
-    notify("error", "Introduza o seu e-mail.");
-    return;
-  }
-
-  if (btn.disabled) return;
-
-  btn.disabled = true;
-  btn.textContent = "Aguarde…";
-
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + "/ciple/login-password.html"
-  });
-
-  if (error) {
-    btn.disabled = false;
-    btn.textContent = "Enviar link de configuração";
-    notify("error", "Não foi possível enviar o link.");
-    return;
-  }
-
-  btn.textContent = "Verifique o seu e-mail";
-  setTimeout(() => btn.remove(), 2500);
-
-  notify("success", "Se o e-mail existir, o link foi enviado.");
-}
-
-/* ---------- PASSWORD LOGIN ---------- */
-async function handleLogin() {
-  const email = loginEmail.value.trim().toLowerCase();
-  const password = loginPwd.value;
-
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    return notify("error", "E-mail ou palavra-passe incorretos.");
-  }
-
-  await supabase.from("login_history").insert({
-    email,
-    status: "success",
-    method: "password"
-  });
-
-  localStorage.setItem("cl_auth", "ok");
-  localStorage.setItem("cl_email", email);
-  localStorage.setItem("cl_login_at", Date.now().toString());
-
-  location.href = getReturnUrl();
-}
-
-/* ---------- PIN LOGIC ---------- */
-function utcDayOfYear(d) {
-  const s = new Date(Date.UTC(d.getUTCFullYear(), 0, 0));
-  return Math.floor((d - s) / 86400000);
-}
-
-function computePin(email) {
-  const n = new Date();
-  const v = (utcDayOfYear(n) * 37) + (n.getUTCHours() * 91) + (email.length * 17);
-  return String(v % 10000).padStart(4, "0");
-}
-
-async function showPin() {
-  const email = pinEmail.value.trim().toLowerCase();
-  if (!email) return notify("error", "Introduza o seu e-mail.");
-
-  let exists = false;
-  try {
-    const res = await fetch(
-      "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/check-user-exists",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      }
-    );
-    const data = await res.json();
-    exists = data.exists === true;
-  } catch (e) {
-    return notify("error", "Não foi possível validar o e-mail. Tente novamente.");
-  }
-
-  if (!exists) {
-    return notify("error", "Este e-mail não existe no sistema.");
-  }
-
-  pinShown.textContent = computePin(email);
-  pinArea.style.display = "block";
-  localStorage.setItem("cl_email", email);
-}
-
-async function pinLogin() {
-  const email = localStorage.getItem("cl_email");
-  const enteredPin = pinEnter.value.trim();
-
-  const res = await fetch(
-    "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/verify-pin-and-log",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": window.SUPABASE_KEY
-      },
-      body: JSON.stringify({ email, enteredPin })
-    }
-  );
-
-  const data = await res.json();
-  if (!data.success) {
-    return notify("error", "PIN incorreto.");
-  }
-
-  localStorage.setItem("cl_auth", "ok");
-  localStorage.setItem("cl_email", email);
-  localStorage.setItem("cl_login_at", Date.now().toString());
-  location.href = getReturnUrl();
-}
-
-function toggleMainPwd() {
-  const pwd = loginPwd;
-  const btn = document.querySelector(".toggle-pwd");
-  if (pwd.type === "password") {
-    pwd.type = "text";
-    btn.textContent = "Ocultar";
-  } else {
-    pwd.type = "password";
-    btn.textContent = "Mostrar";
-  }
-}
-</script>
-
-<script>
-/* === MOBILE LOGIN TABS === */
-document.querySelectorAll(".login-tab").forEach(tab => {
-  tab.addEventListener("click", () => {
-    const target = tab.dataset.tab;
-
-    // Update tab bar
-    document.querySelectorAll(".login-tab").forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
-
-    // Show matching card, hide others
-    document.querySelectorAll(".auth-card").forEach(card => {
-      card.classList.toggle("tab-active", card.dataset.card === target);
-    });
-
-    // Reset setup tab label when switching away from forgot flow
-    if (target !== "setup") {
-      const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
-      if (setupTab) setupTab.textContent = "Novo aqui?";
-      const setupCard = document.querySelector('.card-left');
-      const h2 = setupCard?.querySelector("h2");
-      if (h2) h2.textContent = "Primeira vez aqui?";
-      const p = setupCard?.querySelector("p");
-      if (p) p.textContent = "Acabou de comprar o seu acesso? Crie a sua palavra-passe aqui.";
-    }
-  });
-});
-
-/* === FORGOT PASSWORD LINK === */
-const forgotLink = document.getElementById("forgotLink");
-if (forgotLink) {
-  forgotLink.addEventListener("click", (e) => {
+(function(){
+  'use strict';
+  const SUPABASE_URL='https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const FUNCTIONS_URL=SUPABASE_URL+'/functions/v1';
+  const DASHBOARD_URL='/ciple/dashboard/index.html';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  let resetEmail='';
+  function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');}
+  function getReturnUrl(){const p=new URLSearchParams(window.location.search);return p.get('return')||DASHBOARD_URL;}
+  // LOGIN
+  document.getElementById('login-form').addEventListener('submit',async(e)=>{
     e.preventDefault();
-
-    // Switch to setup tab
-    document.querySelectorAll(".login-tab").forEach(t => t.classList.remove("active"));
-    const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
-    if (setupTab) {
-      setupTab.classList.add("active");
-      setupTab.textContent = "Palavra-passe?";
-    }
-
-    document.querySelectorAll(".auth-card").forEach(card => {
-      card.classList.toggle("tab-active", card.dataset.card === "setup");
-    });
-
-    // Update heading and description
-    const setupCard = document.querySelector('.card-left');
-    const h2 = setupCard?.querySelector("h2");
-    if (h2) h2.textContent = "Esqueceu a palavra-passe?";
-    const p = setupCard?.querySelector("p");
-    if (p) p.textContent = "Introduza o seu e-mail e enviaremos um link para redefinir a sua palavra-passe.";
+    const email=document.getElementById('login-email').value.trim().toLowerCase();
+    const password=document.getElementById('login-password').value;
+    const msgEl=document.getElementById('login-msg');
+    const btn=document.getElementById('login-btn');
+    msgEl.className='msg';btn.disabled=true;btn.innerHTML='<span class="spinner"></span>A iniciar sessão…';
+    const{error}=await sb.auth.signInWithPassword({email,password});
+    if(error){msgEl.className='msg error';msgEl.textContent='E-mail ou palavra-passe incorretos.';btn.disabled=false;btn.textContent='Iniciar sessão';return;}
+    await sb.from('login_history').insert({email,status:'success',method:'password'}).catch(()=>{});
+    window.location.href=getReturnUrl();
   });
-}
+  // NAV
+  document.getElementById('show-reset').addEventListener('click',()=>showView('view-reset-email'));
+  document.getElementById('back-to-login-1').addEventListener('click',()=>showView('view-login'));
+  document.getElementById('back-to-login-2').addEventListener('click',()=>showView('view-login'));
+  document.getElementById('go-to-login').addEventListener('click',()=>showView('view-login'));
+  // RESET STEP 1
+  document.getElementById('reset-email-form').addEventListener('submit',async(e)=>{
+    e.preventDefault();
+    const email=document.getElementById('reset-email').value.trim().toLowerCase();
+    const msgEl=document.getElementById('reset-email-msg');
+    const btn=document.getElementById('reset-email-btn');
+    msgEl.className='msg';btn.disabled=true;btn.innerHTML='<span class="spinner"></span>A verificar…';
+    try{
+      const res=await fetch(FUNCTIONS_URL+'/ciple-reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'check_email',email})});
+      const data=await res.json();
+      if(!data.exists){msgEl.className='msg error';msgEl.textContent=data.message||'E-mail não encontrado.';btn.disabled=false;btn.textContent='Continuar';return;}
+      resetEmail=email;document.getElementById('reset-pin-display').textContent=data.pin;showView('view-reset-pin');
+    }catch(err){msgEl.className='msg error';msgEl.textContent='Erro de ligação. Tente novamente.';}
+    btn.disabled=false;btn.textContent='Continuar';
+  });
+  // RESET STEP 2
+  document.getElementById('reset-pin-form').addEventListener('submit',async(e)=>{
+    e.preventDefault();
+    const pin=document.getElementById('reset-pin').value.trim();
+    const newPassword=document.getElementById('reset-new-password').value;
+    const confirm=document.getElementById('reset-new-password-confirm').value;
+    const msgEl=document.getElementById('reset-pin-msg');
+    const btn=document.getElementById('reset-pin-btn');
+    msgEl.className='msg';
+    if(newPassword!==confirm){msgEl.className='msg error';msgEl.textContent='As palavras-passe não coincidem.';return;}
+    btn.disabled=true;btn.innerHTML='<span class="spinner"></span>A atualizar…';
+    try{
+      const res=await fetch(FUNCTIONS_URL+'/ciple-reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'reset',email:resetEmail,pin,new_password:newPassword})});
+      const data=await res.json();
+      if(data.error){msgEl.className='msg error';msgEl.textContent=data.error;btn.disabled=false;btn.textContent='Atualizar palavra-passe';return;}
+      showView('view-reset-done');
+    }catch(err){msgEl.className='msg error';msgEl.textContent='Erro de ligação. Tente novamente.';btn.disabled=false;btn.textContent='Atualizar palavra-passe';}
+  });
+})();
 </script>
-
 </body>
 </html>
