@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="lb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kont astellen — Sproochentest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary:#00A1DE; --primary-dim:#e6f5fb; --primary-dark:#0082B4;
+      --navy:#0f172a; --muted:#64748b;
+      --border:#e2e8f0; --surface:#ffffff; --bg:#f8f7f4;
+      --pass:#059669; --pass-light:#f0fdf4;
+      --red:#dc2626;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;line-height:1.5;}
+
+    .card{background:var(--surface);border-radius:20px;box-shadow:0 1px 3px rgba(0,0,0,0.06),0 8px 24px rgba(0,0,0,0.06);width:100%;max-width:460px;padding:40px 36px;position:relative;overflow:hidden;}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--pass);}
+
+    .success-icon{width:56px;height:56px;background:var(--pass-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;}
+
+    .brand{text-align:center;margin-bottom:28px;}
+    .brand h1{font-family:"Fraunces",serif;font-size:1.4rem;font-weight:700;color:var(--navy);letter-spacing:-0.02em;}
+    .brand p{font-size:0.95rem;color:var(--muted);margin-top:6px;}
+
+    .form-group{margin-bottom:20px;}
+    .form-group label{display:block;font-size:0.85rem;font-weight:600;color:var(--navy);margin-bottom:6px;}
+    .form-group input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:1rem;font-family:"DM Sans",sans-serif;color:var(--navy);background:#fff;transition:border-color 0.2s,box-shadow 0.2s;outline:none;}
+    .form-group input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-dim);}
+    .form-group input::placeholder{color:#b0b5bf;}
+    .form-group .hint{font-size:0.8rem;color:var(--muted);margin-top:4px;}
+
+    .btn{display:block;width:100%;padding:13px 20px;border:none;border-radius:10px;font-size:1rem;font-weight:600;font-family:"DM Sans",sans-serif;cursor:pointer;transition:background 0.2s,transform 0.1s;}
+    .btn:active{transform:scale(0.99);}
+    .btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+    .btn-primary{background:var(--primary);color:#fff;}
+    .btn-primary:hover:not(:disabled){background:var(--primary-dark);}
+    .btn-pass{background:var(--pass);color:#fff;}
+    .btn-pass:hover:not(:disabled){background:#047857;}
+
+    .msg{padding:10px 14px;border-radius:10px;font-size:0.88rem;margin-bottom:16px;display:none;}
+    .msg.error{display:block;background:#fef2f2;color:var(--red);border:1px solid #fecaca;}
+    .msg.success{display:block;background:var(--pass-light);color:var(--pass);border:1px solid #bbf7d0;}
+
+    .state{display:none;}
+    .state.active{display:block;}
+
+    .spinner{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:8px;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    .product-badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:0.82rem;font-weight:600;margin-top:8px;background:var(--primary-dim);color:var(--primary);}
+
+    .account-done{text-align:center;}
+    .account-done p{color:var(--muted);margin-bottom:24px;}
+
+    .footer{text-align:center;margin-top:24px;font-size:0.8rem;color:var(--muted);}
+    .footer a{color:var(--muted);text-decoration:none;}
+    .footer a:hover{text-decoration:underline;}
+
+    @media(max-width:480px){.card{padding:32px 24px;border-radius:16px;}}
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- STATE 1: Password setup -->
+  <div id="state-setup" class="state active">
+    <div class="success-icon">✓</div>
+    <div class="brand">
+      <h1>Bezuelung bestätegt!</h1>
+      <p>Wielt elo e Passwuert fir Äre Kont</p>
+    </div>
+
+    <div id="setup-msg" class="msg"></div>
+
+    <form id="setup-form">
+      <div class="form-group">
+        <label for="setup-password">Passwuert</label>
+        <input type="password" id="setup-password" required placeholder="Wielt e Passwuert" minlength="6" autocomplete="new-password">
+        <div class="hint">Mindestens 6 Zeechen</div>
+      </div>
+      <div class="form-group">
+        <label for="setup-password-confirm">Passwuert bestätegen</label>
+        <input type="password" id="setup-password-confirm" required placeholder="Widderhuelt d'Passwuert" minlength="6" autocomplete="new-password">
+      </div>
+      <button type="submit" class="btn btn-primary" id="setup-btn">Kont erstellen</button>
+    </form>
+  </div>
+
+  <!-- STATE 2: Account ready -->
+  <div id="state-done" class="state">
+    <div class="success-icon">🎉</div>
+    <div class="account-done">
+      <h1 style="font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;margin-bottom:8px;">Äre Kont ass prett!</h1>
+      <p id="done-email" style="font-size:0.95rem;"></p>
+      <div id="done-badge"></div>
+      <br>
+      <button class="btn btn-pass" id="go-to-dashboard">Ufänken ze üben →</button>
+    </div>
+  </div>
+
+  <!-- STATE 3: Error -->
+  <div id="state-error" class="state">
+    <div class="brand">
+      <h1>Eppes ass schif gaang</h1>
+      <p id="error-detail">Mir konnten Är Bezuelsessioun net fannen. Wann de Problem bestoe bleift, kontaktéiert: admin@civiclearn.com</p>
+    </div>
+    <a href="/sproochentest/" class="btn btn-primary" style="text-align:center;text-decoration:none;">Zréck zum Ufank</a>
+  </div>
+
+</div>
+
+<div class="footer">
+  <a href="https://sproochentest.org">sproochentest.org</a> · <a href="https://civiclearn.com">CivicLearn</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  const SUPABASE_URL      = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const FUNCTIONS_URL     = SUPABASE_URL + '/functions/v1';
+  const DASHBOARD_URL     = '/sproochentest/dashboard/index.html';
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const params    = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+
+  function showState(name) {
+    document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+    document.getElementById('state-' + name).classList.add('active');
+  }
+
+  if (!sessionId) {
+    showState('error');
+    return;
+  }
+
+  document.getElementById('setup-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const password = document.getElementById('setup-password').value;
+    const confirm  = document.getElementById('setup-password-confirm').value;
+    const msgEl    = document.getElementById('setup-msg');
+    const btn      = document.getElementById('setup-btn');
+
+    msgEl.className = 'msg';
+    msgEl.textContent = '';
+
+    if (password !== confirm) {
+      msgEl.className = 'msg error';
+      msgEl.textContent = 'D\'Passwierder stëmmen net iwwereneen.';
+      return;
+    }
+    if (password.length < 6) {
+      msgEl.className = 'msg error';
+      msgEl.textContent = 'D\'Passwuert muss mindestens 6 Zeechen hunn.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Kont gëtt erstallt…';
+
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/sproochentest-setup-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: sessionId,
+          password:   password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        msgEl.className = 'msg error';
+        msgEl.textContent = data.error || 'Et ass e Feeler opgetrueden. Probéiert nach eng Kéier.';
+        btn.disabled = false;
+        btn.textContent = 'Kont erstellen';
+        return;
+      }
+
+      const { error: signInError } = await sb.auth.signInWithPassword({
+        email:    data.email,
+        password: password,
+      });
+
+      if (signInError) {
+        console.error('Auto-login failed:', signInError);
+      }
+
+      document.getElementById('done-email').textContent =
+        'Dir sidd ageloggt als ' + data.email;
+      document.getElementById('done-badge').innerHTML =
+        '<span class="product-badge">Sproochentest Training</span>';
+
+      showState('done');
+
+    } catch (err) {
+      console.error('Setup error:', err);
+      msgEl.className = 'msg error';
+      msgEl.textContent = 'Verbindungsfeeler. Kuckt Ären Internet a probéiert nach eng Kéier.';
+      btn.disabled = false;
+      btn.textContent = 'Kont erstellen';
+    }
+  });
+
+  document.getElementById('go-to-dashboard').addEventListener('click', () => {
+    window.location.href = DASHBOARD_URL;
+  });
+
+})();
+</script>
+</body>
+</html>

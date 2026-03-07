@@ -1,459 +1,147 @@
 <!DOCTYPE html>
 <html lang="lb">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CivicLearn — Sproochentest Premium</title>
-
-  <meta name="description"
-        content="Bereet Iech op de Lëtzebuerger Sproochentest vir mat 10 komplette Simulatiounen (Schwätzen an Héierverstoen), KI-Evaluatioun, detailléiert Feedback an dauerhaften Zougang." />
-  <link rel="canonical" href="https://civiclearn.com/sproochentest/checkout.html">
-
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/checkout.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kafen — Sproochentest Training</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-  
-   /* ── Language switch ── */
-    .lang-switch { display:flex; gap:.35rem; }
-    .lang-switch button {
-      font-family:"Lexend",sans-serif; font-size:.78rem; font-weight:500;
-      padding:.3rem .55rem; border:1.5px solid rgba(0,0,0,.12); border-radius:.45rem;
-      background:transparent; color:#555; cursor:pointer; transition:all .15s;
+    :root {
+      --primary:#00A1DE; --primary-dim:#e6f5fb; --primary-dark:#0082B4;
+      --red:#EF4135; --navy:#0f172a; --slate:#334155; --muted:#64748b;
+      --border:#e2e8f0; --surface:#ffffff; --bg:#f8f7f4;
+      --error:#dc2626;
     }
-    .lang-switch button:hover { border-color:#7c3aed; color:#7c3aed; }
-    .lang-switch button.active { background:#7c3aed; border-color:#7c3aed; color:#fff; }
-	
-    /* ── Plan toggle ── */
-    .plan-toggle { display:flex; gap:.75rem; margin-bottom:1.5rem; }
-    .plan-card {
-      flex:1; padding:1.1rem 1rem; border:2px solid #e5e7eb; border-radius:1rem;
-      cursor:pointer; background:#fff; transition:border-color .15s, box-shadow .15s;
-      position:relative; text-align:center;
-    }
-    .plan-card:hover { border-color:#c4b5fd; }
-    .plan-card.selected { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,.15); }
-    .plan-card-badge {
-      position:absolute; top:-.65rem; left:50%; transform:translateX(-50%);
-      background:#7c3aed; color:#fff; font-size:.68rem; font-weight:600;
-      padding:.15rem .65rem; border-radius:1rem; white-space:nowrap;
-    }
-    .plan-card-name { font-weight:600; font-size:.92rem; color:#1a1a1a; margin-bottom:.25rem; }
-    .plan-card-price { font-size:1.3rem; font-weight:700; color:#7c3aed; }
-    .plan-card-price .was { font-size:.82rem; color:#9ca3af; text-decoration:line-through; font-weight:400; margin-right:.3rem; }
-    .plan-card-save {
-      display:inline-block; margin-top:.35rem; font-size:.72rem; font-weight:600;
-      color:#059669; background:#ecfdf5; padding:.15rem .5rem; border-radius:.5rem;
-    }
-    .plan-card-sub { font-size:.75rem; color:#6b7280; margin-top:.3rem; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 20px;line-height:1.5;}
 
-    /* ── Sidebar dynamic updates ── */
-    .bundle-extras { display:none; }
-    .bundle-extras.show { display:block; }
-    .bundle-extras li { color:#7c3aed; }
-    .price-update { transition:opacity .15s; }
+    .page-header{text-align:center;margin-bottom:36px;max-width:600px;}
+    .header-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:20px;}
+    .topbar-flag{width:32px;height:22px;border-radius:3px;overflow:hidden;flex-shrink:0;display:flex;flex-direction:column;}
+    .topbar-flag span{flex:1;}
+    .topbar-flag span:nth-child(1){background:#EF4135;}
+    .topbar-flag span:nth-child(2){background:#fff;}
+    .topbar-flag span:nth-child(3){background:#00A1DE;}
+    .header-brand-text{font-family:"Fraunces",serif;font-size:1.1rem;font-weight:600;color:var(--navy);}
+    .page-header h1{font-family:"Fraunces",serif;font-size:1.8rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px;}
+    .page-header p{font-size:1.05rem;color:var(--muted);}
 
-    @media(max-width:600px){
-      .plan-toggle { flex-direction:column; }
+    .msg{padding:10px 14px;border-radius:10px;font-size:0.88rem;margin-bottom:16px;background:#fef2f2;color:var(--error);border:1px solid #fecaca;display:none;text-align:center;max-width:480px;width:100%;}
+    .msg.visible{display:block;}
+
+    .product-card{background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:36px 32px;width:100%;max-width:480px;position:relative;transition:border-color 0.2s,box-shadow 0.2s;}
+    .product-card:hover{border-color:var(--primary);box-shadow:0 4px 20px rgba(0,161,222,0.1);}
+    .product-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:14px;background:var(--primary-dim);color:var(--primary);}
+    .product-card h2{font-family:"Fraunces",serif;font-size:1.3rem;font-weight:700;margin-bottom:8px;}
+    .product-price{font-family:"Fraunces",serif;font-size:2.2rem;font-weight:700;color:var(--primary);margin-bottom:4px;}
+    .product-price-note{font-size:0.85rem;color:var(--muted);margin-bottom:22px;}
+    .features{list-style:none;padding:0;}
+    .features li{padding:7px 0;font-size:0.92rem;color:var(--navy);display:flex;align-items:flex-start;gap:10px;}
+    .features li::before{content:'✓';color:var(--primary);font-weight:700;flex-shrink:0;}
+
+    .checkout-section{text-align:center;width:100%;max-width:480px;margin-top:28px;}
+    .btn-checkout{display:inline-block;width:100%;padding:15px 48px;border:none;border-radius:12px;font-size:1.1rem;font-weight:700;font-family:"DM Sans",sans-serif;cursor:pointer;background:var(--primary);color:#fff;transition:background 0.2s,transform 0.1s;}
+    .btn-checkout:hover:not(:disabled){background:var(--primary-dark);}
+    .btn-checkout:active{transform:scale(0.99);}
+    .btn-checkout:disabled{opacity:0.5;cursor:not-allowed;}
+    .secure-note{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:0.82rem;color:var(--muted);}
+    .login-link{text-align:center;margin-top:14px;font-size:0.88rem;color:var(--muted);}
+    .login-link a{color:var(--primary);text-decoration:none;font-weight:600;}
+    .login-link a:hover{text-decoration:underline;}
+
+    .spinner{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:8px;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    .footer{margin-top:auto;padding-top:40px;text-align:center;font-size:0.8rem;color:var(--muted);}
+    .footer a{color:var(--muted);text-decoration:none;}
+    .footer a:hover{text-decoration:underline;}
+
+    @media(max-width:500px){
+      .product-card{padding:28px 22px;}
+      .page-header h1{font-size:1.5rem;}
     }
   </style>
 </head>
-
 <body>
 
-<header class="checkout-header">
-  <div class="checkout-header-inner">
-    <div class="checkout-brand">
-      <img src="/assets/images/lu.svg" alt="Luxembourg">
-      <span data-t="brand_title"></span>
-    </div>
-
-    <div class="lang-switch">
-      <button data-lang="lb">LB</button>
-      <button data-lang="fr">FR</button>
-      <button data-lang="de">DE</button>
-      <button data-lang="en">EN</button>
-    </div>
+<div class="page-header">
+  <div class="header-brand">
+    <div class="topbar-flag"><span></span><span></span><span></span></div>
+    <span class="header-brand-text">Sproochentest</span>
   </div>
-</header>
+  <h1>Sproochentest Training mat KI</h1>
+  <p>Preparéiert Iech fir de Sproochentest mat realistesche Simulatiounen</p>
+</div>
 
-<main>
-  <div class="layout">
+<div id="error-msg" class="msg"></div>
 
-    <aside class="features">
-      <h2 data-t="plan_title"></h2>
-      <div class="price price-update" id="sidebarPrice">69 €</div>
-      <div class="once" data-t="plan_once"></div>
+<div class="product-card">
+  <span class="product-badge">Komplett Zougang</span>
+  <h2>Sproochentest Simulatioun</h2>
+  <div class="product-price">€69</div>
+  <div class="product-price-note">Eemolege Bezuelung · Onlimitéierten Zougang</div>
+  <ul class="features">
+    <li>Komplett Simulatiounen vum Sproochentest</li>
+    <li>Lauschteren — Verständnis vun Hörbeispiller</li>
+    <li>Schwätzen — Gespréich mat KI iwwer Alldag-Themen</li>
+    <li>Bewäertung duerch KI no den offiziellen Critèren</li>
+    <li>Detailléiert Feedback mat Tipps a Verbesserungen</li>
+    <li>Resultat direkt nom Test</li>
+    <li>Übt esou dacks wéi Dir wëllt</li>
+  </ul>
+</div>
 
-      <div class="divider"></div>
-
-      <h3 data-t="included_title"></h3>
-
-      <ul class="benefits">
-        <li data-t="benefit_1"></li>
-        <li data-t="benefit_2"></li>
-        <li data-t="benefit_3"></li>
-        <li data-t="benefit_4"></li>
-        <li data-t="benefit_5"></li>
-        <li data-t="benefit_6"></li>
-      </ul>
-
-      <ul class="benefits bundle-extras" id="bundleExtras">
-        <li data-t="bundle_1"></li>
-        <li data-t="bundle_2"></li>
-        <li data-t="bundle_3"></li>
-        <li data-t="bundle_4"></li>
-      </ul>
-
-      <p class="recommend" data-t="social_proof"></p>
-    </aside>
-
-    <section class="right">
-      <div class="checkout-card">
-
-        <h1 data-t="checkout_title"></h1>
-        <div class="secure-line" data-t="secure_line"></div>
-
-        <!-- ── Plan toggle ── -->
-        <div class="plan-toggle" id="planToggle">
-          <div class="plan-card" data-plan="solo" id="planSolo">
-            <div class="plan-card-name" data-t="toggle_solo_name"></div>
-            <div class="plan-card-price">69 €</div>
-            <div class="plan-card-sub" data-t="toggle_solo_sub"></div>
-          </div>
-          <div class="plan-card" data-plan="bundle" id="planBundle">
-            <div class="plan-card-badge" data-t="toggle_bundle_badge"></div>
-            <div class="plan-card-name" data-t="toggle_bundle_name"></div>
-            <div class="plan-card-price"><span class="was">138 €</span> 99 €</div>
-            <div class="plan-card-save" data-t="toggle_bundle_save"></div>
-            <div class="plan-card-sub" data-t="toggle_bundle_sub"></div>
-          </div>
-        </div>
-
-        <div class="checkout-flow">
-
-          <div class="checkout-step" id="stepInitial">
-            <button class="pay-btn" id="startCheckout" data-t="cta_start"></button>
-            <p class="small-note" data-t="note_redirect"></p>
-          </div>
-
-          <div class="checkout-step" id="stepEmail" hidden>
-            <p data-t="email_instruction"></p>
-
-            <div class="email-field-group">
-              <label for="checkoutEmail" data-t="email_label"></label>
-              <input id="checkoutEmail" type="email" autocomplete="email"/>
-            </div>
-
-            <button class="pay-btn" id="continueWithEmail" data-t="cta_continue"></button>
-          </div>
-
-          <div class="checkout-step" id="stepConfirm" hidden>
-            <p data-t="confirm_text"></p>
-            <p class="email-display" id="emailDisplay"></p>
-
-            <div class="confirm-actions">
-              <button class="pay-btn" id="confirmEmail" data-t="cta_confirm"></button>
-              <button class="link-btn" id="editEmail" data-t="cta_edit"></button>
-            </div>
-          </div>
-
-          <div id="checkoutMessage" class="checkout-message"></div>
-        </div>
-
-      </div>
-    </section>
-
+<div class="checkout-section">
+  <button class="btn-checkout" id="checkout-btn">Elo kafen — €69</button>
+  <div class="secure-note">🔒 Sécher Bezuelung iwwer Stripe</div>
+  <div class="login-link">
+    Hutt Dir schonn e Kont? <a href="/sproochentest/login.html">Aloggen</a>
   </div>
-</main>
+</div>
+
+<div class="footer">
+  <a href="https://sproochentest.org">sproochentest.org</a> · <a href="https://civiclearn.com">CivicLearn</a> · Testrada Pte Ltd
+</div>
 
 <script>
-const I18N = {
+(function() {
+  'use strict';
 
-lb: {
-  brand_title: "CivicLearn Sproochentest",
-  plan_title: "Premium Zougang",
-  plan_once: "Eemolbezuelung · dauerhaften Zougang",
+  const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  const checkoutBtn   = document.getElementById('checkout-btn');
+  const errorMsg      = document.getElementById('error-msg');
 
-  included_title: "Wat ass abegraff",
-  benefit_1: "10 komplett Simulatiounen",
-  benefit_2: "Schwätzen (mëndlech Produktioun)",
-  benefit_3: "Héierverstoen (Audio + Froen)",
-  benefit_4: "KI-Evaluatioun vum Schwätzen",
-  benefit_5: "Detailléiert Feedback pro Kompetenz",
-  benefit_6: "Direkt Zougang no der Bezuelung",
+  checkoutBtn.addEventListener('click', async () => {
+    errorMsg.classList.remove('visible');
+    checkoutBtn.disabled = true;
+    checkoutBtn.innerHTML = '<span class="spinner"></span>Weiderleeden op Stripe…';
 
-  bundle_1: "+ Test Vivre Ensemble",
-  bundle_2: "+ 3 Themen: Geschicht · Institutiounen · Grondrechter",
-  bundle_3: "+ Froen op Franséisch, Englesch an Däitsch",
-  bundle_4: "+ Simulatiounen ënner Zäitdrock (60 Min.)",
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/sproochentest-create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_type: 'sproochentest' }),
+      });
 
-  social_proof: "Fir Kandidaten, déi sech op de Lëtzebuerger Sproochentest virbereeden.",
+      const data = await res.json();
 
-  checkout_title: "Premium Zougang aktivéieren",
-  secure_line: "100 % sécher Bezuelung iwwer Stripe",
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Checkout Feeler');
+      }
 
-  toggle_solo_name: "Sproochentest",
-  toggle_solo_sub: "Nëmmen Sproochentest",
-  toggle_bundle_name: "Sproochentest + Vivre Ensemble",
-  toggle_bundle_badge: "Populärsten",
-  toggle_bundle_save: "Spuert 39 €",
-  toggle_bundle_sub: "Béid Tester mat engem Login",
+      window.location.href = data.url;
 
-  cta_start: "Weider zur sécherer Bezuelung",
-  note_redirect: "Dir gitt op Stripe weidergeleet.",
-
-  email_instruction: "Gitt Är E-Mail-Adress an.",
-  email_label: "E-Mail",
-  cta_continue: "Weider",
-
-  confirm_text: "De Konto gëtt mat dëser Adress erstallt:",
-  cta_confirm: "Jo, weider zur Bezuelung",
-  cta_edit: "Änneren",
-
-  msg_enter_email: "E-Mail néideg.",
-  msg_invalid_email: "Ongëlteg E-Mail.",
-  msg_connecting: "Verbindung mat Stripe…",
-  msg_error: "E Feeler ass geschitt."
-},
-
-fr: {
-  brand_title: "CivicLearn Sproochentest",
-  plan_title: "Accès Premium",
-  plan_once: "Paiement unique · accès à vie",
-
-  included_title: "Inclus",
-  benefit_1: "10 simulations complètes",
-  benefit_2: "Expression orale",
-  benefit_3: "Compréhension orale",
-  benefit_4: "Évaluation IA de l'oral",
-  benefit_5: "Feedback détaillé",
-  benefit_6: "Accès immédiat après paiement",
-
-  bundle_1: "+ Test Vivre Ensemble",
-  bundle_2: "+ 3 thèmes : Histoire · Institutions · Droits fondamentaux",
-  bundle_3: "+ Questions en français, anglais et allemand",
-  bundle_4: "+ Simulations chronométrées (60 min.)",
-
-  social_proof: "Pour les candidats au Sproochentest luxembourgeois.",
-
-  checkout_title: "Activer l'accès Premium",
-  secure_line: "Paiement 100 % sécurisé via Stripe",
-
-  toggle_solo_name: "Sproochentest",
-  toggle_solo_sub: "Sproochentest uniquement",
-  toggle_bundle_name: "Sproochentest + Vivre Ensemble",
-  toggle_bundle_badge: "Le plus populaire",
-  toggle_bundle_save: "Économisez 39 €",
-  toggle_bundle_sub: "Les deux tests avec un seul login",
-
-  cta_start: "Continuer vers le paiement sécurisé",
-  note_redirect: "Redirection vers Stripe.",
-
-  email_instruction: "Entrez votre adresse e-mail.",
-  email_label: "E-mail",
-  cta_continue: "Continuer",
-
-  confirm_text: "Le compte sera créé avec :",
-  cta_confirm: "Oui, continuer",
-  cta_edit: "Modifier",
-
-  msg_enter_email: "Adresse e-mail requise.",
-  msg_invalid_email: "Adresse e-mail invalide.",
-  msg_connecting: "Connexion à Stripe…",
-  msg_error: "Une erreur est survenue."
-},
-
-de: {
-  brand_title: "CivicLearn Sproochentest",
-  plan_title: "Premium-Zugang",
-  plan_once: "Einmalzahlung · lebenslanger Zugriff",
-
-  included_title: "Enthalten",
-  benefit_1: "10 vollständige Simulationen",
-  benefit_2: "Mündlicher Ausdruck",
-  benefit_3: "Hörverstehen",
-  benefit_4: "KI-Bewertung des Sprechens",
-  benefit_5: "Detailliertes Feedback",
-  benefit_6: "Sofortiger Zugriff nach Zahlung",
-
-  bundle_1: "+ Test Vivre Ensemble",
-  bundle_2: "+ 3 Themen: Geschichte · Institutionen · Grundrechte",
-  bundle_3: "+ Fragen auf Französisch, Englisch und Deutsch",
-  bundle_4: "+ Simulationen unter Zeitdruck (60 Min.)",
-
-  social_proof: "Für Kandidaten des Luxemburger Sproochentests.",
-
-  checkout_title: "Premium-Zugang aktivieren",
-  secure_line: "100 % sichere Zahlung über Stripe",
-
-  toggle_solo_name: "Sproochentest",
-  toggle_solo_sub: "Nur Sproochentest",
-  toggle_bundle_name: "Sproochentest + Vivre Ensemble",
-  toggle_bundle_badge: "Am beliebtesten",
-  toggle_bundle_save: "39 € sparen",
-  toggle_bundle_sub: "Beide Tests mit einem Login",
-
-  cta_start: "Weiter zur sicheren Zahlung",
-  note_redirect: "Weiterleitung zu Stripe.",
-
-  email_instruction: "E-Mail-Adresse eingeben.",
-  email_label: "E-Mail",
-  cta_continue: "Weiter",
-
-  confirm_text: "Das Konto wird erstellt mit:",
-  cta_confirm: "Ja, weiter",
-  cta_edit: "Ändern",
-
-  msg_enter_email: "E-Mail erforderlich.",
-  msg_invalid_email: "Ungültige E-Mail.",
-  msg_connecting: "Verbindung zu Stripe…",
-  msg_error: "Fehler aufgetreten."
-},
-
-en: {
-  brand_title: "CivicLearn Sproochentest",
-  plan_title: "Premium Access",
-  plan_once: "One-time payment · lifetime access",
-
-  included_title: "Included",
-  benefit_1: "10 complete simulations",
-  benefit_2: "Speaking",
-  benefit_3: "Listening",
-  benefit_4: "AI speaking evaluation",
-  benefit_5: "Detailed feedback",
-  benefit_6: "Instant access after payment",
-
-  bundle_1: "+ Épreuve Vivre au Luxembourg",
-  bundle_2: "+ 3 themes: History · Institutions · Fundamental Rights",
-  bundle_3: "+ Questions in French, English and German",
-  bundle_4: "+ Timed simulations (60 min.)",
-
-  social_proof: "For candidates preparing for the Luxembourg Sproochentest.",
-
-  checkout_title: "Activate Premium Access",
-  secure_line: "100% secure payment via Stripe",
-
-  toggle_solo_name: "Sproochentest",
-  toggle_solo_sub: "Sproochentest only",
-  toggle_bundle_name: "Sproochentest + Vivre Ensemble",
-  toggle_bundle_badge: "Most popular",
-  toggle_bundle_save: "Save 39 €",
-  toggle_bundle_sub: "Both tests with one login",
-
-  cta_start: "Continue to secure payment",
-  note_redirect: "You will be redirected to Stripe.",
-
-  email_instruction: "Enter your email address.",
-  email_label: "Email",
-  cta_continue: "Continue",
-
-  confirm_text: "The account will be created with:",
-  cta_confirm: "Yes, continue",
-  cta_edit: "Edit",
-
-  msg_enter_email: "Email required.",
-  msg_invalid_email: "Invalid email.",
-  msg_connecting: "Connecting to Stripe…",
-  msg_error: "An error occurred."
-}
-};
-</script>
-
-<script>
-let currentLang = "lb";
-function applyLang(lang){
-  currentLang = lang;
-  document.documentElement.lang = lang;
-  document.querySelectorAll("[data-t]").forEach(el=>{
-    const key = el.dataset.t;
-    if(I18N[lang][key]) el.textContent = I18N[lang][key];
-  });
-  document.querySelectorAll(".lang-switch button").forEach(b=>{
-    b.classList.toggle("active", b.dataset.lang===lang);
-  });
-}
-document.querySelectorAll(".lang-switch button").forEach(b=>{
-  b.onclick=()=>applyLang(b.dataset.lang);
-});
-applyLang("lb");
-</script>
-
-<script>
-(function(){
-
-/* ── Plan state ── */
-const PLANS = {
-  solo:   { product: "sproochentest-premium",       price: "69 €" },
-  bundle: { product: "sproochentest-vivre-bundle",   price: "99 €" }
-};
-
-let selectedPlan = "solo";
-
-/* Read ?plan=bundle from URL */
-const urlPlan = new URLSearchParams(window.location.search).get("plan");
-if (urlPlan === "bundle") selectedPlan = "bundle";
-
-/* DOM refs */
-const cardSolo   = document.getElementById("planSolo");
-const cardBundle = document.getElementById("planBundle");
-const sidebar    = document.getElementById("sidebarPrice");
-const extras     = document.getElementById("bundleExtras");
-
-function selectPlan(plan) {
-  selectedPlan = plan;
-  cardSolo.classList.toggle("selected", plan === "solo");
-  cardBundle.classList.toggle("selected", plan === "bundle");
-  sidebar.textContent = PLANS[plan].price;
-  extras.classList.toggle("show", plan === "bundle");
-}
-
-cardSolo.onclick   = () => selectPlan("solo");
-cardBundle.onclick  = () => selectPlan("bundle");
-
-/* Init */
-selectPlan(selectedPlan);
-
-/* ── Checkout flow (email double-check) ── */
-const s1=stepInitial, s2=stepEmail, s3=stepConfirm;
-
-startCheckout.onclick = () => { s1.hidden=true; s2.hidden=false; };
-
-continueWithEmail.onclick = () => {
-  const v = checkoutEmail.value.trim();
-  if (!v) return alert(I18N[currentLang].msg_enter_email);
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))
-    return alert(I18N[currentLang].msg_invalid_email);
-  emailDisplay.textContent = v;
-  s2.hidden=true; s3.hidden=false;
-};
-
-editEmail.onclick = () => { s3.hidden=true; s2.hidden=false; };
-
-confirmEmail.onclick = async () => {
-  const v = checkoutEmail.value.trim();
-  const msg = document.getElementById("checkoutMessage");
-  msg.textContent = I18N[currentLang].msg_connecting;
-
-  try {
-    const r = await fetch("https://payments.civiclearn.com/create-checkout-session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: v, product: PLANS[selectedPlan].product })
-    });
-    const d = await r.json();
-    if (d.url) {
-      window.location.href = d.url;
-    } else {
-      msg.textContent = d.error || I18N[currentLang].msg_error;
+    } catch (err) {
+      console.error('Checkout error:', err);
+      errorMsg.textContent = 'Et ass e Feeler opgetrueden: ' + err.message + '. Prob\u00e9iert nach eng K\u00e9ier oder kontakt\u00e9iert: admin@civiclearn.com';
+      errorMsg.classList.add('visible');
+      checkoutBtn.disabled = false;
+      checkoutBtn.textContent = 'Elo kafen — €69';
     }
-  } catch (e) {
-    msg.textContent = I18N[currentLang].msg_error;
-  }
-};
-
+  });
 })();
 </script>
-
 </body>
 </html>
