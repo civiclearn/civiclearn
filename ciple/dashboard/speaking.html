@@ -354,7 +354,7 @@
         };
         
         mediaRecorder.onstop = async () => {
-          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
           await CIPLEEngine.saveSpeakingRecording(taskId, audioBlob);
           showPlayback(taskId, CIPLEEngine.currentTest.sections.speaking.recordings[taskId]);
           updateSubmitButton();
@@ -393,9 +393,7 @@
       playbackDiv.innerHTML = `
         <div class="alert alert-success" style="margin-top: 1rem;">
           ✅ Gravação completa
-          <audio controls style="width: 100%; margin-top: 0.5rem;">
-            <source src="${base64Audio}" type="audio/webm">
-          </audio>
+          <audio controls src="${base64Audio}" style="width: 100%; margin-top: 0.5rem;"></audio>
           <button class="btn btn-secondary" style="margin-top: 0.5rem;" 
                   onclick="startRecording('${taskId}')">
             🔄 Gravar Novamente
