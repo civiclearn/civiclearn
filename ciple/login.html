@@ -144,7 +144,7 @@
     msgEl.className='msg';btn.disabled=true;btn.innerHTML='<span class="spinner"></span>A iniciar sessão…';
     const{error}=await sb.auth.signInWithPassword({email,password});
     if(error){msgEl.className='msg error';msgEl.textContent='E-mail ou palavra-passe incorretos.';btn.disabled=false;btn.textContent='Iniciar sessão';return;}
-    await sb.from('login_history').insert({email,status:'success',method:'password'}).catch(()=>{});
+    try{await sb.from('login_history').insert({email,status:'success',method:'password'});}catch(e){}
     window.location.href=getReturnUrl();
   });
   // NAV
