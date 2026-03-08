@@ -472,7 +472,9 @@
 
     try {
       const stream   = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+      const preferredMime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4']
+    .find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+const recorder = new MediaRecorder(stream, preferredMime ? { mimeType: preferredMime } : {});
       const chunks   = [];
 
       recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
@@ -480,7 +482,7 @@
         stream.getTracks().forEach(t => t.stop());
         clearInterval(recordTimer);
 
-        const blob     = new Blob(chunks, { type: 'audio/webm' });
+        const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
         const url      = URL.createObjectURL(blob);
         const duration = (Date.now() - recordStartTime) / 1000;
 
