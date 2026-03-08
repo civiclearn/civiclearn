@@ -242,6 +242,17 @@
       text-decoration: none;
     }
     .footer a:hover { text-decoration: underline; }
+
+    /* ── Admin impersonate ─────────────────── */
+    .admin-toggle{text-align:center;margin-top:16px;font-size:0.75rem;opacity:0.3;cursor:pointer;user-select:none;}
+    .admin-toggle:hover{opacity:0.6;}
+    .admin-panel{display:none;background:var(--card-bg);border:1px dashed var(--border);border-radius:12px;padding:20px;margin-top:12px;width:100%;max-width:420px;}
+    .admin-panel.open{display:block;}
+    .admin-panel h3{font-size:0.85rem;color:var(--text-muted);margin-bottom:12px;text-align:center;}
+    .admin-panel .form-group{margin-bottom:12px;}
+    .admin-panel .btn-admin{background:#6b7280;color:#fff;font-size:0.88rem;padding:10px;display:block;width:100%;border:none;border-radius:var(--radius);font-family:inherit;font-weight:600;cursor:pointer;transition:background 0.2s;}
+    .admin-panel .btn-admin:hover:not(:disabled){background:#4b5563;}
+    .admin-panel .btn-admin:disabled{opacity:0.6;cursor:not-allowed;}
   </style>
 </head>
 <body>
@@ -342,6 +353,22 @@
     </div>
     <button class="btn btn-primary" id="go-to-login">Log ind</button>
   </div>
+</div>
+
+<!-- Admin impersonation (hidden by default) -->
+<div class="admin-toggle" id="admin-toggle">⚙</div>
+<div class="admin-panel" id="admin-panel">
+  <h3>Admin — Login as user</h3>
+  <div id="admin-msg" class="msg"></div>
+  <div class="form-group">
+    <label for="admin-email">User e-mail</label>
+    <input type="email" id="admin-email" placeholder="user@example.com" autocomplete="off">
+  </div>
+  <div class="form-group">
+    <label for="admin-key">Admin key</label>
+    <input type="password" id="admin-key" placeholder="Admin key" autocomplete="off">
+  </div>
+  <button class="btn btn-admin" id="admin-btn">Impersonate</button>
 </div>
 
 <div class="footer">
@@ -532,6 +559,39 @@
       showMsg('reset-msg', 'Der opstod en fejl. Prøv igen.', 'error');
     }
     setLoading('reset-btn', false);
+  });
+
+  // ── Admin impersonate ──────────────────────
+  function getReturnUrl() {
+    return new URLSearchParams(window.location.search).get('return') || DASHBOARD_URL;
+  }
+
+  document.getElementById('admin-toggle').addEventListener('click', () => {
+    document.getElementById('admin-panel').classList.toggle('open');
+  });
+
+  document.getElementById('admin-btn').addEventListener('click', async () => {
+    const email = document.getElementById('admin-email').value.trim().toLowerCase();
+    const key = document.getElementById('admin-key').value;
+    const msgEl = document.getElementById('admin-msg');
+    const btn = document.getElementById('admin-btn');
+    msgEl.className = 'msg';
+    if (!email || !key) { msgEl.className = 'msg error'; msgEl.textContent = 'Both fields required.'; return; }
+    btn.disabled = true; btn.textContent = 'Impersonating…';
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/admin-impersonate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, admin_key: key }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) { msgEl.className = 'msg error'; msgEl.textContent = data.error || 'Failed.'; btn.disabled = false; btn.textContent = 'Impersonate'; return; }
+      const { error: otpError } = await sb.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' });
+      if (otpError) { msgEl.className = 'msg error'; msgEl.textContent = 'Session failed: ' + otpError.message; btn.disabled = false; btn.textContent = 'Impersonate'; return; }
+      localStorage.setItem('cl_auth', 'ok');
+      localStorage.setItem('cl_email', data.email);
+      window.location.href = getReturnUrl();
+    } catch (err) { msgEl.className = 'msg error'; msgEl.textContent = 'Error: ' + err.message; btn.disabled = false; btn.textContent = 'Impersonate'; }
   });
 
 })();
