@@ -248,9 +248,7 @@
       return;
     }
 
-    await sb.from('login_history').insert({
-      email, status: 'success', method: 'password'
-    }).catch(() => {});
+    try { await sb.from('login_history').insert({ email, status: 'success', method: 'password' }); } catch(e) {}
 
     window.location.href = getReturnUrl();
   });
