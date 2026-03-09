@@ -6,7 +6,7 @@
   <title>Kafen — Sproochentest Training</title>
 
   <meta name="description"
-        content="Sproochentest Simulatioun mat KI. Komplett Training fir Lauschteren a Schwätzen. Eemolege Bezuelung, onlimitéierten Zougang." />
+        content="Sproochentest Simulatioun. Komplett Training fir Lauschteren a Schwätzen. Eemolege Bezuelung, onlimitéierten Zougang." />
   <link rel="canonical" href="https://civiclearn.com/sproochentest/checkout.html">
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -22,6 +22,29 @@
     .topbar-flag .f-red { background: #EF4135; }
     .topbar-flag .f-white { background: #fff; }
     .topbar-flag .f-blue { background: #00A1DE; }
+
+    #payment-element { margin-bottom: 1.2rem; min-height: 80px; }
+    .payment-loading { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 2rem 0; }
+
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
+    .field input {
+      width: 100%; padding: 0.75rem 0.9rem; border-radius: 0.9rem;
+      border: 1px solid rgba(0,0,0,0.12); font-size: 0.95rem;
+      font-family: "Lexend", sans-serif; outline: none;
+    }
+    .field input:focus { outline: 2px solid var(--brand); border-color: transparent; }
+
+    .done-icon { font-size: 3rem; text-align: center; margin-bottom: 0.8rem; }
+    .done-title { font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; }
+    .done-sub { font-size: 0.95rem; color: var(--muted); text-align: center; margin-bottom: 1.5rem; }
+
+    .step-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; margin-bottom: 1rem;
+      background: #eef2ff; color: #3730a3;
+    }
   </style>
 </head>
 
@@ -34,7 +57,7 @@
       Sproochentest Training
     </div>
     <div class="checkout-powered">
-      <small>propulséiert vun</small>
+      <small>powered by</small>
       <a href="https://civiclearn.com">CivicLearn</a>
     </div>
   </div>
@@ -43,7 +66,7 @@
 <main>
   <div class="layout">
 
-    <!-- LEFT: BENEFITS -->
+    <!-- LEFT: BENEFITS (Luxembourgish) -->
     <aside class="features">
       <h2>Komplett Zougang</h2>
       <div class="price">69&nbsp;€</div>
@@ -71,64 +94,106 @@
       </p>
     </aside>
 
-    <!-- RIGHT: PAYMENT FLOW -->
+    <!-- RIGHT: PAYMENT FLOW (English) -->
     <section class="right">
       <div class="checkout-card">
 
-        <h1>Sproochentest Training kafen</h1>
-        <div class="secure-line">Sécher Bezuelung iwwer Stripe</div>
+        <h1>Get Sproochentest Training</h1>
+        <div class="secure-line">100% secure payment · your card details never touch our servers</div>
 
         <div class="checkout-flow" id="checkoutFlow">
 
-          <!-- STEP 1: Start -->
           <div class="checkout-step" id="stepInitial">
             <button type="button" class="pay-btn" id="startCheckout">
-              Elo kafen — 69 €
+              Buy now — 69 €
             </button>
             <p class="small-note">
-              Dir gitt op Stripe weidergeleet fir d'Bezuelung ofzeschléissen.
+              You'll pay securely right here. No redirect needed.
             </p>
           </div>
 
-          <!-- STEP 2: Email -->
           <div class="checkout-step" id="stepEmail" hidden>
+            <span class="step-badge">Step 1 of 3</span>
             <p class="email-instructions">
-              Gitt Är E-Mail-Adress an, déi Dir fir Äre CivicLearn-Kont benotze wëllt.
+              Enter the email address you'd like to use for your CivicLearn account.
             </p>
             <div class="email-field-group">
               <label for="checkoutEmail">Email</label>
-              <input type="email" id="checkoutEmail" autocomplete="email" placeholder="beispill@domaine.com" inputmode="email" />
+              <input type="email" id="checkoutEmail" autocomplete="email" placeholder="example@domain.com" inputmode="email" />
             </div>
-            <button type="button" class="pay-btn" id="continueWithEmail">Weider</button>
+            <button type="button" class="pay-btn" id="continueWithEmail">Continue</button>
           </div>
 
-          <!-- STEP 3: Confirm -->
           <div class="checkout-step" id="stepConfirm" hidden>
-            <p class="confirm-text">Äre Kont gëtt mat dëser Adress erstallt:</p>
+            <span class="step-badge">Step 2 of 3</span>
+            <p class="confirm-text">Your account will be created with this address:</p>
             <p class="email-display" id="emailDisplay"></p>
-            <p class="confirm-warning">Kuckt genee no. Dës Adress ass Ären Login.</p>
+            <p class="confirm-warning">Please double-check. This will be your login email.</p>
             <div class="confirm-actions">
               <button type="button" class="pay-btn" id="confirmEmail">
-                Jo, weider op Stripe
+                Confirm and continue to payment
               </button>
               <button type="button" class="link-btn" id="editEmail">
-                E-Mail-Adress änneren
+                Change email address
               </button>
             </div>
+          </div>
+
+          <div class="checkout-step" id="stepPayment" hidden>
+            <span class="step-badge">Step 3 of 3</span>
+            <p class="email-instructions" style="margin-bottom:1rem;">
+              Enter your card details below. Payment is processed securely by Stripe.
+            </p>
+            <div id="payment-element">
+              <div class="payment-loading">Loading payment form…</div>
+            </div>
+            <button type="button" class="pay-btn" id="payBtn" disabled>
+              Pay 69 €
+            </button>
+            <button type="button" class="link-btn" id="backToConfirm" style="margin-top:0.5rem;">
+              ← Back
+            </button>
+          </div>
+
+          <div class="checkout-step" id="stepPassword" hidden>
+            <div style="text-align:center;font-size:2rem;margin-bottom:0.5rem;">🎉</div>
+            <div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;">Payment successful!</div>
+            <p class="email-instructions" style="text-align:center;">
+              Now set a password to complete your account setup.
+            </p>
+            <div class="field">
+              <label for="pw1">Password</label>
+              <input type="password" id="pw1" autocomplete="new-password" placeholder="At least 6 characters">
+            </div>
+            <div class="field">
+              <label for="pw2">Confirm password</label>
+              <input type="password" id="pw2" autocomplete="new-password" placeholder="Repeat password">
+            </div>
+            <button type="button" class="pay-btn" id="setupBtn">Create account</button>
+          </div>
+
+          <div class="checkout-step" id="stepDone" hidden>
+            <div class="done-icon">✅</div>
+            <div class="done-title">Your account is ready!</div>
+            <div class="done-sub" id="doneEmail"></div>
+            <a href="/sproochentest/dashboard/index.html" class="pay-btn" style="text-align:center;text-decoration:none;display:block;">
+              Go to dashboard →
+            </a>
           </div>
 
           <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
+
         </div>
 
         <div class="trust">
-          <div>🔒 Sécher Bezuelung</div>
-          <div>⚡ Direkt Zougang</div>
-          <div>✔ Keen Abonnement</div>
+          <div>🔒 Secure payment</div>
+          <div>⚡ Instant access</div>
+          <div>✔ No subscription</div>
         </div>
 
         <div class="after-text">
-          Hutt Dir schonn e Kont?
-          <a href="/sproochentest/login.html">Aloggen</a>.
+          Already have an account?
+          <a href="/sproochentest/login.html">Log in</a>.
         </div>
 
       </div>
@@ -137,95 +202,238 @@
   </div>
 </main>
 
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
 <script>
 (function() {
-  const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  'use strict';
 
-  const stepInitial = document.getElementById("stepInitial");
-  const stepEmail   = document.getElementById("stepEmail");
-  const stepConfirm = document.getElementById("stepConfirm");
+  const FUNCTIONS_URL  = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  const SUPABASE_URL   = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const STRIPE_PK      = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
+  const RETURN_URL     = 'https://civiclearn.com/sproochentest/checkout.html';
 
-  const startBtn     = document.getElementById("startCheckout");
-  const continueBtn  = document.getElementById("continueWithEmail");
-  const confirmBtn   = document.getElementById("confirmEmail");
-  const editEmailBtn = document.getElementById("editEmail");
+  const stripe = Stripe(STRIPE_PK);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const emailInput   = document.getElementById("checkoutEmail");
-  const emailDisplay = document.getElementById("emailDisplay");
-  const messageBox   = document.getElementById("checkoutMessage");
+  const stepInitial  = document.getElementById('stepInitial');
+  const stepEmail    = document.getElementById('stepEmail');
+  const stepConfirm  = document.getElementById('stepConfirm');
+  const stepPayment  = document.getElementById('stepPayment');
+  const stepPassword = document.getElementById('stepPassword');
+  const stepDone     = document.getElementById('stepDone');
 
-  let currentEmail = "";
+  const startBtn      = document.getElementById('startCheckout');
+  const continueBtn   = document.getElementById('continueWithEmail');
+  const confirmBtn    = document.getElementById('confirmEmail');
+  const editEmailBtn  = document.getElementById('editEmail');
+  const payBtn        = document.getElementById('payBtn');
+  const backToConfirm = document.getElementById('backToConfirm');
+  const setupBtn      = document.getElementById('setupBtn');
+
+  const emailInput   = document.getElementById('checkoutEmail');
+  const emailDisplay = document.getElementById('emailDisplay');
+  const messageBox   = document.getElementById('checkoutMessage');
+
+  let currentEmail = '';
+  let paymentIntentId = '';
+  let stripeElements = null;
   let isSubmitting = false;
 
-  function showStep(stepId) {
-    stepInitial.hidden = stepId !== "initial";
-    stepEmail.hidden   = stepId !== "email";
-    stepConfirm.hidden = stepId !== "confirm";
+  function showStep(id) {
+    [stepInitial, stepEmail, stepConfirm, stepPayment, stepPassword, stepDone]
+      .forEach(el => el.hidden = true);
+    document.getElementById(id).hidden = false;
     clearMessage();
   }
 
   function clearMessage() {
-    messageBox.textContent = "";
-    messageBox.className = "checkout-message";
-    messageBox.style.display = "none";
+    messageBox.textContent = '';
+    messageBox.className = 'checkout-message';
+    messageBox.style.display = 'none';
   }
 
   function showMessage(type, text) {
     messageBox.textContent = text;
-    messageBox.className = "checkout-message " + type;
-    messageBox.style.display = "block";
+    messageBox.className = 'checkout-message ' + type;
+    messageBox.style.display = 'block';
   }
 
   function validateEmail(value) {
     const email = value.trim();
-    if (!email) return { ok: false, msg: "Gitt w.e.g. Är E-Mail-Adress an." };
+    if (!email) return { ok: false, msg: 'Please enter your email address.' };
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
-      return { ok: false, msg: "Ongëlteg E-Mail-Adress. Kuckt nach eng Kéier no." };
+      return { ok: false, msg: 'Invalid email address. Please check and try again.' };
     return { ok: true, email };
   }
 
-  startBtn.addEventListener("click", () => { showStep("email"); emailInput.focus(); });
+  // 3DS return handling
+  const urlParams = new URLSearchParams(window.location.search);
+  const returnedPI = urlParams.get('payment_intent');
+  const returnedSecret = urlParams.get('payment_intent_client_secret');
+  const returnedStatus = urlParams.get('redirect_status');
 
-  continueBtn.addEventListener("click", () => {
+  if (returnedPI && returnedSecret) {
+    currentEmail = localStorage.getItem('sproochentest_checkout_email') || '';
+    paymentIntentId = returnedPI;
+    if (returnedStatus === 'succeeded') {
+      showStep('stepPassword');
+    } else {
+      stripe.retrievePaymentIntent(returnedSecret).then(({ paymentIntent }) => {
+        if (paymentIntent && paymentIntent.status === 'succeeded') {
+          showStep('stepPassword');
+        } else {
+          showMessage('error', 'Payment was not completed. Please try again.');
+          showStep('stepInitial');
+        }
+      });
+    }
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  startBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
+
+  continueBtn.addEventListener('click', () => {
     const { ok, msg, email } = validateEmail(emailInput.value);
-    if (!ok) { showMessage("error", msg); emailInput.focus(); return; }
+    if (!ok) { showMessage('error', msg); emailInput.focus(); return; }
     currentEmail = email;
     emailDisplay.textContent = currentEmail;
-    showStep("confirm");
+    showStep('stepConfirm');
   });
 
-  emailInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); continueBtn.click(); }
+  emailInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); }
   });
 
-  editEmailBtn.addEventListener("click", () => { showStep("email"); emailInput.focus(); });
+  editEmailBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
 
-  confirmBtn.addEventListener("click", async () => {
+  confirmBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
-    if (!currentEmail) { showMessage("error", "E-Mail-Adress feelt."); showStep("email"); return; }
-
     isSubmitting = true;
     confirmBtn.disabled = true;
-    confirmBtn.textContent = "Bezuelsessioun gëtt erstallt…";
-    showMessage("info", "Verbindung mat Stripe. Waart w.e.g.…");
+    confirmBtn.textContent = 'Setting up payment…';
+    showMessage('info', 'Preparing secure payment form…');
 
     try {
-      const response = await fetch(FUNCTIONS_URL + "/sproochentest-create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product_type: "sproochentest", email: currentEmail })
+      const res = await fetch(FUNCTIONS_URL + '/sproochentest-create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail }),
       });
-      if (!response.ok) throw new Error("Feeler beim Start vun der Bezuelung.");
-      const data = await response.json();
-      if (!data || !data.url) throw new Error(data.error || "Onerwaart Äntwert vum Server.");
-      window.location.href = data.url;
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Failed to create payment session.');
+
+      paymentIntentId = data.payment_intent_id;
+      localStorage.setItem('sproochentest_checkout_email', currentEmail);
+
+      stripeElements = stripe.elements({
+        clientSecret: data.client_secret,
+        appearance: {
+          theme: 'stripe',
+          variables: {
+            fontFamily: '"Lexend", system-ui, sans-serif',
+            borderRadius: '0.9rem',
+            colorPrimary: '#7c3aed',
+          },
+        },
+      });
+
+      const paymentElement = stripeElements.create('payment');
+      document.getElementById('payment-element').innerHTML = '';
+      paymentElement.mount('#payment-element');
+
+      paymentElement.on('ready', () => { payBtn.disabled = false; });
+      paymentElement.on('change', (event) => { if (event.complete) payBtn.disabled = false; });
+
+      showStep('stepPayment');
     } catch (err) {
-      showMessage("error", err.message || "Et ass e Feeler opgetrueden. Probéiert nach eng Kéier.");
+      showMessage('error', err.message || 'An error occurred. Please try again.');
+    } finally {
       isSubmitting = false;
       confirmBtn.disabled = false;
-      confirmBtn.textContent = "Jo, weider op Stripe";
+      confirmBtn.textContent = 'Confirm and continue to payment';
     }
   });
+
+  backToConfirm.addEventListener('click', () => showStep('stepConfirm'));
+
+  payBtn.addEventListener('click', async () => {
+    if (isSubmitting) return;
+    isSubmitting = true;
+    payBtn.disabled = true;
+    payBtn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;"></span>Processing payment…';
+    clearMessage();
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements: stripeElements,
+      confirmParams: {
+        return_url: RETURN_URL,
+        receipt_email: currentEmail,
+      },
+      redirect: 'if_required',
+    });
+
+    if (error) {
+      showMessage('error', error.message || 'Payment failed. Please try again.');
+      payBtn.disabled = false;
+      payBtn.textContent = 'Pay 69 €';
+      isSubmitting = false;
+      return;
+    }
+
+    if (paymentIntent && paymentIntent.status === 'succeeded') {
+      paymentIntentId = paymentIntent.id;
+      showStep('stepPassword');
+    }
+    isSubmitting = false;
+  });
+
+  setupBtn.addEventListener('click', async () => {
+    const pw1 = document.getElementById('pw1').value;
+    const pw2 = document.getElementById('pw2').value;
+
+    if (!pw1 || pw1.length < 6) { showMessage('error', 'Password must be at least 6 characters.'); return; }
+    if (pw1 !== pw2) { showMessage('error', 'Passwords do not match.'); return; }
+
+    setupBtn.disabled = true;
+    setupBtn.textContent = 'Creating account…';
+    clearMessage();
+
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/sproochentest-setup-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_intent_id: paymentIntentId, password: pw1 }),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        showMessage('error', data.error || 'Account setup failed. Please contact admin@civiclearn.com.');
+        setupBtn.disabled = false;
+        setupBtn.textContent = 'Create account';
+        return;
+      }
+
+      const { error: signInError } = await sb.auth.signInWithPassword({ email: data.email, password: pw1 });
+      if (signInError) console.error('Auto-login failed:', signInError);
+
+      localStorage.removeItem('sproochentest_checkout_email');
+      document.getElementById('doneEmail').textContent = 'Logged in as: ' + data.email;
+      showStep('stepDone');
+
+    } catch (err) {
+      showMessage('error', 'Connection error. Please try again.');
+      setupBtn.disabled = false;
+      setupBtn.textContent = 'Create account';
+    }
+  });
+
+  document.getElementById('pw2').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') setupBtn.click();
+  });
+
 })();
 </script>
 
