@@ -1,146 +1,238 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Comprar — Simulação CELPE-BRAS</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <meta name="description"
+        content="Simulação CELPE-BRAS com avaliação por IA. 10 simulações completas, parte escrita e oral, feedback detalhado. Pagamento único, acesso ilimitado." />
+  <link rel="canonical" href="https://civiclearn.com/celpe/checkout.html">
+
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/checkout.css">
+
   <style>
-    :root {
-      --green:#009c3b; --green-dim:#e6f5ec; --green-dark:#007a2f;
-      --yellow:#ffdf00; --blue:#002776;
-      --navy:#0f172a; --slate:#334155; --muted:#64748b;
-      --border:#e2e8f0; --surface:#ffffff; --bg:#f8f7f4;
-      --red:#dc2626;
+    .topbar-flag {
+      width: 26px; height: 18px; border-radius: 3px;
+      overflow: hidden; display: inline-block; flex-shrink: 0;
+      vertical-align: middle; background: #009c3b; position: relative;
     }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 20px;line-height:1.5;}
-
-    .page-header{text-align:center;margin-bottom:36px;max-width:600px;}
-    .header-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:20px;}
-    .topbar-flag{width:32px;height:22px;background:var(--green);border-radius:3px;position:relative;overflow:hidden;flex-shrink:0;}
-    .topbar-flag::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:12px;background:var(--yellow);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);}
-    .topbar-flag::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:7px;height:7px;border-radius:50%;background:var(--blue);}
-    .header-brand-text{font-family:"Fraunces",serif;font-size:1.1rem;font-weight:600;color:var(--navy);}
-    .page-header h1{font-family:"Fraunces",serif;font-size:1.8rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px;}
-    .page-header p{font-size:1.05rem;color:var(--muted);}
-
-    .msg{padding:10px 14px;border-radius:10px;font-size:0.88rem;margin-bottom:16px;background:#fef2f2;color:var(--red);border:1px solid #fecaca;display:none;text-align:center;max-width:480px;width:100%;}
-    .msg.visible{display:block;}
-
-    .product-card{background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:36px 32px;width:100%;max-width:480px;position:relative;transition:border-color 0.2s,box-shadow 0.2s;}
-    .product-card:hover{border-color:var(--green);box-shadow:0 4px 20px rgba(0,156,59,0.1);}
-    .product-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:14px;background:var(--green-dim);color:var(--green);}
-    .product-card h2{font-family:"Fraunces",serif;font-size:1.3rem;font-weight:700;margin-bottom:8px;}
-    .product-price{font-family:"Fraunces",serif;font-size:2.2rem;font-weight:700;color:var(--green);margin-bottom:4px;}
-    .product-price-note{font-size:0.85rem;color:var(--muted);margin-bottom:22px;}
-    .features{list-style:none;padding:0;}
-    .features li{padding:7px 0;font-size:0.92rem;color:var(--navy);display:flex;align-items:flex-start;gap:10px;}
-    .features li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0;}
-
-    .checkout-section{text-align:center;width:100%;max-width:480px;margin-top:28px;}
-    .btn-checkout{display:inline-block;width:100%;padding:15px 48px;border:none;border-radius:12px;font-size:1.1rem;font-weight:700;font-family:"DM Sans",sans-serif;cursor:pointer;background:var(--green);color:#fff;transition:background 0.2s,transform 0.1s;}
-    .btn-checkout:hover:not(:disabled){background:var(--green-dark);}
-    .btn-checkout:active{transform:scale(0.99);}
-    .btn-checkout:disabled{opacity:0.5;cursor:not-allowed;}
-    .secure-note{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:0.82rem;color:var(--muted);}
-    .login-link{text-align:center;margin-top:14px;font-size:0.88rem;color:var(--muted);}
-    .login-link a{color:var(--green);text-decoration:none;font-weight:600;}
-    .login-link a:hover{text-decoration:underline;}
-
-    .spinner{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:8px;}
-    @keyframes spin{to{transform:rotate(360deg);}}
-
-    .footer{margin-top:auto;padding-top:40px;text-align:center;font-size:0.8rem;color:var(--muted);}
-    .footer a{color:var(--muted);text-decoration:none;}
-    .footer a:hover{text-decoration:underline;}
-
-    @media(max-width:500px){
-      .product-card{padding:28px 22px;}
-      .page-header h1{font-size:1.5rem;}
+    .topbar-flag::before {
+      content: ''; position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%,-50%); width: 16px; height: 10px;
+      background: #ffdf00; clip-path: polygon(50% 0%,100% 50%,50% 100%,0% 50%);
+    }
+    .topbar-flag::after {
+      content: ''; position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%,-50%); width: 6px; height: 6px;
+      border-radius: 50%; background: #002776;
     }
   </style>
 </head>
+
 <body>
 
-<div class="page-header">
-  <div class="header-brand">
-    <div class="topbar-flag"></div>
-    <span class="header-brand-text">CELPE-BRAS</span>
+<header class="checkout-header">
+  <div class="checkout-header-inner">
+    <div class="checkout-brand">
+      <div class="topbar-flag"></div>
+      CELPE-BRAS – Simulação
+    </div>
+    <div class="checkout-powered">
+      <small>powered by</small>
+      <a href="https://civiclearn.com">CivicLearn</a>
+    </div>
   </div>
-  <h1>Simulação CELPE-BRAS com IA</h1>
-  <p>Pratique para o exame com avaliação inteligente</p>
-</div>
+</header>
 
-<div id="error-msg" class="msg"></div>
+<main>
+  <div class="layout">
 
-<div class="product-card">
-  <span class="product-badge">Acesso completo</span>
-  <h2>Simulação CELPE-BRAS</h2>
-  <div class="product-price">R$ 299</div>
-  <div class="product-price-note">Pagamento único · Acesso ilimitado</div>
-  <ul class="features">
-    <li>10 simulações completas do exame</li>
-    <li>Parte Escrita — 4 tarefas com vídeo, áudio e textos</li>
-    <li>Parte Oral — conversa com IA sobre Elementos Provocadores</li>
-    <li>Avaliação por IA com os 5 critérios oficiais do CELPE-BRAS</li>
-    <li>Feedback detalhado com correções e sugestões</li>
-    <li>Resultado com nível de certificação (Intermediário a Avançado Superior)</li>
-    <li>Pratique quantas vezes quiser</li>
-  </ul>
-</div>
+    <aside class="features">
+      <h2>Acesso Completo</h2>
+      <div class="price">R$&nbsp;299</div>
+      <div class="once">Pagamento único · acesso ilimitado</div>
 
-<div class="checkout-section">
-  <button class="btn-checkout" id="checkout-btn">Comprar agora — R$ 299</button>
-  <div class="secure-note">🔒 Pagamento seguro via Stripe</div>
-  <div class="login-link">
-    Já tem uma conta? <a href="/celpe/login.html">Entrar</a>
+      <div class="divider"></div>
+
+      <h3>O que está incluído</h3>
+
+      <ul class="benefits">
+        <li>10 simulações completas do exame</li>
+        <li>Parte Escrita — 4 tarefas com vídeo, áudio e textos</li>
+        <li>Parte Oral — avaliação por IA dos Elementos Provocadores</li>
+        <li>Avaliação por IA com os 5 critérios oficiais do CELPE-BRAS</li>
+        <li>Feedback detalhado com correções e sugestões</li>
+        <li>Resultado com nível de certificação (Intermediário a Avançado Superior)</li>
+        <li>Pratique quantas vezes quiser</li>
+        <li>100% otimizado para celular, tablet e computador</li>
+        <li>Acesso imediato após pagamento</li>
+        <li>Atualizações gratuitas</li>
+        <li>Acesso ilimitado à plataforma</li>
+      </ul>
+
+      <p class="recommend">
+        Recomendado por candidatos que conquistaram a certificação CELPE-BRAS.
+      </p>
+    </aside>
+
+    <section class="right">
+      <div class="checkout-card">
+
+        <h1>Comprar Simulação CELPE-BRAS</h1>
+        <div class="secure-line">Pagamento 100% seguro via Stripe</div>
+
+        <div class="checkout-flow" id="checkoutFlow">
+
+          <!-- STEP 1: Start -->
+          <div class="checkout-step" id="stepInitial">
+            <button type="button" class="pay-btn" id="startCheckout">
+              Comprar agora — R$ 299
+            </button>
+            <p class="small-note">
+              Você será redirecionado para o Stripe para concluir o pagamento.
+            </p>
+          </div>
+
+          <!-- STEP 2: Email -->
+          <div class="checkout-step" id="stepEmail" hidden>
+            <p class="email-instructions">
+              Digite o endereço de email que deseja usar para sua conta CivicLearn.
+            </p>
+            <div class="email-field-group">
+              <label for="checkoutEmail">Email</label>
+              <input type="email" id="checkoutEmail" autocomplete="email" placeholder="exemplo@dominio.com" inputmode="email" />
+            </div>
+            <button type="button" class="pay-btn" id="continueWithEmail">Continuar</button>
+          </div>
+
+          <!-- STEP 3: Confirm -->
+          <div class="checkout-step" id="stepConfirm" hidden>
+            <p class="confirm-text">Sua conta será criada com este endereço:</p>
+            <p class="email-display" id="emailDisplay"></p>
+            <p class="confirm-warning">Verifique com atenção. Este será seu email de login.</p>
+            <div class="confirm-actions">
+              <button type="button" class="pay-btn" id="confirmEmail">
+                Sim, continuar para o pagamento seguro
+              </button>
+              <button type="button" class="link-btn" id="editEmail">
+                Alterar endereço de email
+              </button>
+            </div>
+          </div>
+
+          <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
+        </div>
+
+        <div class="trust">
+          <div>🔒 Pagamento seguro</div>
+          <div>⚡ Acesso imediato</div>
+          <div>✔ Sem assinatura</div>
+        </div>
+
+        <div class="after-text">
+          Já tem uma conta?
+          <a href="/celpe/login.html">Entrar</a>.
+        </div>
+
+      </div>
+    </section>
+
   </div>
-</div>
-
-<div class="footer">
-  <a href="https://celpebras.org">celpebras.org</a> · <a href="https://civiclearn.com">CivicLearn</a> · Testrada Pte Ltd
-</div>
+</main>
 
 <script>
 (function() {
-  'use strict';
-
   const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
-  const checkoutBtn   = document.getElementById('checkout-btn');
-  const errorMsg      = document.getElementById('error-msg');
 
-  checkoutBtn.addEventListener('click', async () => {
-    errorMsg.classList.remove('visible');
-    checkoutBtn.disabled = true;
-    checkoutBtn.innerHTML = '<span class="spinner"></span>Redirecionando para o Stripe…';
+  const stepInitial = document.getElementById("stepInitial");
+  const stepEmail   = document.getElementById("stepEmail");
+  const stepConfirm = document.getElementById("stepConfirm");
+
+  const startBtn     = document.getElementById("startCheckout");
+  const continueBtn  = document.getElementById("continueWithEmail");
+  const confirmBtn   = document.getElementById("confirmEmail");
+  const editEmailBtn = document.getElementById("editEmail");
+
+  const emailInput   = document.getElementById("checkoutEmail");
+  const emailDisplay = document.getElementById("emailDisplay");
+  const messageBox   = document.getElementById("checkoutMessage");
+
+  let currentEmail = "";
+  let isSubmitting = false;
+
+  function showStep(stepId) {
+    stepInitial.hidden = stepId !== "initial";
+    stepEmail.hidden   = stepId !== "email";
+    stepConfirm.hidden = stepId !== "confirm";
+    clearMessage();
+  }
+
+  function clearMessage() {
+    messageBox.textContent = "";
+    messageBox.className = "checkout-message";
+    messageBox.style.display = "none";
+  }
+
+  function showMessage(type, text) {
+    messageBox.textContent = text;
+    messageBox.className = "checkout-message " + type;
+    messageBox.style.display = "block";
+  }
+
+  function validateEmail(value) {
+    const email = value.trim();
+    if (!email) return { ok: false, msg: "Por favor, digite seu endereço de email." };
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
+      return { ok: false, msg: "Endereço de email inválido. Verifique e tente novamente." };
+    return { ok: true, email };
+  }
+
+  startBtn.addEventListener("click", () => { showStep("email"); emailInput.focus(); });
+
+  continueBtn.addEventListener("click", () => {
+    const { ok, msg, email } = validateEmail(emailInput.value);
+    if (!ok) { showMessage("error", msg); emailInput.focus(); return; }
+    currentEmail = email;
+    emailDisplay.textContent = currentEmail;
+    showStep("confirm");
+  });
+
+  emailInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); continueBtn.click(); }
+  });
+
+  editEmailBtn.addEventListener("click", () => { showStep("email"); emailInput.focus(); });
+
+  confirmBtn.addEventListener("click", async () => {
+    if (isSubmitting) return;
+    if (!currentEmail) { showMessage("error", "Email não definido."); showStep("email"); return; }
+
+    isSubmitting = true;
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = "Criando sessão de pagamento…";
+    showMessage("info", "Conectando ao Stripe. Aguarde…");
 
     try {
-      const res = await fetch(FUNCTIONS_URL + '/celpe-create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_type: 'celpe' }),
+      const response = await fetch(FUNCTIONS_URL + "/celpe-create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_type: "celpe", email: currentEmail })
       });
-
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
-        throw new Error(data.error || 'Erro no checkout');
-      }
-
+      if (!response.ok) throw new Error("Erro ao iniciar o pagamento.");
+      const data = await response.json();
+      if (!data || !data.url) throw new Error(data.error || "Resposta inesperada do servidor.");
       window.location.href = data.url;
-
     } catch (err) {
-      console.error('Checkout error:', err);
-      errorMsg.textContent = 'Ocorreu um erro: ' + err.message + '. Tente novamente ou entre em contato: admin@civiclearn.com';
-      errorMsg.classList.add('visible');
-      checkoutBtn.disabled = false;
-      checkoutBtn.textContent = 'Comprar agora — R$ 299';
+      showMessage("error", err.message || "Ocorreu um erro. Tente novamente.");
+      isSubmitting = false;
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = "Sim, continuar para o pagamento seguro";
     }
   });
 })();
 </script>
+
 </body>
 </html>
