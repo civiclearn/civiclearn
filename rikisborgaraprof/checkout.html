@@ -18,18 +18,40 @@
       overflow: hidden; display: inline-flex; flex-shrink: 0;
       vertical-align: middle; position: relative; background: #003897;
     }
-    .topbar-flag .cross-h {
-      position: absolute; top: 6px; left: 0; right: 0; height: 6px; background: #fff;
+    .topbar-flag .cross-h { position: absolute; top: 6px; left: 0; right: 0; height: 6px; background: #fff; }
+    .topbar-flag .cross-v { position: absolute; top: 0; bottom: 0; left: 7px; width: 6px; background: #fff; }
+    .topbar-flag .cross-h-inner { position: absolute; top: 7px; left: 0; right: 0; height: 4px; background: #D72828; }
+    .topbar-flag .cross-v-inner { position: absolute; top: 0; bottom: 0; left: 8px; width: 4px; background: #D72828; }
+
+    /* Payment Element container */
+    #payment-element { margin-bottom: 1.2rem; min-height: 80px; }
+    .payment-loading { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 2rem 0; }
+
+    /* Password fields */
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
+    .field input {
+      width: 100%; padding: 0.75rem 0.9rem; border-radius: 0.9rem;
+      border: 1px solid rgba(0,0,0,0.12); font-size: 0.95rem;
+      font-family: "Lexend", sans-serif; outline: none;
     }
-    .topbar-flag .cross-v {
-      position: absolute; top: 0; bottom: 0; left: 7px; width: 6px; background: #fff;
+    .field input:focus { outline: 2px solid var(--brand); border-color: transparent; }
+
+    /* Done step */
+    .done-icon { font-size: 3rem; text-align: center; margin-bottom: 0.8rem; }
+    .done-title { font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; }
+    .done-sub { font-size: 0.95rem; color: var(--muted); text-align: center; margin-bottom: 1.5rem; }
+
+    /* Step indicator */
+    .step-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; margin-bottom: 1rem;
+      background: #eef2ff; color: #3730a3;
     }
-    .topbar-flag .cross-h-inner {
-      position: absolute; top: 7px; left: 0; right: 0; height: 4px; background: #D72828;
-    }
-    .topbar-flag .cross-v-inner {
-      position: absolute; top: 0; bottom: 0; left: 8px; width: 4px; background: #D72828;
-    }
+
+    /* Price on pay button */
+    .pay-amount { font-weight: 400; opacity: 0.85; }
   </style>
 </head>
 
@@ -54,6 +76,7 @@
 <main>
   <div class="layout">
 
+    <!-- LEFT: BENEFITS -->
     <aside class="features">
       <h2>Premium Access</h2>
       <div class="price">6.900&nbsp;ISK</div>
@@ -67,8 +90,8 @@
         <li>Full simulations of the Ríkisborgarapróf</li>
         <li>Reading comprehension — texts and exercises</li>
         <li>Listening comprehension — authentic audio</li>
-        <li>Writing — AI-powered evaluation</li>
-        <li>Speaking — AI conversation practice</li>
+        <li>Writing — AI evaluation of your answers</li>
+        <li>Speaking — AI evaluation of your spoken responses</li>
         <li>Detailed feedback with improvement tips</li>
         <li>Results immediately after each simulation</li>
         <li>Practice as many times as you want</li>
@@ -83,24 +106,28 @@
       </p>
     </aside>
 
+    <!-- RIGHT: CHECKOUT FLOW -->
     <section class="right">
       <div class="checkout-card">
 
         <h1>Get your Premium Access</h1>
-        <div class="secure-line">100% secure payment via Stripe</div>
+        <div class="secure-line">100% secure payment · your card details never touch our servers</div>
 
         <div class="checkout-flow" id="checkoutFlow">
 
+          <!-- STEP 1: Start -->
           <div class="checkout-step" id="stepInitial">
             <button type="button" class="pay-btn" id="startCheckout">
               Buy now — 6.900 ISK
             </button>
             <p class="small-note">
-              You will be redirected to Stripe to complete payment.
+              You'll pay securely right here. No redirect needed.
             </p>
           </div>
 
+          <!-- STEP 2: Email -->
           <div class="checkout-step" id="stepEmail" hidden>
+            <span class="step-badge">Step 1 of 3</span>
             <p class="email-instructions">
               Enter the email address you'd like to use for your CivicLearn account.
             </p>
@@ -111,13 +138,15 @@
             <button type="button" class="pay-btn" id="continueWithEmail">Continue</button>
           </div>
 
+          <!-- STEP 3: Confirm email -->
           <div class="checkout-step" id="stepConfirm" hidden>
+            <span class="step-badge">Step 2 of 3</span>
             <p class="confirm-text">Your account will be created with this address:</p>
             <p class="email-display" id="emailDisplay"></p>
             <p class="confirm-warning">Please double-check. This will be your login email.</p>
             <div class="confirm-actions">
               <button type="button" class="pay-btn" id="confirmEmail">
-                Yes, continue to secure payment
+                Confirm and continue to payment
               </button>
               <button type="button" class="link-btn" id="editEmail">
                 Change email address
@@ -125,7 +154,54 @@
             </div>
           </div>
 
+          <!-- STEP 4: Payment (Stripe Elements) -->
+          <div class="checkout-step" id="stepPayment" hidden>
+            <span class="step-badge">Step 3 of 3</span>
+            <p class="email-instructions" style="margin-bottom:1rem;">
+              Enter your card details below. Payment is processed securely by Stripe.
+            </p>
+            <div id="payment-element">
+              <div class="payment-loading">Loading payment form…</div>
+            </div>
+            <button type="button" class="pay-btn" id="payBtn" disabled>
+              Pay <span class="pay-amount">6.900 ISK</span>
+            </button>
+            <button type="button" class="link-btn" id="backToConfirm" style="margin-top:0.5rem;">
+              ← Back
+            </button>
+          </div>
+
+          <!-- STEP 5: Set password -->
+          <div class="checkout-step" id="stepPassword" hidden>
+            <div style="text-align:center;font-size:2rem;margin-bottom:0.5rem;">🎉</div>
+            <div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;">Payment successful!</div>
+            <p class="email-instructions" style="text-align:center;">
+              Now set a password to complete your account setup.
+            </p>
+            <div class="field">
+              <label for="pw1">Password</label>
+              <input type="password" id="pw1" autocomplete="new-password" placeholder="At least 6 characters">
+            </div>
+            <div class="field">
+              <label for="pw2">Confirm password</label>
+              <input type="password" id="pw2" autocomplete="new-password" placeholder="Repeat password">
+            </div>
+            <button type="button" class="pay-btn" id="setupBtn">Create account</button>
+          </div>
+
+          <!-- STEP 6: Done -->
+          <div class="checkout-step" id="stepDone" hidden>
+            <div class="done-icon">✅</div>
+            <div class="done-title">Your account is ready!</div>
+            <div class="done-sub" id="doneEmail"></div>
+            <a href="/rikisborgaraprof/dashboard/index.html" class="pay-btn" style="text-align:center;text-decoration:none;display:block;">
+              Go to dashboard →
+            </a>
+          </div>
+
+          <!-- MESSAGE -->
           <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
+
         </div>
 
         <div class="trust">
@@ -145,95 +221,277 @@
   </div>
 </main>
 
+<!-- Stripe.js -->
+<script src="https://js.stripe.com/v3/"></script>
+<!-- Supabase (for auto-login after account setup) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
 <script>
 (function() {
-  const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  'use strict';
 
-  const stepInitial = document.getElementById("stepInitial");
-  const stepEmail   = document.getElementById("stepEmail");
-  const stepConfirm = document.getElementById("stepConfirm");
+  const FUNCTIONS_URL  = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  const SUPABASE_URL   = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const STRIPE_PK      = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
+  const RETURN_URL     = 'https://civiclearn.com/rikisborgaraprof/checkout.html';
 
-  const startBtn     = document.getElementById("startCheckout");
-  const continueBtn  = document.getElementById("continueWithEmail");
-  const confirmBtn   = document.getElementById("confirmEmail");
-  const editEmailBtn = document.getElementById("editEmail");
+  const stripe = Stripe(STRIPE_PK);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const emailInput   = document.getElementById("checkoutEmail");
-  const emailDisplay = document.getElementById("emailDisplay");
-  const messageBox   = document.getElementById("checkoutMessage");
+  // DOM refs
+  const stepInitial  = document.getElementById('stepInitial');
+  const stepEmail    = document.getElementById('stepEmail');
+  const stepConfirm  = document.getElementById('stepConfirm');
+  const stepPayment  = document.getElementById('stepPayment');
+  const stepPassword = document.getElementById('stepPassword');
+  const stepDone     = document.getElementById('stepDone');
 
-  let currentEmail = "";
+  const startBtn      = document.getElementById('startCheckout');
+  const continueBtn   = document.getElementById('continueWithEmail');
+  const confirmBtn    = document.getElementById('confirmEmail');
+  const editEmailBtn  = document.getElementById('editEmail');
+  const payBtn        = document.getElementById('payBtn');
+  const backToConfirm = document.getElementById('backToConfirm');
+  const setupBtn      = document.getElementById('setupBtn');
+
+  const emailInput   = document.getElementById('checkoutEmail');
+  const emailDisplay = document.getElementById('emailDisplay');
+  const messageBox   = document.getElementById('checkoutMessage');
+
+  let currentEmail = '';
+  let paymentIntentId = '';
+  let stripeElements = null;
   let isSubmitting = false;
 
-  function showStep(stepId) {
-    stepInitial.hidden = stepId !== "initial";
-    stepEmail.hidden   = stepId !== "email";
-    stepConfirm.hidden = stepId !== "confirm";
+  // ── Step management ──────────────────────────────────────────
+  function showStep(id) {
+    [stepInitial, stepEmail, stepConfirm, stepPayment, stepPassword, stepDone]
+      .forEach(el => el.hidden = true);
+    document.getElementById(id).hidden = false;
     clearMessage();
   }
 
   function clearMessage() {
-    messageBox.textContent = "";
-    messageBox.className = "checkout-message";
-    messageBox.style.display = "none";
+    messageBox.textContent = '';
+    messageBox.className = 'checkout-message';
+    messageBox.style.display = 'none';
   }
 
   function showMessage(type, text) {
     messageBox.textContent = text;
-    messageBox.className = "checkout-message " + type;
-    messageBox.style.display = "block";
+    messageBox.className = 'checkout-message ' + type;
+    messageBox.style.display = 'block';
   }
 
   function validateEmail(value) {
     const email = value.trim();
-    if (!email) return { ok: false, msg: "Please enter your email address." };
+    if (!email) return { ok: false, msg: 'Please enter your email address.' };
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
-      return { ok: false, msg: "Invalid email address. Please check and try again." };
+      return { ok: false, msg: 'Invalid email address. Please check and try again.' };
     return { ok: true, email };
   }
 
-  startBtn.addEventListener("click", () => { showStep("email"); emailInput.focus(); });
+  // ── Check for 3DS return ──────────────────────────────────────
+  const urlParams = new URLSearchParams(window.location.search);
+  const returnedPI = urlParams.get('payment_intent');
+  const returnedSecret = urlParams.get('payment_intent_client_secret');
+  const returnedStatus = urlParams.get('redirect_status');
 
-  continueBtn.addEventListener("click", () => {
+  if (returnedPI && returnedSecret) {
+    // Returning from 3DS — verify and show password step
+    currentEmail = localStorage.getItem('rik_checkout_email') || '';
+    paymentIntentId = returnedPI;
+
+    if (returnedStatus === 'succeeded') {
+      showStep('stepPassword');
+    } else {
+      // Payment failed after 3DS
+      stripe.retrievePaymentIntent(returnedSecret).then(({ paymentIntent }) => {
+        if (paymentIntent && paymentIntent.status === 'succeeded') {
+          showStep('stepPassword');
+        } else {
+          showMessage('error', 'Payment was not completed. Please try again.');
+          showStep('stepInitial');
+        }
+      });
+    }
+    // Clean up URL
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  // ── Step 1 → 2 ───────────────────────────────────────────────
+  startBtn.addEventListener('click', () => {
+    showStep('stepEmail');
+    emailInput.focus();
+  });
+
+  // ── Step 2 → 3 ───────────────────────────────────────────────
+  continueBtn.addEventListener('click', () => {
     const { ok, msg, email } = validateEmail(emailInput.value);
-    if (!ok) { showMessage("error", msg); emailInput.focus(); return; }
+    if (!ok) { showMessage('error', msg); emailInput.focus(); return; }
     currentEmail = email;
     emailDisplay.textContent = currentEmail;
-    showStep("confirm");
+    showStep('stepConfirm');
   });
 
-  emailInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); continueBtn.click(); }
+  emailInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); }
   });
 
-  editEmailBtn.addEventListener("click", () => { showStep("email"); emailInput.focus(); });
+  editEmailBtn.addEventListener('click', () => {
+    showStep('stepEmail');
+    emailInput.focus();
+  });
 
-  confirmBtn.addEventListener("click", async () => {
+  // ── Step 3 → 4: Create PaymentIntent + mount Elements ────────
+  confirmBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
-    if (!currentEmail) { showMessage("error", "Email not set."); showStep("email"); return; }
-
     isSubmitting = true;
     confirmBtn.disabled = true;
-    confirmBtn.textContent = "Creating payment session…";
-    showMessage("info", "Connecting to Stripe. Please wait…");
+    confirmBtn.textContent = 'Setting up payment…';
+    showMessage('info', 'Preparing secure payment form…');
 
     try {
-      const response = await fetch(FUNCTIONS_URL + "/rik-create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product_type: "rik", email: currentEmail })
+      const res = await fetch(FUNCTIONS_URL + '/rik-create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail }),
       });
-      if (!response.ok) throw new Error("Error starting payment.");
-      const data = await response.json();
-      if (!data || !data.url) throw new Error(data.error || "Unexpected server response.");
-      window.location.href = data.url;
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Failed to create payment session.');
+
+      paymentIntentId = data.payment_intent_id;
+
+      // Store email for 3DS return
+      localStorage.setItem('rik_checkout_email', currentEmail);
+
+      // Mount Stripe Payment Element
+      stripeElements = stripe.elements({
+        clientSecret: data.client_secret,
+        appearance: {
+          theme: 'stripe',
+          variables: {
+            fontFamily: '"Lexend", system-ui, sans-serif',
+            borderRadius: '0.9rem',
+            colorPrimary: '#7c3aed',
+          },
+        },
+      });
+
+      const paymentElement = stripeElements.create('payment');
+      document.getElementById('payment-element').innerHTML = '';
+      paymentElement.mount('#payment-element');
+
+      paymentElement.on('ready', () => {
+        payBtn.disabled = false;
+      });
+
+      paymentElement.on('change', (event) => {
+        if (event.complete) {
+          payBtn.disabled = false;
+        }
+      });
+
+      showStep('stepPayment');
+
     } catch (err) {
-      showMessage("error", err.message || "An error occurred. Please try again.");
+      showMessage('error', err.message || 'An error occurred. Please try again.');
+    } finally {
       isSubmitting = false;
       confirmBtn.disabled = false;
-      confirmBtn.textContent = "Yes, continue to secure payment";
+      confirmBtn.textContent = 'Confirm and continue to payment';
     }
   });
+
+  backToConfirm.addEventListener('click', () => showStep('stepConfirm'));
+
+  // ── Step 4 → 5: Confirm payment ──────────────────────────────
+  payBtn.addEventListener('click', async () => {
+    if (isSubmitting) return;
+    isSubmitting = true;
+    payBtn.disabled = true;
+    payBtn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;"></span>Processing payment…';
+    clearMessage();
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements: stripeElements,
+      confirmParams: {
+        return_url: RETURN_URL,
+        receipt_email: currentEmail,
+      },
+      redirect: 'if_required',
+    });
+
+    if (error) {
+      // Payment failed
+      showMessage('error', error.message || 'Payment failed. Please try again.');
+      payBtn.disabled = false;
+      payBtn.innerHTML = 'Pay <span class="pay-amount">6.900 ISK</span>';
+      isSubmitting = false;
+      return;
+    }
+
+    // Payment succeeded (no 3DS redirect needed)
+    if (paymentIntent && paymentIntent.status === 'succeeded') {
+      paymentIntentId = paymentIntent.id;
+      showStep('stepPassword');
+    }
+
+    isSubmitting = false;
+  });
+
+  // ── Step 5: Set password + create account ─────────────────────
+  setupBtn.addEventListener('click', async () => {
+    const pw1 = document.getElementById('pw1').value;
+    const pw2 = document.getElementById('pw2').value;
+
+    if (!pw1 || pw1.length < 6) { showMessage('error', 'Password must be at least 6 characters.'); return; }
+    if (pw1 !== pw2) { showMessage('error', 'Passwords do not match.'); return; }
+
+    setupBtn.disabled = true;
+    setupBtn.textContent = 'Creating account…';
+    clearMessage();
+
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/rik-setup-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_intent_id: paymentIntentId, password: pw1 }),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        showMessage('error', data.error || 'Account setup failed. Please contact admin@civiclearn.com.');
+        setupBtn.disabled = false;
+        setupBtn.textContent = 'Create account';
+        return;
+      }
+
+      // Auto-login via Supabase
+      const { error: signInError } = await sb.auth.signInWithPassword({
+        email: data.email,
+        password: pw1,
+      });
+      if (signInError) console.error('Auto-login failed:', signInError);
+
+      // Clean up
+      localStorage.removeItem('rik_checkout_email');
+
+      document.getElementById('doneEmail').textContent = 'Logged in as: ' + data.email;
+      showStep('stepDone');
+
+    } catch (err) {
+      showMessage('error', 'Connection error. Please try again.');
+      setupBtn.disabled = false;
+      setupBtn.textContent = 'Create account';
+    }
+  });
+
+  document.getElementById('pw2').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') setupBtn.click();
+  });
+
 })();
 </script>
 
