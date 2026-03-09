@@ -25,6 +25,27 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/checkout.css">
+
+  <style>
+    #payment-element { margin-bottom: 1.2rem; min-height: 80px; }
+    .payment-loading { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 2rem 0; }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
+    .field input {
+      width: 100%; padding: 0.75rem 0.9rem; border-radius: 0.9rem;
+      border: 1px solid rgba(0,0,0,0.12); font-size: 0.95rem;
+      font-family: "Lexend", sans-serif; outline: none;
+    }
+    .field input:focus { outline: 2px solid var(--brand); border-color: transparent; }
+    .done-icon { font-size: 3rem; text-align: center; margin-bottom: 0.8rem; }
+    .done-title { font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; }
+    .done-sub { font-size: 0.95rem; color: var(--muted); text-align: center; margin-bottom: 1.5rem; }
+    .step-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; margin-bottom: 1rem; background: #eef2ff; color: #3730a3;
+    }
+  </style>
 </head>
 
 <body>
@@ -32,22 +53,18 @@
 <!-- HEADER -->
 <header class="checkout-header">
   <div class="checkout-header-inner">
-
     <div class="checkout-brand">
-      <img src="/assets/images/at.svg" alt="Österreich">
+      <img src="/assets/images/at.svg" alt="Österreich" style="width:24px;height:auto;">
       CivicLearn Österreich – Staatsbürgerschaftstest
     </div>
-
     <div class="checkout-powered">
       <small>powered by</small>
       <a href="https://civiclearn.com">CivicLearn</a>
     </div>
-
   </div>
 </header>
 
 <main>
-
   <div class="layout">
 
     <!-- LEFT: BENEFITS -->
@@ -55,11 +72,8 @@
       <h2>Premium-Zugang</h2>
       <div class="price">EUR 49</div>
       <div class="once">Einmalzahlung · lebenslanger Zugriff</div>
-
       <div class="divider"></div>
-
       <h3>Inhalt</h3>
-
       <ul class="benefits">
         <li>Hunderte sorgfältig erstellte Fragen zum österreichischen Staatsbürgerschaftstest</li>
         <li>Realistische Simulationen im offiziellen Prüfungsformat</li>
@@ -75,7 +89,6 @@
         <li>Kostenlose inhaltliche Aktualisierungen</li>
         <li>Lebenslanger Zugang zur Plattform</li>
       </ul>
-
       <p class="recommend">
         Genutzt von Kandidatinnen und Kandidaten, die den österreichischen Staatsbürgerschaftstest erfolgreich bestanden haben.
       </p>
@@ -84,68 +97,77 @@
     <!-- RIGHT: PAYMENT FLOW -->
     <section class="right">
       <div class="checkout-card">
-
         <h1>Premium-Zugang aktivieren</h1>
-        <div class="secure-line">100&nbsp;% sichere Zahlung über Stripe</div>
+        <div class="secure-line">100&nbsp;% sichere Zahlung · Ihre Bankdaten werden nie über unsere Server übertragen</div>
 
         <div class="checkout-flow" id="checkoutFlow">
 
-          <!-- STEP 1 -->
+          <!-- STEP 1: INITIAL -->
           <div class="checkout-step" id="stepInitial">
-            <button type="button" class="pay-btn" id="startCheckout">
-              Weiter zur sicheren Zahlung
-            </button>
-            <p class="small-note">
-              Sie werden zu Stripe weitergeleitet, um die Zahlung abzuschließen.
-            </p>
+            <button type="button" class="pay-btn" id="startCheckout">Jetzt kaufen — EUR 49</button>
+            <p class="small-note">Sie bezahlen sicher direkt auf dieser Seite. Keine Weiterleitung.</p>
           </div>
 
-          <!-- STEP 2 -->
+          <!-- STEP 2: EMAIL -->
           <div class="checkout-step" id="stepEmail" hidden>
+            <span class="step-badge">Schritt 1 von 3</span>
             <p class="email-instructions">
               Geben Sie die E-Mail-Adresse ein, mit der Sie Ihr CivicLearn-Konto nutzen möchten.
             </p>
-
             <div class="email-field-group">
               <label for="checkoutEmail">E-Mail</label>
-              <input
-                type="email"
-                id="checkoutEmail"
-                autocomplete="email"
-                placeholder="beispiel@email.at"
-                inputmode="email"
-              />
+              <input type="email" id="checkoutEmail" autocomplete="email" placeholder="beispiel@email.at" inputmode="email" />
             </div>
-
-            <button type="button" class="pay-btn" id="continueWithEmail">
-              Weiter
-            </button>
+            <button type="button" class="pay-btn" id="continueWithEmail">Weiter</button>
           </div>
 
-          <!-- STEP 3 -->
+          <!-- STEP 3: CONFIRM EMAIL -->
           <div class="checkout-step" id="stepConfirm" hidden>
-            <p class="confirm-text">
-              Ihr Konto wird mit folgender E-Mail-Adresse erstellt:
-            </p>
-
+            <span class="step-badge">Schritt 2 von 3</span>
+            <p class="confirm-text">Ihr Konto wird mit folgender E-Mail-Adresse erstellt:</p>
             <p class="email-display" id="emailDisplay"></p>
-            <p class="confirm-warning">
-              Bitte überprüfen Sie die Adresse sorgfältig. Der Login-Link wird an diese Adresse gesendet.
-            </p>
-
+            <p class="confirm-warning">Bitte überprüfen Sie die Adresse sorgfältig. Diese Adresse ist Ihre Anmeldedaten.</p>
             <div class="confirm-actions">
-              <button type="button" class="pay-btn" id="confirmEmail">
-                Ja, weiter zur sicheren Zahlung
-              </button>
-              <button type="button" class="link-btn" id="editEmail">
-                E-Mail-Adresse ändern
-              </button>
+              <button type="button" class="pay-btn" id="confirmEmail">Bestätigen und weiter zur Zahlung</button>
+              <button type="button" class="link-btn" id="editEmail">E-Mail-Adresse ändern</button>
             </div>
+          </div>
+
+          <!-- STEP 4: STRIPE ELEMENTS PAYMENT -->
+          <div class="checkout-step" id="stepPayment" hidden>
+            <span class="step-badge">Schritt 3 von 3</span>
+            <p class="email-instructions" style="margin-bottom:1rem;">Geben Sie Ihre Zahlungsdaten unten ein. Die Zahlung wird sicher über Stripe abgewickelt.</p>
+            <div id="payment-element"><div class="payment-loading">Zahlungsformular wird geladen…</div></div>
+            <button type="button" class="pay-btn" id="payBtn" disabled>EUR 49 bezahlen</button>
+            <button type="button" class="link-btn" id="backToConfirm" style="margin-top:0.5rem;">← Zurück</button>
+          </div>
+
+          <!-- STEP 5: SET PASSWORD -->
+          <div class="checkout-step" id="stepPassword" hidden>
+            <div style="text-align:center;font-size:2rem;margin-bottom:0.5rem;">🎉</div>
+            <div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;">Zahlung bestätigt!</div>
+            <p class="email-instructions" style="text-align:center;">Wählen Sie jetzt ein Passwort, um Ihr Konto einzurichten.</p>
+            <div class="field">
+              <label for="pw1">Passwort</label>
+              <input type="password" id="pw1" autocomplete="new-password" placeholder="Mindestens 6 Zeichen">
+            </div>
+            <div class="field">
+              <label for="pw2">Passwort bestätigen</label>
+              <input type="password" id="pw2" autocomplete="new-password" placeholder="Passwort wiederholen">
+            </div>
+            <button type="button" class="pay-btn" id="setupBtn">Konto erstellen</button>
+          </div>
+
+          <!-- STEP 6: DONE -->
+          <div class="checkout-step" id="stepDone" hidden>
+            <div class="done-icon">✅</div>
+            <div class="done-title">Ihr Konto ist bereit!</div>
+            <div class="done-sub" id="doneEmail"></div>
+            <a href="/austria/dashboard/" class="pay-btn" style="text-align:center;text-decoration:none;display:block;">Training starten →</a>
           </div>
 
           <!-- MESSAGE -->
           <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
-
         </div>
 
         <div class="trust">
@@ -153,130 +175,192 @@
           <div>⚡ Sofortiger Zugriff</div>
           <div>✔ Kein Abonnement</div>
         </div>
-
         <div class="after-text">
-          Bereits registriert?
-          <a href="/austria/login.html">Hier anmelden</a>.
+          Bereits registriert? <a href="/austria/login.html">Hier anmelden</a>.
         </div>
-
       </div>
     </section>
 
   </div>
-
 </main>
 
-<!-- CHECKOUT LOGIC -->
+<!-- STRIPE + SUPABASE -->
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
 <script>
 (function() {
-  const stepInitial = document.getElementById("stepInitial");
-  const stepEmail   = document.getElementById("stepEmail");
-  const stepConfirm = document.getElementById("stepConfirm");
+  'use strict';
 
-  const startBtn     = document.getElementById("startCheckout");
-  const continueBtn  = document.getElementById("continueWithEmail");
-  const confirmBtn   = document.getElementById("confirmEmail");
-  const editEmailBtn = document.getElementById("editEmail");
+  const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  const SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const STRIPE_PK     = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
+  const RETURN_URL    = 'https://civiclearn.com/austria/checkout.html';
 
-  const emailInput   = document.getElementById("checkoutEmail");
-  const emailDisplay = document.getElementById("emailDisplay");
-  const messageBox   = document.getElementById("checkoutMessage");
+  const stripe = Stripe(STRIPE_PK);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  let currentEmail = "";
+  const stepInitial  = document.getElementById('stepInitial');
+  const stepEmail    = document.getElementById('stepEmail');
+  const stepConfirm  = document.getElementById('stepConfirm');
+  const stepPayment  = document.getElementById('stepPayment');
+  const stepPassword = document.getElementById('stepPassword');
+  const stepDone     = document.getElementById('stepDone');
+
+  const startBtn         = document.getElementById('startCheckout');
+  const continueBtn      = document.getElementById('continueWithEmail');
+  const confirmBtn       = document.getElementById('confirmEmail');
+  const editEmailBtn     = document.getElementById('editEmail');
+  const payBtn           = document.getElementById('payBtn');
+  const backToConfirmBtn = document.getElementById('backToConfirm');
+  const setupBtn         = document.getElementById('setupBtn');
+
+  const emailInput   = document.getElementById('checkoutEmail');
+  const emailDisplay = document.getElementById('emailDisplay');
+  const messageBox   = document.getElementById('checkoutMessage');
+
+  let currentEmail = '';
+  let paymentIntentId = '';
+  let stripeElements = null;
   let isSubmitting = false;
 
-  function showStep(stepId) {
-    stepInitial.hidden = stepId !== "initial";
-    stepEmail.hidden   = stepId !== "email";
-    stepConfirm.hidden = stepId !== "confirm";
+  function showStep(id) {
+    [stepInitial, stepEmail, stepConfirm, stepPayment, stepPassword, stepDone]
+      .forEach(el => el.hidden = true);
+    document.getElementById(id).hidden = false;
+    clearMessage();
   }
 
-  function clearMessage() {
-    messageBox.textContent = "";
-    messageBox.className = "checkout-message";
-    messageBox.style.display = "none";
-  }
-
-  function showMessage(type, text) {
-    messageBox.textContent = text;
-    messageBox.className = "checkout-message " + type;
-    messageBox.style.display = "block";
-  }
+  function clearMessage() { messageBox.textContent = ''; messageBox.className = 'checkout-message'; messageBox.style.display = 'none'; }
+  function showMessage(type, text) { messageBox.textContent = text; messageBox.className = 'checkout-message ' + type; messageBox.style.display = 'block'; }
 
   function validateEmail(value) {
     const email = value.trim();
-    if (!email) return { ok: false, msg: "Bitte geben Sie Ihre E-Mail-Adresse ein." };
-    const simplePattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-    if (!simplePattern.test(email)) {
-      return { ok: false, msg: "Ungültige E-Mail-Adresse. Bitte überprüfen Sie die Eingabe." };
-    }
+    if (!email) return { ok: false, msg: 'Bitte geben Sie Ihre E-Mail-Adresse ein.' };
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, msg: 'Ungültige E-Mail-Adresse.' };
     return { ok: true, email };
   }
 
-  startBtn.addEventListener("click", () => {
-    clearMessage();
-    showStep("email");
-    emailInput.focus();
-  });
+  // 3DS return handling
+  const urlParams = new URLSearchParams(window.location.search);
+  const returnedPI = urlParams.get('payment_intent');
+  const returnedSecret = urlParams.get('payment_intent_client_secret');
+  const returnedStatus = urlParams.get('redirect_status');
 
-  continueBtn.addEventListener("click", () => {
-    clearMessage();
+  if (returnedPI && returnedSecret) {
+    currentEmail = localStorage.getItem('austria_checkout_email') || '';
+    paymentIntentId = returnedPI;
+    if (returnedStatus === 'succeeded') { showStep('stepPassword'); }
+    else {
+      stripe.retrievePaymentIntent(returnedSecret).then(({ paymentIntent }) => {
+        if (paymentIntent && paymentIntent.status === 'succeeded') showStep('stepPassword');
+        else { showMessage('error', 'Die Zahlung wurde nicht abgeschlossen.'); showStep('stepInitial'); }
+      });
+    }
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  startBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
+
+  continueBtn.addEventListener('click', () => {
     const { ok, msg, email } = validateEmail(emailInput.value);
-    if (!ok) {
-      showMessage("error", msg);
-      emailInput.focus();
-      return;
-    }
-    currentEmail = email;
-    emailDisplay.textContent = currentEmail;
-    showStep("confirm");
+    if (!ok) { showMessage('error', msg); emailInput.focus(); return; }
+    currentEmail = email; emailDisplay.textContent = currentEmail; showStep('stepConfirm');
   });
+  emailInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); } });
+  editEmailBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
 
-  editEmailBtn.addEventListener("click", () => {
-    clearMessage();
-    showStep("email");
-    emailInput.focus();
-  });
-
-  confirmBtn.addEventListener("click", async () => {
+  confirmBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
-    if (!currentEmail) {
-      showMessage("error", "E-Mail-Adresse nicht gesetzt. Bitte erneut versuchen.");
-      showStep("email");
-      return;
-    }
-
-    isSubmitting = true;
-    confirmBtn.disabled = true;
-    confirmBtn.textContent = "Zahlungssitzung wird erstellt…";
-
-    clearMessage();
-    showMessage("info", "Verbindung zu Stripe wird hergestellt. Bitte warten…");
+    isSubmitting = true; confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Zahlung wird vorbereitet…';
+    showMessage('info', 'Sicheres Zahlungsformular wird geladen…');
 
     try {
-      const response = await fetch("https://payments.civiclearn.com/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: currentEmail,
-          product: "austria-premium"
-        })
+      const res = await fetch(FUNCTIONS_URL + '/austria-create-payment-intent', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail }),
       });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Zahlungssitzung konnte nicht erstellt werden.');
 
-      if (!response.ok) throw new Error("Fehler beim Start der Zahlung.");
+      paymentIntentId = data.payment_intent_id;
+      localStorage.setItem('austria_checkout_email', currentEmail);
 
-      const data = await response.json();
-      if (!data || !data.url) throw new Error("Unerwartete Antwort vom Zahlungsserver.");
-
-      window.location.href = data.url;
-
+      stripeElements = stripe.elements({
+        clientSecret: data.client_secret,
+        appearance: { theme: 'stripe', variables: { fontFamily: '"Lexend", system-ui, sans-serif', borderRadius: '0.9rem', colorPrimary: '#7c3aed' } },
+      });
+      const paymentElement = stripeElements.create('payment');
+      document.getElementById('payment-element').innerHTML = '';
+      paymentElement.mount('#payment-element');
+      paymentElement.on('ready', () => { payBtn.disabled = false; });
+      paymentElement.on('change', (event) => { if (event.complete) payBtn.disabled = false; });
+      showStep('stepPayment');
     } catch (err) {
-      showMessage("error", err.message || "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.");
-      isSubmitting = false;
-      confirmBtn.disabled = false;
-      confirmBtn.textContent = "Ja, weiter zur sicheren Zahlung";
+      showMessage('error', err.message || 'Ein Fehler ist aufgetreten.');
+    } finally {
+      isSubmitting = false; confirmBtn.disabled = false; confirmBtn.textContent = 'Bestätigen und weiter zur Zahlung';
     }
   });
+
+  backToConfirmBtn.addEventListener('click', () => showStep('stepConfirm'));
+
+  payBtn.addEventListener('click', async () => {
+    if (isSubmitting) return;
+    isSubmitting = true; payBtn.disabled = true;
+    payBtn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;"></span>Zahlung wird verarbeitet…';
+    clearMessage();
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements: stripeElements,
+      confirmParams: { return_url: RETURN_URL, receipt_email: currentEmail },
+      redirect: 'if_required',
+    });
+
+    if (error) {
+      showMessage('error', error.message || 'Die Zahlung ist fehlgeschlagen.');
+      payBtn.disabled = false; payBtn.textContent = 'EUR 49 bezahlen'; isSubmitting = false; return;
+    }
+    if (paymentIntent && paymentIntent.status === 'succeeded') {
+      paymentIntentId = paymentIntent.id; showStep('stepPassword');
+    }
+    isSubmitting = false;
+  });
+
+  setupBtn.addEventListener('click', async () => {
+    const pw1 = document.getElementById('pw1').value;
+    const pw2 = document.getElementById('pw2').value;
+    if (!pw1 || pw1.length < 6) { showMessage('error', 'Das Passwort muss mindestens 6 Zeichen lang sein.'); return; }
+    if (pw1 !== pw2) { showMessage('error', 'Die Passwörter stimmen nicht überein.'); return; }
+
+    setupBtn.disabled = true; setupBtn.textContent = 'Konto wird erstellt…'; clearMessage();
+
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/austria-setup-account', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_intent_id: paymentIntentId, password: pw1 }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        showMessage('error', data.error || 'Kontoerstellung fehlgeschlagen.');
+        setupBtn.disabled = false; setupBtn.textContent = 'Konto erstellen'; return;
+      }
+
+      const { error: signInError } = await sb.auth.signInWithPassword({ email: data.email, password: pw1 });
+      if (signInError) console.error('Auto-login failed:', signInError);
+
+      localStorage.removeItem('austria_checkout_email');
+      document.getElementById('doneEmail').textContent = 'Angemeldet als: ' + data.email;
+      showStep('stepDone');
+    } catch (err) {
+      showMessage('error', 'Verbindungsfehler. Bitte versuchen Sie es erneut.');
+      setupBtn.disabled = false; setupBtn.textContent = 'Konto erstellen';
+    }
+  });
+
+  document.getElementById('pw2').addEventListener('keydown', (e) => { if (e.key === 'Enter') setupBtn.click(); });
 })();
 </script>
 

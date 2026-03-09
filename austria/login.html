@@ -1,372 +1,353 @@
 <!DOCTYPE html>
 <html lang="de-AT">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – CivicLearn Österreich</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login – CivicLearn Österreich</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand:#7c3aed; --brand-dim:#f4f0ff; --brand-dark:#5b21b6;
+    --navy:#0f172a; --slate:#334155; --muted:#64748b;
+    --border:#e2e8f0; --surface:#ffffff; --bg:#f8f7f4;
+    --red:#dc2626; --green:#059669; --green-light:#f0fdf4; --red-light:#fef2f2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Lexend",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;}
 
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  .topbar{background:var(--navy);border-bottom:3px solid var(--brand);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar-brand{display:flex;align-items:center;gap:14px;}
+  .topbar-brand img{width:22px;height:auto;}
+  .brand-text{display:flex;flex-direction:column;line-height:1.1;}
+  .brand-title{font-size:1rem;font-weight:600;color:#fff;}
+  .brand-sub{font-size:0.72rem;color:#64748b;}
 
-  <script>
-    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
-    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
+  .main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+  .login-card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.04);}
 
-  <style>
-    :root {
-      --purple:#7c3aed;
-      --yellow:#f1c40f;
-      --black:#333;
-      --bg:#fdfaf5;
-    }
+  .state{display:none;} .state.active{display:block;}
 
-    * { box-sizing:border-box; }
+  .view-header{text-align:center;margin-bottom:22px;}
+  .view-title{font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px;}
+  .view-subtitle{font-size:0.85rem;color:var(--muted);line-height:1.5;}
 
-    body {
-      margin:0;
-      font-family:'Lexend',sans-serif;
-      background:var(--bg);
-      color:#111;
-    }
+  .form-group{margin-bottom:16px;}
+  .form-label{display:block;font-size:0.78rem;font-weight:600;color:var(--slate);margin-bottom:6px;}
+  .form-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:"Lexend",sans-serif;font-size:0.92rem;color:var(--navy);background:var(--bg);transition:border-color 0.15s;outline:none;}
+  .form-input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-dim);}
+  .form-input::placeholder{color:#94a3b8;}
+  .pwd-wrap{position:relative;}
+  .pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:0.75rem;color:var(--muted);cursor:pointer;font-family:inherit;font-weight:600;}
+  .pwd-toggle:hover{color:var(--navy);}
 
-    /* HEADER — DANISH WIDTH */
-    .site-header {
-      background:#fff;
-      padding:15px 0;
-      border-bottom:1px solid rgba(0,0,0,.04);
-    }
-    .header-inner {
-      max-width:1100px;
-      margin:0 auto;
-      padding:0 20px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-    }
+  .action-btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:"Lexend",sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;margin-top:4px;background:var(--brand);color:#fff;}
+  .action-btn:hover:not(:disabled){opacity:0.85;}
+  .action-btn:disabled{opacity:0.4;cursor:default;}
 
-    .brand-main {
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-weight:700;
-      text-decoration:none;
-      color:inherit;
-    }
+  .form-footer{text-align:center;margin-top:14px;}
+  .form-link{font-size:0.8rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline;}
+  .form-link:hover{color:var(--navy);}
 
-    .btn-small-purple {
-      background:var(--purple);
-      color:#fff;
-      padding:8px 20px;
-      border-radius:20px;
-      font-size:14px;
-      font-weight:600;
-      text-decoration:none;
-      white-space:nowrap;
-    }
+  .msg{display:none;border-radius:10px;padding:10px 14px;font-size:0.82rem;margin-bottom:16px;text-align:center;}
+  .msg.visible{display:block;}
+  .msg.error{background:var(--red-light);border:1px solid #fecaca;color:var(--red);}
+  .msg.success{background:var(--green-light);border:1px solid #bbf7d0;color:#166534;}
 
-    /* GRID */
-    .login-grid {
-      display:flex;
-      justify-content:center;
-      align-items:stretch;
-      max-width:1100px;
-      margin:80px auto 40px;
-      padding:20px;
-    }
+  .pin-box{background:var(--brand-dim);border:2px dashed var(--brand);border-radius:12px;padding:16px;text-align:center;margin-bottom:20px;}
+  .pin-label{font-size:0.78rem;font-weight:600;color:var(--brand-dark);margin-bottom:6px;}
+  .pin-value{font-size:2rem;font-weight:700;color:var(--brand);letter-spacing:0.15em;}
 
-    .auth-card {
-      width:320px;
-      background:#fff;
-      padding:40px 30px;
-      display:flex;
-      flex-direction:column;
-    }
+  .success-icon{width:56px;height:56px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;}
 
-    .card-left {
-      background:#f3ebff;
-      border:1px solid #e0d0f9;
-      border-radius:20px 0 0 20px;
-    }
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
 
-    .card-center {
-      border-radius:20px;
-      margin:-20px 0;
-      padding:60px 40px;
-      border:1px solid #eee;
-      box-shadow:0 15px 40px rgba(0,0,0,.08);
-      z-index:10;
-    }
+  .page-footer{text-align:center;padding:20px;font-size:0.75rem;color:var(--muted);}
+  .page-footer a{color:var(--brand);text-decoration:none;font-weight:600;}
 
-    .card-right {
-      background:#fffdf0;
-      border:1px solid #f9edbc;
-      border-radius:0 20px 20px 0;
-    }
+  .admin-toggle{text-align:center;margin-top:16px;font-size:0.75rem;opacity:0.3;cursor:pointer;user-select:none;}
+  .admin-toggle:hover{opacity:0.6;}
+  .admin-panel{display:none;background:#fff;border:1px dashed var(--border);border-radius:12px;padding:20px;margin-top:12px;width:100%;max-width:420px;}
+  .admin-panel.open{display:block;}
+  .admin-panel h3{font-size:0.85rem;color:var(--muted);margin-bottom:12px;text-align:center;}
+  .admin-panel .form-group{margin-bottom:12px;}
+  .admin-panel .btn-admin{width:100%;padding:10px;background:#6b7280;color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:0.88rem;font-weight:600;cursor:pointer;transition:background 0.2s;}
+  .admin-panel .btn-admin:hover:not(:disabled){background:#4b5563;}
+  .admin-panel .btn-admin:disabled{opacity:0.6;cursor:not-allowed;}
 
-    h2 { font-size:20px; margin:0 0 15px; }
-    p  { font-size:14px; color:#555; line-height:1.5; margin:0 0 20px; }
-
-    label {
-      font-size:13px;
-      font-weight:600;
-      margin-bottom:8px;
-      display:block;
-    }
-
-    input {
-      width:100%;
-      padding:12px;
-      border:2px solid #e5dfd2;
-      border-radius:10px;
-      margin-bottom:15px;
-      font-family:'Lexend',sans-serif;
-      background:#fff;
-    }
-
-    .btn-action {
-      width:100%;
-      padding:14px;
-      border-radius:10px;
-      border:none;
-      font-weight:700;
-      font-family:'Lexend',sans-serif;
-      cursor:pointer;
-      margin-top:auto;
-    }
-
-    .btn-purple { background:var(--purple); color:#fff; }
-    .btn-black  { background:var(--black); color:#fff; }
-    .btn-yellow { background:var(--yellow); color:#111; }
-
-    .pwd-container { position:relative; }
-    .pwd-container input { padding-right:72px; }
-
-    .toggle-pwd {
-      position:absolute;
-      right:14px;
-      top:50%;
-      transform:translateY(-50%);
-      background:none;
-      border:none;
-      color:var(--purple);
-      font-size:12px;
-      font-weight:700;
-      cursor:pointer;
-    }
-
-    .status-msg {
-      position:fixed;
-      top:100px;
-      left:50%;
-      transform:translateX(-50%);
-      padding:12px 24px;
-      border-radius:30px;
-      font-size:14px;
-      font-weight:500;
-      display:none;
-      z-index:100;
-      box-shadow:0 4px 12px rgba(0,0,0,.1);
-    }
-    .error   { background:#fee2e2; color:#dc2626; display:block; }
-    .success { background:#dcfce7; color:#166534; display:block; }
-
-    @media (max-width:900px){
-      .login-grid{ flex-direction:column; gap:20px; }
-      .auth-card{ width:100%; max-width:420px; border-radius:20px; }
-      .card-center{ margin:0; padding:50px 30px; }
-    }
-  </style>
+  @media(max-width:480px){.login-card{padding:28px 22px;border-radius:16px;}}
+</style>
 </head>
-
 <body>
 
-<header class="site-header">
-  <div class="header-inner">
-    <a href="/austria/" class="brand-main">
-      <img src="/assets/images/at.svg" width="24" alt="">
-      CivicLearn Österreich
-    </a>
-    <a href="/austria/checkout.html" class="btn-small-purple">Zugang kaufen</a>
-  </div>
-</header>
-
-<div id="status" class="status-msg"></div>
-
-<div class="login-grid">
-
-  <!-- FIRST TIME -->
-  <div class="auth-card card-left">
-    <h2 style="color:var(--purple);">Erster Besuch?</h2>
-    <p>
-      Haben Sie gerade Zugang gekauft? Erstellen Sie hier Ihr Passwort.
-    </p>
-
-    <input type="email" id="setupEmail" placeholder="sie@beispiel.at">
-    <button class="btn-action btn-purple" onclick="handleSetup()">
-      Einrichtungslink senden
-    </button>
-
-    <div style="font-size:10px;color:var(--purple);font-weight:600;margin-top:15px;text-align:center;">
-      ℹ️ Bitte auch den Spam-Ordner prüfen.
+<div class="topbar">
+  <div class="topbar-brand">
+    <img src="/assets/images/at.svg" alt="Österreich">
+    <div class="brand-text">
+      <span class="brand-title">CivicLearn Österreich</span>
+      <span class="brand-sub">Staatsbürgerschaftstest</span>
     </div>
   </div>
+</div>
 
-  <!-- PASSWORD LOGIN -->
-  <div class="auth-card card-center">
-    <h2 style="font-size:28px;text-align:center;">Login</h2>
+<div class="main">
+  <div class="login-card">
 
-    <label>E-Mail-Adresse</label>
-    <input type="email" id="loginEmail">
-
-    <label>Passwort</label>
-    <div class="pwd-container">
-      <input type="password" id="loginPwd">
-      <button type="button" class="toggle-pwd" onclick="toggleMainPwd()">Anzeigen</button>
-    </div>
-
-    <button class="btn-action btn-black" onclick="handleLogin()">
-      Mit Passwort einloggen
-    </button>
-  </div>
-
-  <!-- PIN -->
-  <div class="auth-card card-right">
-    <h2 style="color:#856404;">Probleme?</h2>
-    <p>
-      Verwenden Sie einen temporären PIN, wenn der Login mit Passwort nicht funktioniert.
-      Der PIN wird nicht per E-Mail gesendet.
-    </p>
-
-    <label>E-Mail-Adresse</label>
-    <input type="email" id="pinEmail" placeholder="sie@beispiel.at">
-
-    <button class="btn-action btn-yellow" onclick="showPin()">
-      Zugangscode anzeigen
-    </button>
-
-    <div id="pinArea" style="display:none;margin-top:15px;">
-      <div id="pinShown"
-           style="text-align:center;font-size:28px;letter-spacing:6px;font-weight:700;color:var(--purple);margin-bottom:10px;">
-        0000
+    <!-- STATE 1: LOGIN -->
+    <div id="state-login" class="state active">
+      <div id="login-msg" class="msg"></div>
+      <div class="view-header">
+        <div class="view-title">Anmelden</div>
+        <div class="view-subtitle">Melden Sie sich mit E-Mail und Passwort an</div>
       </div>
-
-      <label>PIN eingeben</label>
-      <input type="text" id="pinEnter" maxlength="4" inputmode="numeric"
-             style="text-align:center;letter-spacing:2px;">
-
-      <button class="btn-action btn-black" onclick="pinLogin()">
-        Fortfahren
-      </button>
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="login-email">E-Mail</label>
+          <input class="form-input" id="login-email" type="email" placeholder="beispiel@email.at" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Passwort</label>
+          <div class="pwd-wrap">
+            <input class="form-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
+            <button class="pwd-toggle" type="button" id="pwd-toggle-btn">Anzeigen</button>
+          </div>
+        </div>
+        <button type="submit" class="action-btn" id="login-btn">Anmelden</button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="show-forgot">Passwort vergessen?</button>
+      </div>
     </div>
-  </div>
 
+    <!-- STATE 2: FORGOT — ENTER EMAIL -->
+    <div id="state-forgotEmail" class="state">
+      <div id="forgot-msg" class="msg"></div>
+      <div class="view-header">
+        <div class="view-title">Passwort zurücksetzen</div>
+        <div class="view-subtitle">Geben Sie die E-Mail-Adresse Ihres Kontos ein</div>
+      </div>
+      <form id="forgot-email-form">
+        <div class="form-group">
+          <label class="form-label" for="forgot-email">E-Mail</label>
+          <input class="form-input" id="forgot-email" type="email" placeholder="beispiel@email.at" autocomplete="email">
+        </div>
+        <button type="submit" class="action-btn" id="forgot-email-btn">Weiter</button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="back-to-login">← Zurück zur Anmeldung</button>
+      </div>
+    </div>
+
+    <!-- STATE 3: FORGOT — PIN + NEW PASSWORD -->
+    <div id="state-forgotReset" class="state">
+      <div id="reset-msg" class="msg"></div>
+      <div class="view-header">
+        <div class="view-title">Neues Passwort</div>
+        <div class="view-subtitle">Geben Sie den unten angezeigten Code ein und wählen Sie ein neues Passwort</div>
+      </div>
+      <div class="pin-box">
+        <div class="pin-label">Bestätigungscode</div>
+        <div class="pin-value" id="pin-value">------</div>
+      </div>
+      <form id="reset-form">
+        <div class="form-group">
+          <label class="form-label" for="reset-pin">Code</label>
+          <input class="form-input" id="reset-pin" type="text" placeholder="Code oben eingeben" inputmode="numeric" maxlength="6" autocomplete="off" style="text-align:center;letter-spacing:0.15em;">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reset-password">Neues Passwort</label>
+          <input class="form-input" id="reset-password" type="password" placeholder="Mindestens 6 Zeichen" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reset-password-confirm">Passwort bestätigen</label>
+          <input class="form-input" id="reset-password-confirm" type="password" placeholder="Passwort wiederholen" autocomplete="new-password">
+        </div>
+        <button type="submit" class="action-btn" id="reset-btn">Neues Passwort speichern</button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="back-to-forgot-email">← Zurück</button>
+      </div>
+    </div>
+
+    <!-- STATE 4: RESET SUCCESS -->
+    <div id="state-resetSuccess" class="state">
+      <div class="success-icon">✅</div>
+      <div class="view-header">
+        <div class="view-title">Passwort aktualisiert!</div>
+        <div class="view-subtitle">Ihr neues Passwort wurde gespeichert. Melden Sie sich jetzt an.</div>
+      </div>
+      <button class="action-btn" id="go-to-login">Anmelden</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADMIN IMPERSONATE -->
+<div class="admin-toggle" id="admin-toggle">⚙</div>
+<div class="admin-panel" id="admin-panel">
+  <h3>Admin — Login as user</h3>
+  <div id="admin-msg" class="msg"></div>
+  <div class="form-group">
+    <label class="form-label" for="admin-email">User email</label>
+    <input class="form-input" id="admin-email" type="email" placeholder="user@example.com" autocomplete="off">
+  </div>
+  <div class="form-group">
+    <label class="form-label" for="admin-key">Admin key</label>
+    <input class="form-input" id="admin-key" type="password" placeholder="Admin key" autocomplete="off">
+  </div>
+  <button class="btn-admin" id="admin-btn">Impersonate</button>
+</div>
+
+<div class="page-footer">
+  <a href="https://civiclearn.com/austria/">civiclearn.com/austria</a> — Vorbereitung auf den österreichischen Staatsbürgerschaftstest
 </div>
 
 <script>
-const supabase = window.supabase.createClient(
-  window.SUPABASE_URL,
-  window.SUPABASE_KEY
-);
+(function() {
+  'use strict';
 
-function notify(type,text){
-  const el=document.getElementById("status");
-  el.textContent=text;
-  el.className="status-msg "+type;
-  el.style.display="block";
-  setTimeout(()=>el.style.display="none",6000);
-}
+  const SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
+  const DASHBOARD_URL = '/austria/dashboard/';
 
-async function handleSetup(){
-  const email=setupEmail.value.trim().toLowerCase();
-  if(!email) return notify("error","Bitte geben Sie Ihre E-Mail-Adresse ein.");
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const params    = new URLSearchParams(location.search);
+  const returnUrl = params.get('return') || DASHBOARD_URL;
 
-  await supabase.auth.resetPasswordForEmail(email,{
-    redirectTo:window.location.origin+"/austria/login-password.html"
+  // Auto-redirect if already logged in
+  (async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) window.location.href = returnUrl;
+  })();
+
+  function showState(name) {
+    document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+    document.getElementById('state-' + name).classList.add('active');
+  }
+  function showMsg(id, text, type) { const el = document.getElementById(id); el.textContent = text; el.className = 'msg visible ' + type; }
+  function clearMsg(id) { const el = document.getElementById(id); el.className = 'msg'; el.textContent = ''; }
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    if (loading) { btn.disabled = true; btn.dataset.originalText = btn.textContent; btn.innerHTML = '<span class="spinner"></span>Bitte warten…'; }
+    else { btn.disabled = false; btn.textContent = btn.dataset.originalText || btn.textContent; }
+  }
+
+  // Navigation
+  document.getElementById('show-forgot').addEventListener('click', (e) => {
+    e.preventDefault(); clearMsg('login-msg');
+    const v = document.getElementById('login-email').value.trim();
+    if (v) document.getElementById('forgot-email').value = v;
+    showState('forgotEmail');
+  });
+  document.getElementById('back-to-login').addEventListener('click', () => { clearMsg('forgot-msg'); showState('login'); });
+  document.getElementById('back-to-forgot-email').addEventListener('click', () => { clearMsg('reset-msg'); showState('forgotEmail'); });
+  document.getElementById('go-to-login').addEventListener('click', () => showState('login'));
+
+  // Password toggle
+  document.getElementById('pwd-toggle-btn').addEventListener('click', () => {
+    const el = document.getElementById('login-password'); const btn = document.getElementById('pwd-toggle-btn');
+    if (el.type === 'password') { el.type = 'text'; btn.textContent = 'Verbergen'; } else { el.type = 'password'; btn.textContent = 'Anzeigen'; }
   });
 
-  notify("success","Falls die E-Mail existiert, wurde der Link gesendet.");
-}
+  let resetEmail = '';
 
-async function handleLogin(){
-  const email=loginEmail.value.trim().toLowerCase();
-  const password=loginPwd.value;
+  // LOGIN
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMsg('login-msg');
+    const email = document.getElementById('login-email').value.trim().toLowerCase();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) return showMsg('login-msg', 'Bitte füllen Sie alle Felder aus.', 'error');
+    setLoading('login-btn', true);
+    try {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) { showMsg('login-msg', translateError(error.message), 'error'); setLoading('login-btn', false); return; }
+      try { await sb.from('login_history').insert({ email, status: 'success', method: 'password' }); } catch(e) {}
+      localStorage.setItem('cl_auth', 'ok');
+      localStorage.setItem('cl_email', email);
+      window.location.href = returnUrl;
+    } catch (err) { showMsg('login-msg', 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.', 'error'); setLoading('login-btn', false); }
+  });
 
-  const { error }=await supabase.auth.signInWithPassword({ email,password });
-  if(error) return notify("error","E-Mail oder Passwort falsch.");
+  // FORGOT — CHECK EMAIL
+  document.getElementById('forgot-email-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMsg('forgot-msg');
+    resetEmail = document.getElementById('forgot-email').value.trim().toLowerCase();
+    if (!resetEmail || !resetEmail.includes('@')) return showMsg('forgot-msg', 'Bitte geben Sie eine gültige E-Mail-Adresse ein.', 'error');
+    setLoading('forgot-email-btn', true);
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/austria-reset-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'check_email', email: resetEmail }),
+      });
+      const data = await res.json();
+      if (!data.exists) { showMsg('forgot-msg', data.message || 'E-Mail-Adresse nicht gefunden.', 'error'); setLoading('forgot-email-btn', false); return; }
+      document.getElementById('pin-value').textContent = data.pin;
+      showState('forgotReset');
+    } catch (err) { showMsg('forgot-msg', 'Verbindungsfehler. Bitte versuchen Sie es erneut.', 'error'); }
+    setLoading('forgot-email-btn', false);
+  });
 
-  localStorage.setItem("cl_auth","ok");
-  localStorage.setItem("cl_email",email);
-  location.href="/austria/dashboard/";
-}
+  // FORGOT — RESET WITH PIN
+  document.getElementById('reset-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMsg('reset-msg');
+    const pin = document.getElementById('reset-pin').value.trim();
+    const newPassword = document.getElementById('reset-password').value;
+    const confirmPassword = document.getElementById('reset-password-confirm').value;
+    if (!pin) return showMsg('reset-msg', 'Bitte geben Sie den Bestätigungscode ein.', 'error');
+    if (newPassword.length < 6) return showMsg('reset-msg', 'Das Passwort muss mindestens 6 Zeichen lang sein.', 'error');
+    if (newPassword !== confirmPassword) return showMsg('reset-msg', 'Die Passwörter stimmen nicht überein.', 'error');
+    setLoading('reset-btn', true);
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/austria-reset-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset', email: resetEmail, pin, new_password: newPassword }),
+      });
+      const data = await res.json();
+      if (data.success) showState('resetSuccess');
+      else showMsg('reset-msg', data.error || 'Code falsch. Bitte versuchen Sie es erneut.', 'error');
+    } catch (err) { showMsg('reset-msg', 'Verbindungsfehler. Bitte versuchen Sie es erneut.', 'error'); }
+    setLoading('reset-btn', false);
+  });
 
-function utcDayOfYear(d){
-  const s=new Date(Date.UTC(d.getUTCFullYear(),0,0));
-  return Math.floor((d-s)/86400000);
-}
+  // ADMIN IMPERSONATE
+  document.getElementById('admin-toggle').addEventListener('click', () => { document.getElementById('admin-panel').classList.toggle('open'); });
+  document.getElementById('admin-btn').addEventListener('click', async () => {
+    const email = document.getElementById('admin-email').value.trim().toLowerCase();
+    const key = document.getElementById('admin-key').value;
+    const msgEl = document.getElementById('admin-msg');
+    const btn = document.getElementById('admin-btn');
+    msgEl.className = 'msg';
+    if (!email || !key) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Both fields required.'; return; }
+    btn.disabled = true; btn.textContent = 'Impersonating…';
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/admin-impersonate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, admin_key: key }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) { msgEl.className = 'msg visible error'; msgEl.textContent = data.error || 'Failed.'; btn.disabled = false; btn.textContent = 'Impersonate'; return; }
+      const { error: otpError } = await sb.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' });
+      if (otpError) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Session failed: ' + otpError.message; btn.disabled = false; btn.textContent = 'Impersonate'; return; }
+      localStorage.setItem('cl_auth', 'ok');
+      localStorage.setItem('cl_email', data.email);
+      window.location.href = returnUrl;
+    } catch (err) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Error: ' + err.message; btn.disabled = false; btn.textContent = 'Impersonate'; }
+  });
 
-function computePin(email){
-  const n=new Date();
-  const v=(utcDayOfYear(n)*37)+(n.getUTCHours()*91)+(email.length*17);
-  return String(v%10000).padStart(4,"0");
-}
-
-async function showPin(){
-  const email=pinEmail.value.trim().toLowerCase();
-  if(!email) return notify("error","Bitte geben Sie Ihre E-Mail-Adresse ein.");
-
-  const res=await fetch(
-    "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/check-user-exists",
-    {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ email })
-    }
-  );
-
-  const data=await res.json();
-  if(!data.exists) return notify("error","Diese E-Mail existiert nicht im System.");
-
-  pinShown.textContent=computePin(email);
-  pinArea.style.display="block";
-  localStorage.setItem("cl_email",email);
-}
-
-async function pinLogin(){
-  const email=localStorage.getItem("cl_email");
-  const enteredPin=pinEnter.value.trim();
-
-  const res=await fetch(
-    "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/verify-pin-and-log",
-    {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "apikey":window.SUPABASE_KEY
-      },
-      body:JSON.stringify({ email, enteredPin })
-    }
-  );
-
-  const data=await res.json();
-  if(!data.success) return notify("error","Falscher PIN.");
-
-  localStorage.setItem("cl_auth","ok");
-  localStorage.setItem("cl_email", email);
-  localStorage.setItem("cl_login_at", Date.now().toString());
-  location.href="/austria/dashboard/";
-}
-
-function toggleMainPwd(){
-  const pwd=loginPwd;
-  const btn=document.querySelector(".toggle-pwd");
-  if(pwd.type==="password"){
-    pwd.type="text"; btn.textContent="Verbergen";
-  } else {
-    pwd.type="password"; btn.textContent="Anzeigen";
+  function translateError(msg) {
+    const l = msg.toLowerCase();
+    if (l.includes('invalid login'))       return 'E-Mail oder Passwort falsch.';
+    if (l.includes('email not confirmed')) return 'E-Mail nicht bestätigt.';
+    if (l.includes('too many requests'))   return 'Zu viele Versuche. Bitte warten Sie einen Moment.';
+    if (l.includes('user not found'))      return 'Kein Konto mit dieser E-Mail gefunden.';
+    if (l.includes('network'))             return 'Verbindungsfehler.';
+    return msg;
   }
-}
-</script>
 
+  document.getElementById('login-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-form').requestSubmit(); });
+})();
+</script>
 </body>
 </html>
