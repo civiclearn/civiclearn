@@ -1,445 +1,341 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – Medborgerskabsprove.dk - CivicLearn</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login – Medborgerskabsprove.dk - CivicLearn</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand:#7c3aed; --brand-dim:#f4f0ff; --brand-dark:#5b21b6;
+    --navy:#0f172a; --slate:#334155; --muted:#64748b;
+    --border:#e2e8f0; --surface:#ffffff; --bg:#f8f7f4;
+    --red:#dc2626; --green:#059669; --green-light:#f0fdf4; --red-light:#fef2f2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Lexend",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;}
 
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  .topbar{background:var(--navy);border-bottom:3px solid var(--brand);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar-brand{display:flex;align-items:center;gap:14px;}
+  .topbar-brand img{width:22px;height:auto;}
+  .brand-text{display:flex;flex-direction:column;line-height:1.1;}
+  .brand-title{font-size:1rem;font-weight:600;color:#fff;}
+  .brand-sub{font-size:0.72rem;color:#64748b;}
 
-  <script>
-    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
-    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-  </script>
+  .main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+  .login-card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.04);}
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
-  <link rel="stylesheet" href="/assets/css/newlogin.css">
+  .state{display:none;} .state.active{display:block;}
 
-  <style>
-    /* === MOBILE LOGIN TABS === */
-    .login-tabs {
-      display: none;
-    }
+  .view-header{text-align:center;margin-bottom:22px;}
+  .view-title{font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px;}
+  .view-subtitle{font-size:0.85rem;color:var(--muted);line-height:1.5;}
 
-    @media (max-width: 768px) {
+  .form-group{margin-bottom:16px;}
+  .form-label{display:block;font-size:0.78rem;font-weight:600;color:var(--slate);margin-bottom:6px;}
+  .form-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:"Lexend",sans-serif;font-size:0.92rem;color:var(--navy);background:var(--bg);transition:border-color 0.15s;outline:none;}
+  .form-input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-dim);}
+  .form-input::placeholder{color:#94a3b8;}
+  .pwd-wrap{position:relative;}
+  .pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:0.75rem;color:var(--muted);cursor:pointer;font-family:inherit;font-weight:600;}
+  .pwd-toggle:hover{color:var(--navy);}
 
-      /* Fix header overflow */
-      .header-inner {
-        padding: 10px 12px;
-        gap: 8px;
-      }
-      .header-nav { display: none; }
-      .brand-powered { display: none; }
-      .btn-small-purple {
-        font-size: 12px;
-        padding: 6px 12px;
-        white-space: nowrap;
-        flex-shrink: 0;
-      }
-      .brand-title {
-        font-size: 15px;
-      }
+  .action-btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:"Lexend",sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;margin-top:4px;background:var(--brand);color:#fff;}
+  .action-btn:hover:not(:disabled){opacity:0.85;}
+  .action-btn:disabled{opacity:0.4;cursor:default;}
 
-      /* Tab bar */
-      .login-tabs {
-        display: flex;
-        justify-content: center;
-        gap: 0;
-        margin: 16px auto 0;
-        max-width: 400px;
-        padding: 0 16px;
-      }
+  .form-footer{text-align:center;margin-top:14px;}
+  .form-link{font-size:0.8rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline;}
+  .form-link:hover{color:var(--navy);}
 
-      .login-tab {
-        flex: 1;
-        padding: 10px 6px;
-        font-family: 'Lexend', sans-serif;
-        font-size: 13px;
-        font-weight: 500;
-        text-align: center;
-        border: none;
-        background: #f0eef5;
-        color: #777;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
+  .msg{display:none;border-radius:10px;padding:10px 14px;font-size:0.82rem;margin-bottom:16px;text-align:center;}
+  .msg.visible{display:block;}
+  .msg.error{background:var(--red-light);border:1px solid #fecaca;color:var(--red);}
+  .msg.success{background:var(--green-light);border:1px solid #bbf7d0;color:#166534;}
 
-      .login-tab:first-child {
-        border-radius: 10px 0 0 10px;
-      }
-      .login-tab:last-child {
-        border-radius: 0 10px 10px 0;
-      }
+  .pin-box{background:var(--brand-dim);border:2px dashed var(--brand);border-radius:12px;padding:16px;text-align:center;margin-bottom:20px;}
+  .pin-label{font-size:0.78rem;font-weight:600;color:var(--brand-dark);margin-bottom:6px;}
+  .pin-value{font-size:2rem;font-weight:700;color:var(--brand);letter-spacing:0.15em;}
 
-      .login-tab.active {
-        background: #6c5ce7;
-        color: #fff;
-        font-weight: 600;
-      }
+  .success-icon{width:56px;height:56px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;}
 
-      /* Hide inactive cards */
-      .login-grid {
-        display: block !important;
-        padding: 0 16px;
-      }
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
 
-      .auth-card {
-        display: none;
-        max-width: 400px;
-        margin: 16px auto 0;
-      }
+  .page-footer{text-align:center;padding:20px;font-size:0.75rem;color:var(--muted);}
+  .page-footer a{color:var(--brand);text-decoration:none;font-weight:600;}
 
-      .auth-card.tab-active {
-        display: block;
-        box-sizing: border-box;
-        overflow: hidden;
-      }
+  .admin-toggle{text-align:center;margin-top:16px;font-size:0.75rem;opacity:0.3;cursor:pointer;user-select:none;}
+  .admin-toggle:hover{opacity:0.6;}
+  .admin-panel{display:none;background:#fff;border:1px dashed var(--border);border-radius:12px;padding:20px;margin-top:12px;width:100%;max-width:420px;}
+  .admin-panel.open{display:block;}
+  .admin-panel h3{font-size:0.85rem;color:var(--muted);margin-bottom:12px;text-align:center;}
+  .admin-panel .form-group{margin-bottom:12px;}
+  .admin-panel .btn-admin{width:100%;padding:10px;background:#6b7280;color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:0.88rem;font-weight:600;cursor:pointer;transition:background 0.2s;}
+  .admin-panel .btn-admin:hover:not(:disabled){background:#4b5563;}
+  .admin-panel .btn-admin:disabled{opacity:0.6;cursor:not-allowed;}
 
-      .auth-card input,
-      .auth-card button,
-      .auth-card .pwd-container {
-        max-width: 100%;
-        box-sizing: border-box;
-      }
-    }
-  </style>
+  @media(max-width:480px){.login-card{padding:28px 22px;border-radius:16px;}}
+</style>
 </head>
-
 <body>
 
-<header class="site-header">
-  <div class="header-inner">
-
-    <div class="header-left">
-      <a href="https://medborgerskabsprove.dk/" class="brand-link">
-        <img src="/assets/images/dk.svg" alt="DK">
-        <div class="brand-title">Medborgerskabsprove.dk</div>
-      </a>
+<div class="topbar">
+  <div class="topbar-brand">
+    <img src="/assets/images/dk.svg" alt="Danmark">
+    <div class="brand-text">
+      <span class="brand-title">CivicLearn Danmark</span>
+      <span class="brand-sub">Medborgerskabsprøven</span>
     </div>
-
-    <div class="header-center">
-      <nav class="header-nav">
-        <a href="https://medborgerskabsprove.dk/kontakt/">Contact</a>
-      </nav>
-    </div>
-
-    <div class="header-right">
-      <div class="brand-powered">powered by <span>CivicLearn</span></div>
-      <a href="/denmark-pr/checkout.html" class="btn-small-purple">Opret adgang</a>
-    </div>
-
   </div>
-</header>
-
-<div id="status" class="status-msg"></div>
-
-<div class="login-tabs">
-  <button class="login-tab" data-tab="setup">Første gang?</button>
-  <button class="login-tab active" data-tab="login">Login</button>
-  <button class="login-tab" data-tab="pin">PIN-adgang</button>
 </div>
 
-<div class="login-grid">
+<div class="main">
+  <div class="login-card">
 
-  <!-- LEFT CARD -->
-  <div class="auth-card card-left" data-card="setup">
-    <h2 style="color: var(--purple);">Første gang her?</h2>
-    <p>
-      Har du netop købt adgang? Opret din adgangskode her.
-    </p>
-
-    <input type="email" id="setupEmail" placeholder="navn@eksempel.dk">
-    <button
-  type="button"
-  id="setupBtn"
-  onclick="handleSetup()"
-  class="btn-action btn-purple">
-  Send opsætningslink
-</button>
-
-    <div style="font-size:10px;color:var(--purple);font-weight:600;margin-top:15px;text-align:center;line-height:1.4;">
-      ℹ️ Husk at tjekke spam-mappen.
-    </div>
-  </div>
-
-  <!-- CENTER CARD -->
-  <div class="auth-card card-center tab-active" data-card="login">
-    <h2 style="font-size:28px;text-align:center;">Login</h2>
-
-    <div style="margin-top:20px;">
-      <label>E-mailadresse</label>
-      <input type="email" id="loginEmail">
-
-      <label>Adgangskode</label>
-      <div class="pwd-container">
-        <input type="password" id="loginPwd">
-        <button type="button" class="toggle-pwd" onclick="toggleMainPwd()">Vis</button>
+    <div id="state-login" class="state active">
+      <div id="login-msg" class="msg"></div>
+      <div class="view-header">
+        <div class="view-title">Log ind</div>
+        <div class="view-subtitle">Log ind med email og adgangskode</div>
       </div>
-
-      <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top:10px;">
-        Log ind med adgangskode
-      </button>
-
-      <div style="text-align:center;margin-top:14px;">
-        <a href="#" id="forgotLink" style="font-size:13px;color:var(--purple);font-weight:500;text-decoration:none;">
-          Glemt adgangskode?
-        </a>
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email</label>
+          <input class="form-input" id="login-email" type="email" placeholder="navn@eksempel.dk" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Adgangskode</label>
+          <div class="pwd-wrap">
+            <input class="form-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
+            <button class="pwd-toggle" type="button" id="pwd-toggle-btn">Vis</button>
+          </div>
+        </div>
+        <button type="submit" class="action-btn" id="login-btn">Log ind</button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="show-forgot">Glemt adgangskode?</button>
       </div>
     </div>
-  </div>
 
-  <!-- RIGHT CARD — PIN -->
-  <div class="auth-card card-right" data-card="pin">
-    <h2 style="color:#856404;">Problemer?</h2>
-    <p>
-      Brug en midlertidig adgangs-PIN, hvis login med adgangskode ikke virker.
-      PIN’en sendes ikke på e-mail.
-    </p>
-
-    <label>E-mailadresse</label>
-    <input type="email" id="pinEmail" placeholder="navn@eksempel.dk">
-
-    <button class="btn-action btn-yellow" onclick="showPin()">
-      Vis adgangs-PIN
-    </button>
-
-    <div id="pinArea" style="display:none;margin-top:15px;">
-      <div style="text-align:center;font-size:28px;letter-spacing:6px;font-weight:700;color:var(--purple);margin-bottom:10px;"
-           id="pinShown">0000</div>
-
-      <label>Indtast PIN</label>
-      <input type="text" id="pinEnter" maxlength="4" inputmode="numeric"
-             style="text-align:center;letter-spacing:2px;">
-
-      <button class="btn-action btn-black" onclick="pinLogin()">
-        Fortsæt
-      </button>
+    <div id="state-forgotEmail" class="state">
+      <div id="forgot-msg" class="msg"></div>
+      <div class="view-header">
+        <div class="view-title">Nulstil adgangskode</div>
+        <div class="view-subtitle">Indtast emailadressen til din konto</div>
+      </div>
+      <form id="forgot-email-form">
+        <div class="form-group">
+          <label class="form-label" for="forgot-email">Email</label>
+          <input class="form-input" id="forgot-email" type="email" placeholder="navn@eksempel.dk" autocomplete="email">
+        </div>
+        <button type="submit" class="action-btn" id="forgot-email-btn">Fortsæt</button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="back-to-login">← Tilbage til login</button>
+      </div>
     </div>
-  </div>
 
+    <div id="state-forgotReset" class="state">
+      <div id="reset-msg" class="msg"></div>
+      <div class="view-header">
+        <div class="view-title">Ny adgangskode</div>
+        <div class="view-subtitle">Indtast koden nedenfor og vælg en ny adgangskode</div>
+      </div>
+      <div class="pin-box">
+        <div class="pin-label">Bekræftelseskode</div>
+        <div class="pin-value" id="pin-value">------</div>
+      </div>
+      <form id="reset-form">
+        <div class="form-group">
+          <label class="form-label" for="reset-pin">Kode</label>
+          <input class="form-input" id="reset-pin" type="text" placeholder="Indtast koden ovenfor" inputmode="numeric" maxlength="6" autocomplete="off" style="text-align:center;letter-spacing:0.15em;">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reset-password">Ny adgangskode</label>
+          <input class="form-input" id="reset-password" type="password" placeholder="Mindst 6 tegn" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reset-password-confirm">Bekræft adgangskode</label>
+          <input class="form-input" id="reset-password-confirm" type="password" placeholder="Gentag adgangskoden" autocomplete="new-password">
+        </div>
+        <button type="submit" class="action-btn" id="reset-btn">Gem ny adgangskode</button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="back-to-forgot-email">← Tilbage</button>
+      </div>
+    </div>
+
+    <div id="state-resetSuccess" class="state">
+      <div class="success-icon">✅</div>
+      <div class="view-header">
+        <div class="view-title">Adgangskode opdateret!</div>
+        <div class="view-subtitle">Din nye adgangskode er gemt. Log ind nu.</div>
+      </div>
+      <button class="action-btn" id="go-to-login">Log ind</button>
+    </div>
+
+  </div>
 </div>
 
+<div class="admin-toggle" id="admin-toggle">⚙</div>
+<div class="admin-panel" id="admin-panel">
+  <h3>Admin — Login as user</h3>
+  <div id="admin-msg" class="msg"></div>
+  <div class="form-group">
+    <label class="form-label" for="admin-email">User email</label>
+    <input class="form-input" id="admin-email" type="email" placeholder="user@example.com" autocomplete="off">
+  </div>
+  <div class="form-group">
+    <label class="form-label" for="admin-key">Admin key</label>
+    <input class="form-input" id="admin-key" type="password" placeholder="Admin key" autocomplete="off">
+  </div>
+  <button class="btn-admin" id="admin-btn">Impersonate</button>
+</div>
+
+<div class="page-footer">
+  <a href="https://medborgerskabsprove.dk/">medborgerskabsprove.dk</a> — Forberedelse til Medborgerskabsprøven
+</div>
 
 <script>
-const supabase = window.supabase.createClient(
-  window.SUPABASE_URL,
-  window.SUPABASE_KEY
-);
+(function() {
+  'use strict';
 
-function notify(type, text) {
-  const el = document.getElementById("status");
-  el.textContent = text;
-  el.className = "status-msg " + type;
-  el.style.display = "block";
-  setTimeout(() => el.style.display = "none", 6000);
-}
+  const SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
+  const DASHBOARD_URL = '/denmark-pr/dashboard/';
 
-/* ---------- PASSWORD SETUP ---------- */
-async function handleSetup() {
-  const btn = document.getElementById("setupBtn");
-  const email = setupEmail.value.trim().toLowerCase();
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const params    = new URLSearchParams(location.search);
+  const returnUrl = params.get('return') || DASHBOARD_URL;
 
-  if (!email) {
-    notify("error","Indtast din e-mail.");
-    return;
+  (async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) window.location.href = returnUrl;
+  })();
+
+  function showState(name) {
+    document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+    document.getElementById('state-' + name).classList.add('active');
+  }
+  function showMsg(id, text, type) { const el = document.getElementById(id); el.textContent = text; el.className = 'msg visible ' + type; }
+  function clearMsg(id) { const el = document.getElementById(id); el.className = 'msg'; el.textContent = ''; }
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    if (loading) { btn.disabled = true; btn.dataset.originalText = btn.textContent; btn.innerHTML = '<span class="spinner"></span>Vent venligst…'; }
+    else { btn.disabled = false; btn.textContent = btn.dataset.originalText || btn.textContent; }
   }
 
-  if (btn.disabled) return;
+  document.getElementById('show-forgot').addEventListener('click', (e) => {
+    e.preventDefault(); clearMsg('login-msg');
+    const v = document.getElementById('login-email').value.trim();
+    if (v) document.getElementById('forgot-email').value = v;
+    showState('forgotEmail');
+  });
+  document.getElementById('back-to-login').addEventListener('click', () => { clearMsg('forgot-msg'); showState('login'); });
+  document.getElementById('back-to-forgot-email').addEventListener('click', () => { clearMsg('reset-msg'); showState('forgotEmail'); });
+  document.getElementById('go-to-login').addEventListener('click', () => showState('login'));
 
-  btn.disabled = true;
-  btn.textContent = "Vent…";
-
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + "/denmark-pr/login-password.html"
+  document.getElementById('pwd-toggle-btn').addEventListener('click', () => {
+    const el = document.getElementById('login-password'); const btn = document.getElementById('pwd-toggle-btn');
+    if (el.type === 'password') { el.type = 'text'; btn.textContent = 'Skjul'; } else { el.type = 'password'; btn.textContent = 'Vis'; }
   });
 
-  if (error) {
-    btn.disabled = false;
-    btn.textContent = "Send opsætningslink";
-    notify("error","Linket kunne ikke sendes.");
-    return;
-  }
+  let resetEmail = '';
 
-  btn.textContent = "Tjek din e-mail";
-  setTimeout(() => btn.remove(), 2500);
-
-  notify("success","Hvis e-mailen findes, er et link sendt.");
-}
-
-
-/* ---------- PASSWORD LOGIN ---------- */
-async function handleLogin() {
-  const email = loginEmail.value.trim().toLowerCase();
-  const password = loginPwd.value;
-
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    return notify("error", "Forkert e-mail eller adgangskode.");
-  }
-
-  // ✅ Log successful password login
-  await supabase.from("login_history").insert({
-    email,
-    status: "success",
-    method: "password"
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMsg('login-msg');
+    const email = document.getElementById('login-email').value.trim().toLowerCase();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) return showMsg('login-msg', 'Udfyld venligst alle felter.', 'error');
+    setLoading('login-btn', true);
+    try {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) { showMsg('login-msg', translateError(error.message), 'error'); setLoading('login-btn', false); return; }
+      try { await sb.from('login_history').insert({ email, status: 'success', method: 'password' }); } catch(e) {}
+      localStorage.setItem('cl_auth', 'ok');
+      localStorage.setItem('cl_email', email);
+      window.location.href = returnUrl;
+    } catch (err) { showMsg('login-msg', 'En fejl opstod. Prøv igen.', 'error'); setLoading('login-btn', false); }
   });
 
-  localStorage.setItem("cl_auth", "ok");
-  localStorage.setItem("cl_email", email);
-  localStorage.setItem("cl_login_at", Date.now().toString());
-  
-  // Redirect to dashboard
-  location.href = "/denmark-pr/dashboard/";
-}
+  document.getElementById('forgot-email-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMsg('forgot-msg');
+    resetEmail = document.getElementById('forgot-email').value.trim().toLowerCase();
+    if (!resetEmail || !resetEmail.includes('@')) return showMsg('forgot-msg', 'Indtast en gyldig emailadresse.', 'error');
+    setLoading('forgot-email-btn', true);
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/denmarkpr-reset-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'check_email', email: resetEmail }),
+      });
+      const data = await res.json();
+      if (!data.exists) { showMsg('forgot-msg', data.message || 'Emailadressen blev ikke fundet.', 'error'); setLoading('forgot-email-btn', false); return; }
+      document.getElementById('pin-value').textContent = data.pin;
+      showState('forgotReset');
+    } catch (err) { showMsg('forgot-msg', 'Forbindelsesfejl. Prøv igen.', 'error'); }
+    setLoading('forgot-email-btn', false);
+  });
 
+  document.getElementById('reset-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMsg('reset-msg');
+    const pin = document.getElementById('reset-pin').value.trim();
+    const newPassword = document.getElementById('reset-password').value;
+    const confirmPassword = document.getElementById('reset-password-confirm').value;
+    if (!pin) return showMsg('reset-msg', 'Indtast bekræftelseskoden.', 'error');
+    if (newPassword.length < 6) return showMsg('reset-msg', 'Adgangskoden skal være mindst 6 tegn.', 'error');
+    if (newPassword !== confirmPassword) return showMsg('reset-msg', 'Adgangskoderne stemmer ikke overens.', 'error');
+    setLoading('reset-btn', true);
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/denmarkpr-reset-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset', email: resetEmail, pin, new_password: newPassword }),
+      });
+      const data = await res.json();
+      if (data.success) showState('resetSuccess');
+      else showMsg('reset-msg', data.error || 'Forkert kode. Prøv igen.', 'error');
+    } catch (err) { showMsg('reset-msg', 'Forbindelsesfejl. Prøv igen.', 'error'); }
+    setLoading('reset-btn', false);
+  });
 
-/* ---------- PIN LOGIC (FROM AU) ---------- */
-function utcDayOfYear(d){
-  const s = new Date(Date.UTC(d.getUTCFullYear(),0,0));
-  return Math.floor((d - s) / 86400000);
-}
+  document.getElementById('admin-toggle').addEventListener('click', () => { document.getElementById('admin-panel').classList.toggle('open'); });
+  document.getElementById('admin-btn').addEventListener('click', async () => {
+    const email = document.getElementById('admin-email').value.trim().toLowerCase();
+    const key = document.getElementById('admin-key').value;
+    const msgEl = document.getElementById('admin-msg');
+    const btn = document.getElementById('admin-btn');
+    msgEl.className = 'msg';
+    if (!email || !key) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Both fields required.'; return; }
+    btn.disabled = true; btn.textContent = 'Impersonating…';
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/admin-impersonate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, admin_key: key }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) { msgEl.className = 'msg visible error'; msgEl.textContent = data.error || 'Failed.'; btn.disabled = false; btn.textContent = 'Impersonate'; return; }
+      const { error: otpError } = await sb.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' });
+      if (otpError) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Session failed: ' + otpError.message; btn.disabled = false; btn.textContent = 'Impersonate'; return; }
+      localStorage.setItem('cl_auth', 'ok');
+      localStorage.setItem('cl_email', data.email);
+      window.location.href = returnUrl;
+    } catch (err) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Error: ' + err.message; btn.disabled = false; btn.textContent = 'Impersonate'; }
+  });
 
-function computePin(email){
-  const n = new Date();
-  const v =
-    (utcDayOfYear(n) * 37) +
-    (n.getUTCHours() * 91) +
-    (email.length * 17);
-  return String(v % 10000).padStart(4,"0");
-}
-
-async function showPin(){
-  const email = pinEmail.value.trim().toLowerCase();
-  if (!email) return notify("error","Indtast din e-mail.");
-
-  // 🔐 SERVER CHECK: does this email exist?
-  let exists = false;
-
-  try {
-    const res = await fetch("https://htgliokekeaovdiafrgs.supabase.co/functions/v1/check-user-exists", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email })
-    });
-
-    const data = await res.json();
-    exists = data.exists === true;
-  } catch (e) {
-    return notify("error","Kunne ikke validere e-mailen. Prøv igen.");
+  function translateError(msg) {
+    const l = msg.toLowerCase();
+    if (l.includes('invalid login'))       return 'Forkert email eller adgangskode.';
+    if (l.includes('email not confirmed')) return 'Email ikke bekræftet.';
+    if (l.includes('too many requests'))   return 'For mange forsøg. Vent et øjeblik.';
+    if (l.includes('user not found'))      return 'Ingen konto med denne email.';
+    if (l.includes('network'))             return 'Forbindelsesfejl.';
+    return msg;
   }
 
-  if (!exists) {
-    return notify("error","Denne e-mail findes ikke i systemet.");
-  }
-
-  // ✅ EXACT SAME PIN LOGIC AS AU
-  const pin = computePin(email);
-  pinShown.textContent = pin;
-  pinArea.style.display = "block";
-
-  localStorage.setItem("cl_email", email);
-}
-
-async function pinLogin() {
-  const email = localStorage.getItem("cl_email");
-  const enteredPin = pinEnter.value.trim();
-
-  const res = await fetch(
-    "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/verify-pin-and-log",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": window.SUPABASE_KEY
-      },
-      body: JSON.stringify({ email, enteredPin })
-    }
-  );
-
-  const data = await res.json();
-
-  if (!data.success) {
-    return notify("error", "Forkert PIN.");
-  }
-
-  localStorage.setItem("cl_auth","ok");
-  localStorage.setItem("cl_email", email);
-  localStorage.setItem("cl_login_at", Date.now().toString());
-  location.href="/denmark-pr/dashboard/";
-}
-
-
-
-
-function toggleMainPwd(){
-  const pwd = loginPwd;
-  const btn = document.querySelector(".toggle-pwd");
-  if (pwd.type === "password") {
-    pwd.type = "text";
-    btn.textContent = "Skjul";
-  } else {
-    pwd.type = "password";
-    btn.textContent = "Vis";
-  }
-}
+  document.getElementById('login-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-form').requestSubmit(); });
+})();
 </script>
-
-<script>
-/* === MOBILE LOGIN TABS === */
-document.querySelectorAll(".login-tab").forEach(tab => {
-  tab.addEventListener("click", () => {
-    const target = tab.dataset.tab;
-
-    // Update tab bar
-    document.querySelectorAll(".login-tab").forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
-
-    // Show matching card, hide others
-    document.querySelectorAll(".auth-card").forEach(card => {
-      card.classList.toggle("tab-active", card.dataset.card === target);
-    });
-
-    // Reset setup tab label when switching away from forgot flow
-    if (target !== "setup") {
-      const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
-      if (setupTab) setupTab.textContent = "Første gang?";
-      const setupCard = document.querySelector('.card-left');
-      const h2 = setupCard?.querySelector("h2");
-      if (h2) h2.textContent = "Første gang her?";
-      const p = setupCard?.querySelector("p");
-      if (p) p.textContent = "Har du netop købt adgang? Opret din adgangskode her.";
-    }
-  });
-});
-
-/* === FORGOT PASSWORD LINK === */
-const forgotLink = document.getElementById("forgotLink");
-if (forgotLink) {
-  forgotLink.addEventListener("click", (e) => {
-    e.preventDefault();
-
-    // Switch to setup tab
-    document.querySelectorAll(".login-tab").forEach(t => t.classList.remove("active"));
-    const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
-    if (setupTab) {
-      setupTab.classList.add("active");
-      setupTab.textContent = "Glemt adgangskode?";
-    }
-
-    document.querySelectorAll(".auth-card").forEach(card => {
-      card.classList.toggle("tab-active", card.dataset.card === "setup");
-    });
-
-    // Update heading and description
-    const setupCard = document.querySelector('.card-left');
-    const h2 = setupCard?.querySelector("h2");
-    if (h2) h2.textContent = "Glemt adgangskode?";
-    const p = setupCard?.querySelector("p");
-    if (p) p.textContent = "Indtast din e-mail, så sender vi et link til at nulstille din adgangskode.";
-  });
-}
-</script>
-
 </body>
 </html>

@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Premium adgang – CivicLearn Danmark</title>
 
-  <!-- SEO -->
   <meta name="description" content="Aktivér Premium-adgang til forberedelse til Medborgerskabsprøven. Ubegrænsede officielle simulationer, hundreder af spørgsmål, detaljeret statistik og livstidsadgang. Ét engangsbeløb, adgang med det samme.">
   <link rel="canonical" href="https://civiclearn.com/denmark-pr/checkout.html">
 
@@ -22,39 +21,53 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/checkout.css">
+
+  <style>
+    #payment-element { margin-bottom: 1.2rem; min-height: 80px; }
+    .payment-loading { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 2rem 0; }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
+    .field input {
+      width: 100%; padding: 0.75rem 0.9rem; border-radius: 0.9rem;
+      border: 1px solid rgba(0,0,0,0.12); font-size: 0.95rem;
+      font-family: "Lexend", sans-serif; outline: none;
+    }
+    .field input:focus { outline: 2px solid var(--brand); border-color: transparent; }
+    .done-icon { font-size: 3rem; text-align: center; margin-bottom: 0.8rem; }
+    .done-title { font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; }
+    .done-sub { font-size: 0.95rem; color: var(--muted); text-align: center; margin-bottom: 1.5rem; }
+    .step-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; margin-bottom: 1rem; background: #eef2ff; color: #3730a3;
+    }
+  </style>
 </head>
 
 <body>
 
 <header class="checkout-header">
   <div class="checkout-header-inner">
-
     <div class="checkout-brand">
-      <img src="/assets/images/icons/dk.svg" alt="Danmark">
+      <img src="/assets/images/icons/dk.svg" alt="Danmark" style="width:24px;height:auto;">
       CivicLearn Danmark - Medborgerskabsprøve
     </div>
-
     <div class="checkout-powered">
       <small>drevet af</small>
       <a href="https://civiclearn.com/denmark-pr/">CivicLearn</a>
     </div>
-
   </div>
 </header>
 
 <main>
   <div class="layout">
 
-    <!-- LEFT COLUMN: BENEFITS -->
     <aside class="features">
       <h2>Premium adgang</h2>
       <div class="price">499 kr</div>
       <div class="once">Engangsbetaling · adgang for livet</div>
-
       <div class="divider"></div>
-
       <h3>Hvad er inkluderet</h3>
-
       <ul class="benefits">
         <li>Hundredvis af spørgsmål baseret på Medborgerskabsprøvens temaer</li>
         <li>Ubegrænsede officielle test-simulationer</li>
@@ -68,79 +81,73 @@
         <li>Øjeblikkelig adgang efter betaling</li>
         <li>Gratis opdateringer og livstidsadgang</li>
       </ul>
-
-      <p class="recommend">
-        Anbefalet af brugere, der har bestået prøven.
-      </p>
+      <p class="recommend">Anbefalet af brugere, der har bestået prøven.</p>
     </aside>
 
-    <!-- RIGHT COLUMN: PAYMENT CARD -->
     <section class="right">
       <div class="checkout-card">
-
         <h1>Aktivér din Premium-adgang</h1>
-        <div class="secure-line">100% sikker betaling via Stripe</div>
+        <div class="secure-line">100% sikker betaling · dine kortoplysninger passerer aldrig vores servere</div>
 
-        <!-- MULTI-STATE CHECKOUT FLOW -->
         <div class="checkout-flow" id="checkoutFlow">
 
-          <!-- STEP 1 -->
           <div class="checkout-step" id="stepInitial">
-            <button type="button" class="pay-btn" id="startCheckout">
-              Fortsæt til sikker betaling
-            </button>
-            <p class="small-note">
-              Du bliver sendt videre til Stripe for at betale sikkert.
-            </p>
+            <button type="button" class="pay-btn" id="startCheckout">Køb nu — 499 kr</button>
+            <p class="small-note">Du betaler sikkert direkte på denne side. Ingen omdirigering.</p>
           </div>
 
-          <!-- STEP 2: EMAIL ENTRY -->
           <div class="checkout-step" id="stepEmail" hidden>
-            <p class="email-instructions">
-              Indtast den emailadresse du vil bruge til din CivicLearn-konto.
-            </p>
-
+            <span class="step-badge">Trin 1 af 3</span>
+            <p class="email-instructions">Indtast den emailadresse du vil bruge til din CivicLearn-konto.</p>
             <div class="email-field-group">
               <label for="checkoutEmail">Email</label>
-              <input
-                type="email"
-                id="checkoutEmail"
-                autocomplete="email"
-                placeholder="eksempel@domæne.dk"
-                inputmode="email"
-              />
+              <input type="email" id="checkoutEmail" autocomplete="email" placeholder="eksempel@domæne.dk" inputmode="email" />
             </div>
-
-            <button type="button" class="pay-btn" id="continueWithEmail">
-              Fortsæt
-            </button>
+            <button type="button" class="pay-btn" id="continueWithEmail">Fortsæt</button>
           </div>
 
-          <!-- STEP 3: CONFIRM EMAIL -->
           <div class="checkout-step" id="stepConfirm" hidden>
-            <p class="confirm-text">
-              Din konto vil blive oprettet med denne adresse:
-            </p>
-
+            <span class="step-badge">Trin 2 af 3</span>
+            <p class="confirm-text">Din konto vil blive oprettet med denne adresse:</p>
             <p class="email-display" id="emailDisplay"></p>
-
-            <p class="confirm-warning">
-              Kontrollér venligst, at emailadressen er korrekt.
-            </p>
-
+            <p class="confirm-warning">Kontrollér venligst, at emailadressen er korrekt. Denne adresse er dit login.</p>
             <div class="confirm-actions">
-              <button type="button" class="pay-btn" id="confirmEmail">
-                Ja, fortsæt til sikker betaling
-              </button>
-              <button type="button" class="link-btn" id="editEmail">
-                Rediger email
-              </button>
+              <button type="button" class="pay-btn" id="confirmEmail">Bekræft og gå til betaling</button>
+              <button type="button" class="link-btn" id="editEmail">Rediger email</button>
             </div>
           </div>
 
-          <!-- MESSAGE -->
-          <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
+          <div class="checkout-step" id="stepPayment" hidden>
+            <span class="step-badge">Trin 3 af 3</span>
+            <p class="email-instructions" style="margin-bottom:1rem;">Indtast dine betalingsoplysninger nedenfor. Betalingen håndteres sikkert af Stripe.</p>
+            <div id="payment-element"><div class="payment-loading">Betalingsformular indlæses…</div></div>
+            <button type="button" class="pay-btn" id="payBtn" disabled>Betal 499 kr</button>
+            <button type="button" class="link-btn" id="backToConfirm" style="margin-top:0.5rem;">← Tilbage</button>
+          </div>
 
+          <div class="checkout-step" id="stepPassword" hidden>
+            <div style="text-align:center;font-size:2rem;margin-bottom:0.5rem;">🎉</div>
+            <div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;">Betaling bekræftet!</div>
+            <p class="email-instructions" style="text-align:center;">Vælg nu en adgangskode til din konto.</p>
+            <div class="field">
+              <label for="pw1">Adgangskode</label>
+              <input type="password" id="pw1" autocomplete="new-password" placeholder="Mindst 6 tegn">
+            </div>
+            <div class="field">
+              <label for="pw2">Bekræft adgangskode</label>
+              <input type="password" id="pw2" autocomplete="new-password" placeholder="Gentag adgangskoden">
+            </div>
+            <button type="button" class="pay-btn" id="setupBtn">Opret konto</button>
+          </div>
+
+          <div class="checkout-step" id="stepDone" hidden>
+            <div class="done-icon">✅</div>
+            <div class="done-title">Din konto er klar!</div>
+            <div class="done-sub" id="doneEmail"></div>
+            <a href="/denmark-pr/dashboard/" class="pay-btn" style="text-align:center;text-decoration:none;display:block;">Begynd træning →</a>
+          </div>
+
+          <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
         </div>
 
         <div class="trust">
@@ -148,132 +155,189 @@
           <div>⚡ Øjeblikkelig adgang</div>
           <div>✔ Intet abonnement</div>
         </div>
-
-        <div class="after-text">
-          Har du allerede en konto?
-          <a href="login.html">Log ind her</a>.
-        </div>
-
+        <div class="after-text">Har du allerede en konto? <a href="/denmark-pr/login.html">Log ind her</a>.</div>
       </div>
     </section>
 
   </div>
 </main>
 
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
 <script>
 (function() {
-  const stepInitial = document.getElementById("stepInitial");
-  const stepEmail   = document.getElementById("stepEmail");
-  const stepConfirm = document.getElementById("stepConfirm");
+  'use strict';
 
-  const startBtn        = document.getElementById("startCheckout");
-  const continueBtn     = document.getElementById("continueWithEmail");
-  const confirmBtn      = document.getElementById("confirmEmail");
-  const editEmailBtn    = document.getElementById("editEmail");
+  const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  const SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const STRIPE_PK     = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
+  const RETURN_URL    = 'https://civiclearn.com/denmark-pr/checkout.html';
 
-  const emailInput      = document.getElementById("checkoutEmail");
-  const emailDisplay    = document.getElementById("emailDisplay");
-  const messageBox      = document.getElementById("checkoutMessage");
+  const stripe = Stripe(STRIPE_PK);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  let currentEmail = "";
+  const stepInitial  = document.getElementById('stepInitial');
+  const stepEmail    = document.getElementById('stepEmail');
+  const stepConfirm  = document.getElementById('stepConfirm');
+  const stepPayment  = document.getElementById('stepPayment');
+  const stepPassword = document.getElementById('stepPassword');
+  const stepDone     = document.getElementById('stepDone');
+
+  const startBtn         = document.getElementById('startCheckout');
+  const continueBtn      = document.getElementById('continueWithEmail');
+  const confirmBtn       = document.getElementById('confirmEmail');
+  const editEmailBtn     = document.getElementById('editEmail');
+  const payBtn           = document.getElementById('payBtn');
+  const backToConfirmBtn = document.getElementById('backToConfirm');
+  const setupBtn         = document.getElementById('setupBtn');
+
+  const emailInput   = document.getElementById('checkoutEmail');
+  const emailDisplay = document.getElementById('emailDisplay');
+  const messageBox   = document.getElementById('checkoutMessage');
+
+  let currentEmail = '';
+  let paymentIntentId = '';
+  let stripeElements = null;
   let isSubmitting = false;
 
   function showStep(id) {
-    stepInitial.hidden = id !== "initial";
-    stepEmail.hidden   = id !== "email";
-    stepConfirm.hidden = id !== "confirm";
+    [stepInitial, stepEmail, stepConfirm, stepPayment, stepPassword, stepDone]
+      .forEach(el => el.hidden = true);
+    document.getElementById(id).hidden = false;
+    clearMessage();
   }
 
-  function clearMessage() {
-    messageBox.textContent = "";
-    messageBox.className = "checkout-message";
-    messageBox.style.display = "none";
-  }
-
-  function showMessage(type, text) {
-    messageBox.textContent = text;
-    messageBox.className = "checkout-message " + type;
-    messageBox.style.display = "block";
-  }
+  function clearMessage() { messageBox.textContent = ''; messageBox.className = 'checkout-message'; messageBox.style.display = 'none'; }
+  function showMessage(type, text) { messageBox.textContent = text; messageBox.className = 'checkout-message ' + type; messageBox.style.display = 'block'; }
 
   function validateEmail(value) {
     const email = value.trim();
-    if (!email) return { ok: false, msg: "Indtast venligst din emailadresse." };
-    const simplePattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-    if (!simplePattern.test(email)) {
-      return { ok: false, msg: "Ugyldig emailadresse." };
-    }
+    if (!email) return { ok: false, msg: 'Indtast venligst din emailadresse.' };
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, msg: 'Ugyldig emailadresse.' };
     return { ok: true, email };
   }
 
-  // Step 1 → Step 2
-  startBtn.addEventListener("click", () => {
-    clearMessage();
-    showStep("email");
-    emailInput.focus();
-  });
+  // 3DS return handling
+  const urlParams = new URLSearchParams(window.location.search);
+  const returnedPI = urlParams.get('payment_intent');
+  const returnedSecret = urlParams.get('payment_intent_client_secret');
+  const returnedStatus = urlParams.get('redirect_status');
 
-  // Step 2 → Step 3
-  continueBtn.addEventListener("click", () => {
-    clearMessage();
+  if (returnedPI && returnedSecret) {
+    currentEmail = localStorage.getItem('denmarkpr_checkout_email') || '';
+    paymentIntentId = returnedPI;
+    if (returnedStatus === 'succeeded') { showStep('stepPassword'); }
+    else {
+      stripe.retrievePaymentIntent(returnedSecret).then(({ paymentIntent }) => {
+        if (paymentIntent && paymentIntent.status === 'succeeded') showStep('stepPassword');
+        else { showMessage('error', 'Betalingen blev ikke gennemført.'); showStep('stepInitial'); }
+      });
+    }
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  startBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
+
+  continueBtn.addEventListener('click', () => {
     const { ok, msg, email } = validateEmail(emailInput.value);
-    if (!ok) {
-      showMessage("error", msg);
-      emailInput.focus();
-      return;
-    }
-    currentEmail = email;
-    emailDisplay.textContent = currentEmail;
-    showStep("confirm");
+    if (!ok) { showMessage('error', msg); emailInput.focus(); return; }
+    currentEmail = email; emailDisplay.textContent = currentEmail; showStep('stepConfirm');
   });
+  emailInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); } });
+  editEmailBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
 
-  // Edit email
-  editEmailBtn.addEventListener("click", () => {
-    clearMessage();
-    showStep("email");
-    emailInput.focus();
-  });
-
-  // Final step → Stripe
-  confirmBtn.addEventListener("click", async () => {
+  confirmBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
-    if (!currentEmail) {
-      showMessage("error", "Email ikke angivet. Prøv igen.");
-      showStep("email");
-      return;
-    }
-
-    isSubmitting = true;
-    confirmBtn.disabled = true;
-    confirmBtn.textContent = "Opretter betalingssession…";
-
-    clearMessage();
-    showMessage("info", "Forbinder til Stripe…");
+    isSubmitting = true; confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Forbereder betaling…';
+    showMessage('info', 'Indlæser sikker betalingsformular…');
 
     try {
-      const response = await fetch("https://payments.civiclearn.com/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: currentEmail,
-          country: "denmark-pr",
-          product: "denmark-pr-premium"
-        })
+      const res = await fetch(FUNCTIONS_URL + '/denmarkpr-create-payment-intent', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail }),
       });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Kunne ikke oprette betalingssession.');
 
-      if (!response.ok) throw new Error("Kunne ikke starte betalingen.");
+      paymentIntentId = data.payment_intent_id;
+      localStorage.setItem('denmarkpr_checkout_email', currentEmail);
 
-      const data = await response.json();
-      if (!data || !data.url) throw new Error("Uventet serverrespons.");
-
-      window.location.href = data.url;
+      stripeElements = stripe.elements({
+        clientSecret: data.client_secret,
+        appearance: { theme: 'stripe', variables: { fontFamily: '"Lexend", system-ui, sans-serif', borderRadius: '0.9rem', colorPrimary: '#7c3aed' } },
+      });
+      const paymentElement = stripeElements.create('payment');
+      document.getElementById('payment-element').innerHTML = '';
+      paymentElement.mount('#payment-element');
+      paymentElement.on('ready', () => { payBtn.disabled = false; });
+      paymentElement.on('change', (event) => { if (event.complete) payBtn.disabled = false; });
+      showStep('stepPayment');
     } catch (err) {
-      showMessage("error", err.message || "En fejl opstod. Prøv igen.");
-      isSubmitting = false;
-      confirmBtn.disabled = false;
-      confirmBtn.textContent = "Ja, fortsæt til sikker betaling";
+      showMessage('error', err.message || 'En fejl opstod.');
+    } finally {
+      isSubmitting = false; confirmBtn.disabled = false; confirmBtn.textContent = 'Bekræft og gå til betaling';
     }
   });
+
+  backToConfirmBtn.addEventListener('click', () => showStep('stepConfirm'));
+
+  payBtn.addEventListener('click', async () => {
+    if (isSubmitting) return;
+    isSubmitting = true; payBtn.disabled = true;
+    payBtn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;"></span>Behandler betaling…';
+    clearMessage();
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements: stripeElements,
+      confirmParams: { return_url: RETURN_URL, receipt_email: currentEmail },
+      redirect: 'if_required',
+    });
+
+    if (error) {
+      showMessage('error', error.message || 'Betalingen mislykkedes.');
+      payBtn.disabled = false; payBtn.textContent = 'Betal 499 kr'; isSubmitting = false; return;
+    }
+    if (paymentIntent && paymentIntent.status === 'succeeded') {
+      paymentIntentId = paymentIntent.id; showStep('stepPassword');
+    }
+    isSubmitting = false;
+  });
+
+  setupBtn.addEventListener('click', async () => {
+    const pw1 = document.getElementById('pw1').value;
+    const pw2 = document.getElementById('pw2').value;
+    if (!pw1 || pw1.length < 6) { showMessage('error', 'Adgangskoden skal være mindst 6 tegn.'); return; }
+    if (pw1 !== pw2) { showMessage('error', 'Adgangskoderne stemmer ikke overens.'); return; }
+
+    setupBtn.disabled = true; setupBtn.textContent = 'Opretter konto…'; clearMessage();
+
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/denmarkpr-setup-account', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_intent_id: paymentIntentId, password: pw1 }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        showMessage('error', data.error || 'Kontooprettelse mislykkedes.');
+        setupBtn.disabled = false; setupBtn.textContent = 'Opret konto'; return;
+      }
+
+      const { error: signInError } = await sb.auth.signInWithPassword({ email: data.email, password: pw1 });
+      if (signInError) console.error('Auto-login failed:', signInError);
+
+      localStorage.removeItem('denmarkpr_checkout_email');
+      document.getElementById('doneEmail').textContent = 'Logget ind som: ' + data.email;
+      showStep('stepDone');
+    } catch (err) {
+      showMessage('error', 'Forbindelsesfejl. Prøv igen.');
+      setupBtn.disabled = false; setupBtn.textContent = 'Opret konto';
+    }
+  });
+
+  document.getElementById('pw2').addEventListener('keydown', (e) => { if (e.key === 'Enter') setupBtn.click(); });
 })();
 </script>
 
