@@ -25,6 +25,7 @@
     .page-header p{font-size:1.05rem;color:var(--muted);}
     .msg{padding:10px 14px;border-radius:10px;font-size:0.88rem;margin-bottom:16px;background:#fef2f2;color:var(--error);border:1px solid #fecaca;display:none;text-align:center;max-width:520px;width:100%;}
     .msg.visible{display:block;}
+    .msg.info{background:#eff6ff;color:#1e40af;border-color:#bfdbfe;}
     .product-card{background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:36px 32px;width:100%;max-width:520px;position:relative;}
     .product-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:14px;background:var(--blue-dim);color:var(--blue);}
     .product-card h2{font-family:"Fraunces",serif;font-size:1.3rem;font-weight:700;margin-bottom:8px;}
@@ -40,9 +41,32 @@
     .product-options{display:flex;flex-direction:column;gap:12px;}
     .product-btn{padding:18px 20px;border-radius:14px;border:2px solid var(--border);background:#fff;text-align:left;cursor:pointer;font-family:inherit;transition:border-color 0.2s,box-shadow 0.2s;}
     .product-btn:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(0,35,149,0.1);}
+    .product-btn.selected{border-color:var(--blue);background:var(--blue-dim);box-shadow:0 4px 16px rgba(0,35,149,0.1);}
     .product-btn strong{display:block;font-size:1rem;margin-bottom:4px;color:var(--navy);}
     .product-btn span{font-size:0.88rem;color:var(--muted);}
     .product-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+    /* Email step styles */
+    .checkout-step{display:none;width:100%;max-width:520px;margin-top:24px;}
+    .checkout-step.active{display:block;}
+    .checkout-step-card{background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:28px 28px;}
+    .checkout-step-card h3{font-family:"Fraunces",serif;font-size:1.1rem;font-weight:700;margin-bottom:6px;}
+    .checkout-step-card p{font-size:0.92rem;color:var(--muted);margin-bottom:18px;}
+    .email-field{margin-bottom:18px;}
+    .email-field label{display:block;font-size:0.85rem;font-weight:600;color:var(--navy);margin-bottom:6px;}
+    .email-field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:1rem;font-family:"DM Sans",sans-serif;color:var(--navy);background:#fff;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+    .email-field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim);}
+    .email-field input::placeholder{color:#b0b5bf;}
+    .email-display{font-size:1.1rem;font-weight:600;color:var(--blue);padding:10px 14px;background:var(--blue-dim);border-radius:10px;text-align:center;margin-bottom:14px;word-break:break-all;}
+    .confirm-warning{font-size:0.85rem;color:var(--muted);margin-bottom:18px;text-align:center;}
+    .action-btn{display:block;width:100%;padding:14px 20px;border:none;border-radius:12px;font-size:1rem;font-weight:600;font-family:"DM Sans",sans-serif;cursor:pointer;transition:background 0.2s,transform 0.1s;background:var(--blue);color:#fff;}
+    .action-btn:hover:not(:disabled){background:var(--blue-dark);}
+    .action-btn:active:not(:disabled){transform:scale(0.99);}
+    .action-btn:disabled{opacity:0.5;cursor:not-allowed;}
+    .link-btn{display:block;width:100%;padding:10px;border:none;background:none;font-size:0.9rem;color:var(--blue);font-weight:600;cursor:pointer;text-align:center;font-family:"DM Sans",sans-serif;margin-top:8px;}
+    .link-btn:hover{text-decoration:underline;}
+    .confirm-actions{display:flex;flex-direction:column;}
+
     .secure-note{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:0.82rem;color:var(--muted);}
     .login-link{text-align:center;margin-top:14px;font-size:0.88rem;color:var(--muted);}
     .login-link a{color:var(--blue);text-decoration:none;font-weight:600;}
@@ -51,7 +75,7 @@
     @keyframes spin{to{transform:rotate(360deg);}}
     .footer{margin-top:auto;padding-top:40px;text-align:center;font-size:0.8rem;color:var(--muted);}
     .footer a{color:var(--muted);text-decoration:none;}.footer a:hover{text-decoration:underline;}
-    @media(max-width:500px){.product-card{padding:28px 22px;}.page-header h1{font-size:1.5rem;}}
+    @media(max-width:500px){.product-card{padding:28px 22px;}.page-header h1{font-size:1.5rem;}.checkout-step-card{padding:22px 18px;}}
   </style>
 </head>
 <body>
@@ -86,7 +110,9 @@
   </ul>
   <div class="recommend">Recommandé par des candidats à la carte de séjour et à la carte de résident.</div>
 </div>
-<div class="product-selection">
+
+<!-- STEP 1: Choose product -->
+<div class="product-selection" id="step-product">
   <h3>Choisissez votre démarche</h3>
   <div class="product-options">
     <button type="button" class="product-btn" id="btn-cr">
@@ -103,6 +129,35 @@
     Déjà un compte ? <a href="/france/login.html">Se connecter</a>
   </div>
 </div>
+
+<!-- STEP 2: Enter email -->
+<div class="checkout-step" id="step-email">
+  <div class="checkout-step-card">
+    <h3>Votre adresse email</h3>
+    <p>Entrez l'adresse email que vous souhaitez utiliser pour votre compte CivicLearn.</p>
+    <div class="email-field">
+      <label for="checkout-email">Email</label>
+      <input type="email" id="checkout-email" autocomplete="email" placeholder="exemple@domaine.com" inputmode="email">
+    </div>
+    <button type="button" class="action-btn" id="btn-continue-email">Continuer</button>
+    <button type="button" class="link-btn" id="btn-back-product">← Changer de démarche</button>
+  </div>
+</div>
+
+<!-- STEP 3: Confirm email -->
+<div class="checkout-step" id="step-confirm">
+  <div class="checkout-step-card">
+    <h3>Confirmez votre adresse</h3>
+    <p>Votre compte sera créé avec cette adresse :</p>
+    <div class="email-display" id="email-display"></div>
+    <div class="confirm-warning">Vérifiez attentivement. Vous recevrez votre lien de connexion à cette adresse.</div>
+    <div class="confirm-actions">
+      <button type="button" class="action-btn" id="btn-confirm-pay">Oui, continuer vers le paiement sécurisé</button>
+      <button type="button" class="link-btn" id="btn-edit-email">Modifier l'adresse email</button>
+    </div>
+  </div>
+</div>
+
 <div class="footer">
   <a href="https://preparer-examen-civique.fr">preparer-examen-civique.fr</a> · <a href="https://civiclearn.com">CivicLearn</a> · Testrada Pte Ltd
 </div>
@@ -111,36 +166,123 @@
   'use strict';
   const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
   const errorMsg = document.getElementById('error-msg');
-  const btnCR = document.getElementById('btn-cr');
-  const btnCSP = document.getElementById('btn-csp');
 
-  async function startCheckout(productType, btn) {
+  // Steps
+  const stepProduct = document.getElementById('step-product');
+  const stepEmail   = document.getElementById('step-email');
+  const stepConfirm = document.getElementById('step-confirm');
+
+  // Buttons
+  const btnCR           = document.getElementById('btn-cr');
+  const btnCSP          = document.getElementById('btn-csp');
+  const btnContinueEmail= document.getElementById('btn-continue-email');
+  const btnBackProduct  = document.getElementById('btn-back-product');
+  const btnConfirmPay   = document.getElementById('btn-confirm-pay');
+  const btnEditEmail    = document.getElementById('btn-edit-email');
+
+  // Fields
+  const emailInput   = document.getElementById('checkout-email');
+  const emailDisplay = document.getElementById('email-display');
+
+  let selectedProduct = null;
+  let currentEmail = '';
+  let isSubmitting = false;
+
+  function showStep(step) {
+    stepProduct.style.display = step === 'product' ? 'block' : 'none';
+    stepEmail.classList.toggle('active', step === 'email');
+    stepConfirm.classList.toggle('active', step === 'confirm');
     errorMsg.classList.remove('visible');
-    btnCR.disabled = true;
-    btnCSP.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span>Redirection vers Stripe…';
+    errorMsg.textContent = '';
+  }
+
+  function showError(text) {
+    errorMsg.textContent = text;
+    errorMsg.className = 'msg visible';
+  }
+
+  function showInfo(text) {
+    errorMsg.textContent = text;
+    errorMsg.className = 'msg info visible';
+  }
+
+  function validateEmail(value) {
+    const email = value.trim();
+    if (!email) return { ok: false, msg: 'Veuillez saisir votre adresse email.' };
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      return { ok: false, msg: 'Adresse email invalide. Veuillez vérifier et réessayer.' };
+    }
+    return { ok: true, email };
+  }
+
+  // Step 1 → Step 2: Choose product
+  function selectProduct(productType, btn) {
+    selectedProduct = productType;
+    btnCR.classList.toggle('selected', productType === 'france-cr');
+    btnCSP.classList.toggle('selected', productType === 'france-csp');
+    showStep('email');
+    emailInput.focus();
+  }
+
+  btnCR.addEventListener('click', () => selectProduct('france-cr', btnCR));
+  btnCSP.addEventListener('click', () => selectProduct('france-csp', btnCSP));
+
+  // Step 2 → Step 3: Validate email
+  btnContinueEmail.addEventListener('click', () => {
+    const { ok, msg, email } = validateEmail(emailInput.value);
+    if (!ok) { showError(msg); emailInput.focus(); return; }
+    currentEmail = email;
+    emailDisplay.textContent = currentEmail;
+    showStep('confirm');
+  });
+
+  // Allow Enter key in email field
+  emailInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); btnContinueEmail.click(); }
+  });
+
+  // Step 2 ← back to Step 1
+  btnBackProduct.addEventListener('click', () => {
+    showStep('product');
+  });
+
+  // Step 3 ← edit email
+  btnEditEmail.addEventListener('click', () => {
+    showStep('email');
+    emailInput.focus();
+  });
+
+  // Step 3 → Stripe
+  btnConfirmPay.addEventListener('click', async () => {
+    if (isSubmitting) return;
+    if (!selectedProduct || !currentEmail) {
+      showError('Veuillez sélectionner une démarche et saisir votre email.');
+      showStep('product');
+      return;
+    }
+
+    isSubmitting = true;
+    btnConfirmPay.disabled = true;
+    btnConfirmPay.innerHTML = '<span class="spinner"></span>Redirection vers Stripe…';
+    showInfo('Connexion à Stripe. Veuillez patienter…');
+
     try {
       const res = await fetch(FUNCTIONS_URL + '/france-create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_type: productType }),
+        body: JSON.stringify({ product_type: selectedProduct, email: currentEmail }),
       });
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'Erreur checkout');
       window.location.href = data.url;
     } catch (err) {
       console.error('Checkout error:', err);
-      errorMsg.textContent = 'Une erreur est survenue : ' + err.message + '. Réessayez ou contactez : admin@civiclearn.com';
-      errorMsg.classList.add('visible');
-      btnCR.disabled = false;
-      btnCSP.disabled = false;
-      btnCR.innerHTML = '<strong>Carte de résident (CR)</strong><span>Préparation renforcée, conforme aux exigences de la carte de résident.</span>';
-      btnCSP.innerHTML = '<strong>Carte de séjour pluriannuelle (CSP)</strong><span>Préparation à l\'examen civique requis pour la carte de séjour pluriannuelle.</span>';
+      showError('Une erreur est survenue : ' + err.message + '. Réessayez ou contactez : admin@civiclearn.com');
+      isSubmitting = false;
+      btnConfirmPay.disabled = false;
+      btnConfirmPay.textContent = 'Oui, continuer vers le paiement sécurisé';
     }
-  }
-
-  btnCR.addEventListener('click', () => startCheckout('france-cr', btnCR));
-  btnCSP.addEventListener('click', () => startCheckout('france-csp', btnCSP));
+  });
 })();
 </script>
 </body>
