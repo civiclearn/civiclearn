@@ -25,28 +25,45 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/checkout.css">
+
+  <style>
+    #payment-element { margin-bottom: 1.2rem; min-height: 80px; }
+    .payment-loading { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 2rem 0; }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
+    .field input {
+      width: 100%; padding: 0.75rem 0.9rem; border-radius: 0.9rem;
+      border: 1px solid rgba(0,0,0,0.12); font-size: 0.95rem;
+      font-family: "Lexend", sans-serif; outline: none;
+    }
+    .field input:focus { outline: 2px solid var(--brand); border-color: transparent; }
+    .done-icon { font-size: 3rem; text-align: center; margin-bottom: 0.8rem; }
+    .done-title { font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; }
+    .done-sub { font-size: 0.95rem; color: var(--muted); text-align: center; margin-bottom: 1.5rem; }
+    .step-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; margin-bottom: 1rem; background: #eef2ff; color: #3730a3;
+    }
+  </style>
 </head>
 
 <body>
 
 <header class="checkout-header">
   <div class="checkout-header-inner">
-
     <div class="checkout-brand">
-      <img src="/assets/images/fi.svg" alt="Finland">
+      <img src="/assets/images/fi.svg" alt="Finland" style="width:24px;height:auto;">
       CivicLearn YKI Svenska – Medelnivå
     </div>
-
     <div class="checkout-powered">
       <small>drivs av</small>
       <a href="https://civiclearn.com">CivicLearn</a>
     </div>
-
   </div>
 </header>
 
 <main>
-
   <div class="layout">
 
     <!-- LEFT: FEATURES -->
@@ -54,11 +71,8 @@
       <h2>Premium-tillgång YKI Svenska</h2>
       <div class="price">69&nbsp;€</div>
       <div class="once">Engångsbetalning · livstidsåtkomst</div>
-
       <div class="divider"></div>
-
       <h3>Vad som ingår</h3>
-
       <ul class="benefits">
         <li>20 kompletta simuleringar av YKI Svenska (medelnivå)</li>
         <li>Läsförståelse</li>
@@ -73,207 +87,279 @@
         <li>Permanenta gratis uppdateringar</li>
         <li>Livstidsåtkomst till plattformen</li>
       </ul>
-
       <p class="recommend">
         Används av kandidater som förbereder sig för YKI Svenska (medelnivå) för finskt medborgarskap.
       </p>
     </aside>
 
-    <!-- RIGHT: CHECKOUT -->
+    <!-- RIGHT: PAYMENT FLOW -->
     <section class="right">
       <div class="checkout-card">
-
         <h1>Aktivera premium-tillgång</h1>
-        <div class="secure-line">100 % säker betalning via Stripe</div>
+        <div class="secure-line">100 % säker betalning · dina bankuppgifter passerar aldrig våra servrar</div>
 
         <div class="checkout-flow" id="checkoutFlow">
 
-          <!-- STEP 1 -->
+          <!-- STEP 1: INITIAL -->
           <div class="checkout-step" id="stepInitial">
-            <button type="button" class="pay-btn" id="startCheckout">
-              Fortsätt till säker betalning
-            </button>
-            <p class="small-note">
-              Du omdirigeras till Stripe för att slutföra betalningen.
-            </p>
+            <button type="button" class="pay-btn" id="startCheckout">Köp nu — 69 €</button>
+            <p class="small-note">Du betalar säkert direkt på denna sida. Ingen omdirigering.</p>
           </div>
 
-          <!-- STEP 2 -->
+          <!-- STEP 2: EMAIL -->
           <div class="checkout-step" id="stepEmail" hidden>
+            <span class="step-badge">Steg 1 av 3</span>
             <p class="email-instructions">
               Ange den e-postadress du vill använda för ditt CivicLearn-konto (YKI Svenska).
             </p>
-
             <div class="email-field-group">
               <label for="checkoutEmail">E-post</label>
-              <input
-                type="email"
-                id="checkoutEmail"
-                autocomplete="email"
-                placeholder="exempel@domän.fi"
-                inputmode="email"
-              />
+              <input type="email" id="checkoutEmail" autocomplete="email" placeholder="exempel@domän.fi" inputmode="email" />
             </div>
-
-            <button type="button" class="pay-btn" id="continueWithEmail">
-              Fortsätt
-            </button>
+            <button type="button" class="pay-btn" id="continueWithEmail">Fortsätt</button>
           </div>
 
-          <!-- STEP 3 -->
+          <!-- STEP 3: CONFIRM EMAIL -->
           <div class="checkout-step" id="stepConfirm" hidden>
-            <p class="confirm-text">
-              Ditt konto skapas med denna adress:
-            </p>
-
+            <span class="step-badge">Steg 2 av 3</span>
+            <p class="confirm-text">Ditt konto skapas med denna adress:</p>
             <p class="email-display" id="emailDisplay"></p>
-            <p class="confirm-warning">
-              Kontrollera noggrant. Du får åtkomst via denna e-post.
-            </p>
-
+            <p class="confirm-warning">Kontrollera noggrant. Denna adress blir dina inloggningsuppgifter.</p>
             <div class="confirm-actions">
-              <button type="button" class="pay-btn" id="confirmEmail">
-                Ja, fortsätt till säker betalning
-              </button>
-              <button type="button" class="link-btn" id="editEmail">
-                Ändra e-postadress
-              </button>
+              <button type="button" class="pay-btn" id="confirmEmail">Bekräfta och gå till betalning</button>
+              <button type="button" class="link-btn" id="editEmail">Ändra e-postadress</button>
             </div>
           </div>
 
-          <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
+          <!-- STEP 4: STRIPE ELEMENTS PAYMENT -->
+          <div class="checkout-step" id="stepPayment" hidden>
+            <span class="step-badge">Steg 3 av 3</span>
+            <p class="email-instructions" style="margin-bottom:1rem;">Ange dina betalningsuppgifter nedan. Betalningen hanteras säkert av Stripe.</p>
+            <div id="payment-element"><div class="payment-loading">Betalningsformuläret laddas…</div></div>
+            <button type="button" class="pay-btn" id="payBtn" disabled>Betala 69 €</button>
+            <button type="button" class="link-btn" id="backToConfirm" style="margin-top:0.5rem;">← Tillbaka</button>
+          </div>
 
+          <!-- STEP 5: SET PASSWORD -->
+          <div class="checkout-step" id="stepPassword" hidden>
+            <div style="text-align:center;font-size:2rem;margin-bottom:0.5rem;">🎉</div>
+            <div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;">Betalning bekräftad!</div>
+            <p class="email-instructions" style="text-align:center;">Välj nu ett lösenord för att konfigurera ditt konto.</p>
+            <div class="field">
+              <label for="pw1">Lösenord</label>
+              <input type="password" id="pw1" autocomplete="new-password" placeholder="Minst 6 tecken">
+            </div>
+            <div class="field">
+              <label for="pw2">Bekräfta lösenord</label>
+              <input type="password" id="pw2" autocomplete="new-password" placeholder="Upprepa lösenordet">
+            </div>
+            <button type="button" class="pay-btn" id="setupBtn">Skapa konto</button>
+          </div>
+
+          <!-- STEP 6: DONE -->
+          <div class="checkout-step" id="stepDone" hidden>
+            <div class="done-icon">✅</div>
+            <div class="done-title">Ditt konto är klart!</div>
+            <div class="done-sub" id="doneEmail"></div>
+            <a href="/ykisvenska/dashboard/index.html" class="pay-btn" style="text-align:center;text-decoration:none;display:block;">Börja träna →</a>
+          </div>
+
+          <!-- MESSAGE -->
+          <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
         </div>
 
         <div class="trust">
-          <div>Säker betalning</div>
-          <div>Omedelbar åtkomst</div>
-          <div>Inga prenumerationer</div>
-          <div>Bedömning av skrift och tal ingår</div>
+          <div>🔒 Säker betalning</div>
+          <div>⚡ Omedelbar åtkomst</div>
+          <div>✔ Inga prenumerationer</div>
+          <div>✔ AI-bedömning ingår</div>
         </div>
-
         <div class="after-text">
-          Har du redan ett konto?
-          <a href="/ykisvenska/login.html">Logga in här</a>.
+          Har du redan ett konto? <a href="/ykisvenska/login.html">Logga in här</a>.
         </div>
-
       </div>
     </section>
 
   </div>
-
 </main>
+
+<!-- STRIPE + SUPABASE -->
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <script>
 (function() {
-  const stepInitial = document.getElementById("stepInitial");
-  const stepEmail   = document.getElementById("stepEmail");
-  const stepConfirm = document.getElementById("stepConfirm");
+  'use strict';
 
-  const startBtn     = document.getElementById("startCheckout");
-  const continueBtn  = document.getElementById("continueWithEmail");
-  const confirmBtn   = document.getElementById("confirmEmail");
-  const editEmailBtn = document.getElementById("editEmail");
+  const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  const SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const STRIPE_PK     = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
+  const RETURN_URL    = 'https://civiclearn.com/ykisvenska/checkout.html';
 
-  const emailInput   = document.getElementById("checkoutEmail");
-  const emailDisplay = document.getElementById("emailDisplay");
-  const messageBox   = document.getElementById("checkoutMessage");
+  const stripe = Stripe(STRIPE_PK);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  let currentEmail = "";
+  const stepInitial  = document.getElementById('stepInitial');
+  const stepEmail    = document.getElementById('stepEmail');
+  const stepConfirm  = document.getElementById('stepConfirm');
+  const stepPayment  = document.getElementById('stepPayment');
+  const stepPassword = document.getElementById('stepPassword');
+  const stepDone     = document.getElementById('stepDone');
+
+  const startBtn         = document.getElementById('startCheckout');
+  const continueBtn      = document.getElementById('continueWithEmail');
+  const confirmBtn       = document.getElementById('confirmEmail');
+  const editEmailBtn     = document.getElementById('editEmail');
+  const payBtn           = document.getElementById('payBtn');
+  const backToConfirmBtn = document.getElementById('backToConfirm');
+  const setupBtn         = document.getElementById('setupBtn');
+
+  const emailInput   = document.getElementById('checkoutEmail');
+  const emailDisplay = document.getElementById('emailDisplay');
+  const messageBox   = document.getElementById('checkoutMessage');
+
+  let currentEmail = '';
+  let paymentIntentId = '';
+  let stripeElements = null;
   let isSubmitting = false;
 
-  function showStep(step) {
-    stepInitial.hidden = step !== "initial";
-    stepEmail.hidden   = step !== "email";
-    stepConfirm.hidden = step !== "confirm";
+  function showStep(id) {
+    [stepInitial, stepEmail, stepConfirm, stepPayment, stepPassword, stepDone]
+      .forEach(el => el.hidden = true);
+    document.getElementById(id).hidden = false;
+    clearMessage();
   }
 
-  function clearMessage() {
-    messageBox.textContent = "";
-    messageBox.className = "checkout-message";
-    messageBox.style.display = "none";
-  }
-
-  function showMessage(type, text) {
-    messageBox.textContent = text;
-    messageBox.className = "checkout-message " + type;
-    messageBox.style.display = "block";
-  }
+  function clearMessage() { messageBox.textContent = ''; messageBox.className = 'checkout-message'; messageBox.style.display = 'none'; }
+  function showMessage(type, text) { messageBox.textContent = text; messageBox.className = 'checkout-message ' + type; messageBox.style.display = 'block'; }
 
   function validateEmail(value) {
     const email = value.trim();
-    if (!email) return { ok: false, msg: "Ange din e-postadress." };
-    const pattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-    if (!pattern.test(email)) {
-      return { ok: false, msg: "Ogiltig e-postadress." };
-    }
+    if (!email) return { ok: false, msg: 'Ange din e-postadress.' };
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, msg: 'Ogiltig e-postadress.' };
     return { ok: true, email };
   }
 
-  startBtn.addEventListener("click", () => {
-    clearMessage();
-    showStep("email");
-    emailInput.focus();
-  });
+  // 3DS return handling
+  const urlParams = new URLSearchParams(window.location.search);
+  const returnedPI = urlParams.get('payment_intent');
+  const returnedSecret = urlParams.get('payment_intent_client_secret');
+  const returnedStatus = urlParams.get('redirect_status');
 
-  continueBtn.addEventListener("click", () => {
-    clearMessage();
+  if (returnedPI && returnedSecret) {
+    currentEmail = localStorage.getItem('ykisvenska_checkout_email') || '';
+    paymentIntentId = returnedPI;
+    if (returnedStatus === 'succeeded') { showStep('stepPassword'); }
+    else {
+      stripe.retrievePaymentIntent(returnedSecret).then(({ paymentIntent }) => {
+        if (paymentIntent && paymentIntent.status === 'succeeded') showStep('stepPassword');
+        else { showMessage('error', 'Betalningen slutfördes inte.'); showStep('stepInitial'); }
+      });
+    }
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  startBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
+
+  continueBtn.addEventListener('click', () => {
     const { ok, msg, email } = validateEmail(emailInput.value);
-    if (!ok) {
-      showMessage("error", msg);
-      emailInput.focus();
-      return;
-    }
-    currentEmail = email;
-    emailDisplay.textContent = currentEmail;
-    showStep("confirm");
+    if (!ok) { showMessage('error', msg); emailInput.focus(); return; }
+    currentEmail = email; emailDisplay.textContent = currentEmail; showStep('stepConfirm');
   });
+  emailInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); } });
+  editEmailBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
 
-  editEmailBtn.addEventListener("click", () => {
-    clearMessage();
-    showStep("email");
-    emailInput.focus();
-  });
-
-  confirmBtn.addEventListener("click", async () => {
+  confirmBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
-    if (!currentEmail) {
-      showMessage("error", "E-post ej angiven.");
-      showStep("email");
-      return;
-    }
-
-    isSubmitting = true;
-    confirmBtn.disabled = true;
-    confirmBtn.textContent = "Skapar betalningssession…";
-
-    clearMessage();
-    showMessage("info", "Ansluter till Stripe. Vänta…");
+    isSubmitting = true; confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Förbereder betalning…';
+    showMessage('info', 'Laddar säkert betalningsformulär…');
 
     try {
-      const response = await fetch("https://payments.civiclearn.com/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: currentEmail,
-          product: "yki-svenska-premium"
-        })
+      const res = await fetch(FUNCTIONS_URL + '/ykisvenska-create-payment-intent', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail }),
       });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Kunde inte skapa betalningssession.');
 
-      if (!response.ok) throw new Error("Fel vid start av betalning.");
+      paymentIntentId = data.payment_intent_id;
+      localStorage.setItem('ykisvenska_checkout_email', currentEmail);
 
-      const data = await response.json();
-      if (!data || !data.url) throw new Error("Oväntat svar från betalningsservern.");
-
-      window.location.href = data.url;
-
+      stripeElements = stripe.elements({
+        clientSecret: data.client_secret,
+        appearance: { theme: 'stripe', variables: { fontFamily: '"Lexend", system-ui, sans-serif', borderRadius: '0.9rem', colorPrimary: '#7c3aed' } },
+      });
+      const paymentElement = stripeElements.create('payment');
+      document.getElementById('payment-element').innerHTML = '';
+      paymentElement.mount('#payment-element');
+      paymentElement.on('ready', () => { payBtn.disabled = false; });
+      paymentElement.on('change', (event) => { if (event.complete) payBtn.disabled = false; });
+      showStep('stepPayment');
     } catch (err) {
-      showMessage("error", err.message || "Ett fel uppstod. Försök igen.");
-      isSubmitting = false;
-      confirmBtn.disabled = false;
-      confirmBtn.textContent = "Ja, fortsätt till säker betalning";
+      showMessage('error', err.message || 'Ett fel uppstod.');
+    } finally {
+      isSubmitting = false; confirmBtn.disabled = false; confirmBtn.textContent = 'Bekräfta och gå till betalning';
     }
   });
+
+  backToConfirmBtn.addEventListener('click', () => showStep('stepConfirm'));
+
+  payBtn.addEventListener('click', async () => {
+    if (isSubmitting) return;
+    isSubmitting = true; payBtn.disabled = true;
+    payBtn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;"></span>Behandlar betalning…';
+    clearMessage();
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements: stripeElements,
+      confirmParams: { return_url: RETURN_URL, receipt_email: currentEmail },
+      redirect: 'if_required',
+    });
+
+    if (error) {
+      showMessage('error', error.message || 'Betalningen misslyckades.');
+      payBtn.disabled = false; payBtn.textContent = 'Betala 69 €'; isSubmitting = false; return;
+    }
+    if (paymentIntent && paymentIntent.status === 'succeeded') {
+      paymentIntentId = paymentIntent.id; showStep('stepPassword');
+    }
+    isSubmitting = false;
+  });
+
+  setupBtn.addEventListener('click', async () => {
+    const pw1 = document.getElementById('pw1').value;
+    const pw2 = document.getElementById('pw2').value;
+    if (!pw1 || pw1.length < 6) { showMessage('error', 'Lösenordet måste vara minst 6 tecken.'); return; }
+    if (pw1 !== pw2) { showMessage('error', 'Lösenorden matchar inte.'); return; }
+
+    setupBtn.disabled = true; setupBtn.textContent = 'Skapar konto…'; clearMessage();
+
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/ykisvenska-setup-account', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_intent_id: paymentIntentId, password: pw1 }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        showMessage('error', data.error || 'Kontoskapandet misslyckades.');
+        setupBtn.disabled = false; setupBtn.textContent = 'Skapa konto'; return;
+      }
+
+      const { error: signInError } = await sb.auth.signInWithPassword({ email: data.email, password: pw1 });
+      if (signInError) console.error('Auto-login failed:', signInError);
+
+      localStorage.removeItem('ykisvenska_checkout_email');
+      document.getElementById('doneEmail').textContent = 'Inloggad som: ' + data.email;
+      showStep('stepDone');
+    } catch (err) {
+      showMessage('error', 'Anslutningsfel. Försök igen.');
+      setupBtn.disabled = false; setupBtn.textContent = 'Skapa konto';
+    }
+  });
+
+  document.getElementById('pw2').addEventListener('keydown', (e) => { if (e.key === 'Enter') setupBtn.click(); });
 })();
 </script>
 
