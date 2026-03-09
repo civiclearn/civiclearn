@@ -21,6 +21,29 @@
     .topbar-flag span { height: 100%; }
     .topbar-flag .f-green { width: 40%; background: #006600; }
     .topbar-flag .f-red { width: 60%; background: #FF0000; }
+
+    #payment-element { margin-bottom: 1.2rem; min-height: 80px; }
+    .payment-loading { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 2rem 0; }
+
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
+    .field input {
+      width: 100%; padding: 0.75rem 0.9rem; border-radius: 0.9rem;
+      border: 1px solid rgba(0,0,0,0.12); font-size: 0.95rem;
+      font-family: "Lexend", sans-serif; outline: none;
+    }
+    .field input:focus { outline: 2px solid var(--brand); border-color: transparent; }
+
+    .done-icon { font-size: 3rem; text-align: center; margin-bottom: 0.8rem; }
+    .done-title { font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; }
+    .done-sub { font-size: 0.95rem; color: var(--muted); text-align: center; margin-bottom: 1.5rem; }
+
+    .step-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; margin-bottom: 1rem;
+      background: #eef2ff; color: #3730a3;
+    }
   </style>
 </head>
 
@@ -56,7 +79,7 @@
         <li>Compreensão oral — áudios autênticos</li>
         <li>Compreensão escrita — textos e exercícios</li>
         <li>Expressão escrita — avaliação por IA</li>
-        <li>Expressão oral — conversação com IA</li>
+        <li>Expressão oral — avaliação do conteúdo da sua resposta (escrita ou falada)</li>
         <li>Feedback detalhado com sugestões de melhoria</li>
         <li>Resultados imediatos após cada simulação</li>
         <li>Pratique quantas vezes quiser</li>
@@ -75,7 +98,7 @@
       <div class="checkout-card">
 
         <h1>Ative o seu acesso Premium</h1>
-        <div class="secure-line">Pagamento 100% seguro via Stripe</div>
+        <div class="secure-line">Pagamento 100% seguro · os dados do seu cartão nunca passam pelo nosso servidor</div>
 
         <div class="checkout-flow" id="checkoutFlow">
 
@@ -84,11 +107,12 @@
               Comprar agora — 69 €
             </button>
             <p class="small-note">
-              Será redirecionado para o Stripe para concluir o pagamento.
+              Pague com segurança aqui mesmo. Sem redirecionamento.
             </p>
           </div>
 
           <div class="checkout-step" id="stepEmail" hidden>
+            <span class="step-badge">Passo 1 de 3</span>
             <p class="email-instructions">
               Introduza o endereço de email que pretende usar para a sua conta CivicLearn.
             </p>
@@ -100,12 +124,13 @@
           </div>
 
           <div class="checkout-step" id="stepConfirm" hidden>
+            <span class="step-badge">Passo 2 de 3</span>
             <p class="confirm-text">A sua conta será criada com este endereço:</p>
             <p class="email-display" id="emailDisplay"></p>
             <p class="confirm-warning">Verifique com atenção. Este será o seu identificador de login.</p>
             <div class="confirm-actions">
               <button type="button" class="pay-btn" id="confirmEmail">
-                Sim, continuar para o pagamento seguro
+                Confirmar e continuar para o pagamento
               </button>
               <button type="button" class="link-btn" id="editEmail">
                 Alterar endereço de email
@@ -113,7 +138,50 @@
             </div>
           </div>
 
+          <div class="checkout-step" id="stepPayment" hidden>
+            <span class="step-badge">Passo 3 de 3</span>
+            <p class="email-instructions" style="margin-bottom:1rem;">
+              Insira os dados do seu cartão abaixo. O pagamento é processado com segurança pelo Stripe.
+            </p>
+            <div id="payment-element">
+              <div class="payment-loading">A carregar formulário de pagamento…</div>
+            </div>
+            <button type="button" class="pay-btn" id="payBtn" disabled>
+              Pagar 69 €
+            </button>
+            <button type="button" class="link-btn" id="backToConfirm" style="margin-top:0.5rem;">
+              ← Voltar
+            </button>
+          </div>
+
+          <div class="checkout-step" id="stepPassword" hidden>
+            <div style="text-align:center;font-size:2rem;margin-bottom:0.5rem;">🎉</div>
+            <div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;">Pagamento confirmado!</div>
+            <p class="email-instructions" style="text-align:center;">
+              Agora crie uma palavra-passe para finalizar a sua conta.
+            </p>
+            <div class="field">
+              <label for="pw1">Palavra-passe</label>
+              <input type="password" id="pw1" autocomplete="new-password" placeholder="Mínimo 6 caracteres">
+            </div>
+            <div class="field">
+              <label for="pw2">Confirmar palavra-passe</label>
+              <input type="password" id="pw2" autocomplete="new-password" placeholder="Repita a palavra-passe">
+            </div>
+            <button type="button" class="pay-btn" id="setupBtn">Criar conta</button>
+          </div>
+
+          <div class="checkout-step" id="stepDone" hidden>
+            <div class="done-icon">✅</div>
+            <div class="done-title">A sua conta está pronta!</div>
+            <div class="done-sub" id="doneEmail"></div>
+            <a href="/ciple/dashboard/index.html" class="pay-btn" style="text-align:center;text-decoration:none;display:block;">
+              Ir para o painel →
+            </a>
+          </div>
+
           <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
+
         </div>
 
         <div class="trust">
@@ -133,95 +201,238 @@
   </div>
 </main>
 
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
 <script>
 (function() {
-  const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  'use strict';
 
-  const stepInitial = document.getElementById("stepInitial");
-  const stepEmail   = document.getElementById("stepEmail");
-  const stepConfirm = document.getElementById("stepConfirm");
+  const FUNCTIONS_URL  = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  const SUPABASE_URL   = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const STRIPE_PK      = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
+  const RETURN_URL     = 'https://civiclearn.com/ciple/checkout.html';
 
-  const startBtn     = document.getElementById("startCheckout");
-  const continueBtn  = document.getElementById("continueWithEmail");
-  const confirmBtn   = document.getElementById("confirmEmail");
-  const editEmailBtn = document.getElementById("editEmail");
+  const stripe = Stripe(STRIPE_PK);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const emailInput   = document.getElementById("checkoutEmail");
-  const emailDisplay = document.getElementById("emailDisplay");
-  const messageBox   = document.getElementById("checkoutMessage");
+  const stepInitial  = document.getElementById('stepInitial');
+  const stepEmail    = document.getElementById('stepEmail');
+  const stepConfirm  = document.getElementById('stepConfirm');
+  const stepPayment  = document.getElementById('stepPayment');
+  const stepPassword = document.getElementById('stepPassword');
+  const stepDone     = document.getElementById('stepDone');
 
-  let currentEmail = "";
+  const startBtn      = document.getElementById('startCheckout');
+  const continueBtn   = document.getElementById('continueWithEmail');
+  const confirmBtn    = document.getElementById('confirmEmail');
+  const editEmailBtn  = document.getElementById('editEmail');
+  const payBtn        = document.getElementById('payBtn');
+  const backToConfirm = document.getElementById('backToConfirm');
+  const setupBtn      = document.getElementById('setupBtn');
+
+  const emailInput   = document.getElementById('checkoutEmail');
+  const emailDisplay = document.getElementById('emailDisplay');
+  const messageBox   = document.getElementById('checkoutMessage');
+
+  let currentEmail = '';
+  let paymentIntentId = '';
+  let stripeElements = null;
   let isSubmitting = false;
 
-  function showStep(stepId) {
-    stepInitial.hidden = stepId !== "initial";
-    stepEmail.hidden   = stepId !== "email";
-    stepConfirm.hidden = stepId !== "confirm";
+  function showStep(id) {
+    [stepInitial, stepEmail, stepConfirm, stepPayment, stepPassword, stepDone]
+      .forEach(el => el.hidden = true);
+    document.getElementById(id).hidden = false;
     clearMessage();
   }
 
   function clearMessage() {
-    messageBox.textContent = "";
-    messageBox.className = "checkout-message";
-    messageBox.style.display = "none";
+    messageBox.textContent = '';
+    messageBox.className = 'checkout-message';
+    messageBox.style.display = 'none';
   }
 
   function showMessage(type, text) {
     messageBox.textContent = text;
-    messageBox.className = "checkout-message " + type;
-    messageBox.style.display = "block";
+    messageBox.className = 'checkout-message ' + type;
+    messageBox.style.display = 'block';
   }
 
   function validateEmail(value) {
     const email = value.trim();
-    if (!email) return { ok: false, msg: "Por favor, introduza o seu endereço de email." };
+    if (!email) return { ok: false, msg: 'Por favor, introduza o seu endereço de email.' };
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
-      return { ok: false, msg: "Endereço de email inválido. Verifique e tente novamente." };
+      return { ok: false, msg: 'Endereço de email inválido. Verifique e tente novamente.' };
     return { ok: true, email };
   }
 
-  startBtn.addEventListener("click", () => { showStep("email"); emailInput.focus(); });
+  // 3DS return handling
+  const urlParams = new URLSearchParams(window.location.search);
+  const returnedPI = urlParams.get('payment_intent');
+  const returnedSecret = urlParams.get('payment_intent_client_secret');
+  const returnedStatus = urlParams.get('redirect_status');
 
-  continueBtn.addEventListener("click", () => {
+  if (returnedPI && returnedSecret) {
+    currentEmail = localStorage.getItem('ciple_checkout_email') || '';
+    paymentIntentId = returnedPI;
+    if (returnedStatus === 'succeeded') {
+      showStep('stepPassword');
+    } else {
+      stripe.retrievePaymentIntent(returnedSecret).then(({ paymentIntent }) => {
+        if (paymentIntent && paymentIntent.status === 'succeeded') {
+          showStep('stepPassword');
+        } else {
+          showMessage('error', 'O pagamento não foi concluído. Tente novamente.');
+          showStep('stepInitial');
+        }
+      });
+    }
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  startBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
+
+  continueBtn.addEventListener('click', () => {
     const { ok, msg, email } = validateEmail(emailInput.value);
-    if (!ok) { showMessage("error", msg); emailInput.focus(); return; }
+    if (!ok) { showMessage('error', msg); emailInput.focus(); return; }
     currentEmail = email;
     emailDisplay.textContent = currentEmail;
-    showStep("confirm");
+    showStep('stepConfirm');
   });
 
-  emailInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); continueBtn.click(); }
+  emailInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); }
   });
 
-  editEmailBtn.addEventListener("click", () => { showStep("email"); emailInput.focus(); });
+  editEmailBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
 
-  confirmBtn.addEventListener("click", async () => {
+  confirmBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
-    if (!currentEmail) { showMessage("error", "Email não definido."); showStep("email"); return; }
-
     isSubmitting = true;
     confirmBtn.disabled = true;
-    confirmBtn.textContent = "A criar sessão de pagamento…";
-    showMessage("info", "A ligar ao Stripe. Aguarde…");
+    confirmBtn.textContent = 'A preparar pagamento…';
+    showMessage('info', 'A preparar formulário de pagamento seguro…');
 
     try {
-      const response = await fetch(FUNCTIONS_URL + "/ciple-create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product_type: "ciple", email: currentEmail })
+      const res = await fetch(FUNCTIONS_URL + '/ciple-create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail }),
       });
-      if (!response.ok) throw new Error("Erro ao iniciar o pagamento.");
-      const data = await response.json();
-      if (!data || !data.url) throw new Error(data.error || "Resposta inesperada do servidor.");
-      window.location.href = data.url;
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Falha ao criar sessão de pagamento.');
+
+      paymentIntentId = data.payment_intent_id;
+      localStorage.setItem('ciple_checkout_email', currentEmail);
+
+      stripeElements = stripe.elements({
+        clientSecret: data.client_secret,
+        appearance: {
+          theme: 'stripe',
+          variables: {
+            fontFamily: '"Lexend", system-ui, sans-serif',
+            borderRadius: '0.9rem',
+            colorPrimary: '#7c3aed',
+          },
+        },
+      });
+
+      const paymentElement = stripeElements.create('payment');
+      document.getElementById('payment-element').innerHTML = '';
+      paymentElement.mount('#payment-element');
+
+      paymentElement.on('ready', () => { payBtn.disabled = false; });
+      paymentElement.on('change', (event) => { if (event.complete) payBtn.disabled = false; });
+
+      showStep('stepPayment');
     } catch (err) {
-      showMessage("error", err.message || "Ocorreu um erro. Tente novamente.");
+      showMessage('error', err.message || 'Ocorreu um erro. Tente novamente.');
+    } finally {
       isSubmitting = false;
       confirmBtn.disabled = false;
-      confirmBtn.textContent = "Sim, continuar para o pagamento seguro";
+      confirmBtn.textContent = 'Confirmar e continuar para o pagamento';
     }
   });
+
+  backToConfirm.addEventListener('click', () => showStep('stepConfirm'));
+
+  payBtn.addEventListener('click', async () => {
+    if (isSubmitting) return;
+    isSubmitting = true;
+    payBtn.disabled = true;
+    payBtn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;"></span>A processar pagamento…';
+    clearMessage();
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements: stripeElements,
+      confirmParams: {
+        return_url: RETURN_URL,
+        receipt_email: currentEmail,
+      },
+      redirect: 'if_required',
+    });
+
+    if (error) {
+      showMessage('error', error.message || 'O pagamento falhou. Tente novamente.');
+      payBtn.disabled = false;
+      payBtn.textContent = 'Pagar 69 €';
+      isSubmitting = false;
+      return;
+    }
+
+    if (paymentIntent && paymentIntent.status === 'succeeded') {
+      paymentIntentId = paymentIntent.id;
+      showStep('stepPassword');
+    }
+    isSubmitting = false;
+  });
+
+  setupBtn.addEventListener('click', async () => {
+    const pw1 = document.getElementById('pw1').value;
+    const pw2 = document.getElementById('pw2').value;
+
+    if (!pw1 || pw1.length < 6) { showMessage('error', 'A palavra-passe deve ter pelo menos 6 caracteres.'); return; }
+    if (pw1 !== pw2) { showMessage('error', 'As palavras-passe não coincidem.'); return; }
+
+    setupBtn.disabled = true;
+    setupBtn.textContent = 'A criar conta…';
+    clearMessage();
+
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/ciple-setup-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_intent_id: paymentIntentId, password: pw1 }),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        showMessage('error', data.error || 'Falha na criação da conta. Contacte admin@civiclearn.com.');
+        setupBtn.disabled = false;
+        setupBtn.textContent = 'Criar conta';
+        return;
+      }
+
+      const { error: signInError } = await sb.auth.signInWithPassword({ email: data.email, password: pw1 });
+      if (signInError) console.error('Auto-login failed:', signInError);
+
+      localStorage.removeItem('ciple_checkout_email');
+      document.getElementById('doneEmail').textContent = 'Sessão iniciada como: ' + data.email;
+      showStep('stepDone');
+
+    } catch (err) {
+      showMessage('error', 'Erro de ligação. Tente novamente.');
+      setupBtn.disabled = false;
+      setupBtn.textContent = 'Criar conta';
+    }
+  });
+
+  document.getElementById('pw2').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') setupBtn.click();
+  });
+
 })();
 </script>
 
