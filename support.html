@@ -29,9 +29,7 @@
     .header-inner { max-width: var(--max-w); margin: 0 auto; padding: 0.85rem 2rem; display: flex; align-items: center; justify-content: space-between; }
     .header-left { display: flex; align-items: center; gap: 0.7rem; }
     .brand-main { display: flex; align-items: center; gap: 0.55rem; }
-    .brand-mark {
-      width: 28px; height: 28px; display: block;
-    }
+    .brand-mark { width: 28px; height: 28px; border-radius: 9px; background: radial-gradient(circle at 20% 10%, #a855f7, #4f46e5); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.7rem; font-weight: 700; box-shadow: 0 2px 8px rgba(124,58,237,0.3); }
     .brand-title { font-weight: 600; font-size: 1.05rem; letter-spacing: -0.01em; }
     .brand-sub { font-size: 0.76rem; color: var(--muted); border-left: 1px solid rgba(0,0,0,0.08); padding-left: 0.7rem; margin-left: 0.15rem; }
     .header-right { display: flex; align-items: center; gap: 0.75rem; }
@@ -142,14 +140,13 @@
   <div class="header-inner">
     <div class="header-left">
       <a href="/" class="brand-main">
-        <img src="/assets/images/cl.png" alt="CivicLearn" class="brand-mark">
+        <div class="brand-mark">CL</div>
         <div class="brand-title">CivicLearn</div>
       </a>
       <div class="brand-sub" data-i18n="header_sub">Civic, citizenship and language test preparation</div>
     </div>
     <div class="header-right">
       <a href="/" class="btn-ghost" data-i18n="nav_home">Home</a>
-      <a href="/support" class="btn-ghost" style="color:var(--brand);font-weight:600;">Support</a>
     </div>
   </div>
 </header>
@@ -210,7 +207,7 @@
           <div class="faq-results" id="faqResults"></div>
         </div>
 
-        <form id="supportForm">
+        <form id="supportForm" method="post">
           <!-- Honeypot -->
           <input type="text" name="company" tabindex="-1" autocomplete="off" style="display:none">
 
@@ -248,7 +245,7 @@
         </form>
 
         <div class="form-success" id="formSuccess" data-i18n="form_success">✓ Thank you — your message has been sent. We'll get back to you soon.</div>
-        <div class="form-error" id="formError" data-i18n="form_error">Something went wrong. Please try again or email us directly at <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6706030a0e0927040e110e040b020615094904080a">[email&#160;protected]</a>.</div>
+        <div class="form-error" id="formError" data-i18n="form_error">Something went wrong. Please try again or email us directly at <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="badbded7d3d4fad9d3ccd3d9d6dfdbc8d494d9d5d7">[email&#160;protected]</a>.</div>
       </div>
     </div>
 
@@ -270,12 +267,11 @@
     <a href="/" data-i18n="nav_home">Home</a>
     <a href="/legal" data-i18n="nav_legal">Legal</a>
     <a href="/privacy" data-i18n="nav_privacy">Privacy</a>
-    <a href="/cdn-cgi/l/email-protection#ceafaaa3a7a08eada7b8a7ada2abafbca0e0ada1a3"><span class="__cf_email__" data-cfemail="9ffefbf2f6f1dffcf6e9f6fcf3fafeedf1b1fcf0f2">[email&#160;protected]</span></a>
+    <a href="/cdn-cgi/l/email-protection#f8999c959196b89b918e919b949d998a96d69b9795"><span class="__cf_email__" data-cfemail="6b0a0f0602052b08021d0208070e0a190545080406">[email&#160;protected]</span></a>
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-// ═══════════════════════════════════════════════════════════════
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false">
 // i18n DATA
 // ═══════════════════════════════════════════════════════════════
 const i18n = {
@@ -697,4 +693,15 @@ document.getElementById('supportForm').addEventListener('submit', async function
 // INIT
 // ═══════════════════════════════════════════════════════════════
 document.querySelectorAll('.lang-btn').forEach(btn => {
-  btn.addEventListener('click', () => applyL
+  btn.addEventListener('click', () => applyLang(btn.dataset.lang));
+});
+
+document.getElementById('messageInput').addEventListener('input', onMessageInput);
+
+// Auto-detect browser language
+const browserLang = (navigator.language || 'en').slice(0, 2).toLowerCase();
+const supported = ['en','da','fr','pt','fi','sv','is'];
+applyLang(supported.includes(browserLang) ? browserLang : 'en');
+</script>
+</body>
+</html>
