@@ -3,39 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Køb — Medborgerskabsprøve Træning</title>
+  <title>Premium adgang – Medborgerskabsprøven | CivicLearn Danmark</title>
 
-  <meta name="description"
-        content="Få adgang til medborgerskabsprøve-træning. 800+ spørgsmål, tidtagne prøver, fuldt historik. Engangsbetaling, ubegrænset adgang." />
+  <meta name="description" content="Aktivér Premium-adgang til forberedelse til Medborgerskabsprøven. 800+ spørgsmål, tidtagne simulationer, detaljeret statistik og livstidsadgang. Ét engangsbeløb, adgang med det samme.">
   <link rel="canonical" href="https://civiclearn.com/denmark-pr/checkout.html">
+
+  <meta property="og:title" content="Premium adgang – Medborgerskabsprøven">
+  <meta property="og:description" content="Fuld adgang til alle træningsfunktioner: simulationer, spørgsmål, statistik, historik og meget mere. Engangsbetaling – adgang for livet.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://civiclearn.com/denmark-pr/checkout.html">
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/checkout.css">
 
   <style>
-    .product-options { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
-    .product-btn {
-      padding: 1rem 1.1rem; border-radius: 0.9rem; border: 2px solid rgba(0,0,0,0.08);
-      background: #fff; text-align: left; cursor: pointer; font-family: "Lexend", system-ui, sans-serif;
-      transition: border-color 0.2s, box-shadow 0.2s; position: relative;
-    }
-    .product-btn:hover { border-color: var(--brand); box-shadow: 0 4px 16px rgba(124,58,237,0.1); }
-    .product-btn.selected { border-color: var(--brand); background: #f4f0ff; }
-    .product-btn strong { display: block; font-size: 0.95rem; font-weight: 600; margin-bottom: 2px; color: var(--text-main); }
-    .product-btn span { font-size: 0.84rem; color: var(--muted); }
-    .product-btn .best-tag {
-      position: absolute; top: -1px; right: 12px; background: var(--brand); color: #fff;
-      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.06em; padding: 3px 10px; border-radius: 0 0 6px 6px;
-    }
-    .topbar-flag {
-      width: 26px; height: 18px; border-radius: 3px; overflow: hidden;
-      display: inline-flex; flex-shrink: 0; vertical-align: middle;
-      position: relative; background: #C8102E;
-    }
-    .topbar-flag .cross-h { position: absolute; top: 6px; left: 0; right: 0; height: 6px; background: #fff; }
-    .topbar-flag .cross-v { position: absolute; top: 0; bottom: 0; left: 8px; width: 6px; background: #fff; }
-
     #payment-element { margin-bottom: 1.2rem; min-height: 300px; }
     .payment-loading { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 2rem 0; }
     .field { margin-bottom: 1rem; }
@@ -54,6 +35,42 @@
       font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.05em; margin-bottom: 1rem; background: #eef2ff; color: #3730a3;
     }
+    .topbar-flag {
+      width: 26px; height: 18px; border-radius: 3px; overflow: hidden;
+      display: inline-flex; flex-shrink: 0; vertical-align: middle;
+      position: relative; background: #C8102E;
+    }
+    .topbar-flag .cross-h { position: absolute; top: 6px; left: 0; right: 0; height: 6px; background: #fff; }
+    .topbar-flag .cross-v { position: absolute; top: 0; bottom: 0; left: 8px; width: 6px; background: #fff; }
+
+    /* ── Plan toggle ── */
+    .plan-toggle { display: flex; gap: .75rem; margin-bottom: 1.5rem; }
+    .plan-card {
+      flex: 1; padding: 1.1rem 1rem; border: 2px solid #e5e7eb; border-radius: 1rem;
+      cursor: pointer; background: #fff; transition: border-color .15s, box-shadow .15s;
+      position: relative; text-align: center;
+    }
+    .plan-card:hover { border-color: #c4b5fd; }
+    .plan-card.selected { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,.15); }
+    .plan-card-badge {
+      position: absolute; top: -.65rem; left: 50%; transform: translateX(-50%);
+      background: #7c3aed; color: #fff; font-size: .68rem; font-weight: 600;
+      padding: .15rem .65rem; border-radius: 1rem; white-space: nowrap;
+    }
+    .plan-card-name { font-weight: 600; font-size: .92rem; color: #1a1a1a; margin-bottom: .25rem; }
+    .plan-card-price { font-size: 1.3rem; font-weight: 700; color: #7c3aed; }
+    .plan-card-price .was { font-size: .82rem; color: #9ca3af; text-decoration: line-through; font-weight: 400; margin-right: .3rem; }
+    .plan-card-save {
+      display: inline-block; margin-top: .35rem; font-size: .72rem; font-weight: 600;
+      color: #059669; background: #ecfdf5; padding: .15rem .5rem; border-radius: .5rem;
+    }
+    .plan-card-sub { font-size: .75rem; color: #6b7280; margin-top: .3rem; }
+    .bundle-extras { display: none; }
+    .bundle-extras.show { display: block; }
+    .bundle-extras li { color: #7c3aed; }
+    .price-update { transition: opacity .15s; }
+
+    @media (max-width: 600px) { .plan-toggle { flex-direction: column; } }
   </style>
 </head>
 
@@ -63,11 +80,11 @@
   <div class="checkout-header-inner">
     <div class="checkout-brand">
       <div class="topbar-flag"><span class="cross-h"></span><span class="cross-v"></span></div>
-      Medborgerskabsprøven
+      CivicLearn Danmark – Medborgerskabsprøven
     </div>
     <div class="checkout-powered">
       <small>drevet af</small>
-      <a href="https://civiclearn.com">CivicLearn</a>
+      <a href="https://civiclearn.com/denmark-pr/">CivicLearn</a>
     </div>
   </div>
 </header>
@@ -76,84 +93,93 @@
   <div class="layout">
 
     <aside class="features">
-      <h2>Medborgerskabsprøve Træning</h2>
-      <div class="price">Fra kr. 499</div>
-      <div class="once">Engangsbetaling · ubegrænset adgang</div>
+      <h2>Premium adgang</h2>
+      <div class="price price-update" id="sidebarPrice">499 kr</div>
+      <div class="once">Engangsbetaling · adgang for livet</div>
       <div class="divider"></div>
-      <h3>Det er inkluderet</h3>
+      <h3>Hvad er inkluderet</h3>
       <ul class="benefits">
-        <li>800+ spørgsmål baseret på prøvens emner</li>
+        <li>800+ spørgsmål baseret på medborgerskabsprøvens temaer</li>
         <li>Tidtagne prøvesimulationer</li>
         <li>Hurtige tests til daglig træning</li>
         <li>Tests organiseret efter tema</li>
-        <li>Automatisk udvalgte svære spørgsmål</li>
+        <li>Automatisk fokus på spørgsmål du har svært ved</li>
         <li>Detaljeret statistik og fuldt historik-overblik</li>
         <li>Oplæsning af spørgsmål og svar</li>
         <li>Integreret studiemateriale (tekst + lyd)</li>
-        <li>100% optimeret til mobil, tablet og computer</li>
-        <li>Direkte adgang efter betaling</li>
-        <li>Gratis opdateringer</li>
-        <li>Ubegrænset adgang til platformen</li>
+        <li>Optimalt design til mobil, tablet og computer</li>
+        <li>Øjeblikkelig adgang efter betaling</li>
       </ul>
-      <p class="recommend">Anbefalet af kursister der har bestået medborgerskabsprøven.</p>
+      <ul class="benefits bundle-extras" id="bundleExtras">
+        <li>+ Prøve i Dansk 3 – komplet træning</li>
+        <li>+ Læseforståelse, skriftlig og mundtlig</li>
+        <li>+ AI-evaluering af tale og skrift</li>
+        <li>+ 10 simulationer med detaljeret feedback</li>
+      </ul>
+      <p class="recommend">Anbefalet af brugere, der har bestået prøven.</p>
     </aside>
 
     <section class="right">
       <div class="checkout-card">
-        <h1>Vælg din pakke</h1>
-        <div class="secure-line">100% sikker betaling · dine kortoplysninger rører aldrig vores servere</div>
+        <h1>Aktivér din Premium-adgang</h1>
+        <div class="secure-line">100% sikker betaling · dine kortoplysninger passerer aldrig vores servere</div>
+
+        <!-- ── Plan toggle ── -->
+        <div class="plan-toggle" id="planToggle">
+          <div class="plan-card" data-plan="solo" id="planSolo">
+            <div class="plan-card-name">Medborgerskabsprøven</div>
+            <div class="plan-card-price">499 kr</div>
+            <div class="plan-card-sub">Kun medborgerskabsprøven</div>
+          </div>
+          <div class="plan-card" data-plan="bundle" id="planBundle">
+            <div class="plan-card-badge">Mest populære</div>
+            <div class="plan-card-name">Medborgerskabsprøven + Dansk 3</div>
+            <div class="plan-card-price"><span class="was">1.398 kr</span> 999 kr</div>
+            <div class="plan-card-save">Spar 399 kr</div>
+            <div class="plan-card-sub">Begge prøver med ét login</div>
+          </div>
+        </div>
 
         <div class="checkout-flow" id="checkoutFlow">
 
-          <div class="checkout-step" id="stepProduct">
-            <div class="product-options">
-              <button type="button" class="product-btn selected" id="btnDKPR">
-                <strong>Medborgerskabsprøven</strong>
-                <span>800+ spørgsmål · Tidtagne simuleringer · Tematest · Statistik · kr. 499</span>
-              </button>
-              <button type="button" class="product-btn" id="btnCombo">
-                <div class="best-tag">Bedste tilbud</div>
-                <strong>Medborgerskabsprøven + Prøve i Dansk 3</strong>
-                <span>Alt i medborgerskabsprøven + 10 PD3-simulationer med AI-evaluering · kr. 999 · Spar kr. 399</span>
-              </button>
-            </div>
-            <p class="small-note">Du betaler sikkert lige her. Ingen omdirigering.</p>
+          <div class="checkout-step" id="stepInitial">
+            <button type="button" class="pay-btn" id="startCheckout">Køb nu — 499 kr</button>
+            <p class="small-note">Du betaler sikkert direkte på denne side. Ingen omdirigering.</p>
           </div>
 
           <div class="checkout-step" id="stepEmail" hidden>
             <span class="step-badge">Trin 1 af 3</span>
-            <p class="email-instructions">Indtast den e-mailadresse du vil bruge til din CivicLearn-konto.</p>
+            <p class="email-instructions">Indtast den emailadresse du vil bruge til din CivicLearn-konto.</p>
             <div class="email-field-group">
               <label for="checkoutEmail">Email</label>
               <input type="email" id="checkoutEmail" autocomplete="email" placeholder="eksempel@domæne.dk" inputmode="email" />
             </div>
             <button type="button" class="pay-btn" id="continueWithEmail">Fortsæt</button>
-            <button type="button" class="link-btn" id="backToProduct" style="margin-top:0.5rem;">← Skift pakke</button>
           </div>
 
           <div class="checkout-step" id="stepConfirm" hidden>
             <span class="step-badge">Trin 2 af 3</span>
-            <p class="confirm-text">Din konto oprettes med denne adresse:</p>
+            <p class="confirm-text">Din konto vil blive oprettet med denne adresse:</p>
             <p class="email-display" id="emailDisplay"></p>
-            <p class="confirm-warning">Tjek venligst nøje. Denne adresse bliver dit login.</p>
+            <p class="confirm-warning">Kontrollér, at e-mailadressen er stavet korrekt. Denne adresse er dit login.</p>
             <div class="confirm-actions">
-              <button type="button" class="pay-btn" id="confirmEmail">Bekræft og fortsæt til betaling</button>
-              <button type="button" class="link-btn" id="editEmail">Ret e-mailadresse</button>
+              <button type="button" class="pay-btn" id="confirmEmail">Bekræft og gå til betaling</button>
+              <button type="button" class="link-btn" id="editEmail">Rediger email</button>
             </div>
           </div>
 
           <div class="checkout-step" id="stepPayment" hidden>
             <span class="step-badge">Trin 3 af 3</span>
-            <p class="email-instructions" style="margin-bottom:1rem;">Indtast dine kortoplysninger nedenfor. Betalingen behandles sikkert af Stripe.</p>
-            <div id="payment-element"><div class="payment-loading">Indlæser betalingsformular…</div></div>
-            <button type="button" class="pay-btn" id="payBtn" disabled>Betal kr. 499</button>
+            <p class="email-instructions" style="margin-bottom:1rem;">Indtast dine betalingsoplysninger nedenfor. Betalingen håndteres sikkert af Stripe.</p>
+            <div id="payment-element"><div class="payment-loading">Betalingsformular indlæses…</div></div>
+            <button type="button" class="pay-btn" id="payBtn" disabled>Betal 499 kr</button>
             <button type="button" class="link-btn" id="backToConfirm" style="margin-top:0.5rem;">← Tilbage</button>
           </div>
 
           <div class="checkout-step" id="stepPassword" hidden>
             <div style="text-align:center;font-size:2rem;margin-bottom:0.5rem;">🎉</div>
-            <div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;">Betaling gennemført!</div>
-            <p class="email-instructions" style="text-align:center;">Vælg nu en adgangskode for at afslutte din kontoopsætning.</p>
+            <div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;">Betaling bekræftet!</div>
+            <p class="email-instructions" style="text-align:center;">Vælg nu en adgangskode til din konto.</p>
             <div class="field">
               <label for="pw1">Adgangskode</label>
               <input type="password" id="pw1" autocomplete="new-password" placeholder="Mindst 6 tegn">
@@ -169,7 +195,7 @@
             <div class="done-icon">✅</div>
             <div class="done-title">Din konto er klar!</div>
             <div class="done-sub" id="doneEmail"></div>
-            <a href="/denmark-pr/dashboard/index.html" class="pay-btn" style="text-align:center;text-decoration:none;display:block;">Gå til kontrolpanelet →</a>
+            <a href="/denmark-pr/dashboard/index.html" class="pay-btn" style="text-align:center;text-decoration:none;display:block;">Begynd træning →</a>
           </div>
 
           <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
@@ -177,7 +203,7 @@
 
         <div class="trust">
           <div>🔒 Sikker betaling</div>
-          <div>⚡ Direkte adgang</div>
+          <div>⚡ Øjeblikkelig adgang</div>
           <div>✔ Intet abonnement</div>
         </div>
         <div class="after-text">Har du allerede en konto? <a href="/denmark-pr/login.html">Log ind her</a>.</div>
@@ -199,22 +225,50 @@
   const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
   const STRIPE_PK     = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
   const RETURN_URL    = 'https://civiclearn.com/denmark-pr/checkout.html';
-  const PRICES = { dkpr: 'kr. 499', combo: 'kr. 999' };
 
   const stripe = Stripe(STRIPE_PK);
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const stepProduct  = document.getElementById('stepProduct');
+  /* ── Plan state ── */
+  const PLANS = {
+    solo:   { price: '499 kr', payLabel: 'Betal 499 kr' },
+    bundle: { price: '999 kr', payLabel: 'Betal 999 kr' }
+  };
+  let selectedPlan = 'solo';
+
+  const urlPlan = new URLSearchParams(window.location.search).get('plan');
+  if (urlPlan === 'bundle') selectedPlan = 'bundle';
+
+  const cardSolo   = document.getElementById('planSolo');
+  const cardBundle = document.getElementById('planBundle');
+  const sidebar    = document.getElementById('sidebarPrice');
+  const extras     = document.getElementById('bundleExtras');
+  const startBtn   = document.getElementById('startCheckout');
+
+  function selectPlan(plan) {
+    selectedPlan = plan;
+    cardSolo.classList.toggle('selected', plan === 'solo');
+    cardBundle.classList.toggle('selected', plan === 'bundle');
+    sidebar.textContent = PLANS[plan].price;
+    extras.classList.toggle('show', plan === 'bundle');
+    startBtn.textContent = 'Køb nu — ' + PLANS[plan].price;
+    const payBtn = document.getElementById('payBtn');
+    if (payBtn && !payBtn.disabled) payBtn.textContent = PLANS[plan].payLabel;
+  }
+
+  cardSolo.onclick   = () => selectPlan('solo');
+  cardBundle.onclick = () => selectPlan('bundle');
+  selectPlan(selectedPlan); // init
+
+  /* ── DOM refs ── */
+  const stepInitial  = document.getElementById('stepInitial');
   const stepEmail    = document.getElementById('stepEmail');
   const stepConfirm  = document.getElementById('stepConfirm');
   const stepPayment  = document.getElementById('stepPayment');
   const stepPassword = document.getElementById('stepPassword');
   const stepDone     = document.getElementById('stepDone');
 
-  const btnDKPR          = document.getElementById('btnDKPR');
-  const btnCombo         = document.getElementById('btnCombo');
   const continueBtn      = document.getElementById('continueWithEmail');
-  const backToProductBtn = document.getElementById('backToProduct');
   const confirmBtn       = document.getElementById('confirmEmail');
   const editEmailBtn     = document.getElementById('editEmail');
   const payBtn           = document.getElementById('payBtn');
@@ -225,99 +279,100 @@
   const emailDisplay = document.getElementById('emailDisplay');
   const messageBox   = document.getElementById('checkoutMessage');
 
-  let selectedProduct = 'dkpr';
   let currentEmail = '';
   let paymentIntentId = '';
   let stripeElements = null;
   let isSubmitting = false;
 
-  // Pre-select combo if ?plan=bundle in URL
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('plan') === 'bundle') {
-    selectedProduct = 'combo';
-    btnDKPR.classList.remove('selected');
-    btnCombo.classList.add('selected');
-  }
-
   function showStep(id) {
-    [stepProduct, stepEmail, stepConfirm, stepPayment, stepPassword, stepDone]
+    [stepInitial, stepEmail, stepConfirm, stepPayment, stepPassword, stepDone]
       .forEach(el => el.hidden = true);
     document.getElementById(id).hidden = false;
+    // Plan toggle visible only on initial + email steps
+    document.getElementById('planToggle').style.display =
+      (id === 'stepInitial' || id === 'stepEmail') ? 'flex' : 'none';
     clearMessage();
   }
 
-  function clearMessage() { messageBox.textContent = ''; messageBox.className = 'checkout-message'; messageBox.style.display = 'none'; }
-  function showMessage(type, text) { messageBox.textContent = text; messageBox.className = 'checkout-message ' + type; messageBox.style.display = 'block'; }
-  function updatePayBtn() { payBtn.textContent = 'Betal ' + PRICES[selectedProduct]; }
+  function clearMessage() {
+    messageBox.textContent = '';
+    messageBox.className = 'checkout-message';
+    messageBox.style.display = 'none';
+  }
+  function showMessage(type, text) {
+    messageBox.textContent = text;
+    messageBox.className = 'checkout-message ' + type;
+    messageBox.style.display = 'block';
+  }
 
   function validateEmail(value) {
     const email = value.trim();
-    if (!email) return { ok: false, msg: 'Indtast venligst din e-mailadresse.' };
-    if (!/^[^\@\s]+@[^\@\s]+\.[^\@\s]+$/.test(email)) return { ok: false, msg: 'Ugyldig e-mailadresse. Tjek og prøv igen.' };
+    if (!email) return { ok: false, msg: 'Indtast venligst din emailadresse.' };
+    if (!/^[^\@\s]+@[^\@\s]+\.[^\@\s]+$/.test(email)) return { ok: false, msg: 'Ugyldig emailadresse.' };
     return { ok: true, email };
   }
 
-  // 3DS return
+  /* ── 3DS return handling ── */
+  const urlParams      = new URLSearchParams(window.location.search);
   const returnedPI     = urlParams.get('payment_intent');
   const returnedSecret = urlParams.get('payment_intent_client_secret');
   const returnedStatus = urlParams.get('redirect_status');
 
   if (returnedPI && returnedSecret) {
-    currentEmail = localStorage.getItem('dkpr_checkout_email') || '';
-    selectedProduct = localStorage.getItem('dkpr_checkout_product') || 'dkpr';
+    currentEmail    = localStorage.getItem('dkpr_checkout_email') || '';
     paymentIntentId = returnedPI;
-    if (returnedStatus === 'succeeded') { showStep('stepPassword'); }
-    else {
+    if (returnedStatus === 'succeeded') {
+      showStep('stepPassword');
+    } else {
       stripe.retrievePaymentIntent(returnedSecret).then(({ paymentIntent }) => {
         if (paymentIntent && paymentIntent.status === 'succeeded') showStep('stepPassword');
-        else { showMessage('error', 'Betaling blev ikke gennemført. Prøv igen.'); showStep('stepProduct'); }
+        else { showMessage('error', 'Betalingen blev ikke gennemført.'); showStep('stepInitial'); }
       });
     }
     window.history.replaceState({}, '', window.location.pathname);
   }
 
-  // Step 1: product selection
-  function selectProduct(type) {
-    selectedProduct = type;
-    btnDKPR.classList.toggle('selected', type === 'dkpr');
-    btnCombo.classList.toggle('selected', type === 'combo');
-    showStep('stepEmail'); emailInput.focus();
-  }
-  btnDKPR.addEventListener('click', () => selectProduct('dkpr'));
-  btnCombo.addEventListener('click', () => selectProduct('combo'));
+  /* ── Step flow ── */
+  startBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
 
-  // Step 2: email
   continueBtn.addEventListener('click', () => {
     const { ok, msg, email } = validateEmail(emailInput.value);
     if (!ok) { showMessage('error', msg); emailInput.focus(); return; }
-    currentEmail = email; emailDisplay.textContent = currentEmail; showStep('stepConfirm');
+    currentEmail = email;
+    emailDisplay.textContent = currentEmail;
+    showStep('stepConfirm');
   });
-  emailInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); } });
-  backToProductBtn.addEventListener('click', () => showStep('stepProduct'));
+  emailInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); }
+  });
   editEmailBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
 
-  // Step 3 → 4: create PI + mount Elements
+  /* ── Create payment intent ── */
   confirmBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
-    isSubmitting = true; confirmBtn.disabled = true;
+    isSubmitting = true;
+    confirmBtn.disabled = true;
     confirmBtn.textContent = 'Forbereder betaling…';
-    showMessage('info', 'Forbereder sikker betalingsformular…');
+    showMessage('info', 'Indlæser sikker betalingsformular…');
 
     try {
       const res = await fetch(FUNCTIONS_URL + '/denmarkpr-create-payment-intent', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentEmail, product_type: selectedProduct }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail, plan: selectedPlan }),
       });
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'Kunne ikke oprette betalingssession.');
 
       paymentIntentId = data.payment_intent_id;
       localStorage.setItem('dkpr_checkout_email', currentEmail);
-      localStorage.setItem('dkpr_checkout_product', selectedProduct);
 
       stripeElements = stripe.elements({
         clientSecret: data.client_secret,
-        appearance: { theme: 'stripe', variables: { fontFamily: '"Lexend", system-ui, sans-serif', borderRadius: '0.9rem', colorPrimary: '#7c3aed' } },
+        appearance: {
+          theme: 'stripe',
+          variables: { fontFamily: '"Lexend", system-ui, sans-serif', borderRadius: '0.9rem', colorPrimary: '#7c3aed' }
+        },
       });
       const paymentElement = stripeElements.create('payment', { layout: 'tabs' });
       document.getElementById('payment-element').innerHTML = '';
@@ -326,22 +381,30 @@
         showMessage('error', 'Betalingsformularen kunne ikke indlæses. Opdater siden eller prøv en anden browser.');
         isSubmitting = false; confirmBtn.disabled = false;
       });
-      paymentElement.on('ready', () => { payBtn.disabled = false; updatePayBtn(); });
-      paymentElement.on('change', (event) => { if (event.complete) payBtn.disabled = false; });
-      showStep('stepPayment'); updatePayBtn();
+      paymentElement.on('ready', () => {
+        payBtn.disabled = false;
+        payBtn.textContent = PLANS[selectedPlan].payLabel;
+      });
+      paymentElement.on('change', (event) => {
+        if (event.complete) { payBtn.disabled = false; payBtn.textContent = PLANS[selectedPlan].payLabel; }
+      });
+      showStep('stepPayment');
     } catch (err) {
-      showMessage('error', err.message || 'Der opstod en fejl. Prøv igen.');
+      showMessage('error', err.message || 'En fejl opstod.');
     } finally {
-      isSubmitting = false; confirmBtn.disabled = false; confirmBtn.textContent = 'Bekræft og fortsæt til betaling';
+      isSubmitting = false;
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = 'Bekræft og gå til betaling';
     }
   });
 
   backToConfirmBtn.addEventListener('click', () => showStep('stepConfirm'));
 
-  // Step 4 → 5: pay
+  /* ── Pay ── */
   payBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
-    isSubmitting = true; payBtn.disabled = true;
+    isSubmitting = true;
+    payBtn.disabled = true;
     payBtn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;"></span>Behandler betaling…';
     clearMessage();
 
@@ -352,52 +415,68 @@
     });
 
     if (error) {
-      showMessage('error', error.message || 'Betaling fejlede. Prøv igen.');
-      payBtn.disabled = false; updatePayBtn(); isSubmitting = false; return;
+      showMessage('error', error.message || 'Betalingen mislykkedes.');
+      payBtn.disabled = false;
+      payBtn.textContent = PLANS[selectedPlan].payLabel;
+      isSubmitting = false;
+      return;
     }
     if (paymentIntent && paymentIntent.status === 'succeeded') {
-      paymentIntentId = paymentIntent.id; showStep('stepPassword');
+      paymentIntentId = paymentIntent.id;
+      showStep('stepPassword');
     } else if (paymentIntent && paymentIntent.status === 'processing') {
       showMessage('info', 'Din betaling behandles. Vent venligst…');
     }
     isSubmitting = false;
   });
 
-  // Step 5: password setup
+  /* ── Account setup ── */
   setupBtn.addEventListener('click', async () => {
     const pw1 = document.getElementById('pw1').value;
     const pw2 = document.getElementById('pw2').value;
     if (!pw1 || pw1.length < 6) { showMessage('error', 'Adgangskoden skal være mindst 6 tegn.'); return; }
-    if (pw1 !== pw2) { showMessage('error', 'Adgangskoderne er ikke ens.'); return; }
+    if (pw1 !== pw2) { showMessage('error', 'Adgangskoderne stemmer ikke overens.'); return; }
 
-    setupBtn.disabled = true; setupBtn.textContent = 'Opretter konto…'; clearMessage();
+    setupBtn.disabled = true;
+    setupBtn.textContent = 'Opretter konto…';
+    clearMessage();
 
     try {
       const res = await fetch(FUNCTIONS_URL + '/denmarkpr-setup-account', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ payment_intent_id: paymentIntentId, password: pw1 }),
       });
       const data = await res.json();
       if (!data.success) {
-        showMessage('error', data.error || 'Kontoopsætning fejlede. Kontakt admin@civiclearn.com.');
-        setupBtn.disabled = false; setupBtn.textContent = 'Opret konto'; return;
+        showMessage('error', data.error || 'Kontooprettelse mislykkedes. Kontakt admin@civiclearn.com.');
+        setupBtn.disabled = false;
+        setupBtn.textContent = 'Opret konto';
+        return;
       }
+
       const { error: signInError } = await sb.auth.signInWithPassword({ email: data.email, password: pw1 });
       if (signInError) console.error('Auto-login failed:', signInError);
 
       localStorage.removeItem('dkpr_checkout_email');
-      localStorage.removeItem('dkpr_checkout_product');
 
-      const comboNote = data.is_combo ? ' (Medborgerskabsprøven + Prøve i Dansk 3)' : '';
-      document.getElementById('doneEmail').textContent = 'Logget ind som: ' + data.email + comboNote;
+      // Flag bundle for dashboard banner
+      if (data.plan === 'bundle') {
+        localStorage.setItem('cl_bundle', 'dkpr');
+      }
+
+      document.getElementById('doneEmail').textContent = 'Logget ind som: ' + data.email;
       showStep('stepDone');
     } catch (err) {
       showMessage('error', 'Forbindelsesfejl. Prøv igen.');
-      setupBtn.disabled = false; setupBtn.textContent = 'Opret konto';
+      setupBtn.disabled = false;
+      setupBtn.textContent = 'Opret konto';
     }
   });
 
-  document.getElementById('pw2').addEventListener('keydown', (e) => { if (e.key === 'Enter') setupBtn.click(); });
+  document.getElementById('pw2').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') setupBtn.click();
+  });
 })();
 </script>
 
