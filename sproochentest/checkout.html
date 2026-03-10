@@ -45,6 +45,39 @@
       letter-spacing: 0.05em; margin-bottom: 1rem;
       background: #eef2ff; color: #3730a3;
     }
+
+    /* ── Plan toggle ── */
+    .plan-toggle { display:flex; gap:.75rem; margin-bottom:1.5rem; }
+    .plan-card {
+      flex:1; padding:1.1rem 1rem; border:2px solid #e5e7eb; border-radius:1rem;
+      cursor:pointer; background:#fff; transition:border-color .15s, box-shadow .15s;
+      position:relative; text-align:center;
+    }
+    .plan-card:hover { border-color:#c4b5fd; }
+    .plan-card.selected { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,.15); }
+    .plan-card-badge {
+      position:absolute; top:-.65rem; left:50%; transform:translateX(-50%);
+      background:#7c3aed; color:#fff; font-size:.68rem; font-weight:600;
+      padding:.15rem .65rem; border-radius:1rem; white-space:nowrap;
+    }
+    .plan-card-name { font-weight:600; font-size:.92rem; color:#1a1a1a; margin-bottom:.25rem; }
+    .plan-card-price { font-size:1.3rem; font-weight:700; color:#7c3aed; }
+    .plan-card-price .was { font-size:.82rem; color:#9ca3af; text-decoration:line-through; font-weight:400; margin-right:.3rem; }
+    .plan-card-save {
+      display:inline-block; margin-top:.35rem; font-size:.72rem; font-weight:600;
+      color:#059669; background:#ecfdf5; padding:.15rem .5rem; border-radius:.5rem;
+    }
+    .plan-card-sub { font-size:.75rem; color:#6b7280; margin-top:.3rem; }
+
+    /* ── Sidebar dynamic updates ── */
+    .bundle-extras { display:none; }
+    .bundle-extras.show { display:block; }
+    .bundle-extras li { color:#7c3aed; }
+    .price-update { transition:opacity .15s; }
+
+    @media(max-width:600px){
+      .plan-toggle { flex-direction:column; }
+    }
   </style>
 </head>
 
@@ -69,7 +102,7 @@
     <!-- LEFT: BENEFITS (Luxembourgish) -->
     <aside class="features">
       <h2>Komplett Zougang</h2>
-      <div class="price">69&nbsp;€</div>
+      <div class="price price-update" id="sidebarPrice">69&nbsp;€</div>
       <div class="once">Eemolege Bezuelung · Onlimitéierten Zougang</div>
 
       <div class="divider"></div>
@@ -89,6 +122,13 @@
         <li>Gratis Updates</li>
       </ul>
 
+      <ul class="benefits bundle-extras" id="bundleExtras">
+        <li>+ Vivre-Ensemble Froen a Simulatiounen</li>
+        <li>+ Institutiounen, Rechter an Obligatiounen</li>
+        <li>+ Statistiken a Fortschrëtt</li>
+        <li>+ Froen op Franséisch, Englesch an Däitsch</li>
+      </ul>
+
       <p class="recommend">
         Recommandéiert vu Kandidaten déi de Sproochentest bestanen hunn.
       </p>
@@ -101,22 +141,32 @@
         <h1>Get Sproochentest Training</h1>
         <div class="secure-line">100% secure payment · your card details never touch our servers</div>
 
+        <!-- ── Plan toggle ── -->
+        <div class="plan-toggle" id="planToggle">
+          <div class="plan-card" data-plan="solo" id="planSolo">
+            <div class="plan-card-name">Sproochentest</div>
+            <div class="plan-card-price">69 €</div>
+            <div class="plan-card-sub">Sproochentest only</div>
+          </div>
+          <div class="plan-card" data-plan="bundle" id="planBundle">
+            <div class="plan-card-badge">Most popular</div>
+            <div class="plan-card-name">Sproochentest + Vivre-Ensemble</div>
+            <div class="plan-card-price"><span class="was">138 €</span> 99 €</div>
+            <div class="plan-card-save">Save €39</div>
+            <div class="plan-card-sub">Both tests with one login</div>
+          </div>
+        </div>
+
         <div class="checkout-flow" id="checkoutFlow">
 
           <div class="checkout-step" id="stepInitial">
-            <button type="button" class="pay-btn" id="startCheckout">
-              Buy now — 69 €
-            </button>
-            <p class="small-note">
-              You'll pay securely right here. No redirect needed.
-            </p>
+            <button type="button" class="pay-btn" id="startCheckout">Buy now — 69 €</button>
+            <p class="small-note">You'll pay securely right here. No redirect needed.</p>
           </div>
 
           <div class="checkout-step" id="stepEmail" hidden>
             <span class="step-badge">Step 1 of 3</span>
-            <p class="email-instructions">
-              Enter the email address you'd like to use for your CivicLearn account.
-            </p>
+            <p class="email-instructions">Enter the email address you'd like to use for your CivicLearn account.</p>
             <div class="email-field-group">
               <label for="checkoutEmail">Email</label>
               <input type="email" id="checkoutEmail" autocomplete="email" placeholder="example@domain.com" inputmode="email" />
@@ -130,37 +180,23 @@
             <p class="email-display" id="emailDisplay"></p>
             <p class="confirm-warning">Please double-check. This will be your login email.</p>
             <div class="confirm-actions">
-              <button type="button" class="pay-btn" id="confirmEmail">
-                Confirm and continue to payment
-              </button>
-              <button type="button" class="link-btn" id="editEmail">
-                Change email address
-              </button>
+              <button type="button" class="pay-btn" id="confirmEmail">Confirm and continue to payment</button>
+              <button type="button" class="link-btn" id="editEmail">Change email address</button>
             </div>
           </div>
 
           <div class="checkout-step" id="stepPayment" hidden>
             <span class="step-badge">Step 3 of 3</span>
-            <p class="email-instructions" style="margin-bottom:1rem;">
-              Enter your card details below. Payment is processed securely by Stripe.
-            </p>
-            <div id="payment-element">
-              <div class="payment-loading">Loading payment form…</div>
-            </div>
-            <button type="button" class="pay-btn" id="payBtn" disabled>
-              Pay 69 €
-            </button>
-            <button type="button" class="link-btn" id="backToConfirm" style="margin-top:0.5rem;">
-              ← Back
-            </button>
+            <p class="email-instructions" style="margin-bottom:1rem;">Enter your card details below. Payment is processed securely by Stripe.</p>
+            <div id="payment-element"><div class="payment-loading">Loading payment form…</div></div>
+            <button type="button" class="pay-btn" id="payBtn" disabled>Pay 69 €</button>
+            <button type="button" class="link-btn" id="backToConfirm" style="margin-top:0.5rem;">← Back</button>
           </div>
 
           <div class="checkout-step" id="stepPassword" hidden>
             <div style="text-align:center;font-size:2rem;margin-bottom:0.5rem;">🎉</div>
             <div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;">Payment successful!</div>
-            <p class="email-instructions" style="text-align:center;">
-              Now set a password to complete your account setup.
-            </p>
+            <p class="email-instructions" style="text-align:center;">Now set a password to complete your account setup.</p>
             <div class="field">
               <label for="pw1">Password</label>
               <input type="password" id="pw1" autocomplete="new-password" placeholder="At least 6 characters">
@@ -176,9 +212,7 @@
             <div class="done-icon">✅</div>
             <div class="done-title">Your account is ready!</div>
             <div class="done-sub" id="doneEmail"></div>
-            <a href="/sproochentest/dashboard/index.html" class="pay-btn" style="text-align:center;text-decoration:none;display:block;">
-              Go to dashboard →
-            </a>
+            <a href="/sproochentest/dashboard/index.html" class="pay-btn" id="doneCta" style="text-align:center;text-decoration:none;display:block;">Go to dashboard →</a>
           </div>
 
           <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
@@ -218,6 +252,40 @@
   const stripe = Stripe(STRIPE_PK);
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+  /* ── Plan state ── */
+  const PLANS = {
+    solo:   { price: '69 €', payLabel: 'Pay 69 €',  createFn: 'sproochentest-create-payment-intent', setupFn: 'sproochentest-setup-account' },
+    bundle: { price: '99 €', payLabel: 'Pay 99 €',  createFn: 'lux-create-payment-intent',           setupFn: 'lux-setup-account' }
+  };
+  let selectedPlan = 'solo';
+
+  // Read ?plan=bundle from URL
+  const urlPlan = new URLSearchParams(window.location.search).get('plan');
+  if (urlPlan === 'bundle') selectedPlan = 'bundle';
+
+  const cardSolo   = document.getElementById('planSolo');
+  const cardBundle = document.getElementById('planBundle');
+  const sidebar    = document.getElementById('sidebarPrice');
+  const extras     = document.getElementById('bundleExtras');
+  const startBtn   = document.getElementById('startCheckout');
+
+  function selectPlan(plan) {
+    selectedPlan = plan;
+    cardSolo.classList.toggle('selected', plan === 'solo');
+    cardBundle.classList.toggle('selected', plan === 'bundle');
+    sidebar.textContent = PLANS[plan].price;
+    extras.classList.toggle('show', plan === 'bundle');
+    startBtn.textContent = 'Buy now — ' + PLANS[plan].price;
+    // Update pay button if visible
+    const payBtn = document.getElementById('payBtn');
+    if (payBtn && !payBtn.disabled) payBtn.textContent = PLANS[plan].payLabel;
+  }
+
+  cardSolo.onclick   = () => selectPlan('solo');
+  cardBundle.onclick  = () => selectPlan('bundle');
+  selectPlan(selectedPlan);
+
+  /* ── DOM refs ── */
   const stepInitial  = document.getElementById('stepInitial');
   const stepEmail    = document.getElementById('stepEmail');
   const stepConfirm  = document.getElementById('stepConfirm');
@@ -225,13 +293,12 @@
   const stepPassword = document.getElementById('stepPassword');
   const stepDone     = document.getElementById('stepDone');
 
-  const startBtn      = document.getElementById('startCheckout');
-  const continueBtn   = document.getElementById('continueWithEmail');
-  const confirmBtn    = document.getElementById('confirmEmail');
-  const editEmailBtn  = document.getElementById('editEmail');
-  const payBtn        = document.getElementById('payBtn');
-  const backToConfirm = document.getElementById('backToConfirm');
-  const setupBtn      = document.getElementById('setupBtn');
+  const continueBtn    = document.getElementById('continueWithEmail');
+  const confirmBtn     = document.getElementById('confirmEmail');
+  const editEmailBtn   = document.getElementById('editEmail');
+  const payBtn         = document.getElementById('payBtn');
+  const backToConfirm  = document.getElementById('backToConfirm');
+  const setupBtn       = document.getElementById('setupBtn');
 
   const emailInput   = document.getElementById('checkoutEmail');
   const emailDisplay = document.getElementById('emailDisplay');
@@ -241,35 +308,30 @@
   let paymentIntentId = '';
   let stripeElements = null;
   let isSubmitting = false;
+  // Track which setup function to call (determined at PI creation time)
+  let activeSetupFn = PLANS.solo.setupFn;
 
   function showStep(id) {
     [stepInitial, stepEmail, stepConfirm, stepPayment, stepPassword, stepDone]
       .forEach(el => el.hidden = true);
     document.getElementById(id).hidden = false;
+    // Hide plan toggle after email step
+    document.getElementById('planToggle').style.display =
+      (id === 'stepInitial' || id === 'stepEmail') ? 'flex' : 'none';
     clearMessage();
   }
 
-  function clearMessage() {
-    messageBox.textContent = '';
-    messageBox.className = 'checkout-message';
-    messageBox.style.display = 'none';
-  }
-
-  function showMessage(type, text) {
-    messageBox.textContent = text;
-    messageBox.className = 'checkout-message ' + type;
-    messageBox.style.display = 'block';
-  }
+  function clearMessage() { messageBox.textContent = ''; messageBox.className = 'checkout-message'; messageBox.style.display = 'none'; }
+  function showMessage(type, text) { messageBox.textContent = text; messageBox.className = 'checkout-message ' + type; messageBox.style.display = 'block'; }
 
   function validateEmail(value) {
     const email = value.trim();
     if (!email) return { ok: false, msg: 'Please enter your email address.' };
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
-      return { ok: false, msg: 'Invalid email address. Please check and try again.' };
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, msg: 'Invalid email address.' };
     return { ok: true, email };
   }
 
-  // 3DS return handling
+  /* ── 3DS return handling ── */
   const urlParams = new URLSearchParams(window.location.search);
   const returnedPI = urlParams.get('payment_intent');
   const returnedSecret = urlParams.get('payment_intent_client_secret');
@@ -278,161 +340,142 @@
   if (returnedPI && returnedSecret) {
     currentEmail = localStorage.getItem('sproochentest_checkout_email') || '';
     paymentIntentId = returnedPI;
-    if (returnedStatus === 'succeeded') {
-      showStep('stepPassword');
-    } else {
+    // Restore which setup function to use
+    activeSetupFn = localStorage.getItem('sproochentest_checkout_setupfn') || PLANS.solo.setupFn;
+    if (returnedStatus === 'succeeded') { showStep('stepPassword'); }
+    else {
       stripe.retrievePaymentIntent(returnedSecret).then(({ paymentIntent }) => {
-        if (paymentIntent && paymentIntent.status === 'succeeded') {
-          showStep('stepPassword');
-        } else {
-          showMessage('error', 'Payment was not completed. Please try again.');
-          showStep('stepInitial');
-        }
+        if (paymentIntent && paymentIntent.status === 'succeeded') showStep('stepPassword');
+        else { showMessage('error', 'Payment was not completed. Please try again.'); showStep('stepInitial'); }
       });
     }
     window.history.replaceState({}, '', window.location.pathname);
   }
 
+  /* ── Step navigation ── */
   startBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
 
   continueBtn.addEventListener('click', () => {
     const { ok, msg, email } = validateEmail(emailInput.value);
     if (!ok) { showMessage('error', msg); emailInput.focus(); return; }
-    currentEmail = email;
-    emailDisplay.textContent = currentEmail;
-    showStep('stepConfirm');
+    currentEmail = email; emailDisplay.textContent = currentEmail; showStep('stepConfirm');
   });
 
-  emailInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); }
-  });
-
+  emailInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); } });
   editEmailBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
 
+  /* ── Create PaymentIntent ── */
   confirmBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
-    isSubmitting = true;
-    confirmBtn.disabled = true;
+    isSubmitting = true; confirmBtn.disabled = true;
     confirmBtn.textContent = 'Setting up payment…';
     showMessage('info', 'Preparing secure payment form…');
 
+    const plan = selectedPlan;
+    const createFn = PLANS[plan].createFn;
+    activeSetupFn = PLANS[plan].setupFn;
+
+    // Build request body — bundle goes to lux-create-payment-intent which expects { email, plan }
+    // solo goes to sproochentest-create-payment-intent which expects { email }
+    const body = plan === 'bundle'
+      ? { email: currentEmail, plan: 'bundle' }
+      : { email: currentEmail };
+
     try {
-      const res = await fetch(FUNCTIONS_URL + '/sproochentest-create-payment-intent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentEmail }),
+      const res = await fetch(FUNCTIONS_URL + '/' + createFn, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'Failed to create payment session.');
 
       paymentIntentId = data.payment_intent_id;
       localStorage.setItem('sproochentest_checkout_email', currentEmail);
+      localStorage.setItem('sproochentest_checkout_setupfn', activeSetupFn);
 
       stripeElements = stripe.elements({
         clientSecret: data.client_secret,
-        appearance: {
-          theme: 'stripe',
-          variables: {
-            fontFamily: '"Lexend", system-ui, sans-serif',
-            borderRadius: '0.9rem',
-            colorPrimary: '#7c3aed',
-          },
-        },
+        appearance: { theme: 'stripe', variables: { fontFamily: '"Lexend", system-ui, sans-serif', borderRadius: '0.9rem', colorPrimary: '#7c3aed' } },
       });
-
       const paymentElement = stripeElements.create('payment');
       document.getElementById('payment-element').innerHTML = '';
       paymentElement.mount('#payment-element');
-
-      paymentElement.on('ready', () => { payBtn.disabled = false; });
-      paymentElement.on('change', (event) => { if (event.complete) payBtn.disabled = false; });
-
+      paymentElement.on('ready', () => { payBtn.disabled = false; payBtn.textContent = PLANS[plan].payLabel; });
+      paymentElement.on('change', (event) => { if (event.complete) { payBtn.disabled = false; payBtn.textContent = PLANS[plan].payLabel; } });
       showStep('stepPayment');
     } catch (err) {
       showMessage('error', err.message || 'An error occurred. Please try again.');
     } finally {
-      isSubmitting = false;
-      confirmBtn.disabled = false;
-      confirmBtn.textContent = 'Confirm and continue to payment';
+      isSubmitting = false; confirmBtn.disabled = false; confirmBtn.textContent = 'Confirm and continue to payment';
     }
   });
 
   backToConfirm.addEventListener('click', () => showStep('stepConfirm'));
 
+  /* ── Confirm payment ── */
   payBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
-    isSubmitting = true;
-    payBtn.disabled = true;
+    isSubmitting = true; payBtn.disabled = true;
     payBtn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;"></span>Processing payment…';
     clearMessage();
 
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements: stripeElements,
-      confirmParams: {
-        return_url: RETURN_URL,
-        receipt_email: currentEmail,
-      },
+      confirmParams: { return_url: RETURN_URL, receipt_email: currentEmail },
       redirect: 'if_required',
     });
 
     if (error) {
       showMessage('error', error.message || 'Payment failed. Please try again.');
-      payBtn.disabled = false;
-      payBtn.textContent = 'Pay 69 €';
-      isSubmitting = false;
-      return;
+      payBtn.disabled = false; payBtn.textContent = PLANS[selectedPlan].payLabel; isSubmitting = false; return;
     }
-
     if (paymentIntent && paymentIntent.status === 'succeeded') {
-      paymentIntentId = paymentIntent.id;
-      showStep('stepPassword');
+      paymentIntentId = paymentIntent.id; showStep('stepPassword');
     }
     isSubmitting = false;
   });
 
+  /* ── Set password + create account ── */
   setupBtn.addEventListener('click', async () => {
     const pw1 = document.getElementById('pw1').value;
     const pw2 = document.getElementById('pw2').value;
-
     if (!pw1 || pw1.length < 6) { showMessage('error', 'Password must be at least 6 characters.'); return; }
     if (pw1 !== pw2) { showMessage('error', 'Passwords do not match.'); return; }
 
-    setupBtn.disabled = true;
-    setupBtn.textContent = 'Creating account…';
-    clearMessage();
+    setupBtn.disabled = true; setupBtn.textContent = 'Creating account…'; clearMessage();
 
     try {
-      const res = await fetch(FUNCTIONS_URL + '/sproochentest-setup-account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch(FUNCTIONS_URL + '/' + activeSetupFn, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ payment_intent_id: paymentIntentId, password: pw1 }),
       });
       const data = await res.json();
-
       if (!data.success) {
         showMessage('error', data.error || 'Account setup failed. Please contact admin@civiclearn.com.');
-        setupBtn.disabled = false;
-        setupBtn.textContent = 'Create account';
-        return;
+        setupBtn.disabled = false; setupBtn.textContent = 'Create account'; return;
       }
 
       const { error: signInError } = await sb.auth.signInWithPassword({ email: data.email, password: pw1 });
       if (signInError) console.error('Auto-login failed:', signInError);
 
       localStorage.removeItem('sproochentest_checkout_email');
+      localStorage.removeItem('sproochentest_checkout_setupfn');
       document.getElementById('doneEmail').textContent = 'Logged in as: ' + data.email;
-      showStep('stepDone');
 
+      // If bundle was purchased, show both dashboards are accessible
+      if (data.plan === 'bundle') {
+        const doneCta = document.getElementById('doneCta');
+        doneCta.textContent = 'Go to Sproochentest dashboard →';
+      }
+
+      showStep('stepDone');
     } catch (err) {
       showMessage('error', 'Connection error. Please try again.');
-      setupBtn.disabled = false;
-      setupBtn.textContent = 'Create account';
+      setupBtn.disabled = false; setupBtn.textContent = 'Create account';
     }
   });
 
-  document.getElementById('pw2').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') setupBtn.click();
-  });
+  document.getElementById('pw2').addEventListener('keydown', (e) => { if (e.key === 'Enter') setupBtn.click(); });
 
 })();
 </script>
