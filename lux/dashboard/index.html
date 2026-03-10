@@ -495,9 +495,27 @@ CivicLearnI18n.onReady(() => {
 
 <!-- Bundle banner -->
 <script>
-(function () {
-  const bundle = localStorage.getItem('cl_bundle');
-  if (bundle !== 'lu') return;
+(async function () {
+  let hasBundle = localStorage.getItem('cl_bundle') === 'lu';
+
+  // Fallback: check Supabase if localStorage doesn't have the flag
+  if (!hasBundle) {
+    const email = localStorage.getItem('cl_email');
+    if (!email) return;
+    try {
+      if (window.luxAuth && window.luxAuth.ready) await window.luxAuth.ready;
+      const sb = window.luxAuth && window.luxAuth.supabase;
+      if (!sb) return;
+      const { data } = await sb
+        .from('users').select('bundle').eq('email', email).maybeSingle();
+      if (data && data.bundle === 'lux') {
+        localStorage.setItem('cl_bundle', 'lu');
+        hasBundle = true;
+      }
+    } catch(e) { /* silent */ }
+  }
+
+  if (!hasBundle) return;
 
   const lang = window.CIVICEDGE_LANG || 'fr';
 
