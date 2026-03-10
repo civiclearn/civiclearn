@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/assets/css/checkout.css">
 
   <style>
-    #payment-element { margin-bottom: 1.2rem; min-height: 80px; }
+    #payment-element { margin-bottom: 1.2rem; min-height: 300px; }
     .payment-loading { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 2rem 0; }
     .field { margin-bottom: 1rem; }
     .field label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
@@ -269,9 +269,13 @@
         clientSecret: data.client_secret,
         appearance: { theme: 'stripe', variables: { fontFamily: '"Lexend", system-ui, sans-serif', borderRadius: '0.9rem', colorPrimary: '#7c3aed' } },
       });
-      const paymentElement = stripeElements.create('payment');
+      const paymentElement = stripeElements.create('payment', { layout: 'tabs' });
       document.getElementById('payment-element').innerHTML = '';
       paymentElement.mount('#payment-element');
+      paymentElement.on('loaderror', (event) => {
+        showMessage('error', 'Betalingsformularen kunne ikke indlæses. Opdater siden eller prøv en anden browser.');
+        isSubmitting = false; confirmBtn.disabled = false;
+      });
       paymentElement.on('ready', () => { payBtn.disabled = false; });
       paymentElement.on('change', (event) => { if (event.complete) payBtn.disabled = false; });
       showStep('stepPayment');
@@ -302,6 +306,8 @@
     }
     if (paymentIntent && paymentIntent.status === 'succeeded') {
       paymentIntentId = paymentIntent.id; showStep('stepPassword');
+    } else if (paymentIntent && paymentIntent.status === 'processing') {
+      showMessage('info', 'Din betaling behandles. Vent venligst…');
     }
     isSubmitting = false;
   });
