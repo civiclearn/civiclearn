@@ -23,7 +23,8 @@
     .topbar-flag .f-white { background: #fff; }
     .topbar-flag .f-blue { background: #00A1DE; }
 
-    #payment-element { margin-bottom: 1.2rem; min-height: 80px; }
+    /* PATCH: Increased min-height to prevent iframe clipping and loading issues */
+    #payment-element { margin-bottom: 1.2rem; min-height: 300px; }
     .payment-loading { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 2rem 0; }
 
     .field { margin-bottom: 1rem; }
@@ -46,7 +47,6 @@
       background: #eef2ff; color: #3730a3;
     }
 
-    /* ── Plan toggle ── */
     .plan-toggle { display:flex; gap:.75rem; margin-bottom:1.5rem; }
     .plan-card {
       flex:1; padding:1.1rem 1rem; border:2px solid #e5e7eb; border-radius:1rem;
@@ -69,7 +69,6 @@
     }
     .plan-card-sub { font-size:.75rem; color:#6b7280; margin-top:.3rem; }
 
-    /* ── Sidebar dynamic updates ── */
     .bundle-extras { display:none; }
     .bundle-extras.show { display:block; }
     .bundle-extras li { color:#7c3aed; }
@@ -78,6 +77,8 @@
     @media(max-width:600px){
       .plan-toggle { flex-direction:column; }
     }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 
@@ -98,17 +99,12 @@
 
 <main>
   <div class="layout">
-
-    <!-- LEFT: BENEFITS (Luxembourgish) -->
     <aside class="features">
       <h2>Komplett Zougang</h2>
       <div class="price price-update" id="sidebarPrice">69&nbsp;€</div>
       <div class="once">Eemolege Bezuelung · Onlimitéierten Zougang</div>
-
       <div class="divider"></div>
-
       <h3>Wat dra ass</h3>
-
       <ul class="benefits">
         <li>Komplett Simulatiounen vum Sproochentest</li>
         <li>Lauschteren — authentesch Audioopnamen op Lëtzebuergesch</li>
@@ -121,27 +117,20 @@
         <li>Direkt Zougang no der Bezuelung</li>
         <li>Gratis Updates</li>
       </ul>
-
       <ul class="benefits bundle-extras" id="bundleExtras">
         <li>+ Vivre-Ensemble Froen a Simulatiounen</li>
         <li>+ Institutiounen, Rechter an Obligatiounen</li>
         <li>+ Statistiken a Fortschrëtt</li>
         <li>+ Froen op Franséisch, Englesch an Däitsch</li>
       </ul>
-
-      <p class="recommend">
-        Recommandéiert vu Kandidaten déi de Sproochentest bestanen hunn.
-      </p>
+      <p class="recommend">Recommandéiert vu Kandidaten déi de Sproochentest bestanen hunn.</p>
     </aside>
 
-    <!-- RIGHT: PAYMENT FLOW (English) -->
     <section class="right">
       <div class="checkout-card">
-
         <h1>Get Sproochentest Training</h1>
         <div class="secure-line">100% secure payment · your card details never touch our servers</div>
 
-        <!-- ── Plan toggle ── -->
         <div class="plan-toggle" id="planToggle">
           <div class="plan-card" data-plan="solo" id="planSolo">
             <div class="plan-card-name">Sproochentest</div>
@@ -158,7 +147,6 @@
         </div>
 
         <div class="checkout-flow" id="checkoutFlow">
-
           <div class="checkout-step" id="stepInitial">
             <button type="button" class="pay-btn" id="startCheckout">Buy now — 69 €</button>
             <p class="small-note">You'll pay securely right here. No redirect needed.</p>
@@ -216,7 +204,6 @@
           </div>
 
           <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
-
         </div>
 
         <div class="trust">
@@ -226,13 +213,10 @@
         </div>
 
         <div class="after-text">
-          Already have an account?
-          <a href="/sproochentest/login.html">Log in</a>.
+          Already have an account? <a href="/sproochentest/login.html">Log in</a>.
         </div>
-
       </div>
     </section>
-
   </div>
 </main>
 
@@ -252,14 +236,12 @@
   const stripe = Stripe(STRIPE_PK);
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  /* ── Plan state ── */
   const PLANS = {
     solo:   { price: '69 €', payLabel: 'Pay 69 €',  createFn: 'sproochentest-create-payment-intent', setupFn: 'sproochentest-setup-account' },
     bundle: { price: '99 €', payLabel: 'Pay 99 €',  createFn: 'lux-create-payment-intent',           setupFn: 'lux-setup-account' }
   };
   let selectedPlan = 'solo';
 
-  // Read ?plan=bundle from URL
   const urlPlan = new URLSearchParams(window.location.search).get('plan');
   if (urlPlan === 'bundle') selectedPlan = 'bundle';
 
@@ -276,16 +258,14 @@
     sidebar.textContent = PLANS[plan].price;
     extras.classList.toggle('show', plan === 'bundle');
     startBtn.textContent = 'Buy now — ' + PLANS[plan].price;
-    // Update pay button if visible
     const payBtn = document.getElementById('payBtn');
     if (payBtn && !payBtn.disabled) payBtn.textContent = PLANS[plan].payLabel;
   }
 
-  cardSolo.onclick   = () => selectPlan('solo');
-  cardBundle.onclick  = () => selectPlan('bundle');
+  cardSolo.onclick = () => selectPlan('solo');
+  cardBundle.onclick = () => selectPlan('bundle');
   selectPlan(selectedPlan);
 
-  /* ── DOM refs ── */
   const stepInitial  = document.getElementById('stepInitial');
   const stepEmail    = document.getElementById('stepEmail');
   const stepConfirm  = document.getElementById('stepConfirm');
@@ -308,14 +288,12 @@
   let paymentIntentId = '';
   let stripeElements = null;
   let isSubmitting = false;
-  // Track which setup function to call (determined at PI creation time)
   let activeSetupFn = PLANS.solo.setupFn;
 
   function showStep(id) {
     [stepInitial, stepEmail, stepConfirm, stepPayment, stepPassword, stepDone]
       .forEach(el => el.hidden = true);
     document.getElementById(id).hidden = false;
-    // Hide plan toggle after email step
     document.getElementById('planToggle').style.display =
       (id === 'stepInitial' || id === 'stepEmail') ? 'flex' : 'none';
     clearMessage();
@@ -331,7 +309,6 @@
     return { ok: true, email };
   }
 
-  /* ── 3DS return handling ── */
   const urlParams = new URLSearchParams(window.location.search);
   const returnedPI = urlParams.get('payment_intent');
   const returnedSecret = urlParams.get('payment_intent_client_secret');
@@ -340,7 +317,6 @@
   if (returnedPI && returnedSecret) {
     currentEmail = localStorage.getItem('sproochentest_checkout_email') || '';
     paymentIntentId = returnedPI;
-    // Restore which setup function to use
     activeSetupFn = localStorage.getItem('sproochentest_checkout_setupfn') || PLANS.solo.setupFn;
     if (returnedStatus === 'succeeded') { showStep('stepPassword'); }
     else {
@@ -352,7 +328,6 @@
     window.history.replaceState({}, '', window.location.pathname);
   }
 
-  /* ── Step navigation ── */
   startBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
 
   continueBtn.addEventListener('click', () => {
@@ -364,7 +339,7 @@
   emailInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); } });
   editEmailBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
 
-  /* ── Create PaymentIntent ── */
+  /* ── PATCHED: CREATE PAYMENT INTENT WITH ERROR HANDLING ── */
   confirmBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
     isSubmitting = true; confirmBtn.disabled = true;
@@ -375,11 +350,7 @@
     const createFn = PLANS[plan].createFn;
     activeSetupFn = PLANS[plan].setupFn;
 
-    // Build request body — bundle goes to lux-create-payment-intent which expects { email, plan }
-    // solo goes to sproochentest-create-payment-intent which expects { email }
-    const body = plan === 'bundle'
-      ? { email: currentEmail, plan: 'bundle' }
-      : { email: currentEmail };
+    const body = plan === 'bundle' ? { email: currentEmail, plan: 'bundle' } : { email: currentEmail };
 
     try {
       const res = await fetch(FUNCTIONS_URL + '/' + createFn, {
@@ -395,24 +366,43 @@
 
       stripeElements = stripe.elements({
         clientSecret: data.client_secret,
-        appearance: { theme: 'stripe', variables: { fontFamily: '"Lexend", system-ui, sans-serif', borderRadius: '0.9rem', colorPrimary: '#7c3aed' } },
+        appearance: { 
+          theme: 'stripe', 
+          variables: { fontFamily: '"Lexend", system-ui, sans-serif', borderRadius: '0.9rem', colorPrimary: '#7c3aed' } 
+        },
       });
-      const paymentElement = stripeElements.create('payment');
+
+      const paymentElement = stripeElements.create('payment', { layout: 'tabs' });
       document.getElementById('payment-element').innerHTML = '';
       paymentElement.mount('#payment-element');
-      paymentElement.on('ready', () => { payBtn.disabled = false; payBtn.textContent = PLANS[plan].payLabel; });
-      paymentElement.on('change', (event) => { if (event.complete) { payBtn.disabled = false; payBtn.textContent = PLANS[plan].payLabel; } });
+
+      // Detect if Stripe fails to load properly (e.g., ad blockers or network issues)
+      paymentElement.on('loaderror', (event) => {
+        showMessage('error', 'Failed to load payment form. Please refresh or try another browser.');
+        isSubmitting = false;
+        confirmBtn.disabled = false;
+      });
+
+      paymentElement.on('ready', () => { 
+        payBtn.disabled = false; 
+        payBtn.textContent = PLANS[plan].payLabel; 
+        isSubmitting = false; 
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Confirm and continue to payment';
+      });
+
       showStep('stepPayment');
     } catch (err) {
       showMessage('error', err.message || 'An error occurred. Please try again.');
-    } finally {
-      isSubmitting = false; confirmBtn.disabled = false; confirmBtn.textContent = 'Confirm and continue to payment';
+      isSubmitting = false; 
+      confirmBtn.disabled = false; 
+      confirmBtn.textContent = 'Confirm and continue to payment';
     }
   });
 
   backToConfirm.addEventListener('click', () => showStep('stepConfirm'));
 
-  /* ── Confirm payment ── */
+  /* ── PATCHED: CONFIRM PAYMENT WITH STATUS CHECKS ── */
   payBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
     isSubmitting = true; payBtn.disabled = true;
@@ -429,13 +419,15 @@
       showMessage('error', error.message || 'Payment failed. Please try again.');
       payBtn.disabled = false; payBtn.textContent = PLANS[selectedPlan].payLabel; isSubmitting = false; return;
     }
+
     if (paymentIntent && paymentIntent.status === 'succeeded') {
       paymentIntentId = paymentIntent.id; showStep('stepPassword');
+    } else if (paymentIntent && paymentIntent.status === 'processing') {
+      showMessage('info', 'Your payment is being processed. Please wait...');
     }
     isSubmitting = false;
   });
 
-  /* ── Set password + create account ── */
   setupBtn.addEventListener('click', async () => {
     const pw1 = document.getElementById('pw1').value;
     const pw2 = document.getElementById('pw2').value;
@@ -462,7 +454,6 @@
       localStorage.removeItem('sproochentest_checkout_setupfn');
       document.getElementById('doneEmail').textContent = 'Logged in as: ' + data.email;
 
-      // If bundle was purchased, flag it for dashboard banner + update CTA
       if (data.plan === 'bundle') {
         localStorage.setItem('cl_bundle', 'lu');
         const doneCta = document.getElementById('doneCta');
@@ -477,7 +468,6 @@
   });
 
   document.getElementById('pw2').addEventListener('keydown', (e) => { if (e.key === 'Enter') setupBtn.click(); });
-
 })();
 </script>
 
