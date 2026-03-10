@@ -51,7 +51,8 @@
   </script>
 
   <!-- 3. Auth guard — safe, because it waits for window.supabase -->
-  <script src="/assets/js/auth-guard-dk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/denmark/assets/js/denmark-auth.js"></script>
  
 </head>
 
@@ -116,7 +117,7 @@
     <strong>Din pakkeaftale er aktiv!</strong>
     <span>Du har også adgang til Prøve i Dansk 3 — samme e-mail og adgangskode.</span>
   </div>
-  <a href="https://dansk3.dk/dansk3/dashboard/" class="bundle-banner-btn">Åbn Dansk 3 →</a>
+  <a href="https://civiclearn.com/dansk3/dashboard/" class="bundle-banner-btn">Åbn Dansk 3 →</a>
 </div>
 
 
@@ -503,12 +504,27 @@ WonderPush.push(["addTag", "country:dk"]);
 <script src="/assets/js/signout.js"></script>
 <script>
   // Bundle banner — show if user has dk bundle
-  (function(){
-    var b = localStorage.getItem('cl_bundle');
-    if(b === 'dk'){
-      var el = document.getElementById('bundleBanner');
-      if(el) el.classList.add('show');
+  (async function(){
+    var el = document.getElementById('bundleBanner');
+    if (!el) return;
+
+    if (localStorage.getItem('cl_bundle') === 'dk') {
+      el.classList.add('show');
+      return;
     }
+    // Fallback: check Supabase
+    var email = localStorage.getItem('cl_email');
+    if (!email) return;
+    try {
+      if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
+      var sb = window.denmarkAuth && window.denmarkAuth.supabase;
+      if (!sb) return;
+      var result = await sb.from('users').select('bundle').eq('email', email).maybeSingle();
+      if (result.data && result.data.bundle === 'dk') {
+        localStorage.setItem('cl_bundle', 'dk');
+        el.classList.add('show');
+      }
+    } catch(e) { /* silent */ }
   })();
 </script>
 </body>
