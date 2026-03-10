@@ -201,7 +201,7 @@
           <strong>Äre Pak-Offer ass aktiv!</strong>
           Dir hutt och Zougang zu der <strong>Épreuve Vivre Ensemble au Luxembourg</strong> — déiselwecht E-Mail an Passwuert.
         </div>
-        <a href="https://civiclearn.com/lux/login" class="bundle-banner-btn">
+        <a href="https://civiclearn.com/lux/login.html" class="bundle-banner-btn">
           Vivre Ensemble öffnen →
         </a>
       </div>
@@ -341,10 +341,28 @@
   // BUNDLE BANNER
   // ==========================================================================
 
-  function checkBundleBanner() {
+  async function checkBundleBanner() {
     if (localStorage.getItem('cl_bundle') === 'lu') {
       document.getElementById('bundleBanner').classList.add('show');
+      return;
     }
+    // Fallback: check Supabase (covers different-device login, cleared localStorage)
+    const email = localStorage.getItem('cl_email');
+    if (!email) return;
+    try {
+      // Wait for auth guard to finish initializing
+      if (window.sproochentestAuth && window.sproochentestAuth.ready) {
+        await window.sproochentestAuth.ready;
+      }
+      const sb = window.sproochentestAuth && window.sproochentestAuth.supabase;
+      if (!sb) return;
+      const { data } = await sb
+        .from('users').select('bundle').eq('email', email).maybeSingle();
+      if (data && data.bundle === 'lux') {
+        localStorage.setItem('cl_bundle', 'lu');
+        document.getElementById('bundleBanner').classList.add('show');
+      }
+    } catch(e) { /* silent — banner just won't show */ }
   }
 
   // ==========================================================================
