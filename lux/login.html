@@ -1,568 +1,539 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr-LU">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – Vivre-Ensemble.lu</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion — Vivre-Ensemble.lu</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand:#7c3aed; --brand-dim:#f4f0ff; --brand-dark:#5b21b6;
+    --navy:#0f172a; --slate:#334155; --muted:#64748b;
+    --border:#e2e8f0; --surface:#ffffff; --bg:#f8f7f4;
+    --red:#dc2626; --green:#059669; --green-light:#f0fdf4; --red-light:#fef2f2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Lexend",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;}
 
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  .topbar{background:var(--navy);border-bottom:3px solid var(--brand);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar-brand{display:flex;align-items:center;gap:14px;}
+  .topbar-brand img{width:22px;height:auto;}
+  .brand-text{display:flex;flex-direction:column;line-height:1.1;}
+  .brand-title{font-size:1rem;font-weight:600;color:#fff;}
+  .brand-sub{font-size:0.72rem;color:#64748b;}
 
-  <script>
-    window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
-    window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
-  </script>
+  .topbar-right{display:flex;align-items:center;gap:12px;}
+  .lang-switch{display:flex;gap:.3rem;}
+  .lang-switch button{
+    font-family:"Lexend",sans-serif;font-size:.72rem;font-weight:600;
+    padding:.25rem .5rem;border:1.5px solid rgba(255,255,255,.2);border-radius:.4rem;
+    background:transparent;color:rgba(255,255,255,.6);cursor:pointer;transition:all .15s;
+  }
+  .lang-switch button:hover{border-color:rgba(255,255,255,.5);color:#fff;}
+  .lang-switch button.active{background:var(--brand);border-color:var(--brand);color:#fff;}
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.7.1/dist/umd/supabase.js"></script>
-  <link rel="stylesheet" href="/assets/css/newlogin.css">
+  .main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+  .login-card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.04);}
 
-  <style>
-    /* === MOBILE LOGIN TABS === */
-    .login-tabs {
-      display: none;
-    }
+  .state{display:none;} .state.active{display:block;}
 
-    @media (max-width: 768px) {
+  .view-header{text-align:center;margin-bottom:22px;}
+  .view-title{font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px;}
+  .view-subtitle{font-size:0.85rem;color:var(--muted);line-height:1.5;}
 
-      /* Fix header overflow */
-      .header-inner {
-        padding: 10px 12px;
-        gap: 8px;
-        flex-wrap: wrap;
-        row-gap: 10px;
-      }
-      .header-nav { display: none; }
-      .brand-powered { display: none; }
+  .form-group{margin-bottom:16px;}
+  .form-label{display:block;font-size:0.78rem;font-weight:600;color:var(--slate);margin-bottom:6px;}
+  .form-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:"Lexend",sans-serif;font-size:0.92rem;color:var(--navy);background:var(--bg);transition:border-color 0.15s;outline:none;}
+  .form-input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-dim);}
+  .form-input::placeholder{color:#94a3b8;}
+  .pwd-wrap{position:relative;}
+  .pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:0.75rem;color:var(--muted);cursor:pointer;font-family:inherit;font-weight:600;}
+  .pwd-toggle:hover{color:var(--navy);}
 
-      .header-left {
-        width: auto;
-        flex: 1;
-      }
-      .header-center {
-        width: auto;
-        display: flex;
-        align-items: center;
-      }
-      .header-right {
-        display: flex;
-        align-items: center;
-      }
+  .action-btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:"Lexend",sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;margin-top:4px;background:var(--brand);color:#fff;}
+  .action-btn:hover:not(:disabled){opacity:0.85;}
+  .action-btn:disabled{opacity:0.4;cursor:default;}
 
-      .btn-small-purple {
-        font-size: 12px;
-        padding: 6px 12px;
-        white-space: nowrap;
-        flex-shrink: 0;
-      }
-      .brand-title {
-        font-size: 15px;
-      }
+  .form-footer{text-align:center;margin-top:14px;}
+  .form-link{font-size:0.8rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline;}
+  .form-link:hover{color:var(--navy);}
 
-      .lang-switch {
-        max-width: 100%;
-      }
-      .lang-switch button {
-        padding: 5px 8px;
-        font-size: 12px;
-      }
+  .msg{display:none;border-radius:10px;padding:10px 14px;font-size:0.82rem;margin-bottom:16px;text-align:center;}
+  .msg.visible{display:block;}
+  .msg.error{background:var(--red-light);border:1px solid #fecaca;color:var(--red);}
+  .msg.success{background:var(--green-light);border:1px solid #bbf7d0;color:#166534;}
 
-      /* Tab bar */
-      .login-tabs {
-        display: flex;
-        justify-content: center;
-        gap: 0;
-        margin: 16px auto 0;
-        max-width: 400px;
-        padding: 0 16px;
-      }
+  .pin-box{background:var(--brand-dim);border:2px dashed var(--brand);border-radius:12px;padding:16px;text-align:center;margin-bottom:20px;}
+  .pin-label{font-size:0.78rem;font-weight:600;color:var(--brand-dark);margin-bottom:6px;}
+  .pin-value{font-size:2rem;font-weight:700;color:var(--brand);letter-spacing:0.15em;}
 
-      .login-tab {
-        flex: 1;
-        padding: 10px 6px;
-        font-family: 'Lexend', sans-serif;
-        font-size: 13px;
-        font-weight: 500;
-        text-align: center;
-        border: none;
-        background: #f0eef5;
-        color: #777;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
+  .success-icon{width:56px;height:56px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;}
 
-      .login-tab:first-child {
-        border-radius: 10px 0 0 10px;
-      }
-      .login-tab:last-child {
-        border-radius: 0 10px 10px 0;
-      }
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
 
-      .login-tab.active {
-        background: #6c5ce7;
-        color: #fff;
-        font-weight: 600;
-      }
+  .page-footer{text-align:center;padding:20px;font-size:0.75rem;color:var(--muted);}
+  .page-footer a{color:var(--brand);text-decoration:none;font-weight:600;}
 
-      /* Hide inactive cards */
-      .login-grid {
-        display: block !important;
-        padding: 0 16px;
-      }
+  .admin-toggle{text-align:center;margin-top:16px;font-size:0.75rem;opacity:0.3;cursor:pointer;user-select:none;}
+  .admin-toggle:hover{opacity:0.6;}
+  .admin-panel{display:none;background:#fff;border:1px dashed var(--border);border-radius:12px;padding:20px;margin-top:12px;width:100%;max-width:420px;}
+  .admin-panel.open{display:block;}
+  .admin-panel h3{font-size:0.85rem;color:var(--muted);margin-bottom:12px;text-align:center;}
+  .admin-panel .form-group{margin-bottom:12px;}
+  .admin-panel .btn-admin{width:100%;padding:10px;background:#6b7280;color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:0.88rem;font-weight:600;cursor:pointer;transition:background 0.2s;}
+  .admin-panel .btn-admin:hover:not(:disabled){background:#4b5563;}
+  .admin-panel .btn-admin:disabled{opacity:0.6;cursor:not-allowed;}
 
-      .auth-card {
-        display: none;
-        max-width: 400px;
-        margin: 16px auto 0;
-      }
-
-      .auth-card.tab-active {
-        display: block;
-        box-sizing: border-box;
-        overflow: hidden;
-      }
-
-      .auth-card input,
-      .auth-card button,
-      .auth-card .pwd-container {
-        max-width: 100%;
-        box-sizing: border-box;
-      }
-    }
-  </style>
+  @media(max-width:480px){.login-card{padding:28px 22px;border-radius:16px;}}
+</style>
 </head>
-
 <body>
 
-<header class="site-header">
-  <div class="header-inner">
-
-    <!-- LEFT -->
-    <div class="header-left">
-      <a href="https://vivre-ensemble.lu/" class="brand-link">
-        <img src="/assets/images/lu.svg" alt="LU">
-        <div class="brand-title">Vivre-Ensemble.lu</div>
-      </a>
+<div class="topbar">
+  <div class="topbar-brand">
+    <img src="/assets/images/lu.svg" alt="Luxembourg">
+    <div class="brand-text">
+      <span class="brand-title">CivicLearn Luxembourg</span>
+      <span class="brand-sub">Vivre-Ensemble</span>
     </div>
-
-    <!-- CENTER -->
-    <div class="header-center">
-      <div class="lang-switch">
-        <button onclick="applyLang('en')" id="btn-en">EN</button>
-        <button onclick="applyLang('fr')" id="btn-fr">FR</button>
-        <button onclick="applyLang('de')" id="btn-de">DE</button>
-      </div>
-
-      <nav class="header-nav">
-        <a href="https://vivre-ensemble.lu/contact/">Contact</a>
-      </nav>
-    </div>
-
-    <!-- RIGHT -->
-    <div class="header-right">
-      <div class="brand-powered">powered by <span>CivicLearn</span></div>
-      <a href="/lux/checkout.html" class="btn-small-purple" data-t="nav_signup">Sign up</a>
-    </div>
-
   </div>
-</header>
-
-<div id="status" class="status-msg"></div>
-
-<div class="login-tabs">
-  <button class="login-tab" data-tab="setup" data-t="tab_setup">First time?</button>
-  <button class="login-tab active" data-tab="login" data-t="tab_login">Login</button>
-  <button class="login-tab" data-tab="pin" data-t="tab_pin">PIN access</button>
+  <div class="topbar-right">
+    <div class="lang-switch">
+      <button data-lang="fr">FR</button>
+      <button data-lang="de">DE</button>
+      <button data-lang="en">EN</button>
+    </div>
+  </div>
 </div>
 
-<div class="login-grid">
+<div class="main">
+  <div class="login-card">
 
-  <!-- LEFT CARD -->
-  <div class="auth-card card-left" data-card="setup">
-    <h2 style="color: var(--purple);" data-t="left_title"></h2>
-    <p data-t="left_desc"></p>
-    <input type="email" id="setupEmail" placeholder="name@example.lu">
-    <button onclick="handleSetup()" class="btn-action btn-purple" data-t="left_btn"></button>
-    <div style="font-size:10px;color:var(--purple);font-weight:600;margin-top:15px;text-align:center;line-height:1.4;" data-t="spam_note"></div>
-  </div>
-
-  <!-- CENTER CARD -->
-  <div class="auth-card card-center tab-active" data-card="login">
-    <h2 style="font-size:28px;text-align:center;" data-t="center_title"></h2>
-
-    <div style="margin-top:20px;">
-      <label data-t="email_label"></label>
-      <input type="email" id="loginEmail" placeholder="Email">
-
-      <label data-t="pwd_label"></label>
-      <div class="pwd-container">
-        <input type="password" id="loginPwd">
-        <button type="button" class="toggle-pwd" onclick="toggleMainPwd()" data-t="show_pwd"></button>
+    <!-- STATE 1: LOGIN -->
+    <div id="state-login" class="state active">
+      <div id="login-msg" class="msg"></div>
+      <div class="view-header">
+        <div class="view-title" data-t="login_title"></div>
+        <div class="view-subtitle" data-t="login_subtitle"></div>
       </div>
-
-      <button onclick="handleLogin()" class="btn-action btn-black" style="margin-top:10px;" data-t="center_btn"></button>
-
-      <div style="text-align:center;margin-top:14px;">
-        <a href="#" id="forgotLink" style="font-size:13px;color:var(--purple);font-weight:500;text-decoration:none;" data-t="forgot_link"></a>
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="login-email" data-t="email_label"></label>
+          <input class="form-input" id="login-email" type="email" placeholder="name@example.lu" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password" data-t="pwd_label"></label>
+          <div class="pwd-wrap">
+            <input class="form-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
+            <button class="pwd-toggle" type="button" id="pwd-toggle-btn" data-t="show_pwd"></button>
+          </div>
+        </div>
+        <button type="submit" class="action-btn" id="login-btn" data-t="login_btn"></button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="show-forgot" data-t="forgot_link"></button>
       </div>
     </div>
-  </div>
 
-  <!-- RIGHT CARD — PIN -->
-  <div class="auth-card card-right" data-card="pin">
-    <h2 style="color:#856404;" data-t="pin_title"></h2>
-    <p data-t="pin_desc"></p>
-
-    <label data-t="pin_email_label"></label>
-    <input type="email" id="pinEmail" data-t-placeholder="pin_email_placeholder">
-
-    <button class="btn-action btn-yellow" onclick="showPin()" data-t="pin_show_btn"></button>
-
-    <div id="pinArea" style="display:none;margin-top:15px;">
-      <div id="pinShown" style="text-align:center;font-size:28px;letter-spacing:6px;font-weight:700;color:var(--purple);margin-bottom:10px;">0000</div>
-
-      <label data-t="pin_enter_label"></label>
-      <input type="text" id="pinEnter" maxlength="4" inputmode="numeric" style="text-align:center;letter-spacing:2px;">
-
-      <button class="btn-action btn-black" onclick="pinLogin()" data-t="pin_continue_btn"></button>
+    <!-- STATE 2: FORGOT — ENTER EMAIL -->
+    <div id="state-forgotEmail" class="state">
+      <div id="forgot-msg" class="msg"></div>
+      <div class="view-header">
+        <div class="view-title" data-t="reset_title"></div>
+        <div class="view-subtitle" data-t="reset_subtitle"></div>
+      </div>
+      <form id="forgot-email-form">
+        <div class="form-group">
+          <label class="form-label" for="forgot-email" data-t="email_label"></label>
+          <input class="form-input" id="forgot-email" type="email" placeholder="name@example.lu" autocomplete="email">
+        </div>
+        <button type="submit" class="action-btn" id="forgot-email-btn" data-t="continue_btn"></button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="back-to-login" data-t="back_to_login"></button>
+      </div>
     </div>
-  </div>
 
+    <!-- STATE 3: FORGOT — PIN + NEW PASSWORD -->
+    <div id="state-forgotReset" class="state">
+      <div id="reset-msg" class="msg"></div>
+      <div class="view-header">
+        <div class="view-title" data-t="new_pwd_title"></div>
+        <div class="view-subtitle" data-t="new_pwd_subtitle"></div>
+      </div>
+      <div class="pin-box">
+        <div class="pin-label" data-t="pin_label"></div>
+        <div class="pin-value" id="pin-value">------</div>
+      </div>
+      <form id="reset-form">
+        <div class="form-group">
+          <label class="form-label" for="reset-pin" data-t="code_label"></label>
+          <input class="form-input" id="reset-pin" type="text" inputmode="numeric" maxlength="6" autocomplete="off" style="text-align:center;letter-spacing:0.15em;">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reset-password" data-t="new_pwd_label"></label>
+          <input class="form-input" id="reset-password" type="password" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reset-password-confirm" data-t="confirm_pwd_label"></label>
+          <input class="form-input" id="reset-password-confirm" type="password" autocomplete="new-password">
+        </div>
+        <button type="submit" class="action-btn" id="reset-btn" data-t="save_pwd_btn"></button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="back-to-forgot-email" data-t="back_btn"></button>
+      </div>
+    </div>
+
+    <!-- STATE 4: RESET SUCCESS -->
+    <div id="state-resetSuccess" class="state">
+      <div class="success-icon">✅</div>
+      <div class="view-header">
+        <div class="view-title" data-t="success_title"></div>
+        <div class="view-subtitle" data-t="success_subtitle"></div>
+      </div>
+      <button class="action-btn" id="go-to-login" data-t="login_btn"></button>
+    </div>
+
+  </div>
 </div>
 
+<!-- ADMIN IMPERSONATE -->
+<div class="admin-toggle" id="admin-toggle">⚙</div>
+<div class="admin-panel" id="admin-panel">
+  <h3>Admin — Login as user</h3>
+  <div id="admin-msg" class="msg"></div>
+  <div class="form-group">
+    <label class="form-label" for="admin-email">User email</label>
+    <input class="form-input" id="admin-email" type="email" placeholder="user@example.com" autocomplete="off">
+  </div>
+  <div class="form-group">
+    <label class="form-label" for="admin-key">Admin key</label>
+    <input class="form-input" id="admin-key" type="password" placeholder="Admin key" autocomplete="off">
+  </div>
+  <button class="btn-admin" id="admin-btn">Impersonate</button>
+</div>
+
+<div class="page-footer">
+  <a href="https://civiclearn.com/lux/">civiclearn.com/lux</a> — Vivre-Ensemble au Luxembourg
+</div>
+
+<!-- =========================
+     I18N DICTIONARY
+========================= -->
 <script>
-/* =========================
-   I18N STRINGS
-========================= */
 const I18N = {
-  en: {
-    nav_signup: "Sign up",
-    tab_setup: "First time?",
-    tab_login: "Login",
-    tab_pin: "PIN access",
-    left_title: "First time here?",
-    left_desc: "Just bought access? Set your password here.",
-    left_btn: "Send setup link",
-    spam_note: "\u2139\uFE0F Please check your spam folder if you don't receive the email within 2 minutes.",
-    center_title: "Login",
-    email_label: "Email Address",
-    pwd_label: "Password",
-    show_pwd: "Show",
-    hide_pwd: "Hide",
-    center_btn: "Login with password",
-    forgot_link: "Forgot password?",
-    forgot_tab: "Forgot password?",
-    forgot_title: "Forgot password?",
-    forgot_desc: "Enter your email and we'll send you a link to reset your password.",
-    pin_title: "Problems?",
-    pin_desc: "Use a temporary PIN if password login does not work. The PIN is not sent by email.",
-    pin_email_label: "Email address",
-    pin_email_placeholder: "name@example.lu",
-    pin_show_btn: "Show PIN",
-    pin_enter_label: "Enter PIN",
-    pin_continue_btn: "Continue",
-    err_no_email: "Please enter an email.",
-    err_not_found: "Email not found in our system.",
-    err_login: "Invalid email or password.",
-    err_pin: "Invalid PIN. Please try again.",
-    msg_sent: "If your email is in our system, a link has been sent."
-  },
-  fr: {
-    nav_signup: "S'inscrire",
-    tab_setup: "Nouveau ?",
-    tab_login: "Connexion",
-    tab_pin: "Acc\u00e8s PIN",
-    left_title: "Premi\u00e8re visite ?",
-    left_desc: "Vous venez d'acheter un acc\u00e8s ? Cr\u00e9ez votre mot de passe ici.",
-    left_btn: "Envoyer le lien",
-    spam_note: "\u2139\uFE0F V\u00e9rifiez vos spams si vous ne recevez pas l'e-mail.",
-    center_title: "Connexion",
-    email_label: "Adresse e-mail",
-    pwd_label: "Mot de passe",
-    show_pwd: "Voir",
-    hide_pwd: "Cacher",
-    center_btn: "Se connecter",
-    forgot_link: "Mot de passe oubli\u00e9 ?",
-    forgot_tab: "Mot de passe oubli\u00e9 ?",
-    forgot_title: "Mot de passe oubli\u00e9 ?",
-    forgot_desc: "Entrez votre e-mail et nous vous enverrons un lien pour r\u00e9initialiser votre mot de passe.",
-    pin_title: "Un probl\u00e8me ?",
-    pin_desc: "Utilisez un code PIN temporaire si la connexion \u00e9choue. Le PIN n'est pas envoy\u00e9 par e-mail.",
-    pin_email_label: "Adresse e-mail",
-    pin_email_placeholder: "nom@exemple.lu",
-    pin_show_btn: "Afficher le PIN",
-    pin_enter_label: "Saisir le PIN",
-    pin_continue_btn: "Continuer",
-    err_no_email: "Veuillez entrer un e-mail.",
-    err_not_found: "E-mail non trouv\u00e9.",
-    err_login: "E-mail ou mot de passe invalide.",
-    err_pin: "PIN invalide.",
-    msg_sent: "Si votre e-mail existe, un lien a \u00e9t\u00e9 envoy\u00e9."
-  },
-  de: {
-    nav_signup: "Registrieren",
-    tab_setup: "Neu hier?",
-    tab_login: "Anmelden",
-    tab_pin: "PIN-Zugang",
-    left_title: "Zum ersten Mal hier?",
-    left_desc: "Gerade Zugang gekauft? Erstellen Sie hier Ihr Passwort.",
-    left_btn: "Link senden",
-    spam_note: "\u2139\uFE0F Bitte pr\u00fcfen Sie Ihren Spam-Ordner.",
-    center_title: "Anmelden",
-    email_label: "E-Mail-Adresse",
-    pwd_label: "Passwort",
-    show_pwd: "Anzeigen",
-    hide_pwd: "Verbergen",
-    center_btn: "Mit Passwort anmelden",
-    forgot_link: "Passwort vergessen?",
-    forgot_tab: "Passwort vergessen?",
-    forgot_title: "Passwort vergessen?",
-    forgot_desc: "Geben Sie Ihre E-Mail ein, und wir senden Ihnen einen Link zum Zur\u00fccksetzen.",
-    pin_title: "Probleme?",
-    pin_desc: "Verwenden Sie eine tempor\u00e4re PIN, wenn die Passwort-Anmeldung nicht funktioniert. Die PIN wird nicht per E-Mail gesendet.",
-    pin_email_label: "E-Mail-Adresse",
-    pin_email_placeholder: "name@beispiel.lu",
-    pin_show_btn: "PIN anzeigen",
-    pin_enter_label: "PIN eingeben",
-    pin_continue_btn: "Weiter",
-    err_no_email: "E-Mail eingeben.",
-    err_not_found: "E-Mail nicht gefunden.",
-    err_login: "Ung\u00fcltige Zugangsdaten.",
-    err_pin: "Ung\u00fcltige PIN.",
-    msg_sent: "Falls vorhanden, wurde ein Link gesendet."
-  }
+
+fr: {
+  login_title: "Connexion",
+  login_subtitle: "Connectez-vous avec votre email et mot de passe",
+  email_label: "E-mail",
+  pwd_label: "Mot de passe",
+  show_pwd: "Afficher",
+  hide_pwd: "Masquer",
+  login_btn: "Se connecter",
+  forgot_link: "Mot de passe oublié ?",
+  reset_title: "Réinitialiser le mot de passe",
+  reset_subtitle: "Entrez l'adresse email de votre compte",
+  continue_btn: "Continuer",
+  back_to_login: "← Retour à la connexion",
+  new_pwd_title: "Nouveau mot de passe",
+  new_pwd_subtitle: "Entrez le code affiché ci-dessous et choisissez un nouveau mot de passe",
+  pin_label: "Code de confirmation",
+  code_label: "Code",
+  code_placeholder: "Entrez le code ci-dessus",
+  new_pwd_label: "Nouveau mot de passe",
+  new_pwd_placeholder: "Minimum 6 caractères",
+  confirm_pwd_label: "Confirmer le mot de passe",
+  confirm_pwd_placeholder: "Répétez le mot de passe",
+  save_pwd_btn: "Enregistrer le nouveau mot de passe",
+  back_btn: "← Retour",
+  success_title: "Mot de passe mis à jour !",
+  success_subtitle: "Votre nouveau mot de passe a été enregistré. Connectez-vous pour continuer.",
+  err_fill_all: "Veuillez remplir tous les champs.",
+  err_invalid_email: "Veuillez saisir un email valide.",
+  err_enter_code: "Veuillez entrer le code de confirmation.",
+  err_pwd_short: "Le mot de passe doit contenir au moins 6 caractères.",
+  err_pwd_mismatch: "Les mots de passe ne correspondent pas.",
+  err_invalid_login: "Email ou mot de passe incorrect.",
+  err_email_not_confirmed: "Email non confirmé.",
+  err_too_many: "Trop de tentatives. Veuillez patienter.",
+  err_user_not_found: "Aucun compte trouvé avec cet email.",
+  err_network: "Erreur de connexion.",
+  err_email_not_found: "Email introuvable.",
+  err_wrong_code: "Code incorrect. Réessayez.",
+  err_connection: "Erreur de connexion. Réessayez.",
+  err_generic: "Une erreur est survenue. Réessayez.",
+  loading: "Veuillez patienter…"
+},
+
+de: {
+  login_title: "Anmelden",
+  login_subtitle: "Melden Sie sich mit E-Mail und Passwort an",
+  email_label: "E-Mail",
+  pwd_label: "Passwort",
+  show_pwd: "Anzeigen",
+  hide_pwd: "Verbergen",
+  login_btn: "Anmelden",
+  forgot_link: "Passwort vergessen?",
+  reset_title: "Passwort zurücksetzen",
+  reset_subtitle: "Geben Sie die E-Mail-Adresse Ihres Kontos ein",
+  continue_btn: "Weiter",
+  back_to_login: "← Zurück zur Anmeldung",
+  new_pwd_title: "Neues Passwort",
+  new_pwd_subtitle: "Geben Sie den unten angezeigten Code ein und wählen Sie ein neues Passwort",
+  pin_label: "Bestätigungscode",
+  code_label: "Code",
+  code_placeholder: "Code oben eingeben",
+  new_pwd_label: "Neues Passwort",
+  new_pwd_placeholder: "Mindestens 6 Zeichen",
+  confirm_pwd_label: "Passwort bestätigen",
+  confirm_pwd_placeholder: "Passwort wiederholen",
+  save_pwd_btn: "Neues Passwort speichern",
+  back_btn: "← Zurück",
+  success_title: "Passwort aktualisiert!",
+  success_subtitle: "Ihr neues Passwort wurde gespeichert. Melden Sie sich jetzt an.",
+  err_fill_all: "Bitte füllen Sie alle Felder aus.",
+  err_invalid_email: "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+  err_enter_code: "Bitte geben Sie den Bestätigungscode ein.",
+  err_pwd_short: "Das Passwort muss mindestens 6 Zeichen lang sein.",
+  err_pwd_mismatch: "Die Passwörter stimmen nicht überein.",
+  err_invalid_login: "E-Mail oder Passwort falsch.",
+  err_email_not_confirmed: "E-Mail nicht bestätigt.",
+  err_too_many: "Zu viele Versuche. Bitte warten Sie einen Moment.",
+  err_user_not_found: "Kein Konto mit dieser E-Mail gefunden.",
+  err_network: "Verbindungsfehler.",
+  err_email_not_found: "E-Mail-Adresse nicht gefunden.",
+  err_wrong_code: "Code falsch. Bitte versuchen Sie es erneut.",
+  err_connection: "Verbindungsfehler. Bitte versuchen Sie es erneut.",
+  err_generic: "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+  loading: "Bitte warten…"
+},
+
+en: {
+  login_title: "Log in",
+  login_subtitle: "Sign in with your email and password",
+  email_label: "Email",
+  pwd_label: "Password",
+  show_pwd: "Show",
+  hide_pwd: "Hide",
+  login_btn: "Log in",
+  forgot_link: "Forgot password?",
+  reset_title: "Reset password",
+  reset_subtitle: "Enter the email address of your account",
+  continue_btn: "Continue",
+  back_to_login: "← Back to login",
+  new_pwd_title: "New password",
+  new_pwd_subtitle: "Enter the code shown below and choose a new password",
+  pin_label: "Confirmation code",
+  code_label: "Code",
+  code_placeholder: "Enter the code above",
+  new_pwd_label: "New password",
+  new_pwd_placeholder: "Minimum 6 characters",
+  confirm_pwd_label: "Confirm password",
+  confirm_pwd_placeholder: "Repeat password",
+  save_pwd_btn: "Save new password",
+  back_btn: "← Back",
+  success_title: "Password updated!",
+  success_subtitle: "Your new password has been saved. Log in to continue.",
+  err_fill_all: "Please fill in all fields.",
+  err_invalid_email: "Please enter a valid email address.",
+  err_enter_code: "Please enter the confirmation code.",
+  err_pwd_short: "Password must be at least 6 characters.",
+  err_pwd_mismatch: "Passwords do not match.",
+  err_invalid_login: "Incorrect email or password.",
+  err_email_not_confirmed: "Email not confirmed.",
+  err_too_many: "Too many attempts. Please wait a moment.",
+  err_user_not_found: "No account found with this email.",
+  err_network: "Connection error.",
+  err_email_not_found: "Email address not found.",
+  err_wrong_code: "Incorrect code. Please try again.",
+  err_connection: "Connection error. Please try again.",
+  err_generic: "An error occurred. Please try again.",
+  loading: "Please wait…"
+}
 };
-
-let currentLang = "en";
-let _forgotActive = false;
-
-/* =========================
-   LANGUAGE APPLY
-========================= */
-function applyLang(lang) {
-  currentLang = lang;
-  document.querySelectorAll("[data-t]").forEach(el => {
-    const key = el.getAttribute("data-t");
-    if (I18N[lang][key]) el.innerHTML = I18N[lang][key];
-  });
-  document.querySelectorAll("[data-t-placeholder]").forEach(el => {
-    const key = el.getAttribute("data-t-placeholder");
-    if (I18N[lang][key]) el.placeholder = I18N[lang][key];
-  });
-  document.querySelectorAll(".lang-switch button").forEach(btn => {
-    btn.classList.toggle("active", btn.id === `btn-${lang}`);
-  });
-
-  // If forgot flow is active, keep its labels in the new language
-  if (_forgotActive) {
-    const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
-    if (setupTab) setupTab.textContent = I18N[lang].forgot_tab;
-    const setupCard = document.querySelector('.card-left');
-    const h2 = setupCard?.querySelector("h2");
-    if (h2) h2.textContent = I18N[lang].forgot_title;
-    const p = setupCard?.querySelector("p");
-    if (p) p.textContent = I18N[lang].forgot_desc;
-  }
-}
-
-/* =========================
-   SUPABASE INIT
-========================= */
-const supabase = window.supabase.createClient(
-  window.SUPABASE_URL,
-  window.SUPABASE_KEY
-);
-
-/* =========================
-   NOTIFY
-========================= */
-function notify(type, text) {
-  const el = document.getElementById("status");
-  el.textContent = text;
-  el.className = "status-msg " + type;
-  el.style.display = "block";
-  setTimeout(() => el.style.display = "none", 6000);
-}
-
-/* =========================
-   PASSWORD SETUP
-========================= */
-async function handleSetup() {
-  const email = setupEmail.value.trim().toLowerCase();
-  if (!email) return notify("error", I18N[currentLang].err_no_email);
-
-  await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + "/lux/login-password.html"
-  });
-
-  notify("success", I18N[currentLang].msg_sent);
-}
-
-/* =========================
-   PASSWORD LOGIN
-========================= */
-async function handleLogin() {
-  const email = loginEmail.value.trim().toLowerCase();
-  const password = loginPwd.value.trim();
-
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (error) return notify("error", I18N[currentLang].err_login);
-
-  await supabase.from("login_history").insert({
-    email,
-    status: "success",
-    method: "password"
-  });
-
-  localStorage.setItem("cl_auth", "ok");
-  localStorage.setItem("cl_email", email);
-  localStorage.setItem("cl_login_at", Date.now().toString());
-  window.location.href = "/lux/dashboard/index.html";
-}
-
-/* =========================
-   PIN LOGIC
-========================= */
-function utcDayOfYear(d) {
-  const s = new Date(Date.UTC(d.getUTCFullYear(), 0, 0));
-  return Math.floor((d - s) / 86400000);
-}
-
-function computePin(email) {
-  const n = new Date();
-  const v = (utcDayOfYear(n) * 37) + (n.getUTCHours() * 91) + (email.length * 17);
-  return String(v % 10000).padStart(4, "0");
-}
-
-async function showPin() {
-  const email = pinEmail.value.trim().toLowerCase();
-  if (!email) return notify("error", I18N[currentLang].err_no_email);
-
-  let exists = false;
-  try {
-    const res = await fetch(
-      "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/check-user-exists",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      }
-    );
-    const data = await res.json();
-    exists = data.exists === true;
-  } catch (e) {
-    return notify("error", I18N[currentLang].err_not_found);
-  }
-
-  if (!exists) return notify("error", I18N[currentLang].err_not_found);
-
-  pinShown.textContent = computePin(email);
-  pinArea.style.display = "block";
-  localStorage.setItem("cl_email", email);
-}
-
-async function pinLogin() {
-  const email = localStorage.getItem("cl_email");
-  const enteredPin = pinEnter.value.trim();
-
-  const res = await fetch(
-    "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/verify-pin-and-log",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": window.SUPABASE_KEY
-      },
-      body: JSON.stringify({ email, enteredPin })
-    }
-  );
-
-  const data = await res.json();
-  if (!data.success) return notify("error", I18N[currentLang].err_pin);
-
-  localStorage.setItem("cl_auth", "ok");
-  localStorage.setItem("cl_email", email);
-  localStorage.setItem("cl_login_at", Date.now().toString());
-  window.location.href = "/lux/dashboard/index.html";
-}
-
-/* =========================
-   PASSWORD VISIBILITY
-========================= */
-function toggleMainPwd() {
-  const pwd = loginPwd;
-  const btn = document.querySelector(".toggle-pwd");
-  if (pwd.type === "password") {
-    pwd.type = "text";
-    btn.textContent = I18N[currentLang].hide_pwd;
-  } else {
-    pwd.type = "password";
-    btn.textContent = I18N[currentLang].show_pwd;
-  }
-}
-
-/* =========================
-   INIT
-========================= */
-applyLang(currentLang);
 </script>
 
+<!-- =========================
+     I18N ENGINE + LOGIC
+========================= -->
 <script>
-/* === MOBILE LOGIN TABS === */
-document.querySelectorAll(".login-tab").forEach(tab => {
-  tab.addEventListener("click", () => {
-    const target = tab.dataset.tab;
+(function() {
+  'use strict';
 
-    // Update tab bar
-    document.querySelectorAll(".login-tab").forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
+  let currentLang = 'en';
+  function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || key; }
 
-    // Show matching card, hide others
-    document.querySelectorAll(".auth-card").forEach(card => {
-      card.classList.toggle("tab-active", card.dataset.card === target);
+  function applyLang(lang) {
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-t]').forEach(el => {
+      const key = el.dataset.t;
+      if (I18N[lang][key]) el.textContent = I18N[lang][key];
     });
-
-    // Reset setup tab label when switching away from forgot flow
-    if (target !== "setup" && _forgotActive) {
-      _forgotActive = false;
-      const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
-      if (setupTab) setupTab.textContent = I18N[currentLang].tab_setup;
-      const setupCard = document.querySelector('.card-left');
-      const h2 = setupCard?.querySelector("h2");
-      if (h2) h2.textContent = I18N[currentLang].left_title;
-      const p = setupCard?.querySelector("p");
-      if (p) p.textContent = I18N[currentLang].left_desc;
-    }
-  });
-});
-
-/* === FORGOT PASSWORD LINK === */
-const forgotLink = document.getElementById("forgotLink");
-if (forgotLink) {
-  forgotLink.addEventListener("click", (e) => {
-    e.preventDefault();
-    _forgotActive = true;
-
-    // Switch to setup tab
-    document.querySelectorAll(".login-tab").forEach(t => t.classList.remove("active"));
-    const setupTab = document.querySelector('.login-tab[data-tab="setup"]');
-    if (setupTab) {
-      setupTab.classList.add("active");
-      setupTab.textContent = I18N[currentLang].forgot_tab;
-    }
-
-    document.querySelectorAll(".auth-card").forEach(card => {
-      card.classList.toggle("tab-active", card.dataset.card === "setup");
+    document.querySelectorAll('.lang-switch button').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === lang);
     });
+    // Update placeholders
+    const rp = document.getElementById('reset-pin');
+    const rpw = document.getElementById('reset-password');
+    const rpc = document.getElementById('reset-password-confirm');
+    if (rp) rp.placeholder = t('code_placeholder');
+    if (rpw) rpw.placeholder = t('new_pwd_placeholder');
+    if (rpc) rpc.placeholder = t('confirm_pwd_placeholder');
+  }
 
-    // Update heading and description
-    const setupCard = document.querySelector('.card-left');
-    const h2 = setupCard?.querySelector("h2");
-    if (h2) h2.textContent = I18N[currentLang].forgot_title;
-    const p = setupCard?.querySelector("p");
-    if (p) p.textContent = I18N[currentLang].forgot_desc;
+  document.querySelectorAll('.lang-switch button').forEach(b => {
+    b.onclick = () => applyLang(b.dataset.lang);
   });
-}
+  applyLang('en');
+
+  /* ── Supabase ── */
+  const SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
+  const DASHBOARD_URL = '/lux/dashboard/index.html';
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const params    = new URLSearchParams(location.search);
+  const returnUrl = params.get('return') || DASHBOARD_URL;
+
+  // Auto-redirect if already logged in
+  (async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) window.location.href = returnUrl;
+  })();
+
+  /* ── Helpers ── */
+  function showState(name) {
+    document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+    document.getElementById('state-' + name).classList.add('active');
+  }
+  function showMsg(id, text, type) { const el = document.getElementById(id); el.textContent = text; el.className = 'msg visible ' + type; }
+  function clearMsg(id) { const el = document.getElementById(id); el.className = 'msg'; el.textContent = ''; }
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    if (loading) { btn.disabled = true; btn.dataset.originalText = btn.textContent; btn.innerHTML = '<span class="spinner"></span>' + t('loading'); }
+    else { btn.disabled = false; btn.textContent = btn.dataset.originalText || btn.textContent; }
+  }
+
+  function translateError(msg) {
+    const l = msg.toLowerCase();
+    if (l.includes('invalid login'))       return t('err_invalid_login');
+    if (l.includes('email not confirmed')) return t('err_email_not_confirmed');
+    if (l.includes('too many requests'))   return t('err_too_many');
+    if (l.includes('user not found'))      return t('err_user_not_found');
+    if (l.includes('network'))             return t('err_network');
+    return msg;
+  }
+
+  /* ── Navigation ── */
+  document.getElementById('show-forgot').addEventListener('click', (e) => {
+    e.preventDefault(); clearMsg('login-msg');
+    const v = document.getElementById('login-email').value.trim();
+    if (v) document.getElementById('forgot-email').value = v;
+    showState('forgotEmail');
+  });
+  document.getElementById('back-to-login').addEventListener('click', () => { clearMsg('forgot-msg'); showState('login'); });
+  document.getElementById('back-to-forgot-email').addEventListener('click', () => { clearMsg('reset-msg'); showState('forgotEmail'); });
+  document.getElementById('go-to-login').addEventListener('click', () => showState('login'));
+
+  /* ── Password toggle ── */
+  document.getElementById('pwd-toggle-btn').addEventListener('click', () => {
+    const el = document.getElementById('login-password'); const btn = document.getElementById('pwd-toggle-btn');
+    if (el.type === 'password') { el.type = 'text'; btn.textContent = t('hide_pwd'); } else { el.type = 'password'; btn.textContent = t('show_pwd'); }
+  });
+
+  let resetEmail = '';
+
+  /* ── LOGIN ── */
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMsg('login-msg');
+    const email = document.getElementById('login-email').value.trim().toLowerCase();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) return showMsg('login-msg', t('err_fill_all'), 'error');
+    setLoading('login-btn', true);
+    try {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) { showMsg('login-msg', translateError(error.message), 'error'); setLoading('login-btn', false); return; }
+      try { await sb.from('login_history').insert({ email, status: 'success', method: 'password' }); } catch(e) {}
+      localStorage.setItem('cl_auth', 'ok');
+      localStorage.setItem('cl_email', email);
+      window.location.href = returnUrl;
+    } catch (err) { showMsg('login-msg', t('err_generic'), 'error'); setLoading('login-btn', false); }
+  });
+
+  /* ── FORGOT — CHECK EMAIL ── */
+  document.getElementById('forgot-email-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMsg('forgot-msg');
+    resetEmail = document.getElementById('forgot-email').value.trim().toLowerCase();
+    if (!resetEmail || !resetEmail.includes('@')) return showMsg('forgot-msg', t('err_invalid_email'), 'error');
+    setLoading('forgot-email-btn', true);
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/lux-reset-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'check_email', email: resetEmail }),
+      });
+      const data = await res.json();
+      if (!data.exists) { showMsg('forgot-msg', data.message || t('err_email_not_found'), 'error'); setLoading('forgot-email-btn', false); return; }
+      document.getElementById('pin-value').textContent = data.pin;
+      showState('forgotReset');
+    } catch (err) { showMsg('forgot-msg', t('err_connection'), 'error'); }
+    setLoading('forgot-email-btn', false);
+  });
+
+  /* ── FORGOT — RESET WITH PIN ── */
+  document.getElementById('reset-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMsg('reset-msg');
+    const pin = document.getElementById('reset-pin').value.trim();
+    const newPassword = document.getElementById('reset-password').value;
+    const confirmPassword = document.getElementById('reset-password-confirm').value;
+    if (!pin) return showMsg('reset-msg', t('err_enter_code'), 'error');
+    if (newPassword.length < 6) return showMsg('reset-msg', t('err_pwd_short'), 'error');
+    if (newPassword !== confirmPassword) return showMsg('reset-msg', t('err_pwd_mismatch'), 'error');
+    setLoading('reset-btn', true);
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/lux-reset-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset', email: resetEmail, pin, new_password: newPassword }),
+      });
+      const data = await res.json();
+      if (data.success) showState('resetSuccess');
+      else showMsg('reset-msg', data.error || t('err_wrong_code'), 'error');
+    } catch (err) { showMsg('reset-msg', t('err_connection'), 'error'); }
+    setLoading('reset-btn', false);
+  });
+
+  /* ── ADMIN IMPERSONATE ── */
+  document.getElementById('admin-toggle').addEventListener('click', () => { document.getElementById('admin-panel').classList.toggle('open'); });
+  document.getElementById('admin-btn').addEventListener('click', async () => {
+    const email = document.getElementById('admin-email').value.trim().toLowerCase();
+    const key = document.getElementById('admin-key').value;
+    const msgEl = document.getElementById('admin-msg');
+    const btn = document.getElementById('admin-btn');
+    msgEl.className = 'msg';
+    if (!email || !key) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Both fields required.'; return; }
+    btn.disabled = true; btn.textContent = 'Impersonating…';
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/admin-impersonate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, admin_key: key }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) { msgEl.className = 'msg visible error'; msgEl.textContent = data.error || 'Failed.'; btn.disabled = false; btn.textContent = 'Impersonate'; return; }
+      const { error: otpError } = await sb.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' });
+      if (otpError) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Session failed: ' + otpError.message; btn.disabled = false; btn.textContent = 'Impersonate'; return; }
+      localStorage.setItem('cl_auth', 'ok');
+      localStorage.setItem('cl_email', data.email);
+      window.location.href = returnUrl;
+    } catch (err) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Error: ' + err.message; btn.disabled = false; btn.textContent = 'Impersonate'; }
+  });
+
+  document.getElementById('login-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-form').requestSubmit(); });
+})();
 </script>
-
 </body>
 </html>
