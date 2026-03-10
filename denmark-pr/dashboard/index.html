@@ -37,6 +37,18 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/denmark-pr/assets/js/denmarkpr-auth.js"></script>
  
+
+  <style>
+    .bundle-banner{display:none;background:linear-gradient(135deg,#f5f3ff 0%,#ede9fe 100%);border:1px solid #ddd6fe;border-radius:12px;padding:14px 20px;margin:0 0 20px 0;align-items:center;gap:14px;flex-wrap:wrap;}
+    .bundle-banner.show{display:flex;}
+    .bundle-banner-icon{font-size:1.3rem;flex-shrink:0;}
+    .bundle-banner-text{flex:1;min-width:200px;}
+    .bundle-banner-text strong{color:#4c1d95;font-size:.92rem;}
+    .bundle-banner-text span{display:block;color:#5b21b6;font-size:.82rem;margin-top:2px;}
+    .bundle-banner-btn{background:#7c3aed;color:#fff;text-decoration:none;padding:8px 18px;border-radius:8px;font-size:.85rem;font-weight:600;white-space:nowrap;transition:background .15s;}
+    .bundle-banner-btn:hover{background:#6d28d9;}
+    @media(max-width:600px){.bundle-banner{flex-direction:column;text-align:center;}.bundle-banner-btn{width:100%;text-align:center;}}
+  </style>
 </head>
 
 <body class="dashboard">
@@ -90,6 +102,17 @@
 
 <!-- MAIN -->
 <main class="main">
+
+
+<!-- Bundle banner — shown to dkpr combo users -->
+<div class="bundle-banner" id="bundleBanner">
+  <div class="bundle-banner-icon">🎁</div>
+  <div class="bundle-banner-text">
+    <strong>Du har også adgang til Prøve i Dansk 3 Træning</strong>
+    <span>Din kombipakke inkluderer 10 simulationer med AI-evaluering og karakterer</span>
+  </div>
+  <a href="https://civiclearn.com/dansk3/dashboard/" class="bundle-banner-btn">Åbn Dansk 3 →</a>
+</div>
 
     <!-- TOP METRICS -->
    <div class="db-top-metrics">
@@ -387,6 +410,30 @@ WonderPush.push(["addTag", "country:denmark-pr"]);
 <script src="/assets/js/maintenance-bar.js"></script>
 <script src="/assets/js/sync-announce.js"></script>
 <script src="/assets/js/signout.js"></script>
+
+<script>
+  // Bundle banner — show if user has dkpr combo bundle
+  (async function(){
+    var el = document.getElementById('bundleBanner');
+    if (!el) return;
+    if (localStorage.getItem('cl_bundle') === 'dkpr') {
+      el.classList.add('show');
+      return;
+    }
+    var email = localStorage.getItem('cl_email');
+    if (!email) return;
+    try {
+      if (window.denmarkprAuth && window.denmarkprAuth.ready) await window.denmarkprAuth.ready;
+      var sb = window.denmarkprAuth && window.denmarkprAuth.supabase;
+      if (!sb) return;
+      var result = await sb.from('users').select('bundle').eq('email', email).maybeSingle();
+      if (result.data && result.data.bundle === 'dkpr') {
+        localStorage.setItem('cl_bundle', 'dkpr');
+        el.classList.add('show');
+      }
+    } catch(e) { /* silent */ }
+  })();
+</script>
 </body>
 </html>
 
