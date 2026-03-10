@@ -24,7 +24,7 @@
     .topbar-flag .cross-v-inner { position: absolute; top: 0; bottom: 0; left: 8px; width: 4px; background: #D72828; }
 
     /* Payment Element container */
-    #payment-element { margin-bottom: 1.2rem; min-height: 80px; }
+    #payment-element { margin-bottom: 1.2rem; min-height: 300px; }
     .payment-loading { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 2rem 0; }
 
     /* Password fields */
@@ -379,9 +379,14 @@
         },
       });
 
-      const paymentElement = stripeElements.create('payment');
+      const paymentElement = stripeElements.create('payment', { layout: 'tabs' });
       document.getElementById('payment-element').innerHTML = '';
       paymentElement.mount('#payment-element');
+
+      paymentElement.on('loaderror', (event) => {
+        showMessage('error', 'Failed to load payment form. Please refresh the page or try another browser.');
+        isSubmitting = false; confirmBtn.disabled = false;
+      });
 
       paymentElement.on('ready', () => {
         payBtn.disabled = false;
@@ -436,6 +441,8 @@
     if (paymentIntent && paymentIntent.status === 'succeeded') {
       paymentIntentId = paymentIntent.id;
       showStep('stepPassword');
+    } else if (paymentIntent && paymentIntent.status === 'processing') {
+      showMessage('info', 'Your payment is being processed. Please wait…');
     }
 
     isSubmitting = false;
