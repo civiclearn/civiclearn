@@ -181,6 +181,25 @@
       border-radius: 2px;
     }
 
+    #startBtn {
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 1.5rem;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    #startBtn:hover { background: #235c41; }
+    #startBtn:active { transform: scale(0.98); }
+    #startBtn:disabled { background: #a8c5b5; cursor: not-allowed; transform: none; }
+
     footer {
       margin-top: 2rem;
       font-size: 0.75rem;
@@ -197,9 +216,11 @@
   <h1>Refreshing your app</h1>
   <p class="subtitle">Clearing stored data so you get the latest version. This takes just a moment.</p>
 
-  <div class="bar-wrap"><div class="bar" id="bar"></div></div>
+  <button id="startBtn" onclick="startReset()">Clear &amp; refresh</button>
 
-  <ul class="steps" id="steps">
+  <div class="bar-wrap" id="barWrap" style="display:none"><div class="bar" id="bar"></div></div>
+
+  <ul class="steps" id="steps" style="display:none">
     <li class="step" id="s1"><span class="step-icon">1</span> Unregister service workers</li>
     <li class="step" id="s2"><span class="step-icon">2</span> Clear cache storage</li>
     <li class="step" id="s3"><span class="step-icon">3</span> Clear local session data</li>
@@ -208,7 +229,7 @@
 
   <div class="status" id="status"></div>
   <div class="redirect" id="redirectMsg">
-    Redirecting to login in <span class="countdown" id="countdown">3</span>s…
+    Please visit your login page now.
   </div>
 </div>
 
@@ -231,6 +252,14 @@
 
   function setBar(pct) {
     bar.style.width = pct + '%';
+  }
+
+  function startReset() {
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('startBtn').textContent = 'Clearing…';
+    document.getElementById('barWrap').style.display = 'block';
+    document.getElementById('steps').style.display = 'flex';
+    resetCache();
   }
 
   async function resetCache() {
@@ -295,45 +324,11 @@
       statusEl.innerHTML = '<strong>Completed with warnings.</strong> Some items could not be cleared: ' + errors.join(', ') + '. Try opening this page in a private/incognito window.';
     } else {
       statusEl.className = 'status success';
-      statusEl.innerHTML = '<strong>All clear.</strong> Your browser has been refreshed. You\'ll be redirected to the login page now.';
-      startRedirect();
+      statusEl.innerHTML = '<strong>All clear.</strong> Your browser has been refreshed.';
+      redirectMsg.classList.add('visible');
     }
   }
-
-  function startRedirect() {
-    redirectMsg.classList.add('visible');
-    let n = 3;
-    const iv = setInterval(() => {
-      n--;
-      countdownEl.textContent = n;
-      if (n <= 0) {
-        clearInterval(iv);
-        // Redirect to civiclearn.com/denmark/login as default
-        // (user can be directed to specific product login in support email)
-        const dest = getLoginUrl();
-        window.location.replace(dest);
-      }
-    }, 1000);
-  }
-
-  function getLoginUrl() {
-    // If user came from a specific product, try to detect it
-    const ref = document.referrer;
-    const products = [
-      'denmark-pr','denmark','lux','ciple','celpe',
-      'ykifinnish','ykisvenska','rikisborgaraprof','australia','pd3'
-    ];
-    for (const p of products) {
-      if (ref.includes('/' + p + '/')) return 'https://civiclearn.com/' + p + '/login';
-    }
-    // Default fallback
-    return 'https://civiclearn.com/denmark/login';
-  }
-
   function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-  // Kick off immediately
-  window.addEventListener('load', resetCache);
 </script>
 </body>
 </html>
