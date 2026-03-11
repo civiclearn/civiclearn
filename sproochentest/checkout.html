@@ -1,67 +1,41 @@
 <!DOCTYPE html>
-<html lang="lb">
+<html lang="fr-LU">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Kafen — Sproochentest Training</title>
+  <title>CivicLearn – Sproochentest Training</title>
 
-  <meta name="description"
-        content="Sproochentest Simulatioun. Komplett Training fir Lauschteren a Schwätzen. Eemolege Bezuelung, onlimitéierten Zougang." />
   <link rel="canonical" href="https://civiclearn.com/sproochentest/checkout.html">
-
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/checkout.css">
 
   <style>
-    .topbar-flag {
-      width: 26px; height: 18px; border-radius: 3px;
-      overflow: hidden; display: inline-flex; flex-shrink: 0;
-      flex-direction: column; vertical-align: middle;
+    /* ── Language switch ── */
+    .lang-switch { display:flex; gap:.35rem; }
+    .lang-switch button {
+      font-family:"Lexend",sans-serif; font-size:.78rem; font-weight:500;
+      padding:.3rem .55rem; border:1.5px solid rgba(0,0,0,.12); border-radius:.45rem;
+      background:transparent; color:#555; cursor:pointer; transition:all .15s;
     }
-    .topbar-flag span { flex: 1; }
-    .topbar-flag .f-red { background: #EF4135; }
-    .topbar-flag .f-white { background: #fff; }
-    .topbar-flag .f-blue { background: #00A1DE; }
+    .lang-switch button:hover { border-color:#0f766e; color:#0f766e; }
+    .lang-switch button.active { background:#0f766e; border-color:#0f766e; color:#fff; }
 
-    /* PATCH: Increased min-height to prevent iframe clipping and loading issues */
-    #payment-element { margin-bottom: 1.2rem; min-height: 300px; }
-    .payment-loading { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 2rem 0; }
-
-    .field { margin-bottom: 1rem; }
-    .field label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
-    .field input {
-      width: 100%; padding: 0.75rem 0.9rem; border-radius: 0.9rem;
-      border: 1px solid rgba(0,0,0,0.12); font-size: 0.95rem;
-      font-family: "Lexend", sans-serif; outline: none;
-    }
-    .field input:focus { outline: 2px solid var(--brand); border-color: transparent; }
-
-    .done-icon { font-size: 3rem; text-align: center; margin-bottom: 0.8rem; }
-    .done-title { font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; }
-    .done-sub { font-size: 0.95rem; color: var(--muted); text-align: center; margin-bottom: 1.5rem; }
-
-    .step-badge {
-      display: inline-block; padding: 3px 10px; border-radius: 20px;
-      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.05em; margin-bottom: 1rem;
-      background: #eef2ff; color: #3730a3;
-    }
-
+    /* ── Plan toggle ── */
     .plan-toggle { display:flex; gap:.75rem; margin-bottom:1.5rem; }
     .plan-card {
       flex:1; padding:1.1rem 1rem; border:2px solid #e5e7eb; border-radius:1rem;
       cursor:pointer; background:#fff; transition:border-color .15s, box-shadow .15s;
       position:relative; text-align:center;
     }
-    .plan-card:hover { border-color:#c4b5fd; }
-    .plan-card.selected { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,.15); }
+    .plan-card:hover { border-color:#99f6e4; }
+    .plan-card.selected { border-color:#0f766e; box-shadow:0 0 0 3px rgba(15,118,110,.15); }
     .plan-card-badge {
       position:absolute; top:-.65rem; left:50%; transform:translateX(-50%);
-      background:#7c3aed; color:#fff; font-size:.68rem; font-weight:600;
+      background:#0f766e; color:#fff; font-size:.68rem; font-weight:600;
       padding:.15rem .65rem; border-radius:1rem; white-space:nowrap;
     }
     .plan-card-name { font-weight:600; font-size:.92rem; color:#1a1a1a; margin-bottom:.25rem; }
-    .plan-card-price { font-size:1.3rem; font-weight:700; color:#7c3aed; }
+    .plan-card-price { font-size:1.3rem; font-weight:700; color:#0f766e; }
     .plan-card-price .was { font-size:.82rem; color:#9ca3af; text-decoration:line-through; font-weight:400; margin-right:.3rem; }
     .plan-card-save {
       display:inline-block; margin-top:.35rem; font-size:.72rem; font-weight:600;
@@ -69,16 +43,204 @@
     }
     .plan-card-sub { font-size:.75rem; color:#6b7280; margin-top:.3rem; }
 
-    .bundle-extras { display:none; }
-    .bundle-extras.show { display:block; }
-    .bundle-extras li { color:#7c3aed; }
-    .price-update { transition:opacity .15s; }
+    /* ── Legacy sidebar refs (kept for JS compat, not visible) ── */
+    #sidebarPrice { display:none; }
+    #bundleExtras { display:none !important; }
 
-    @media(max-width:600px){
-      .plan-toggle { flex-direction:column; }
+    /* ── Stripe Elements + password steps ── */
+    #payment-element { margin-bottom: 1.2rem; min-height: 300px; }
+    .payment-loading { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 2rem 0; }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
+    .field input {
+      width: 100%; padding: 0.75rem 0.9rem; border-radius: 0.9rem;
+      border: 1px solid rgba(0,0,0,0.12); font-size: 0.95rem;
+      font-family: "Lexend", sans-serif; outline: none;
+    }
+    .field input:focus { outline: 2px solid #0f766e; border-color: transparent; }
+    .done-icon { font-size: 3rem; text-align: center; margin-bottom: 0.8rem; }
+    .done-title { font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; }
+    .done-sub { font-size: 0.95rem; color: var(--muted); text-align: center; margin-bottom: 1.5rem; }
+    .step-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; margin-bottom: 1rem; background: #ccfbf1; color: #065f46;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media(max-width:600px){ .plan-toggle { flex-direction:column; } }
+
+    /* ══════════════════════════════════════════════
+       SIDEBAR STYLES (teal scheme — Sproochentest primary)
+    ══════════════════════════════════════════════ */
+    main { padding: 0 !important; max-width: none !important; }
+    .layout {
+      display: flex !important; min-height: calc(100vh - 52px);
+      gap: 0 !important; max-width: none !important; padding: 0 !important;
     }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .checkout-header-inner { justify-content: space-between; align-items: center; display: flex; }
+    .checkout-brand { display: flex; align-items: center; gap: .6rem; }
+    .lu-flag {
+      width: 26px; height: 18px; border-radius: 3px; overflow: hidden; flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,.15); display: flex; flex-direction: column;
+    }
+    .lu-flag-r { flex: 1; background: #EF3340; }
+    .lu-flag-w { flex: 1; background: #FFFFFF; border-top: .5px solid #e0e0e0; border-bottom: .5px solid #e0e0e0; }
+    .lu-flag-b { flex: 1; background: #00A3E0; }
+    .header-right { display: flex; align-items: center; gap: .75rem; }
+    .header-contact {
+      font-size: .74rem; font-weight: 500; color: #888; text-decoration: none;
+      display: flex; align-items: center; gap: .28rem;
+      padding: .27rem .52rem; border: 1px solid #e8e4df; border-radius: .45rem;
+      transition: all .15s; white-space: nowrap;
+    }
+    .header-contact:hover { border-color: #0f766e; color: #0f766e; background: #ccfbf1; }
+
+    .features {
+      background: #f0ede8 !important; width: 44% !important; min-width: 300px;
+      flex-shrink: 0 !important; padding: 2.25rem 2.5rem 3rem !important;
+      display: flex !important; flex-direction: column !important;
+      position: relative; overflow: hidden;
+      border-radius: 0 !important; box-shadow: none !important;
+    }
+    .features::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 80% 10%, rgba(15,118,110,.09) 0%, transparent 55%),
+        radial-gradient(ellipse at 10% 85%, rgba(20,184,166,.06) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .features > * { position: relative; }
+
+    .right {
+      flex: 1 !important; background: #fff !important;
+      display: flex !important; align-items: flex-start !important;
+      justify-content: center !important; padding: 2.5rem 2.5rem 3rem !important;
+    }
+    .checkout-card {
+      width: 100% !important; max-width: 480px !important;
+      box-shadow: none !important; border: none !important; padding: 0 !important;
+    }
+
+    .feat-plan-label {
+      font-size: .67rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: #0f766e; margin-bottom: .3rem;
+    }
+    .feat-price {
+      font-size: 2.6rem; font-weight: 700; color: #1a1a1a; line-height: 1;
+      margin-bottom: .3rem; display: flex; align-items: flex-start; gap: .12rem;
+    }
+    .feat-price-sym { font-size: 1.1rem; font-weight: 600; margin-top: .38rem; }
+    .feat-once {
+      display: inline-flex; align-items: center; gap: .3rem;
+      font-size: .73rem; color: #065f46; font-weight: 600;
+      background: #ccfbf1; padding: .23rem .58rem; border-radius: 9999px; margin-top: .25rem;
+    }
+    .feat-divider { height: 1px; background: #e8e4df; margin: 1rem 0; }
+    .feat-section-label {
+      font-size: .63rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: #bbb; margin-bottom: .75rem;
+    }
+
+    .sidebar-panel { }
+    .sidebar-panel.s-hidden { display: none !important; }
+
+    .sidebar-switcher {
+      display: flex; gap: .3rem; margin-bottom: 1rem;
+      background: rgba(255,255,255,.55); border-radius: .65rem; padding: .25rem;
+      border: 1px solid rgba(255,255,255,.8); width: fit-content;
+    }
+    .switcher-btn {
+      font-family: "Lexend", sans-serif; font-size: .72rem; font-weight: 600;
+      padding: .3rem .7rem; border: none; border-radius: .45rem;
+      background: transparent; color: #666; cursor: pointer; transition: all .18s;
+      display: flex; align-items: center; gap: .28rem;
+    }
+    .switcher-btn.sw-active      { background: #7c3aed; color: #fff; box-shadow: 0 1px 4px rgba(124,58,237,.3); }
+    .switcher-btn.sw-active-teal { background: #0f766e; color: #fff; box-shadow: 0 1px 4px rgba(15,118,110,.3); }
+    .switcher-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .6; }
+
+    .feat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; }
+    .feat-grid .span-full { grid-column: 1 / -1; }
+
+    .feat-card {
+      background: rgba(255,255,255,.65); border: 1px solid rgba(255,255,255,.8);
+      border-radius: .8rem; padding: .7rem .75rem;
+      transition: background .12s, box-shadow .12s; backdrop-filter: blur(4px);
+    }
+    .feat-card:hover { background: rgba(255,255,255,.9); box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+    .feat-card.highlight {
+      background: rgba(124,58,237,.06); border-color: rgba(124,58,237,.2);
+      box-shadow: 0 0 0 1.5px rgba(124,58,237,.1);
+    }
+    .feat-card.highlight:hover { background: rgba(124,58,237,.09); }
+    .feat-card.highlight .feat-title { color: #5b21b6; }
+    .feat-card.highlight-teal {
+      background: rgba(15,118,110,.05); border-color: rgba(15,118,110,.2);
+      box-shadow: 0 0 0 1.5px rgba(15,118,110,.1);
+    }
+    .feat-card.highlight-teal .feat-title { color: #0f766e; }
+    .feat-card.highlight-teal:hover { background: rgba(15,118,110,.09); }
+    .feat-card-top { display: flex; align-items: center; gap: .48rem; margin-bottom: .3rem; }
+    .feat-icon {
+      width: 27px; height: 27px; border-radius: .48rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .88rem; flex-shrink: 0;
+    }
+    .feat-title { font-size: .79rem; font-weight: 600; color: #1a1a1a; line-height: 1.25; }
+    .feat-desc  { font-size: .7rem; color: #888; line-height: 1.35; margin-top: .05rem; }
+
+    .feat-tags { display: flex; flex-wrap: wrap; gap: .2rem; margin-top: .1rem; }
+    .tag {
+      display: inline-flex; align-items: center; font-size: .61rem; font-weight: 600;
+      padding: .14rem .4rem; border-radius: 9999px; white-space: nowrap;
+    }
+    .tag-count  { font-weight: 400; opacity: .65; }
+    .tag-purple { background: #ede9fe; color: #5b21b6; }
+    .tag-blue   { background: #dbeafe; color: #1d4ed8; }
+    .tag-green  { background: #d1fae5; color: #065f46; }
+    .tag-sky    { background: #e0f2fe; color: #0369a1; }
+    .tag-rose   { background: #ffe4e6; color: #9f1239; }
+    .tag-teal   { background: #ccfbf1; color: #0f766e; }
+    .tag-amber  { background: #fef3c7; color: #92400e; }
+    .tag-violet { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+    .tag-lang   { background: #1a1a1a; color: #fff; font-size: .59rem; padding: .12rem .36rem; }
+
+    .feat-social {
+      margin-top: auto; padding-top: 1rem; font-size: .73rem; color: #666; line-height: 1.45;
+      display: flex; gap: .45rem; align-items: flex-start;
+    }
+    .feat-social-icon {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; font-weight: 700; flex-shrink: 0; margin-top: .05rem;
+    }
+    .feat-social-icon.teal  { background: #ccfbf1; color: #0f766e; }
+    .feat-social-icon.green { background: #d1fae5; color: #065f46; }
+
+    @media (max-width: 760px) {
+      .layout { flex-direction: column-reverse !important; }
+      .features {
+        width: 100% !important; min-width: unset !important;
+        padding: 1.5rem 1.1rem 2rem !important;
+        order: 2; display: none !important;
+      }
+      .features.mob-open { display: flex !important; }
+      .right { order: 1; padding: 1.2rem 1rem !important; }
+      .feat-grid { grid-template-columns: 1fr !important; }
+      .feat-grid .span-full { grid-column: 1 !important; }
+      .header-contact span { display: none; }
+    }
+    .mob-toggle {
+      display: none; align-items: center; justify-content: space-between;
+      padding: .85rem 1rem; background: rgba(255,255,255,.7);
+      border: 1px solid #e8e4df; border-radius: .8rem; margin: .75rem 1rem 1.1rem;
+      cursor: pointer; font-size: .81rem; font-weight: 600; color: #444;
+      transition: background .12s;
+    }
+    .mob-toggle .mob-arrow { transition: transform .25s; font-size: .72rem; color: #0f766e; }
+    .mob-toggle.mob-open .mob-arrow { transform: rotate(180deg); }
+    @media (max-width: 760px) { .mob-toggle { display: flex; } }
   </style>
 </head>
 
@@ -87,184 +249,767 @@
 <header class="checkout-header">
   <div class="checkout-header-inner">
     <div class="checkout-brand">
-      <div class="topbar-flag"><span class="f-red"></span><span class="f-white"></span><span class="f-blue"></span></div>
-      Sproochentest Training
+      <div class="lu-flag">
+        <div class="lu-flag-r"></div>
+        <div class="lu-flag-w"></div>
+        <div class="lu-flag-b"></div>
+      </div>
+      <span data-t="brand_title"></span>
     </div>
-    <div class="checkout-powered">
-      <small>powered by</small>
-      <a href="https://civiclearn.com">CivicLearn</a>
+    <div class="header-right">
+      <a href="https://civiclearn.com/contact/" target="_blank" class="header-contact">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <span data-t="header_contact_label"></span>
+      </a>
+      <div class="lang-switch">
+        <button data-lang="fr">FR</button>
+        <button data-lang="de">DE</button>
+        <button data-lang="en">EN</button>
+      </div>
     </div>
   </div>
 </header>
 
+<div class="mob-toggle" id="mobToggle" onclick="toggleMobFeatures()">
+  <span data-t="mobile_toggle_label"></span>
+  <span class="mob-arrow">▼</span>
+</div>
+
 <main>
   <div class="layout">
-    <aside class="features">
-      <h2>Komplett Zougang</h2>
-      <div class="price price-update" id="sidebarPrice">69&nbsp;€</div>
-      <div class="once">Eemolege Bezuelung · Onlimitéierten Zougang</div>
-      <div class="divider"></div>
-      <h3>Wat dra ass</h3>
-      <ul class="benefits">
-        <li>Komplett Simulatiounen vum Sproochentest</li>
-        <li>Lauschteren — authentesch Audioopnamen op Lëtzebuergesch</li>
-        <li>Schwätzen — Froen a Situatiounen wéi am richtege Test</li>
-        <li>Bewäertung no den offiziellen Critèren</li>
-        <li>Detailléiert Feedback mat Tipps a Verbesserungen</li>
-        <li>Resultat direkt nom Test</li>
-        <li>Übt esou dacks wéi Dir wëllt</li>
-        <li>100% optimiséiert fir Handy, Tablet an Computer</li>
-        <li>Direkt Zougang no der Bezuelung</li>
-        <li>Gratis Updates</li>
-      </ul>
-      <ul class="benefits bundle-extras" id="bundleExtras">
-        <li>+ Vivre-Ensemble Froen a Simulatiounen</li>
-        <li>+ Institutiounen, Rechter an Obligatiounen</li>
-        <li>+ Statistiken a Fortschrëtt</li>
-        <li>+ Froen op Franséisch, Englesch an Däitsch</li>
-      </ul>
-      <p class="recommend">Recommandéiert vu Kandidaten déi de Sproochentest bestanen hunn.</p>
+
+    <!-- ══════════════════════════
+         LEFT — FEATURE SIDEBAR
+    ══════════════════════════ -->
+    <aside class="features" id="featureSidebar">
+
+      <!-- Hidden legacy elements for JS compat -->
+      <span id="sidebarPrice" style="display:none">69 €</span>
+      <ul id="bundleExtras" style="display:none"></ul>
+
+      <div class="feat-plan-label" data-t="plan_title"></div>
+      <div class="feat-price">
+        <span class="feat-price-sym">€</span>
+        <span id="sidebarPriceNum">69</span>
+      </div>
+      <div class="feat-once" data-t="plan_once"></div>
+      <div class="feat-divider"></div>
+
+      <!-- ══ PANEL A: SPROOCHENTEST (solo) ══ -->
+      <div class="sidebar-panel" id="panelST">
+        <div class="feat-section-label" data-t="included_title"></div>
+        <div class="feat-grid">
+
+          <div class="feat-card span-full highlight-teal">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#ccfbf1">🎧</div>
+              <div class="feat-title" data-t="st_sim_title"></div>
+            </div>
+            <div class="feat-tags">
+              <span class="tag tag-teal" data-t="st_sim_t1"></span>
+              <span class="tag tag-teal" data-t="st_sim_t2"></span>
+              <span class="tag tag-teal" data-t="st_sim_t3"></span>
+            </div>
+          </div>
+
+          <div class="feat-card span-full highlight">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#f5f3ff">🎯</div>
+              <div class="feat-title" data-t="st_grade_title"></div>
+            </div>
+            <div class="feat-tags">
+              <span class="tag tag-violet" data-t="st_grade_listen"></span>
+              <span class="tag tag-violet" data-t="st_grade_speak"></span>
+              <span class="tag tag-violet" data-t="st_grade_official"></span>
+            </div>
+          </div>
+
+          <div class="feat-card">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#e0f2fe">👂</div>
+              <div class="feat-title" data-t="st_listen_title"></div>
+            </div>
+            <div class="feat-tags"><span class="tag tag-sky">B1</span></div>
+          </div>
+
+          <div class="feat-card">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#fdf4ff">🎙️</div>
+              <div class="feat-title" data-t="st_speak_title"></div>
+            </div>
+            <div class="feat-tags"><span class="tag tag-purple">A2</span></div>
+          </div>
+
+          <div class="feat-card span-full">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#dbeafe">📋</div>
+              <div class="feat-title" data-t="st_results_title"></div>
+            </div>
+            <div class="feat-tags">
+              <span class="tag tag-blue" data-t="st_results_t1"></span>
+              <span class="tag tag-blue" data-t="st_results_t2"></span>
+            </div>
+          </div>
+
+          <div class="feat-card">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#d1fae5">♾️</div>
+              <div class="feat-title" data-t="st_unlimited_title"></div>
+            </div>
+            <div class="feat-desc" data-t="st_unlimited_desc"></div>
+          </div>
+
+          <div class="feat-card">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#fdf4ff">📅</div>
+              <div class="feat-title" data-t="f_countdown_title"></div>
+            </div>
+            <div class="feat-tags">
+              <span class="tag tag-rose" data-t="f_countdown_tag"></span>
+            </div>
+          </div>
+
+          <div class="feat-card span-full">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#fef3c7">📊</div>
+              <div class="feat-title" data-t="st_progress_title"></div>
+            </div>
+            <div class="feat-tags">
+              <span class="tag tag-amber" data-t="st_prog_t1"></span>
+            </div>
+          </div>
+
+          <div class="feat-card span-full">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#f0fdf4">📱</div>
+              <div class="feat-title" data-t="st_devices_title"></div>
+            </div>
+            <div class="feat-tags">
+              <span class="tag tag-green" data-t="st_dev_t1"></span>
+              <span class="tag tag-green" data-t="st_dev_t2"></span>
+              <span class="tag tag-green" data-t="st_dev_t3"></span>
+            </div>
+          </div>
+
+        </div>
+        <div class="feat-social">
+          <div class="feat-social-icon teal">✓</div>
+          <span data-t="social_proof"></span>
+        </div>
+      </div><!-- /panelST -->
+
+
+      <!-- ══ PANEL B: BUNDLE ══ -->
+      <div class="sidebar-panel s-hidden" id="panelBundle">
+
+        <div class="sidebar-switcher">
+          <!-- ST tab left (primary — user knows it) -->
+          <button class="switcher-btn" id="swST" onclick="switchSubPanel('st')">
+            <span class="switcher-dot"></span>
+            <span data-t="sw_st">Sproochentest</span>
+          </button>
+          <!-- VE tab right (auto-selected to show what's added) -->
+          <button class="switcher-btn sw-active" id="swVE" onclick="switchSubPanel('ve')">
+            <span class="switcher-dot"></span>
+            <span data-t="sw_ve">Vivre-Ensemble</span>
+          </button>
+        </div>
+
+        <!-- Sub-panel: Vivre-Ensemble (auto-selected) -->
+        <div id="subPanelVE">
+          <div class="feat-section-label" data-t="included_title_ve"></div>
+          <div class="feat-grid">
+
+            <div class="feat-card span-full">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#ede9fe">📄</div>
+                <div class="feat-title" data-t="f_official_title"></div>
+              </div>
+              <div class="feat-tags">
+                <span class="tag tag-purple" data-t="f_official_t1"></span>
+                <span class="tag tag-purple" data-t="f_official_t2"></span>
+              </div>
+            </div>
+
+            <div class="feat-card span-full">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#dbeafe">🏛️</div>
+                <div class="feat-title" data-t="f_topics_title"></div>
+              </div>
+              <div class="feat-tags">
+                <span class="tag tag-blue">Histoire <span class="tag-count">· 128</span></span>
+                <span class="tag tag-blue">Droits <span class="tag-count">· 100</span></span>
+                <span class="tag tag-blue">Institutions <span class="tag-count">· 416</span></span>
+              </div>
+            </div>
+
+            <div class="feat-card span-full highlight">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#f5f3ff">🎯</div>
+                <div class="feat-title" data-t="f_sim_title"></div>
+              </div>
+              <div class="feat-tags">
+                <span class="tag tag-violet" data-t="f_sim_t1"></span>
+                <span class="tag tag-violet" data-t="f_sim_t2"></span>
+                <span class="tag tag-violet" data-t="f_sim_t3"></span>
+              </div>
+            </div>
+
+            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#ffe4e6">🪤</div><div class="feat-title" data-t="f_traps_title"></div></div></div>
+            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#fef3c7">⭐</div><div class="feat-title" data-t="f_mylist_title"></div></div></div>
+            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#ccfbf1">🃏</div><div class="feat-title" data-t="f_flash_title"></div></div></div>
+            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#ffedd5">🔔</div><div class="feat-title" data-t="f_reminder_title"></div></div></div>
+
+            <div class="feat-card span-full">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#e0f2fe">📊</div>
+                <div class="feat-title" data-t="f_progress_title"></div>
+              </div>
+              <div class="feat-tags">
+                <span class="tag tag-sky" data-t="f_prog_t1"></span>
+                <span class="tag tag-sky" data-t="f_prog_t2"></span>
+                <span class="tag tag-sky" data-t="f_prog_t3"></span>
+              </div>
+            </div>
+
+            <div class="feat-card span-full">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#f0fdf4">🌐</div>
+                <div class="feat-title" data-t="f_lang_title"></div>
+              </div>
+              <div class="feat-tags">
+                <span class="tag tag-lang">FR</span>
+                <span class="tag tag-lang">DE</span>
+                <span class="tag tag-lang">EN</span>
+                <span class="tag tag-purple" data-t="f_audio_tag"></span>
+              </div>
+            </div>
+
+          </div>
+        </div><!-- /subPanelVE -->
+
+        <!-- Sub-panel: Sproochentest summary -->
+        <div id="subPanelST" style="display:none">
+          <div class="feat-section-label" data-t="st_section_label"></div>
+          <div class="feat-grid">
+            <div class="feat-card span-full highlight-teal">
+              <div class="feat-card-top"><div class="feat-icon" style="background:#ccfbf1">🎧</div><div class="feat-title" data-t="st_sim_title"></div></div>
+              <div class="feat-tags">
+                <span class="tag tag-teal" data-t="st_sim_t1"></span>
+                <span class="tag tag-teal" data-t="st_sim_t2"></span>
+                <span class="tag tag-teal" data-t="st_sim_t3"></span>
+              </div>
+            </div>
+            <div class="feat-card span-full highlight">
+              <div class="feat-card-top"><div class="feat-icon" style="background:#f5f3ff">🎯</div><div class="feat-title" data-t="st_grade_title"></div></div>
+              <div class="feat-tags">
+                <span class="tag tag-violet" data-t="st_grade_listen"></span>
+                <span class="tag tag-violet" data-t="st_grade_speak"></span>
+                <span class="tag tag-violet" data-t="st_grade_official"></span>
+              </div>
+            </div>
+            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#e0f2fe">👂</div><div class="feat-title" data-t="st_listen_title"></div></div><div class="feat-tags"><span class="tag tag-sky">B1</span></div></div>
+            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#fdf4ff">🎙️</div><div class="feat-title" data-t="st_speak_title"></div></div><div class="feat-tags"><span class="tag tag-purple">A2</span></div></div>
+            <div class="feat-card span-full">
+              <div class="feat-card-top"><div class="feat-icon" style="background:#dbeafe">📋</div><div class="feat-title" data-t="st_results_title"></div></div>
+              <div class="feat-tags"><span class="tag tag-blue" data-t="st_results_t1"></span><span class="tag tag-blue" data-t="st_results_t2"></span></div>
+            </div>
+            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#d1fae5">♾️</div><div class="feat-title" data-t="st_unlimited_title"></div></div></div>
+            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#fef3c7">📊</div><div class="feat-title" data-t="st_progress_title"></div></div><div class="feat-tags"><span class="tag tag-amber" data-t="st_prog_t1"></span></div></div>
+            <div class="feat-card span-full">
+              <div class="feat-card-top"><div class="feat-icon" style="background:#f0fdf4">🔑</div><div class="feat-title" data-t="st_login_title"></div></div>
+              <div class="feat-desc" data-t="st_login_desc"></div>
+            </div>
+          </div>
+        </div><!-- /subPanelST -->
+
+        <div class="feat-social">
+          <div class="feat-social-icon green">✓</div>
+          <span data-t="bundle_social_proof"></span>
+        </div>
+      </div><!-- /panelBundle -->
+
     </aside>
 
+    <!-- ══════════════════════════
+         RIGHT — CHECKOUT
+    ══════════════════════════ -->
     <section class="right">
       <div class="checkout-card">
-        <h1>Get Sproochentest Training</h1>
-        <div class="secure-line">100% secure payment · your card details never touch our servers</div>
+
+        <h1 data-t="checkout_title"></h1>
+        <div class="secure-line" data-t="secure_line"></div>
 
         <div class="plan-toggle" id="planToggle">
           <div class="plan-card" data-plan="solo" id="planSolo">
-            <div class="plan-card-name">Sproochentest</div>
+            <div class="plan-card-name" data-t="toggle_solo_name"></div>
             <div class="plan-card-price">69 €</div>
-            <div class="plan-card-sub">Sproochentest only</div>
+            <div class="plan-card-sub" data-t="toggle_solo_sub"></div>
           </div>
           <div class="plan-card" data-plan="bundle" id="planBundle">
-            <div class="plan-card-badge">Most popular</div>
-            <div class="plan-card-name">Sproochentest + Vivre-Ensemble</div>
+            <div class="plan-card-badge" data-t="toggle_bundle_badge"></div>
+            <div class="plan-card-name" data-t="toggle_bundle_name"></div>
             <div class="plan-card-price"><span class="was">138 €</span> 99 €</div>
-            <div class="plan-card-save">Save €39</div>
-            <div class="plan-card-sub">Both tests with one login</div>
+            <div class="plan-card-save" data-t="toggle_bundle_save"></div>
+            <div class="plan-card-sub" data-t="toggle_bundle_sub"></div>
           </div>
         </div>
 
         <div class="checkout-flow" id="checkoutFlow">
+
           <div class="checkout-step" id="stepInitial">
-            <button type="button" class="pay-btn" id="startCheckout">Buy now — 69 €</button>
-            <p class="small-note">You'll pay securely right here. No redirect needed.</p>
+            <button class="pay-btn" id="startCheckout" data-t="cta_start"></button>
+            <p class="small-note" data-t="note_no_redirect"></p>
           </div>
 
           <div class="checkout-step" id="stepEmail" hidden>
-            <span class="step-badge">Step 1 of 3</span>
-            <p class="email-instructions">Enter the email address you'd like to use for your CivicLearn account.</p>
+            <span class="step-badge" data-t="step_1_of_3"></span>
+            <p data-t="email_instruction"></p>
             <div class="email-field-group">
-              <label for="checkoutEmail">Email</label>
-              <input type="email" id="checkoutEmail" autocomplete="email" placeholder="example@domain.com" inputmode="email" />
+              <label for="checkoutEmail" data-t="email_label"></label>
+              <input id="checkoutEmail" type="email" autocomplete="email" inputmode="email" />
             </div>
-            <button type="button" class="pay-btn" id="continueWithEmail">Continue</button>
+            <button class="pay-btn" id="continueWithEmail" data-t="cta_continue"></button>
           </div>
 
           <div class="checkout-step" id="stepConfirm" hidden>
-            <span class="step-badge">Step 2 of 3</span>
-            <p class="confirm-text">Your account will be created with this address:</p>
+            <span class="step-badge" data-t="step_2_of_3"></span>
+            <p data-t="confirm_text"></p>
             <p class="email-display" id="emailDisplay"></p>
-            <p class="confirm-warning">Please double-check. This will be your login email.</p>
+            <p class="confirm-warning" data-t="confirm_warning"></p>
             <div class="confirm-actions">
-              <button type="button" class="pay-btn" id="confirmEmail">Confirm and continue to payment</button>
-              <button type="button" class="link-btn" id="editEmail">Change email address</button>
+              <button class="pay-btn" id="confirmEmail" data-t="cta_confirm"></button>
+              <button class="link-btn" id="editEmail" data-t="cta_edit"></button>
             </div>
           </div>
 
           <div class="checkout-step" id="stepPayment" hidden>
-            <span class="step-badge">Step 3 of 3</span>
-            <p class="email-instructions" style="margin-bottom:1rem;">Enter your card details below. Payment is processed securely by Stripe.</p>
-            <div id="payment-element"><div class="payment-loading">Loading payment form…</div></div>
-            <button type="button" class="pay-btn" id="payBtn" disabled>Pay 69 €</button>
-            <button type="button" class="link-btn" id="backToConfirm" style="margin-top:0.5rem;">← Back</button>
+            <span class="step-badge" data-t="step_3_of_3"></span>
+            <p data-t="payment_instruction" style="margin-bottom:1rem;"></p>
+            <div id="payment-element"><div class="payment-loading" data-t="payment_loading"></div></div>
+            <button class="pay-btn" id="payBtn" disabled data-t="cta_pay"></button>
+            <button class="link-btn" id="backToConfirm" style="margin-top:0.5rem;" data-t="cta_back"></button>
           </div>
 
           <div class="checkout-step" id="stepPassword" hidden>
             <div style="text-align:center;font-size:2rem;margin-bottom:0.5rem;">🎉</div>
-            <div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;">Payment successful!</div>
-            <p class="email-instructions" style="text-align:center;">Now set a password to complete your account setup.</p>
+            <div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;" data-t="payment_confirmed"></div>
+            <p class="email-instructions" style="text-align:center;" data-t="password_instruction"></p>
             <div class="field">
-              <label for="pw1">Password</label>
-              <input type="password" id="pw1" autocomplete="new-password" placeholder="At least 6 characters">
+              <label for="pw1" data-t="pwd_label"></label>
+              <input type="password" id="pw1" autocomplete="new-password">
             </div>
             <div class="field">
-              <label for="pw2">Confirm password</label>
-              <input type="password" id="pw2" autocomplete="new-password" placeholder="Repeat password">
+              <label for="pw2" data-t="pwd_confirm_label"></label>
+              <input type="password" id="pw2" autocomplete="new-password">
             </div>
-            <button type="button" class="pay-btn" id="setupBtn">Create account</button>
+            <button class="pay-btn" id="setupBtn" data-t="cta_create_account"></button>
           </div>
 
           <div class="checkout-step" id="stepDone" hidden>
             <div class="done-icon">✅</div>
-            <div class="done-title">Your account is ready!</div>
+            <div class="done-title" data-t="done_title"></div>
             <div class="done-sub" id="doneEmail"></div>
-            <a href="/sproochentest/dashboard/index.html" class="pay-btn" id="doneCta" style="text-align:center;text-decoration:none;display:block;">Go to dashboard →</a>
+            <a href="/sproochentest/dashboard/index.html" class="pay-btn" id="doneCta"
+               style="text-align:center;text-decoration:none;display:block;" data-t="cta_start_training"></a>
           </div>
 
           <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
         </div>
 
         <div class="trust">
-          <div>🔒 Secure payment</div>
-          <div>⚡ Instant access</div>
-          <div>✔ No subscription</div>
+          <div data-t="trust_secure"></div>
+          <div data-t="trust_instant"></div>
+          <div data-t="trust_no_sub"></div>
         </div>
-
         <div class="after-text">
-          Already have an account? <a href="/sproochentest/login.html">Log in</a>.
+          <span data-t="already_account"></span>
+          <a href="/sproochentest/login.html" data-t="login_link"></a>.
         </div>
       </div>
     </section>
+
   </div>
 </main>
 
+<!-- =====================
+     I18N DICTIONARY
+===================== -->
+<script>
+const I18N = {
+
+fr: {
+  brand_title: "CivicLearn Sproochentest",
+  plan_title: "Accès Premium",
+  plan_once: "Paiement unique · accès à vie",
+  included_title: "Inclus",
+  included_title_ve: "Vivre-Ensemble — Inclus",
+  st_section_label: "Sproochentest — Inclus",
+  mobile_toggle_label: "📋 Voir ce qui est inclus",
+  header_contact_label: "Une question ?",
+  sw_ve: "Vivre-Ensemble",
+  sw_st: "Sproochentest",
+  /* ST features */
+  st_sim_title: "10 simulations complètes",
+  st_sim_t1: "Luxembourgeois natif", st_sim_t2: "Audio authentique", st_sim_t3: "Accès illimité",
+  st_grade_title: "Critères de notation officiels",
+  st_grade_listen: "Écoute B1", st_grade_speak: "Expression A2", st_grade_official: "Barème officiel",
+  st_listen_title: "Compréhension orale",
+  st_speak_title: "Expression orale",
+  st_results_title: "Résultats détaillés",
+  st_results_t1: "Par compétence", st_results_t2: "Feedback IA",
+  st_unlimited_title: "Rejouer à volonté", st_unlimited_desc: "Aucune limite de tentatives",
+  st_progress_title: "Suivi de progression", st_prog_t1: "Par simulation",
+  st_devices_title: "Tous appareils · Accès immédiat",
+  st_dev_t1: "Mobile", st_dev_t2: "Tablette", st_dev_t3: "Ordinateur",
+  st_login_title: "Un seul compte", st_login_desc: "Sproochentest + Vivre-Ensemble avec le même login",
+  social_proof: "Utilisé par des candidats ayant réussi le Sproochentest.",
+  /* VE features */
+  f_official_title: "Questions basées sur les sources officielles",
+  f_official_t1: "Matériaux recommandés par le gouvernement", f_official_t2: "PDF inclus",
+  f_topics_title: "Tests par thème",
+  f_sim_title: "Simulations illimitées du test officiel",
+  f_sim_t1: "40 questions", f_sim_t2: "60 min", f_sim_t3: "Notation officielle",
+  f_flash_title: "Flashcards", f_traps_title: "Pièges fréquents", f_mylist_title: "Ma liste",
+  f_progress_title: "Progression & historique",
+  f_prog_t1: "Par thème", f_prog_t2: "Graphiques", f_prog_t3: "Historique",
+  f_reminder_title: "Rappels",
+  f_countdown_title: "Compte à rebours", f_countdown_tag: "Dates officielles",
+  f_lang_title: "3 langues · Lecture audio", f_audio_tag: "🔊 Écouter les questions",
+  bundle_social_proof: "Pack complet pour la naturalisation luxembourgeoise.",
+  /* Checkout */
+  checkout_title: "Activer votre accès Sproochentest",
+  secure_line: "Paiement 100 % sécurisé · vos données bancaires ne passent jamais par nos serveurs",
+  toggle_solo_name: "Sproochentest",
+  toggle_solo_sub: "Sproochentest uniquement",
+  toggle_bundle_name: "Sproochentest + Vivre-Ensemble",
+  toggle_bundle_badge: "Le plus populaire",
+  toggle_bundle_save: "Économisez 39 €",
+  toggle_bundle_sub: "Les deux tests avec un seul login",
+  cta_start: "Acheter maintenant",
+  note_no_redirect: "Vous payez en toute sécurité ici même. Aucune redirection.",
+  step_1_of_3: "Étape 1 sur 3", step_2_of_3: "Étape 2 sur 3", step_3_of_3: "Étape 3 sur 3",
+  email_instruction: "Entrez votre adresse e-mail.", email_label: "E-mail",
+  cta_continue: "Continuer",
+  confirm_text: "Le compte sera créé avec :",
+  confirm_warning: "Vérifiez attentivement. Cette adresse sera votre identifiant de connexion.",
+  cta_confirm: "Confirmer et passer au paiement", cta_edit: "Modifier",
+  payment_instruction: "Entrez vos coordonnées bancaires ci-dessous. Le paiement est traité de manière sécurisée par Stripe.",
+  payment_loading: "Chargement du formulaire de paiement…",
+  cta_pay_solo: "Payer 69 €", cta_pay_bundle: "Payer 99 €", cta_pay: "Payer",
+  cta_back: "← Retour",
+  payment_confirmed: "Paiement confirmé !",
+  password_instruction: "Choisissez maintenant un mot de passe pour finaliser votre compte.",
+  pwd_label: "Mot de passe", pwd_confirm_label: "Confirmer le mot de passe",
+  pwd_placeholder: "Minimum 6 caractères", pwd_confirm_placeholder: "Répétez le mot de passe",
+  cta_create_account: "Créer le compte",
+  done_title: "Votre compte est prêt !",
+  cta_start_training: "Commencer l'entraînement →",
+  trust_secure: "🔒 Paiement sécurisé", trust_instant: "⚡ Accès immédiat", trust_no_sub: "✔ Aucun abonnement",
+  already_account: "Déjà un compte ?", login_link: "Se connecter",
+  msg_enter_email: "Veuillez saisir votre adresse e-mail.", msg_invalid_email: "Adresse e-mail invalide.",
+  msg_preparing: "Préparation du formulaire de paiement sécurisé…",
+  msg_creating: "Création du compte…", msg_processing: "Traitement du paiement…",
+  msg_error: "Une erreur est survenue.", msg_payment_failed: "Le paiement a échoué.",
+  msg_payment_incomplete: "Le paiement n'a pas été finalisé.",
+  msg_pwd_short: "Le mot de passe doit contenir au moins 6 caractères.",
+  msg_pwd_mismatch: "Les mots de passe ne correspondent pas.",
+  msg_account_failed: "Échec de la création du compte.",
+  msg_connection_error: "Erreur de connexion. Veuillez réessayer.",
+  msg_logged_in_as: "Connecté en tant que : "
+},
+
+de: {
+  brand_title: "CivicLearn Sproochentest",
+  plan_title: "Premium-Zugang",
+  plan_once: "Einmalzahlung · lebenslanger Zugriff",
+  included_title: "Enthalten",
+  included_title_ve: "Vivre-Ensemble — Enthalten",
+  st_section_label: "Sproochentest — Enthalten",
+  mobile_toggle_label: "📋 Leistungen ansehen",
+  header_contact_label: "Fragen?",
+  sw_ve: "Vivre-Ensemble", sw_st: "Sproochentest",
+  st_sim_title: "10 vollständige Simulationen",
+  st_sim_t1: "Echtes Lëtzebuergesch", st_sim_t2: "Authentisches Audio", st_sim_t3: "Unbegrenzt",
+  st_grade_title: "Offizielle Bewertungskriterien",
+  st_grade_listen: "Hören B1", st_grade_speak: "Sprechen A2", st_grade_official: "Offiz. Bewertung",
+  st_listen_title: "Hörverstehen", st_speak_title: "Mündlicher Ausdruck",
+  st_results_title: "Detaillierte Ergebnisse",
+  st_results_t1: "Pro Kompetenz", st_results_t2: "KI-Feedback",
+  st_unlimited_title: "Unbegrenzt wiederholen", st_unlimited_desc: "Keine Versuchslimits",
+  st_progress_title: "Fortschrittsübersicht", st_prog_t1: "Pro Simulation",
+  st_devices_title: "Alle Geräte · Sofortiger Zugriff",
+  st_dev_t1: "Handy", st_dev_t2: "Tablet", st_dev_t3: "Computer",
+  st_login_title: "Ein Konto", st_login_desc: "Sproochentest + Vivre-Ensemble mit einem Login",
+  social_proof: "Von erfolgreichen Sproochentest-Kandidaten genutzt.",
+  f_official_title: "Fragen basierend auf offiziellen Quellen",
+  f_official_t1: "Staatlich empfohlene Materialien", f_official_t2: "PDF inbegriffen",
+  f_topics_title: "Tests nach Thema",
+  f_sim_title: "Unbegrenzte Simulationen des offiziellen Tests",
+  f_sim_t1: "40 Fragen", f_sim_t2: "60 Min.", f_sim_t3: "Offizielle Bewertung",
+  f_flash_title: "Lernkarten", f_traps_title: "Häufige Fehler", f_mylist_title: "Meine Liste",
+  f_progress_title: "Fortschritt & Verlauf",
+  f_prog_t1: "Nach Thema", f_prog_t2: "Diagramme", f_prog_t3: "Verlauf",
+  f_reminder_title: "Erinnerungen",
+  f_countdown_title: "Countdown", f_countdown_tag: "Offizielle Termine",
+  f_lang_title: "3 Sprachen · Audio-Assist", f_audio_tag: "🔊 Fragen anhören",
+  bundle_social_proof: "Komplettpaket für die luxemburgische Einbürgerung.",
+  checkout_title: "Sproochentest-Zugang aktivieren",
+  secure_line: "100 % sichere Zahlung · Ihre Bankdaten werden nie über unsere Server übertragen",
+  toggle_solo_name: "Sproochentest", toggle_solo_sub: "Nur Sproochentest",
+  toggle_bundle_name: "Sproochentest + Vivre-Ensemble",
+  toggle_bundle_badge: "Am beliebtesten", toggle_bundle_save: "39 € sparen",
+  toggle_bundle_sub: "Beide Tests mit einem Login",
+  cta_start: "Jetzt kaufen",
+  note_no_redirect: "Sie bezahlen sicher direkt auf dieser Seite. Keine Weiterleitung.",
+  step_1_of_3: "Schritt 1 von 3", step_2_of_3: "Schritt 2 von 3", step_3_of_3: "Schritt 3 von 3",
+  email_instruction: "Geben Sie Ihre E-Mail-Adresse ein.", email_label: "E-Mail",
+  cta_continue: "Weiter",
+  confirm_text: "Das Konto wird erstellt mit:",
+  confirm_warning: "Bitte überprüfen Sie sorgfältig. Diese Adresse ist Ihre Anmeldedaten.",
+  cta_confirm: "Bestätigen und weiter zur Zahlung", cta_edit: "Ändern",
+  payment_instruction: "Geben Sie Ihre Zahlungsdaten unten ein. Die Zahlung wird sicher über Stripe abgewickelt.",
+  payment_loading: "Zahlungsformular wird geladen…",
+  cta_pay_solo: "69 € bezahlen", cta_pay_bundle: "99 € bezahlen", cta_pay: "Bezahlen",
+  cta_back: "← Zurück",
+  payment_confirmed: "Zahlung bestätigt!",
+  password_instruction: "Wählen Sie jetzt ein Passwort, um Ihr Konto einzurichten.",
+  pwd_label: "Passwort", pwd_confirm_label: "Passwort bestätigen",
+  pwd_placeholder: "Mindestens 6 Zeichen", pwd_confirm_placeholder: "Passwort wiederholen",
+  cta_create_account: "Konto erstellen",
+  done_title: "Ihr Konto ist bereit!", cta_start_training: "Training starten →",
+  trust_secure: "🔒 Sichere Zahlung", trust_instant: "⚡ Sofortiger Zugriff", trust_no_sub: "✔ Kein Abonnement",
+  already_account: "Bereits ein Konto?", login_link: "Anmelden",
+  msg_enter_email: "Bitte geben Sie Ihre E-Mail-Adresse ein.", msg_invalid_email: "Ungültige E-Mail-Adresse.",
+  msg_preparing: "Sicheres Zahlungsformular wird geladen…",
+  msg_creating: "Konto wird erstellt…", msg_processing: "Zahlung wird verarbeitet…",
+  msg_error: "Ein Fehler ist aufgetreten.", msg_payment_failed: "Die Zahlung ist fehlgeschlagen.",
+  msg_payment_incomplete: "Die Zahlung wurde nicht abgeschlossen.",
+  msg_pwd_short: "Das Passwort muss mindestens 6 Zeichen lang sein.",
+  msg_pwd_mismatch: "Die Passwörter stimmen nicht überein.",
+  msg_account_failed: "Kontoerstellung fehlgeschlagen.",
+  msg_connection_error: "Verbindungsfehler. Bitte versuchen Sie es erneut.",
+  msg_logged_in_as: "Angemeldet als: "
+},
+
+en: {
+  brand_title: "CivicLearn Sproochentest",
+  plan_title: "Premium Access",
+  plan_once: "One-time payment · lifetime access",
+  included_title: "Included",
+  included_title_ve: "Vivre-Ensemble — Included",
+  st_section_label: "Sproochentest — Included",
+  mobile_toggle_label: "📋 See what's included",
+  header_contact_label: "Any questions?",
+  sw_ve: "Vivre-Ensemble", sw_st: "Sproochentest",
+  st_sim_title: "10 complete simulations",
+  st_sim_t1: "Native Luxembourgish", st_sim_t2: "Authentic audio", st_sim_t3: "Unlimited retakes",
+  st_grade_title: "Official grading criteria",
+  st_grade_listen: "Listening B1", st_grade_speak: "Speaking A2", st_grade_official: "Official scale",
+  st_listen_title: "Listening comprehension", st_speak_title: "Oral expression",
+  st_results_title: "Detailed results",
+  st_results_t1: "Per skill", st_results_t2: "AI feedback",
+  st_unlimited_title: "Redo anytime", st_unlimited_desc: "No attempt limits",
+  st_progress_title: "Progress tracking", st_prog_t1: "Per simulation",
+  st_devices_title: "All devices · Instant access",
+  st_dev_t1: "Mobile", st_dev_t2: "Tablet", st_dev_t3: "Desktop",
+  st_login_title: "One account", st_login_desc: "Sproochentest + Vivre-Ensemble with one login",
+  social_proof: "Used by candidates who passed the Sproochentest.",
+  f_official_title: "Questions based on official materials",
+  f_official_t1: "Govt-recommended materials", f_official_t2: "PDF included",
+  f_topics_title: "Tests by topic",
+  f_sim_title: "Unlimited simulations of the official test",
+  f_sim_t1: "40 questions", f_sim_t2: "60 min", f_sim_t3: "Official grading",
+  f_flash_title: "Flashcards", f_traps_title: "Frequent Traps", f_mylist_title: "My List",
+  f_progress_title: "Progress & History",
+  f_prog_t1: "By topic", f_prog_t2: "Graphs", f_prog_t3: "Test history",
+  f_reminder_title: "Reminders",
+  f_countdown_title: "Countdown", f_countdown_tag: "Official test dates",
+  f_lang_title: "3 languages · Audio Assist", f_audio_tag: "🔊 Listen to questions",
+  bundle_social_proof: "The complete pack for Luxembourg naturalisation.",
+  checkout_title: "Activate Sproochentest Access",
+  secure_line: "100% secure payment · your bank details never pass through our servers",
+  toggle_solo_name: "Sproochentest", toggle_solo_sub: "Sproochentest only",
+  toggle_bundle_name: "Sproochentest + Vivre-Ensemble",
+  toggle_bundle_badge: "Most popular", toggle_bundle_save: "Save €39",
+  toggle_bundle_sub: "Both tests with one login",
+  cta_start: "Buy now",
+  note_no_redirect: "You pay securely right on this page. No redirect.",
+  step_1_of_3: "Step 1 of 3", step_2_of_3: "Step 2 of 3", step_3_of_3: "Step 3 of 3",
+  email_instruction: "Enter your email address.", email_label: "Email",
+  cta_continue: "Continue",
+  confirm_text: "The account will be created with:",
+  confirm_warning: "Please check carefully. This address will be your login.",
+  cta_confirm: "Confirm and proceed to payment", cta_edit: "Edit",
+  payment_instruction: "Enter your payment details below. Payment is processed securely by Stripe.",
+  payment_loading: "Loading payment form…",
+  cta_pay_solo: "Pay €69", cta_pay_bundle: "Pay €99", cta_pay: "Pay",
+  cta_back: "← Back",
+  payment_confirmed: "Payment confirmed!",
+  password_instruction: "Choose a password to set up your account.",
+  pwd_label: "Password", pwd_confirm_label: "Confirm password",
+  pwd_placeholder: "Minimum 6 characters", pwd_confirm_placeholder: "Repeat password",
+  cta_create_account: "Create account",
+  done_title: "Your account is ready!", cta_start_training: "Start training →",
+  trust_secure: "🔒 Secure payment", trust_instant: "⚡ Instant access", trust_no_sub: "✔ No subscription",
+  already_account: "Already have an account?", login_link: "Log in",
+  msg_enter_email: "Please enter your email address.", msg_invalid_email: "Invalid email address.",
+  msg_preparing: "Loading secure payment form…",
+  msg_creating: "Creating account…", msg_processing: "Processing payment…",
+  msg_error: "An error occurred.", msg_payment_failed: "Payment failed.",
+  msg_payment_incomplete: "Payment was not completed.",
+  msg_pwd_short: "Password must be at least 6 characters.",
+  msg_pwd_mismatch: "Passwords do not match.",
+  msg_account_failed: "Account creation failed.",
+  msg_connection_error: "Connection error. Please try again.",
+  msg_logged_in_as: "Logged in as: "
+}
+
+};
+</script>
+
+<!-- =====================
+     I18N ENGINE
+===================== -->
+<script>
+let currentLang = "fr";
+function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || key; }
+
+function applyLang(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-t]").forEach(el => {
+    const key = el.dataset.t;
+    if (I18N[lang][key]) el.textContent = I18N[lang][key];
+  });
+  document.querySelectorAll(".lang-switch button").forEach(b => {
+    b.classList.toggle("active", b.dataset.lang === lang);
+  });
+  if (typeof updatePayBtnText === 'function') updatePayBtnText();
+  const pw1 = document.getElementById('pw1');
+  const pw2 = document.getElementById('pw2');
+  if (pw1) pw1.placeholder = t('pwd_placeholder');
+  if (pw2) pw2.placeholder = t('pwd_confirm_placeholder');
+}
+
+document.querySelectorAll(".lang-switch button").forEach(b => {
+  b.onclick = () => applyLang(b.dataset.lang);
+});
+applyLang("fr");
+</script>
+
+<!-- =====================
+     SIDEBAR PANEL LOGIC
+===================== -->
+<script>
+function switchSidebarPanel(plan) {
+  const panelST     = document.getElementById('panelST');
+  const panelBundle = document.getElementById('panelBundle');
+  const priceNum    = document.getElementById('sidebarPriceNum');
+  if (plan === 'bundle') {
+    panelST.classList.add('s-hidden');
+    panelBundle.classList.remove('s-hidden');
+    if (priceNum) priceNum.textContent = '99';
+    switchSubPanel('ve'); // auto-select VE tab — show what the bundle adds
+  } else {
+    panelBundle.classList.add('s-hidden');
+    panelST.classList.remove('s-hidden');
+    if (priceNum) priceNum.textContent = '69';
+  }
+}
+
+function switchSubPanel(panel) {
+  const swST  = document.getElementById('swST');
+  const swVE  = document.getElementById('swVE');
+  const subST = document.getElementById('subPanelST');
+  const subVE = document.getElementById('subPanelVE');
+  if (!swST || !swVE) return;
+  if (panel === 've') {
+    swVE.className = 'switcher-btn sw-active';
+    swST.className = 'switcher-btn';
+    subVE.style.display = '';
+    subST.style.display = 'none';
+  } else {
+    swST.className = 'switcher-btn sw-active-teal';
+    swVE.className = 'switcher-btn';
+    subST.style.display = '';
+    subVE.style.display = 'none';
+  }
+}
+
+function toggleMobFeatures() {
+  const sidebar = document.getElementById('featureSidebar');
+  const toggle  = document.getElementById('mobToggle');
+  sidebar.classList.toggle('mob-open');
+  toggle.classList.toggle('mob-open');
+}
+
+// Plan card visual selection — wired here so it works even if Stripe CDN is blocked
+// (e.g. in preview sandboxes). The full payment flow is still gated inside the IIFE.
+(function() {
+  const PLAN_PRICES = { solo: '69', bundle: '99' };
+  let _selectedPlan = (new URLSearchParams(window.location.search).get('plan') === 'bundle') ? 'bundle' : 'solo';
+
+  function _selectPlan(plan) {
+    _selectedPlan = plan;
+    document.getElementById('planSolo').classList.toggle('selected', plan === 'solo');
+    document.getElementById('planBundle').classList.toggle('selected', plan === 'bundle');
+    const priceNum = document.getElementById('sidebarPriceNum');
+    if (priceNum) priceNum.textContent = PLAN_PRICES[plan];
+    switchSidebarPanel(plan);
+    // Let the checkout IIFE know if it's already running
+    if (typeof window._onPlanChange === 'function') window._onPlanChange(plan);
+  }
+
+  document.getElementById('planSolo').onclick   = () => _selectPlan('solo');
+  document.getElementById('planBundle').onclick  = () => _selectPlan('bundle');
+
+  // Expose for the checkout IIFE
+  window._getSelectedPlan = () => _selectedPlan;
+  window._selectPlan = _selectPlan;
+
+  _selectPlan(_selectedPlan);
+})();
+</script>
+
+<!-- STRIPE + SUPABASE -->
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
+<!-- =====================
+     CHECKOUT LOGIC
+===================== -->
 <script>
 (function() {
   'use strict';
 
-  const FUNCTIONS_URL  = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
-  const SUPABASE_URL   = 'https://htgliokekeaovdiafrgs.supabase.co';
-  const SUPABASE_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
-  const STRIPE_PK      = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
-  const RETURN_URL     = 'https://civiclearn.com/sproochentest/checkout.html';
+  const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  const SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const STRIPE_PK     = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
+  const RETURN_URL    = 'https://civiclearn.com/sproochentest/checkout.html';
 
   const stripe = Stripe(STRIPE_PK);
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const PLANS = {
-    solo:   { price: '69 €', payLabel: 'Pay 69 €',  createFn: 'sproochentest-create-payment-intent', setupFn: 'sproochentest-setup-account' },
-    bundle: { price: '99 €', payLabel: 'Pay 99 €',  createFn: 'lux-create-payment-intent',           setupFn: 'lux-setup-account' }
+    solo:   { price: '69 €', payKey: 'cta_pay_solo',   createFn: 'sproochentest-create-payment-intent', setupFn: 'sproochentest-setup-account' },
+    bundle: { price: '99 €', payKey: 'cta_pay_bundle',  createFn: 'lux-create-payment-intent',           setupFn: 'lux-setup-account' }
   };
-  let selectedPlan = 'solo';
+  // Plan selection & sidebar are driven by the sidebar script block (no Stripe dep).
+  // We just read the shared state here and hook into changes for the pay button.
+  let activeSetupFn = PLANS[window._getSelectedPlan()].setupFn;
 
-  const urlPlan = new URLSearchParams(window.location.search).get('plan');
-  if (urlPlan === 'bundle') selectedPlan = 'bundle';
-
-  const cardSolo   = document.getElementById('planSolo');
-  const cardBundle = document.getElementById('planBundle');
-  const sidebar    = document.getElementById('sidebarPrice');
-  const extras     = document.getElementById('bundleExtras');
-  const startBtn   = document.getElementById('startCheckout');
-
-  function selectPlan(plan) {
-    selectedPlan = plan;
-    cardSolo.classList.toggle('selected', plan === 'solo');
-    cardBundle.classList.toggle('selected', plan === 'bundle');
-    sidebar.textContent = PLANS[plan].price;
-    extras.classList.toggle('show', plan === 'bundle');
-    startBtn.textContent = 'Buy now — ' + PLANS[plan].price;
+  window.updatePayBtnText = function() {
+    const plan   = window._getSelectedPlan();
     const payBtn = document.getElementById('payBtn');
-    if (payBtn && !payBtn.disabled) payBtn.textContent = PLANS[plan].payLabel;
-  }
+    if (payBtn && !payBtn.disabled) payBtn.textContent = t(PLANS[plan].payKey);
+  };
 
-  cardSolo.onclick = () => selectPlan('solo');
-  cardBundle.onclick = () => selectPlan('bundle');
-  selectPlan(selectedPlan);
+  window._onPlanChange = function(plan) {
+    activeSetupFn = PLANS[plan].setupFn;
+    updatePayBtnText();
+  };
 
   const stepInitial  = document.getElementById('stepInitial');
   const stepEmail    = document.getElementById('stepEmail');
@@ -273,22 +1018,22 @@
   const stepPassword = document.getElementById('stepPassword');
   const stepDone     = document.getElementById('stepDone');
 
-  const continueBtn    = document.getElementById('continueWithEmail');
-  const confirmBtn     = document.getElementById('confirmEmail');
-  const editEmailBtn   = document.getElementById('editEmail');
-  const payBtn         = document.getElementById('payBtn');
-  const backToConfirm  = document.getElementById('backToConfirm');
-  const setupBtn       = document.getElementById('setupBtn');
+  const startBtn         = document.getElementById('startCheckout');
+  const continueBtn      = document.getElementById('continueWithEmail');
+  const confirmBtn       = document.getElementById('confirmEmail');
+  const editEmailBtn     = document.getElementById('editEmail');
+  const payBtn           = document.getElementById('payBtn');
+  const backToConfirmBtn = document.getElementById('backToConfirm');
+  const setupBtn         = document.getElementById('setupBtn');
 
   const emailInput   = document.getElementById('checkoutEmail');
   const emailDisplay = document.getElementById('emailDisplay');
   const messageBox   = document.getElementById('checkoutMessage');
 
-  let currentEmail = '';
+  let currentEmail    = '';
   let paymentIntentId = '';
-  let stripeElements = null;
-  let isSubmitting = false;
-  let activeSetupFn = PLANS.solo.setupFn;
+  let stripeElements  = null;
+  let isSubmitting    = false;
 
   function showStep(id) {
     [stepInitial, stepEmail, stepConfirm, stepPayment, stepPassword, stepDone]
@@ -304,25 +1049,26 @@
 
   function validateEmail(value) {
     const email = value.trim();
-    if (!email) return { ok: false, msg: 'Please enter your email address.' };
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, msg: 'Invalid email address.' };
+    if (!email) return { ok: false, msg: t('msg_enter_email') };
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, msg: t('msg_invalid_email') };
     return { ok: true, email };
   }
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const returnedPI = urlParams.get('payment_intent');
+  /* ── 3DS return handling ── */
+  const urlParams      = new URLSearchParams(window.location.search);
+  const returnedPI     = urlParams.get('payment_intent');
   const returnedSecret = urlParams.get('payment_intent_client_secret');
   const returnedStatus = urlParams.get('redirect_status');
 
   if (returnedPI && returnedSecret) {
-    currentEmail = localStorage.getItem('sproochentest_checkout_email') || '';
+    currentEmail    = localStorage.getItem('sproochentest_checkout_email')   || '';
+    activeSetupFn   = localStorage.getItem('sproochentest_checkout_setupfn') || PLANS.solo.setupFn;
     paymentIntentId = returnedPI;
-    activeSetupFn = localStorage.getItem('sproochentest_checkout_setupfn') || PLANS.solo.setupFn;
     if (returnedStatus === 'succeeded') { showStep('stepPassword'); }
     else {
       stripe.retrievePaymentIntent(returnedSecret).then(({ paymentIntent }) => {
         if (paymentIntent && paymentIntent.status === 'succeeded') showStep('stepPassword');
-        else { showMessage('error', 'Payment was not completed. Please try again.'); showStep('stepInitial'); }
+        else { showMessage('error', t('msg_payment_incomplete')); showStep('stepInitial'); }
       });
     }
     window.history.replaceState({}, '', window.location.pathname);
@@ -335,78 +1081,63 @@
     if (!ok) { showMessage('error', msg); emailInput.focus(); return; }
     currentEmail = email; emailDisplay.textContent = currentEmail; showStep('stepConfirm');
   });
-
   emailInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); } });
   editEmailBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
 
-  /* ── PATCHED: CREATE PAYMENT INTENT WITH ERROR HANDLING ── */
+  /* ── Create PaymentIntent ── */
   confirmBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
-    isSubmitting = true; confirmBtn.disabled = true;
-    confirmBtn.textContent = 'Setting up payment…';
-    showMessage('info', 'Preparing secure payment form…');
+    isSubmitting = true; confirmBtn.disabled = true; confirmBtn.textContent = '…';
+    showMessage('info', t('msg_preparing'));
 
-    const plan = selectedPlan;
+    const plan     = window._getSelectedPlan();
     const createFn = PLANS[plan].createFn;
-    activeSetupFn = PLANS[plan].setupFn;
-
-    const body = plan === 'bundle' ? { email: currentEmail, plan: 'bundle' } : { email: currentEmail };
+    activeSetupFn  = PLANS[plan].setupFn;
+    const body = plan === 'bundle'
+      ? { email: currentEmail, plan: 'bundle' }
+      : { email: currentEmail };
 
     try {
-      const res = await fetch(FUNCTIONS_URL + '/' + createFn, {
+      const res  = await fetch(FUNCTIONS_URL + '/' + createFn, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || 'Failed to create payment session.');
+      if (!res.ok || data.error) throw new Error(data.error || t('msg_error'));
 
       paymentIntentId = data.payment_intent_id;
-      localStorage.setItem('sproochentest_checkout_email', currentEmail);
+      localStorage.setItem('sproochentest_checkout_email',   currentEmail);
       localStorage.setItem('sproochentest_checkout_setupfn', activeSetupFn);
 
       stripeElements = stripe.elements({
         clientSecret: data.client_secret,
-        appearance: { 
-          theme: 'stripe', 
-          variables: { fontFamily: '"Lexend", system-ui, sans-serif', borderRadius: '0.9rem', colorPrimary: '#7c3aed' } 
-        },
+        appearance: { theme: 'stripe', variables: { fontFamily: '"Lexend", system-ui, sans-serif', borderRadius: '0.9rem', colorPrimary: '#0f766e' } },
       });
-
       const paymentElement = stripeElements.create('payment', { layout: 'tabs' });
       document.getElementById('payment-element').innerHTML = '';
       paymentElement.mount('#payment-element');
-
-      // Detect if Stripe fails to load properly (e.g., ad blockers or network issues)
-      paymentElement.on('loaderror', (event) => {
-        showMessage('error', 'Failed to load payment form. Please refresh or try another browser.');
-        isSubmitting = false;
-        confirmBtn.disabled = false;
+      paymentElement.on('loaderror', () => {
+        showMessage('error', t('msg_error'));
+        isSubmitting = false; confirmBtn.disabled = false;
       });
-
-      paymentElement.on('ready', () => { 
-        payBtn.disabled = false; 
-        payBtn.textContent = PLANS[plan].payLabel; 
-        isSubmitting = false; 
-        confirmBtn.disabled = false;
-        confirmBtn.textContent = 'Confirm and continue to payment';
+      paymentElement.on('ready', () => {
+        payBtn.disabled = false; payBtn.textContent = t(PLANS[plan].payKey);
       });
-
       showStep('stepPayment');
     } catch (err) {
-      showMessage('error', err.message || 'An error occurred. Please try again.');
-      isSubmitting = false; 
-      confirmBtn.disabled = false; 
-      confirmBtn.textContent = 'Confirm and continue to payment';
+      showMessage('error', err.message || t('msg_error'));
+    } finally {
+      isSubmitting = false; confirmBtn.disabled = false; confirmBtn.textContent = t('cta_confirm');
     }
   });
 
-  backToConfirm.addEventListener('click', () => showStep('stepConfirm'));
+  backToConfirmBtn.addEventListener('click', () => showStep('stepConfirm'));
 
-  /* ── PATCHED: CONFIRM PAYMENT WITH STATUS CHECKS ── */
+  /* ── Confirm payment ── */
   payBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
     isSubmitting = true; payBtn.disabled = true;
-    payBtn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;"></span>Processing payment…';
+    payBtn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;"></span>' + t('msg_processing');
     clearMessage();
 
     const { error, paymentIntent } = await stripe.confirmPayment({
@@ -416,35 +1147,35 @@
     });
 
     if (error) {
-      showMessage('error', error.message || 'Payment failed. Please try again.');
-      payBtn.disabled = false; payBtn.textContent = PLANS[selectedPlan].payLabel; isSubmitting = false; return;
+      showMessage('error', error.message || t('msg_payment_failed'));
+      payBtn.disabled = false; payBtn.textContent = t(PLANS[window._getSelectedPlan()].payKey); isSubmitting = false; return;
     }
-
     if (paymentIntent && paymentIntent.status === 'succeeded') {
       paymentIntentId = paymentIntent.id; showStep('stepPassword');
     } else if (paymentIntent && paymentIntent.status === 'processing') {
-      showMessage('info', 'Your payment is being processed. Please wait...');
+      showMessage('info', t('msg_processing'));
     }
     isSubmitting = false;
   });
 
+  /* ── Set password + create account ── */
   setupBtn.addEventListener('click', async () => {
     const pw1 = document.getElementById('pw1').value;
     const pw2 = document.getElementById('pw2').value;
-    if (!pw1 || pw1.length < 6) { showMessage('error', 'Password must be at least 6 characters.'); return; }
-    if (pw1 !== pw2) { showMessage('error', 'Passwords do not match.'); return; }
+    if (!pw1 || pw1.length < 6) { showMessage('error', t('msg_pwd_short')); return; }
+    if (pw1 !== pw2) { showMessage('error', t('msg_pwd_mismatch')); return; }
 
-    setupBtn.disabled = true; setupBtn.textContent = 'Creating account…'; clearMessage();
+    setupBtn.disabled = true; setupBtn.textContent = t('msg_creating'); clearMessage();
 
     try {
-      const res = await fetch(FUNCTIONS_URL + '/' + activeSetupFn, {
+      const res  = await fetch(FUNCTIONS_URL + '/' + activeSetupFn, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ payment_intent_id: paymentIntentId, password: pw1 }),
       });
       const data = await res.json();
       if (!data.success) {
-        showMessage('error', data.error || 'Account setup failed. Please contact admin@civiclearn.com.');
-        setupBtn.disabled = false; setupBtn.textContent = 'Create account'; return;
+        showMessage('error', data.error || t('msg_account_failed'));
+        setupBtn.disabled = false; setupBtn.textContent = t('cta_create_account'); return;
       }
 
       const { error: signInError } = await sb.auth.signInWithPassword({ email: data.email, password: pw1 });
@@ -452,18 +1183,16 @@
 
       localStorage.removeItem('sproochentest_checkout_email');
       localStorage.removeItem('sproochentest_checkout_setupfn');
-      document.getElementById('doneEmail').textContent = 'Logged in as: ' + data.email;
+      document.getElementById('doneEmail').textContent = t('msg_logged_in_as') + data.email;
 
       if (data.plan === 'bundle') {
         localStorage.setItem('cl_bundle', 'lu');
-        const doneCta = document.getElementById('doneCta');
-        doneCta.textContent = 'Go to Sproochentest dashboard →';
       }
 
       showStep('stepDone');
     } catch (err) {
-      showMessage('error', 'Connection error. Please try again.');
-      setupBtn.disabled = false; setupBtn.textContent = 'Create account';
+      showMessage('error', t('msg_connection_error'));
+      setupBtn.disabled = false; setupBtn.textContent = t('cta_create_account');
     }
   });
 
