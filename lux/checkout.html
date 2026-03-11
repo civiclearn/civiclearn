@@ -522,7 +522,7 @@ main { padding: 2.5rem 1.5rem 4rem; max-width: 100%; }
 </header>
 
 <!-- Mobile toggle -->
-<div class="mob-toggle" id="mobToggle" onclick="document.getElementById('featureSidebar').classList.toggle('mob-open');this.classList.toggle('mob-open');">
+<div class="mob-toggle" id="mobToggle" onclick="toggleMobFeatures()">
   <span data-t="mob_toggle">📋 See what's included</span>
   <span class="mob-arrow">▼</span>
 </div>
@@ -855,6 +855,22 @@ main { padding: 2.5rem 1.5rem 4rem; max-width: 100%; }
 
 </div>
 </main>
+
+<!-- ═══════════════════════════════════ MOBILE TOGGLE ═══════════════════════════════════ -->
+<script>
+function toggleMobFeatures() {
+  var sidebar = document.getElementById('featureSidebar');
+  var toggle = document.getElementById('mobToggle');
+  var isOpening = !sidebar.classList.contains('mob-open');
+  sidebar.classList.toggle('mob-open');
+  toggle.classList.toggle('mob-open');
+  if (isOpening) {
+    setTimeout(function() {
+      sidebar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }
+}
+</script>
 
 <!-- ═══════════════════════════════════ I18N ═══════════════════════════════════ -->
 <script>
