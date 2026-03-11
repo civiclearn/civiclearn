@@ -17,14 +17,14 @@
    RESET & BASE
 ════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 16px; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; overflow-x: clip; }
 body {
   font-family: 'DM Sans', system-ui, sans-serif;
   background: #f0f4f8;
   background-image:
     radial-gradient(ellipse 80% 50% at 20% -10%, rgba(200,16,46,.07) 0%, transparent 60%),
     radial-gradient(ellipse 60% 40% at 80% 110%, rgba(220,38,38,.05) 0%, transparent 60%);
-  min-height: 100vh; color: #0f172a; overflow-x: hidden; width: 100%;
+  min-height: 100vh; color: #0f172a; overflow-x: clip; width: 100%;
 }
 a { color: inherit; }
 
@@ -46,12 +46,22 @@ a { color: inherit; }
   font-weight: 700; font-size: .9rem; color: #0f172a; flex-shrink: 1; min-width: 0;
 }
 .checkout-brand img { width: 24px; height: auto; border-radius: 3px; }
+.header-contact {
+  font-size: .74rem; font-weight: 500; color: #94a3b8;
+  text-decoration: none; display: flex; align-items: center; gap: .28rem;
+  padding: .27rem .52rem; border: 1px solid #e2e8f0; border-radius: .45rem;
+  transition: all .15s; white-space: nowrap;
+}
+.header-contact:hover { border-color: #c8102e; color: #c8102e; background: #fef2f2; }
 .checkout-powered { font-size: .75rem; color: #94a3b8; flex-shrink: 0; }
 .checkout-powered a { color: #64748b; text-decoration: none; font-weight: 500; }
 .checkout-powered a:hover { color: #0f172a; }
 @media (max-width: 520px) {
   .checkout-header-inner { padding: .65rem 1rem; }
   .checkout-brand { font-size: .82rem; }
+  .header-contact span { display: none; }
+  .header-contact { padding: .25rem .4rem; }
+  .checkout-powered { display: none; }
 }
 
 /* ════════════════════════════════════════════
@@ -276,9 +286,15 @@ main { padding: 2.5rem 1.5rem 4rem; max-width: 100%; }
       <img src="/assets/images/dk.svg" alt="Danmark">
       CivicLearn Danmark – Indfødsretsprøve
     </div>
-    <div class="checkout-powered">
-      <small>drevet af </small>
-      <a href="https://civiclearn.com/denmark/">CivicLearn</a>
+    <div style="display:flex;align-items:center;gap:.75rem;">
+      <a href="https://indfodsretsprove.dk/kontakt/" target="_blank" class="header-contact">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <span>Spørgsmål?</span>
+      </a>
+      <div class="checkout-powered">
+        <small>drevet af </small>
+        <a href="https://civiclearn.com/denmark/">CivicLearn</a>
+      </div>
     </div>
   </div>
 </header>
