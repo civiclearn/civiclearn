@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicLearn — Refreshing</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f3ee;
+      --ink: #1a1a18;
+      --muted: #888880;
+      --accent: #2d6a4f;
+      --accent-light: #d8f3dc;
+      --err: #c1351a;
+      --err-light: #fdecea;
+      --mono: 'DM Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-weight: 300;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border: 1px solid #e2dfd8;
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 2px 24px rgba(0,0,0,0.06);
+    }
+
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 500;
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    /* Steps list */
+    .steps {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      transition: color 0.3s;
+    }
+
+    .step.done { color: var(--accent); }
+    .step.active { color: var(--ink); }
+    .step.error { color: var(--err); }
+
+    .step-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.65rem;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .step.done .step-icon {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .step.active .step-icon {
+      border-color: var(--ink);
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    /* Status banner */
+    .status {
+      border-radius: 8px;
+      padding: 0.875rem 1rem;
+      font-size: 0.825rem;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .status.success {
+      display: block;
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .status.error {
+      display: block;
+      background: var(--err-light);
+      color: var(--err);
+    }
+
+    .status strong { font-weight: 500; }
+
+    /* Redirect countdown */
+    .redirect {
+      margin-top: 1.25rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-family: var(--mono);
+      display: none;
+    }
+
+    .redirect.visible { display: block; }
+
+    .countdown {
+      display: inline-block;
+      font-weight: 500;
+      color: var(--accent);
+      min-width: 1.2em;
+    }
+
+    /* Progress bar */
+    .bar-wrap {
+      height: 2px;
+      background: #e2dfd8;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .bar {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.4s ease;
+      border-radius: 2px;
+    }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: #bbb8b0;
+      font-family: var(--mono);
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">CivicLearn</div>
+  <h1>Refreshing your app</h1>
+  <p class="subtitle">Clearing stored data so you get the latest version. This takes just a moment.</p>
+
+  <div class="bar-wrap"><div class="bar" id="bar"></div></div>
+
+  <ul class="steps" id="steps">
+    <li class="step" id="s1"><span class="step-icon">1</span> Unregister service workers</li>
+    <li class="step" id="s2"><span class="step-icon">2</span> Clear cache storage</li>
+    <li class="step" id="s3"><span class="step-icon">3</span> Clear local session data</li>
+    <li class="step" id="s4"><span class="step-icon">4</span> Done</li>
+  </ul>
+
+  <div class="status" id="status"></div>
+  <div class="redirect" id="redirectMsg">
+    Redirecting to login in <span class="countdown" id="countdown">3</span>s…
+  </div>
+</div>
+
+<footer>civiclearn.com/reset-cache</footer>
+
+<script>
+  const bar = document.getElementById('bar');
+  const statusEl = document.getElementById('status');
+  const redirectMsg = document.getElementById('redirectMsg');
+  const countdownEl = document.getElementById('countdown');
+
+  function setStep(id, state) {
+    const el = document.getElementById(id);
+    el.className = 'step ' + state;
+    const icon = el.querySelector('.step-icon');
+    if (state === 'done') icon.innerHTML = '✓';
+    else if (state === 'error') icon.innerHTML = '✕';
+    else icon.innerHTML = id.replace('s','');
+  }
+
+  function setBar(pct) {
+    bar.style.width = pct + '%';
+  }
+
+  async function resetCache() {
+    let errors = [];
+
+    // Step 1 — Unregister service workers
+    setStep('s1', 'active');
+    setBar(10);
+    try {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+      setStep('s1', 'done');
+    } catch(e) {
+      errors.push('Service worker: ' + e.message);
+      setStep('s1', 'error');
+    }
+    setBar(30);
+
+    await delay(300);
+
+    // Step 2 — Clear Cache API
+    setStep('s2', 'active');
+    try {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+      setStep('s2', 'done');
+    } catch(e) {
+      errors.push('Cache: ' + e.message);
+      setStep('s2', 'error');
+    }
+    setBar(65);
+
+    await delay(300);
+
+    // Step 3 — Clear localStorage & sessionStorage
+    setStep('s3', 'active');
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+      // Clear cookies for this domain
+      document.cookie.split(';').forEach(c => {
+        document.cookie = c.replace(/^ +/, '')
+          .replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
+      });
+      setStep('s3', 'done');
+    } catch(e) {
+      errors.push('Storage: ' + e.message);
+      setStep('s3', 'error');
+    }
+    setBar(90);
+
+    await delay(300);
+    setStep('s4', 'done');
+    setBar(100);
+
+    if (errors.length > 0) {
+      statusEl.className = 'status error';
+      statusEl.innerHTML = '<strong>Completed with warnings.</strong> Some items could not be cleared: ' + errors.join(', ') + '. Try opening this page in a private/incognito window.';
+    } else {
+      statusEl.className = 'status success';
+      statusEl.innerHTML = '<strong>All clear.</strong> Your browser has been refreshed. You\'ll be redirected to the login page now.';
+      startRedirect();
+    }
+  }
+
+  function startRedirect() {
+    redirectMsg.classList.add('visible');
+    let n = 3;
+    const iv = setInterval(() => {
+      n--;
+      countdownEl.textContent = n;
+      if (n <= 0) {
+        clearInterval(iv);
+        // Redirect to civiclearn.com/denmark/login as default
+        // (user can be directed to specific product login in support email)
+        const dest = getLoginUrl();
+        window.location.replace(dest);
+      }
+    }, 1000);
+  }
+
+  function getLoginUrl() {
+    // If user came from a specific product, try to detect it
+    const ref = document.referrer;
+    const products = [
+      'denmark-pr','denmark','lux','ciple','celpe',
+      'ykifinnish','ykisvenska','rikisborgaraprof','australia','pd3'
+    ];
+    for (const p of products) {
+      if (ref.includes('/' + p + '/')) return 'https://civiclearn.com/' + p + '/login';
+    }
+    // Default fallback
+    return 'https://civiclearn.com/denmark/login';
+  }
+
+  function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // Kick off immediately
+  window.addEventListener('load', resetCache);
+</script>
+</body>
+</html>
