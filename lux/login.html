@@ -666,7 +666,13 @@ en: {
         body: JSON.stringify({ action: 'check_email', email: resetEmail }),
       });
       const data = await res.json();
-      if (!data.exists) { showMsg('forgot-msg', data.message || t('err_email_not_found'), 'error'); setLoading('forgot-email-btn', false); return; }
+      if (!data.exists) {
+        document.getElementById('confirm-email-display').textContent = resetEmail;
+        document.getElementById('contact-email').value = resetEmail;
+        showState('unknownConfirm');
+        setLoading('forgot-email-btn', false);
+        return;
+      }
       document.getElementById('pin-value').textContent = data.pin;
       showState('forgotReset');
     } catch (err) { showMsg('forgot-msg', t('err_connection'), 'error'); }
