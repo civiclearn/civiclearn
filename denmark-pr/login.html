@@ -475,7 +475,7 @@ const I18N = {
         if (error.message.toLowerCase().includes('invalid login')) {
           // Differentiate: wrong password vs unknown email
           try {
-            const res = await fetch(FUNCTIONS_URL + '/denmark-pr-reset-password', {
+            const res = await fetch(FUNCTIONS_URL + '/denmarkpr-reset-password', {
               method: 'POST', headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ action: 'check_email', email }),
             });
@@ -521,7 +521,7 @@ const I18N = {
     if (!resetEmail || !resetEmail.includes('@')) return showMsg('forgot-msg', t('err_invalid_email'), 'error');
     setLoading('forgot-email-btn', true);
     try {
-      const res = await fetch(FUNCTIONS_URL + '/denmark-pr-reset-password', {
+      const res = await fetch(FUNCTIONS_URL + '/denmarkpr-reset-password', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'check_email', email: resetEmail }),
       });
@@ -550,7 +550,7 @@ const I18N = {
     if (newPassword !== confirmPassword) return showMsg('reset-msg', t('err_pwd_mismatch'), 'error');
     setLoading('reset-btn', true);
     try {
-      const res = await fetch(FUNCTIONS_URL + '/denmark-pr-reset-password', {
+      const res = await fetch(FUNCTIONS_URL + '/denmarkpr-reset-password', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'reset', email: resetEmail, pin, new_password: newPassword }),
       });
