@@ -42,11 +42,9 @@
     }
     .plan-card-sub { font-size:.75rem; color:#6b7280; margin-top:.3rem; }
 
-    /* ── Sidebar dynamic updates ── */
-    .bundle-extras { display:none; }
-    .bundle-extras.show { display:block; }
-    .bundle-extras li { color:#7c3aed; }
-    .price-update { transition:opacity .15s; }
+    /* ── Legacy sidebar refs (kept for JS compat, not visible) ── */
+    #sidebarPrice { display:none; }
+    #bundleExtras { display:none !important; }
 
     /* ── Stripe Elements + password steps ── */
     #payment-element { margin-bottom: 1.2rem; min-height: 300px; }
@@ -67,10 +65,235 @@
       font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.05em; margin-bottom: 1rem; background: #eef2ff; color: #3730a3;
     }
+    @media(max-width:600px){ .plan-toggle { flex-direction:column; } }
 
-    @media(max-width:600px){
-      .plan-toggle { flex-direction:column; }
+    /* ══════════════════════════════════════════════
+       NEW SIDEBAR STYLES
+    ══════════════════════════════════════════════ */
+
+    /* Override layout to full-bleed split */
+    main { padding: 0 !important; max-width: none !important; }
+    .layout {
+      display: flex !important;
+      min-height: calc(100vh - 52px);
+      gap: 0 !important;
+      max-width: none !important;
+      padding: 0 !important;
     }
+
+    /* Header additions */
+    .checkout-header-inner { justify-content: space-between; align-items: center; display: flex; }
+    .checkout-brand { display: flex; align-items: center; gap: .6rem; }
+    .lu-flag {
+      width: 26px; height: 18px; border-radius: 3px;
+      overflow: hidden; flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,.15);
+      display: flex; flex-direction: column;
+    }
+    .lu-flag-r { flex: 1; background: #EF3340; }
+    .lu-flag-w { flex: 1; background: #FFFFFF; border-top: .5px solid #e0e0e0; border-bottom: .5px solid #e0e0e0; }
+    .lu-flag-b { flex: 1; background: #00A3E0; }
+    .header-right { display: flex; align-items: center; gap: .75rem; }
+    .header-contact {
+      font-size: .74rem; font-weight: 500; color: #888;
+      text-decoration: none;
+      display: flex; align-items: center; gap: .28rem;
+      padding: .27rem .52rem;
+      border: 1px solid #e8e4df;
+      border-radius: .45rem;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .header-contact:hover { border-color: #7c3aed; color: #7c3aed; background: #ede9fe; }
+
+    /* ── Sidebar panel ── */
+    .features {
+      background: #f0ede8 !important;
+      width: 44% !important;
+      min-width: 300px;
+      flex-shrink: 0 !important;
+      padding: 2.25rem 2.5rem 3rem !important;
+      display: flex !important;
+      flex-direction: column !important;
+      position: relative;
+      overflow: hidden;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+    .features::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 80% 10%, rgba(124,58,237,.08) 0%, transparent 55%),
+        radial-gradient(ellipse at 10% 85%, rgba(168,85,247,.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .features > * { position: relative; }
+
+    /* Right section */
+    .right {
+      flex: 1 !important;
+      background: #fff !important;
+      display: flex !important;
+      align-items: flex-start !important;
+      justify-content: center !important;
+      padding: 2.5rem 2.5rem 3rem !important;
+    }
+    .checkout-card {
+      width: 100% !important;
+      max-width: 480px !important;
+      box-shadow: none !important;
+      border: none !important;
+      padding: 0 !important;
+    }
+
+    /* ── Sidebar header block ── */
+    .feat-plan-label {
+      font-size: .67rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: #7c3aed; margin-bottom: .3rem;
+    }
+    .feat-price {
+      font-size: 2.6rem; font-weight: 700;
+      color: #1a1a1a; line-height: 1;
+      margin-bottom: .3rem;
+      display: flex; align-items: flex-start; gap: .12rem;
+    }
+    .feat-price-sym { font-size: 1.1rem; font-weight: 600; margin-top: .38rem; }
+    .feat-once {
+      display: inline-flex; align-items: center; gap: .3rem;
+      font-size: .73rem; color: #5b21b6; font-weight: 600;
+      background: #ede9fe; padding: .23rem .58rem;
+      border-radius: 9999px; margin-top: .25rem;
+    }
+    .feat-divider { height: 1px; background: #e8e4df; margin: 1rem 0; }
+    .feat-section-label {
+      font-size: .63rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: #bbb; margin-bottom: .75rem;
+    }
+
+    /* ── Sidebar panel swap ── */
+    .sidebar-panel { }
+    .sidebar-panel.s-hidden { display: none !important; }
+
+    /* ── Sub-panel switcher (bundle) ── */
+    .sidebar-switcher {
+      display: flex; gap: .3rem;
+      margin-bottom: 1rem;
+      background: rgba(255,255,255,.55);
+      border-radius: .65rem; padding: .25rem;
+      border: 1px solid rgba(255,255,255,.8);
+      width: fit-content;
+    }
+    .switcher-btn {
+      font-family: "Lexend", sans-serif;
+      font-size: .72rem; font-weight: 600;
+      padding: .3rem .7rem; border: none; border-radius: .45rem;
+      background: transparent; color: #666; cursor: pointer; transition: all .18s;
+      display: flex; align-items: center; gap: .28rem;
+    }
+    .switcher-btn.sw-active { background: #7c3aed; color: #fff; box-shadow: 0 1px 4px rgba(124,58,237,.3); }
+    .switcher-btn.sw-active-teal { background: #0f766e; color: #fff; box-shadow: 0 1px 4px rgba(15,118,110,.3); }
+    .switcher-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .6; }
+
+    /* ── Feature grid – 2 columns ── */
+    .feat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .45rem;
+    }
+    .feat-grid .span-full { grid-column: 1 / -1; }
+
+    /* ── Feature card ── */
+    .feat-card {
+      background: rgba(255,255,255,.65);
+      border: 1px solid rgba(255,255,255,.8);
+      border-radius: .8rem; padding: .7rem .75rem;
+      transition: background .12s, box-shadow .12s;
+      backdrop-filter: blur(4px);
+    }
+    .feat-card:hover { background: rgba(255,255,255,.9); box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+    .feat-card.highlight {
+      background: rgba(124,58,237,.06); border-color: rgba(124,58,237,.2);
+      box-shadow: 0 0 0 1.5px rgba(124,58,237,.1);
+    }
+    .feat-card.highlight:hover { background: rgba(124,58,237,.09); }
+    .feat-card.highlight-teal {
+      background: rgba(15,118,110,.05); border-color: rgba(15,118,110,.2);
+      box-shadow: 0 0 0 1.5px rgba(15,118,110,.1);
+    }
+    .feat-card.highlight-teal .feat-title { color: #0f766e; }
+    .feat-card.highlight-teal:hover { background: rgba(15,118,110,.09); }
+    .feat-card-top { display: flex; align-items: center; gap: .48rem; margin-bottom: .3rem; }
+    .feat-icon {
+      width: 27px; height: 27px; border-radius: .48rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .88rem; flex-shrink: 0;
+    }
+    .feat-title { font-size: .79rem; font-weight: 600; color: #1a1a1a; line-height: 1.25; }
+    .feat-card.highlight .feat-title { color: #5b21b6; }
+    .feat-desc { font-size: .7rem; color: #888; line-height: 1.35; margin-top: .05rem; }
+
+    /* ── Pills ── */
+    .feat-tags { display: flex; flex-wrap: wrap; gap: .2rem; margin-top: .1rem; }
+    .tag {
+      display: inline-flex; align-items: center;
+      font-size: .61rem; font-weight: 600;
+      padding: .14rem .4rem; border-radius: 9999px; white-space: nowrap;
+    }
+    .tag-count { font-weight: 400; opacity: .65; }
+    .tag-purple  { background: #ede9fe; color: #5b21b6; }
+    .tag-blue    { background: #dbeafe; color: #1d4ed8; }
+    .tag-green   { background: #d1fae5; color: #065f46; }
+    .tag-sky     { background: #e0f2fe; color: #0369a1; }
+    .tag-rose    { background: #ffe4e6; color: #9f1239; }
+    .tag-teal    { background: #ccfbf1; color: #0f766e; }
+    .tag-amber   { background: #fef3c7; color: #92400e; }
+    .tag-violet  { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+    .tag-lang    { background: #1a1a1a; color: #fff; font-size: .59rem; padding: .12rem .36rem; }
+
+    /* ── Social proof ── */
+    .feat-social {
+      margin-top: auto; padding-top: 1rem;
+      font-size: .73rem; color: #666; line-height: 1.45;
+      display: flex; gap: .45rem; align-items: flex-start;
+    }
+    .feat-social-icon {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; font-weight: 700; flex-shrink: 0; margin-top: .05rem;
+    }
+    .feat-social-icon.green { background: #d1fae5; color: #065f46; }
+    .feat-social-icon.teal  { background: #ccfbf1; color: #0f766e; }
+
+    /* ── Mobile: payment first, features collapsible ── */
+    @media (max-width: 760px) {
+      .layout { flex-direction: column-reverse !important; }
+      .features {
+        width: 100% !important; min-width: unset !important;
+        padding: 1.5rem 1.1rem 2rem !important;
+        order: 2; display: none !important;
+      }
+      .features.mob-open { display: flex !important; }
+      .right { order: 1; padding: 1.2rem 1rem !important; }
+      .feat-grid { grid-template-columns: 1fr !important; }
+      .feat-grid .span-full { grid-column: 1 !important; }
+      .header-contact span { display: none; }
+    }
+    .mob-toggle {
+      display: none;
+      align-items: center; justify-content: space-between;
+      padding: .85rem 1rem;
+      background: rgba(255,255,255,.7);
+      border: 1px solid #e8e4df; border-radius: .8rem;
+      margin: .75rem 1rem 1.1rem;
+      cursor: pointer; font-size: .81rem; font-weight: 600; color: #444;
+      transition: background .12s;
+    }
+    .mob-toggle .mob-arrow { transition: transform .25s; font-size: .72rem; color: #7c3aed; }
+    .mob-toggle.mob-open .mob-arrow { transform: rotate(180deg); }
+    @media (max-width: 760px) { .mob-toggle { display: flex; } }
   </style>
 </head>
 
@@ -79,48 +302,343 @@
 <header class="checkout-header">
   <div class="checkout-header-inner">
     <div class="checkout-brand">
-      <img src="/assets/images/lu.svg" alt="Luxembourg">
+      <!-- Luxembourg flag (real colours) -->
+      <div class="lu-flag">
+        <div class="lu-flag-r"></div>
+        <div class="lu-flag-w"></div>
+        <div class="lu-flag-b"></div>
+      </div>
       <span data-t="brand_title"></span>
     </div>
-    <div class="lang-switch">
-      <button data-lang="fr">FR</button>
-      <button data-lang="de">DE</button>
-      <button data-lang="en">EN</button>
+    <div class="header-right">
+      <a href="https://vivre-ensemble.lu/contact/" target="_blank" class="header-contact">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <span data-t="header_contact_label">Une question ?</span>
+      </a>
+      <div class="lang-switch">
+        <button data-lang="fr">FR</button>
+        <button data-lang="de">DE</button>
+        <button data-lang="en">EN</button>
+      </div>
     </div>
   </div>
 </header>
 
+<!-- Mobile toggle (between header and payment on small screens) -->
+<div class="mob-toggle" id="mobToggle" onclick="toggleMobFeatures()">
+  <span data-t="mobile_toggle_label">📋 Voir ce qui est inclus</span>
+  <span class="mob-arrow">▼</span>
+</div>
+
 <main>
   <div class="layout">
 
-    <!-- LEFT SIDEBAR -->
-    <aside class="features">
-      <h2 data-t="plan_title"></h2>
-      <div class="price price-update" id="sidebarPrice">69 €</div>
-      <div class="once" data-t="plan_once"></div>
-      <div class="divider"></div>
-      <h3 data-t="included_title"></h3>
+    <!-- ════════════════════════════
+         LEFT — RICH FEATURE SIDEBAR
+    ════════════════════════════ -->
+    <aside class="features" id="featureSidebar">
 
-      <ul class="benefits">
-        <li data-t="benefit_1"></li>
-        <li data-t="benefit_2"></li>
-        <li data-t="benefit_3"></li>
-        <li data-t="benefit_4"></li>
-        <li data-t="benefit_5"></li>
-        <li data-t="benefit_6"></li>
-      </ul>
+      <!-- Hidden legacy elements for JS compat -->
+      <span id="sidebarPrice" style="display:none">69 €</span>
+      <ul id="bundleExtras" style="display:none"></ul>
 
-      <ul class="benefits bundle-extras" id="bundleExtras">
-        <li data-t="bundle_1"></li>
-        <li data-t="bundle_2"></li>
-        <li data-t="bundle_3"></li>
-        <li data-t="bundle_4"></li>
-      </ul>
+      <!-- Price header -->
+      <div class="feat-plan-label" data-t="plan_title">Accès Premium</div>
+      <div class="feat-price">
+        <span class="feat-price-sym">€</span>
+        <span id="sidebarPriceNum">69</span>
+      </div>
+      <div class="feat-once" data-t="plan_once">Paiement unique · accès à vie</div>
+      <div class="feat-divider"></div>
 
-      <p class="recommend" data-t="social_proof"></p>
+      <!-- ══ PANEL A: VIVRE-ENSEMBLE (solo) ══ -->
+      <div class="sidebar-panel" id="panelVE">
+        <div class="feat-section-label" data-t="included_title">Inclus</div>
+        <div class="feat-grid">
+
+          <div class="feat-card span-full">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#ede9fe">📄</div>
+              <div class="feat-title" data-t="f_official_title">Questions basées sur les sources officielles</div>
+            </div>
+            <div class="feat-tags">
+              <span class="tag tag-purple" data-t="f_official_t1">Matériaux recommandés par le gouvernement</span>
+              <span class="tag tag-purple" data-t="f_official_t2">PDF inclus</span>
+            </div>
+          </div>
+
+          <div class="feat-card span-full">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#dbeafe">🏛️</div>
+              <div class="feat-title" data-t="f_topics_title">Tests par thème</div>
+            </div>
+            <div class="feat-tags">
+              <span class="tag tag-blue">Histoire <span class="tag-count">· 128</span></span>
+              <span class="tag tag-blue">Droits <span class="tag-count">· 100</span></span>
+              <span class="tag tag-blue">Institutions <span class="tag-count">· 416</span></span>
+            </div>
+          </div>
+
+          <div class="feat-card span-full highlight">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#f5f3ff">🎯</div>
+              <div class="feat-title" data-t="f_sim_title">Simulations illimitées du test officiel</div>
+            </div>
+            <div class="feat-tags">
+              <span class="tag tag-violet" data-t="f_sim_t1">40 questions</span>
+              <span class="tag tag-violet" data-t="f_sim_t2">60 min</span>
+              <span class="tag tag-violet" data-t="f_sim_t3">Notation officielle</span>
+            </div>
+          </div>
+
+          <div class="feat-card">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#d1fae5">⚡</div>
+              <div class="feat-title" data-t="f_quick_title">Quick Test</div>
+            </div>
+            <div class="feat-tags">
+              <span class="tag tag-green" data-t="f_quick_tag">5 q · aléatoire</span>
+            </div>
+          </div>
+
+          <div class="feat-card">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#ccfbf1">🃏</div>
+              <div class="feat-title" data-t="f_flash_title">Flashcards</div>
+            </div>
+            <div class="feat-desc" data-t="f_flash_desc">Format carte</div>
+          </div>
+
+          <div class="feat-card">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#ffe4e6">🪤</div>
+              <div class="feat-title" data-t="f_traps_title">Pièges fréquents</div>
+            </div>
+            <div class="feat-desc" data-t="f_traps_desc">Erreurs répétées auto.</div>
+          </div>
+
+          <div class="feat-card">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#fef3c7">⭐</div>
+              <div class="feat-title" data-t="f_mylist_title">Ma liste</div>
+            </div>
+            <div class="feat-desc" data-t="f_mylist_desc">Questions à revoir</div>
+          </div>
+
+          <div class="feat-card span-full">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#e0f2fe">📊</div>
+              <div class="feat-title" data-t="f_progress_title">Progression & historique</div>
+            </div>
+            <div class="feat-tags">
+              <span class="tag tag-sky" data-t="f_prog_t1">Par thème</span>
+              <span class="tag tag-sky" data-t="f_prog_t2">Graphiques</span>
+              <span class="tag tag-sky" data-t="f_prog_t3">Historique</span>
+            </div>
+          </div>
+
+          <div class="feat-card">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#ffedd5">🔔</div>
+              <div class="feat-title" data-t="f_reminder_title">Rappels</div>
+            </div>
+            <div class="feat-desc" data-t="f_reminder_desc">Test pratique envoyé chaque jour</div>
+          </div>
+
+          <div class="feat-card">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#fdf4ff">📅</div>
+              <div class="feat-title" data-t="f_countdown_title">Compte à rebours</div>
+            </div>
+            <div class="feat-tags">
+              <span class="tag tag-rose" data-t="f_countdown_tag">Dates officielles</span>
+            </div>
+          </div>
+
+          <div class="feat-card span-full">
+            <div class="feat-card-top">
+              <div class="feat-icon" style="background:#f0fdf4">🌐</div>
+              <div class="feat-title" data-t="f_lang_title">3 langues · Lecture audio</div>
+            </div>
+            <div class="feat-tags">
+              <span class="tag tag-lang">FR</span>
+              <span class="tag tag-lang">DE</span>
+              <span class="tag tag-lang">EN</span>
+              <span class="tag tag-purple" data-t="f_audio_tag">🔊 Écouter les questions</span>
+            </div>
+          </div>
+
+        </div><!-- /feat-grid -->
+        <div class="feat-social">
+          <div class="feat-social-icon green">✓</div>
+          <span data-t="social_proof">Utilisé par des candidats ayant réussi le test Vivre-Ensemble.</span>
+        </div>
+      </div><!-- /panelVE -->
+
+      <!-- ══ PANEL B: BUNDLE ══ -->
+      <div class="sidebar-panel s-hidden" id="panelBundle">
+
+        <div class="sidebar-switcher">
+          <button class="switcher-btn sw-active" id="swVE" onclick="switchSubPanel('ve')">
+            <span class="switcher-dot"></span>
+            <span data-t="sw_ve">Vivre-Ensemble</span>
+          </button>
+          <button class="switcher-btn" id="swST" onclick="switchSubPanel('st')">
+            <span class="switcher-dot"></span>
+            <span data-t="sw_st">Sproochentest</span>
+          </button>
+        </div>
+
+        <!-- Bundle sub-panel: VE summary -->
+        <div id="subPanelVE" style="display:none">
+          <div class="feat-section-label" data-t="included_title_ve">Vivre-Ensemble — Inclus</div>
+          <div class="feat-grid">
+            <div class="feat-card span-full">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#dbeafe">🏛️</div>
+                <div class="feat-title" data-t="f_topics_title">Tests par thème</div>
+              </div>
+              <div class="feat-tags">
+                <span class="tag tag-blue">Histoire <span class="tag-count">· 128</span></span>
+                <span class="tag tag-blue">Droits <span class="tag-count">· 100</span></span>
+                <span class="tag tag-blue">Institutions <span class="tag-count">· 416</span></span>
+              </div>
+            </div>
+            <div class="feat-card span-full highlight">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#f5f3ff">🎯</div>
+                <div class="feat-title" data-t="f_sim_title">Simulations illimitées du test officiel</div>
+              </div>
+              <div class="feat-tags">
+                <span class="tag tag-violet" data-t="f_sim_t1">40 questions</span>
+                <span class="tag tag-violet" data-t="f_sim_t2">60 min</span>
+                <span class="tag tag-violet" data-t="f_sim_t3">Notation officielle</span>
+              </div>
+            </div>
+            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#ffe4e6">🪤</div><div class="feat-title" data-t="f_traps_title">Pièges fréquents</div></div></div>
+            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#fef3c7">⭐</div><div class="feat-title" data-t="f_mylist_title">Ma liste</div></div></div>
+            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#ccfbf1">🃏</div><div class="feat-title" data-t="f_flash_title">Flashcards</div></div></div>
+            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#ffedd5">🔔</div><div class="feat-title" data-t="f_reminder_title">Rappels</div></div></div>
+            <div class="feat-card span-full">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#e0f2fe">📊</div>
+                <div class="feat-title" data-t="f_progress_title">Progression & historique</div>
+              </div>
+              <div class="feat-tags">
+                <span class="tag tag-sky" data-t="f_prog_t1">Par thème</span>
+                <span class="tag tag-sky" data-t="f_prog_t2">Graphiques</span>
+                <span class="tag tag-sky" data-t="f_prog_t3">Historique</span>
+              </div>
+            </div>
+          </div>
+        </div><!-- /subPanelVE -->
+
+        <!-- Bundle sub-panel: Sproochentest -->
+        <div id="subPanelST">
+          <div class="feat-section-label" data-t="st_section_label">Sproochentest — Inclus</div>
+          <div class="feat-grid">
+
+            <div class="feat-card span-full highlight-teal">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#ccfbf1">🎧</div>
+                <div class="feat-title" data-t="st_sim_title">10 Simulations complètes</div>
+              </div>
+              <div class="feat-tags">
+                <span class="tag tag-teal" data-t="st_sim_t1">Luxembourgeois natif</span>
+                <span class="tag tag-teal" data-t="st_sim_t2">Audio authentique</span>
+                <span class="tag tag-teal" data-t="st_sim_t3">Accès illimité</span>
+              </div>
+            </div>
+
+            <div class="feat-card span-full highlight">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#f5f3ff">🎯</div>
+                <div class="feat-title" data-t="st_grade_title">Critères officiels</div>
+              </div>
+              <div class="feat-tags">
+                <span class="tag tag-violet" data-t="st_grade_listen">Écoute B1</span>
+                <span class="tag tag-violet" data-t="st_grade_speak">Expression A2</span>
+                <span class="tag tag-violet" data-t="st_grade_official">Barème officiel</span>
+              </div>
+            </div>
+
+            <div class="feat-card">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#e0f2fe">👂</div>
+                <div class="feat-title" data-t="st_listen_title">Compréhension orale</div>
+              </div>
+              <div class="feat-tags"><span class="tag tag-sky">B1</span></div>
+            </div>
+
+            <div class="feat-card">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#fdf4ff">🎙️</div>
+                <div class="feat-title" data-t="st_speak_title">Expression orale</div>
+              </div>
+              <div class="feat-tags"><span class="tag tag-purple">A2</span></div>
+            </div>
+
+            <div class="feat-card span-full">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#dbeafe">📋</div>
+                <div class="feat-title" data-t="st_results_title">Résultats détaillés</div>
+              </div>
+              <div class="feat-tags">
+                <span class="tag tag-blue" data-t="st_results_t1">Par compétence</span>
+                <span class="tag tag-blue" data-t="st_results_t2">Feedback IA</span>
+              </div>
+            </div>
+
+            <div class="feat-card">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#d1fae5">♾️</div>
+                <div class="feat-title" data-t="st_unlimited_title">Rejouer à volonté</div>
+              </div>
+              <div class="feat-desc" data-t="st_unlimited_desc">Aucune limite de tentatives</div>
+            </div>
+
+            <div class="feat-card">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#fdf4ff">📅</div>
+                <div class="feat-title" data-t="f_countdown_title">Compte à rebours</div>
+              </div>
+              <div class="feat-tags">
+                <span class="tag tag-rose" data-t="f_countdown_tag">Dates officielles</span>
+              </div>
+            </div>
+
+            <div class="feat-card span-full">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#fef3c7">📊</div>
+                <div class="feat-title" data-t="st_progress_title">Suivi de progression</div>
+              </div>
+              <div class="feat-tags">
+                <span class="tag tag-amber" data-t="st_prog_t1">Par simulation</span>
+              </div>
+            </div>
+
+            <div class="feat-card span-full">
+              <div class="feat-card-top">
+                <div class="feat-icon" style="background:#f0fdf4">🔑</div>
+                <div class="feat-title" data-t="st_login_title">Un seul compte</div>
+              </div>
+              <div class="feat-desc" data-t="st_login_desc">Accès VE + Sproochentest avec le même login</div>
+            </div>
+
+          </div><!-- /st feat-grid -->
+        </div><!-- /subPanelST -->
+
+        <div class="feat-social">
+          <div class="feat-social-icon teal">✓</div>
+          <span data-t="bundle_social_proof">Pack complet pour la naturalisation luxembourgeoise.</span>
+        </div>
+      </div><!-- /panelBundle -->
+
     </aside>
 
-    <!-- RIGHT CHECKOUT -->
+    <!-- ════════════════════════════
+         RIGHT — CHECKOUT (UNTOUCHED)
+    ════════════════════════════ -->
     <section class="right">
       <div class="checkout-card">
 
@@ -237,17 +755,43 @@ fr: {
   plan_title: "Accès Premium",
   plan_once: "Paiement unique · accès à vie",
   included_title: "Inclus",
-  benefit_1: "Questions conformes au test Vivre-Ensemble",
-  benefit_2: "Institutions, droits et devoirs",
-  benefit_3: "Simulations chronométrées (60 min.)",
-  benefit_4: "Questions en français, anglais et allemand",
-  benefit_5: "Statistiques et suivi de progression",
-  benefit_6: "Accès immédiat après paiement",
-  bundle_1: "+ 10 simulations Sproochentest",
-  bundle_2: "+ Oral : expression orale évaluée par IA",
-  bundle_3: "+ Écoute : compréhension orale",
-  bundle_4: "+ Feedback détaillé par compétence",
+  included_title_ve: "Vivre-Ensemble — Inclus",
+  mobile_toggle_label: "📋 Voir ce qui est inclus",
+  header_contact_label: "Une question ?",
+  sw_ve: "Vivre-Ensemble",
+  sw_st: "Sproochentest",
+  /* VE features */
+  f_official_title: "Questions basées sur les sources officielles",
+  f_official_t1: "Matériaux recommandés par le gouvernement",
+  f_official_t2: "PDF inclus",
+  f_topics_title: "Tests par thème",
+  f_sim_title: "Simulations illimitées du test officiel",
+  f_sim_t1: "40 questions", f_sim_t2: "60 min", f_sim_t3: "Notation officielle",
+  f_quick_title: "Quick Test", f_quick_tag: "5 q · aléatoire",
+  f_flash_title: "Flashcards", f_flash_desc: "Format carte",
+  f_traps_title: "Pièges fréquents", f_traps_desc: "Erreurs répétées auto.",
+  f_mylist_title: "Ma liste", f_mylist_desc: "Questions à revoir",
+  f_progress_title: "Progression & historique",
+  f_prog_t1: "Par thème", f_prog_t2: "Graphiques", f_prog_t3: "Historique",
+  f_reminder_title: "Rappels", f_reminder_desc: "Test pratique envoyé chaque jour",
+  f_countdown_title: "Compte à rebours", f_countdown_tag: "Dates officielles",
+  f_lang_title: "3 langues · Lecture audio", f_audio_tag: "🔊 Écouter les questions",
   social_proof: "Utilisé par des candidats ayant réussi le test Vivre-Ensemble.",
+  /* ST features */
+  st_section_label: "Sproochentest — Inclus",
+  st_sim_title: "10 Simulations complètes",
+  st_sim_t1: "Luxembourgeois natif", st_sim_t2: "Audio authentique", st_sim_t3: "Accès illimité",
+  st_grade_title: "Critères officiels",
+  st_grade_listen: "Écoute B1", st_grade_speak: "Expression A2", st_grade_official: "Barème officiel",
+  st_listen_title: "Compréhension orale",
+  st_speak_title: "Expression orale",
+  st_results_title: "Résultats détaillés",
+  st_results_t1: "Par compétence", st_results_t2: "Feedback IA",
+  st_unlimited_title: "Rejouer à volonté", st_unlimited_desc: "Aucune limite de tentatives",
+  st_progress_title: "Suivi de progression", st_prog_t1: "Par simulation",
+  st_login_title: "Un seul compte", st_login_desc: "Accès VE + Sproochentest avec le même login",
+  bundle_social_proof: "Pack complet pour la naturalisation luxembourgeoise.",
+  /* Payment side — ALL ORIGINAL KEYS PRESERVED */
   checkout_title: "Activer l'accès Premium",
   secure_line: "Paiement 100 % sécurisé · vos données bancaires ne passent jamais par nos serveurs",
   toggle_solo_name: "Vivre-Ensemble",
@@ -308,17 +852,40 @@ de: {
   plan_title: "Premium-Zugang",
   plan_once: "Einmalzahlung · lebenslanger Zugriff",
   included_title: "Enthalten",
-  benefit_1: "Fragen gemäß Vivre-Ensemble-Test",
-  benefit_2: "Institutionen, Rechte und Pflichten",
-  benefit_3: "Simulationen unter Zeitdruck (60 Min.)",
-  benefit_4: "Fragen auf Französisch, Englisch und Deutsch",
-  benefit_5: "Statistiken und Fortschrittsverfolgung",
-  benefit_6: "Sofortiger Zugriff nach Zahlung",
-  bundle_1: "+ 10 Sproochentest-Simulationen",
-  bundle_2: "+ Sprechen: KI-basierte Auswertung",
-  bundle_3: "+ Hören: Hörverstehen",
-  bundle_4: "+ Detailliertes Feedback pro Kompetenz",
+  included_title_ve: "Vivre-Ensemble — Enthalten",
+  mobile_toggle_label: "📋 Leistungen ansehen",
+  header_contact_label: "Fragen?",
+  sw_ve: "Vivre-Ensemble",
+  sw_st: "Sproochentest",
+  f_official_title: "Fragen basierend auf offiziellen Quellen",
+  f_official_t1: "Staatlich empfohlene Materialien",
+  f_official_t2: "PDF inbegriffen",
+  f_topics_title: "Tests nach Thema",
+  f_sim_title: "Unbegrenzte Simulationen des offiziellen Tests",
+  f_sim_t1: "40 Fragen", f_sim_t2: "60 Min.", f_sim_t3: "Offizielle Bewertung",
+  f_quick_title: "Quick Test", f_quick_tag: "5 F. · zufällig",
+  f_flash_title: "Lernkarten", f_flash_desc: "Karteikarten-Format",
+  f_traps_title: "Häufige Fehler", f_traps_desc: "Auto. erfasst",
+  f_mylist_title: "Meine Liste", f_mylist_desc: "Zur Wiederholung",
+  f_progress_title: "Fortschritt & Verlauf",
+  f_prog_t1: "Nach Thema", f_prog_t2: "Diagramme", f_prog_t3: "Verlauf",
+  f_reminder_title: "Erinnerungen", f_reminder_desc: "Tägliche Übung, jeden Tag gesendet",
+  f_countdown_title: "Countdown", f_countdown_tag: "Offizielle Termine",
+  f_lang_title: "3 Sprachen · Audio-Assist", f_audio_tag: "🔊 Fragen anhören",
   social_proof: "Von erfolgreichen Kandidaten genutzt.",
+  st_section_label: "Sproochentest — Enthalten",
+  st_sim_title: "10 vollständige Simulationen",
+  st_sim_t1: "Echtes Lëtzebuergesch", st_sim_t2: "Authentisches Audio", st_sim_t3: "Unbegrenzt",
+  st_grade_title: "Offizielle Kriterien",
+  st_grade_listen: "Hören B1", st_grade_speak: "Sprechen A2", st_grade_official: "Offiz. Bewertung",
+  st_listen_title: "Hörverstehen",
+  st_speak_title: "Mündlicher Ausdruck",
+  st_results_title: "Detaillierte Ergebnisse",
+  st_results_t1: "Pro Kompetenz", st_results_t2: "KI-Feedback",
+  st_unlimited_title: "Unbegrenzt wiederholen", st_unlimited_desc: "Keine Versuchslimits",
+  st_progress_title: "Fortschrittsübersicht", st_prog_t1: "Pro Simulation",
+  st_login_title: "Ein Konto", st_login_desc: "VE + Sproochentest mit einem Login",
+  bundle_social_proof: "Komplettpaket für die luxemburgische Einbürgerung.",
   checkout_title: "Premium-Zugang aktivieren",
   secure_line: "100 % sichere Zahlung · Ihre Bankdaten werden nie über unsere Server übertragen",
   toggle_solo_name: "Vivre-Ensemble",
@@ -379,17 +946,40 @@ en: {
   plan_title: "Premium Access",
   plan_once: "One-time payment · lifetime access",
   included_title: "Included",
-  benefit_1: "Questions aligned with the Vivre-Ensemble test",
-  benefit_2: "Institutions, rights and duties",
-  benefit_3: "Timed simulations (60 min.)",
-  benefit_4: "Questions in French, English and German",
-  benefit_5: "Statistics and progress tracking",
-  benefit_6: "Instant access after payment",
-  bundle_1: "+ 10 Sproochentest simulations",
-  bundle_2: "+ Speaking: AI-powered evaluation",
-  bundle_3: "+ Listening: audio comprehension",
-  bundle_4: "+ Detailed feedback per skill",
-  social_proof: "Used by successful candidates.",
+  included_title_ve: "Vivre-Ensemble — Included",
+  mobile_toggle_label: "📋 See what's included",
+  header_contact_label: "Any questions?",
+  sw_ve: "Vivre-Ensemble",
+  sw_st: "Sproochentest",
+  f_official_title: "Questions based on official materials",
+  f_official_t1: "Govt-recommended materials",
+  f_official_t2: "PDF included",
+  f_topics_title: "Tests by topic",
+  f_sim_title: "Unlimited simulations of the official test",
+  f_sim_t1: "40 questions", f_sim_t2: "60 min", f_sim_t3: "Official grading",
+  f_quick_title: "Quick Test", f_quick_tag: "5 q · random",
+  f_flash_title: "Flashcards", f_flash_desc: "Card format",
+  f_traps_title: "Frequent Traps", f_traps_desc: "Repeat mistakes, auto-tracked",
+  f_mylist_title: "My List", f_mylist_desc: "Questions for review",
+  f_progress_title: "Progress & History",
+  f_prog_t1: "By topic", f_prog_t2: "Graphs", f_prog_t3: "Test history",
+  f_reminder_title: "Reminders", f_reminder_desc: "A practice test sent every day",
+  f_countdown_title: "Countdown", f_countdown_tag: "Official test dates",
+  f_lang_title: "3 languages · Audio Assist", f_audio_tag: "🔊 Listen to questions",
+  social_proof: "Used by candidates who passed the Vivre-Ensemble test.",
+  st_section_label: "Sproochentest — Included",
+  st_sim_title: "10 complete simulations",
+  st_sim_t1: "Native Luxembourgish", st_sim_t2: "Authentic audio", st_sim_t3: "Unlimited retakes",
+  st_grade_title: "Official grading criteria",
+  st_grade_listen: "Listening B1", st_grade_speak: "Speaking A2", st_grade_official: "Official scale",
+  st_listen_title: "Listening comprehension",
+  st_speak_title: "Oral expression",
+  st_results_title: "Detailed results",
+  st_results_t1: "Per skill", st_results_t2: "AI feedback",
+  st_unlimited_title: "Redo anytime", st_unlimited_desc: "No attempt limits",
+  st_progress_title: "Progress tracking", st_prog_t1: "Per simulation",
+  st_login_title: "One account", st_login_desc: "VE + Sproochentest with one login",
+  bundle_social_proof: "The complete pack for Luxembourg naturalisation.",
   checkout_title: "Activate Premium Access",
   secure_line: "100% secure payment · your bank details never pass through our servers",
   toggle_solo_name: "Vivre-Ensemble",
@@ -448,7 +1038,7 @@ en: {
 </script>
 
 <!-- =========================
-     I18N ENGINE
+     I18N ENGINE (ORIGINAL — UNTOUCHED)
 ========================= -->
 <script>
 let currentLang = "fr";
@@ -479,12 +1069,63 @@ document.querySelectorAll(".lang-switch button").forEach(b => {
 applyLang("fr");
 </script>
 
+<!-- =========================
+     SIDEBAR PANEL LOGIC
+     (new — drives the feature panels only,
+      does not touch payment flow)
+========================= -->
+<script>
+function switchSidebarPanel(plan) {
+  const panelVE     = document.getElementById('panelVE');
+  const panelBundle = document.getElementById('panelBundle');
+  const priceNum    = document.getElementById('sidebarPriceNum');
+  if (plan === 'bundle') {
+    panelVE.classList.add('s-hidden');
+    panelBundle.classList.remove('s-hidden');
+    if (priceNum) priceNum.textContent = '99';
+    switchSubPanel('st'); // auto-select Sproochentest tab
+  } else {
+    panelBundle.classList.add('s-hidden');
+    panelVE.classList.remove('s-hidden');
+    if (priceNum) priceNum.textContent = '69';
+  }
+}
+
+function switchSubPanel(panel) {
+  const swVE  = document.getElementById('swVE');
+  const swST  = document.getElementById('swST');
+  const subVE = document.getElementById('subPanelVE');
+  const subST = document.getElementById('subPanelST');
+  if (!swVE || !swST) return;
+  if (panel === 've') {
+    swVE.className = 'switcher-btn sw-active';
+    swST.className = 'switcher-btn';
+    subVE.style.display = '';
+    subST.style.display = 'none';
+  } else {
+    swST.className = 'switcher-btn sw-active-teal';
+    swVE.className = 'switcher-btn';
+    subST.style.display = '';
+    subVE.style.display = 'none';
+  }
+}
+
+function toggleMobFeatures() {
+  const sidebar = document.getElementById('featureSidebar');
+  const toggle  = document.getElementById('mobToggle');
+  sidebar.classList.toggle('mob-open');
+  toggle.classList.toggle('mob-open');
+}
+</script>
+
 <!-- STRIPE + SUPABASE -->
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <!-- =========================
-     CHECKOUT LOGIC
+     CHECKOUT LOGIC (ORIGINAL — UNTOUCHED)
+     Only addition: switchSidebarPanel() call
+     appended inside selectPlan()
 ========================= -->
 <script>
 (function() {
@@ -522,6 +1163,8 @@ applyLang("fr");
     sidebar.textContent = PLANS[plan].price;
     extras.classList.toggle('show', plan === 'bundle');
     updatePayBtnText();
+    // Drive the new sidebar panels
+    switchSidebarPanel(plan);
   }
 
   // Expose for i18n engine
