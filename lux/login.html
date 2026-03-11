@@ -58,11 +58,14 @@
   .form-footer{text-align:center;margin-top:14px;}
   .form-link{font-size:0.8rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline;}
   .form-link:hover{color:var(--navy);}
+  .form-link.pulse-hint{color:var(--brand);font-weight:700;animation:pulse-link 1s ease-in-out 3;}
+  @keyframes pulse-link{0%,100%{opacity:1;}50%{opacity:0.4;}}
 
   .msg{display:none;border-radius:10px;padding:10px 14px;font-size:0.82rem;margin-bottom:16px;text-align:center;}
   .msg.visible{display:block;}
   .msg.error{background:var(--red-light);border:1px solid #fecaca;color:var(--red);}
   .msg.success{background:var(--green-light);border:1px solid #bbf7d0;color:#166534;}
+  .msg.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;}
 
   .pin-box{background:var(--brand-dim);border:2px dashed var(--brand);border-radius:12px;padding:16px;text-align:center;margin-bottom:20px;}
   .pin-label{font-size:0.78rem;font-weight:600;color:var(--brand-dark);margin-bottom:6px;}
@@ -197,6 +200,39 @@
       <button class="action-btn" id="go-to-login" data-t="login_btn"></button>
     </div>
 
+    <!-- STATE 5: UNKNOWN EMAIL — CONTACT FORM -->
+    <div id="state-unknownContact" class="state">
+      <div id="contact-msg" class="msg"></div>
+      <div class="view-header">
+        <div style="font-size:2rem;margin-bottom:10px;">🔍</div>
+        <div class="view-title" data-t="unknown_email_contact_title"></div>
+        <div class="view-subtitle" data-t="unknown_email_contact_subtitle"></div>
+      </div>
+      <form id="contact-form">
+        <div class="form-group">
+          <label class="form-label" for="contact-email" data-t="contact_email_label"></label>
+          <input class="form-input" id="contact-email" type="email" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="contact-message" data-t="contact_msg_label"></label>
+          <textarea class="form-input" id="contact-message" rows="4" style="resize:vertical;line-height:1.5;"></textarea>
+        </div>
+        <button type="submit" class="action-btn" id="contact-send-btn" data-t="contact_send_btn"></button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="back-to-login-from-contact" data-t="contact_try_different"></button>
+      </div>
+    </div>
+
+    <!-- STATE 6: CONTACT SENT -->
+    <div id="state-contactSent" class="state">
+      <div class="success-icon">💬</div>
+      <div class="view-header">
+        <div class="view-title" data-t="contact_sent_title"></div>
+        <div class="view-subtitle" data-t="contact_sent_subtitle"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -234,7 +270,7 @@ fr: {
   show_pwd: "Afficher",
   hide_pwd: "Masquer",
   login_btn: "Se connecter",
-  forgot_link: "Mot de passe oublié ?",
+  forgot_link: "Réinitialisation du mot de passe",
   reset_title: "Réinitialiser le mot de passe",
   reset_subtitle: "Entrez l'adresse email de votre compte",
   continue_btn: "Continuer",
@@ -258,6 +294,17 @@ fr: {
   err_pwd_short: "Le mot de passe doit contenir au moins 6 caractères.",
   err_pwd_mismatch: "Les mots de passe ne correspondent pas.",
   err_invalid_login: "Email ou mot de passe incorrect.",
+  err_wrong_password: "Mot de passe incorrect. Utilisez « Réinitialisation du mot de passe » ci-dessous.",
+  err_email_unknown: "Nous ne reconnaissons pas cette adresse e-mail. Vous avez peut-être utilisé une adresse différente — vérifiez votre boîte mail pour un e-mail de bienvenue de CivicLearn.",
+  unknown_email_contact_title: "Adresse introuvable",
+  unknown_email_contact_subtitle: "Cette adresse n'est pas dans notre système. Envoyez-nous un message et nous vous aiderons à retrouver votre compte.",
+  contact_email_label: "Votre adresse e-mail",
+  contact_msg_label: "Votre message",
+  contact_msg_placeholder: "Expliquez brièvement votre situation (ex. ancienne adresse, achat récent…)",
+  contact_send_btn: "Envoyer le message",
+  contact_sent_title: "Message envoyé !",
+  contact_sent_subtitle: "Nous avons bien reçu votre message et vous répondrons dès que possible.",
+  contact_try_different: "Essayer avec une autre adresse",
   err_email_not_confirmed: "Email non confirmé.",
   err_too_many: "Trop de tentatives. Veuillez patienter.",
   err_user_not_found: "Aucun compte trouvé avec cet email.",
@@ -266,7 +313,8 @@ fr: {
   err_wrong_code: "Code incorrect. Réessayez.",
   err_connection: "Erreur de connexion. Réessayez.",
   err_generic: "Une erreur est survenue. Réessayez.",
-  loading: "Veuillez patienter…"
+  loading: "Veuillez patienter…",
+  cache_cleared_msg: "🔄 Un problème de session a été détecté et résolu automatiquement. Veuillez vous reconnecter."
 },
 
 de: {
@@ -277,7 +325,7 @@ de: {
   show_pwd: "Anzeigen",
   hide_pwd: "Verbergen",
   login_btn: "Anmelden",
-  forgot_link: "Passwort vergessen?",
+  forgot_link: "Passwort zurücksetzen",
   reset_title: "Passwort zurücksetzen",
   reset_subtitle: "Geben Sie die E-Mail-Adresse Ihres Kontos ein",
   continue_btn: "Weiter",
@@ -301,6 +349,17 @@ de: {
   err_pwd_short: "Das Passwort muss mindestens 6 Zeichen lang sein.",
   err_pwd_mismatch: "Die Passwörter stimmen nicht überein.",
   err_invalid_login: "E-Mail oder Passwort falsch.",
+  err_wrong_password: "Falsches Passwort. Verwenden Sie unten « Passwort zurücksetzen ».",
+  err_email_unknown: "Diese E-Mail-Adresse ist uns nicht bekannt. Möglicherweise haben Sie sich mit einer anderen Adresse registriert — überprüfen Sie Ihren Posteingang auf eine Willkommens-E-Mail von CivicLearn.",
+  unknown_email_contact_title: "Adresse nicht gefunden",
+  unknown_email_contact_subtitle: "Diese Adresse ist nicht in unserem System. Schicken Sie uns eine Nachricht und wir helfen Ihnen, Ihr Konto zu finden.",
+  contact_email_label: "Ihre E-Mail-Adresse",
+  contact_msg_label: "Ihre Nachricht",
+  contact_msg_placeholder: "Beschreiben Sie kurz Ihre Situation (z.B. alte Adresse, kürzlicher Kauf…)",
+  contact_send_btn: "Nachricht senden",
+  contact_sent_title: "Nachricht gesendet!",
+  contact_sent_subtitle: "Wir haben Ihre Nachricht erhalten und werden uns so schnell wie möglich bei Ihnen melden.",
+  contact_try_different: "Mit anderer Adresse versuchen",
   err_email_not_confirmed: "E-Mail nicht bestätigt.",
   err_too_many: "Zu viele Versuche. Bitte warten Sie einen Moment.",
   err_user_not_found: "Kein Konto mit dieser E-Mail gefunden.",
@@ -309,7 +368,8 @@ de: {
   err_wrong_code: "Code falsch. Bitte versuchen Sie es erneut.",
   err_connection: "Verbindungsfehler. Bitte versuchen Sie es erneut.",
   err_generic: "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
-  loading: "Bitte warten…"
+  loading: "Bitte warten…",
+  cache_cleared_msg: "🔄 Ein Sitzungsproblem wurde erkannt und automatisch behoben. Bitte melden Sie sich erneut an."
 },
 
 en: {
@@ -320,7 +380,7 @@ en: {
   show_pwd: "Show",
   hide_pwd: "Hide",
   login_btn: "Log in",
-  forgot_link: "Forgot password?",
+  forgot_link: "Password reset",
   reset_title: "Reset password",
   reset_subtitle: "Enter the email address of your account",
   continue_btn: "Continue",
@@ -344,6 +404,17 @@ en: {
   err_pwd_short: "Password must be at least 6 characters.",
   err_pwd_mismatch: "Passwords do not match.",
   err_invalid_login: "Incorrect email or password.",
+  err_wrong_password: "Incorrect password. Use 'Password reset' below to set a new one.",
+  err_email_unknown: "We don't recognise this email address. You may have signed up with a different address — check your inbox for a welcome email from CivicLearn.",
+  unknown_email_contact_title: "Email address not found",
+  unknown_email_contact_subtitle: "This address isn't in our system. Send us a message and we'll help you find your account.",
+  contact_email_label: "Your email address",
+  contact_msg_label: "Your message",
+  contact_msg_placeholder: "Briefly describe your situation (e.g. different address used, recent purchase…)",
+  contact_send_btn: "Send message",
+  contact_sent_title: "Message sent!",
+  contact_sent_subtitle: "We've received your message and will get back to you as soon as possible.",
+  contact_try_different: "Try a different email address",
   err_email_not_confirmed: "Email not confirmed.",
   err_too_many: "Too many attempts. Please wait a moment.",
   err_user_not_found: "No account found with this email.",
@@ -352,7 +423,8 @@ en: {
   err_wrong_code: "Incorrect code. Please try again.",
   err_connection: "Connection error. Please try again.",
   err_generic: "An error occurred. Please try again.",
-  loading: "Please wait…"
+  loading: "Please wait…",
+  cache_cleared_msg: "🔄 A session issue was detected and automatically resolved. Please try logging in again."
 }
 };
 </script>
@@ -401,10 +473,39 @@ en: {
   const params    = new URLSearchParams(location.search);
   const returnUrl = params.get('return') || DASHBOARD_URL;
 
-  // Auto-redirect if already logged in
+  /* ── Cache / session helpers ── */
+  function clearSupabaseCache() {
+    const toRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && (k.startsWith('sb-') || k.startsWith('supabase') || k === 'cl_auth' || k === 'cl_email')) {
+        toRemove.push(k);
+      }
+    }
+    toRemove.forEach(k => localStorage.removeItem(k));
+  }
+
+  function markRedirect() {
+    sessionStorage.setItem('cl_redirect_ts', Date.now().toString());
+  }
+
+  function checkBounce() {
+    const ts = sessionStorage.getItem('cl_redirect_ts');
+    if (!ts) return false;
+    sessionStorage.removeItem('cl_redirect_ts');
+    return (Date.now() - parseInt(ts, 10)) < 30000; // within 30 seconds = bounce
+  }
+
+  // Auto-redirect if already logged in — with bounce detection
   (async () => {
+    if (checkBounce()) {
+      // User was redirected to dashboard but came straight back — stale session
+      clearSupabaseCache();
+      showMsg('login-msg', t('cache_cleared_msg'), 'info');
+      return; // don't re-check session (we just cleared it)
+    }
     const { data: { session } } = await sb.auth.getSession();
-    if (session) window.location.href = returnUrl;
+    if (session) { markRedirect(); window.location.href = returnUrl; }
   })();
 
   /* ── Helpers ── */
@@ -458,10 +559,44 @@ en: {
     setLoading('login-btn', true);
     try {
       const { error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) { showMsg('login-msg', translateError(error.message), 'error'); setLoading('login-btn', false); return; }
+      if (error) {
+        if (error.message.toLowerCase().includes('invalid login')) {
+          // Differentiate: wrong password vs unknown email
+          try {
+            const res = await fetch(FUNCTIONS_URL + '/lux-reset-password', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'check_email', email }),
+            });
+            const data = await res.json();
+            if (data.exists) {
+              // Email found — it's a wrong password
+              showMsg('login-msg', t('err_wrong_password'), 'error');
+              // Pulse the reset link to draw attention to it
+              const resetLink = document.getElementById('show-forgot');
+              resetLink.classList.remove('pulse-hint');
+              void resetLink.offsetWidth; // force reflow to restart animation
+              resetLink.classList.add('pulse-hint');
+              resetLink.addEventListener('animationend', () => resetLink.classList.remove('pulse-hint'), { once: true });
+            } else {
+              // Email not in system — show inline contact form, pre-filled
+              document.getElementById('contact-email').value = email;
+              document.getElementById('contact-message').value = '';
+              showState('unknownContact');
+            }
+          } catch {
+            // Fallback if check_email call fails
+            showMsg('login-msg', t('err_invalid_login'), 'error');
+          }
+        } else {
+          showMsg('login-msg', translateError(error.message), 'error');
+        }
+        setLoading('login-btn', false);
+        return;
+      }
       try { await sb.from('login_history').insert({ email, status: 'success', method: 'password' }); } catch(e) {}
       localStorage.setItem('cl_auth', 'ok');
       localStorage.setItem('cl_email', email);
+      markRedirect();
       window.location.href = returnUrl;
     } catch (err) { showMsg('login-msg', t('err_generic'), 'error'); setLoading('login-btn', false); }
   });
@@ -528,12 +663,38 @@ en: {
       if (otpError) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Session failed: ' + otpError.message; btn.disabled = false; btn.textContent = 'Impersonate'; return; }
       localStorage.setItem('cl_auth', 'ok');
       localStorage.setItem('cl_email', data.email);
+      markRedirect();
       window.location.href = returnUrl;
     } catch (err) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Error: ' + err.message; btn.disabled = false; btn.textContent = 'Impersonate'; }
   });
 
   document.getElementById('login-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-form').requestSubmit(); });
+
+  /* ── CONTACT FORM (unknown email) ── */
+  document.getElementById('contact-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMsg('contact-msg');
+    const email = document.getElementById('contact-email').value.trim().toLowerCase();
+    const message = document.getElementById('contact-message').value.trim();
+    if (!email || !message) return showMsg('contact-msg', t('err_fill_all'), 'error');
+    setLoading('contact-send-btn', true);
+    try {
+      await sb.from('contact_messages').insert({
+        email,
+        message: '[LOGIN – EMAIL NOT FOUND]\n' + message,
+        product: 'lux',
+        status: 'new'
+      });
+      showState('contactSent');
+    } catch (err) {
+      showMsg('contact-msg', t('err_generic'), 'error');
+      setLoading('contact-send-btn', false);
+    }
+  });
+
+  document.getElementById('back-to-login-from-contact').addEventListener('click', () => { clearMsg('contact-msg'); showState('login'); });
+
 })();
 </script>
 </body>
 </html>
+
