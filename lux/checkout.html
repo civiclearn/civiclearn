@@ -1,319 +1,495 @@
 <!DOCTYPE html>
 <html lang="fr-LU">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CivicLearn – Paiement sécurisé</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CivicLearn – Paiement sécurisé</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════
+   RESET & BASE
+════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: #f0f4f8;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(124,58,237,.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(168,85,247,.05) 0%, transparent 60%);
+  min-height: 100vh;
+  color: #0f172a;
+}
+a { color: inherit; }
 
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/checkout.css">
+/* ════════════════════════════════════════════
+   HEADER
+════════════════════════════════════════════ */
+.checkout-header {
+  background: rgba(255,255,255,.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,0,0,.07);
+  position: sticky; top: 0; z-index: 100;
+}
+.checkout-header-inner {
+  max-width: 1060px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .85rem 1.5rem;
+}
+.checkout-brand {
+  display: flex; align-items: center; gap: .55rem;
+  font-weight: 700; font-size: .9rem; color: #0f172a;
+}
+.lu-flag {
+  width: 24px; height: 16px; border-radius: 3px;
+  overflow: hidden; flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,.15);
+  display: flex; flex-direction: column;
+}
+.lu-flag-r { flex: 1; background: #EF3340; }
+.lu-flag-w { flex: 1; background: #FFFFFF; border-top: .5px solid #e0e0e0; border-bottom: .5px solid #e0e0e0; }
+.lu-flag-b { flex: 1; background: #00A3E0; }
+.header-right { display: flex; align-items: center; gap: .75rem; }
+.header-contact {
+  font-size: .74rem; font-weight: 500; color: #94a3b8;
+  text-decoration: none;
+  display: flex; align-items: center; gap: .28rem;
+  padding: .27rem .52rem;
+  border: 1px solid #e2e8f0;
+  border-radius: .45rem;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.header-contact:hover { border-color: #7c3aed; color: #7c3aed; background: #f5f3ff; }
+.lang-switch { display: flex; gap: .35rem; }
+.lang-switch button {
+  font-family: 'DM Sans', sans-serif; font-size: .74rem; font-weight: 600;
+  padding: .25rem .5rem; border: 1.5px solid #e2e8f0; border-radius: .45rem;
+  background: transparent; color: #64748b; cursor: pointer; transition: all .15s;
+}
+.lang-switch button:hover { border-color: #7c3aed; color: #7c3aed; }
+.lang-switch button.active { background: #7c3aed; border-color: #7c3aed; color: #fff; }
 
-  <style>
-    /* ── Language switch ── */
-    .lang-switch { display:flex; gap:.35rem; }
-    .lang-switch button {
-      font-family:"Lexend",sans-serif; font-size:.78rem; font-weight:500;
-      padding:.3rem .55rem; border:1.5px solid rgba(0,0,0,.12); border-radius:.45rem;
-      background:transparent; color:#555; cursor:pointer; transition:all .15s;
-    }
-    .lang-switch button:hover { border-color:#7c3aed; color:#7c3aed; }
-    .lang-switch button.active { background:#7c3aed; border-color:#7c3aed; color:#fff; }
+/* ════════════════════════════════════════════
+   LAYOUT
+════════════════════════════════════════════ */
+main { padding: 2.5rem 1.5rem 4rem; }
+.layout {
+  max-width: 1000px; margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 2rem;
+  align-items: start;
+}
+@media (max-width: 820px) {
+  .layout { grid-template-columns: 1fr; }
+  .features { order: 2; }
+  .right    { order: 1; position: static !important; }
+}
 
-    /* ── Plan toggle ── */
-    .plan-toggle { display:flex; gap:.75rem; margin-bottom:1.5rem; }
-    .plan-card {
-      flex:1; padding:1.1rem 1rem; border:2px solid #e5e7eb; border-radius:1rem;
-      cursor:pointer; background:#fff; transition:border-color .15s, box-shadow .15s;
-      position:relative; text-align:center;
-    }
-    .plan-card:hover { border-color:#c4b5fd; }
-    .plan-card.selected { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,.15); }
-    .plan-card-badge {
-      position:absolute; top:-.65rem; left:50%; transform:translateX(-50%);
-      background:#7c3aed; color:#fff; font-size:.68rem; font-weight:600;
-      padding:.15rem .65rem; border-radius:1rem; white-space:nowrap;
-    }
-    .plan-card-name { font-weight:600; font-size:.92rem; color:#1a1a1a; margin-bottom:.25rem; }
-    .plan-card-price { font-size:1.3rem; font-weight:700; color:#7c3aed; }
-    .plan-card-price .was { font-size:.82rem; color:#9ca3af; text-decoration:line-through; font-weight:400; margin-right:.3rem; }
-    .plan-card-save {
-      display:inline-block; margin-top:.35rem; font-size:.72rem; font-weight:600;
-      color:#059669; background:#ecfdf5; padding:.15rem .5rem; border-radius:.5rem;
-    }
-    .plan-card-sub { font-size:.75rem; color:#6b7280; margin-top:.3rem; }
+/* ════════════════════════════════════════════
+   MOBILE TOGGLE
+════════════════════════════════════════════ */
+.mob-toggle {
+  display: none;
+  align-items: center; justify-content: space-between;
+  max-width: 1000px; margin: 0 auto;
+  padding: .75rem 1rem;
+  background: #fff;
+  border: 1px solid #e2e8f0; border-radius: .85rem;
+  cursor: pointer; font-size: .81rem; font-weight: 600; color: #475569;
+}
+.mob-toggle .mob-arrow { transition: transform .25s; font-size: .72rem; color: #7c3aed; }
+.mob-toggle.mob-open .mob-arrow { transform: rotate(180deg); }
+@media (max-width: 820px) {
+  .mob-toggle { display: flex; margin: 0 1.5rem .75rem; }
+  .features { display: none !important; }
+  .features.mob-open { display: flex !important; flex-direction: column; }
+}
 
-    /* ── Legacy sidebar refs (kept for JS compat, not visible) ── */
-    #sidebarPrice { display:none; }
-    #bundleExtras { display:none !important; }
+/* ════════════════════════════════════════════
+   SIDEBAR
+════════════════════════════════════════════ */
+.features {
+  background: #fff;
+  border-radius: 1.5rem;
+  padding: 2rem 1.75rem 1.75rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,.03), 0 8px 32px rgba(0,0,0,.07);
+  animation: rise .5s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes rise {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
 
-    /* ── Stripe Elements + password steps ── */
-    #payment-element { margin-bottom: 1.2rem; min-height: 300px; }
-    .payment-loading { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 2rem 0; }
-    .field { margin-bottom: 1rem; }
-    .field label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
-    .field input {
-      width: 100%; padding: 0.75rem 0.9rem; border-radius: 0.9rem;
-      border: 1px solid rgba(0,0,0,0.12); font-size: 0.95rem;
-      font-family: "Lexend", sans-serif; outline: none;
-    }
-    .field input:focus { outline: 2px solid var(--brand); border-color: transparent; }
-    .done-icon { font-size: 3rem; text-align: center; margin-bottom: 0.8rem; }
-    .done-title { font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; }
-    .done-sub { font-size: 0.95rem; color: var(--muted); text-align: center; margin-bottom: 1.5rem; }
-    .step-badge {
-      display: inline-block; padding: 3px 10px; border-radius: 20px;
-      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.05em; margin-bottom: 1rem; background: #eef2ff; color: #3730a3;
-    }
-    @media(max-width:600px){ .plan-toggle { flex-direction:column; } }
+/* price hero */
+.price-hero {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: .5rem;
+  margin-bottom: 1.4rem;
+}
+.price-label {
+  font-size: .68rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .1em;
+  color: #94a3b8; margin-bottom: .3rem;
+}
+.price-amount {
+  font-size: 2.6rem; font-weight: 700;
+  color: #0f172a; line-height: 1; letter-spacing: -.03em;
+}
+.price-amount sup {
+  font-size: 1.1rem; font-weight: 600;
+  vertical-align: super; margin-right: .1rem; color: #334155;
+}
+.price-once {
+  font-size: .72rem; color: #94a3b8; margin-top: .35rem;
+  display: flex; align-items: center; gap: .3rem;
+}
+.price-once::before {
+  content: ''; display: inline-block;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #22c55e; flex-shrink: 0;
+}
+.price-badge {
+  background: linear-gradient(135deg, #1e3a5f 0%, #7c3aed 100%);
+  color: #fff; font-size: .63rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em;
+  padding: .35rem .8rem; border-radius: .65rem;
+  white-space: nowrap; align-self: center;
+  box-shadow: 0 2px 10px rgba(124,58,237,.3);
+}
 
-    /* ══════════════════════════════════════════════
-       NEW SIDEBAR STYLES
-    ══════════════════════════════════════════════ */
+/* section labels */
+.section-label {
+  font-size: .61rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .13em;
+  color: #94a3b8; margin: .85rem 0 .55rem;
+  display: flex; align-items: center; gap: .5rem;
+}
+.section-label::after {
+  content: ''; flex: 1; height: 1px; background: #f1f5f9;
+}
 
-    /* Override layout to full-bleed split */
-    main { padding: 0 !important; max-width: none !important; }
-    .layout {
-      display: flex !important;
-      min-height: calc(100vh - 52px);
-      gap: 0 !important;
-      max-width: none !important;
-      padding: 0 !important;
-    }
+/* feature rows */
+.feature-list { list-style: none; display: flex; flex-direction: column; gap: .35rem; }
 
-    /* Header additions */
-    .checkout-header-inner { justify-content: space-between; align-items: center; display: flex; }
-    .checkout-brand { display: flex; align-items: center; gap: .6rem; }
-    .lu-flag {
-      width: 26px; height: 18px; border-radius: 3px;
-      overflow: hidden; flex-shrink: 0;
-      box-shadow: 0 1px 3px rgba(0,0,0,.15);
-      display: flex; flex-direction: column;
-    }
-    .lu-flag-r { flex: 1; background: #EF3340; }
-    .lu-flag-w { flex: 1; background: #FFFFFF; border-top: .5px solid #e0e0e0; border-bottom: .5px solid #e0e0e0; }
-    .lu-flag-b { flex: 1; background: #00A3E0; }
-    .header-right { display: flex; align-items: center; gap: .75rem; }
-    .header-contact {
-      font-size: .74rem; font-weight: 500; color: #888;
-      text-decoration: none;
-      display: flex; align-items: center; gap: .28rem;
-      padding: .27rem .52rem;
-      border: 1px solid #e8e4df;
-      border-radius: .45rem;
-      transition: all .15s;
-      white-space: nowrap;
-    }
-    .header-contact:hover { border-color: #7c3aed; color: #7c3aed; background: #ede9fe; }
+.feat {
+  display: flex; align-items: flex-start;
+  gap: .6rem; padding: .45rem .65rem;
+  border-radius: .85rem; background: #f8fafc;
+  transition: background .15s;
+  animation: slideIn .4s ease both;
+}
+.feat:hover { background: #f1f5f9; }
 
-    /* ── Sidebar panel ── */
-    .features {
-      background: #f0ede8 !important;
-      width: 44% !important;
-      min-width: 300px;
-      flex-shrink: 0 !important;
-      padding: 2.25rem 2.5rem 3rem !important;
-      display: flex !important;
-      flex-direction: column !important;
-      position: relative;
-      overflow: hidden;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-    }
-    .features::before {
-      content: '';
-      position: absolute; inset: 0;
-      background:
-        radial-gradient(ellipse at 80% 10%, rgba(124,58,237,.08) 0%, transparent 55%),
-        radial-gradient(ellipse at 10% 85%, rgba(168,85,247,.05) 0%, transparent 50%);
-      pointer-events: none;
-    }
-    .features > * { position: relative; }
+@keyframes slideIn {
+  from { opacity:0; transform:translateX(-8px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+.feat:nth-child(1)  { animation-delay:.06s; }
+.feat:nth-child(2)  { animation-delay:.10s; }
+.feat:nth-child(3)  { animation-delay:.14s; }
+.feat:nth-child(4)  { animation-delay:.18s; }
+.feat:nth-child(5)  { animation-delay:.22s; }
+.feat:nth-child(6)  { animation-delay:.26s; }
+.feat:nth-child(7)  { animation-delay:.30s; }
+.feat:nth-child(8)  { animation-delay:.34s; }
+.feat:nth-child(9)  { animation-delay:.38s; }
+.feat:nth-child(10) { animation-delay:.42s; }
+.feat:nth-child(11) { animation-delay:.46s; }
 
-    /* Right section */
-    .right {
-      flex: 1 !important;
-      background: #fff !important;
-      display: flex !important;
-      align-items: flex-start !important;
-      justify-content: center !important;
-      padding: 2.5rem 2.5rem 3rem !important;
-    }
-    .checkout-card {
-      width: 100% !important;
-      max-width: 480px !important;
-      box-shadow: none !important;
-      border: none !important;
-      padding: 0 !important;
-    }
+.feat-icon {
+  width: 30px; height: 30px; border-radius: .55rem;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .9rem; flex-shrink: 0; margin-top: .05rem;
+}
+.feat-body {
+  flex: 1; min-width: 0;
+  display: flex; flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: .4rem; row-gap: .1rem;
+}
+.feat-title { font-size: .8rem; font-weight: 600; color: #1e293b; line-height: 1.25; }
+.feat-sub   {
+  font-size: .71rem; color: #94a3b8; margin-top: 0; line-height: 1.35;
+  order: 2; flex-basis: 100%;
+}
 
-    /* ── Sidebar header block ── */
-    .feat-plan-label {
-      font-size: .67rem; font-weight: 700;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: #7c3aed; margin-bottom: .3rem;
-    }
-    .feat-price {
-      font-size: 2.6rem; font-weight: 700;
-      color: #1a1a1a; line-height: 1;
-      margin-bottom: .3rem;
-      display: flex; align-items: flex-start; gap: .12rem;
-    }
-    .feat-price-sym { font-size: 1.1rem; font-weight: 600; margin-top: .38rem; }
-    .feat-once {
-      display: inline-flex; align-items: center; gap: .3rem;
-      font-size: .73rem; color: #5b21b6; font-weight: 600;
-      background: #ede9fe; padding: .23rem .58rem;
-      border-radius: 9999px; margin-top: .25rem;
-    }
-    .feat-divider { height: 1px; background: #e8e4df; margin: 1rem 0; }
-    .feat-section-label {
-      font-size: .63rem; font-weight: 700;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: #bbb; margin-bottom: .75rem;
-    }
+/* pills */
+.pills { display: flex; flex-wrap: wrap; gap: .22rem; margin-top: 0; order: 1; }
+.pill {
+  display: inline-flex; align-items: center; gap: .2rem;
+  font-size: .63rem; font-weight: 600;
+  padding: .16rem .48rem; border-radius: 99px;
+  white-space: nowrap; letter-spacing: .01em; line-height: 1.4;
+}
+.pill-blue   { background: #eff6ff; color: #2563eb; }
+.pill-teal   { background: #f0fdfa; color: #0d9488; }
+.pill-amber  { background: #fffbeb; color: #d97706; }
+.pill-rose   { background: #fff1f2; color: #e11d48; }
+.pill-violet { background: #f5f3ff; color: #7c3aed; }
+.pill-green  { background: #f0fdf4; color: #16a34a; }
+.pill-slate  { background: #f1f5f9; color: #475569; }
+.pill-orange { background: #fff7ed; color: #ea580c; }
+.pill-indigo { background: #eef2ff; color: #4338ca; }
+.pill-sky    { background: #f0f9ff; color: #7c3aed; }
+.pill-lux    { background: #fef3c7; color: #92400e; border:1px solid #fde68a; }
 
-    /* ── Sidebar panel swap ── */
-    .sidebar-panel { }
-    .sidebar-panel.s-hidden { display: none !important; }
+/* icon bg */
+.ic-blue   { background: #eff6ff; }
+.ic-teal   { background: #f0fdfa; }
+.ic-amber  { background: #fffbeb; }
+.ic-rose   { background: #fff1f2; }
+.ic-violet { background: #f5f3ff; }
+.ic-green  { background: #f0fdf4; }
+.ic-slate  { background: #f1f5f9; }
+.ic-orange { background: #fff7ed; }
+.ic-indigo { background: #eef2ff; }
+.ic-sky    { background: #f0f9ff; }
+.ic-lux    { background: #fffbeb; }
 
-    /* ── Sub-panel switcher (bundle) ── */
-    .sidebar-switcher {
-      display: flex; gap: .3rem;
-      margin-bottom: 1rem;
-      background: rgba(255,255,255,.55);
-      border-radius: .65rem; padding: .25rem;
-      border: 1px solid rgba(255,255,255,.8);
-      width: fit-content;
-    }
-    .switcher-btn {
-      font-family: "Lexend", sans-serif;
-      font-size: .72rem; font-weight: 600;
-      padding: .3rem .7rem; border: none; border-radius: .45rem;
-      background: transparent; color: #666; cursor: pointer; transition: all .18s;
-      display: flex; align-items: center; gap: .28rem;
-    }
-    .switcher-btn.sw-active { background: #7c3aed; color: #fff; box-shadow: 0 1px 4px rgba(124,58,237,.3); }
-    .switcher-btn.sw-active-teal { background: #0f766e; color: #fff; box-shadow: 0 1px 4px rgba(15,118,110,.3); }
-    .switcher-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .6; }
+/* flag pills */
+.flag-pill {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .63rem; font-weight: 700;
+  padding: .18rem .5rem; border-radius: 99px;
+  background: #f8fafc; border: 1px solid #e2e8f0; color: #334155;
+}
+.flag-img {
+  width: 14px; height: 10px; border-radius: 2px;
+  object-fit: cover; vertical-align: middle;
+  box-shadow: 0 0 0 .5px rgba(0,0,0,.1);
+}
 
-    /* ── Feature grid – 2 columns ── */
-    .feat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: .45rem;
-    }
-    .feat-grid .span-full { grid-column: 1 / -1; }
+/* trust footer */
+.trust-footer {
+  margin-top: 1.3rem;
+  background: linear-gradient(135deg, #3b0764 0%, #7c3aed 100%);
+  border-radius: 1rem; padding: .95rem 1.1rem;
+  color: #fff; display: flex; align-items: center; gap: .8rem;
+}
+.trust-icon { font-size: 1.5rem; flex-shrink: 0; }
+.trust-title { font-size: .78rem; font-weight: 700; margin-bottom: .12rem; }
+.trust-sub   { font-size: .68rem; opacity: .75; line-height: 1.4; }
 
-    /* ── Feature card ── */
-    .feat-card {
-      background: rgba(255,255,255,.65);
-      border: 1px solid rgba(255,255,255,.8);
-      border-radius: .8rem; padding: .7rem .75rem;
-      transition: background .12s, box-shadow .12s;
-      backdrop-filter: blur(4px);
-    }
-    .feat-card:hover { background: rgba(255,255,255,.9); box-shadow: 0 2px 10px rgba(0,0,0,.06); }
-    .feat-card.highlight {
-      background: rgba(124,58,237,.06); border-color: rgba(124,58,237,.2);
-      box-shadow: 0 0 0 1.5px rgba(124,58,237,.1);
-    }
-    .feat-card.highlight:hover { background: rgba(124,58,237,.09); }
-    .feat-card.highlight-teal {
-      background: rgba(15,118,110,.05); border-color: rgba(15,118,110,.2);
-      box-shadow: 0 0 0 1.5px rgba(15,118,110,.1);
-    }
-    .feat-card.highlight-teal .feat-title { color: #0f766e; }
-    .feat-card.highlight-teal:hover { background: rgba(15,118,110,.09); }
-    .feat-card-top { display: flex; align-items: center; gap: .48rem; margin-bottom: .3rem; }
-    .feat-icon {
-      width: 27px; height: 27px; border-radius: .48rem;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .88rem; flex-shrink: 0;
-    }
-    .feat-title { font-size: .79rem; font-weight: 600; color: #1a1a1a; line-height: 1.25; }
-    .feat-card.highlight .feat-title { color: #5b21b6; }
-    .feat-desc { font-size: .7rem; color: #888; line-height: 1.35; margin-top: .05rem; }
+/* ════════════════════════════════════════════
+   PAYMENT CARD
+════════════════════════════════════════════ */
+.right {
+  animation: rise .5s .1s cubic-bezier(.22,1,.36,1) both;
+  position: sticky; top: 70px; align-self: start;
+}
+.checkout-card {
+  background: #fff; border-radius: 1.5rem;
+  padding: 2rem 1.75rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,.03), 0 8px 32px rgba(0,0,0,.07);
+}
 
-    /* ── Pills ── */
-    .feat-tags { display: flex; flex-wrap: wrap; gap: .2rem; margin-top: .1rem; }
-    .tag {
-      display: inline-flex; align-items: center;
-      font-size: .61rem; font-weight: 600;
-      padding: .14rem .4rem; border-radius: 9999px; white-space: nowrap;
-    }
-    .tag-count { font-weight: 400; opacity: .65; }
-    .tag-purple  { background: #ede9fe; color: #5b21b6; }
-    .tag-blue    { background: #dbeafe; color: #1d4ed8; }
-    .tag-green   { background: #d1fae5; color: #065f46; }
-    .tag-sky     { background: #e0f2fe; color: #0369a1; }
-    .tag-rose    { background: #ffe4e6; color: #9f1239; }
-    .tag-teal    { background: #ccfbf1; color: #0f766e; }
-    .tag-amber   { background: #fef3c7; color: #92400e; }
-    .tag-violet  { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
-    .tag-lang    { background: #1a1a1a; color: #fff; font-size: .59rem; padding: .12rem .36rem; }
+.checkout-card h1 {
+  font-size: 1.2rem; font-weight: 700;
+  color: #0f172a; margin-bottom: .4rem; line-height: 1.25;
+}
+.secure-line {
+  font-size: .72rem; color: #94a3b8;
+  margin-bottom: 1.4rem; display: flex; align-items: center; gap: .35rem;
+}
+.secure-line::before { content: '🔒'; font-size: .8rem; }
 
-    /* ── Social proof ── */
-    .feat-social {
-      margin-top: auto; padding-top: 1rem;
-      font-size: .73rem; color: #666; line-height: 1.45;
-      display: flex; gap: .45rem; align-items: flex-start;
-    }
-    .feat-social-icon {
-      width: 22px; height: 22px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .7rem; font-weight: 700; flex-shrink: 0; margin-top: .05rem;
-    }
-    .feat-social-icon.green { background: #d1fae5; color: #065f46; }
-    .feat-social-icon.teal  { background: #ccfbf1; color: #0f766e; }
+/* plan toggle */
+.plan-toggle {
+  display: flex; gap: .65rem; margin-bottom: 1.5rem;
+  align-items: stretch;
+}
+.plan-card {
+  flex: 1; padding: 1rem .9rem;
+  border: 2px solid #e5e7eb; border-radius: 1rem;
+  cursor: pointer; background: #fff;
+  transition: border-color .15s, box-shadow .15s;
+  position: relative; text-align: center;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.plan-card:hover { border-color: #c4b5fd; }
+.plan-card.selected { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,.12); }
+.plan-card-badge {
+  position: absolute; top: -.65rem; left: 50%; transform: translateX(-50%);
+  background: #7c3aed; color: #fff; font-size: .63rem; font-weight: 700;
+  padding: .15rem .65rem; border-radius: 99px; white-space: nowrap;
+}
+.plan-card-name { font-weight: 600; font-size: .85rem; color: #1a1a1a; margin-bottom: .25rem; }
+.plan-card-price { font-size: 1.2rem; font-weight: 700; color: #7c3aed; }
+.plan-card-price .was {
+  font-size: .78rem; color: #9ca3af;
+  text-decoration: line-through; font-weight: 400; margin-right: .3rem;
+}
+.plan-card-save {
+  display: inline-block; margin-top: .3rem;
+  font-size: .68rem; font-weight: 600;
+  color: #059669; background: #ecfdf5; padding: .12rem .45rem; border-radius: .5rem;
+}
+.plan-card-sub { font-size: .7rem; color: #6b7280; margin-top: .25rem; }
+.plan-card-detail {
+  font-size: .63rem; color: #7c3aed; font-weight: 600;
+  margin-top: .35rem; padding-top: .3rem;
+  border-top: 1px solid #f3f4f6;
+}
 
-    /* ── Mobile: payment first, features collapsible ── */
-    @media (max-width: 760px) {
-      .layout { flex-direction: column-reverse !important; }
-      .features {
-        width: 100% !important; min-width: unset !important;
-        padding: 1.5rem 1.1rem 2rem !important;
-        order: 2; display: none !important;
-      }
-      .features.mob-open { display: flex !important; }
-      .right { order: 1; padding: 1.2rem 1rem !important; }
-      .feat-grid { grid-template-columns: 1fr !important; }
-      .feat-grid .span-full { grid-column: 1 !important; }
-      .header-contact span { display: none; }
-    }
-    .mob-toggle {
-      display: none;
-      align-items: center; justify-content: space-between;
-      padding: .85rem 1rem;
-      background: rgba(255,255,255,.7);
-      border: 1px solid #e8e4df; border-radius: .8rem;
-      margin: .75rem 1rem 1.1rem;
-      cursor: pointer; font-size: .81rem; font-weight: 600; color: #444;
-      transition: background .12s;
-    }
-    .mob-toggle .mob-arrow { transition: transform .25s; font-size: .72rem; color: #7c3aed; }
-    .mob-toggle.mob-open .mob-arrow { transform: rotate(180deg); }
-    @media (max-width: 760px) { .mob-toggle { display: flex; } }
-  </style>
+@media(max-width:500px) { .plan-toggle { flex-direction:column; } }
+
+/* steps */
+.checkout-step { }
+.step-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: .68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; margin-bottom: .9rem;
+  background: #f5f3ff; color: #7c3aed;
+}
+
+/* fields */
+.field { margin-bottom: 1rem; }
+.field label {
+  display: block; font-size: .82rem; font-weight: 500;
+  margin-bottom: .3rem; color: #374151;
+}
+.field input {
+  width: 100%; padding: .75rem .9rem;
+  border-radius: .85rem; border: 1.5px solid #e5e7eb;
+  font-size: .92rem; font-family: 'DM Sans', sans-serif;
+  color: #0f172a; outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.field input:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,.12); }
+
+.email-instructions {
+  font-size: .85rem; color: #475569;
+  margin-bottom: .85rem; line-height: 1.5;
+}
+.email-display {
+  font-size: .95rem; font-weight: 600; color: #0f172a;
+  padding: .6rem 1rem; background: #f5f3ff;
+  border-radius: .75rem; margin-bottom: .5rem; text-align: center;
+  word-break: break-all;
+}
+.confirm-text    { font-size:.82rem; color:#475569; margin-bottom:.4rem; }
+.confirm-warning {
+  font-size: .75rem; color: #d97706;
+  background: #fffbeb; border-radius: .6rem;
+  padding: .5rem .75rem; margin: .6rem 0 1rem;
+  line-height: 1.45; display: flex; align-items: flex-start; gap: .4rem;
+}
+.confirm-warning::before { content: '⚠️'; font-size: .85rem; flex-shrink:0; }
+.confirm-actions { display: flex; flex-direction: column; gap: .5rem; }
+
+/* payment element */
+#payment-element { margin-bottom: 1.2rem; min-height: 280px; }
+.payment-loading { text-align:center; color:#94a3b8; font-size:.85rem; padding:2rem 0; }
+
+/* pay button */
+.pay-btn {
+  width: 100%; padding: .9rem 1.2rem;
+  background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+  color: #fff; border: none; border-radius: .9rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem; font-weight: 700; cursor: pointer;
+  transition: opacity .15s, transform .1s, box-shadow .15s;
+  box-shadow: 0 4px 14px rgba(124,58,237,.35);
+  letter-spacing: .01em;
+}
+.pay-btn:hover:not(:disabled) {
+  opacity: .93; transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(124,58,237,.4);
+}
+.pay-btn:active:not(:disabled) { transform: translateY(0); }
+.pay-btn:disabled { opacity: .55; cursor: not-allowed; }
+
+.link-btn {
+  width: 100%; padding: .6rem;
+  background: none; border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: .82rem;
+  color: #64748b; text-align: center;
+  transition: color .12s;
+}
+.link-btn:hover { color: #0f172a; }
+
+.small-note {
+  text-align: center; font-size: .72rem; color: #94a3b8;
+  margin-top: .65rem; line-height: 1.45;
+}
+
+/* trust icons strip */
+.trust-strip {
+  display: flex; align-items: center; justify-content: center;
+  gap: 1.2rem; margin-top: 1.2rem; padding-top: 1.1rem;
+  border-top: 1px solid #f1f5f9;
+}
+.trust-item {
+  display: flex; align-items: center; gap: .3rem;
+  font-size: .71rem; color: #94a3b8; white-space: nowrap;
+}
+.trust-item span:first-child { font-size: .85rem; }
+
+/* existing account */
+.after-text {
+  text-align: center; font-size: .75rem;
+  color: #94a3b8; margin-top: .85rem;
+}
+.after-text a { color: #7c3aed; font-weight: 500; text-decoration: none; }
+.after-text a:hover { text-decoration: underline; }
+
+/* messages */
+.checkout-message {
+  border-radius: .75rem; padding: .65rem .9rem;
+  font-size: .82rem; margin-top: .75rem;
+  display: none; line-height: 1.45;
+}
+.checkout-message.error  { background: #fff1f2; color: #be123c; }
+.checkout-message.info   { background: #f5f3ff; color: #6d28d9; }
+.checkout-message.success{ background: #f0fdf4; color: #15803d; }
+
+/* done step */
+.done-icon  { font-size: 2.8rem; text-align: center; margin-bottom: .7rem; }
+.done-title { font-size: 1.2rem; font-weight: 700; text-align: center; margin-bottom: .4rem; }
+.done-sub   { font-size: .85rem; color: #94a3b8; text-align: center; margin-bottom: 1.3rem; }
+
+/* spinner */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* bundle extras in sidebar */
+.bundle-extras { display: none; margin-top: .5rem; }
+.bundle-extras.show { display: flex; flex-direction: column; gap: .4rem; }
+.bundle-extra-item {
+  display: flex; align-items: flex-start; gap: .7rem;
+  padding: .55rem .7rem;
+  border-radius: .85rem;
+  background: #f0fdfa;
+  border: 1px solid #99f6e4;
+  animation: slideIn .3s ease both;
+}
+.bundle-extra-icon {
+  width: 30px; height: 30px; border-radius: .55rem;
+  background: #ccfbf1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .9rem; flex-shrink: 0;
+}
+.bundle-extra-title { font-size: .8rem; font-weight: 600; color: #0f766e; line-height: 1.25; }
+.bundle-extra-sub   { font-size: .71rem; color: #0d9488; margin-top: .1rem; line-height: 1.35; opacity: .8; }
+
+/* sidebar price label update */
+#sidebarLabel { transition: opacity .15s; }
+
+</style>
 </head>
-
 <body>
 
+<!-- ══ HEADER ══ -->
 <header class="checkout-header">
   <div class="checkout-header-inner">
     <div class="checkout-brand">
-      <!-- Luxembourg flag (real colours) -->
-      <div class="lu-flag">
-        <div class="lu-flag-r"></div>
-        <div class="lu-flag-w"></div>
-        <div class="lu-flag-b"></div>
-      </div>
-      <span data-t="brand_title"></span>
+      <div class="lu-flag"><div class="lu-flag-r"></div><div class="lu-flag-w"></div><div class="lu-flag-b"></div></div>
+      <span data-t="brand_title">CivicLearn Vivre-Ensemble</span>
     </div>
     <div class="header-right">
       <a href="https://vivre-ensemble.lu/contact/" target="_blank" class="header-contact">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-        <span data-t="header_contact_label">Une question ?</span>
+        <span data-t="header_contact">Any questions?</span>
       </a>
       <div class="lang-switch">
         <button data-lang="fr">FR</button>
@@ -324,1045 +500,644 @@
   </div>
 </header>
 
-<!-- Mobile toggle (between header and payment on small screens) -->
-<div class="mob-toggle" id="mobToggle" onclick="toggleMobFeatures()">
-  <span data-t="mobile_toggle_label">📋 Voir ce qui est inclus</span>
+<!-- Mobile toggle -->
+<div class="mob-toggle" id="mobToggle" onclick="document.getElementById('featureSidebar').classList.toggle('mob-open');this.classList.toggle('mob-open');">
+  <span data-t="mob_toggle">📋 See what's included</span>
   <span class="mob-arrow">▼</span>
 </div>
 
 <main>
-  <div class="layout">
+<div class="layout">
 
-    <!-- ════════════════════════════
-         LEFT — RICH FEATURE SIDEBAR
-    ════════════════════════════ -->
-    <aside class="features" id="featureSidebar">
+  <!-- ══════════════════════════════════
+       LEFT — FEATURE SIDEBAR
+  ══════════════════════════════════ -->
+  <aside class="features" id="featureSidebar">
 
-      <!-- Hidden legacy elements for JS compat -->
-      <span id="sidebarPrice" style="display:none">69 €</span>
-      <ul id="bundleExtras" style="display:none"></ul>
-
-      <!-- Price header -->
-      <div class="feat-plan-label" data-t="plan_title">Accès Premium</div>
-      <div class="feat-price">
-        <span class="feat-price-sym">€</span>
-        <span id="sidebarPriceNum">69</span>
+    <div class="price-hero">
+      <div>
+        <div class="price-label" id="sidebarLabel" data-t="sidebar_label">Vivre-Ensemble · Full Access</div>
+        <div class="price-amount"><sup>€</sup><span id="sidebarPrice">69</span></div>
+        <div class="price-once" data-t="price_once">One-time · Lifetime access</div>
       </div>
-      <div class="feat-once" data-t="plan_once">Paiement unique · accès à vie</div>
-      <div class="feat-divider"></div>
+      <div class="price-badge" data-t="price_badge">650+ questions</div>
+    </div>
 
-      <!-- ══ PANEL A: VIVRE-ENSEMBLE (solo) ══ -->
-      <div class="sidebar-panel" id="panelVE">
-        <div class="feat-section-label" data-t="included_title">Inclus</div>
-        <div class="feat-grid">
+    <!-- PRACTICE MODES -->
+    <div class="section-label" data-t="section_practice">Practice Modes</div>
+    <ul class="feature-list">
 
-          <div class="feat-card span-full">
-            <div class="feat-card-top">
-              <div class="feat-icon" style="background:#ede9fe">📄</div>
-              <div class="feat-title" data-t="f_official_title">Questions basées sur les sources officielles</div>
-            </div>
-            <div class="feat-tags">
-              <span class="tag tag-purple" data-t="f_official_t1">Matériaux recommandés par le gouvernement</span>
-              <span class="tag tag-purple" data-t="f_official_t2">PDF inclus</span>
-            </div>
-          </div>
-
-          <div class="feat-card span-full">
-            <div class="feat-card-top">
-              <div class="feat-icon" style="background:#dbeafe">🏛️</div>
-              <div class="feat-title" data-t="f_topics_title">Tests par thème</div>
-            </div>
-            <div class="feat-tags">
-              <span class="tag tag-blue">Histoire <span class="tag-count">· 128</span></span>
-              <span class="tag tag-blue">Droits <span class="tag-count">· 100</span></span>
-              <span class="tag tag-blue">Institutions <span class="tag-count">· 416</span></span>
-            </div>
-          </div>
-
-          <div class="feat-card span-full highlight">
-            <div class="feat-card-top">
-              <div class="feat-icon" style="background:#f5f3ff">🎯</div>
-              <div class="feat-title" data-t="f_sim_title">Simulations illimitées du test officiel</div>
-            </div>
-            <div class="feat-tags">
-              <span class="tag tag-violet" data-t="f_sim_t1">40 questions</span>
-              <span class="tag tag-violet" data-t="f_sim_t2">60 min</span>
-              <span class="tag tag-violet" data-t="f_sim_t3">Notation officielle</span>
-            </div>
-          </div>
-
-          <div class="feat-card">
-            <div class="feat-card-top">
-              <div class="feat-icon" style="background:#d1fae5">⚡</div>
-              <div class="feat-title" data-t="f_quick_title">Quick Test</div>
-            </div>
-            <div class="feat-tags">
-              <span class="tag tag-green" data-t="f_quick_tag">5 q · aléatoire</span>
-            </div>
-          </div>
-
-          <div class="feat-card">
-            <div class="feat-card-top">
-              <div class="feat-icon" style="background:#ccfbf1">🃏</div>
-              <div class="feat-title" data-t="f_flash_title">Flashcards</div>
-            </div>
-            <div class="feat-desc" data-t="f_flash_desc">Format carte</div>
-          </div>
-
-          <div class="feat-card">
-            <div class="feat-card-top">
-              <div class="feat-icon" style="background:#ffe4e6">🪤</div>
-              <div class="feat-title" data-t="f_traps_title">Pièges fréquents</div>
-            </div>
-            <div class="feat-desc" data-t="f_traps_desc">Erreurs répétées auto.</div>
-          </div>
-
-          <div class="feat-card">
-            <div class="feat-card-top">
-              <div class="feat-icon" style="background:#fef3c7">⭐</div>
-              <div class="feat-title" data-t="f_mylist_title">Ma liste</div>
-            </div>
-            <div class="feat-desc" data-t="f_mylist_desc">Questions à revoir</div>
-          </div>
-
-          <div class="feat-card span-full">
-            <div class="feat-card-top">
-              <div class="feat-icon" style="background:#e0f2fe">📊</div>
-              <div class="feat-title" data-t="f_progress_title">Progression & historique</div>
-            </div>
-            <div class="feat-tags">
-              <span class="tag tag-sky" data-t="f_prog_t1">Par thème</span>
-              <span class="tag tag-sky" data-t="f_prog_t2">Graphiques</span>
-              <span class="tag tag-sky" data-t="f_prog_t3">Historique</span>
-            </div>
-          </div>
-
-          <div class="feat-card">
-            <div class="feat-card-top">
-              <div class="feat-icon" style="background:#ffedd5">🔔</div>
-              <div class="feat-title" data-t="f_reminder_title">Rappels</div>
-            </div>
-            <div class="feat-desc" data-t="f_reminder_desc">Test pratique envoyé chaque jour</div>
-          </div>
-
-          <div class="feat-card">
-            <div class="feat-card-top">
-              <div class="feat-icon" style="background:#fdf4ff">📅</div>
-              <div class="feat-title" data-t="f_countdown_title">Compte à rebours</div>
-            </div>
-            <div class="feat-tags">
-              <span class="tag tag-rose" data-t="f_countdown_tag">Dates officielles</span>
-            </div>
-          </div>
-
-          <div class="feat-card span-full">
-            <div class="feat-card-top">
-              <div class="feat-icon" style="background:#f0fdf4">🌐</div>
-              <div class="feat-title" data-t="f_lang_title">3 langues · Lecture audio</div>
-            </div>
-            <div class="feat-tags">
-              <span class="tag tag-lang">FR</span>
-              <span class="tag tag-lang">DE</span>
-              <span class="tag tag-lang">EN</span>
-              <span class="tag tag-purple" data-t="f_audio_tag">🔊 Écouter les questions</span>
-            </div>
-          </div>
-
-        </div><!-- /feat-grid -->
-        <div class="feat-social">
-          <div class="feat-social-icon green">✓</div>
-          <span data-t="social_proof">Utilisé par des candidats ayant réussi le test Vivre-Ensemble.</span>
-        </div>
-      </div><!-- /panelVE -->
-
-      <!-- ══ PANEL B: BUNDLE ══ -->
-      <div class="sidebar-panel s-hidden" id="panelBundle">
-
-        <div class="sidebar-switcher">
-          <button class="switcher-btn sw-active" id="swVE" onclick="switchSubPanel('ve')">
-            <span class="switcher-dot"></span>
-            <span data-t="sw_ve">Vivre-Ensemble</span>
-          </button>
-          <button class="switcher-btn" id="swST" onclick="switchSubPanel('st')">
-            <span class="switcher-dot"></span>
-            <span data-t="sw_st">Sproochentest</span>
-          </button>
-        </div>
-
-        <!-- Bundle sub-panel: VE summary -->
-        <div id="subPanelVE" style="display:none">
-          <div class="feat-section-label" data-t="included_title_ve">Vivre-Ensemble — Inclus</div>
-          <div class="feat-grid">
-            <div class="feat-card span-full">
-              <div class="feat-card-top">
-                <div class="feat-icon" style="background:#dbeafe">🏛️</div>
-                <div class="feat-title" data-t="f_topics_title">Tests par thème</div>
-              </div>
-              <div class="feat-tags">
-                <span class="tag tag-blue">Histoire <span class="tag-count">· 128</span></span>
-                <span class="tag tag-blue">Droits <span class="tag-count">· 100</span></span>
-                <span class="tag tag-blue">Institutions <span class="tag-count">· 416</span></span>
-              </div>
-            </div>
-            <div class="feat-card span-full highlight">
-              <div class="feat-card-top">
-                <div class="feat-icon" style="background:#f5f3ff">🎯</div>
-                <div class="feat-title" data-t="f_sim_title">Simulations illimitées du test officiel</div>
-              </div>
-              <div class="feat-tags">
-                <span class="tag tag-violet" data-t="f_sim_t1">40 questions</span>
-                <span class="tag tag-violet" data-t="f_sim_t2">60 min</span>
-                <span class="tag tag-violet" data-t="f_sim_t3">Notation officielle</span>
-              </div>
-            </div>
-            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#ffe4e6">🪤</div><div class="feat-title" data-t="f_traps_title">Pièges fréquents</div></div></div>
-            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#fef3c7">⭐</div><div class="feat-title" data-t="f_mylist_title">Ma liste</div></div></div>
-            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#ccfbf1">🃏</div><div class="feat-title" data-t="f_flash_title">Flashcards</div></div></div>
-            <div class="feat-card"><div class="feat-card-top"><div class="feat-icon" style="background:#ffedd5">🔔</div><div class="feat-title" data-t="f_reminder_title">Rappels</div></div></div>
-            <div class="feat-card span-full">
-              <div class="feat-card-top">
-                <div class="feat-icon" style="background:#e0f2fe">📊</div>
-                <div class="feat-title" data-t="f_progress_title">Progression & historique</div>
-              </div>
-              <div class="feat-tags">
-                <span class="tag tag-sky" data-t="f_prog_t1">Par thème</span>
-                <span class="tag tag-sky" data-t="f_prog_t2">Graphiques</span>
-                <span class="tag tag-sky" data-t="f_prog_t3">Historique</span>
-              </div>
-            </div>
-          </div>
-        </div><!-- /subPanelVE -->
-
-        <!-- Bundle sub-panel: Sproochentest -->
-        <div id="subPanelST">
-          <div class="feat-section-label" data-t="st_section_label">Sproochentest — Inclus</div>
-          <div class="feat-grid">
-
-            <div class="feat-card span-full highlight-teal">
-              <div class="feat-card-top">
-                <div class="feat-icon" style="background:#ccfbf1">🎧</div>
-                <div class="feat-title" data-t="st_sim_title">10 Simulations complètes</div>
-              </div>
-              <div class="feat-tags">
-                <span class="tag tag-teal" data-t="st_sim_t1">Luxembourgeois natif</span>
-                <span class="tag tag-teal" data-t="st_sim_t2">Audio authentique</span>
-                <span class="tag tag-teal" data-t="st_sim_t3">Accès illimité</span>
-              </div>
-            </div>
-
-            <div class="feat-card span-full highlight">
-              <div class="feat-card-top">
-                <div class="feat-icon" style="background:#f5f3ff">🎯</div>
-                <div class="feat-title" data-t="st_grade_title">Critères officiels</div>
-              </div>
-              <div class="feat-tags">
-                <span class="tag tag-violet" data-t="st_grade_listen">Écoute B1</span>
-                <span class="tag tag-violet" data-t="st_grade_speak">Expression A2</span>
-                <span class="tag tag-violet" data-t="st_grade_official">Barème officiel</span>
-              </div>
-            </div>
-
-            <div class="feat-card">
-              <div class="feat-card-top">
-                <div class="feat-icon" style="background:#e0f2fe">👂</div>
-                <div class="feat-title" data-t="st_listen_title">Compréhension orale</div>
-              </div>
-              <div class="feat-tags"><span class="tag tag-sky">B1</span></div>
-            </div>
-
-            <div class="feat-card">
-              <div class="feat-card-top">
-                <div class="feat-icon" style="background:#fdf4ff">🎙️</div>
-                <div class="feat-title" data-t="st_speak_title">Expression orale</div>
-              </div>
-              <div class="feat-tags"><span class="tag tag-purple">A2</span></div>
-            </div>
-
-            <div class="feat-card span-full">
-              <div class="feat-card-top">
-                <div class="feat-icon" style="background:#dbeafe">📋</div>
-                <div class="feat-title" data-t="st_results_title">Résultats détaillés</div>
-              </div>
-              <div class="feat-tags">
-                <span class="tag tag-blue" data-t="st_results_t1">Par compétence</span>
-                <span class="tag tag-blue" data-t="st_results_t2">Feedback IA</span>
-              </div>
-            </div>
-
-            <div class="feat-card">
-              <div class="feat-card-top">
-                <div class="feat-icon" style="background:#d1fae5">♾️</div>
-                <div class="feat-title" data-t="st_unlimited_title">Rejouer à volonté</div>
-              </div>
-              <div class="feat-desc" data-t="st_unlimited_desc">Aucune limite de tentatives</div>
-            </div>
-
-            <div class="feat-card">
-              <div class="feat-card-top">
-                <div class="feat-icon" style="background:#fdf4ff">📅</div>
-                <div class="feat-title" data-t="f_countdown_title">Compte à rebours</div>
-              </div>
-              <div class="feat-tags">
-                <span class="tag tag-rose" data-t="f_countdown_tag">Dates officielles</span>
-              </div>
-            </div>
-
-            <div class="feat-card span-full">
-              <div class="feat-card-top">
-                <div class="feat-icon" style="background:#fef3c7">📊</div>
-                <div class="feat-title" data-t="st_progress_title">Suivi de progression</div>
-              </div>
-              <div class="feat-tags">
-                <span class="tag tag-amber" data-t="st_prog_t1">Par simulation</span>
-              </div>
-            </div>
-
-            <div class="feat-card span-full">
-              <div class="feat-card-top">
-                <div class="feat-icon" style="background:#f0fdf4">🔑</div>
-                <div class="feat-title" data-t="st_login_title">Un seul compte</div>
-              </div>
-              <div class="feat-desc" data-t="st_login_desc">Accès VE + Sproochentest avec le même login</div>
-            </div>
-
-          </div><!-- /st feat-grid -->
-        </div><!-- /subPanelST -->
-
-        <div class="feat-social">
-          <div class="feat-social-icon teal">✓</div>
-          <span data-t="bundle_social_proof">Pack complet pour la naturalisation luxembourgeoise.</span>
-        </div>
-      </div><!-- /panelBundle -->
-
-    </aside>
-
-    <!-- ════════════════════════════
-         RIGHT — CHECKOUT (UNTOUCHED)
-    ════════════════════════════ -->
-    <section class="right">
-      <div class="checkout-card">
-
-        <h1 data-t="checkout_title"></h1>
-        <div class="secure-line" data-t="secure_line"></div>
-
-        <!-- ── Plan toggle ── -->
-        <div class="plan-toggle" id="planToggle">
-          <div class="plan-card" data-plan="solo" id="planSolo">
-            <div class="plan-card-name" data-t="toggle_solo_name"></div>
-            <div class="plan-card-price">69 €</div>
-            <div class="plan-card-sub" data-t="toggle_solo_sub"></div>
-          </div>
-          <div class="plan-card" data-plan="bundle" id="planBundle">
-            <div class="plan-card-badge" data-t="toggle_bundle_badge"></div>
-            <div class="plan-card-name" data-t="toggle_bundle_name"></div>
-            <div class="plan-card-price"><span class="was">138 €</span> 99 €</div>
-            <div class="plan-card-save" data-t="toggle_bundle_save"></div>
-            <div class="plan-card-sub" data-t="toggle_bundle_sub"></div>
+      <li class="feat">
+        <div class="feat-icon ic-blue">📚</div>
+        <div class="feat-body">
+          <div class="feat-title" data-t="f_topics">Tests by Topic</div>
+          <div class="pills">
+            <span class="pill pill-blue" data-t="f_topics_p1">History of Luxembourg</span>
+            <span class="pill pill-violet" data-t="f_topics_p2">Droits &amp; Devoirs</span>
+            <span class="pill pill-teal" data-t="f_topics_p3">Institutions</span>
           </div>
         </div>
+      </li>
 
-        <div class="checkout-flow" id="checkoutFlow">
-
-          <!-- STEP 1: INITIAL -->
-          <div class="checkout-step" id="stepInitial">
-            <button class="pay-btn" id="startCheckout" data-t="cta_start"></button>
-            <p class="small-note" data-t="note_no_redirect"></p>
+      <li class="feat">
+        <div class="feat-icon ic-amber">⚡</div>
+        <div class="feat-body">
+          <div class="feat-title" data-t="f_quick">Quick Test</div>
+          <div class="feat-sub" data-t="f_quick_sub">5 random questions — instant feedback, any time</div>
+          <div class="pills">
+            <span class="pill pill-amber" data-t="f_quick_p1">Any topic</span>
+            <span class="pill pill-amber" data-t="f_quick_p2">Instant results</span>
           </div>
-
-          <!-- STEP 2: EMAIL -->
-          <div class="checkout-step" id="stepEmail" hidden>
-            <span class="step-badge" data-t="step_1_of_3"></span>
-            <p data-t="email_instruction"></p>
-            <div class="email-field-group">
-              <label for="checkoutEmail" data-t="email_label"></label>
-              <input id="checkoutEmail" type="email" autocomplete="email" inputmode="email" />
-            </div>
-            <button class="pay-btn" id="continueWithEmail" data-t="cta_continue"></button>
-          </div>
-
-          <!-- STEP 3: CONFIRM EMAIL -->
-          <div class="checkout-step" id="stepConfirm" hidden>
-            <span class="step-badge" data-t="step_2_of_3"></span>
-            <p data-t="confirm_text"></p>
-            <p class="email-display" id="emailDisplay"></p>
-            <p class="confirm-warning" data-t="confirm_warning"></p>
-            <div class="confirm-actions">
-              <button class="pay-btn" id="confirmEmail" data-t="cta_confirm"></button>
-              <button class="link-btn" id="editEmail" data-t="cta_edit"></button>
-            </div>
-          </div>
-
-          <!-- STEP 4: STRIPE ELEMENTS PAYMENT -->
-          <div class="checkout-step" id="stepPayment" hidden>
-            <span class="step-badge" data-t="step_3_of_3"></span>
-            <p data-t="payment_instruction" style="margin-bottom:1rem;"></p>
-            <div id="payment-element"><div class="payment-loading" data-t="payment_loading"></div></div>
-            <button class="pay-btn" id="payBtn" disabled data-t="cta_pay"></button>
-            <button class="link-btn" id="backToConfirm" style="margin-top:0.5rem;" data-t="cta_back"></button>
-          </div>
-
-          <!-- STEP 5: SET PASSWORD -->
-          <div class="checkout-step" id="stepPassword" hidden>
-            <div style="text-align:center;font-size:2rem;margin-bottom:0.5rem;">🎉</div>
-            <div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;" data-t="payment_confirmed"></div>
-            <p class="email-instructions" style="text-align:center;" data-t="password_instruction"></p>
-            <div class="field">
-              <label for="pw1" data-t="pwd_label"></label>
-              <input type="password" id="pw1" autocomplete="new-password">
-            </div>
-            <div class="field">
-              <label for="pw2" data-t="pwd_confirm_label"></label>
-              <input type="password" id="pw2" autocomplete="new-password">
-            </div>
-            <button class="pay-btn" id="setupBtn" data-t="cta_create_account"></button>
-          </div>
-
-          <!-- STEP 6: DONE -->
-          <div class="checkout-step" id="stepDone" hidden>
-            <div class="done-icon">✅</div>
-            <div class="done-title" data-t="done_title"></div>
-            <div class="done-sub" id="doneEmail"></div>
-            <a href="/lux/dashboard/index.html" class="pay-btn" id="doneCta" style="text-align:center;text-decoration:none;display:block;" data-t="cta_start_training"></a>
-          </div>
-
-          <!-- MESSAGE -->
-          <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
         </div>
+      </li>
 
-        <div class="trust">
-          <div data-t="trust_secure"></div>
-          <div data-t="trust_instant"></div>
-          <div data-t="trust_no_sub"></div>
+      <li class="feat">
+        <div class="feat-icon ic-indigo">🎓</div>
+        <div class="feat-body">
+          <div class="feat-title" data-t="f_sim">Unlimited official simulations</div>
+          <div class="feat-sub" data-t="f_sim_sub">The exact format and grading of the real exam</div>
+          <div class="pills">
+            <span class="pill pill-indigo" data-t="f_sim_p1">40 questions</span>
+            <span class="pill pill-indigo" data-t="f_sim_p2">60 min</span>
+            <span class="pill pill-green" data-t="f_sim_p3">Official grading</span>
+          </div>
         </div>
-        <div class="after-text">
-          <span data-t="already_account"></span>
-          <a href="/lux/login.html" data-t="login_link"></a>.
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-slate">🃏</div>
+        <div class="feat-body">
+          <div class="feat-title" data-t="f_flash">Flashcards</div>
+          <div class="feat-sub" data-t="f_flash_sub">Every question in card format — perfect for commutes</div>
+        </div>
+      </li>
+
+    </ul>
+
+    <!-- SMART TOOLS -->
+    <div class="section-label" data-t="section_tools">Smart Tools</div>
+    <ul class="feature-list">
+
+      <li class="feat">
+        <div class="feat-icon ic-rose">🔁</div>
+        <div class="feat-body">
+          <div class="feat-title" data-t="f_traps">Frequent Traps</div>
+          <div class="feat-sub" data-t="f_traps_sub">We spot questions you keep missing and isolate them for focused review</div>
+          <div class="pills">
+            <span class="pill pill-rose" data-t="f_traps_p1">Auto-detected</span>
+            <span class="pill pill-rose" data-t="f_traps_p2">Targeted review</span>
+          </div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-amber">⭐</div>
+        <div class="feat-body">
+          <div class="feat-title" data-t="f_mylist">My List</div>
+          <div class="feat-sub" data-t="f_mylist_sub">Bookmark any question you want to revisit later</div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-teal">📊</div>
+        <div class="feat-body">
+          <div class="feat-title" data-t="f_progress">Progress &amp; History</div>
+          <div class="feat-sub" data-t="f_progress_sub">Every session logged — scores, mistakes, trends</div>
+          <div class="pills">
+            <span class="pill pill-teal" data-t="f_progress_p1">By topic</span>
+            <span class="pill pill-teal" data-t="f_progress_p2">Timeline graphs</span>
+            <span class="pill pill-teal" data-t="f_progress_p3">Weak areas</span>
+          </div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-orange">📅</div>
+        <div class="feat-body">
+          <div class="feat-title" data-t="f_countdown">Exam Countdown</div>
+          <div class="feat-sub" data-t="f_countdown_sub">Synced with official Vivre-Ensemble session dates</div>
+          <div class="pills">
+            <span class="pill pill-orange" data-t="f_countdown_p1">Official dates</span>
+            <span class="pill pill-orange" data-t="f_countdown_p2">Days remaining</span>
+          </div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-violet">🔔</div>
+        <div class="feat-body">
+          <div class="feat-title" data-t="f_reminders">Daily Reminders</div>
+          <div class="feat-sub" data-t="f_reminders_sub">Opt-in daily nudge with a fresh mini-test to keep momentum</div>
+        </div>
+      </li>
+
+    </ul>
+
+    <!-- LANGUAGE & ACCESS -->
+    <div class="section-label" data-t="section_lang">Language &amp; Accessibility</div>
+    <ul class="feature-list">
+
+      <li class="feat">
+        <div class="feat-icon ic-sky">🌍</div>
+        <div class="feat-body">
+          <div class="feat-title" data-t="f_langs">Three Interface Languages</div>
+          <div class="feat-sub" data-t="f_langs_sub">Full platform available in all three — switch anytime</div>
+          <div class="pills">
+            <span class="flag-pill"><img src="/assets/images/uk.svg" alt="EN" class="flag-img"> EN</span>
+            <span class="flag-pill"><img src="/assets/images/fr.svg" alt="FR" class="flag-img"> FR</span>
+            <span class="flag-pill"><img src="/assets/images/de.svg" alt="DE" class="flag-img"> DE</span>
+          </div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-green">🔊</div>
+        <div class="feat-body">
+          <div class="feat-title" data-t="f_audio">Reading Assist</div>
+          <div class="feat-sub" data-t="f_audio_sub">Listen to every question and answer — no reading required</div>
+          <div class="pills">
+            <span class="pill pill-green" data-t="f_audio_p1">Audio questions</span>
+            <span class="pill pill-green" data-t="f_audio_p2">Audio answers</span>
+          </div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-lux">📖</div>
+        <div class="feat-body">
+          <div class="feat-title" data-t="f_official">Official Study Materials</div>
+          <div class="feat-sub" data-t="f_official_sub">All questions sourced from government-recommended materials</div>
+          <div class="pills">
+            <span class="pill pill-lux" data-t="f_official_p1">Official source</span>
+            <span class="pill pill-lux" data-t="f_official_p2">PDF included</span>
+          </div>
+        </div>
+      </li>
+
+    </ul>
+
+
+    <!-- BUNDLE EXTRAS — shown only when bundle is selected -->
+    <div id="bundleExtras" class="bundle-extras">
+      <div class="section-label" style="margin-top:.2rem;" data-t="bundle_also">Also included</div>
+      <div class="bundle-extra-item">
+        <div class="bundle-extra-icon">🎧</div>
+        <div class="feat-body">
+          <div class="bundle-extra-title" data-t="bx_sim">10 Sproochentest Simulations</div>
+          <div class="bundle-extra-sub" data-t="bx_sim_sub">Native Luxembourgish audio · Listening B1 + Speaking A2</div>
         </div>
       </div>
-    </section>
+      <div class="bundle-extra-item">
+        <div class="bundle-extra-icon">🎯</div>
+        <div class="feat-body">
+          <div class="bundle-extra-title" data-t="bx_grade">Official Grading Criteria</div>
+          <div class="bundle-extra-sub" data-t="bx_grade_sub">Evaluated with the real exam scoring scale</div>
+        </div>
+      </div>
+      <div class="bundle-extra-item">
+        <div class="bundle-extra-icon">📋</div>
+        <div class="feat-body">
+          <div class="bundle-extra-title" data-t="bx_results">Detailed Results &amp; AI Feedback</div>
+          <div class="bundle-extra-sub" data-t="bx_results_sub">Per-skill breakdown after each attempt</div>
+        </div>
+      </div>
+      <div class="bundle-extra-item">
+        <div class="bundle-extra-icon">♾️</div>
+        <div class="feat-body">
+          <div class="bundle-extra-title" data-t="bx_unlimited">Unlimited Retakes</div>
+          <div class="bundle-extra-sub" data-t="bx_unlimited_sub">No attempt limits — practise until you're ready</div>
+        </div>
+      </div>
+      <div class="bundle-extra-item">
+        <div class="bundle-extra-icon">🔑</div>
+        <div class="feat-body">
+          <div class="bundle-extra-title" data-t="bx_login">Shared login · one account</div>
+          <div class="bundle-extra-sub" data-t="bx_login_sub">Both products accessible with the same login</div>
+        </div>
+      </div>
+    </div>
 
-  </div>
+    <div class="trust-footer">
+      <div class="trust-icon">🏅</div>
+      <div>
+        <div class="trust-title" data-t="trust_title">Recommended by users who passed</div>
+        <div class="trust-sub" data-t="trust_sub">One payment · No subscription · Access never expires</div>
+      </div>
+    </div>
+
+  </aside>
+
+
+  <!-- ══════════════════════════════════
+       RIGHT — PAYMENT FORM
+  ══════════════════════════════════ -->
+  <section class="right">
+    <div class="checkout-card">
+      <h1 data-t="checkout_h1">Activate your full access</h1>
+      <div class="secure-line" data-t="secure_line">100% secure payment · your card details never touch our servers</div>
+
+      <!-- plan toggle -->
+      <div class="plan-toggle" id="planToggle">
+        <div class="plan-card selected" data-plan="solo" id="planSolo">
+          <div class="plan-card-name" data-t="plan_solo_name">Vivre-Ensemble</div>
+          <div class="plan-card-price">€69</div>
+          <div class="plan-card-sub" data-t="plan_solo_sub">Vivre-Ensemble only</div>
+          <div class="plan-card-detail" data-t="plan_solo_detail">650 questions · 3 languages</div>
+        </div>
+        <div class="plan-card" data-plan="bundle" id="planBundle">
+          <div class="plan-card-badge" data-t="plan_bundle_badge">Best value</div>
+          <div class="plan-card-name" data-t="plan_bundle_name">Vivre Ensemble + Sproochentest</div>
+          <div class="plan-card-price"><span class="was">€138</span> €99</div>
+          <div class="plan-card-save" data-t="plan_bundle_save">Save €39</div>
+          <div class="plan-card-sub" data-t="plan_bundle_sub">Both exams · one login</div>
+        </div>
+      </div>
+
+      <div class="checkout-flow" id="checkoutFlow">
+
+        <!-- step 0: start -->
+        <div class="checkout-step" id="stepInitial">
+          <button type="button" class="pay-btn" id="startCheckout" data-t="cta_start_solo">Get access — €69</button>
+          <p class="small-note" data-t="small_note">You pay securely on this page. No redirects. Powered by Stripe.</p>
+          <div class="trust-strip">
+            <div class="trust-item"><span>🔒</span><span data-t="ts_secure">Secure payment</span></div>
+            <div class="trust-item"><span>⚡</span><span data-t="ts_instant">Instant access</span></div>
+            <div class="trust-item"><span>✔</span><span data-t="ts_nosub">No subscription</span></div>
+          </div>
+        </div>
+
+        <!-- step 1: email -->
+        <div class="checkout-step" id="stepEmail" hidden>
+          <span class="step-badge" data-t="step1">Step 1 of 3</span>
+          <p class="email-instructions" data-t="email_instr">Enter the email address you'd like to use for your CivicLearn account.</p>
+          <div class="field">
+            <label for="checkoutEmail" data-t="email_label">Email</label>
+            <input type="email" id="checkoutEmail" autocomplete="email"
+                   placeholder="you@example.com" inputmode="email">
+          </div>
+          <button type="button" class="pay-btn" id="continueWithEmail" data-t="cta_continue">Continue</button>
+        </div>
+
+        <!-- step 2: confirm email -->
+        <div class="checkout-step" id="stepConfirm" hidden>
+          <span class="step-badge" data-t="step2">Step 2 of 3</span>
+          <p class="confirm-text" data-t="confirm_text">Your account will be created with this address:</p>
+          <p class="email-display" id="emailDisplay"></p>
+          <p class="confirm-warning" data-t="confirm_warn">Please double-check the spelling. This is your login.</p>
+          <div class="confirm-actions">
+            <button type="button" class="pay-btn" id="confirmEmail" data-t="cta_confirm">Confirm &amp; go to payment</button>
+            <button type="button" class="link-btn" id="editEmail" data-t="cta_edit">← Edit email</button>
+          </div>
+        </div>
+
+        <!-- step 3: payment -->
+        <div class="checkout-step" id="stepPayment" hidden>
+          <span class="step-badge" data-t="step3">Step 3 of 3</span>
+          <p class="email-instructions" style="margin-bottom:1rem;" data-t="pay_instr">Enter your payment details below. Processed securely by Stripe.</p>
+          <div id="payment-element"><div class="payment-loading" data-t="pay_loading">Loading payment form…</div></div>
+          <button type="button" class="pay-btn" id="payBtn" disabled data-t="pay_solo">Pay €69</button>
+          <button type="button" class="link-btn" id="backToConfirm" style="margin-top:.4rem;" data-t="cta_back">← Back</button>
+        </div>
+
+        <!-- step 4: set password -->
+        <div class="checkout-step" id="stepPassword" hidden>
+          <div style="text-align:center;font-size:2.4rem;margin-bottom:.6rem;">🎉</div>
+          <div class="done-title" data-t="pay_confirmed">Payment confirmed!</div>
+          <p class="email-instructions" style="text-align:center;margin-bottom:1.1rem;" data-t="pwd_instr">Choose a password for your account.</p>
+          <div class="field">
+            <label for="pw1" data-t="pwd_label">Password</label>
+            <input type="password" id="pw1" autocomplete="new-password">
+          </div>
+          <div class="field">
+            <label for="pw2" data-t="pwd_confirm_label">Confirm password</label>
+            <input type="password" id="pw2" autocomplete="new-password">
+          </div>
+          <button type="button" class="pay-btn" id="setupBtn" data-t="cta_create">Create account</button>
+        </div>
+
+        <!-- step 5: done -->
+        <div class="checkout-step" id="stepDone" hidden>
+          <div class="done-icon">✅</div>
+          <div class="done-title" data-t="done_title">Your account is ready!</div>
+          <div class="done-sub" id="doneEmail"></div>
+          <a href="/lux/dashboard/index.html" class="pay-btn" id="doneCta"
+             style="text-align:center;text-decoration:none;display:block;"
+             data-t="cta_go">Start practising →</a>
+        </div>
+
+        <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
+      </div>
+
+      <p class="after-text"><span data-t="already">Already have an account?</span> <a href="/lux/login.html" data-t="signin">Sign in here</a>.</p>
+    </div>
+  </section>
+
+</div>
 </main>
 
-<!-- =========================
-     I18N DICTIONARY
-========================= -->
+<!-- ═══════════════════════════════════ I18N ═══════════════════════════════════ -->
 <script>
 const I18N = {
-
-fr: {
-  brand_title: "CivicLearn Vivre-Ensemble",
-  plan_title: "Accès Premium",
-  plan_once: "Paiement unique · accès à vie",
-  included_title: "Inclus",
-  included_title_ve: "Vivre-Ensemble — Inclus",
-  mobile_toggle_label: "📋 Voir ce qui est inclus",
-  header_contact_label: "Une question ?",
-  sw_ve: "Vivre-Ensemble",
-  sw_st: "Sproochentest",
-  /* VE features */
-  f_official_title: "Questions basées sur les sources officielles",
-  f_official_t1: "Matériaux recommandés par le gouvernement",
-  f_official_t2: "PDF inclus",
-  f_topics_title: "Tests par thème",
-  f_sim_title: "Simulations illimitées du test officiel",
-  f_sim_t1: "40 questions", f_sim_t2: "60 min", f_sim_t3: "Notation officielle",
-  f_quick_title: "Quick Test", f_quick_tag: "5 q · aléatoire",
-  f_flash_title: "Flashcards", f_flash_desc: "Format carte",
-  f_traps_title: "Pièges fréquents", f_traps_desc: "Erreurs répétées auto.",
-  f_mylist_title: "Ma liste", f_mylist_desc: "Questions à revoir",
-  f_progress_title: "Progression & historique",
-  f_prog_t1: "Par thème", f_prog_t2: "Graphiques", f_prog_t3: "Historique",
-  f_reminder_title: "Rappels", f_reminder_desc: "Test pratique envoyé chaque jour",
-  f_countdown_title: "Compte à rebours", f_countdown_tag: "Dates officielles",
-  f_lang_title: "3 langues · Lecture audio", f_audio_tag: "🔊 Écouter les questions",
-  social_proof: "Utilisé par des candidats ayant réussi le test Vivre-Ensemble.",
-  /* ST features */
-  st_section_label: "Sproochentest — Inclus",
-  st_sim_title: "10 Simulations complètes",
-  st_sim_t1: "Luxembourgeois natif", st_sim_t2: "Audio authentique", st_sim_t3: "Accès illimité",
-  st_grade_title: "Critères officiels",
-  st_grade_listen: "Écoute B1", st_grade_speak: "Expression A2", st_grade_official: "Barème officiel",
-  st_listen_title: "Compréhension orale",
-  st_speak_title: "Expression orale",
-  st_results_title: "Résultats détaillés",
-  st_results_t1: "Par compétence", st_results_t2: "Feedback IA",
-  st_unlimited_title: "Rejouer à volonté", st_unlimited_desc: "Aucune limite de tentatives",
-  st_progress_title: "Suivi de progression", st_prog_t1: "Par simulation",
-  st_login_title: "Un seul compte", st_login_desc: "Accès VE + Sproochentest avec le même login",
-  bundle_social_proof: "Pack complet pour la naturalisation luxembourgeoise.",
-  /* Payment side — ALL ORIGINAL KEYS PRESERVED */
-  checkout_title: "Activer l'accès Premium",
-  secure_line: "Paiement 100 % sécurisé · vos données bancaires ne passent jamais par nos serveurs",
-  toggle_solo_name: "Vivre-Ensemble",
-  toggle_solo_sub: "Vivre-Ensemble uniquement",
-  toggle_bundle_name: "Vivre-Ensemble + Sproochentest",
-  toggle_bundle_badge: "Le plus populaire",
-  toggle_bundle_save: "Économisez 39 €",
-  toggle_bundle_sub: "Les deux tests avec un seul login",
-  cta_start: "Acheter maintenant",
-  note_no_redirect: "Vous payez en toute sécurité ici même. Aucune redirection.",
-  step_1_of_3: "Étape 1 sur 3",
-  step_2_of_3: "Étape 2 sur 3",
-  step_3_of_3: "Étape 3 sur 3",
-  email_instruction: "Entrez votre adresse e-mail.",
-  email_label: "E-mail",
-  cta_continue: "Continuer",
-  confirm_text: "Le compte sera créé avec :",
-  confirm_warning: "Vérifiez attentivement. Cette adresse sera votre identifiant de connexion.",
-  cta_confirm: "Confirmer et passer au paiement",
-  cta_edit: "Modifier",
-  payment_instruction: "Entrez vos coordonnées bancaires ci-dessous. Le paiement est traité de manière sécurisée par Stripe.",
-  payment_loading: "Chargement du formulaire de paiement…",
-  cta_pay_solo: "Payer 69 €",
-  cta_pay_bundle: "Payer 99 €",
-  cta_pay: "Payer",
-  cta_back: "← Retour",
-  payment_confirmed: "Paiement confirmé !",
-  password_instruction: "Choisissez maintenant un mot de passe pour finaliser votre compte.",
-  pwd_label: "Mot de passe",
-  pwd_confirm_label: "Confirmer le mot de passe",
-  pwd_placeholder: "Minimum 6 caractères",
-  pwd_confirm_placeholder: "Répétez le mot de passe",
-  cta_create_account: "Créer le compte",
-  done_title: "Votre compte est prêt !",
-  cta_start_training: "Commencer l'entraînement →",
-  trust_secure: "🔒 Paiement sécurisé",
-  trust_instant: "⚡ Accès immédiat",
-  trust_no_sub: "✔ Aucun abonnement",
-  already_account: "Déjà un compte ?",
-  login_link: "Se connecter",
-  msg_enter_email: "Veuillez saisir votre adresse e-mail.",
-  msg_invalid_email: "Adresse e-mail invalide.",
-  msg_preparing: "Préparation du formulaire de paiement sécurisé…",
-  msg_creating: "Création du compte…",
-  msg_processing: "Traitement du paiement…",
-  msg_error: "Une erreur est survenue.",
-  msg_payment_failed: "Le paiement a échoué.",
-  msg_payment_incomplete: "Le paiement n'a pas été finalisé.",
-  msg_pwd_short: "Le mot de passe doit contenir au moins 6 caractères.",
-  msg_pwd_mismatch: "Les mots de passe ne correspondent pas.",
-  msg_account_failed: "Échec de la création du compte.",
-  msg_connection_error: "Erreur de connexion. Veuillez réessayer.",
-  msg_logged_in_as: "Connecté en tant que : "
-},
-
-de: {
-  brand_title: "CivicLearn Vivre-Ensemble",
-  plan_title: "Premium-Zugang",
-  plan_once: "Einmalzahlung · lebenslanger Zugriff",
-  included_title: "Enthalten",
-  included_title_ve: "Vivre-Ensemble — Enthalten",
-  mobile_toggle_label: "📋 Leistungen ansehen",
-  header_contact_label: "Fragen?",
-  sw_ve: "Vivre-Ensemble",
-  sw_st: "Sproochentest",
-  f_official_title: "Fragen basierend auf offiziellen Quellen",
-  f_official_t1: "Staatlich empfohlene Materialien",
-  f_official_t2: "PDF inbegriffen",
-  f_topics_title: "Tests nach Thema",
-  f_sim_title: "Unbegrenzte Simulationen des offiziellen Tests",
-  f_sim_t1: "40 Fragen", f_sim_t2: "60 Min.", f_sim_t3: "Offizielle Bewertung",
-  f_quick_title: "Quick Test", f_quick_tag: "5 F. · zufällig",
-  f_flash_title: "Lernkarten", f_flash_desc: "Karteikarten-Format",
-  f_traps_title: "Häufige Fehler", f_traps_desc: "Auto. erfasst",
-  f_mylist_title: "Meine Liste", f_mylist_desc: "Zur Wiederholung",
-  f_progress_title: "Fortschritt & Verlauf",
-  f_prog_t1: "Nach Thema", f_prog_t2: "Diagramme", f_prog_t3: "Verlauf",
-  f_reminder_title: "Erinnerungen", f_reminder_desc: "Tägliche Übung, jeden Tag gesendet",
-  f_countdown_title: "Countdown", f_countdown_tag: "Offizielle Termine",
-  f_lang_title: "3 Sprachen · Audio-Assist", f_audio_tag: "🔊 Fragen anhören",
-  social_proof: "Von erfolgreichen Kandidaten genutzt.",
-  st_section_label: "Sproochentest — Enthalten",
-  st_sim_title: "10 vollständige Simulationen",
-  st_sim_t1: "Echtes Lëtzebuergesch", st_sim_t2: "Authentisches Audio", st_sim_t3: "Unbegrenzt",
-  st_grade_title: "Offizielle Kriterien",
-  st_grade_listen: "Hören B1", st_grade_speak: "Sprechen A2", st_grade_official: "Offiz. Bewertung",
-  st_listen_title: "Hörverstehen",
-  st_speak_title: "Mündlicher Ausdruck",
-  st_results_title: "Detaillierte Ergebnisse",
-  st_results_t1: "Pro Kompetenz", st_results_t2: "KI-Feedback",
-  st_unlimited_title: "Unbegrenzt wiederholen", st_unlimited_desc: "Keine Versuchslimits",
-  st_progress_title: "Fortschrittsübersicht", st_prog_t1: "Pro Simulation",
-  st_login_title: "Ein Konto", st_login_desc: "VE + Sproochentest mit einem Login",
-  bundle_social_proof: "Komplettpaket für die luxemburgische Einbürgerung.",
-  checkout_title: "Premium-Zugang aktivieren",
-  secure_line: "100 % sichere Zahlung · Ihre Bankdaten werden nie über unsere Server übertragen",
-  toggle_solo_name: "Vivre-Ensemble",
-  toggle_solo_sub: "Nur Vivre-Ensemble",
-  toggle_bundle_name: "Vivre-Ensemble + Sproochentest",
-  toggle_bundle_badge: "Am beliebtesten",
-  toggle_bundle_save: "39 € sparen",
-  toggle_bundle_sub: "Beide Tests mit einem Login",
-  cta_start: "Jetzt kaufen",
-  note_no_redirect: "Sie bezahlen sicher direkt auf dieser Seite. Keine Weiterleitung.",
-  step_1_of_3: "Schritt 1 von 3",
-  step_2_of_3: "Schritt 2 von 3",
-  step_3_of_3: "Schritt 3 von 3",
-  email_instruction: "Geben Sie Ihre E-Mail-Adresse ein.",
-  email_label: "E-Mail",
-  cta_continue: "Weiter",
-  confirm_text: "Das Konto wird erstellt mit:",
-  confirm_warning: "Bitte überprüfen Sie sorgfältig. Diese Adresse ist Ihre Anmeldedaten.",
-  cta_confirm: "Bestätigen und weiter zur Zahlung",
-  cta_edit: "Ändern",
-  payment_instruction: "Geben Sie Ihre Zahlungsdaten unten ein. Die Zahlung wird sicher über Stripe abgewickelt.",
-  payment_loading: "Zahlungsformular wird geladen…",
-  cta_pay_solo: "69 € bezahlen",
-  cta_pay_bundle: "99 € bezahlen",
-  cta_pay: "Bezahlen",
-  cta_back: "← Zurück",
-  payment_confirmed: "Zahlung bestätigt!",
-  password_instruction: "Wählen Sie jetzt ein Passwort, um Ihr Konto einzurichten.",
-  pwd_label: "Passwort",
-  pwd_confirm_label: "Passwort bestätigen",
-  pwd_placeholder: "Mindestens 6 Zeichen",
-  pwd_confirm_placeholder: "Passwort wiederholen",
-  cta_create_account: "Konto erstellen",
-  done_title: "Ihr Konto ist bereit!",
-  cta_start_training: "Training starten →",
-  trust_secure: "🔒 Sichere Zahlung",
-  trust_instant: "⚡ Sofortiger Zugriff",
-  trust_no_sub: "✔ Kein Abonnement",
-  already_account: "Bereits ein Konto?",
-  login_link: "Anmelden",
-  msg_enter_email: "Bitte geben Sie Ihre E-Mail-Adresse ein.",
-  msg_invalid_email: "Ungültige E-Mail-Adresse.",
-  msg_preparing: "Sicheres Zahlungsformular wird geladen…",
-  msg_creating: "Konto wird erstellt…",
-  msg_processing: "Zahlung wird verarbeitet…",
-  msg_error: "Ein Fehler ist aufgetreten.",
-  msg_payment_failed: "Die Zahlung ist fehlgeschlagen.",
-  msg_payment_incomplete: "Die Zahlung wurde nicht abgeschlossen.",
-  msg_pwd_short: "Das Passwort muss mindestens 6 Zeichen lang sein.",
-  msg_pwd_mismatch: "Die Passwörter stimmen nicht überein.",
-  msg_account_failed: "Kontoerstellung fehlgeschlagen.",
-  msg_connection_error: "Verbindungsfehler. Bitte versuchen Sie es erneut.",
-  msg_logged_in_as: "Angemeldet als: "
-},
-
 en: {
-  brand_title: "CivicLearn Vivre-Ensemble",
-  plan_title: "Premium Access",
-  plan_once: "One-time payment · lifetime access",
-  included_title: "Included",
-  included_title_ve: "Vivre-Ensemble — Included",
-  mobile_toggle_label: "📋 See what's included",
-  header_contact_label: "Any questions?",
-  sw_ve: "Vivre-Ensemble",
-  sw_st: "Sproochentest",
-  f_official_title: "Questions based on official materials",
-  f_official_t1: "Govt-recommended materials",
-  f_official_t2: "PDF included",
-  f_topics_title: "Tests by topic",
-  f_sim_title: "Unlimited simulations of the official test",
-  f_sim_t1: "40 questions", f_sim_t2: "60 min", f_sim_t3: "Official grading",
-  f_quick_title: "Quick Test", f_quick_tag: "5 q · random",
-  f_flash_title: "Flashcards", f_flash_desc: "Card format",
-  f_traps_title: "Frequent Traps", f_traps_desc: "Repeat mistakes, auto-tracked",
-  f_mylist_title: "My List", f_mylist_desc: "Questions for review",
-  f_progress_title: "Progress & History",
-  f_prog_t1: "By topic", f_prog_t2: "Graphs", f_prog_t3: "Test history",
-  f_reminder_title: "Reminders", f_reminder_desc: "A practice test sent every day",
-  f_countdown_title: "Countdown", f_countdown_tag: "Official test dates",
-  f_lang_title: "3 languages · Audio Assist", f_audio_tag: "🔊 Listen to questions",
-  social_proof: "Used by candidates who passed the Vivre-Ensemble test.",
-  st_section_label: "Sproochentest — Included",
-  st_sim_title: "10 complete simulations",
-  st_sim_t1: "Native Luxembourgish", st_sim_t2: "Authentic audio", st_sim_t3: "Unlimited retakes",
-  st_grade_title: "Official grading criteria",
-  st_grade_listen: "Listening B1", st_grade_speak: "Speaking A2", st_grade_official: "Official scale",
-  st_listen_title: "Listening comprehension",
-  st_speak_title: "Oral expression",
-  st_results_title: "Detailed results",
-  st_results_t1: "Per skill", st_results_t2: "AI feedback",
-  st_unlimited_title: "Redo anytime", st_unlimited_desc: "No attempt limits",
-  st_progress_title: "Progress tracking", st_prog_t1: "Per simulation",
-  st_login_title: "One account", st_login_desc: "VE + Sproochentest with one login",
-  bundle_social_proof: "The complete pack for Luxembourg naturalisation.",
-  checkout_title: "Activate Premium Access",
-  secure_line: "100% secure payment · your bank details never pass through our servers",
-  toggle_solo_name: "Vivre-Ensemble",
-  toggle_solo_sub: "Vivre-Ensemble only",
-  toggle_bundle_name: "Vivre-Ensemble + Sproochentest",
-  toggle_bundle_badge: "Most popular",
-  toggle_bundle_save: "Save €39",
-  toggle_bundle_sub: "Both tests with one login",
-  cta_start: "Buy now",
-  note_no_redirect: "You pay securely right on this page. No redirect.",
-  step_1_of_3: "Step 1 of 3",
-  step_2_of_3: "Step 2 of 3",
-  step_3_of_3: "Step 3 of 3",
-  email_instruction: "Enter your email address.",
-  email_label: "Email",
-  cta_continue: "Continue",
-  confirm_text: "The account will be created with:",
-  confirm_warning: "Please check carefully. This address will be your login.",
-  cta_confirm: "Confirm and proceed to payment",
-  cta_edit: "Edit",
-  payment_instruction: "Enter your payment details below. Payment is processed securely by Stripe.",
-  payment_loading: "Loading payment form…",
-  cta_pay_solo: "Pay €69",
-  cta_pay_bundle: "Pay €99",
-  cta_pay: "Pay",
-  cta_back: "← Back",
-  payment_confirmed: "Payment confirmed!",
-  password_instruction: "Choose a password to set up your account.",
-  pwd_label: "Password",
-  pwd_confirm_label: "Confirm password",
-  pwd_placeholder: "Minimum 6 characters",
-  pwd_confirm_placeholder: "Repeat password",
-  cta_create_account: "Create account",
-  done_title: "Your account is ready!",
-  cta_start_training: "Start training →",
-  trust_secure: "🔒 Secure payment",
-  trust_instant: "⚡ Instant access",
-  trust_no_sub: "✔ No subscription",
-  already_account: "Already have an account?",
-  login_link: "Log in",
-  msg_enter_email: "Please enter your email address.",
-  msg_invalid_email: "Invalid email address.",
-  msg_preparing: "Loading secure payment form…",
-  msg_creating: "Creating account…",
-  msg_processing: "Processing payment…",
-  msg_error: "An error occurred.",
-  msg_payment_failed: "Payment failed.",
-  msg_payment_incomplete: "Payment was not completed.",
-  msg_pwd_short: "Password must be at least 6 characters.",
-  msg_pwd_mismatch: "Passwords do not match.",
-  msg_account_failed: "Account creation failed.",
-  msg_connection_error: "Connection error. Please try again.",
-  msg_logged_in_as: "Logged in as: "
+  brand_title:"CivicLearn Vivre-Ensemble", header_contact:"Any questions?", mob_toggle:"📋 See what's included",
+  sidebar_label:"Vivre-Ensemble · Full Access", sidebar_label_bundle:"Vivre-Ensemble + Sproochentest · Bundle",
+  price_once:"One-time · Lifetime access", price_badge:"650+ questions",
+  section_practice:"Practice Modes",
+  f_topics:"Tests by Topic", f_topics_p1:"History of Luxembourg", f_topics_p2:"Droits & Devoirs", f_topics_p3:"Institutions",
+  f_quick:"Quick Test", f_quick_sub:"5 random questions — instant feedback, any time", f_quick_p1:"Any topic", f_quick_p2:"Instant results",
+  f_sim:"Unlimited official simulations", f_sim_sub:"The exact format and grading of the real exam", f_sim_p1:"40 questions", f_sim_p2:"60 min", f_sim_p3:"Official grading",
+  f_flash:"Flashcards", f_flash_sub:"Every question in card format — perfect for commutes",
+  section_tools:"Smart Tools",
+  f_traps:"Frequent Traps", f_traps_sub:"We spot questions you keep missing and isolate them for focused review", f_traps_p1:"Auto-detected", f_traps_p2:"Targeted review",
+  f_mylist:"My List", f_mylist_sub:"Bookmark any question you want to revisit later",
+  f_progress:"Progress & History", f_progress_sub:"Every session logged — scores, mistakes, trends", f_progress_p1:"By topic", f_progress_p2:"Timeline graphs", f_progress_p3:"Weak areas",
+  f_countdown:"Exam Countdown", f_countdown_sub:"Synced with official Vivre-Ensemble session dates", f_countdown_p1:"Official dates", f_countdown_p2:"Days remaining",
+  f_reminders:"Daily Reminders", f_reminders_sub:"Opt-in daily nudge with a fresh mini-test to keep momentum",
+  section_lang:"Language & Accessibility",
+  f_langs:"Three Interface Languages", f_langs_sub:"Full platform available in all three — switch anytime",
+  f_audio:"Reading Assist", f_audio_sub:"Listen to every question and answer — no reading required", f_audio_p1:"Audio questions", f_audio_p2:"Audio answers",
+  f_official:"Official Study Materials", f_official_sub:"All questions sourced from government-recommended materials", f_official_p1:"Official source", f_official_p2:"PDF included",
+  bundle_also:"Also included",
+  bx_sim:"10 Sproochentest Simulations", bx_sim_sub:"Native Luxembourgish audio · Listening B1 + Speaking A2",
+  bx_grade:"Official Grading Criteria", bx_grade_sub:"Evaluated with the real exam scoring scale",
+  bx_results:"Detailed Results & AI Feedback", bx_results_sub:"Per-skill breakdown after each attempt",
+  bx_unlimited:"Unlimited Retakes", bx_unlimited_sub:"No attempt limits — practise until you're ready",
+  bx_login:"Shared login · one account", bx_login_sub:"Both products accessible with the same login",
+  trust_title:"Recommended by users who passed", trust_sub:"One payment · No subscription · Access never expires",
+  checkout_h1:"Activate your full access", secure_line:"100% secure payment · your card details never touch our servers",
+  plan_solo_name:"Vivre-Ensemble au Luxembourg", plan_solo_sub:"Vivre-Ensemble only", plan_solo_detail:"650 questions · 3 languages",
+  plan_bundle_badge:"Best value", plan_bundle_name:"Vivre-Ensemble + Sproochentest", plan_bundle_save:"Save €39", plan_bundle_sub:"Both exams · one login",
+  cta_start_solo:"Get access — €69", cta_start_bundle:"Get access — €99",
+  small_note:"You pay securely on this page. No redirects. Powered by Stripe.",
+  ts_secure:"Secure payment", ts_instant:"Instant access", ts_nosub:"No subscription",
+  step1:"Step 1 of 3", step2:"Step 2 of 3", step3:"Step 3 of 3",
+  email_instr:"Enter the email address you'd like to use for your CivicLearn account.", email_label:"Email", cta_continue:"Continue",
+  confirm_text:"Your account will be created with this address:", confirm_warn:"Please double-check the spelling. This is your login.",
+  cta_confirm:"Confirm & go to payment", cta_edit:"← Edit email",
+  pay_instr:"Enter your payment details below. Processed securely by Stripe.", pay_loading:"Loading payment form…",
+  pay_solo:"Pay €69", pay_bundle:"Pay €99", cta_back:"← Back",
+  pay_confirmed:"Payment confirmed!", pwd_instr:"Choose a password for your account.",
+  pwd_label:"Password", pwd_confirm_label:"Confirm password", pwd_placeholder:"At least 6 characters", pwd_confirm_placeholder:"Repeat password",
+  cta_create:"Create account", done_title:"Your account is ready!", cta_go:"Start practising →",
+  already:"Already have an account?", signin:"Sign in here",
+  msg_email_required:"Please enter a valid email.", msg_preparing:"Loading secure payment form…", msg_processing:"Processing…",
+  msg_creating:"Creating account…", msg_error:"An error occurred.", msg_payment_failed:"Payment failed.",
+  msg_payment_incomplete:"Payment was not completed.", msg_pwd_short:"Password must be at least 6 characters.",
+  msg_pwd_mismatch:"Passwords do not match.", msg_account_failed:"Account creation failed.",
+  msg_connection_error:"Connection error. Please try again.", msg_logged_in:"Signed in as: "
+},
+fr: {
+  brand_title:"CivicLearn Vivre-Ensemble", header_contact:"Une question?", mob_toggle:"📋 Voir ce qui est inclus",
+  sidebar_label:"Vivre-Ensemble · Accès complet", sidebar_label_bundle:"Vivre-Ensemble + Sproochentest · Pack",
+  price_once:"Paiement unique · Accès à vie", price_badge:"650+ questions",
+  section_practice:"Modes d'entraînement",
+  f_topics:"Tests par thème", f_topics_p1:"Histoire du Luxembourg", f_topics_p2:"Droits & Devoirs", f_topics_p3:"Institutions",
+  f_quick:"Test rapide", f_quick_sub:"5 questions aléatoires — résultat instantané, à tout moment", f_quick_p1:"Tout thème", f_quick_p2:"Résultats instantanés",
+  f_sim:"Simulations officielles illimitées", f_sim_sub:"Le format et la notation exacts du vrai examen", f_sim_p1:"40 questions", f_sim_p2:"60 min", f_sim_p3:"Notation officielle",
+  f_flash:"Flashcards", f_flash_sub:"Chaque question en format carte — idéal en déplacement",
+  section_tools:"Outils intelligents",
+  f_traps:"Pièges fréquents", f_traps_sub:"Nous repérons les questions que vous ratez et les isolons pour une révision ciblée", f_traps_p1:"Détection auto", f_traps_p2:"Révision ciblée",
+  f_mylist:"Ma liste", f_mylist_sub:"Marquez les questions que vous souhaitez revoir",
+  f_progress:"Progression & Historique", f_progress_sub:"Chaque session enregistrée — scores, erreurs, tendances", f_progress_p1:"Par thème", f_progress_p2:"Graphiques", f_progress_p3:"Points faibles",
+  f_countdown:"Compte à rebours", f_countdown_sub:"Synchronisé avec les dates officielles de l'examen Vivre-Ensemble", f_countdown_p1:"Dates officielles", f_countdown_p2:"Jours restants",
+  f_reminders:"Rappels quotidiens", f_reminders_sub:"Un mini-test quotidien pour maintenir le rythme",
+  section_lang:"Langues & Accessibilité",
+  f_langs:"Trois langues d'interface", f_langs_sub:"Plateforme complète dans les trois — changez à tout moment",
+  f_audio:"Aide à la lecture", f_audio_sub:"Écoutez chaque question et réponse — pas de lecture requise", f_audio_p1:"Questions audio", f_audio_p2:"Réponses audio",
+  f_official:"Matériaux d'étude officiels", f_official_sub:"Questions issues des matériaux recommandés par le gouvernement", f_official_p1:"Source officielle", f_official_p2:"PDF inclus",
+  bundle_also:"Également inclus",
+  bx_sim:"10 Simulations Sproochentest", bx_sim_sub:"Audio luxembourgeois natif · Écoute B1 + Expression A2",
+  bx_grade:"Critères de notation officiels", bx_grade_sub:"Évalué selon le barème réel de l'examen",
+  bx_results:"Résultats détaillés & Feedback IA", bx_results_sub:"Analyse par compétence après chaque tentative",
+  bx_unlimited:"Tentatives illimitées", bx_unlimited_sub:"Aucune limite — entraînez-vous jusqu'à être prêt",
+  bx_login:"Connexion partagée · un seul compte", bx_login_sub:"Les deux produits accessibles avec le même identifiant",
+  trust_title:"Recommandé par les candidats ayant réussi", trust_sub:"Paiement unique · Aucun abonnement · Accès permanent",
+  checkout_h1:"Activer votre accès complet", secure_line:"Paiement 100 % sécurisé · vos données bancaires ne touchent jamais nos serveurs",
+  plan_solo_name:"Vivre-Ensemble au Luxembourg", plan_solo_sub:"Vivre-Ensemble uniquement", plan_solo_detail:"650 questions · 3 langues",
+  plan_bundle_badge:"Meilleur rapport", plan_bundle_name:"Vivre-Ensemble + Sproochentest", plan_bundle_save:"Économisez 39 €", plan_bundle_sub:"Les deux examens · un seul identifiant",
+  cta_start_solo:"Acheter — 69 €", cta_start_bundle:"Acheter — 99 €",
+  small_note:"Vous payez en toute sécurité sur cette page. Aucune redirection.",
+  ts_secure:"Paiement sécurisé", ts_instant:"Accès immédiat", ts_nosub:"Aucun abonnement",
+  step1:"Étape 1 sur 3", step2:"Étape 2 sur 3", step3:"Étape 3 sur 3",
+  email_instr:"Entrez l'adresse e-mail pour votre compte CivicLearn.", email_label:"E-mail", cta_continue:"Continuer",
+  confirm_text:"Votre compte sera créé avec cette adresse :", confirm_warn:"Vérifiez attentivement l'orthographe. C'est votre identifiant.",
+  cta_confirm:"Confirmer et passer au paiement", cta_edit:"← Modifier l'e-mail",
+  pay_instr:"Entrez vos coordonnées de paiement. Traité de manière sécurisée par Stripe.", pay_loading:"Chargement du formulaire de paiement…",
+  pay_solo:"Payer 69 €", pay_bundle:"Payer 99 €", cta_back:"← Retour",
+  pay_confirmed:"Paiement confirmé !", pwd_instr:"Choisissez un mot de passe pour votre compte.",
+  pwd_label:"Mot de passe", pwd_confirm_label:"Confirmer le mot de passe", pwd_placeholder:"Minimum 6 caractères", pwd_confirm_placeholder:"Répétez le mot de passe",
+  cta_create:"Créer le compte", done_title:"Votre compte est prêt !", cta_go:"Commencer l'entraînement →",
+  already:"Déjà un compte ?", signin:"Se connecter",
+  msg_email_required:"Veuillez entrer une adresse e-mail valide.", msg_preparing:"Préparation du formulaire de paiement…", msg_processing:"Traitement en cours…",
+  msg_creating:"Création du compte…", msg_error:"Une erreur est survenue.", msg_payment_failed:"Le paiement a échoué.",
+  msg_payment_incomplete:"Le paiement n'a pas été finalisé.", msg_pwd_short:"Le mot de passe doit contenir au moins 6 caractères.",
+  msg_pwd_mismatch:"Les mots de passe ne correspondent pas.", msg_account_failed:"Échec de la création du compte.",
+  msg_connection_error:"Erreur de connexion. Veuillez réessayer.", msg_logged_in:"Connecté en tant que : "
+},
+de: {
+  brand_title:"CivicLearn Vivre-Ensemble", header_contact:"Fragen?", mob_toggle:"📋 Leistungen ansehen",
+  sidebar_label:"Vivre-Ensemble · Vollzugang", sidebar_label_bundle:"Vivre-Ensemble + Sproochentest · Paket",
+  price_once:"Einmalzahlung · Lebenslanger Zugriff", price_badge:"650+ Fragen",
+  section_practice:"Übungsmodi",
+  f_topics:"Tests nach Thema", f_topics_p1:"Geschichte Luxemburgs", f_topics_p2:"Rechte & Pflichten", f_topics_p3:"Institutionen",
+  f_quick:"Schnelltest", f_quick_sub:"5 zufällige Fragen — sofortiges Feedback, jederzeit", f_quick_p1:"Jedes Thema", f_quick_p2:"Sofortergebnisse",
+  f_sim:"Unbegrenzte offizielle Simulationen", f_sim_sub:"Das exakte Format und die Bewertung der echten Prüfung", f_sim_p1:"40 Fragen", f_sim_p2:"60 Min.", f_sim_p3:"Offizielle Bewertung",
+  f_flash:"Lernkarten", f_flash_sub:"Jede Frage als Karteikarte — ideal für unterwegs",
+  section_tools:"Smarte Tools",
+  f_traps:"Häufige Fehler", f_traps_sub:"Wir erkennen Fragen, die Sie oft falsch beantworten, und isolieren sie zur gezielten Wiederholung", f_traps_p1:"Automatisch erkannt", f_traps_p2:"Gezielte Wiederholung",
+  f_mylist:"Meine Liste", f_mylist_sub:"Markieren Sie Fragen, die Sie später wiederholen möchten",
+  f_progress:"Fortschritt & Verlauf", f_progress_sub:"Jede Sitzung protokolliert — Punkte, Fehler, Trends", f_progress_p1:"Nach Thema", f_progress_p2:"Zeitverlauf", f_progress_p3:"Schwächen",
+  f_countdown:"Prüfungs-Countdown", f_countdown_sub:"Synchronisiert mit offiziellen Vivre-Ensemble-Terminen", f_countdown_p1:"Offizielle Termine", f_countdown_p2:"Verbleibende Tage",
+  f_reminders:"Tägliche Erinnerungen", f_reminders_sub:"Täglicher Mini-Test, um am Ball zu bleiben",
+  section_lang:"Sprachen & Barrierefreiheit",
+  f_langs:"Drei Sprachen verfügbar", f_langs_sub:"Komplette Plattform in allen drei — jederzeit wechselbar",
+  f_audio:"Vorlesehilfe", f_audio_sub:"Hören Sie sich jede Frage und Antwort an — kein Lesen nötig", f_audio_p1:"Audio-Fragen", f_audio_p2:"Audio-Antworten",
+  f_official:"Offizielle Lernmaterialien", f_official_sub:"Alle Fragen aus staatlich empfohlenen Materialien", f_official_p1:"Offizielle Quelle", f_official_p2:"PDF inklusive",
+  bundle_also:"Ebenfalls enthalten",
+  bx_sim:"10 Sproochentest-Simulationen", bx_sim_sub:"Echtes Lëtzebuergesch-Audio · Hören B1 + Sprechen A2",
+  bx_grade:"Offizielle Bewertungskriterien", bx_grade_sub:"Bewertet nach dem echten Prüfungsmaßstab",
+  bx_results:"Detaillierte Ergebnisse & KI-Feedback", bx_results_sub:"Aufschlüsselung pro Kompetenz nach jedem Versuch",
+  bx_unlimited:"Unbegrenzt wiederholen", bx_unlimited_sub:"Keine Versuchslimits — üben Sie, bis Sie bereit sind",
+  bx_login:"Gemeinsamer Zugang · ein Konto", bx_login_sub:"Beide Produkte über dasselbe Dashboard zugänglich",
+  trust_title:"Empfohlen von Kandidaten, die bestanden haben", trust_sub:"Einmalzahlung · Kein Abo · Zugriff läuft nie ab",
+  checkout_h1:"Vollzugang aktivieren", secure_line:"100 % sichere Zahlung · Ihre Bankdaten berühren nie unsere Server",
+  plan_solo_name:"Vivre-Ensemble in Luxemburg", plan_solo_sub:"Nur Vivre-Ensemble", plan_solo_detail:"650 Fragen · 3 Sprachen",
+  plan_bundle_badge:"Bester Wert", plan_bundle_name:"VE + Sproochentest", plan_bundle_save:"39 € sparen", plan_bundle_sub:"Beide Prüfungen · ein Zugang",
+  cta_start_solo:"Zugang kaufen — 69 €", cta_start_bundle:"Zugang kaufen — 99 €",
+  small_note:"Sie bezahlen sicher auf dieser Seite. Keine Weiterleitung.",
+  ts_secure:"Sichere Zahlung", ts_instant:"Sofortiger Zugriff", ts_nosub:"Kein Abo",
+  step1:"Schritt 1 von 3", step2:"Schritt 2 von 3", step3:"Schritt 3 von 3",
+  email_instr:"Geben Sie die E-Mail-Adresse für Ihr CivicLearn-Konto ein.", email_label:"E-Mail", cta_continue:"Weiter",
+  confirm_text:"Ihr Konto wird mit dieser Adresse erstellt:", confirm_warn:"Bitte überprüfen Sie die Schreibweise. Dies sind Ihre Zugangsdaten.",
+  cta_confirm:"Bestätigen & weiter zur Zahlung", cta_edit:"← E-Mail ändern",
+  pay_instr:"Geben Sie Ihre Zahlungsdaten unten ein. Sicher verarbeitet durch Stripe.", pay_loading:"Zahlungsformular wird geladen…",
+  pay_solo:"69 € bezahlen", pay_bundle:"99 € bezahlen", cta_back:"← Zurück",
+  pay_confirmed:"Zahlung bestätigt!", pwd_instr:"Wählen Sie ein Passwort für Ihr Konto.",
+  pwd_label:"Passwort", pwd_confirm_label:"Passwort bestätigen", pwd_placeholder:"Mindestens 6 Zeichen", pwd_confirm_placeholder:"Passwort wiederholen",
+  cta_create:"Konto erstellen", done_title:"Ihr Konto ist bereit!", cta_go:"Training starten →",
+  already:"Bereits ein Konto?", signin:"Anmelden",
+  msg_email_required:"Bitte geben Sie eine gültige E-Mail-Adresse ein.", msg_preparing:"Zahlungsformular wird geladen…", msg_processing:"Wird verarbeitet…",
+  msg_creating:"Konto wird erstellt…", msg_error:"Ein Fehler ist aufgetreten.", msg_payment_failed:"Zahlung fehlgeschlagen.",
+  msg_payment_incomplete:"Zahlung nicht abgeschlossen.", msg_pwd_short:"Mindestens 6 Zeichen.",
+  msg_pwd_mismatch:"Passwörter stimmen nicht überein.", msg_account_failed:"Kontoerstellung fehlgeschlagen.",
+  msg_connection_error:"Verbindungsfehler. Bitte erneut versuchen.", msg_logged_in:"Angemeldet als: "
 }
 };
 </script>
 
-<!-- =========================
-     I18N ENGINE (ORIGINAL — UNTOUCHED)
-========================= -->
+<!-- I18N ENGINE -->
 <script>
-let currentLang = "fr";
-function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || key; }
-
-function applyLang(lang) {
-  currentLang = lang;
-  document.documentElement.lang = lang;
-  document.querySelectorAll("[data-t]").forEach(el => {
-    const key = el.dataset.t;
-    if (I18N[lang][key]) el.textContent = I18N[lang][key];
-  });
-  document.querySelectorAll(".lang-switch button").forEach(b => {
-    b.classList.toggle("active", b.dataset.lang === lang);
-  });
-  // Update dynamic pay button text
-  if (typeof updatePayBtnText === 'function') updatePayBtnText();
-  // Update placeholders
-  const pw1 = document.getElementById('pw1');
-  const pw2 = document.getElementById('pw2');
-  if (pw1) pw1.placeholder = t('pwd_placeholder');
-  if (pw2) pw2.placeholder = t('pwd_confirm_placeholder');
+let currentLang='fr';
+function t(k){return(I18N[currentLang]&&I18N[currentLang][k])||k;}
+function applyLang(lang){
+  currentLang=lang;
+  document.documentElement.lang=lang==='en'?'en':lang==='de'?'de':'fr-LU';
+  document.querySelectorAll('[data-t]').forEach(el=>{const k=el.dataset.t;if(I18N[lang][k])el.textContent=I18N[lang][k];});
+  document.querySelectorAll('.lang-switch button').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));
+  if(typeof refreshDynamic==='function')refreshDynamic();
+  const pw1=document.getElementById('pw1'),pw2=document.getElementById('pw2');
+  if(pw1)pw1.placeholder=t('pwd_placeholder');if(pw2)pw2.placeholder=t('pwd_confirm_placeholder');
 }
-
-document.querySelectorAll(".lang-switch button").forEach(b => {
-  b.onclick = () => applyLang(b.dataset.lang);
-});
-applyLang("fr");
-</script>
-
-<!-- =========================
-     SIDEBAR PANEL LOGIC
-     (new — drives the feature panels only,
-      does not touch payment flow)
-========================= -->
-<script>
-function switchSidebarPanel(plan) {
-  const panelVE     = document.getElementById('panelVE');
-  const panelBundle = document.getElementById('panelBundle');
-  const priceNum    = document.getElementById('sidebarPriceNum');
-  if (plan === 'bundle') {
-    panelVE.classList.add('s-hidden');
-    panelBundle.classList.remove('s-hidden');
-    if (priceNum) priceNum.textContent = '99';
-    switchSubPanel('st'); // auto-select Sproochentest tab
-  } else {
-    panelBundle.classList.add('s-hidden');
-    panelVE.classList.remove('s-hidden');
-    if (priceNum) priceNum.textContent = '69';
-  }
-}
-
-function switchSubPanel(panel) {
-  const swVE  = document.getElementById('swVE');
-  const swST  = document.getElementById('swST');
-  const subVE = document.getElementById('subPanelVE');
-  const subST = document.getElementById('subPanelST');
-  if (!swVE || !swST) return;
-  if (panel === 've') {
-    swVE.className = 'switcher-btn sw-active';
-    swST.className = 'switcher-btn';
-    subVE.style.display = '';
-    subST.style.display = 'none';
-  } else {
-    swST.className = 'switcher-btn sw-active-teal';
-    swVE.className = 'switcher-btn';
-    subST.style.display = '';
-    subVE.style.display = 'none';
-  }
-}
-
-function toggleMobFeatures() {
-  const sidebar = document.getElementById('featureSidebar');
-  const toggle  = document.getElementById('mobToggle');
-  sidebar.classList.toggle('mob-open');
-  toggle.classList.toggle('mob-open');
-}
+document.querySelectorAll('.lang-switch button').forEach(b=>{b.onclick=()=>applyLang(b.dataset.lang);});
+applyLang('fr');
 </script>
 
 <!-- STRIPE + SUPABASE -->
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
-<!-- =========================
-     CHECKOUT LOGIC (ORIGINAL — UNTOUCHED)
-     Only addition: switchSidebarPanel() call
-     appended inside selectPlan()
-========================= -->
+<!-- CHECKOUT LOGIC -->
 <script>
-(function() {
+(function(){
   'use strict';
+  const FUNCTIONS_URL='https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  const SUPABASE_URL='https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const STRIPE_PK='pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
+  const RETURN_URL='https://civiclearn.com/lux/checkout.html';
 
-  const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
-  const SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
-  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
-  const STRIPE_PK     = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
-  const RETURN_URL    = 'https://civiclearn.com/lux/checkout.html';
+  const stripe=Stripe(STRIPE_PK);
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-  const stripe = Stripe(STRIPE_PK);
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  /* ── Plan state ── */
-  const PLANS = {
-    solo:   { price: '69 €', payKey: 'cta_pay_solo' },
-    bundle: { price: '99 €', payKey: 'cta_pay_bundle' }
+  const PLANS={
+    solo:{price:'69',ctaKey:'cta_start_solo',payKey:'pay_solo',labelKey:'sidebar_label'},
+    bundle:{price:'99',ctaKey:'cta_start_bundle',payKey:'pay_bundle',labelKey:'sidebar_label_bundle'},
   };
-  let selectedPlan = 'solo';
+  let selectedPlan='solo';
+  const urlPlan=new URLSearchParams(window.location.search).get('plan');
+  if(urlPlan==='bundle')selectedPlan='bundle';
 
-  // Read ?plan=bundle from URL
-  const urlPlan = new URLSearchParams(window.location.search).get('plan');
-  if (urlPlan === 'bundle') selectedPlan = 'bundle';
+  const cardSolo=document.getElementById('planSolo');
+  const cardBundle=document.getElementById('planBundle');
+  const sidebarPrice=document.getElementById('sidebarPrice');
+  const sidebarLabel=document.getElementById('sidebarLabel');
+  const bundleExtras=document.getElementById('bundleExtras');
+  const startBtn=document.getElementById('startCheckout');
 
-  const cardSolo   = document.getElementById('planSolo');
-  const cardBundle = document.getElementById('planBundle');
-  const sidebar    = document.getElementById('sidebarPrice');
-  const extras     = document.getElementById('bundleExtras');
-
-  function selectPlan(plan) {
-    selectedPlan = plan;
-    cardSolo.classList.toggle('selected', plan === 'solo');
-    cardBundle.classList.toggle('selected', plan === 'bundle');
-    sidebar.textContent = PLANS[plan].price;
-    extras.classList.toggle('show', plan === 'bundle');
-    updatePayBtnText();
-    // Drive the new sidebar panels
-    switchSidebarPanel(plan);
+  function selectPlan(plan){
+    selectedPlan=plan;
+    cardSolo.classList.toggle('selected',plan==='solo');
+    cardBundle.classList.toggle('selected',plan==='bundle');
+    sidebarPrice.textContent=PLANS[plan].price;
+    sidebarLabel.textContent=t(PLANS[plan].labelKey);
+    bundleExtras.classList.toggle('show',plan==='bundle');
+    startBtn.textContent=t(PLANS[plan].ctaKey);
+    const payBtn=document.getElementById('payBtn');
+    if(payBtn&&!payBtn.disabled)payBtn.textContent=t(PLANS[plan].payKey);
   }
+  window.refreshDynamic=function(){selectPlan(selectedPlan);};
 
-  // Expose for i18n engine
-  window.updatePayBtnText = function() {
-    const payBtn = document.getElementById('payBtn');
-    if (payBtn && !payBtn.disabled) {
-      payBtn.textContent = t(PLANS[selectedPlan].payKey);
-    }
-  };
-
-  cardSolo.onclick = () => { selectPlan('solo'); };
-  cardBundle.onclick = () => { selectPlan('bundle'); };
+  cardSolo.addEventListener('click',()=>selectPlan('solo'));
+  cardBundle.addEventListener('click',()=>selectPlan('bundle'));
   selectPlan(selectedPlan);
 
-  /* ── DOM refs ── */
-  const stepInitial  = document.getElementById('stepInitial');
-  const stepEmail    = document.getElementById('stepEmail');
-  const stepConfirm  = document.getElementById('stepConfirm');
-  const stepPayment  = document.getElementById('stepPayment');
-  const stepPassword = document.getElementById('stepPassword');
-  const stepDone     = document.getElementById('stepDone');
+  /* ── Steps ── */
+  const steps={initial:document.getElementById('stepInitial'),email:document.getElementById('stepEmail'),confirm:document.getElementById('stepConfirm'),payment:document.getElementById('stepPayment'),password:document.getElementById('stepPassword'),done:document.getElementById('stepDone')};
+  const toggle=document.getElementById('planToggle');
+  const msg=document.getElementById('checkoutMessage');
+  let currentEmail='',paymentIntentId='',stripeElements=null,isSubmitting=false;
 
-  const startBtn         = document.getElementById('startCheckout');
-  const continueBtn      = document.getElementById('continueWithEmail');
-  const confirmBtn       = document.getElementById('confirmEmail');
-  const editEmailBtn     = document.getElementById('editEmail');
-  const payBtn           = document.getElementById('payBtn');
-  const backToConfirmBtn = document.getElementById('backToConfirm');
-  const setupBtn         = document.getElementById('setupBtn');
+  function show(name){Object.values(steps).forEach(s=>s.hidden=true);steps[name].hidden=false;toggle.style.display=(name==='initial'||name==='email')?'flex':'none';msg.style.display='none';}
+  function err(text){msg.textContent=text;msg.className='checkout-message error';msg.style.display='block';}
+  function info(text){msg.textContent=text;msg.className='checkout-message info';msg.style.display='block';}
 
-  const emailInput   = document.getElementById('checkoutEmail');
-  const emailDisplay = document.getElementById('emailDisplay');
-  const messageBox   = document.getElementById('checkoutMessage');
-
-  let currentEmail = '';
-  let paymentIntentId = '';
-  let stripeElements = null;
-  let isSubmitting = false;
-
-  function showStep(id) {
-    [stepInitial, stepEmail, stepConfirm, stepPayment, stepPassword, stepDone]
-      .forEach(el => el.hidden = true);
-    document.getElementById(id).hidden = false;
-    // Hide plan toggle after email step
-    document.getElementById('planToggle').style.display =
-      (id === 'stepInitial' || id === 'stepEmail') ? 'flex' : 'none';
-    clearMessage();
+  /* ── 3DS return ── */
+  const urlParams=new URLSearchParams(window.location.search);
+  const returnedPI=urlParams.get('payment_intent'),returnedSecret=urlParams.get('payment_intent_client_secret'),returnedStatus=urlParams.get('redirect_status');
+  if(returnedPI&&returnedSecret){
+    currentEmail=localStorage.getItem('lux_checkout_email')||'';paymentIntentId=returnedPI;
+    if(returnedStatus==='succeeded'){show('password');}
+    else{stripe.retrievePaymentIntent(returnedSecret).then(({paymentIntent})=>{if(paymentIntent&&paymentIntent.status==='succeeded')show('password');else{err(t('msg_payment_incomplete'));show('initial');}});}
+    window.history.replaceState({},'',window.location.pathname);
   }
 
-  function clearMessage() { messageBox.textContent = ''; messageBox.className = 'checkout-message'; messageBox.style.display = 'none'; }
-  function showMessage(type, text) { messageBox.textContent = text; messageBox.className = 'checkout-message ' + type; messageBox.style.display = 'block'; }
+  /* ── Start ── */
+  startBtn.onclick=()=>{show('email');document.getElementById('checkoutEmail').focus();};
 
-  function validateEmail(value) {
-    const email = value.trim();
-    if (!email) return { ok: false, msg: t('msg_enter_email') };
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, msg: t('msg_invalid_email') };
-    return { ok: true, email };
-  }
+  /* ── Email ── */
+  document.getElementById('continueWithEmail').onclick=()=>{
+    const v=document.getElementById('checkoutEmail').value.trim();
+    if(!v||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){err(t('msg_email_required'));return;}
+    currentEmail=v;document.getElementById('emailDisplay').textContent=v;show('confirm');
+  };
+  document.getElementById('checkoutEmail').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('continueWithEmail').click();});
+  document.getElementById('editEmail').onclick=()=>{show('email');document.getElementById('checkoutEmail').focus();};
 
-  /* ── 3DS return handling ── */
-  const urlParams = new URLSearchParams(window.location.search);
-  const returnedPI = urlParams.get('payment_intent');
-  const returnedSecret = urlParams.get('payment_intent_client_secret');
-  const returnedStatus = urlParams.get('redirect_status');
+  /* ── Confirm → create PI ── */
+  document.getElementById('confirmEmail').onclick=async()=>{
+    if(isSubmitting)return;isSubmitting=true;
+    const btn=document.getElementById('confirmEmail');btn.disabled=true;btn.textContent='…';info(t('msg_preparing'));
+    try{
+      const res=await fetch(FUNCTIONS_URL+'/lux-create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:currentEmail,plan:selectedPlan})});
+      const data=await res.json();if(!res.ok||data.error)throw new Error(data.error||t('msg_error'));
+      paymentIntentId=data.payment_intent_id;localStorage.setItem('lux_checkout_email',currentEmail);
+      stripeElements=stripe.elements({clientSecret:data.client_secret,appearance:{theme:'stripe',variables:{fontFamily:'"DM Sans",system-ui,sans-serif',borderRadius:'0.85rem',colorPrimary:'#7c3aed'}}});
+      const pe=stripeElements.create('payment',{layout:'tabs'});document.getElementById('payment-element').innerHTML='';pe.mount('#payment-element');
+      pe.on('loaderror',()=>{err(t('msg_error'));isSubmitting=false;btn.disabled=false;});
+      pe.on('ready',()=>{document.getElementById('payBtn').disabled=false;document.getElementById('payBtn').textContent=t(PLANS[selectedPlan].payKey);});
+      pe.on('change',ev=>{if(ev.complete){document.getElementById('payBtn').disabled=false;document.getElementById('payBtn').textContent=t(PLANS[selectedPlan].payKey);}});
+      show('payment');
+    }catch(e){err(e.message||t('msg_error'));}
+    finally{isSubmitting=false;btn.disabled=false;btn.textContent=t('cta_confirm');}
+  };
 
-  if (returnedPI && returnedSecret) {
-    currentEmail = localStorage.getItem('lux_checkout_email') || '';
-    paymentIntentId = returnedPI;
-    if (returnedStatus === 'succeeded') { showStep('stepPassword'); }
-    else {
-      stripe.retrievePaymentIntent(returnedSecret).then(({ paymentIntent }) => {
-        if (paymentIntent && paymentIntent.status === 'succeeded') showStep('stepPassword');
-        else { showMessage('error', t('msg_payment_incomplete')); showStep('stepInitial'); }
-      });
-    }
-    window.history.replaceState({}, '', window.location.pathname);
-  }
+  /* ── Payment ── */
+  document.getElementById('backToConfirm').onclick=()=>show('confirm');
+  document.getElementById('payBtn').onclick=async()=>{
+    if(isSubmitting)return;isSubmitting=true;const btn=document.getElementById('payBtn');btn.disabled=true;
+    btn.innerHTML='<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;"></span>'+t('msg_processing');
+    msg.style.display='none';
+    const{error,paymentIntent}=await stripe.confirmPayment({elements:stripeElements,confirmParams:{return_url:RETURN_URL,receipt_email:currentEmail},redirect:'if_required'});
+    if(error){err(error.message||t('msg_payment_failed'));btn.disabled=false;btn.textContent=t(PLANS[selectedPlan].payKey);isSubmitting=false;return;}
+    if(paymentIntent&&paymentIntent.status==='succeeded'){paymentIntentId=paymentIntent.id;show('password');}
+    else if(paymentIntent&&paymentIntent.status==='processing'){info(t('msg_processing'));}
+    isSubmitting=false;
+  };
 
-  /* ── Step navigation ── */
-  startBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
+  /* ── Password ── */
+  document.getElementById('setupBtn').onclick=async()=>{
+    const p1=document.getElementById('pw1').value,p2=document.getElementById('pw2').value;
+    if(!p1||p1.length<6){err(t('msg_pwd_short'));return;}if(p1!==p2){err(t('msg_pwd_mismatch'));return;}
+    const btn=document.getElementById('setupBtn');btn.disabled=true;btn.textContent=t('msg_creating');msg.style.display='none';
+    try{
+      const res=await fetch(FUNCTIONS_URL+'/lux-setup-account',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({payment_intent_id:paymentIntentId,password:p1})});
+      const data=await res.json();if(!data.success){err(data.error||t('msg_account_failed'));btn.disabled=false;btn.textContent=t('cta_create');return;}
 
-  continueBtn.addEventListener('click', () => {
-    const { ok, msg, email } = validateEmail(emailInput.value);
-    if (!ok) { showMessage('error', msg); emailInput.focus(); return; }
-    currentEmail = email; emailDisplay.textContent = currentEmail; showStep('stepConfirm');
-  });
-  emailInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); } });
-  editEmailBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
-
-  /* ── Create PaymentIntent + mount Stripe Elements ── */
-  confirmBtn.addEventListener('click', async () => {
-    if (isSubmitting) return;
-    isSubmitting = true; confirmBtn.disabled = true;
-    confirmBtn.textContent = '…';
-    showMessage('info', t('msg_preparing'));
-
-    try {
-      const res = await fetch(FUNCTIONS_URL + '/lux-create-payment-intent', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentEmail, plan: selectedPlan }),
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || t('msg_error'));
-
-      paymentIntentId = data.payment_intent_id;
-      localStorage.setItem('lux_checkout_email', currentEmail);
-
-      stripeElements = stripe.elements({
-        clientSecret: data.client_secret,
-        appearance: { theme: 'stripe', variables: { fontFamily: '"Lexend", system-ui, sans-serif', borderRadius: '0.9rem', colorPrimary: '#7c3aed' } },
-      });
-      const paymentElement = stripeElements.create('payment', { layout: 'tabs' });
-      document.getElementById('payment-element').innerHTML = '';
-      paymentElement.mount('#payment-element');
-      paymentElement.on('loaderror', (event) => {
-        showMessage('error', t('msg_error'));
-        isSubmitting = false; confirmBtn.disabled = false;
-      });
-      paymentElement.on('ready', () => { payBtn.disabled = false; payBtn.textContent = t(PLANS[selectedPlan].payKey); });
-      paymentElement.on('change', (event) => { if (event.complete) { payBtn.disabled = false; payBtn.textContent = t(PLANS[selectedPlan].payKey); } });
-      showStep('stepPayment');
-    } catch (err) {
-      showMessage('error', err.message || t('msg_error'));
-    } finally {
-      isSubmitting = false; confirmBtn.disabled = false; confirmBtn.textContent = t('cta_confirm');
-    }
-  });
-
-  backToConfirmBtn.addEventListener('click', () => showStep('stepConfirm'));
-
-  /* ── Confirm payment ── */
-  payBtn.addEventListener('click', async () => {
-    if (isSubmitting) return;
-    isSubmitting = true; payBtn.disabled = true;
-    payBtn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;"></span>' + t('msg_processing');
-    clearMessage();
-
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements: stripeElements,
-      confirmParams: { return_url: RETURN_URL, receipt_email: currentEmail },
-      redirect: 'if_required',
-    });
-
-    if (error) {
-      showMessage('error', error.message || t('msg_payment_failed'));
-      payBtn.disabled = false; payBtn.textContent = t(PLANS[selectedPlan].payKey); isSubmitting = false; return;
-    }
-    if (paymentIntent && paymentIntent.status === 'succeeded') {
-      paymentIntentId = paymentIntent.id; showStep('stepPassword');
-    } else if (paymentIntent && paymentIntent.status === 'processing') {
-      showMessage('info', t('msg_processing'));
-    }
-    isSubmitting = false;
-  });
-
-  /* ── Set password + create account ── */
-  setupBtn.addEventListener('click', async () => {
-    const pw1 = document.getElementById('pw1').value;
-    const pw2 = document.getElementById('pw2').value;
-    if (!pw1 || pw1.length < 6) { showMessage('error', t('msg_pwd_short')); return; }
-    if (pw1 !== pw2) { showMessage('error', t('msg_pwd_mismatch')); return; }
-
-    setupBtn.disabled = true; setupBtn.textContent = t('msg_creating'); clearMessage();
-
-    try {
-      const res = await fetch(FUNCTIONS_URL + '/lux-setup-account', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payment_intent_id: paymentIntentId, password: pw1 }),
-      });
-      const data = await res.json();
-      if (!data.success) {
-        showMessage('error', data.error || t('msg_account_failed'));
-        setupBtn.disabled = false; setupBtn.textContent = t('cta_create_account'); return;
-      }
-
-      const { error: signInError } = await sb.auth.signInWithPassword({ email: data.email, password: pw1 });
-      if (signInError) console.error('Auto-login failed:', signInError);
+      const{error:signInError}=await sb.auth.signInWithPassword({email:data.email,password:p1});
+      if(signInError)console.error('Auto-login failed:',signInError);
 
       localStorage.removeItem('lux_checkout_email');
-      document.getElementById('doneEmail').textContent = t('msg_logged_in_as') + data.email;
+      document.getElementById('doneEmail').textContent=t('msg_logged_in')+data.email;
 
-      // If bundle, flag it for dashboard banners + update CTA
-      if (data.plan === 'bundle') {
-        localStorage.setItem('cl_bundle', 'lu');
-        const doneCta = document.getElementById('doneCta');
-        doneCta.textContent = t('cta_start_training');
+      if(data.plan==='bundle'){
+        localStorage.setItem('cl_bundle','lu');
+        document.getElementById('doneCta').textContent=t('cta_go');
       }
-
-      showStep('stepDone');
-    } catch (err) {
-      showMessage('error', t('msg_connection_error'));
-      setupBtn.disabled = false; setupBtn.textContent = t('cta_create_account');
-    }
-  });
-
-  document.getElementById('pw2').addEventListener('keydown', (e) => { if (e.key === 'Enter') setupBtn.click(); });
+      show('done');
+    }catch(e){err(t('msg_connection_error'));btn.disabled=false;btn.textContent=t('cta_create');}
+  };
+  document.getElementById('pw2').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('setupBtn').click();});
 })();
 </script>
-
 </body>
 </html>
