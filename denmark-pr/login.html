@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login – Medborgerskabsprove.dk - CivicLearn</title>
+<title>Log ind – Medborgerskabsprøven – CivicLearn</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -22,6 +22,16 @@
   .brand-text{display:flex;flex-direction:column;line-height:1.1;}
   .brand-title{font-size:1rem;font-weight:600;color:#fff;}
   .brand-sub{font-size:0.72rem;color:#64748b;}
+
+  .topbar-right{display:flex;align-items:center;gap:12px;}
+  .lang-switch{display:flex;gap:.3rem;}
+  .lang-switch button{
+    font-family:"Lexend",sans-serif;font-size:.72rem;font-weight:600;
+    padding:.25rem .5rem;border:1.5px solid rgba(255,255,255,.2);border-radius:.4rem;
+    background:transparent;color:rgba(255,255,255,.6);cursor:pointer;transition:all .15s;
+  }
+  .lang-switch button:hover{border-color:rgba(255,255,255,.5);color:#fff;}
+  .lang-switch button.active{background:var(--brand);border-color:var(--brand);color:#fff;}
 
   .main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
   .login-card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.04);}
@@ -48,11 +58,14 @@
   .form-footer{text-align:center;margin-top:14px;}
   .form-link{font-size:0.8rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline;}
   .form-link:hover{color:var(--navy);}
+  .form-link.pulse-hint{color:var(--brand);font-weight:700;animation:pulse-link 1s ease-in-out 3;}
+  @keyframes pulse-link{0%,100%{opacity:1;}50%{opacity:0.4;}}
 
   .msg{display:none;border-radius:10px;padding:10px 14px;font-size:0.82rem;margin-bottom:16px;text-align:center;}
   .msg.visible{display:block;}
   .msg.error{background:var(--red-light);border:1px solid #fecaca;color:var(--red);}
   .msg.success{background:var(--green-light);border:1px solid #bbf7d0;color:#166534;}
+  .msg.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;}
 
   .pin-box{background:var(--brand-dim);border:2px dashed var(--brand);border-radius:12px;padding:16px;text-align:center;margin-bottom:20px;}
   .pin-label{font-size:0.78rem;font-weight:600;color:var(--brand-dark);margin-bottom:6px;}
@@ -89,96 +102,167 @@
       <span class="brand-sub">Medborgerskabsprøven</span>
     </div>
   </div>
+  <div class="topbar-right">
+  </div>
 </div>
 
 <div class="main">
   <div class="login-card">
 
+    <!-- STATE 1: LOGIN -->
     <div id="state-login" class="state active">
       <div id="login-msg" class="msg"></div>
       <div class="view-header">
-        <div class="view-title">Log ind</div>
-        <div class="view-subtitle">Log ind med email og adgangskode</div>
+        <div class="view-title" data-t="login_title"></div>
+        <div class="view-subtitle" data-t="login_subtitle"></div>
       </div>
       <form id="login-form">
         <div class="form-group">
-          <label class="form-label" for="login-email">Email</label>
+          <label class="form-label" for="login-email" data-t="email_label"></label>
           <input class="form-input" id="login-email" type="email" placeholder="navn@eksempel.dk" autocomplete="email">
         </div>
         <div class="form-group">
-          <label class="form-label" for="login-password">Adgangskode</label>
+          <label class="form-label" for="login-password" data-t="pwd_label"></label>
           <div class="pwd-wrap">
             <input class="form-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
-            <button class="pwd-toggle" type="button" id="pwd-toggle-btn">Vis</button>
+            <button class="pwd-toggle" type="button" id="pwd-toggle-btn" data-t="show_pwd"></button>
           </div>
         </div>
-        <button type="submit" class="action-btn" id="login-btn">Log ind</button>
+        <button type="submit" class="action-btn" id="login-btn" data-t="login_btn"></button>
       </form>
       <div class="form-footer">
-        <button class="form-link" id="show-forgot">Glemt adgangskode?</button>
+        <button class="form-link" id="show-forgot" data-t="forgot_link"></button>
       </div>
     </div>
 
+    <!-- STATE 2: FORGOT — ENTER EMAIL -->
     <div id="state-forgotEmail" class="state">
       <div id="forgot-msg" class="msg"></div>
       <div class="view-header">
-        <div class="view-title">Nulstil adgangskode</div>
-        <div class="view-subtitle">Indtast emailadressen til din konto</div>
+        <div class="view-title" data-t="reset_title"></div>
+        <div class="view-subtitle" data-t="reset_subtitle"></div>
       </div>
       <form id="forgot-email-form">
         <div class="form-group">
-          <label class="form-label" for="forgot-email">Email</label>
+          <label class="form-label" for="forgot-email" data-t="email_label"></label>
           <input class="form-input" id="forgot-email" type="email" placeholder="navn@eksempel.dk" autocomplete="email">
         </div>
-        <button type="submit" class="action-btn" id="forgot-email-btn">Fortsæt</button>
+        <button type="submit" class="action-btn" id="forgot-email-btn" data-t="continue_btn"></button>
       </form>
       <div class="form-footer">
-        <button class="form-link" id="back-to-login">← Tilbage til login</button>
+        <button class="form-link" id="back-to-login" data-t="back_to_login"></button>
       </div>
     </div>
 
+    <!-- STATE 3: FORGOT — PIN + NEW PASSWORD -->
     <div id="state-forgotReset" class="state">
       <div id="reset-msg" class="msg"></div>
       <div class="view-header">
-        <div class="view-title">Ny adgangskode</div>
-        <div class="view-subtitle">Indtast koden nedenfor og vælg en ny adgangskode</div>
+        <div class="view-title" data-t="new_pwd_title"></div>
+        <div class="view-subtitle" data-t="new_pwd_subtitle"></div>
       </div>
       <div class="pin-box">
-        <div class="pin-label">Bekræftelseskode</div>
+        <div class="pin-label" data-t="pin_label"></div>
         <div class="pin-value" id="pin-value">------</div>
       </div>
       <form id="reset-form">
         <div class="form-group">
-          <label class="form-label" for="reset-pin">Kode</label>
-          <input class="form-input" id="reset-pin" type="text" placeholder="Indtast koden ovenfor" inputmode="numeric" maxlength="6" autocomplete="off" style="text-align:center;letter-spacing:0.15em;">
+          <label class="form-label" for="reset-pin" data-t="code_label"></label>
+          <input class="form-input" id="reset-pin" type="text" inputmode="numeric" maxlength="6" autocomplete="off" style="text-align:center;letter-spacing:0.15em;">
         </div>
         <div class="form-group">
-          <label class="form-label" for="reset-password">Ny adgangskode</label>
-          <input class="form-input" id="reset-password" type="password" placeholder="Mindst 6 tegn" autocomplete="new-password">
+          <label class="form-label" for="reset-password" data-t="new_pwd_label"></label>
+          <input class="form-input" id="reset-password" type="password" autocomplete="new-password">
         </div>
         <div class="form-group">
-          <label class="form-label" for="reset-password-confirm">Bekræft adgangskode</label>
-          <input class="form-input" id="reset-password-confirm" type="password" placeholder="Gentag adgangskoden" autocomplete="new-password">
+          <label class="form-label" for="reset-password-confirm" data-t="confirm_pwd_label"></label>
+          <input class="form-input" id="reset-password-confirm" type="password" autocomplete="new-password">
         </div>
-        <button type="submit" class="action-btn" id="reset-btn">Gem ny adgangskode</button>
+        <button type="submit" class="action-btn" id="reset-btn" data-t="save_pwd_btn"></button>
       </form>
       <div class="form-footer">
-        <button class="form-link" id="back-to-forgot-email">← Tilbage</button>
+        <button class="form-link" id="back-to-forgot-email" data-t="back_btn"></button>
       </div>
     </div>
 
+    <!-- STATE 4: RESET SUCCESS -->
     <div id="state-resetSuccess" class="state">
       <div class="success-icon">✅</div>
       <div class="view-header">
-        <div class="view-title">Adgangskode opdateret!</div>
-        <div class="view-subtitle">Din nye adgangskode er gemt. Log ind nu.</div>
+        <div class="view-title" data-t="success_title"></div>
+        <div class="view-subtitle" data-t="success_subtitle"></div>
       </div>
-      <button class="action-btn" id="go-to-login">Log ind</button>
+      <button class="action-btn" id="go-to-login" data-t="login_btn"></button>
+    </div>
+
+    <!-- STATE 5: UNKNOWN EMAIL — CONFIRM BEFORE CONTACT -->
+    <div id="state-unknownConfirm" class="state">
+      <div class="view-header">
+        <div style="font-size:2rem;margin-bottom:10px;">🤔</div>
+        <div class="view-title" data-t="unknown_email_confirm_title"></div>
+        <div class="view-subtitle" data-t="unknown_email_confirm_subtitle"></div>
+      </div>
+      <div id="confirm-email-display" style="background:var(--brand-dim);border:1.5px solid var(--brand);border-radius:10px;padding:10px 14px;text-align:center;font-size:0.9rem;font-weight:600;color:var(--brand-dark);margin:16px 0;word-break:break-all;"></div>
+      <ul style="list-style:none;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:10px;">
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:0.88rem;color:var(--slate);">
+          <span style="color:var(--brand);font-size:1.1rem;line-height:1.3;">?</span>
+          <span data-t="unknown_email_confirm_check1"></span>
+        </li>
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:0.88rem;color:var(--slate);">
+          <span style="color:var(--brand);font-size:1.1rem;line-height:1.3;">?</span>
+          <span data-t="unknown_email_confirm_check2"></span>
+        </li>
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:0.88rem;color:var(--slate);">
+          <span style="color:var(--brand);font-size:1.1rem;line-height:1.3;">?</span>
+          <span data-t="unknown_email_confirm_check3"></span>
+        </li>
+      </ul>
+      <button class="action-btn" id="confirm-yes-btn" data-t="unknown_email_confirm_yes"></button>
+      <div class="form-footer" style="margin-top:14px;">
+        <button class="form-link" id="back-to-login-from-confirm" data-t="unknown_email_try_again"></button>
+      </div>
+    </div>
+
+    <!-- STATE 6: UNKNOWN EMAIL — CONTACT FORM -->
+    <div id="state-unknownContact" class="state">
+      <div id="contact-msg" class="msg"></div>
+      <div class="view-header">
+        <div style="font-size:2rem;margin-bottom:10px;">🔍</div>
+        <div class="view-title" data-t="unknown_email_contact_title"></div>
+        <div class="view-subtitle" data-t="unknown_email_contact_subtitle"></div>
+      </div>
+      <form id="contact-form">
+        <div class="form-group">
+          <label class="form-label" for="contact-email" data-t="contact_email_label"></label>
+          <input class="form-input" id="contact-email" type="email" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="contact-message" data-t="contact_msg_label"></label>
+          <textarea class="form-input" id="contact-message" rows="4" style="resize:vertical;line-height:1.5;"></textarea>
+        </div>
+        <button type="submit" class="action-btn" id="contact-send-btn" data-t="contact_send_btn"></button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="back-to-login-from-contact" data-t="contact_try_different"></button>
+      </div>
+    </div>
+
+    <!-- STATE 7: CONTACT SENT -->
+    <div id="state-contactSent" class="state">
+      <div class="success-icon">💬</div>
+      <div class="view-header">
+        <div class="view-title" data-t="contact_sent_title"></div>
+        <div class="view-subtitle" data-t="contact_sent_subtitle"></div>
+      </div>
+      <div class="form-footer" style="margin-top:20px;">
+        <button class="form-link" id="back-to-login-from-sent" data-t="back_to_login"></button>
+      </div>
     </div>
 
   </div>
 </div>
 
+<!-- ADMIN IMPERSONATE -->
 <div class="admin-toggle" id="admin-toggle">⚙</div>
 <div class="admin-panel" id="admin-panel">
   <h3>Admin — Login as user</h3>
@@ -195,13 +279,103 @@
 </div>
 
 <div class="page-footer">
-  <a href="https://medborgerskabsprove.dk/">medborgerskabsprove.dk</a> — Forberedelse til Medborgerskabsprøven
+  <a href="https://civiclearn.com/denmark-pr/">civiclearn.com/denmark-pr</a> — Forberedelse til Medborgerskabsprøven
 </div>
 
+<!-- =========================
+     I18N DICTIONARY
+========================= -->
+<script>
+const I18N = {
+  login_title: "Log ind",
+  login_subtitle: "Log ind med email og adgangskode",
+  email_label: "Email",
+  pwd_label: "Adgangskode",
+  show_pwd: "Vis",
+  hide_pwd: "Skjul",
+  login_btn: "Log ind",
+  forgot_link: "Nulstil adgangskode",
+  reset_title: "Nulstil adgangskode",
+  reset_subtitle: "Indtast emailadressen til din konto",
+  continue_btn: "Fortsæt",
+  back_to_login: "← Tilbage til login",
+  new_pwd_title: "Ny adgangskode",
+  new_pwd_subtitle: "Indtast koden nedenfor og vælg en ny adgangskode",
+  pin_label: "Bekræftelseskode",
+  code_label: "Kode",
+  code_placeholder: "Indtast koden ovenfor",
+  new_pwd_label: "Ny adgangskode",
+  new_pwd_placeholder: "Mindst 6 tegn",
+  confirm_pwd_label: "Bekræft adgangskode",
+  confirm_pwd_placeholder: "Gentag adgangskoden",
+  save_pwd_btn: "Gem ny adgangskode",
+  back_btn: "← Tilbage",
+  success_title: "Adgangskode opdateret!",
+  success_subtitle: "Din nye adgangskode er gemt. Log ind for at fortsætte.",
+  err_fill_all: "Udfyld venligst alle felter.",
+  err_invalid_email: "Indtast en gyldig emailadresse.",
+  err_enter_code: "Indtast bekræftelseskoden.",
+  err_pwd_short: "Adgangskoden skal være mindst 6 tegn.",
+  err_pwd_mismatch: "Adgangskoderne stemmer ikke overens.",
+  err_invalid_login: "Forkert email eller adgangskode.",
+  err_wrong_password: "Forkert adgangskode. Brug 'Glemt adgangskode?' nedenfor for at oprette en ny.",
+  err_email_unknown: "Vi kan ikke genkende denne emailadresse.",
+  err_email_not_confirmed: "Email ikke bekræftet.",
+  err_too_many: "For mange forsøg. Vent et øjeblik.",
+  err_user_not_found: "Ingen konto med denne email.",
+  err_network: "Forbindelsesfejl.",
+  err_email_not_found: "Emailadressen blev ikke fundet.",
+  err_wrong_code: "Forkert kode. Prøv igen.",
+  err_connection: "Forbindelsesfejl. Prøv igen.",
+  err_generic: "En fejl opstod. Prøv igen.",
+  loading: "Vent venligst…",
+  cache_cleared_msg: "🔄 Et sessionsproblem blev registreret og automatisk løst. Log venligst ind igen.",
+  unknown_email_confirm_title: "Tjek din emailadresse",
+  unknown_email_confirm_subtitle: "Denne adresse er ikke i vores system. Inden du kontakter os, så tjek venligst:",
+  unknown_email_confirm_check1: "Er adressen stavet korrekt?",
+  unknown_email_confirm_check2: "Er det den samme adresse, du brugte ved købet?",
+  unknown_email_confirm_check3: "Har du tjekket dine andre indbakker?",
+  unknown_email_try_again: "← Prøv en anden emailadresse",
+  unknown_email_confirm_yes: "Ja, det er den rigtige adresse — kontakt support",
+  unknown_email_contact_title: "Emailadresse ikke fundet",
+  unknown_email_contact_subtitle: "Denne adresse er ikke i vores system. Send os en besked, så hjælper vi dig med at finde din konto.",
+  contact_email_label: "Din emailadresse",
+  contact_msg_label: "Din besked",
+  contact_msg_placeholder: "Beskriv kort din situation (f.eks. anden adresse brugt, nyligt køb…)",
+  contact_send_btn: "Send besked",
+  contact_sent_title: "Besked sendt!",
+  contact_sent_subtitle: "Vi har modtaget din besked og vender tilbage hurtigst muligt.",
+  contact_try_different: "← Prøv en anden emailadresse"
+};
+</script>
+
+<!-- =========================
+     I18N ENGINE + LOGIC
+========================= -->
 <script>
 (function() {
   'use strict';
 
+  let currentLang = 'da';
+  function t(key) { return I18N[key] || key; }
+
+  function applyLang() {
+    document.querySelectorAll('[data-t]').forEach(el => {
+      const key = el.dataset.t;
+      if (I18N[key]) el.textContent = I18N[key];
+    });
+    // Update placeholders
+    const rp = document.getElementById('reset-pin');
+    const rpw = document.getElementById('reset-password');
+    const rpc = document.getElementById('reset-password-confirm');
+    if (rp) rp.placeholder = t('code_placeholder');
+    if (rpw) rpw.placeholder = t('new_pwd_placeholder');
+    if (rpc) rpc.placeholder = t('confirm_pwd_placeholder');
+  }
+
+  applyLang();
+
+  /* ── Supabase ── */
   const SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
   const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
   const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
@@ -211,11 +385,42 @@
   const params    = new URLSearchParams(location.search);
   const returnUrl = params.get('return') || DASHBOARD_URL;
 
+  /* ── Cache / session helpers ── */
+  function clearSupabaseCache() {
+    const toRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && (k.startsWith('sb-') || k.startsWith('supabase') || k === 'cl_auth' || k === 'cl_email')) {
+        toRemove.push(k);
+      }
+    }
+    toRemove.forEach(k => localStorage.removeItem(k));
+  }
+
+  function markRedirect() {
+    sessionStorage.setItem('cl_redirect_ts', Date.now().toString());
+  }
+
+  function checkBounce() {
+    const ts = sessionStorage.getItem('cl_redirect_ts');
+    if (!ts) return false;
+    sessionStorage.removeItem('cl_redirect_ts');
+    return (Date.now() - parseInt(ts, 10)) < 30000; // within 30 seconds = bounce
+  }
+
+  // Auto-redirect if already logged in — with bounce detection
   (async () => {
+    if (checkBounce()) {
+      // User was redirected to dashboard but came straight back — stale session
+      clearSupabaseCache();
+      showMsg('login-msg', t('cache_cleared_msg'), 'info');
+      return; // don't re-check session (we just cleared it)
+    }
     const { data: { session } } = await sb.auth.getSession();
-    if (session) window.location.href = returnUrl;
+    if (session) { markRedirect(); window.location.href = returnUrl; }
   })();
 
+  /* ── Helpers ── */
   function showState(name) {
     document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
     document.getElementById('state-' + name).classList.add('active');
@@ -224,10 +429,21 @@
   function clearMsg(id) { const el = document.getElementById(id); el.className = 'msg'; el.textContent = ''; }
   function setLoading(btnId, loading) {
     const btn = document.getElementById(btnId);
-    if (loading) { btn.disabled = true; btn.dataset.originalText = btn.textContent; btn.innerHTML = '<span class="spinner"></span>Vent venligst…'; }
+    if (loading) { btn.disabled = true; btn.dataset.originalText = btn.textContent; btn.innerHTML = '<span class="spinner"></span>' + t('loading'); }
     else { btn.disabled = false; btn.textContent = btn.dataset.originalText || btn.textContent; }
   }
 
+  function translateError(msg) {
+    const l = msg.toLowerCase();
+    if (l.includes('invalid login'))       return t('err_invalid_login');
+    if (l.includes('email not confirmed')) return t('err_email_not_confirmed');
+    if (l.includes('too many requests'))   return t('err_too_many');
+    if (l.includes('user not found'))      return t('err_user_not_found');
+    if (l.includes('network'))             return t('err_network');
+    return msg;
+  }
+
+  /* ── Navigation ── */
   document.getElementById('show-forgot').addEventListener('click', (e) => {
     e.preventDefault(); clearMsg('login-msg');
     const v = document.getElementById('login-email').value.trim();
@@ -238,68 +454,108 @@
   document.getElementById('back-to-forgot-email').addEventListener('click', () => { clearMsg('reset-msg'); showState('forgotEmail'); });
   document.getElementById('go-to-login').addEventListener('click', () => showState('login'));
 
+  /* ── Password toggle ── */
   document.getElementById('pwd-toggle-btn').addEventListener('click', () => {
     const el = document.getElementById('login-password'); const btn = document.getElementById('pwd-toggle-btn');
-    if (el.type === 'password') { el.type = 'text'; btn.textContent = 'Skjul'; } else { el.type = 'password'; btn.textContent = 'Vis'; }
+    if (el.type === 'password') { el.type = 'text'; btn.textContent = t('hide_pwd'); } else { el.type = 'password'; btn.textContent = t('show_pwd'); }
   });
 
   let resetEmail = '';
 
+  /* ── LOGIN ── */
   document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault(); clearMsg('login-msg');
     const email = document.getElementById('login-email').value.trim().toLowerCase();
     const password = document.getElementById('login-password').value;
-    if (!email || !password) return showMsg('login-msg', 'Udfyld venligst alle felter.', 'error');
+    if (!email || !password) return showMsg('login-msg', t('err_fill_all'), 'error');
     setLoading('login-btn', true);
     try {
       const { error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) { showMsg('login-msg', translateError(error.message), 'error'); setLoading('login-btn', false); return; }
+      if (error) {
+        if (error.message.toLowerCase().includes('invalid login')) {
+          // Differentiate: wrong password vs unknown email
+          try {
+            const res = await fetch(FUNCTIONS_URL + '/denmark-pr-reset-password', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'check_email', email }),
+            });
+            const data = await res.json();
+            if (data.exists) {
+              // Email found — it's a wrong password
+              showMsg('login-msg', t('err_wrong_password'), 'error');
+              // Pulse the reset link to draw attention to it
+              const resetLink = document.getElementById('show-forgot');
+              resetLink.classList.remove('pulse-hint');
+              void resetLink.offsetWidth; // force reflow to restart animation
+              resetLink.classList.add('pulse-hint');
+              resetLink.addEventListener('animationend', () => resetLink.classList.remove('pulse-hint'), { once: true });
+            } else {
+              // Email not in system — show confirmation screen first, pre-store email
+              document.getElementById('confirm-email-display').textContent = email;
+              document.getElementById('contact-email').value = email;
+              document.getElementById('contact-message').value = '';
+              showState('unknownConfirm');
+            }
+          } catch {
+            // Fallback if check_email call fails
+            showMsg('login-msg', t('err_invalid_login'), 'error');
+          }
+        } else {
+          showMsg('login-msg', translateError(error.message), 'error');
+        }
+        setLoading('login-btn', false);
+        return;
+      }
       try { await sb.from('login_history').insert({ email, status: 'success', method: 'password' }); } catch(e) {}
       localStorage.setItem('cl_auth', 'ok');
       localStorage.setItem('cl_email', email);
+      markRedirect();
       window.location.href = returnUrl;
-    } catch (err) { showMsg('login-msg', 'En fejl opstod. Prøv igen.', 'error'); setLoading('login-btn', false); }
+    } catch (err) { showMsg('login-msg', t('err_generic'), 'error'); setLoading('login-btn', false); }
   });
 
+  /* ── FORGOT — CHECK EMAIL ── */
   document.getElementById('forgot-email-form').addEventListener('submit', async (e) => {
     e.preventDefault(); clearMsg('forgot-msg');
     resetEmail = document.getElementById('forgot-email').value.trim().toLowerCase();
-    if (!resetEmail || !resetEmail.includes('@')) return showMsg('forgot-msg', 'Indtast en gyldig emailadresse.', 'error');
+    if (!resetEmail || !resetEmail.includes('@')) return showMsg('forgot-msg', t('err_invalid_email'), 'error');
     setLoading('forgot-email-btn', true);
     try {
-      const res = await fetch(FUNCTIONS_URL + '/denmarkpr-reset-password', {
+      const res = await fetch(FUNCTIONS_URL + '/denmark-pr-reset-password', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'check_email', email: resetEmail }),
       });
       const data = await res.json();
-      if (!data.exists) { showMsg('forgot-msg', data.message || 'Emailadressen blev ikke fundet.', 'error'); setLoading('forgot-email-btn', false); return; }
+      if (!data.exists) { showMsg('forgot-msg', data.message || t('err_email_not_found'), 'error'); setLoading('forgot-email-btn', false); return; }
       document.getElementById('pin-value').textContent = data.pin;
       showState('forgotReset');
-    } catch (err) { showMsg('forgot-msg', 'Forbindelsesfejl. Prøv igen.', 'error'); }
+    } catch (err) { showMsg('forgot-msg', t('err_connection'), 'error'); }
     setLoading('forgot-email-btn', false);
   });
 
+  /* ── FORGOT — RESET WITH PIN ── */
   document.getElementById('reset-form').addEventListener('submit', async (e) => {
     e.preventDefault(); clearMsg('reset-msg');
     const pin = document.getElementById('reset-pin').value.trim();
     const newPassword = document.getElementById('reset-password').value;
     const confirmPassword = document.getElementById('reset-password-confirm').value;
-    if (!pin) return showMsg('reset-msg', 'Indtast bekræftelseskoden.', 'error');
-    if (newPassword.length < 6) return showMsg('reset-msg', 'Adgangskoden skal være mindst 6 tegn.', 'error');
-    if (newPassword !== confirmPassword) return showMsg('reset-msg', 'Adgangskoderne stemmer ikke overens.', 'error');
+    if (!pin) return showMsg('reset-msg', t('err_enter_code'), 'error');
+    if (newPassword.length < 6) return showMsg('reset-msg', t('err_pwd_short'), 'error');
+    if (newPassword !== confirmPassword) return showMsg('reset-msg', t('err_pwd_mismatch'), 'error');
     setLoading('reset-btn', true);
     try {
-      const res = await fetch(FUNCTIONS_URL + '/denmarkpr-reset-password', {
+      const res = await fetch(FUNCTIONS_URL + '/denmark-pr-reset-password', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'reset', email: resetEmail, pin, new_password: newPassword }),
       });
       const data = await res.json();
       if (data.success) showState('resetSuccess');
-      else showMsg('reset-msg', data.error || 'Forkert kode. Prøv igen.', 'error');
-    } catch (err) { showMsg('reset-msg', 'Forbindelsesfejl. Prøv igen.', 'error'); }
+      else showMsg('reset-msg', data.error || t('err_wrong_code'), 'error');
+    } catch (err) { showMsg('reset-msg', t('err_connection'), 'error'); }
     setLoading('reset-btn', false);
   });
 
+  /* ── ADMIN IMPERSONATE ── */
   document.getElementById('admin-toggle').addEventListener('click', () => { document.getElementById('admin-panel').classList.toggle('open'); });
   document.getElementById('admin-btn').addEventListener('click', async () => {
     const email = document.getElementById('admin-email').value.trim().toLowerCase();
@@ -320,22 +576,46 @@
       if (otpError) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Session failed: ' + otpError.message; btn.disabled = false; btn.textContent = 'Impersonate'; return; }
       localStorage.setItem('cl_auth', 'ok');
       localStorage.setItem('cl_email', data.email);
+      markRedirect();
       window.location.href = returnUrl;
     } catch (err) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Error: ' + err.message; btn.disabled = false; btn.textContent = 'Impersonate'; }
   });
 
-  function translateError(msg) {
-    const l = msg.toLowerCase();
-    if (l.includes('invalid login'))       return 'Forkert email eller adgangskode.';
-    if (l.includes('email not confirmed')) return 'Email ikke bekræftet.';
-    if (l.includes('too many requests'))   return 'For mange forsøg. Vent et øjeblik.';
-    if (l.includes('user not found'))      return 'Ingen konto med denne email.';
-    if (l.includes('network'))             return 'Forbindelsesfejl.';
-    return msg;
-  }
-
   document.getElementById('login-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-form').requestSubmit(); });
+
+  /* ── CONTACT FORM (unknown email) ── */
+  document.getElementById('contact-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMsg('contact-msg');
+    const email = document.getElementById('contact-email').value.trim().toLowerCase();
+    const message = document.getElementById('contact-message').value.trim();
+    if (!email || !message) return showMsg('contact-msg', t('err_fill_all'), 'error');
+    setLoading('contact-send-btn', true);
+    try {
+      await fetch('https://civiclearn.app.n8n.cloud/webhook/contact', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          site: 'denmark-pr',
+          page: 'login',
+          name: '',
+          email,
+          message: '[LOGIN – EMAIL NOT FOUND]\n' + message,
+          user_id: ''
+        }),
+      });
+      showState('contactSent');
+    } catch (err) {
+      showMsg('contact-msg', t('err_generic'), 'error');
+      setLoading('contact-send-btn', false);
+    }
+  });
+
+  document.getElementById('back-to-login-from-confirm').addEventListener('click', () => showState('login'));
+  document.getElementById('confirm-yes-btn').addEventListener('click', () => showState('unknownContact'));
+  document.getElementById('back-to-login-from-contact').addEventListener('click', () => { clearMsg('contact-msg'); showState('login'); });
+  document.getElementById('back-to-login-from-sent').addEventListener('click', () => showState('login'));
+
 })();
 </script>
 </body>
 </html>
+
