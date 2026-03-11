@@ -1,394 +1,625 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Køb — Prøve i Dansk 3 Træning</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Køb — Prøve i Dansk 3 Træning | CivicLearn</title>
+<meta name="description" content="Få adgang til Prøve i Dansk 3 træning. 10 komplette simulationer, AI-evaluering, detaljeret feedback. Engangsbetaling, ubegrænset adgang.">
+<link rel="canonical" href="https://civiclearn.com/dansk3/checkout.html">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; overflow-x: clip; }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: #f0f4f8;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(200,16,46,.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(220,38,38,.05) 0%, transparent 60%);
+  min-height: 100vh; color: #0f172a; overflow-x: clip; width: 100%;
+}
+a { color: inherit; }
 
-  <meta name="description"
-        content="Få adgang til Prøve i Dansk 3 træning. AI-evaluering, simulationer, detaljeret feedback. Engangsbetaling, ubegrænset adgang." />
-  <link rel="canonical" href="https://civiclearn.com/dansk3/checkout.html">
+/* HEADER */
+.checkout-header { background: rgba(255,255,255,.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,.07); position: sticky; top: 0; z-index: 100; }
+.checkout-header-inner { max-width: 1060px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: .85rem 1.5rem; gap: .5rem; }
+.checkout-brand { display: flex; align-items: center; gap: .55rem; font-weight: 700; font-size: .9rem; color: #0f172a; flex-shrink: 1; min-width: 0; }
+.checkout-brand img { width: 24px; height: auto; border-radius: 3px; }
+.header-contact { font-size: .74rem; font-weight: 500; color: #94a3b8; text-decoration: none; display: flex; align-items: center; gap: .28rem; padding: .27rem .52rem; border: 1px solid #e2e8f0; border-radius: .45rem; transition: all .15s; white-space: nowrap; }
+.header-contact:hover { border-color: #c8102e; color: #c8102e; background: #fef2f2; }
+.checkout-powered { font-size: .75rem; color: #94a3b8; flex-shrink: 0; }
+.checkout-powered a { color: #64748b; text-decoration: none; font-weight: 500; }
+@media (max-width: 520px) {
+  .checkout-header-inner { padding: .65rem 1rem; }
+  .checkout-brand { font-size: .82rem; }
+  .header-contact span { display: none; }
+  .header-contact { padding: .25rem .4rem; }
+  .checkout-powered { display: none; }
+}
 
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/checkout.css">
+/* LAYOUT */
+main { padding: 2.5rem 1.5rem 4rem; max-width: 100%; }
+.layout { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 420px; gap: 2rem; align-items: start; }
+@media (max-width: 820px) {
+  main { padding: 1.2rem 1rem 3rem; }
+  .layout { grid-template-columns: 1fr; gap: 1.2rem; }
+  .features { order: 2; overflow: hidden; word-break: break-word; max-width: 100%; }
+  .right { order: 1; position: static !important; max-width: 100%; }
+  .checkout-card { border-radius: 1rem; padding: 1.5rem 1.25rem; }
+  .pills { overflow: hidden; }
+  .feat { min-width: 0; }
+  .feat-body { min-width: 0; overflow: hidden; }
+}
 
-  <style>
-    .product-options { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
-    .product-btn {
-      padding: 1rem 1.1rem; border-radius: 0.9rem; border: 2px solid rgba(0,0,0,0.08);
-      background: #fff; text-align: left; cursor: pointer; font-family: "Lexend", system-ui, sans-serif;
-      transition: border-color 0.2s, box-shadow 0.2s; position: relative;
-    }
-    .product-btn:hover { border-color: var(--brand); box-shadow: 0 4px 16px rgba(124,58,237,0.1); }
-    .product-btn.selected { border-color: var(--brand); background: #f4f0ff; }
-    .product-btn strong { display: block; font-size: 0.95rem; font-weight: 600; margin-bottom: 2px; color: var(--text-main); }
-    .product-btn span { font-size: 0.84rem; color: var(--muted); }
-    .product-btn .best-tag {
-      position: absolute; top: -1px; right: 12px; background: var(--brand); color: #fff;
-      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.06em; padding: 3px 10px; border-radius: 0 0 6px 6px;
-    }
-    .topbar-flag {
-      width: 26px; height: 18px; border-radius: 3px; overflow: hidden;
-      display: inline-flex; flex-shrink: 0; vertical-align: middle;
-      position: relative; background: #C8102E;
-    }
-    .topbar-flag .cross-h { position: absolute; top: 6px; left: 0; right: 0; height: 6px; background: #fff; }
-    .topbar-flag .cross-v { position: absolute; top: 0; bottom: 0; left: 8px; width: 6px; background: #fff; }
+/* MOBILE TOGGLE */
+.mob-toggle { display: none; align-items: center; justify-content: space-between; padding: .75rem 1.1rem; background: #fff; border-bottom: 1px solid #e2e8f0; cursor: pointer; font-size: .81rem; font-weight: 600; color: #475569; width: 100%; }
+.mob-toggle .mob-arrow { transition: transform .25s; font-size: .72rem; color: #c8102e; }
+.mob-toggle.mob-open .mob-arrow { transform: rotate(180deg); }
+@media (max-width: 820px) { .mob-toggle { display: flex; } .features { display: none !important; } .features.mob-open { display: flex !important; flex-direction: column; } }
 
-    #payment-element { margin-bottom: 1.2rem; min-height: 300px; }
-    .payment-loading { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 2rem 0; }
-    .field { margin-bottom: 1rem; }
-    .field label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
-    .field input {
-      width: 100%; padding: 0.75rem 0.9rem; border-radius: 0.9rem;
-      border: 1px solid rgba(0,0,0,0.12); font-size: 0.95rem;
-      font-family: "Lexend", sans-serif; outline: none;
-    }
-    .field input:focus { outline: 2px solid var(--brand); border-color: transparent; }
-    .done-icon { font-size: 3rem; text-align: center; margin-bottom: 0.8rem; }
-    .done-title { font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; }
-    .done-sub { font-size: 0.95rem; color: var(--muted); text-align: center; margin-bottom: 1.5rem; }
-    .step-badge {
-      display: inline-block; padding: 3px 10px; border-radius: 20px;
-      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.05em; margin-bottom: 1rem; background: #eef2ff; color: #3730a3;
-    }
-  </style>
+/* SIDEBAR */
+.features { background: #fff; border-radius: 1.5rem; padding: 2rem 1.75rem 1.75rem; box-shadow: 0 2px 4px rgba(0,0,0,.03), 0 8px 32px rgba(0,0,0,.07); animation: rise .5s cubic-bezier(.22,1,.36,1) both; min-width: 0; overflow: hidden; }
+@keyframes rise { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+.price-hero { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; margin-bottom: 1.4rem; }
+.price-label { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: #94a3b8; margin-bottom: .3rem; }
+.price-amount { font-size: 2.6rem; font-weight: 700; color: #0f172a; line-height: 1; letter-spacing: -.03em; }
+.price-once { font-size: .72rem; color: #94a3b8; margin-top: .35rem; display: flex; align-items: center; gap: .3rem; }
+.price-once::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+.price-badge { background: linear-gradient(135deg, #7f1d1d 0%, #c8102e 100%); color: #fff; font-size: .63rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; padding: .35rem .8rem; border-radius: .65rem; white-space: nowrap; align-self: center; box-shadow: 0 2px 10px rgba(200,16,46,.3); }
+.section-label { font-size: .61rem; font-weight: 700; text-transform: uppercase; letter-spacing: .13em; color: #94a3b8; margin: .85rem 0 .55rem; display: flex; align-items: center; gap: .5rem; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: #f1f5f9; }
+
+/* FEATURES */
+.feature-list { list-style: none; display: flex; flex-direction: column; gap: .35rem; }
+.feat { display: flex; align-items: flex-start; gap: .6rem; padding: .45rem .65rem; border-radius: .85rem; background: #f8fafc; transition: background .15s; animation: slideIn .4s ease both; }
+.feat:hover { background: #f1f5f9; }
+@keyframes slideIn { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:translateX(0); } }
+.feat:nth-child(1){animation-delay:.06s} .feat:nth-child(2){animation-delay:.10s} .feat:nth-child(3){animation-delay:.14s} .feat:nth-child(4){animation-delay:.18s} .feat:nth-child(5){animation-delay:.22s} .feat:nth-child(6){animation-delay:.26s} .feat:nth-child(7){animation-delay:.30s}
+.feat-icon { width: 30px; height: 30px; border-radius: .55rem; display: flex; align-items: center; justify-content: center; font-size: .9rem; flex-shrink: 0; margin-top: .05rem; }
+.feat-body { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: .4rem; row-gap: .1rem; }
+.feat-title { font-size: .8rem; font-weight: 600; color: #1e293b; line-height: 1.25; }
+.feat-sub { font-size: .71rem; color: #94a3b8; margin-top: 0; line-height: 1.35; order: 2; flex-basis: 100%; }
+.pills { display: flex; flex-wrap: wrap; gap: .22rem; margin-top: 0; order: 1; }
+.pill { display: inline-flex; align-items: center; gap: .2rem; font-size: .63rem; font-weight: 600; padding: .16rem .48rem; border-radius: 99px; white-space: nowrap; letter-spacing: .01em; line-height: 1.4; }
+.pill-blue{background:#eff6ff;color:#2563eb} .pill-teal{background:#f0fdfa;color:#0d9488} .pill-amber{background:#fffbeb;color:#d97706}
+.pill-rose{background:#fff1f2;color:#e11d48} .pill-red{background:#fef2f2;color:#c8102e} .pill-green{background:#f0fdf4;color:#16a34a}
+.pill-indigo{background:#eef2ff;color:#4338ca} .pill-sky{background:#f0f9ff;color:#0284c7} .pill-orange{background:#fff7ed;color:#ea580c}
+.pill-violet{background:#f5f3ff;color:#7c3aed}
+.ic-blue{background:#eff6ff} .ic-teal{background:#f0fdfa} .ic-amber{background:#fffbeb} .ic-rose{background:#fff1f2}
+.ic-red{background:#fef2f2} .ic-green{background:#f0fdf4} .ic-indigo{background:#eef2ff} .ic-sky{background:#f0f9ff}
+.ic-orange{background:#fff7ed} .ic-violet{background:#f5f3ff} .ic-slate{background:#f1f5f9}
+
+/* TRUST FOOTER */
+.trust-footer { margin-top: 1.3rem; background: linear-gradient(135deg, #7f1d1d 0%, #c8102e 100%); border-radius: 1rem; padding: .95rem 1.1rem; color: #fff; display: flex; align-items: center; gap: .8rem; }
+.trust-icon { font-size: 1.5rem; flex-shrink: 0; }
+.trust-title { font-size: .78rem; font-weight: 700; margin-bottom: .12rem; }
+.trust-sub { font-size: .68rem; opacity: .75; line-height: 1.4; }
+
+/* BUNDLE EXTRAS */
+.bundle-extras { display: none; margin-top: .5rem; }
+.bundle-extras.show { display: flex; flex-direction: column; gap: .4rem; }
+.bundle-extra-item { display: flex; align-items: flex-start; gap: .7rem; padding: .55rem .7rem; border-radius: .85rem; background: #fef2f2; border: 1px solid #fecaca; animation: slideIn .3s ease both; }
+.bundle-extra-icon { width: 30px; height: 30px; border-radius: .55rem; background: #fee2e2; display: flex; align-items: center; justify-content: center; font-size: .9rem; flex-shrink: 0; }
+.bundle-extra-title { font-size: .8rem; font-weight: 600; color: #991b1b; line-height: 1.25; }
+.bundle-extra-sub { font-size: .71rem; color: #b91c1c; margin-top: .1rem; line-height: 1.35; opacity: .8; }
+
+/* PAYMENT CARD */
+.right { animation: rise .5s .1s cubic-bezier(.22,1,.36,1) both; position: sticky; top: 70px; align-self: start; }
+.checkout-card { background: #fff; border-radius: 1.5rem; padding: 2rem 1.75rem; box-shadow: 0 2px 4px rgba(0,0,0,.03), 0 8px 32px rgba(0,0,0,.07); }
+.checkout-card h1 { font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-bottom: .4rem; line-height: 1.25; }
+.secure-line { font-size: .72rem; color: #94a3b8; margin-bottom: 1.4rem; display: flex; align-items: center; gap: .35rem; }
+.secure-line::before { content: '🔒'; font-size: .8rem; }
+
+/* PLAN SELECTOR — 3 options */
+.plan-selector { margin-bottom: 1.5rem; }
+.plan-solo-row { margin-bottom: .55rem; }
+.plan-bundle-row { display: flex; gap: .55rem; }
+.plan-card {
+  flex: 1; padding: .85rem .75rem; border: 2px solid #e5e7eb; border-radius: 1rem;
+  cursor: pointer; background: #fff; transition: border-color .15s, box-shadow .15s;
+  position: relative; text-align: center; display: flex; flex-direction: column; justify-content: center;
+}
+.plan-card:hover { border-color: #fecaca; }
+.plan-card.selected { border-color: #c8102e; box-shadow: 0 0 0 3px rgba(200,16,46,.12); }
+.plan-card-badge { position: absolute; top: -.6rem; left: 50%; transform: translateX(-50%); background: #c8102e; color: #fff; font-size: .6rem; font-weight: 700; padding: .13rem .55rem; border-radius: 99px; white-space: nowrap; }
+.plan-card-name { font-weight: 600; font-size: .82rem; color: #1a1a1a; margin-bottom: .2rem; }
+.plan-card-price { font-size: 1.15rem; font-weight: 700; color: #c8102e; }
+.plan-card-price .was { font-size: .72rem; color: #9ca3af; text-decoration: line-through; font-weight: 400; margin-right: .25rem; }
+.plan-card-save { display: inline-block; margin-top: .25rem; font-size: .63rem; font-weight: 600; color: #059669; background: #ecfdf5; padding: .1rem .4rem; border-radius: .5rem; }
+.plan-card-sub { font-size: .66rem; color: #6b7280; margin-top: .2rem; }
+.plan-card-detail { font-size: .6rem; color: #c8102e; font-weight: 600; margin-top: .3rem; padding-top: .25rem; border-top: 1px solid #f3f4f6; }
+.plan-bundle-label { font-size: .58rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #94a3b8; margin-bottom: .4rem; text-align: center; }
+@media(max-width:500px) { .plan-bundle-row { flex-direction: column; } }
+
+/* STEPS */
+.step-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .9rem; background: #fef2f2; color: #c8102e; }
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: .82rem; font-weight: 500; margin-bottom: .3rem; color: #374151; }
+.field input { width: 100%; padding: .75rem .9rem; border-radius: .85rem; border: 1.5px solid #e5e7eb; font-size: .92rem; font-family: 'DM Sans', sans-serif; color: #0f172a; outline: none; transition: border-color .15s, box-shadow .15s; }
+.field input:focus { border-color: #c8102e; box-shadow: 0 0 0 3px rgba(200,16,46,.12); }
+.email-instructions { font-size: .85rem; color: #475569; margin-bottom: .85rem; line-height: 1.5; }
+.email-display { font-size: .95rem; font-weight: 600; color: #0f172a; padding: .6rem 1rem; background: #fef2f2; border-radius: .75rem; margin-bottom: .5rem; text-align: center; word-break: break-all; }
+.confirm-text { font-size:.82rem; color:#475569; margin-bottom:.4rem; }
+.confirm-warning { font-size: .75rem; color: #d97706; background: #fffbeb; border-radius: .6rem; padding: .5rem .75rem; margin: .6rem 0 1rem; line-height: 1.45; display: flex; align-items: flex-start; gap: .4rem; }
+.confirm-warning::before { content: '⚠️'; font-size: .85rem; flex-shrink:0; }
+.confirm-actions { display: flex; flex-direction: column; gap: .5rem; }
+#payment-element { margin-bottom: 1.2rem; min-height: 280px; }
+.payment-loading { text-align:center; color:#94a3b8; font-size:.85rem; padding:2rem 0; }
+.pay-btn { width: 100%; padding: .9rem 1.2rem; background: linear-gradient(135deg, #b91c1c 0%, #c8102e 100%); color: #fff; border: none; border-radius: .9rem; font-family: 'DM Sans', sans-serif; font-size: .95rem; font-weight: 700; cursor: pointer; transition: opacity .15s, transform .1s, box-shadow .15s; box-shadow: 0 4px 14px rgba(200,16,46,.35); letter-spacing: .01em; }
+.pay-btn:hover:not(:disabled) { opacity: .93; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,16,46,.4); }
+.pay-btn:active:not(:disabled) { transform: translateY(0); }
+.pay-btn:disabled { opacity: .55; cursor: not-allowed; }
+.link-btn { width: 100%; padding: .6rem; background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: .82rem; color: #64748b; text-align: center; transition: color .12s; }
+.link-btn:hover { color: #0f172a; }
+.small-note { text-align: center; font-size: .72rem; color: #94a3b8; margin-top: .65rem; line-height: 1.45; }
+.trust-strip { display: flex; align-items: center; justify-content: center; gap: 1.2rem; margin-top: 1.2rem; padding-top: 1.1rem; border-top: 1px solid #f1f5f9; flex-wrap: wrap; }
+.trust-item { display: flex; align-items: center; gap: .3rem; font-size: .71rem; color: #94a3b8; white-space: nowrap; }
+.trust-item span:first-child { font-size: .85rem; }
+.after-text { text-align: center; font-size: .75rem; color: #94a3b8; margin-top: .85rem; }
+.after-text a { color: #c8102e; font-weight: 500; text-decoration: none; }
+.after-text a:hover { text-decoration: underline; }
+.checkout-message { border-radius: .75rem; padding: .65rem .9rem; font-size: .82rem; margin-top: .75rem; display: none; line-height: 1.45; }
+.checkout-message.error { background: #fff1f2; color: #be123c; }
+.checkout-message.info { background: #fef2f2; color: #b91c1c; }
+.done-icon { font-size: 2.8rem; text-align: center; margin-bottom: .7rem; }
+.done-title { font-size: 1.2rem; font-weight: 700; text-align: center; margin-bottom: .4rem; }
+.done-sub { font-size: .85rem; color: #94a3b8; text-align: center; margin-bottom: 1.3rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
 </head>
-
 <body>
 
 <header class="checkout-header">
   <div class="checkout-header-inner">
     <div class="checkout-brand">
-      <div class="topbar-flag"><span class="cross-h"></span><span class="cross-v"></span></div>
+      <img src="/assets/images/dk.svg" alt="Danmark">
       Dansk3 – Prøve i Dansk 3
     </div>
-    <div class="checkout-powered">
-      <small>drevet af</small>
-      <a href="https://civiclearn.com">CivicLearn</a>
+    <div style="display:flex;align-items:center;gap:.75rem;">
+      <a href="https://dansk3.dk/kontakt/" target="_blank" class="header-contact">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <span>Spørgsmål?</span>
+      </a>
+      <div class="checkout-powered">
+        <small>drevet af </small>
+        <a href="https://civiclearn.com">CivicLearn</a>
+      </div>
     </div>
   </div>
 </header>
 
+<div class="mob-toggle" id="mobToggle" onclick="toggleMobFeatures()">
+  <span>📋 Se hvad der er inkluderet</span>
+  <span class="mob-arrow">▼</span>
+</div>
+
 <main>
-  <div class="layout">
+<div class="layout">
 
-    <aside class="features">
-      <h2>Prøve i Dansk 3 Træning</h2>
-      <div class="price">Fra kr. 899</div>
-      <div class="once">Engangsbetaling · ubegrænset adgang</div>
-      <div class="divider"></div>
-      <h3>Det er inkluderet</h3>
-      <ul class="benefits">
-        <li>10 komplette prøvesimulationer</li>
-        <li>Læsning, skrivning og mundtlig</li>
-        <li>AI-evaluering med detaljeret feedback</li>
-        <li>Karakterer efter 7-trins-skalaen</li>
-        <li>Øv så mange gange du vil</li>
-        <li>Resultater straks efter hver simulation</li>
-        <li>100% optimeret til mobil, tablet og computer</li>
-        <li>Direkte adgang efter betaling</li>
-        <li>Gratis opdateringer</li>
-        <li>Ubegrænset adgang til platformen</li>
-      </ul>
-      <p class="recommend">Anbefalet af kursister der har bestået Prøve i Dansk 3.</p>
-    </aside>
+  <aside class="features" id="featureSidebar">
 
-    <section class="right">
-      <div class="checkout-card">
-        <h1>Vælg din pakke</h1>
-        <div class="secure-line">100% sikker betaling · dine kortoplysninger rører aldrig vores servere</div>
-
-        <div class="checkout-flow" id="checkoutFlow">
-
-          <div class="checkout-step" id="stepProduct">
-            <div class="product-options">
-              <button type="button" class="product-btn selected" id="btnPD3">
-                <strong>Prøve i Dansk 3</strong>
-                <span>10 simulationer · Læsning, skrivning, mundtlig · AI-feedback · kr. 899</span>
-              </button>
-              <button type="button" class="product-btn" id="btnCombo">
-                <div class="best-tag">Bedste tilbud</div>
-                <strong>Dansk 3 + Indfødsretsprøven</strong>
-                <span>Alt i Dansk 3 + fuld adgang til indfødsretsprøve-træning · kr. 999 · Spar kr. 399</span>
-              </button>
-            </div>
-            <p class="small-note">Du betaler sikkert lige her. Ingen omdirigering.</p>
-          </div>
-
-          <div class="checkout-step" id="stepEmail" hidden>
-            <span class="step-badge">Trin 1 af 3</span>
-            <p class="email-instructions">Indtast den e-mailadresse du vil bruge til din CivicLearn-konto.</p>
-            <div class="email-field-group">
-              <label for="checkoutEmail">Email</label>
-              <input type="email" id="checkoutEmail" autocomplete="email" placeholder="eksempel@domæne.dk" inputmode="email" />
-            </div>
-            <button type="button" class="pay-btn" id="continueWithEmail">Fortsæt</button>
-            <button type="button" class="link-btn" id="backToProduct" style="margin-top:0.5rem;">← Skift pakke</button>
-          </div>
-
-          <div class="checkout-step" id="stepConfirm" hidden>
-            <span class="step-badge">Trin 2 af 3</span>
-            <p class="confirm-text">Din konto oprettes med denne adresse:</p>
-            <p class="email-display" id="emailDisplay"></p>
-            <p class="confirm-warning">Tjek venligst nøje. Denne adresse bliver dit login.</p>
-            <div class="confirm-actions">
-              <button type="button" class="pay-btn" id="confirmEmail">Bekræft og fortsæt til betaling</button>
-              <button type="button" class="link-btn" id="editEmail">Ret e-mailadresse</button>
-            </div>
-          </div>
-
-          <div class="checkout-step" id="stepPayment" hidden>
-            <span class="step-badge">Trin 3 af 3</span>
-            <p class="email-instructions" style="margin-bottom:1rem;">Indtast dine kortoplysninger nedenfor. Betalingen behandles sikkert af Stripe.</p>
-            <div id="payment-element"><div class="payment-loading">Indlæser betalingsformular…</div></div>
-            <button type="button" class="pay-btn" id="payBtn" disabled>Betal kr. 899</button>
-            <button type="button" class="link-btn" id="backToConfirm" style="margin-top:0.5rem;">← Tilbage</button>
-          </div>
-
-          <div class="checkout-step" id="stepPassword" hidden>
-            <div style="text-align:center;font-size:2rem;margin-bottom:0.5rem;">🎉</div>
-            <div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;">Betaling gennemført!</div>
-            <p class="email-instructions" style="text-align:center;">Vælg nu en adgangskode for at afslutte din kontoopsætning.</p>
-            <div class="field">
-              <label for="pw1">Adgangskode</label>
-              <input type="password" id="pw1" autocomplete="new-password" placeholder="Mindst 6 tegn">
-            </div>
-            <div class="field">
-              <label for="pw2">Bekræft adgangskode</label>
-              <input type="password" id="pw2" autocomplete="new-password" placeholder="Gentag adgangskoden">
-            </div>
-            <button type="button" class="pay-btn" id="setupBtn">Opret konto</button>
-          </div>
-
-          <div class="checkout-step" id="stepDone" hidden>
-            <div class="done-icon">✅</div>
-            <div class="done-title">Din konto er klar!</div>
-            <div class="done-sub" id="doneEmail"></div>
-            <a href="/dansk3/dashboard/index.html" class="pay-btn" style="text-align:center;text-decoration:none;display:block;">Gå til kontrolpanelet →</a>
-          </div>
-
-          <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
-        </div>
-
-        <div class="trust">
-          <div>🔒 Sikker betaling</div>
-          <div>⚡ Direkte adgang</div>
-          <div>✔ Intet abonnement</div>
-        </div>
-        <div class="after-text">Har du allerede en konto? <a href="/dansk3/login.html">Log ind her</a>.</div>
+    <div class="price-hero">
+      <div>
+        <div class="price-label" id="sidebarLabel">Prøve i Dansk 3 · Premium</div>
+        <div class="price-amount"><span id="sidebarPrice">899</span> <span style="font-size:1.1rem;font-weight:600;color:#334155">kr</span></div>
+        <div class="price-once">Engangsbetaling · adgang for livet</div>
       </div>
-    </section>
+      <div class="price-badge">10 simulationer</div>
+    </div>
 
-  </div>
+    <!-- SIMULATIONS -->
+    <div class="section-label">Simulationer & bedømmelse</div>
+    <ul class="feature-list">
+
+      <li class="feat">
+        <div class="feat-icon ic-red">🎓</div>
+        <div class="feat-body">
+          <div class="feat-title">10 komplette prøvesimulationer</div>
+          <div class="pills">
+            <span class="pill pill-red">Læsning</span>
+            <span class="pill pill-red">Skrivning</span>
+            <span class="pill pill-red">Mundtlig</span>
+          </div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-indigo">🤖</div>
+        <div class="feat-body">
+          <div class="feat-title">AI-evaluering med detaljeret feedback</div>
+          <div class="feat-sub">Skrift og tale bedømt automatisk — med konkrete forbedringspunkter</div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-violet">📊</div>
+        <div class="feat-body">
+          <div class="feat-title">Karakterer efter 7-trins-skalaen</div>
+          <div class="pills">
+            <span class="pill pill-violet">9 delprøver</span>
+            <span class="pill pill-violet">Mundtlig dobbeltvægtet</span>
+          </div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-green">♾️</div>
+        <div class="feat-body">
+          <div class="feat-title">Øv så mange gange du vil</div>
+          <div class="feat-sub">Ingen begrænsning på antal forsøg</div>
+        </div>
+      </li>
+
+    </ul>
+
+    <!-- ACCESS & RESULTS -->
+    <div class="section-label">Resultater & adgang</div>
+    <ul class="feature-list">
+
+      <li class="feat">
+        <div class="feat-icon ic-teal">📋</div>
+        <div class="feat-body">
+          <div class="feat-title">Resultater straks efter hver simulation</div>
+          <div class="pills">
+            <span class="pill pill-teal">Per delprøve</span>
+            <span class="pill pill-teal">Samlet karakter</span>
+          </div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-sky">💻</div>
+        <div class="feat-body">
+          <div class="feat-title">Alle enheder · Øjeblikkelig adgang</div>
+          <div class="pills">
+            <span class="pill pill-sky">Mobil</span>
+            <span class="pill pill-sky">Tablet</span>
+            <span class="pill pill-sky">Computer</span>
+          </div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-amber">🔄</div>
+        <div class="feat-body">
+          <div class="feat-title">Gratis opdateringer for livet</div>
+          <div class="feat-sub">Nye simulationer og forbedringer inkluderet</div>
+        </div>
+      </li>
+
+    </ul>
+
+    <!-- BUNDLE EXTRAS — Indfødsretsprøven -->
+    <div id="bundleExtrasDK" class="bundle-extras">
+      <div class="section-label" style="margin-top:.2rem;">+ Indfødsretsprøven inkluderet</div>
+      <div class="bundle-extra-item">
+        <div class="bundle-extra-icon">📚</div>
+        <div class="feat-body">
+          <div class="bundle-extra-title">3.000+ spørgsmål om Danmark</div>
+          <div class="bundle-extra-sub">Demokrati, Historie, Kulturliv, Økonomi m.fl.</div>
+        </div>
+      </div>
+      <div class="bundle-extra-item">
+        <div class="bundle-extra-icon">🎯</div>
+        <div class="feat-body">
+          <div class="bundle-extra-title">Ubegrænsede officielle simulationer</div>
+          <div class="bundle-extra-sub">40 spørgsmål · 45 min · Officiel bedømmelse</div>
+        </div>
+      </div>
+      <div class="bundle-extra-item">
+        <div class="bundle-extra-icon">📖</div>
+        <div class="feat-body">
+          <div class="bundle-extra-title">Pensum, flashcards & smarte værktøjer</div>
+          <div class="bundle-extra-sub">Officielt materiale + lyd · Hyppige fælder · Fremdrift</div>
+        </div>
+      </div>
+      <div class="bundle-extra-item">
+        <div class="bundle-extra-icon">🔑</div>
+        <div class="feat-body">
+          <div class="bundle-extra-title">Fælles login · én konto</div>
+          <div class="bundle-extra-sub">Dansk 3 + Indfødsretsprøven med samme login</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUNDLE EXTRAS — Medborgerskabsprøven -->
+    <div id="bundleExtrasDKPR" class="bundle-extras">
+      <div class="section-label" style="margin-top:.2rem;">+ Medborgerskabsprøven inkluderet</div>
+      <div class="bundle-extra-item">
+        <div class="bundle-extra-icon">📚</div>
+        <div class="feat-body">
+          <div class="bundle-extra-title">800+ spørgsmål om medborgerskab</div>
+          <div class="bundle-extra-sub">Børn og unge, Historie og kultur, Demokrati m.fl.</div>
+        </div>
+      </div>
+      <div class="bundle-extra-item">
+        <div class="bundle-extra-icon">🎯</div>
+        <div class="feat-body">
+          <div class="bundle-extra-title">Tidtagne prøvesimulationer</div>
+          <div class="bundle-extra-sub">25 spørgsmål · 30 min · Officiel bedømmelse</div>
+        </div>
+      </div>
+      <div class="bundle-extra-item">
+        <div class="bundle-extra-icon">📖</div>
+        <div class="feat-body">
+          <div class="bundle-extra-title">Pensum, flashcards & smarte værktøjer</div>
+          <div class="bundle-extra-sub">Officielt materiale · Hyppige fælder · Fremdrift</div>
+        </div>
+      </div>
+      <div class="bundle-extra-item">
+        <div class="bundle-extra-icon">🔑</div>
+        <div class="feat-body">
+          <div class="bundle-extra-title">Fælles login · én konto</div>
+          <div class="bundle-extra-sub">Dansk 3 + Medborgerskabsprøven med samme login</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="trust-footer">
+      <div class="trust-icon">🏅</div>
+      <div>
+        <div class="trust-title">Anbefalet af kursister der har bestået PD3</div>
+        <div class="trust-sub">Engangsbetaling · Intet abonnement · Adgang udløber aldrig</div>
+      </div>
+    </div>
+
+  </aside>
+
+
+  <section class="right">
+    <div class="checkout-card">
+      <h1>Vælg din pakke</h1>
+      <div class="secure-line">100% sikker betaling · dine kortoplysninger rører aldrig vores servere</div>
+
+      <!-- PLAN SELECTOR: solo + 2 bundles -->
+      <div class="plan-selector" id="planSelector">
+        <div class="plan-solo-row">
+          <div class="plan-card selected" data-plan="pd3" id="planPD3">
+            <div class="plan-card-name">Prøve i Dansk 3</div>
+            <div class="plan-card-price">899 kr</div>
+            <div class="plan-card-sub">Kun Prøve i Dansk 3</div>
+            <div class="plan-card-detail">10 simulationer · AI-feedback · 7-trinsskala</div>
+          </div>
+        </div>
+        <div class="plan-bundle-label">Eller kombiner og spar:</div>
+        <div class="plan-bundle-row">
+          <div class="plan-card" data-plan="combo" id="planCombo">
+            <div class="plan-card-badge">Spar 399 kr</div>
+            <div class="plan-card-name">Dansk 3 + Indfødsretsprøven</div>
+            <div class="plan-card-price"><span class="was">1.398 kr</span> 999 kr</div>
+            <div class="plan-card-sub">Begge prøver · ét login</div>
+          </div>
+          <div class="plan-card" data-plan="combo_pr" id="planComboPR">
+            <div class="plan-card-badge">Spar 399 kr</div>
+            <div class="plan-card-name">Dansk 3 + Medborgerskab</div>
+            <div class="plan-card-price"><span class="was">1.398 kr</span> 999 kr</div>
+            <div class="plan-card-sub">Begge prøver · ét login</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checkout-flow" id="checkoutFlow">
+
+        <div class="checkout-step" id="stepInitial">
+          <button type="button" class="pay-btn" id="startCheckout">Køb nu — 899 kr</button>
+          <p class="small-note">Du betaler sikkert direkte på denne side. Ingen omdirigering.</p>
+          <div class="trust-strip">
+            <div class="trust-item"><span>🔒</span><span>Sikker betaling</span></div>
+            <div class="trust-item"><span>⚡</span><span>Direkte adgang</span></div>
+            <div class="trust-item"><span>✔</span><span>Intet abonnement</span></div>
+          </div>
+        </div>
+
+        <div class="checkout-step" id="stepEmail" hidden>
+          <span class="step-badge">Trin 1 af 3</span>
+          <p class="email-instructions">Indtast den e-mailadresse du vil bruge til din CivicLearn-konto.</p>
+          <div class="field">
+            <label for="checkoutEmail">Email</label>
+            <input type="email" id="checkoutEmail" autocomplete="email" placeholder="eksempel@domæne.dk" inputmode="email">
+          </div>
+          <button type="button" class="pay-btn" id="continueWithEmail">Fortsæt</button>
+        </div>
+
+        <div class="checkout-step" id="stepConfirm" hidden>
+          <span class="step-badge">Trin 2 af 3</span>
+          <p class="confirm-text">Din konto oprettes med denne adresse:</p>
+          <p class="email-display" id="emailDisplay"></p>
+          <p class="confirm-warning">Tjek venligst nøje. Denne adresse bliver dit login.</p>
+          <div class="confirm-actions">
+            <button type="button" class="pay-btn" id="confirmEmail">Bekræft og fortsæt til betaling</button>
+            <button type="button" class="link-btn" id="editEmail">← Ret e-mailadresse</button>
+          </div>
+        </div>
+
+        <div class="checkout-step" id="stepPayment" hidden>
+          <span class="step-badge">Trin 3 af 3</span>
+          <p class="email-instructions" style="margin-bottom:1rem;">Indtast dine kortoplysninger nedenfor. Betalingen behandles sikkert af Stripe.</p>
+          <div id="payment-element"><div class="payment-loading">Indlæser betalingsformular…</div></div>
+          <button type="button" class="pay-btn" id="payBtn" disabled>Betal 899 kr</button>
+          <button type="button" class="link-btn" id="backToConfirm" style="margin-top:.4rem;">← Tilbage</button>
+        </div>
+
+        <div class="checkout-step" id="stepPassword" hidden>
+          <div style="text-align:center;font-size:2.4rem;margin-bottom:.6rem;">🎉</div>
+          <div class="done-title">Betaling gennemført!</div>
+          <p class="email-instructions" style="text-align:center;margin-bottom:1.1rem;">Vælg nu en adgangskode for at afslutte din kontoopsætning.</p>
+          <div class="field">
+            <label for="pw1">Adgangskode</label>
+            <input type="password" id="pw1" autocomplete="new-password" placeholder="Mindst 6 tegn">
+          </div>
+          <div class="field">
+            <label for="pw2">Bekræft adgangskode</label>
+            <input type="password" id="pw2" autocomplete="new-password" placeholder="Gentag adgangskoden">
+          </div>
+          <button type="button" class="pay-btn" id="setupBtn">Opret konto</button>
+        </div>
+
+        <div class="checkout-step" id="stepDone" hidden>
+          <div class="done-icon">✅</div>
+          <div class="done-title">Din konto er klar!</div>
+          <div class="done-sub" id="doneEmail"></div>
+          <a href="/dansk3/dashboard/index.html" class="pay-btn" id="doneCta" style="text-align:center;text-decoration:none;display:block;">Gå til kontrolpanelet →</a>
+        </div>
+
+        <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
+      </div>
+
+      <p class="after-text">Har du allerede en konto? <a href="/dansk3/login.html">Log ind her</a>.</p>
+    </div>
+  </section>
+
+</div>
 </main>
+
+<script>
+function toggleMobFeatures() {
+  var sidebar = document.getElementById('featureSidebar');
+  var toggle = document.getElementById('mobToggle');
+  var isOpening = !sidebar.classList.contains('mob-open');
+  sidebar.classList.toggle('mob-open');
+  toggle.classList.toggle('mob-open');
+  if (isOpening) setTimeout(function(){ sidebar.scrollIntoView({ behavior:'smooth', block:'start' }); }, 50);
+}
+</script>
 
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <script>
-(function() {
+(function(){
   'use strict';
+  var FUNCTIONS_URL='https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  var SUPABASE_URL='https://htgliokekeaovdiafrgs.supabase.co';
+  var SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  var STRIPE_PK='pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
+  var RETURN_URL='https://civiclearn.com/dansk3/checkout.html';
 
-  const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
-  const SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
-  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
-  const STRIPE_PK     = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
-  const RETURN_URL    = 'https://civiclearn.com/dansk3/checkout.html';
-  const PRICES = { pd3: 'kr. 899', combo: 'kr. 999' };
+  var stripe=Stripe(STRIPE_PK);
+  var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-  const stripe = Stripe(STRIPE_PK);
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var PLANS={
+    pd3:      {price:'899 kr', payLabel:'Betal 899 kr', ctaLabel:'Køb nu — 899 kr', sidebarLabel:'Prøve i Dansk 3 · Premium', sidebarPrice:'899'},
+    combo:    {price:'999 kr', payLabel:'Betal 999 kr', ctaLabel:'Køb nu — 999 kr', sidebarLabel:'Dansk 3 + Indfødsretsprøven · Pakke', sidebarPrice:'999'},
+    combo_pr: {price:'999 kr', payLabel:'Betal 999 kr', ctaLabel:'Køb nu — 999 kr', sidebarLabel:'Dansk 3 + Medborgerskabsprøven · Pakke', sidebarPrice:'999'},
+  };
+  var selectedPlan='pd3';
 
-  const stepProduct  = document.getElementById('stepProduct');
-  const stepEmail    = document.getElementById('stepEmail');
-  const stepConfirm  = document.getElementById('stepConfirm');
-  const stepPayment  = document.getElementById('stepPayment');
-  const stepPassword = document.getElementById('stepPassword');
-  const stepDone     = document.getElementById('stepDone');
+  var urlPlan=new URLSearchParams(window.location.search).get('plan');
+  if(urlPlan==='combo') selectedPlan='combo';
+  if(urlPlan==='combo_pr') selectedPlan='combo_pr';
 
-  const btnPD3           = document.getElementById('btnPD3');
-  const btnCombo         = document.getElementById('btnCombo');
-  const continueBtn      = document.getElementById('continueWithEmail');
-  const backToProductBtn = document.getElementById('backToProduct');
-  const confirmBtn       = document.getElementById('confirmEmail');
-  const editEmailBtn     = document.getElementById('editEmail');
-  const payBtn           = document.getElementById('payBtn');
-  const backToConfirmBtn = document.getElementById('backToConfirm');
-  const setupBtn         = document.getElementById('setupBtn');
+  var cardPD3=document.getElementById('planPD3');
+  var cardCombo=document.getElementById('planCombo');
+  var cardComboPR=document.getElementById('planComboPR');
+  var sidebarPrice=document.getElementById('sidebarPrice');
+  var sidebarLabel=document.getElementById('sidebarLabel');
+  var extrasDK=document.getElementById('bundleExtrasDK');
+  var extrasDKPR=document.getElementById('bundleExtrasDKPR');
+  var startBtn=document.getElementById('startCheckout');
 
-  const emailInput   = document.getElementById('checkoutEmail');
-  const emailDisplay = document.getElementById('emailDisplay');
-  const messageBox   = document.getElementById('checkoutMessage');
-
-  let selectedProduct = 'pd3';
-  let currentEmail = '';
-  let paymentIntentId = '';
-  let stripeElements = null;
-  let isSubmitting = false;
-
-  function showStep(id) {
-    [stepProduct, stepEmail, stepConfirm, stepPayment, stepPassword, stepDone]
-      .forEach(el => el.hidden = true);
-    document.getElementById(id).hidden = false;
-    clearMessage();
+  function selectPlan(plan){
+    selectedPlan=plan;
+    cardPD3.classList.toggle('selected',plan==='pd3');
+    cardCombo.classList.toggle('selected',plan==='combo');
+    cardComboPR.classList.toggle('selected',plan==='combo_pr');
+    sidebarPrice.textContent=PLANS[plan].sidebarPrice;
+    sidebarLabel.textContent=PLANS[plan].sidebarLabel;
+    extrasDK.classList.toggle('show',plan==='combo');
+    extrasDKPR.classList.toggle('show',plan==='combo_pr');
+    startBtn.textContent=PLANS[plan].ctaLabel;
+    var payBtn=document.getElementById('payBtn');
+    if(payBtn&&!payBtn.disabled) payBtn.textContent=PLANS[plan].payLabel;
   }
 
-  function clearMessage() { messageBox.textContent = ''; messageBox.className = 'checkout-message'; messageBox.style.display = 'none'; }
-  function showMessage(type, text) { messageBox.textContent = text; messageBox.className = 'checkout-message ' + type; messageBox.style.display = 'block'; }
-  function updatePayBtn() { payBtn.textContent = 'Betal ' + PRICES[selectedProduct]; }
+  cardPD3.addEventListener('click',function(){selectPlan('pd3');});
+  cardCombo.addEventListener('click',function(){selectPlan('combo');});
+  cardComboPR.addEventListener('click',function(){selectPlan('combo_pr');});
+  selectPlan(selectedPlan);
 
-  function validateEmail(value) {
-    const email = value.trim();
-    if (!email) return { ok: false, msg: 'Indtast venligst din e-mailadresse.' };
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, msg: 'Ugyldig e-mailadresse. Tjek og prøv igen.' };
-    return { ok: true, email };
+  /* Steps */
+  var steps={initial:document.getElementById('stepInitial'),email:document.getElementById('stepEmail'),confirm:document.getElementById('stepConfirm'),payment:document.getElementById('stepPayment'),password:document.getElementById('stepPassword'),done:document.getElementById('stepDone')};
+  var selector=document.getElementById('planSelector');
+  var msg=document.getElementById('checkoutMessage');
+  var currentEmail='',paymentIntentId='',stripeElements=null,isSubmitting=false;
+
+  function show(name){Object.values(steps).forEach(function(s){s.hidden=true;});steps[name].hidden=false;selector.style.display=(name==='initial'||name==='email')?'block':'none';msg.style.display='none';}
+  function err(text){msg.textContent=text;msg.className='checkout-message error';msg.style.display='block';}
+  function info(text){msg.textContent=text;msg.className='checkout-message info';msg.style.display='block';}
+
+  /* 3DS return */
+  var urlParams=new URLSearchParams(window.location.search);
+  var returnedPI=urlParams.get('payment_intent'),returnedSecret=urlParams.get('payment_intent_client_secret'),returnedStatus=urlParams.get('redirect_status');
+  if(returnedPI&&returnedSecret){
+    currentEmail=localStorage.getItem('pd3_checkout_email')||'';
+    selectedPlan=localStorage.getItem('pd3_checkout_plan')||'pd3';
+    paymentIntentId=returnedPI;
+    if(returnedStatus==='succeeded'){show('password');}
+    else{stripe.retrievePaymentIntent(returnedSecret).then(function(r){var pi=r.paymentIntent;if(pi&&pi.status==='succeeded')show('password');else{err('Betaling blev ikke gennemført. Prøv igen.');show('initial');}});}
+    window.history.replaceState({},'',window.location.pathname);
   }
 
-  // 3DS return
-  const urlParams = new URLSearchParams(window.location.search);
-  const returnedPI = urlParams.get('payment_intent');
-  const returnedSecret = urlParams.get('payment_intent_client_secret');
-  const returnedStatus = urlParams.get('redirect_status');
+  startBtn.onclick=function(){show('email');document.getElementById('checkoutEmail').focus();};
 
-  if (returnedPI && returnedSecret) {
-    currentEmail = localStorage.getItem('pd3_checkout_email') || '';
-    selectedProduct = localStorage.getItem('pd3_checkout_product') || 'pd3';
-    paymentIntentId = returnedPI;
-    if (returnedStatus === 'succeeded') { showStep('stepPassword'); }
-    else {
-      stripe.retrievePaymentIntent(returnedSecret).then(({ paymentIntent }) => {
-        if (paymentIntent && paymentIntent.status === 'succeeded') showStep('stepPassword');
-        else { showMessage('error', 'Betaling blev ikke gennemført. Prøv igen.'); showStep('stepProduct'); }
-      });
-    }
-    window.history.replaceState({}, '', window.location.pathname);
-  }
+  document.getElementById('continueWithEmail').onclick=function(){
+    var v=document.getElementById('checkoutEmail').value.trim();
+    if(!v||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){err('Indtast venligst en gyldig e-mailadresse.');return;}
+    currentEmail=v;document.getElementById('emailDisplay').textContent=v;show('confirm');
+  };
+  document.getElementById('checkoutEmail').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('continueWithEmail').click();});
+  document.getElementById('editEmail').onclick=function(){show('email');document.getElementById('checkoutEmail').focus();};
 
-  // Step 1: product
-  function selectProduct(type) {
-    selectedProduct = type;
-    btnPD3.classList.toggle('selected', type === 'pd3');
-    btnCombo.classList.toggle('selected', type === 'combo');
-    showStep('stepEmail'); emailInput.focus();
-  }
-  btnPD3.addEventListener('click', () => selectProduct('pd3'));
-  btnCombo.addEventListener('click', () => selectProduct('combo'));
+  /* Confirm → create PI */
+  document.getElementById('confirmEmail').onclick=async function(){
+    if(isSubmitting)return;isSubmitting=true;
+    var btn=document.getElementById('confirmEmail');btn.disabled=true;btn.textContent='Forbereder…';info('Forbereder sikker betalingsformular…');
+    try{
+      var res=await fetch(FUNCTIONS_URL+'/pd3-create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:currentEmail,product_type:selectedPlan})});
+      var data=await res.json();if(!res.ok||data.error)throw new Error(data.error||'Kunne ikke oprette betalingssession.');
+      paymentIntentId=data.payment_intent_id;
+      localStorage.setItem('pd3_checkout_email',currentEmail);
+      localStorage.setItem('pd3_checkout_plan',selectedPlan);
+      stripeElements=stripe.elements({clientSecret:data.client_secret,appearance:{theme:'stripe',variables:{fontFamily:'"DM Sans",system-ui,sans-serif',borderRadius:'0.85rem',colorPrimary:'#c8102e'}}});
+      var pe=stripeElements.create('payment',{layout:'tabs'});document.getElementById('payment-element').innerHTML='';pe.mount('#payment-element');
+      pe.on('loaderror',function(){err('Betalingsformularen kunne ikke indlæses.');isSubmitting=false;btn.disabled=false;});
+      pe.on('ready',function(){document.getElementById('payBtn').disabled=false;document.getElementById('payBtn').textContent=PLANS[selectedPlan].payLabel;});
+      pe.on('change',function(ev){if(ev.complete){document.getElementById('payBtn').disabled=false;document.getElementById('payBtn').textContent=PLANS[selectedPlan].payLabel;}});
+      show('payment');
+    }catch(e){err(e.message||'En fejl opstod.');}
+    finally{isSubmitting=false;btn.disabled=false;btn.textContent='Bekræft og fortsæt til betaling';}
+  };
 
-  // Step 2: email
-  continueBtn.addEventListener('click', () => {
-    const { ok, msg, email } = validateEmail(emailInput.value);
-    if (!ok) { showMessage('error', msg); emailInput.focus(); return; }
-    currentEmail = email; emailDisplay.textContent = currentEmail; showStep('stepConfirm');
-  });
-  emailInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); } });
-  backToProductBtn.addEventListener('click', () => showStep('stepProduct'));
-  editEmailBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
+  document.getElementById('backToConfirm').onclick=function(){show('confirm');};
 
-  // Step 3 → 4: create PI + mount Elements
-  confirmBtn.addEventListener('click', async () => {
-    if (isSubmitting) return;
-    isSubmitting = true; confirmBtn.disabled = true;
-    confirmBtn.textContent = 'Forbereder betaling…';
-    showMessage('info', 'Forbereder sikker betalingsformular…');
+  /* Pay */
+  document.getElementById('payBtn').onclick=async function(){
+    if(isSubmitting)return;isSubmitting=true;var btn=document.getElementById('payBtn');btn.disabled=true;
+    btn.innerHTML='<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;"></span>Behandler betaling…';
+    msg.style.display='none';
+    var result=await stripe.confirmPayment({elements:stripeElements,confirmParams:{return_url:RETURN_URL,receipt_email:currentEmail},redirect:'if_required'});
+    if(result.error){err(result.error.message||'Betaling fejlede.');btn.disabled=false;btn.textContent=PLANS[selectedPlan].payLabel;isSubmitting=false;return;}
+    if(result.paymentIntent&&result.paymentIntent.status==='succeeded'){paymentIntentId=result.paymentIntent.id;show('password');}
+    else if(result.paymentIntent&&result.paymentIntent.status==='processing'){info('Din betaling behandles…');}
+    isSubmitting=false;
+  };
 
-    try {
-      const res = await fetch(FUNCTIONS_URL + '/pd3-create-payment-intent', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentEmail, product_type: selectedProduct }),
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || 'Kunne ikke oprette betalingssession.');
-
-      paymentIntentId = data.payment_intent_id;
-      localStorage.setItem('pd3_checkout_email', currentEmail);
-      localStorage.setItem('pd3_checkout_product', selectedProduct);
-
-      stripeElements = stripe.elements({
-        clientSecret: data.client_secret,
-        appearance: { theme: 'stripe', variables: { fontFamily: '"Lexend", system-ui, sans-serif', borderRadius: '0.9rem', colorPrimary: '#7c3aed' } },
-      });
-      const paymentElement = stripeElements.create('payment', { layout: 'tabs' });
-      document.getElementById('payment-element').innerHTML = '';
-      paymentElement.mount('#payment-element');
-      paymentElement.on('loaderror', (event) => {
-        showMessage('error', 'Betalingsformularen kunne ikke indlæses. Opdater siden eller prøv en anden browser.');
-        isSubmitting = false; confirmBtn.disabled = false;
-      });
-      paymentElement.on('ready', () => { payBtn.disabled = false; updatePayBtn(); });
-      paymentElement.on('change', (event) => { if (event.complete) payBtn.disabled = false; });
-      showStep('stepPayment'); updatePayBtn();
-    } catch (err) {
-      showMessage('error', err.message || 'Der opstod en fejl. Prøv igen.');
-    } finally {
-      isSubmitting = false; confirmBtn.disabled = false; confirmBtn.textContent = 'Bekræft og fortsæt til betaling';
-    }
-  });
-
-  backToConfirmBtn.addEventListener('click', () => showStep('stepConfirm'));
-
-  // Step 4 → 5: pay
-  payBtn.addEventListener('click', async () => {
-    if (isSubmitting) return;
-    isSubmitting = true; payBtn.disabled = true;
-    payBtn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;"></span>Behandler betaling…';
-    clearMessage();
-
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements: stripeElements,
-      confirmParams: { return_url: RETURN_URL, receipt_email: currentEmail },
-      redirect: 'if_required',
-    });
-
-    if (error) {
-      showMessage('error', error.message || 'Betaling fejlede. Prøv igen.');
-      payBtn.disabled = false; updatePayBtn(); isSubmitting = false; return;
-    }
-    if (paymentIntent && paymentIntent.status === 'succeeded') {
-      paymentIntentId = paymentIntent.id; showStep('stepPassword');
-    } else if (paymentIntent && paymentIntent.status === 'processing') {
-      showMessage('info', 'Din betaling behandles. Vent venligst…');
-    }
-    isSubmitting = false;
-  });
-
-  // Step 5: password (6 chars, same as all sites)
-  setupBtn.addEventListener('click', async () => {
-    const pw1 = document.getElementById('pw1').value;
-    const pw2 = document.getElementById('pw2').value;
-    if (!pw1 || pw1.length < 6) { showMessage('error', 'Adgangskoden skal være mindst 6 tegn.'); return; }
-    if (pw1 !== pw2) { showMessage('error', 'Adgangskoderne er ikke ens.'); return; }
-
-    setupBtn.disabled = true; setupBtn.textContent = 'Opretter konto…'; clearMessage();
-
-    try {
-      const res = await fetch(FUNCTIONS_URL + '/pd3-setup-account', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payment_intent_id: paymentIntentId, password: pw1 }),
-      });
-      const data = await res.json();
-      if (!data.success) {
-        showMessage('error', data.error || 'Kontoopsætning fejlede. Kontakt admin@civiclearn.com.');
-        setupBtn.disabled = false; setupBtn.textContent = 'Opret konto'; return;
-      }
-      const { error: signInError } = await sb.auth.signInWithPassword({ email: data.email, password: pw1 });
-      if (signInError) console.error('Auto-login failed:', signInError);
-
+  /* Password */
+  document.getElementById('setupBtn').onclick=async function(){
+    var p1=document.getElementById('pw1').value,p2=document.getElementById('pw2').value;
+    if(!p1||p1.length<6){err('Adgangskoden skal være mindst 6 tegn.');return;}if(p1!==p2){err('Adgangskoderne er ikke ens.');return;}
+    var btn=document.getElementById('setupBtn');btn.disabled=true;btn.textContent='Opretter konto…';msg.style.display='none';
+    try{
+      var res=await fetch(FUNCTIONS_URL+'/pd3-setup-account',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({payment_intent_id:paymentIntentId,password:p1})});
+      var data=await res.json();if(!data.success){err(data.error||'Kontoopsætning fejlede. Kontakt admin@civiclearn.com.');btn.disabled=false;btn.textContent='Opret konto';return;}
+      var signIn=await sb.auth.signInWithPassword({email:data.email,password:p1});
+      if(signIn.error)console.error('Auto-login failed:',signIn.error);
       localStorage.removeItem('pd3_checkout_email');
-      localStorage.removeItem('pd3_checkout_product');
-
-      const comboNote = data.is_combo ? ' (Dansk 3 + Indfødsretsprøven)' : '';
-      document.getElementById('doneEmail').textContent = 'Logget ind som: ' + data.email + comboNote;
-      showStep('stepDone');
-    } catch (err) {
-      showMessage('error', 'Forbindelsesfejl. Prøv igen.');
-      setupBtn.disabled = false; setupBtn.textContent = 'Opret konto';
-    }
-  });
-
-  document.getElementById('pw2').addEventListener('keydown', (e) => { if (e.key === 'Enter') setupBtn.click(); });
+      localStorage.removeItem('pd3_checkout_plan');
+      var comboNote=data.is_combo?' (inkl. '+((selectedPlan==='combo')?'Indfødsretsprøven':'Medborgerskabsprøven')+')':'';
+      document.getElementById('doneEmail').textContent='Logget ind som: '+data.email+comboNote;
+      show('done');
+    }catch(e){err('Forbindelsesfejl. Prøv igen.');btn.disabled=false;btn.textContent='Opret konto';}
+  };
+  document.getElementById('pw2').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('setupBtn').click();});
 })();
 </script>
 
