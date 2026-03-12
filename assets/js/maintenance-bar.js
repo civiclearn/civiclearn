@@ -7,11 +7,13 @@
      NOTICE CONFIGURATION
      ========================= */
 
-  const NOTICE = {
-    id: "maintenance_2026_04", // change to re-show for everyone
-    enabled: false,                 // global on/off
-    type: "outage"                // "info" | "warning" | "outage" | "success"
-  };
+const NOTICE = {
+  id: "aktuelle_2026_03",   // new id = shows again for everyone
+  enabled: true,             // was false
+  type: "info"
+};
+
+  const TARGET_COUNTRIES = ["denmark"];
   
   const TARGET_COUNTRIES = ["uk"]; // "geneva", "denmark-pr", "france-cr", "ccse", etc
 
@@ -51,7 +53,8 @@ if (
 
 const MESSAGES = {
   info: {
-    en: "A new feature has just been released on CivicLearn.",
+    da: "Nye spørgsmål tilføjet: Aktuelle begivenheder er blevet opdateret med et nyt sæt spørgsmål om de seneste begivenheder.",
+	en: "A new feature has just been released on CivicLearn.",
     fr: "Une nouvelle fonctionnalité vient d’être publiée sur CivicLearn.",
     de: "Eine neue Funktion wurde soeben auf CivicLearn veröffentlicht."
   },
