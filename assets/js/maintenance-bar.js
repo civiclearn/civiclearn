@@ -15,8 +15,6 @@ const NOTICE = {
 
   const TARGET_COUNTRIES = ["denmark"];
   
-  const TARGET_COUNTRIES = ["uk"]; // "geneva", "denmark-pr", "france-cr", "ccse", etc
-
   const MESSAGE_KEY = NOTICE.type
 
   const STORAGE_KEY = "civiclearn_notice_dismissed_" + NOTICE.id;
