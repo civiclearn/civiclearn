@@ -420,13 +420,12 @@ WonderPush.push(["addTag", "country:denmark-pr"]);
       el.classList.add('show');
       return;
     }
-    var email = localStorage.getItem('cl_email');
-    if (!email) return;
     try {
       if (window.denmarkprAuth && window.denmarkprAuth.ready) await window.denmarkprAuth.ready;
       var sb = window.denmarkprAuth && window.denmarkprAuth.supabase;
-      if (!sb) return;
-      var result = await sb.from('users').select('bundle').eq('email', email).maybeSingle();
+      var userId = window.denmarkprAuth && window.denmarkprAuth.userId;
+      if (!sb || !userId) return;
+      var result = await sb.from('users').select('bundle').eq('id', userId).maybeSingle();
       if (result.data && result.data.bundle === 'dkpr') {
         localStorage.setItem('cl_bundle', 'dkpr');
         el.classList.add('show');

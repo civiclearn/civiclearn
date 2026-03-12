@@ -501,24 +501,23 @@ WonderPush.push(["addTag", "country:dk"]);
 </script>
 <script src="/assets/js/maintenance-bar.js"></script>
 <script src="/assets/js/signout.js"></script>
+
 <script>
   // Bundle banner — show if user has dk bundle
   (async function(){
     var el = document.getElementById('bundleBanner');
     if (!el) return;
-
     if (localStorage.getItem('cl_bundle') === 'dk') {
       el.classList.add('show');
       return;
     }
-    // Fallback: check Supabase
-    var email = localStorage.getItem('cl_email');
-    if (!email) return;
+    // Fallback: check Supabase (uses userId to satisfy RLS policy)
     try {
       if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
       var sb = window.denmarkAuth && window.denmarkAuth.supabase;
-      if (!sb) return;
-      var result = await sb.from('users').select('bundle').eq('email', email).maybeSingle();
+      var userId = window.denmarkAuth && window.denmarkAuth.userId;
+      if (!sb || !userId) return;
+      var result = await sb.from('users').select('bundle').eq('id', userId).maybeSingle();
       if (result.data && result.data.bundle === 'dk') {
         localStorage.setItem('cl_bundle', 'dk');
         el.classList.add('show');

@@ -500,14 +500,13 @@ CivicLearnI18n.onReady(() => {
 
   // Fallback: check Supabase if localStorage doesn't have the flag
   if (!hasBundle) {
-    const email = localStorage.getItem('cl_email');
-    if (!email) return;
     try {
       if (window.luxAuth && window.luxAuth.ready) await window.luxAuth.ready;
       const sb = window.luxAuth && window.luxAuth.supabase;
-      if (!sb) return;
+      const userId = window.luxAuth && window.luxAuth.userId;
+      if (!sb || !userId) return;
       const { data } = await sb
-        .from('users').select('bundle').eq('email', email).maybeSingle();
+        .from('users').select('bundle').eq('id', userId).maybeSingle();
       if (data && data.bundle === 'lux') {
         localStorage.setItem('cl_bundle', 'lu');
         hasBundle = true;
