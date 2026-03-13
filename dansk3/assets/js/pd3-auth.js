@@ -26,6 +26,11 @@
   // Initialize Supabase client
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+  function redirectToLogin() {
+    const returnUrl = window.location.pathname + window.location.search;
+    window.location.href = LOGIN_URL + '?return=' + encodeURIComponent(returnUrl);
+  }
+
   const auth = {
     email: null,
     userId: null,
@@ -46,8 +51,7 @@
 
       if (error || !session) {
         // No valid session — redirect to login
-        const returnUrl = window.location.pathname + window.location.search;
-        window.location.href = LOGIN_URL + '?return=' + encodeURIComponent(returnUrl);
+        redirectToLogin();
         return;
       }
 
@@ -57,8 +61,13 @@
 
       // Listen for auth state changes (e.g., token refresh, sign out)
       supabase.auth.onAuthStateChange((event, newSession) => {
-        if (event === 'SIGNED_OUT' || !newSession) {
-          window.location.href = LOGIN_URL;
+        // Only redirect on an explicit sign-out event.
+        // Do NOT act on !newSession alone — Supabase can fire TOKEN_REFRESHED
+        // with a briefly-null session, which would cause spurious logouts and
+        // lose the user's current page.
+        if (event === 'SIGNED_OUT') {
+          redirectToLogin();
+          return;
         }
         if (newSession) {
           auth.session = newSession;
@@ -70,7 +79,7 @@
 
     } catch (err) {
       console.error('PD3 Auth error:', err);
-      window.location.href = LOGIN_URL;
+      redirectToLogin();
     }
   })();
 
