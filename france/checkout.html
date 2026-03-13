@@ -1,393 +1,582 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Accès Premium – Examen civique (France)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accès Premium – Examen civique France</title>
+<meta name="description" content="Activez l'accès Premium pour l'examen civique en France. 200 mises en situation, entraînements ciblés par démarche, statistiques détaillées. Paiement unique, accès immédiat.">
+<link rel="canonical" href="https://civiclearn.com/france/checkout.html">
+<meta property="og:title" content="Accès Premium – Examen civique France">
+<meta property="og:description" content="200 mises en situation conformes, carte de résident ou carte de séjour pluriannuelle. Paiement unique, accès à vie.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://civiclearn.com/france/checkout.html">
+<meta property="og:image" content="https://civiclearn.com/france/assets/img/og-cover.webp">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; overflow-x: clip; }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: #f0f4f8;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(0,35,149,.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(237,41,57,.04) 0%, transparent 60%);
+  min-height: 100vh; color: #0f172a; overflow-x: clip; width: 100%;
+}
+a { color: inherit; }
 
-  <meta name="description"
-        content="Activez l'accès Premium pour la préparation à l'examen civique en France. Contenu structuré, entraînements ciblés, accès immédiat. Paiement unique." />
-  <link rel="canonical" href="https://civiclearn.com/france/checkout.html">
+/* HEADER */
+.checkout-header { background: rgba(255,255,255,.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,.07); position: sticky; top: 0; z-index: 100; }
+.checkout-header-inner { max-width: 1060px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: .85rem 1.5rem; gap: .5rem; }
+.checkout-brand { display: flex; align-items: center; gap: .55rem; font-weight: 700; font-size: .9rem; color: #0f172a; flex-shrink: 1; min-width: 0; }
+/* Inline French flag */
+.fr-flag { width: 26px; height: 18px; border-radius: 3px; overflow: hidden; flex-shrink: 0; display: flex; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.fr-flag span { flex: 1; }
+.fr-flag .f-blue { background: #002395; }
+.fr-flag .f-white { background: #fff; }
+.fr-flag .f-red { background: #ED2939; }
+.header-right { display: flex; align-items: center; gap: .75rem; }
+.header-contact { font-size: .74rem; font-weight: 500; color: #94a3b8; text-decoration: none; display: flex; align-items: center; gap: .28rem; padding: .27rem .52rem; border: 1px solid #e2e8f0; border-radius: .45rem; transition: all .15s; white-space: nowrap; }
+.header-contact:hover { border-color: #002395; color: #002395; background: #eff3ff; }
+.checkout-powered { font-size: .75rem; color: #94a3b8; flex-shrink: 0; }
+.checkout-powered a { color: #64748b; text-decoration: none; font-weight: 500; }
+@media (max-width: 520px) {
+  .checkout-header-inner { padding: .65rem 1rem; }
+  .checkout-brand { font-size: .82rem; }
+  .header-contact span { display: none; }
+  .header-contact { padding: .25rem .4rem; }
+  .checkout-powered { display: none; }
+}
 
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/checkout.css">
+/* LAYOUT */
+main { padding: 2.5rem 1.5rem 4rem; max-width: 100%; }
+.layout { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 420px; gap: 2rem; align-items: start; }
+@media (max-width: 820px) {
+  main { padding: 1.2rem 1rem 3rem; }
+  .layout { grid-template-columns: 1fr; gap: 1.2rem; }
+  .features { order: 2; overflow: hidden; word-break: break-word; max-width: 100%; }
+  .right { order: 1; position: static !important; max-width: 100%; }
+  .checkout-card { border-radius: 1rem; padding: 1.5rem 1.25rem; }
+  .pills { overflow: hidden; }
+  .feat { min-width: 0; }
+  .feat-body { min-width: 0; overflow: hidden; }
+}
 
-  <style>
-    .product-options { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
-    .product-btn {
-      padding: 1rem 1.1rem; border-radius: 0.9rem; border: 2px solid rgba(0,0,0,0.08);
-      background: #fff; text-align: left; cursor: pointer; font-family: "Lexend", system-ui, sans-serif;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .product-btn:hover { border-color: var(--brand); box-shadow: 0 4px 16px rgba(124,58,237,0.1); }
-    .product-btn.selected { border-color: var(--brand); background: #f4f0ff; }
-    .product-btn strong { display: block; font-size: 0.95rem; font-weight: 600; margin-bottom: 2px; color: var(--text-main); }
-    .product-btn span { font-size: 0.84rem; color: var(--muted); }
-    .topbar-flag {
-      width: 26px; height: 18px; border-radius: 3px; overflow: hidden;
-      display: inline-flex; flex-shrink: 0; vertical-align: middle;
-    }
-    .topbar-flag span { flex: 1; }
-    .topbar-flag .f-blue { background: #002395; }
-    .topbar-flag .f-white { background: #fff; }
-    .topbar-flag .f-red { background: #ED2939; }
+/* MOBILE TOGGLE */
+.mob-toggle { display: none; align-items: center; justify-content: space-between; padding: .75rem 1.1rem; background: #fff; border-bottom: 1px solid #e2e8f0; cursor: pointer; font-size: .81rem; font-weight: 600; color: #475569; width: 100%; }
+.mob-toggle .mob-arrow { transition: transform .25s; font-size: .72rem; color: #002395; }
+.mob-toggle.mob-open .mob-arrow { transform: rotate(180deg); }
+@media (max-width: 820px) { .mob-toggle { display: flex; } .features { display: none !important; } .features.mob-open { display: flex !important; flex-direction: column; } }
 
-    #payment-element { margin-bottom: 1.2rem; min-height: 300px; }
-    .payment-loading { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 2rem 0; }
-    .field { margin-bottom: 1rem; }
-    .field label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
-    .field input {
-      width: 100%; padding: 0.75rem 0.9rem; border-radius: 0.9rem;
-      border: 1px solid rgba(0,0,0,0.12); font-size: 0.95rem;
-      font-family: "Lexend", sans-serif; outline: none;
-    }
-    .field input:focus { outline: 2px solid var(--brand); border-color: transparent; }
-    .done-icon { font-size: 3rem; text-align: center; margin-bottom: 0.8rem; }
-    .done-title { font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; }
-    .done-sub { font-size: 0.95rem; color: var(--muted); text-align: center; margin-bottom: 1.5rem; }
-    .step-badge {
-      display: inline-block; padding: 3px 10px; border-radius: 20px;
-      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.05em; margin-bottom: 1rem; background: #eef2ff; color: #3730a3;
-    }
-  </style>
+/* SIDEBAR */
+.features { background: #fff; border-radius: 1.5rem; padding: 2rem 1.75rem 1.75rem; box-shadow: 0 2px 4px rgba(0,0,0,.03), 0 8px 32px rgba(0,0,0,.07); animation: rise .5s cubic-bezier(.22,1,.36,1) both; min-width: 0; overflow: hidden; }
+@keyframes rise { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+.price-hero { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; margin-bottom: 1.4rem; }
+.price-label { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: #94a3b8; margin-bottom: .3rem; }
+.price-amount { font-size: 2.6rem; font-weight: 700; color: #0f172a; line-height: 1; letter-spacing: -.03em; }
+.price-amount sup { font-size: 1.1rem; font-weight: 600; vertical-align: super; margin-right: .1rem; color: #334155; }
+.price-once { font-size: .72rem; color: #94a3b8; margin-top: .35rem; display: flex; align-items: center; gap: .3rem; }
+.price-once::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+.price-badge { background: linear-gradient(135deg, #001a6e 0%, #002395 100%); color: #fff; font-size: .63rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; padding: .35rem .8rem; border-radius: .65rem; white-space: nowrap; align-self: center; box-shadow: 0 2px 10px rgba(0,35,149,.3); }
+.section-label { font-size: .61rem; font-weight: 700; text-transform: uppercase; letter-spacing: .13em; color: #94a3b8; margin: .85rem 0 .55rem; display: flex; align-items: center; gap: .5rem; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: #f1f5f9; }
+
+/* FEATURES */
+.feature-list { list-style: none; display: flex; flex-direction: column; gap: .35rem; }
+.feat { display: flex; align-items: flex-start; gap: .6rem; padding: .45rem .65rem; border-radius: .85rem; background: #f8fafc; transition: background .15s; animation: slideIn .4s ease both; }
+.feat:hover { background: #f1f5f9; }
+@keyframes slideIn { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:translateX(0); } }
+.feat:nth-child(1){animation-delay:.06s} .feat:nth-child(2){animation-delay:.10s} .feat:nth-child(3){animation-delay:.14s} .feat:nth-child(4){animation-delay:.18s} .feat:nth-child(5){animation-delay:.22s} .feat:nth-child(6){animation-delay:.26s}
+.feat-icon { width: 30px; height: 30px; border-radius: .55rem; display: flex; align-items: center; justify-content: center; font-size: .9rem; flex-shrink: 0; margin-top: .05rem; }
+.feat-body { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: .4rem; row-gap: .1rem; }
+.feat-title { font-size: .8rem; font-weight: 600; color: #1e293b; line-height: 1.25; }
+.feat-sub { font-size: .71rem; color: #94a3b8; line-height: 1.35; order: 2; flex-basis: 100%; }
+.pills { display: flex; flex-wrap: wrap; gap: .22rem; order: 1; }
+.pill { display: inline-flex; align-items: center; gap: .2rem; font-size: .63rem; font-weight: 600; padding: .16rem .48rem; border-radius: 99px; white-space: nowrap; letter-spacing: .01em; line-height: 1.4; }
+.pill-blue{background:#eff6ff;color:#2563eb} .pill-teal{background:#f0fdfa;color:#0d9488} .pill-amber{background:#fffbeb;color:#d97706}
+.pill-rose{background:#fff1f2;color:#e11d48} .pill-sky{background:#f0f9ff;color:#0284c7}
+.pill-green{background:#f0fdf4;color:#16a34a} .pill-indigo{background:#eef2ff;color:#4338ca}
+.pill-violet{background:#f5f3ff;color:#7c3aed} .pill-navy{background:#eff3ff;color:#002395}
+.pill-orange{background:#fff7ed;color:#ea580c}
+.ic-blue{background:#eff6ff} .ic-teal{background:#f0fdfa} .ic-amber{background:#fffbeb} .ic-rose{background:#fff1f2}
+.ic-green{background:#f0fdf4} .ic-indigo{background:#eef2ff} .ic-sky{background:#f0f9ff}
+.ic-violet{background:#f5f3ff} .ic-navy{background:#eff3ff} .ic-orange{background:#fff7ed} .ic-slate{background:#f1f5f9}
+
+/* TRUST FOOTER */
+.trust-footer { margin-top: 1.3rem; background: linear-gradient(135deg, #001a6e 0%, #002395 100%); border-radius: 1rem; padding: .95rem 1.1rem; color: #fff; display: flex; align-items: center; gap: .8rem; }
+.trust-icon { font-size: 1.5rem; flex-shrink: 0; }
+.trust-title { font-size: .78rem; font-weight: 700; margin-bottom: .12rem; }
+.trust-sub { font-size: .68rem; opacity: .75; line-height: 1.4; }
+
+/* PAYMENT CARD */
+.right { animation: rise .5s .1s cubic-bezier(.22,1,.36,1) both; position: sticky; top: 70px; align-self: start; }
+.checkout-card { background: #fff; border-radius: 1.5rem; padding: 2rem 1.75rem; box-shadow: 0 2px 4px rgba(0,0,0,.03), 0 8px 32px rgba(0,0,0,.07); }
+.checkout-card h1 { font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-bottom: .4rem; line-height: 1.25; }
+.secure-line { font-size: .72rem; color: #94a3b8; margin-bottom: 1.4rem; display: flex; align-items: center; gap: .35rem; }
+.secure-line::before { content: '🔒'; font-size: .8rem; }
+.step-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .9rem; background: #eff3ff; color: #002395; }
+
+/* PRODUCT CARDS */
+.product-cards { display: flex; flex-direction: column; gap: .65rem; margin-bottom: 1rem; }
+.product-card { position: relative; padding: .95rem 1.1rem; border-radius: 1rem; border: 2px solid #e5e7eb; background: #fff; cursor: pointer; text-align: left; font-family: 'DM Sans', sans-serif; transition: border-color .15s, box-shadow .15s, background .15s; width: 100%; }
+.product-card:hover { border-color: #7090e8; box-shadow: 0 4px 16px rgba(0,35,149,.1); background: #fafbff; }
+.product-card.selected { border-color: #002395; background: #f0f3ff; box-shadow: 0 4px 18px rgba(0,35,149,.15); }
+.product-card-header { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .25rem; }
+.product-card-name { font-size: .88rem; font-weight: 700; color: #0f172a; }
+.product-card-badge { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; padding: .18rem .5rem; border-radius: 99px; background: #e0e7ff; color: #3730a3; white-space: nowrap; }
+.product-card.selected .product-card-badge { background: #002395; color: #fff; }
+.product-card-desc { font-size: .75rem; color: #64748b; line-height: 1.45; }
+.product-card-arrow { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); font-size: .75rem; color: #cbd5e1; transition: color .15s, transform .15s; }
+.product-card:hover .product-card-arrow { color: #002395; transform: translateY(-50%) translateX(2px); }
+
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: .82rem; font-weight: 500; margin-bottom: .3rem; color: #374151; }
+.field input { width: 100%; padding: .75rem .9rem; border-radius: .85rem; border: 1.5px solid #e5e7eb; font-size: .92rem; font-family: 'DM Sans', sans-serif; color: #0f172a; outline: none; transition: border-color .15s, box-shadow .15s; }
+.field input:focus { border-color: #002395; box-shadow: 0 0 0 3px rgba(0,35,149,.12); }
+.email-instructions { font-size: .85rem; color: #475569; margin-bottom: .85rem; line-height: 1.5; }
+.email-display { font-size: .95rem; font-weight: 600; color: #0f172a; padding: .6rem 1rem; background: #eff3ff; border-radius: .75rem; margin-bottom: .5rem; text-align: center; word-break: break-all; }
+.confirm-text { font-size:.82rem; color:#475569; margin-bottom:.4rem; }
+.confirm-warning { font-size: .75rem; color: #d97706; background: #fffbeb; border-radius: .6rem; padding: .5rem .75rem; margin: .6rem 0 1rem; line-height: 1.45; display: flex; align-items: flex-start; gap: .4rem; }
+.confirm-warning::before { content: '⚠️'; font-size: .85rem; flex-shrink:0; }
+.confirm-actions { display: flex; flex-direction: column; gap: .5rem; }
+#payment-element { margin-bottom: 1.2rem; min-height: 280px; }
+.payment-loading { text-align:center; color:#94a3b8; font-size:.85rem; padding:2rem 0; }
+.pay-btn { width: 100%; padding: .9rem 1.2rem; background: linear-gradient(135deg, #001a6e 0%, #002395 100%); color: #fff; border: none; border-radius: .9rem; font-family: 'DM Sans', sans-serif; font-size: .95rem; font-weight: 700; cursor: pointer; transition: opacity .15s, transform .1s, box-shadow .15s; box-shadow: 0 4px 14px rgba(0,35,149,.35); letter-spacing: .01em; }
+.pay-btn:hover:not(:disabled) { opacity: .93; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,35,149,.4); }
+.pay-btn:active:not(:disabled) { transform: translateY(0); }
+.pay-btn:disabled { opacity: .55; cursor: not-allowed; }
+.link-btn { width: 100%; padding: .6rem; background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: .82rem; color: #64748b; text-align: center; transition: color .12s; }
+.link-btn:hover { color: #0f172a; }
+.small-note { text-align: center; font-size: .72rem; color: #94a3b8; margin-top: .65rem; line-height: 1.45; }
+/* Product selection context tag */
+.product-context { display: flex; align-items: center; gap: .5rem; background: #f0f3ff; border-radius: .65rem; padding: .45rem .75rem; margin-bottom: 1rem; font-size: .75rem; color: #002395; font-weight: 600; }
+.product-context-label { flex: 1; }
+.product-context-change { font-size: .7rem; font-weight: 500; color: #94a3b8; cursor: pointer; text-decoration: none; }
+.product-context-change:hover { color: #002395; }
+.trust-strip { display: flex; align-items: center; justify-content: center; gap: 1.2rem; margin-top: 1.2rem; padding-top: 1.1rem; border-top: 1px solid #f1f5f9; flex-wrap: wrap; }
+.trust-item { display: flex; align-items: center; gap: .3rem; font-size: .71rem; color: #94a3b8; white-space: nowrap; }
+.trust-item span:first-child { font-size: .85rem; }
+.after-text { text-align: center; font-size: .75rem; color: #94a3b8; margin-top: .85rem; }
+.after-text a { color: #002395; font-weight: 500; text-decoration: none; }
+.after-text a:hover { text-decoration: underline; }
+.checkout-message { border-radius: .75rem; padding: .65rem .9rem; font-size: .82rem; margin-top: .75rem; display: none; line-height: 1.45; }
+.checkout-message.error { background: #fff1f2; color: #be123c; }
+.checkout-message.info { background: #eff3ff; color: #002395; }
+.done-icon { font-size: 2.8rem; text-align: center; margin-bottom: .7rem; }
+.done-title { font-size: 1.2rem; font-weight: 700; text-align: center; margin-bottom: .4rem; }
+.done-sub { font-size: .85rem; color: #94a3b8; text-align: center; margin-bottom: 1.3rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
 </head>
-
 <body>
 
 <header class="checkout-header">
   <div class="checkout-header-inner">
     <div class="checkout-brand">
-      <div class="topbar-flag"><span class="f-blue"></span><span class="f-white"></span><span class="f-red"></span></div>
+      <div class="fr-flag"><span class="f-blue"></span><span class="f-white"></span><span class="f-red"></span></div>
       CivicLearn – Examen civique
     </div>
-    <div class="checkout-powered">
-      <small>propulsé par</small>
-      <a href="https://civiclearn.com">CivicLearn</a>
+    <div class="header-right">
+      <a href="https://civiclearn.com/france/contact/" target="_blank" class="header-contact">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <span>Questions ?</span>
+      </a>
+      <div class="checkout-powered">
+        <small>propulsé par </small>
+        <a href="https://civiclearn.com">CivicLearn</a>
+      </div>
     </div>
   </div>
 </header>
 
+<div class="mob-toggle" id="mobToggle" onclick="toggleMobFeatures()">
+  <span>📋 Voir ce qui est inclus</span>
+  <span class="mob-arrow">▼</span>
+</div>
+
 <main>
-  <div class="layout">
+<div class="layout">
 
-    <aside class="features">
-      <h2>Accès Premium</h2>
-      <div class="price">49&nbsp;€</div>
-      <div class="once">Paiement unique · accès à vie</div>
-      <div class="divider"></div>
-      <h3>Ce qui est inclus</h3>
-      <ul class="benefits">
-        <li>200 mises en situation conformes aux nouvelles exigences</li>
-        <li>Questions conformes au format officiel de l'examen civique</li>
-        <li>Entraînements ciblés selon votre démarche administrative</li>
-        <li>Sessions courtes et efficaces (5–10 minutes)</li>
-        <li>Questions difficiles regroupées automatiquement</li>
-        <li>Statistiques détaillées et suivi de progression</li>
-        <li>Historique complet de vos entraînements</li>
-        <li>Fait du jour pour un apprentissage régulier</li>
-        <li>Rappels pour maintenir la régularité</li>
-        <li>100% optimisé pour téléphone, tablette et ordinateur</li>
-        <li>Accès immédiat après paiement</li>
-        <li>Mises à jour gratuites</li>
-        <li>Accès à vie à la plateforme</li>
-      </ul>
-      <p class="recommend">Recommandé par des candidats à la carte de séjour et à la carte de résident.</p>
-    </aside>
+  <aside class="features" id="featureSidebar">
 
-    <section class="right">
-      <div class="checkout-card">
-        <h1>Activez votre accès Premium</h1>
-        <div class="secure-line">Paiement 100% sécurisé · vos données bancaires ne passent jamais par nos serveurs</div>
-
-        <div class="checkout-flow" id="checkoutFlow">
-
-          <div class="checkout-step" id="stepProduct">
-            <div class="product-options">
-              <button type="button" class="product-btn" id="btnCR">
-                <strong>Carte de résident (CR)</strong>
-                <span>Préparation renforcée, conforme aux exigences de la carte de résident.</span>
-              </button>
-              <button type="button" class="product-btn" id="btnCSP">
-                <strong>Carte de séjour pluriannuelle (CSP)</strong>
-                <span>Préparation à l'examen civique requis pour la carte de séjour pluriannuelle.</span>
-              </button>
-            </div>
-            <p class="small-note">Vous payez en toute sécurité ici même. Aucune redirection.</p>
-          </div>
-
-          <div class="checkout-step" id="stepEmail" hidden>
-            <span class="step-badge">Étape 1 sur 3</span>
-            <p class="email-instructions">Entrez l'adresse email que vous souhaitez utiliser pour votre compte CivicLearn.</p>
-            <div class="email-field-group">
-              <label for="checkoutEmail">Email</label>
-              <input type="email" id="checkoutEmail" autocomplete="email" placeholder="exemple@domaine.com" inputmode="email" />
-            </div>
-            <button type="button" class="pay-btn" id="continueWithEmail">Continuer</button>
-            <button type="button" class="link-btn" id="backToProduct" style="margin-top:0.5rem;">← Changer de démarche</button>
-          </div>
-
-          <div class="checkout-step" id="stepConfirm" hidden>
-            <span class="step-badge">Étape 2 sur 3</span>
-            <p class="confirm-text">Votre compte sera créé avec cette adresse :</p>
-            <p class="email-display" id="emailDisplay"></p>
-            <p class="confirm-warning">Vérifiez attentivement. Cette adresse sera votre identifiant de connexion.</p>
-            <div class="confirm-actions">
-              <button type="button" class="pay-btn" id="confirmEmail">Confirmer et passer au paiement</button>
-              <button type="button" class="link-btn" id="editEmail">Modifier l'adresse email</button>
-            </div>
-          </div>
-
-          <div class="checkout-step" id="stepPayment" hidden>
-            <span class="step-badge">Étape 3 sur 3</span>
-            <p class="email-instructions" style="margin-bottom:1rem;">Entrez vos coordonnées bancaires ci-dessous. Le paiement est traité de manière sécurisée par Stripe.</p>
-            <div id="payment-element"><div class="payment-loading">Chargement du formulaire de paiement…</div></div>
-            <button type="button" class="pay-btn" id="payBtn" disabled>Payer 49 €</button>
-            <button type="button" class="link-btn" id="backToConfirm" style="margin-top:0.5rem;">← Retour</button>
-          </div>
-
-          <div class="checkout-step" id="stepPassword" hidden>
-            <div style="text-align:center;font-size:2rem;margin-bottom:0.5rem;">🎉</div>
-            <div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;">Paiement confirmé !</div>
-            <p class="email-instructions" style="text-align:center;">Choisissez maintenant un mot de passe pour finaliser votre compte.</p>
-            <div class="field">
-              <label for="pw1">Mot de passe</label>
-              <input type="password" id="pw1" autocomplete="new-password" placeholder="Minimum 6 caractères">
-            </div>
-            <div class="field">
-              <label for="pw2">Confirmer le mot de passe</label>
-              <input type="password" id="pw2" autocomplete="new-password" placeholder="Répétez le mot de passe">
-            </div>
-            <button type="button" class="pay-btn" id="setupBtn">Créer le compte</button>
-          </div>
-
-          <div class="checkout-step" id="stepDone" hidden>
-            <div class="done-icon">✅</div>
-            <div class="done-title">Votre compte est prêt !</div>
-            <div class="done-sub" id="doneEmail"></div>
-            <a id="dashboardLink" href="/france/cr/dashboard/index.html" class="pay-btn" style="text-align:center;text-decoration:none;display:block;">Commencer l'entraînement →</a>
-          </div>
-
-          <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
-        </div>
-
-        <div class="trust">
-          <div>🔒 Paiement sécurisé</div>
-          <div>⚡ Accès immédiat</div>
-          <div>✔ Aucun abonnement</div>
-        </div>
-        <div class="after-text">Déjà un compte ? <a href="/france/login.html">Se connecter</a>.</div>
+    <div class="price-hero">
+      <div>
+        <div class="price-label">France · Accès complet</div>
+        <div class="price-amount"><sup>€</sup>49</div>
+        <div class="price-once">Paiement unique · accès à vie</div>
       </div>
-    </section>
+      <div class="price-badge">200 mises en situation</div>
+    </div>
 
-  </div>
+    <!-- CONTENU -->
+    <div class="section-label">Mises en situation</div>
+    <ul class="feature-list">
+
+      <li class="feat">
+        <div class="feat-icon ic-navy">🇫🇷</div>
+        <div class="feat-body">
+          <div class="feat-title">200 mises en situation</div>
+          <div class="feat-sub">Conformes aux nouvelles exigences du format officiel de l'examen civique</div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-green">📜</div>
+        <div class="feat-body">
+          <div class="feat-title">Toutes les questions officielles</div>
+          <div class="feat-sub">Intégralité des questions publiées par l'arrêté du 10 octobre 2025</div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-indigo">📂</div>
+        <div class="feat-body">
+          <div class="feat-title">Entraînements par démarche</div>
+          <div class="pills">
+            <span class="pill pill-navy">Carte de résident</span>
+            <span class="pill pill-indigo">Carte de séjour pluriannuelle</span>
+          </div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-sky">⚡</div>
+        <div class="feat-body">
+          <div class="feat-title">Sessions courtes et efficaces</div>
+          <div class="pills">
+            <span class="pill pill-sky">5–10 minutes</span>
+            <span class="pill pill-sky">N'importe où</span>
+          </div>
+        </div>
+      </li>
+
+    </ul>
+
+    <!-- OUTILS -->
+    <div class="section-label">Outils intelligents</div>
+    <ul class="feature-list">
+
+      <li class="feat">
+        <div class="feat-icon ic-rose">🎯</div>
+        <div class="feat-body">
+          <div class="feat-title">Analyse des erreurs fréquentes</div>
+          <div class="feat-sub">Les questions difficiles sont regroupées automatiquement pour une révision ciblée</div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-amber">📊</div>
+        <div class="feat-body">
+          <div class="feat-title">Statistiques détaillées</div>
+          <div class="pills">
+            <span class="pill pill-amber">Par thème</span>
+            <span class="pill pill-amber">Progression</span>
+            <span class="pill pill-amber">Historique</span>
+          </div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-teal">📅</div>
+        <div class="feat-body">
+          <div class="feat-title">Fait du jour & rappels</div>
+          <div class="feat-sub">Apprenez un fait chaque jour et maintenez votre régularité</div>
+        </div>
+      </li>
+
+    </ul>
+
+    <!-- ACCÈS -->
+    <div class="section-label">Accès</div>
+    <ul class="feature-list">
+
+      <li class="feat">
+        <div class="feat-icon ic-green">♾️</div>
+        <div class="feat-body">
+          <div class="feat-title">Entraînez-vous autant que vous voulez</div>
+          <div class="feat-sub">Aucune limite d'utilisation</div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-sky">💻</div>
+        <div class="feat-body">
+          <div class="feat-title">Tous les appareils · Accès immédiat</div>
+          <div class="pills">
+            <span class="pill pill-sky">Téléphone</span>
+            <span class="pill pill-sky">Tablette</span>
+            <span class="pill pill-sky">Ordinateur</span>
+          </div>
+        </div>
+      </li>
+
+      <li class="feat">
+        <div class="feat-icon ic-orange">🔄</div>
+        <div class="feat-body">
+          <div class="feat-title">Mises à jour gratuites à vie</div>
+          <div class="feat-sub">Nouveau contenu et améliorations sans frais supplémentaires</div>
+        </div>
+      </li>
+
+    </ul>
+
+    <div class="trust-footer">
+      <div class="trust-icon">🏅</div>
+      <div>
+        <div class="trust-title">Recommandé par des candidats à la carte de séjour et à la carte de résident</div>
+        <div class="trust-sub">Paiement unique · Aucun abonnement · Accès à vie</div>
+      </div>
+    </div>
+
+  </aside>
+
+
+  <section class="right">
+    <div class="checkout-card">
+      <h1>Activer votre accès Premium</h1>
+      <div class="secure-line">Paiement 100% sécurisé · vos données bancaires ne passent jamais par nos serveurs</div>
+
+      <div class="checkout-flow" id="checkoutFlow">
+
+        <!-- STEP 0: PRODUCT SELECTION -->
+        <div class="checkout-step" id="stepProduct">
+          <p class="email-instructions" style="margin-bottom:.85rem;">Choisissez votre démarche administrative pour accéder à l'entraînement adapté.</p>
+          <div class="product-cards">
+            <button type="button" class="product-card" id="btnCR">
+              <div class="product-card-header">
+                <span class="product-card-name">Carte de résident</span>
+                <span class="product-card-badge">CR</span>
+              </div>
+              <div class="product-card-desc">Préparation renforcée conforme aux exigences de la carte de résident — niveau d'intégration plus approfondi.</div>
+              <span class="product-card-arrow">→</span>
+            </button>
+            <button type="button" class="product-card" id="btnCSP">
+              <div class="product-card-header">
+                <span class="product-card-name">Carte de séjour pluriannuelle</span>
+                <span class="product-card-badge">CSP</span>
+              </div>
+              <div class="product-card-desc">Préparation à l'examen civique requis pour le renouvellement de la carte de séjour pluriannuelle.</div>
+              <span class="product-card-arrow">→</span>
+            </button>
+          </div>
+          <p class="small-note">49 € · Paiement unique · Les deux démarches au même tarif</p>
+          <div class="trust-strip">
+            <div class="trust-item"><span>🔒</span><span>Paiement sécurisé</span></div>
+            <div class="trust-item"><span>⚡</span><span>Accès immédiat</span></div>
+            <div class="trust-item"><span>✔</span><span>Aucun abonnement</span></div>
+          </div>
+        </div>
+
+        <!-- STEP 1: EMAIL -->
+        <div class="checkout-step" id="stepEmail" hidden>
+          <span class="step-badge">Étape 1 sur 3</span>
+          <div class="product-context" id="productContext">
+            <span class="product-context-label" id="productContextLabel"></span>
+            <a class="product-context-change" onclick="showStep('stepProduct')" href="#">Changer</a>
+          </div>
+          <p class="email-instructions">Entrez l'adresse email que vous souhaitez utiliser pour votre compte CivicLearn.</p>
+          <div class="field">
+            <label for="checkoutEmail">Email</label>
+            <input type="email" id="checkoutEmail" autocomplete="email" placeholder="exemple@domaine.fr" inputmode="email">
+          </div>
+          <button type="button" class="pay-btn" id="continueWithEmail">Continuer</button>
+        </div>
+
+        <!-- STEP 2: CONFIRM EMAIL -->
+        <div class="checkout-step" id="stepConfirm" hidden>
+          <span class="step-badge">Étape 2 sur 3</span>
+          <div class="product-context">
+            <span class="product-context-label" id="productContextLabel2"></span>
+          </div>
+          <p class="confirm-text">Votre compte sera créé avec cette adresse :</p>
+          <p class="email-display" id="emailDisplay"></p>
+          <p class="confirm-warning">Vérifiez attentivement. Cette adresse sera votre identifiant de connexion.</p>
+          <div class="confirm-actions">
+            <button type="button" class="pay-btn" id="confirmEmail">Confirmer et passer au paiement</button>
+            <button type="button" class="link-btn" id="editEmail">← Modifier l'adresse email</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: PAYMENT -->
+        <div class="checkout-step" id="stepPayment" hidden>
+          <span class="step-badge">Étape 3 sur 3</span>
+          <p class="email-instructions" style="margin-bottom:1rem;">Entrez vos coordonnées bancaires ci-dessous. Le paiement est traité de manière sécurisée par Stripe.</p>
+          <div id="payment-element"><div class="payment-loading">Chargement du formulaire de paiement…</div></div>
+          <button type="button" class="pay-btn" id="payBtn" disabled>Payer 49 €</button>
+          <button type="button" class="link-btn" id="backToConfirm" style="margin-top:.4rem;">← Retour</button>
+        </div>
+
+        <!-- STEP 4: PASSWORD -->
+        <div class="checkout-step" id="stepPassword" hidden>
+          <div style="text-align:center;font-size:2.4rem;margin-bottom:.6rem;">🎉</div>
+          <div class="done-title">Paiement confirmé !</div>
+          <p class="email-instructions" style="text-align:center;margin-bottom:1.1rem;">Choisissez maintenant un mot de passe pour finaliser votre compte.</p>
+          <div class="field">
+            <label for="pw1">Mot de passe</label>
+            <input type="password" id="pw1" autocomplete="new-password" placeholder="Minimum 6 caractères">
+          </div>
+          <div class="field">
+            <label for="pw2">Confirmer le mot de passe</label>
+            <input type="password" id="pw2" autocomplete="new-password" placeholder="Répétez le mot de passe">
+          </div>
+          <button type="button" class="pay-btn" id="setupBtn">Créer le compte</button>
+        </div>
+
+        <!-- STEP 5: DONE -->
+        <div class="checkout-step" id="stepDone" hidden>
+          <div class="done-icon">✅</div>
+          <div class="done-title">Votre compte est prêt !</div>
+          <div class="done-sub" id="doneEmail"></div>
+          <a id="dashboardLink" href="/france/cr/dashboard/index.html" class="pay-btn" style="text-align:center;text-decoration:none;display:block;">Commencer l'entraînement →</a>
+        </div>
+
+        <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
+      </div>
+
+      <p class="after-text">Déjà un compte ? <a href="/france/login.html">Se connecter</a>.</p>
+    </div>
+  </section>
+
+</div>
 </main>
+
+<script>
+function toggleMobFeatures() {
+  var sidebar = document.getElementById('featureSidebar');
+  var toggle = document.getElementById('mobToggle');
+  var isOpening = !sidebar.classList.contains('mob-open');
+  sidebar.classList.toggle('mob-open');
+  toggle.classList.toggle('mob-open');
+  if (isOpening) setTimeout(function(){ sidebar.scrollIntoView({ behavior:'smooth', block:'start' }); }, 50);
+}
+</script>
 
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <script>
-(function() {
+(function(){
   'use strict';
+  var FUNCTIONS_URL='https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  var SUPABASE_URL='https://htgliokekeaovdiafrgs.supabase.co';
+  var SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  var STRIPE_PK='pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
+  var RETURN_URL='https://civiclearn.com/france/checkout.html';
 
-  const FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
-  const SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
-  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
-  const STRIPE_PK     = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
-  const RETURN_URL    = 'https://civiclearn.com/france/checkout.html';
+  var stripe=Stripe(STRIPE_PK);
+  var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-  const stripe = Stripe(STRIPE_PK);
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var allSteps=['stepProduct','stepEmail','stepConfirm','stepPayment','stepPassword','stepDone'];
+  var msg=document.getElementById('checkoutMessage');
+  var selectedProduct=null,currentEmail='',paymentIntentId='',stripeElements=null,isSubmitting=false;
 
-  const stepProduct  = document.getElementById('stepProduct');
-  const stepEmail    = document.getElementById('stepEmail');
-  const stepConfirm  = document.getElementById('stepConfirm');
-  const stepPayment  = document.getElementById('stepPayment');
-  const stepPassword = document.getElementById('stepPassword');
-  const stepDone     = document.getElementById('stepDone');
+  var PRODUCT_LABELS={'france-cr':'🎫 Carte de résident (CR)','france-csp':'🪪 Carte de séjour pluriannuelle (CSP)'};
 
-  const btnCR            = document.getElementById('btnCR');
-  const btnCSP           = document.getElementById('btnCSP');
-  const continueBtn      = document.getElementById('continueWithEmail');
-  const backToProductBtn = document.getElementById('backToProduct');
-  const confirmBtn       = document.getElementById('confirmEmail');
-  const editEmailBtn     = document.getElementById('editEmail');
-  const payBtn           = document.getElementById('payBtn');
-  const backToConfirmBtn = document.getElementById('backToConfirm');
-  const setupBtn         = document.getElementById('setupBtn');
+  function showStep(id){
+    allSteps.forEach(function(s){document.getElementById(s).hidden=true;});
+    document.getElementById(id).hidden=false;
+    msg.style.display='none';
+  }
+  function err(text){msg.textContent=text;msg.className='checkout-message error';msg.style.display='block';}
+  function info(text){msg.textContent=text;msg.className='checkout-message info';msg.style.display='block';}
 
-  const emailInput   = document.getElementById('checkoutEmail');
-  const emailDisplay = document.getElementById('emailDisplay');
-  const messageBox   = document.getElementById('checkoutMessage');
-
-  let selectedProduct = null;
-  let currentEmail = '';
-  let paymentIntentId = '';
-  let stripeElements = null;
-  let isSubmitting = false;
-
-  function showStep(id) {
-    [stepProduct, stepEmail, stepConfirm, stepPayment, stepPassword, stepDone]
-      .forEach(el => el.hidden = true);
-    document.getElementById(id).hidden = false;
-    clearMessage();
+  function setProductContext(){
+    var label=PRODUCT_LABELS[selectedProduct]||'';
+    var el1=document.getElementById('productContextLabel');
+    var el2=document.getElementById('productContextLabel2');
+    if(el1)el1.textContent=label;
+    if(el2)el2.textContent=label;
+    // highlight selected card
+    document.getElementById('btnCR').classList.toggle('selected',selectedProduct==='france-cr');
+    document.getElementById('btnCSP').classList.toggle('selected',selectedProduct==='france-csp');
   }
 
-  function clearMessage() { messageBox.textContent = ''; messageBox.className = 'checkout-message'; messageBox.style.display = 'none'; }
-  function showMessage(type, text) { messageBox.textContent = text; messageBox.className = 'checkout-message ' + type; messageBox.style.display = 'block'; }
-
-  function validateEmail(value) {
-    const email = value.trim();
-    if (!email) return { ok: false, msg: 'Veuillez saisir votre adresse email.' };
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, msg: 'Adresse email invalide. Veuillez vérifier et réessayer.' };
-    return { ok: true, email };
+  /* 3DS return */
+  var urlParams=new URLSearchParams(window.location.search);
+  var returnedPI=urlParams.get('payment_intent'),returnedSecret=urlParams.get('payment_intent_client_secret'),returnedStatus=urlParams.get('redirect_status');
+  if(returnedPI&&returnedSecret){
+    currentEmail=localStorage.getItem('france_checkout_email')||'';
+    selectedProduct=localStorage.getItem('france_checkout_product')||'france-cr';
+    paymentIntentId=returnedPI;
+    if(returnedStatus==='succeeded'){showStep('stepPassword');}
+    else{stripe.retrievePaymentIntent(returnedSecret).then(function(r){var pi=r.paymentIntent;if(pi&&pi.status==='succeeded')showStep('stepPassword');else{err("Le paiement n'a pas été finalisé. Veuillez réessayer.");showStep('stepProduct');}});}
+    window.history.replaceState({},'',window.location.pathname);
   }
 
-  // 3DS return
-  const urlParams = new URLSearchParams(window.location.search);
-  const returnedPI = urlParams.get('payment_intent');
-  const returnedSecret = urlParams.get('payment_intent_client_secret');
-  const returnedStatus = urlParams.get('redirect_status');
-
-  if (returnedPI && returnedSecret) {
-    currentEmail = localStorage.getItem('france_checkout_email') || '';
-    selectedProduct = localStorage.getItem('france_checkout_product') || 'france-cr';
-    paymentIntentId = returnedPI;
-    if (returnedStatus === 'succeeded') { showStep('stepPassword'); }
-    else {
-      stripe.retrievePaymentIntent(returnedSecret).then(({ paymentIntent }) => {
-        if (paymentIntent && paymentIntent.status === 'succeeded') showStep('stepPassword');
-        else { showMessage('error', 'Le paiement n\'a pas été finalisé. Veuillez réessayer.'); showStep('stepProduct'); }
-      });
-    }
-    window.history.replaceState({}, '', window.location.pathname);
+  /* Product selection */
+  function selectProduct(type){
+    selectedProduct=type;
+    setProductContext();
+    showStep('stepEmail');
+    document.getElementById('checkoutEmail').focus();
   }
+  document.getElementById('btnCR').onclick=function(){selectProduct('france-cr');};
+  document.getElementById('btnCSP').onclick=function(){selectProduct('france-csp');};
 
-  // Step 1: product
-  function selectProduct(type) {
-    selectedProduct = type;
-    btnCR.classList.toggle('selected', type === 'france-cr');
-    btnCSP.classList.toggle('selected', type === 'france-csp');
-    showStep('stepEmail'); emailInput.focus();
-  }
-  btnCR.addEventListener('click', () => selectProduct('france-cr'));
-  btnCSP.addEventListener('click', () => selectProduct('france-csp'));
+  /* Email */
+  document.getElementById('continueWithEmail').onclick=function(){
+    var v=document.getElementById('checkoutEmail').value.trim();
+    if(!v){err('Veuillez saisir votre adresse email.');return;}
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){err('Adresse email invalide. Veuillez vérifier et réessayer.');return;}
+    currentEmail=v;document.getElementById('emailDisplay').textContent=v;showStep('stepConfirm');
+  };
+  document.getElementById('checkoutEmail').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('continueWithEmail').click();});
+  document.getElementById('editEmail').onclick=function(){showStep('stepEmail');document.getElementById('checkoutEmail').focus();};
 
-  // Step 2: email
-  continueBtn.addEventListener('click', () => {
-    const { ok, msg, email } = validateEmail(emailInput.value);
-    if (!ok) { showMessage('error', msg); emailInput.focus(); return; }
-    currentEmail = email; emailDisplay.textContent = currentEmail; showStep('stepConfirm');
-  });
-  emailInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); } });
-  backToProductBtn.addEventListener('click', () => showStep('stepProduct'));
-  editEmailBtn.addEventListener('click', () => { showStep('stepEmail'); emailInput.focus(); });
-
-  // Step 3 → 4: create PI + mount Elements
-  confirmBtn.addEventListener('click', async () => {
-    if (isSubmitting) return;
-    isSubmitting = true; confirmBtn.disabled = true;
-    confirmBtn.textContent = 'Préparation du paiement…';
-    showMessage('info', 'Préparation du formulaire de paiement sécurisé…');
-
-    try {
-      const res = await fetch(FUNCTIONS_URL + '/france-create-payment-intent', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentEmail, product_type: selectedProduct }),
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || 'Impossible de créer la session de paiement.');
-
-      paymentIntentId = data.payment_intent_id;
-      localStorage.setItem('france_checkout_email', currentEmail);
-      localStorage.setItem('france_checkout_product', selectedProduct);
-
-      stripeElements = stripe.elements({
-        clientSecret: data.client_secret,
-        appearance: { theme: 'stripe', variables: { fontFamily: '"Lexend", system-ui, sans-serif', borderRadius: '0.9rem', colorPrimary: '#7c3aed' } },
-      });
-      const paymentElement = stripeElements.create('payment', { layout: 'tabs' });
-      document.getElementById('payment-element').innerHTML = '';
-      paymentElement.mount('#payment-element');
-      paymentElement.on('loaderror', (event) => {
-        showMessage('error', 'Le formulaire de paiement n\'a pas pu être chargé. Actualisez la page ou essayez un autre navigateur.');
-        isSubmitting = false; confirmBtn.disabled = false;
-      });
-      paymentElement.on('ready', () => { payBtn.disabled = false; });
-      paymentElement.on('change', (event) => { if (event.complete) payBtn.disabled = false; });
+  /* Confirm → PI */
+  document.getElementById('confirmEmail').onclick=async function(){
+    if(isSubmitting)return;isSubmitting=true;
+    var btn=document.getElementById('confirmEmail');btn.disabled=true;btn.textContent='Préparation du paiement…';
+    info('Préparation du formulaire de paiement sécurisé…');
+    try{
+      var res=await fetch(FUNCTIONS_URL+'/france-create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:currentEmail,product_type:selectedProduct})});
+      var data=await res.json();if(!res.ok||data.error)throw new Error(data.error||'Impossible de créer la session de paiement.');
+      paymentIntentId=data.payment_intent_id;
+      localStorage.setItem('france_checkout_email',currentEmail);
+      localStorage.setItem('france_checkout_product',selectedProduct);
+      stripeElements=stripe.elements({clientSecret:data.client_secret,appearance:{theme:'stripe',variables:{fontFamily:'"DM Sans",system-ui,sans-serif',borderRadius:'0.85rem',colorPrimary:'#002395'}}});
+      var pe=stripeElements.create('payment',{layout:'tabs'});document.getElementById('payment-element').innerHTML='';pe.mount('#payment-element');
+      pe.on('loaderror',function(){err("Le formulaire de paiement n'a pas pu être chargé. Actualisez la page ou essayez un autre navigateur.");isSubmitting=false;btn.disabled=false;});
+      pe.on('ready',function(){document.getElementById('payBtn').disabled=false;});
+      pe.on('change',function(ev){if(ev.complete)document.getElementById('payBtn').disabled=false;});
       showStep('stepPayment');
-    } catch (err) {
-      showMessage('error', err.message || 'Une erreur est survenue. Veuillez réessayer.');
-    } finally {
-      isSubmitting = false; confirmBtn.disabled = false; confirmBtn.textContent = 'Confirmer et passer au paiement';
-    }
-  });
+    }catch(e){err(e.message||'Une erreur est survenue. Veuillez réessayer.');}
+    finally{isSubmitting=false;btn.disabled=false;btn.textContent='Confirmer et passer au paiement';}
+  };
 
-  backToConfirmBtn.addEventListener('click', () => showStep('stepConfirm'));
+  document.getElementById('backToConfirm').onclick=function(){showStep('stepConfirm');};
 
-  // Step 4 → 5: pay
-  payBtn.addEventListener('click', async () => {
-    if (isSubmitting) return;
-    isSubmitting = true; payBtn.disabled = true;
-    payBtn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;"></span>Traitement du paiement…';
-    clearMessage();
+  /* Pay */
+  document.getElementById('payBtn').onclick=async function(){
+    if(isSubmitting)return;isSubmitting=true;var btn=document.getElementById('payBtn');btn.disabled=true;
+    btn.innerHTML='<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;"></span>Traitement du paiement…';
+    msg.style.display='none';
+    var result=await stripe.confirmPayment({elements:stripeElements,confirmParams:{return_url:RETURN_URL,receipt_email:currentEmail},redirect:'if_required'});
+    if(result.error){err(result.error.message||'Le paiement a échoué. Veuillez réessayer.');btn.disabled=false;btn.textContent='Payer 49 €';isSubmitting=false;return;}
+    if(result.paymentIntent&&result.paymentIntent.status==='succeeded'){paymentIntentId=result.paymentIntent.id;showStep('stepPassword');}
+    else if(result.paymentIntent&&result.paymentIntent.status==='processing'){info('Votre paiement est en cours de traitement. Veuillez patienter…');}
+    isSubmitting=false;
+  };
 
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements: stripeElements,
-      confirmParams: { return_url: RETURN_URL, receipt_email: currentEmail },
-      redirect: 'if_required',
-    });
-
-    if (error) {
-      showMessage('error', error.message || 'Le paiement a échoué. Veuillez réessayer.');
-      payBtn.disabled = false; payBtn.textContent = 'Payer 49 €'; isSubmitting = false; return;
-    }
-    if (paymentIntent && paymentIntent.status === 'succeeded') {
-      paymentIntentId = paymentIntent.id; showStep('stepPassword');
-    } else if (paymentIntent && paymentIntent.status === 'processing') {
-      showMessage('info', 'Votre paiement est en cours de traitement. Veuillez patienter…');
-    }
-    isSubmitting = false;
-  });
-
-  // Step 5: password
-  setupBtn.addEventListener('click', async () => {
-    const pw1 = document.getElementById('pw1').value;
-    const pw2 = document.getElementById('pw2').value;
-    if (!pw1 || pw1.length < 6) { showMessage('error', 'Le mot de passe doit contenir au moins 6 caractères.'); return; }
-    if (pw1 !== pw2) { showMessage('error', 'Les mots de passe ne correspondent pas.'); return; }
-
-    setupBtn.disabled = true; setupBtn.textContent = 'Création du compte…'; clearMessage();
-
-    try {
-      const res = await fetch(FUNCTIONS_URL + '/france-setup-account', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payment_intent_id: paymentIntentId, password: pw1 }),
-      });
-      const data = await res.json();
-      if (!data.success) {
-        showMessage('error', data.error || 'Échec de la création du compte. Contactez admin@civiclearn.com.');
-        setupBtn.disabled = false; setupBtn.textContent = 'Créer le compte'; return;
-      }
-
-      const { error: signInError } = await sb.auth.signInWithPassword({ email: data.email, password: pw1 });
-      if (signInError) console.error('Auto-login failed:', signInError);
-
+  /* Password */
+  document.getElementById('setupBtn').onclick=async function(){
+    var p1=document.getElementById('pw1').value,p2=document.getElementById('pw2').value;
+    if(!p1||p1.length<6){err('Le mot de passe doit contenir au moins 6 caractères.');return;}
+    if(p1!==p2){err('Les mots de passe ne correspondent pas.');return;}
+    var btn=document.getElementById('setupBtn');btn.disabled=true;btn.textContent='Création du compte…';msg.style.display='none';
+    try{
+      var res=await fetch(FUNCTIONS_URL+'/france-setup-account',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({payment_intent_id:paymentIntentId,password:p1})});
+      var data=await res.json();if(!data.success){err(data.error||'Échec de la création du compte. Contactez admin@civiclearn.com.');btn.disabled=false;btn.textContent='Créer le compte';return;}
+      var signIn=await sb.auth.signInWithPassword({email:data.email,password:p1});
+      if(signIn.error)console.error('Auto-login failed:',signIn.error);
       localStorage.removeItem('france_checkout_email');
       localStorage.removeItem('france_checkout_product');
-
-      document.getElementById('doneEmail').textContent = 'Connecté en tant que : ' + data.email;
-      if (data.access_path) {
-        document.getElementById('dashboardLink').href = data.access_path + '/index.html';
-      }
+      document.getElementById('doneEmail').textContent='Connecté en tant que : '+data.email;
+      if(data.access_path)document.getElementById('dashboardLink').href=data.access_path+'/index.html';
       showStep('stepDone');
-    } catch (err) {
-      showMessage('error', 'Erreur de connexion. Veuillez réessayer.');
-      setupBtn.disabled = false; setupBtn.textContent = 'Créer le compte';
-    }
-  });
-
-  document.getElementById('pw2').addEventListener('keydown', (e) => { if (e.key === 'Enter') setupBtn.click(); });
+    }catch(e){err('Erreur de connexion. Veuillez réessayer.');btn.disabled=false;btn.textContent='Créer le compte';}
+  };
+  document.getElementById('pw2').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('setupBtn').click();});
 })();
 </script>
 
