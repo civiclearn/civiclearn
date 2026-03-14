@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Premium adgang – Indfødsretsprøven | CivicLearn Danmark</title>
-<meta name="description" content="Aktivér Premium-adgang til forberedelse til Indfødsretsprøven.">
-<link rel="canonical" href="https://civiclearn.com/denmark/checkout">
-<meta property="og:title" content="Premium adgang – Indfødsretsprøven">
+<title>Premium adgang – Indfødsretsprøve | CivicLearn Danmark</title>
+<meta name="description" content="Aktivér Premium-adgang til forberedelse til Indfødsretsprøve.">
+<link rel="canonical" href="https://civiclearn.com/denmark/checkout.html">
+<meta property="og:title" content="Premium adgang – Indfødsretsprøve">
 <meta property="og:description" content="Fuld adgang til alle træningsfunktioner. Engangsbetaling – adgang for livet.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://civiclearn.com/denmark/checkout">
+<meta property="og:url" content="https://civiclearn.com/denmark/checkout.html">
 <meta property="og:image" content="https://civiclearn.com/denmark/assets/img/og-cover.webp">
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -85,14 +85,14 @@ main {
 
 /* ── PRICE LINE ── */
 .price-line {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
   padding-bottom: 1.6rem; margin-bottom: 1.6rem;
   border-bottom: 1px solid #e8e0d4;
 }
 .price-line-label { font-size: .82rem; font-weight: 500; color: #78716c; }
 .price-line-meta { font-size: .72rem; color: #a8a29e; margin-top: .2rem; }
-.price-line-amount { font-size: 1.65rem; font-weight: 700; color: #0f172a; letter-spacing: -.02em; }
-.price-line-once { font-size: .7rem; color: #a8a29e; font-weight: 400; margin-left: .4rem; }
+.price-line-amount { font-size: 1.15rem; font-weight: 700; color: #0f172a; letter-spacing: -.01em; white-space: nowrap; }
+.price-line-once { font-size: .7rem; color: #a8a29e; font-weight: 400; margin-left: .3rem; white-space: nowrap; }
 
 /* ── STRIPE ELEMENTS ── */
 #link-auth-element { margin-bottom: 1.1rem; }
@@ -203,11 +203,11 @@ main {
   <!-- PLAN TOGGLE -->
   <div class="plan-toggle" id="planToggle">
     <div class="plan-card selected" data-plan="solo" id="planSolo">
-      <div class="plan-card-name">Indfødsretsprøven<br><span class="plan-card-sub">Superpakke</span></div>
+      <div class="plan-card-name">Indfødsretsprøve<br><span class="plan-card-sub">Superpakke</span></div>
       <div class="plan-card-price">499 kr</div>
     </div>
     <div class="plan-card" data-plan="bundle" id="planBundle">
-      <div class="plan-card-name">Indfødsretsprøven<br><span class="plan-card-sub">+ Dansk 3</span></div>
+      <div class="plan-card-name">Indfødsretsprøve<br><span class="plan-card-sub">+ Dansk 3</span></div>
       <div class="plan-card-price">999 kr</div>
     </div>
   </div>
@@ -215,10 +215,10 @@ main {
   <!-- PRICE LINE -->
   <div class="price-line" id="priceLine">
     <div>
-      <div class="price-line-label" id="priceLabel">Indfødsretsprøven · Premium</div>
+      <div class="price-line-label" id="priceLabel">Indfødsretsprøve · Premium</div>
       <div class="price-line-meta" id="priceMeta">3.000+ spørgsmål · Livstidsadgang</div>
     </div>
-    <div><span class="price-line-amount" id="priceAmount">499 kr</span><span class="price-line-once">engang</span></div>
+    <div style="flex-shrink:0;text-align:right"><span class="price-line-amount" id="priceAmount">499 kr</span><span class="price-line-once">engang</span></div>
   </div>
 
   <!-- ══ CHECKOUT FORM — all visible on load ══ -->
@@ -300,8 +300,8 @@ main {
   var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   var PLANS = {
-    solo:   { amount: 49900, price: '499 kr', payLabel: 'Betal 499 kr', label: 'Indfødsretsprøven · Premium',         meta: '3.000+ spørgsmål · Livstidsadgang', createFn: 'denmark-create-payment-intent', setupFn: 'denmark-setup-account' },
-    bundle: { amount: 99900, price: '999 kr', payLabel: 'Betal 999 kr', label: 'Indfødsretsprøven + Dansk 3 · Pakke', meta: '3.000+ spørgsmål · Dansk 3-simulationer · Livstidsadgang', createFn: 'denmark-create-payment-intent', setupFn: 'denmark-setup-account' },
+    solo:   { amount: 49900, price: '499 kr', payLabel: 'Betal 499 kr', label: 'Indfødsretsprøve · Premium',         meta: '3.000+ spørgsmål · Livstidsadgang', createFn: 'denmark-create-payment-intent', setupFn: 'denmark-setup-account' },
+    bundle: { amount: 99900, price: '999 kr', payLabel: 'Betal 999 kr', label: 'Indfødsretsprøve + Dansk 3 · Pakke', meta: '3.000+ spørgsmål · Dansk 3-simulationer · Livstidsadgang', createFn: 'denmark-create-payment-intent', setupFn: 'denmark-setup-account' },
   };
 
   var soloFeatures = [
@@ -315,7 +315,7 @@ main {
     'Livstidsadgang — intet abonnement'
   ];
   var bundleFeatures = [
-    'Alt fra Indfødsretsprøven (3.000+ spm.)',
+    'Alt fra Indfødsretsprøve (3.000+ spm.)',
     'Dansk 3 — 10 komplette simulationer',
     'KI-evaluering af tale og skrift',
     '9 delprøver med 7-trinsskala',
