@@ -85,11 +85,12 @@ main {
 
 /* ── PRICE LINE ── */
 .price-line {
-  display: flex; align-items: baseline; justify-content: space-between;
+  display: flex; align-items: center; justify-content: space-between;
   padding-bottom: 1.6rem; margin-bottom: 1.6rem;
   border-bottom: 1px solid #e8e0d4;
 }
 .price-line-label { font-size: .82rem; font-weight: 500; color: #78716c; }
+.price-line-meta { font-size: .72rem; color: #a8a29e; margin-top: .2rem; }
 .price-line-amount { font-size: 1.65rem; font-weight: 700; color: #0f172a; letter-spacing: -.02em; }
 .price-line-once { font-size: .7rem; color: #a8a29e; font-weight: 400; margin-left: .4rem; }
 
@@ -116,7 +117,6 @@ main {
 }
 .trust-item { display: flex; align-items: center; gap: .3rem; font-size: .7rem; color: #a8a29e; white-space: nowrap; }
 .trust-item span:first-child { font-size: .82rem; }
-.small-note { text-align: center; font-size: .72rem; color: #a8a29e; margin-top: .65rem; line-height: 1.45; }
 
 /* ── DIVIDER ── */
 .section-divider { height: 1px; background: #e8e0d4; margin: 1.8rem 0; }
@@ -181,7 +181,7 @@ main {
   <div class="checkout-header-inner">
     <div class="checkout-brand">
       <img src="/assets/images/dk.svg" alt="Danmark">
-      CivicLearn Danmark
+      Indfødsretsprøve.dk
     </div>
     <div class="header-right">
       <a href="https://indfodsretsprove.dk/kontakt/" target="_blank" class="header-contact">
@@ -214,7 +214,10 @@ main {
 
   <!-- PRICE LINE -->
   <div class="price-line" id="priceLine">
-    <div class="price-line-label" id="priceLabel">Indfødsretsprøven · Premium</div>
+    <div>
+      <div class="price-line-label" id="priceLabel">Indfødsretsprøven · Premium</div>
+      <div class="price-line-meta" id="priceMeta">3.000+ spørgsmål · Livstidsadgang</div>
+    </div>
     <div><span class="price-line-amount" id="priceAmount">499 kr</span><span class="price-line-once">engang</span></div>
   </div>
 
@@ -223,11 +226,10 @@ main {
     <div id="link-auth-element"></div>
     <div id="payment-element"><div class="stripe-loading">Indlæser betalingsmuligheder…</div></div>
     <button type="button" class="pay-btn" id="payBtn" disabled>Betal 499 kr</button>
-    <p class="small-note">Engangsbetaling · øjeblikkelig adgang · intet abonnement</p>
     <div class="trust-strip">
       <div class="trust-item"><span>🔒</span><span>Stripe-sikret</span></div>
       <div class="trust-item"><span>⚡</span><span>Adgang med det samme</span></div>
-      <div class="trust-item"><span>✔</span><span>Ingen binding</span></div>
+      <div class="trust-item"><span>✔</span><span>Engangsbetaling</span></div>
     </div>
   </div>
 
@@ -298,8 +300,8 @@ main {
   var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   var PLANS = {
-    solo:   { amount: 49900, price: '499 kr', payLabel: 'Betal 499 kr', label: 'Indfødsretsprøven · Premium',         createFn: 'denmark-create-payment-intent', setupFn: 'denmark-setup-account' },
-    bundle: { amount: 99900, price: '999 kr', payLabel: 'Betal 999 kr', label: 'Indfødsretsprøven + Dansk 3 · Pakke', createFn: 'denmark-create-payment-intent', setupFn: 'denmark-setup-account' },
+    solo:   { amount: 49900, price: '499 kr', payLabel: 'Betal 499 kr', label: 'Indfødsretsprøven · Premium',         meta: '3.000+ spørgsmål · Livstidsadgang', createFn: 'denmark-create-payment-intent', setupFn: 'denmark-setup-account' },
+    bundle: { amount: 99900, price: '999 kr', payLabel: 'Betal 999 kr', label: 'Indfødsretsprøven + Dansk 3 · Pakke', meta: '3.000+ spørgsmål · Dansk 3-simulationer · Livstidsadgang', createFn: 'denmark-create-payment-intent', setupFn: 'denmark-setup-account' },
   };
 
   var soloFeatures = [
@@ -366,6 +368,7 @@ main {
     cardSolo.classList.toggle('selected', plan === 'solo');
     cardBundle.classList.toggle('selected', plan === 'bundle');
     document.getElementById('priceLabel').textContent = PLANS[plan].label;
+    document.getElementById('priceMeta').textContent = PLANS[plan].meta;
     document.getElementById('priceAmount').textContent = PLANS[plan].price;
     document.getElementById('payBtn').textContent = PLANS[plan].payLabel;
     renderFeatures(plan === 'bundle' ? bundleFeatures : soloFeatures);
