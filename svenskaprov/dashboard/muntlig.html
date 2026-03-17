@@ -256,8 +256,7 @@ async function handleSubmit() {
   document.getElementById('submitBtn').disabled = true;
   document.getElementById('submitBtn').textContent = 'Skickar…';
 
-  // Combine all recordings into a single base64 (use the longest/first one)
-  // For SvenskaProv we'll concatenate task info and send the combined audio
+  // Concatenate all recorded blobs into a single audio blob
   const taskEntries = examData.tasks.map(t => ({
     task_id: t.task_id,
     title: t.title,
@@ -266,14 +265,24 @@ async function handleSubmit() {
     duration: recordings[t.task_id]?.duration || 0,
   }));
 
-  // Use the first recording's base64 for now (simplified pattern)
-  // In production, we could concatenate blobs
-  const firstRec = Object.values(recordings)[0];
+  // Merge all blobs in task order
+  const orderedBlobs = examData.tasks
+    .filter(t => recordings[t.task_id])
+    .map(t => recordings[t.task_id].blob);
+
+  const combinedBlob = new Blob(orderedBlobs, { type: orderedBlobs[0]?.type || 'audio/webm' });
+
+  // Convert combined blob to base64
+  const combinedBase64 = await new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(combinedBlob);
+  });
 
   try {
     await SP.submitAudio({
       attemptId, elemKey: 'speaking',
-      audioBase64: firstRec.base64,
+      audioBase64: combinedBase64,
       responseJson: {
         tasks: taskEntries,
         total_recordings: Object.keys(recordings).length,
