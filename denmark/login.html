@@ -33,7 +33,7 @@
   .lang-switch button:hover{border-color:rgba(255,255,255,.5);color:#fff;}
   .lang-switch button.active{background:var(--brand);border-color:var(--brand);color:#fff;}
 
-  .main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+  .main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:16px;}
   .login-card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.04);}
 
   .state{display:none;} .state.active{display:block;}
@@ -88,6 +88,35 @@
   .admin-panel .btn-admin{width:100%;padding:10px;background:#6b7280;color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:0.88rem;font-weight:600;cursor:pointer;transition:background 0.2s;}
   .admin-panel .btn-admin:hover:not(:disabled){background:#4b5563;}
   .admin-panel .btn-admin:disabled{opacity:0.6;cursor:not-allowed;}
+
+  .help-card{
+    margin-top:16px;width:100%;max-width:420px;
+    background:var(--surface);border:1.5px solid var(--border);border-radius:16px;
+    overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.03);
+  }
+  .help-toggle{
+    width:100%;padding:14px 18px;display:flex;align-items:center;gap:10px;
+    background:none;border:none;cursor:pointer;font-family:"Lexend",sans-serif;
+    font-size:0.82rem;font-weight:600;color:var(--slate);text-align:left;
+  }
+  .help-toggle:hover{color:var(--navy);}
+  .help-toggle .help-icon{font-size:1.1rem;}
+  .help-toggle .help-arrow{margin-left:auto;font-size:0.7rem;color:var(--muted);transition:transform 0.2s;}
+  .help-card.open .help-arrow{transform:rotate(180deg);}
+  .help-body{
+    display:none;padding:0 18px 18px;
+  }
+  .help-card.open .help-body{display:block;}
+  .help-item{
+    display:flex;align-items:flex-start;gap:10px;
+    font-size:0.82rem;color:var(--slate);line-height:1.55;
+    padding:8px 0;
+  }
+  .help-item:first-child{padding-top:0;}
+  .help-item .hi-icon{flex-shrink:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;}
+  .help-item a{color:var(--brand);font-weight:600;text-decoration:none;}
+  .help-item a:hover{text-decoration:underline;}
+  .help-divider{height:1px;background:var(--border);margin:4px 0;}
 
   @media(max-width:480px){.login-card{padding:28px 22px;border-radius:16px;}}
 </style>
@@ -260,6 +289,37 @@
     </div>
 
   </div>
+
+  <!-- HELP CARD -->
+  <div class="help-card" id="helpCard">
+    <button class="help-toggle" id="helpToggle">
+      <span class="help-icon">💡</span>
+      Problemer med at logge ind?
+      <span class="help-arrow">▼</span>
+    </button>
+    <div class="help-body">
+      <div class="help-item">
+        <span class="hi-icon">🔄</span>
+        <span>Hvis siden ikke virker korrekt, kan du <a href="https://civiclearn.com/reset-cache">rydde din cache her</a> og derefter prøve igen.</span>
+      </div>
+      <div class="help-divider"></div>
+      <div class="help-item">
+        <span class="hi-icon">🔑</span>
+        <span>Glemt din adgangskode? Klik på "Nulstil adgangskode" nedenfor — du får vist en kode på skærmen med det samme.</span>
+      </div>
+      <div class="help-divider"></div>
+      <div class="help-item">
+        <span class="hi-icon">📱</span>
+        <span>Bruger du appen fra din startskærm? Prøv at slette den og tilføje den igen via Safari → Del-knap → "Føj til hjemmeskærm".</span>
+      </div>
+      <div class="help-divider"></div>
+      <div class="help-item">
+        <span class="hi-icon">🌐</span>
+        <span>Ser du "En fejl opstod"? Prøv fra et andet netværk (f.eks. mobildata) eller en anden browser.</span>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ADMIN IMPERSONATE -->
@@ -329,7 +389,6 @@ const I18N = {
   err_connection: "Forbindelsesfejl. Prøv igen.",
   err_generic: "En fejl opstod. Prøv igen.",
   loading: "Vent venligst…",
-  cache_cleared_msg: "🔄 Et sessionsproblem blev registreret og automatisk løst. Log venligst ind igen.",
   unknown_email_confirm_title: "Tjek din emailadresse",
   unknown_email_confirm_subtitle: "Denne adresse er ikke i vores system. Inden du kontakter os, så tjek venligst:",
   unknown_email_confirm_check1: "Er adressen stavet korrekt?",
@@ -385,39 +444,10 @@ const I18N = {
   const params    = new URLSearchParams(location.search);
   const returnUrl = params.get('return') || DASHBOARD_URL;
 
-  /* ── Cache / session helpers ── */
-  function clearSupabaseCache() {
-    const toRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && (k.startsWith('sb-') || k.startsWith('supabase') || k === 'cl_auth' || k === 'cl_email')) {
-        toRemove.push(k);
-      }
-    }
-    toRemove.forEach(k => localStorage.removeItem(k));
-  }
-
-  function markRedirect() {
-    sessionStorage.setItem('cl_redirect_ts', Date.now().toString());
-  }
-
-  function checkBounce() {
-    const ts = sessionStorage.getItem('cl_redirect_ts');
-    if (!ts) return false;
-    sessionStorage.removeItem('cl_redirect_ts');
-    return (Date.now() - parseInt(ts, 10)) < 30000; // within 30 seconds = bounce
-  }
-
-  // Auto-redirect if already logged in — with bounce detection
+  /* ── Auto-redirect if already logged in ── */
   (async () => {
-    if (checkBounce()) {
-      // User was redirected to dashboard but came straight back — stale session
-      clearSupabaseCache();
-      showMsg('login-msg', t('cache_cleared_msg'), 'info');
-      return; // don't re-check session (we just cleared it)
-    }
     const { data: { session } } = await sb.auth.getSession();
-    if (session) { markRedirect(); window.location.href = returnUrl; }
+    if (session) { window.location.href = returnUrl; }
   })();
 
   /* ── Helpers ── */
@@ -509,7 +539,6 @@ const I18N = {
       try { await sb.from('login_history').insert({ email, status: 'success', method: 'password' }); } catch(e) {}
       localStorage.setItem('cl_auth', 'ok');
       localStorage.setItem('cl_email', email);
-      markRedirect();
       window.location.href = returnUrl;
     } catch (err) { showMsg('login-msg', t('err_generic'), 'error'); setLoading('login-btn', false); }
   });
@@ -582,7 +611,6 @@ const I18N = {
       if (otpError) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Session failed: ' + otpError.message; btn.disabled = false; btn.textContent = 'Impersonate'; return; }
       localStorage.setItem('cl_auth', 'ok');
       localStorage.setItem('cl_email', data.email);
-      markRedirect();
       window.location.href = returnUrl;
     } catch (err) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Error: ' + err.message; btn.disabled = false; btn.textContent = 'Impersonate'; }
   });
@@ -619,6 +647,11 @@ const I18N = {
   document.getElementById('confirm-yes-btn').addEventListener('click', () => showState('unknownContact'));
   document.getElementById('back-to-login-from-contact').addEventListener('click', () => { clearMsg('contact-msg'); showState('login'); });
   document.getElementById('back-to-login-from-sent').addEventListener('click', () => showState('login'));
+
+  /* ── HELP CARD TOGGLE ── */
+  document.getElementById('helpToggle').addEventListener('click', () => {
+    document.getElementById('helpCard').classList.toggle('open');
+  });
 
 })();
 </script>
