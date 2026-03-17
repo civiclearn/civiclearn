@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SvenskaProv — Läsförståelse</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/svenskaprov/assets/js/sp-auth.js"></script>
+  <script src="/svenskaprov/assets/js/sp-engine.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--blue:#006AA7;--blue-dim:#e8f1f8;--yellow:#FECC02;--navy:#0f172a;--muted:#64748b;--border:#e2e8f0;--surface:#fff;--bg:#f8f7f4;--pass:#166534;--pass-bg:#dcfce7;--fail:#991b1b;--fail-bg:#fee2e2}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
+
+    .topbar{background:var(--navy);border-bottom:3px solid var(--blue);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+    .topbar-left{display:flex;align-items:center;gap:12px}
+    .back-link{color:#64748b;text-decoration:none;font-size:0.8rem;display:flex;align-items:center;gap:5px}
+    .back-link:hover{color:#fff}
+    .topbar-divider{width:1px;height:20px;background:#1e293b}
+    .topbar-title{font-size:0.9rem;font-weight:700;color:#fff}
+    .topbar-flag{width:22px;height:16px;background:var(--blue);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0}
+    .topbar-flag::before{content:'';position:absolute;top:0;left:6px;width:3px;height:100%;background:var(--yellow)}
+    .topbar-flag::after{content:'';position:absolute;top:6px;left:0;width:100%;height:3px;background:var(--yellow)}
+
+    #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity 0.35s}
+    #loading-overlay.hidden{opacity:0;pointer-events:none}
+    .loading-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--blue);animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .exam-wrap{max-width:820px;margin:0 auto;padding:28px 24px 80px}
+
+    .task-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:24px;margin-bottom:28px}
+    .task-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+    .task-num{width:32px;height:32px;border-radius:8px;background:var(--blue-dim);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0}
+    .task-title{font-weight:700;font-size:1rem}
+
+    .passage{background:#fafaf8;border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:20px;font-size:0.88rem;line-height:1.7;white-space:pre-line}
+
+    .question{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #f1f5f9}
+    .question:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+    .q-prompt{font-weight:600;font-size:0.88rem;margin-bottom:10px;line-height:1.5}
+    .q-options{display:flex;flex-direction:column;gap:6px}
+    .q-option{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.15s;font-size:0.85rem;line-height:1.4}
+    .q-option:hover{border-color:#94a3b8;background:#fafaf8}
+    .q-option.selected{border-color:var(--blue);background:var(--blue-dim)}
+    .q-option.correct{border-color:var(--pass);background:var(--pass-bg)}
+    .q-option.wrong{border-color:var(--fail);background:var(--fail-bg)}
+    .q-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+    .q-option.selected .q-radio{border-color:var(--blue);background:var(--blue)}
+    .q-option.selected .q-radio::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff}
+
+    .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;z-index:100}
+    .progress-text{font-size:0.82rem;color:var(--muted);font-weight:500}
+    .btn-row{display:flex;gap:10px}
+    .btn{padding:10px 24px;border-radius:8px;font-size:0.88rem;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity 0.15s}
+    .btn:hover{opacity:0.85}
+    .btn-skip{background:#f1f5f9;color:var(--navy)}
+    .btn-submit{background:var(--blue);color:#fff}
+    .btn-submit:disabled{opacity:0.4;cursor:not-allowed}
+    .btn-back{background:var(--navy);color:#fff}
+
+    .result-banner{background:var(--surface);border:2px solid var(--border);border-radius:14px;padding:24px;text-align:center;margin-bottom:24px}
+    .result-score{font-size:2rem;font-weight:700}
+    .result-score.high{color:var(--pass)}
+    .result-score.mid{color:#92400e}
+    .result-score.low{color:var(--fail)}
+
+    @media(max-width:600px){.exam-wrap{padding:20px 14px 80px}.task-card{padding:18px 16px}.passage{padding:14px 16px;font-size:0.84rem}}
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div style="font-size:0.9rem;color:var(--muted)">Laddar läsförståelse…</div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" id="backLink" href="#">← Tillbaka</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-flag"></div>
+    <span class="topbar-title">Läsförståelse</span>
+  </div>
+</div>
+
+<div class="exam-wrap" id="examContent"></div>
+
+<div class="bottom-bar" id="bottomBar">
+  <div class="progress-text" id="progressText">0 av 0 besvarade</div>
+  <div class="btn-row">
+    <button class="btn btn-skip" onclick="handleSkip()">Hoppa över</button>
+    <button class="btn btn-submit" id="submitBtn" onclick="handleSubmit()" disabled>Skicka in</button>
+  </div>
+</div>
+
+<script>
+let simId, attemptId, user, examData;
+let userAnswers = {}; // { q_id: selected_option_text }
+let submitted = false;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const ctx = await SP.init('reading');
+  user = ctx.user; simId = ctx.simId; attemptId = ctx.attemptId;
+
+  document.getElementById('backLink').href = `/svenskaprov/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
+
+  // Check if already submitted
+  const alreadyDone = await SP.isSubmitted(user.id, attemptId, 'reading');
+  if (alreadyDone) {
+    document.getElementById('examContent').innerHTML = `
+      <div style="text-align:center;padding:60px 20px;">
+        <div style="font-size:2rem;">✅</div>
+        <h2 style="margin:12px 0;">Läsförståelse redan inskickad</h2>
+        <p style="color:var(--muted);">Du har redan svarat på denna del.</p>
+        <a href="/svenskaprov/dashboard/exam.html?sim=${simId}&attempt=${attemptId}" style="display:inline-block;margin-top:16px;color:var(--blue);font-weight:600;">← Tillbaka till provet</a>
+      </div>`;
+    document.getElementById('bottomBar').style.display = 'none';
+    SP.hideLoading();
+    return;
+  }
+
+  // Load JSON
+  const simNum = ctx.simNum;
+  const jsonPath = `/svenskaprov/data/sp-${String(simNum).padStart(2,'0')}-reading.json`;
+  try {
+    const res = await fetch(jsonPath);
+    if (!res.ok) throw new Error('JSON not found');
+    examData = await res.json();
+  } catch (err) {
+    SP.showError(`Kunde inte ladda provdata: ${err.message}`, simId, attemptId);
+    return;
+  }
+
+  renderExam();
+  SP.hideLoading();
+});
+
+function renderExam() {
+  const wrap = document.getElementById('examContent');
+  let html = '';
+
+  examData.tasks.forEach((task, ti) => {
+    html += `<div class="task-card">
+      <div class="task-header">
+        <div class="task-num">${ti + 1}</div>
+        <div class="task-title">${SP.escapeHtml(task.title)}</div>
+      </div>`;
+
+    // Some questions have passage text embedded in their prompt (the first question of each task)
+    // We need to detect and separate passage from question
+    task.questions.forEach((q, qi) => {
+      const prompt = q.prompt || '';
+      // Check if prompt is very long (likely contains passage + question)
+      const isPassageQuestion = prompt.length > 300;
+
+      if (isPassageQuestion && qi === 0) {
+        // First question likely has passage embedded - show it
+        html += `<div class="passage">${SP.escapeHtml(prompt)}</div>`;
+      }
+
+      html += `<div class="question" data-qid="${q.id}">
+        <div class="q-prompt">${qi + 1}. ${isPassageQuestion && qi === 0 ? SP.escapeHtml(task.instructions || 'Välj det rätta svaret.') : SP.escapeHtml(prompt)}</div>
+        <div class="q-options">`;
+
+      q.options.forEach((opt, oi) => {
+        html += `<div class="q-option" data-qid="${q.id}" data-opt="${oi}" onclick="selectOption('${q.id}', ${oi})">
+          <div class="q-radio"></div>
+          <div>${SP.escapeHtml(opt)}</div>
+        </div>`;
+      });
+
+      html += `</div></div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  wrap.innerHTML = html;
+  updateProgress();
+}
+
+function selectOption(qId, optIdx) {
+  if (submitted) return;
+  const task = examData.tasks.flatMap(t => t.questions).find(q => q.id === qId);
+  if (!task) return;
+
+  userAnswers[qId] = task.options[optIdx];
+
+  // Update UI
+  document.querySelectorAll(`.q-option[data-qid="${qId}"]`).forEach(el => el.classList.remove('selected'));
+  document.querySelector(`.q-option[data-qid="${qId}"][data-opt="${optIdx}"]`).classList.add('selected');
+  updateProgress();
+}
+
+function updateProgress() {
+  const totalQ = examData.tasks.reduce((sum, t) => sum + t.questions.length, 0);
+  const answered = Object.keys(userAnswers).length;
+  document.getElementById('progressText').textContent = `${answered} av ${totalQ} besvarade`;
+  document.getElementById('submitBtn').disabled = answered === 0;
+}
+
+function gradeExam() {
+  let correct = 0;
+  let total = 0;
+  const allQuestions = examData.tasks.flatMap(t => t.questions);
+  allQuestions.forEach(q => {
+    total++;
+    if (userAnswers[q.id] === q.correct_option) correct++;
+  });
+  return { correct, total, percentage: total > 0 ? Math.round((correct / total) * 100) : 0 };
+}
+
+async function handleSubmit() {
+  if (submitted) return;
+  const result = gradeExam();
+
+  if (!confirm(`Du har besvarat ${Object.keys(userAnswers).length} av ${result.total} frågor.\n\nVill du skicka in?`)) return;
+
+  submitted = true;
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('submitBtn').textContent = 'Skickar…';
+
+  // Show correct/wrong
+  examData.tasks.flatMap(t => t.questions).forEach(q => {
+    const opts = document.querySelectorAll(`.q-option[data-qid="${q.id}"]`);
+    opts.forEach((el, i) => {
+      el.style.cursor = 'default';
+      if (q.options[i] === q.correct_option) el.classList.add('correct');
+      else if (userAnswers[q.id] === q.options[i]) el.classList.add('wrong');
+    });
+  });
+
+  // Show result banner
+  const banner = document.createElement('div');
+  banner.className = 'result-banner';
+  const pctClass = result.percentage >= 60 ? 'high' : result.percentage >= 40 ? 'mid' : 'low';
+  banner.innerHTML = `
+    <div style="font-size:1.5rem;">📖</div>
+    <div class="result-score ${pctClass}">${result.correct}/${result.total}</div>
+    <div style="font-size:0.88rem;color:var(--muted);margin-top:4px;">${result.percentage}% rätt</div>
+  `;
+  document.getElementById('examContent').prepend(banner);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Submit to server
+  try {
+    await SP.submit({
+      attemptId, elemKey: 'reading',
+      score: result.percentage,
+      total_questions: result.total,
+      correct_answers: result.correct,
+      json: { answers: userAnswers, result }
+    });
+  } catch (err) {
+    console.error('Submit error:', err);
+    SP.toast('Fel vid inskickning, men dina svar är sparade lokalt.');
+  }
+
+  // Replace bottom bar
+  document.getElementById('bottomBar').innerHTML = `
+    <div class="progress-text">${result.percentage}% rätt (${result.correct}/${result.total})</div>
+    <div class="btn-row">
+      <a class="btn btn-back" href="/svenskaprov/dashboard/exam.html?sim=${simId}&attempt=${attemptId}">← Tillbaka till provet</a>
+    </div>`;
+}
+
+async function handleSkip() {
+  if (submitted) return;
+  if (!confirm('Vill du hoppa över läsförståelsen? Du får 0 poäng.')) return;
+  try {
+    await SP.skip({ attemptId, elemKey: 'reading' });
+  } catch (e) { console.warn('Skip failed:', e); }
+  window.location.href = `/svenskaprov/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
+}
+</script>
+</body>
+</html>

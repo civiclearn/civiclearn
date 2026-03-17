@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SvenskaProv — Resultat</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/svenskaprov/assets/js/sp-auth.js"></script>
+  <script src="/svenskaprov/assets/js/sp-engine.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--blue:#006AA7;--blue-dim:#e8f1f8;--yellow:#FECC02;--navy:#0f172a;--muted:#64748b;--border:#e2e8f0;--surface:#fff;--bg:#f8f7f4;--pass:#166534;--pass-bg:#dcfce7;--fail:#991b1b;--fail-bg:#fee2e2;--amber:#92400e;--amber-bg:#fef9c3}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
+
+    .topbar{background:var(--navy);border-bottom:3px solid var(--blue);padding:0 28px;height:52px;display:flex;align-items:center;position:sticky;top:0;z-index:200}
+    .topbar-left{display:flex;align-items:center;gap:12px}
+    .back-link{color:#64748b;text-decoration:none;font-size:0.8rem;display:flex;align-items:center;gap:5px}
+    .back-link:hover{color:#fff}
+    .topbar-divider{width:1px;height:20px;background:#1e293b}
+    .topbar-title{font-size:0.9rem;font-weight:700;color:#fff}
+    .topbar-flag{width:22px;height:16px;background:var(--blue);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0}
+    .topbar-flag::before{content:'';position:absolute;top:0;left:6px;width:3px;height:100%;background:var(--yellow)}
+    .topbar-flag::after{content:'';position:absolute;top:6px;left:0;width:100%;height:3px;background:var(--yellow)}
+
+    #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity 0.35s}
+    #loading-overlay.hidden{opacity:0;pointer-events:none}
+    .loading-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--blue);animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .results-wrap{max-width:820px;margin:0 auto;padding:28px 24px 80px}
+
+    .summary-card{background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:32px;text-align:center;margin-bottom:32px}
+    .summary-level{font-size:1.8rem;font-weight:700;margin:12px 0}
+    .summary-level.pass{color:var(--pass)}
+    .summary-level.fail{color:var(--fail)}
+    .summary-scores{display:flex;justify-content:center;gap:24px;margin-top:18px;flex-wrap:wrap}
+    .ss-item{text-align:center;min-width:80px}
+    .ss-label{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em}
+    .ss-value{font-size:1.4rem;font-weight:700;margin-top:2px}
+    .ss-value.high{color:var(--pass)}.ss-value.mid{color:var(--amber)}.ss-value.low{color:var(--fail)}
+
+    .element-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px}
+    .el-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .el-title{font-weight:700;font-size:1rem}
+    .el-score-badge{padding:4px 14px;border-radius:99px;font-size:0.82rem;font-weight:700}
+    .el-score-badge.high{background:var(--pass-bg);color:var(--pass)}
+    .el-score-badge.mid{background:var(--amber-bg);color:var(--amber)}
+    .el-score-badge.low{background:var(--fail-bg);color:var(--fail)}
+    .el-score-badge.skip{background:#f1f5f9;color:#94a3b8}
+
+    .feedback-section{margin-top:14px}
+    .fb-summary{font-size:0.88rem;line-height:1.6;color:var(--navy);margin-bottom:14px}
+    .fb-list-title{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:6px}
+    .fb-list{list-style:none;padding:0;margin-bottom:14px}
+    .fb-list li{font-size:0.85rem;line-height:1.5;padding:4px 0;color:var(--slate)}
+    .fb-list li::before{content:'• ';color:var(--blue);font-weight:700}
+
+    .mistake-card{background:var(--fail-bg);border:1px solid #fecaca;border-radius:8px;padding:12px 14px;margin-bottom:8px;font-size:0.84rem}
+    .mistake-original{text-decoration:line-through;color:var(--fail)}
+    .mistake-correction{color:var(--pass);font-weight:600}
+    .mistake-explain{color:var(--muted);font-size:0.78rem;margin-top:4px}
+
+    .auto-result{padding:16px;background:var(--blue-dim);border-radius:10px;font-size:0.88rem}
+
+    @media(max-width:600px){.results-wrap{padding:20px 14px 60px}.summary-card{padding:24px 16px}}
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div style="font-size:0.9rem;color:var(--muted)">Laddar resultat…</div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" href="/svenskaprov/dashboard/index.html">← Simuleringar</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-flag"></div>
+    <span class="topbar-title">Resultat</span>
+  </div>
+</div>
+
+<div class="results-wrap" id="resultsContent"></div>
+
+<script>
+const ELEM_LABELS = {
+  reading: '📖 Läsförståelse',
+  listening: '🎧 Hörförståelse',
+  writing: '✍️ Skriftlig färdighet',
+  speaking: '🎤 Muntlig färdighet',
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const ctx = await SP.init();
+  const { user, simId, attemptId } = ctx;
+
+  const data = await SP.hydrateData(user.id, attemptId, true);
+  if (!data) { SP.showError('Kunde inte ladda data.'); return; }
+
+  const attempt = (data.attempts || []).find(a => a.id === attemptId);
+  if (!attempt) { SP.showError('Simulering hittades inte.'); return; }
+
+  const elems = attempt.elements || [];
+  const wrap = document.getElementById('resultsContent');
+  let html = '';
+
+  // Summary card
+  const level = attempt.result_level || '—';
+  const isPass = level !== 'Ej godkänt' && level !== '—';
+  const overall = attempt.grade_overall != null ? Math.round(attempt.grade_overall) : null;
+
+  function pctClass(v) { return v >= 60 ? 'high' : v >= 40 ? 'mid' : 'low'; }
+
+  html += `<div class="summary-card">
+    <div style="font-size:2rem;">${isPass ? '🎉' : '📋'}</div>
+    <div class="summary-level ${isPass ? 'pass' : 'fail'}">${SP.escapeHtml(level)}</div>
+    <div style="font-size:0.88rem;color:var(--muted);margin-top:4px;">Simulering ${ctx.simNum}</div>
+    <div class="summary-scores">
+      <div class="ss-item"><div class="ss-label">Läsning</div><div class="ss-value ${pctClass(attempt.grade_reading || 0)}">${attempt.grade_reading != null ? Math.round(attempt.grade_reading) + '%' : '—'}</div></div>
+      <div class="ss-item"><div class="ss-label">Hörförståelse</div><div class="ss-value ${pctClass(attempt.grade_listening || 0)}">${attempt.grade_listening != null ? Math.round(attempt.grade_listening) + '%' : '—'}</div></div>
+      <div class="ss-item"><div class="ss-label">Skriftlig</div><div class="ss-value ${pctClass(((attempt.grade_writing || 0) / 25) * 100)}">${attempt.grade_writing ?? '—'}/25</div></div>
+      <div class="ss-item"><div class="ss-label">Muntlig</div><div class="ss-value ${pctClass(((attempt.grade_speaking || 0) / 25) * 100)}">${attempt.grade_speaking ?? '—'}/25</div></div>
+      <div class="ss-item"><div class="ss-label">Totalt</div><div class="ss-value ${pctClass(overall || 0)}">${overall != null ? overall + '%' : '—'}</div></div>
+    </div>
+  </div>`;
+
+  // Element cards
+  const order = ['reading', 'listening', 'writing', 'speaking'];
+  order.forEach(key => {
+    const el = elems.find(e => e.element_key === key);
+    if (!el) return;
+
+    const title = ELEM_LABELS[key] || key;
+    const isAuto = key === 'reading' || key === 'listening';
+    const score = Number(el.ai_score_internal) || 0;
+    const fb = el.ai_feedback || {};
+    const wasSkipped = el.submission_status === 'skipped';
+
+    let scoreDisplay, scoreClass;
+    if (wasSkipped) {
+      scoreDisplay = 'Hoppade över';
+      scoreClass = 'skip';
+    } else if (isAuto) {
+      scoreDisplay = Math.round(score) + '%';
+      scoreClass = pctClass(score);
+    } else {
+      scoreDisplay = score + '/25';
+      const pct = (score / 25) * 100;
+      scoreClass = pctClass(pct);
+    }
+
+    html += `<div class="element-card">
+      <div class="el-header">
+        <div class="el-title">${title}</div>
+        <span class="el-score-badge ${scoreClass}">${scoreDisplay}</span>
+      </div>`;
+
+    if (wasSkipped) {
+      html += `<div style="color:var(--muted);font-size:0.85rem;">Denna del hoppades över.</div>`;
+    } else if (isAuto && fb.auto_graded) {
+      html += `<div class="auto-result">
+        <strong>${fb.correct_answers || 0}</strong> av <strong>${fb.total_questions || 0}</strong> frågor rätt (${fb.percentage || 0}%)
+      </div>`;
+    } else if (fb.summary || fb.strengths || fb.weaknesses || fb.mistakes) {
+      html += `<div class="feedback-section">`;
+      if (fb.summary) html += `<div class="fb-summary">${SP.escapeHtml(fb.summary)}</div>`;
+
+      if (fb.strengths && fb.strengths.length > 0) {
+        html += `<div class="fb-list-title">Styrkor</div><ul class="fb-list">`;
+        fb.strengths.forEach(s => { html += `<li>${SP.escapeHtml(s)}</li>`; });
+        html += `</ul>`;
+      }
+
+      if (fb.weaknesses && fb.weaknesses.length > 0) {
+        html += `<div class="fb-list-title">Förbättringsområden</div><ul class="fb-list">`;
+        fb.weaknesses.forEach(w => { html += `<li>${SP.escapeHtml(w)}</li>`; });
+        html += `</ul>`;
+      }
+
+      if (fb.mistakes && fb.mistakes.length > 0) {
+        html += `<div class="fb-list-title">Fel att rätta</div>`;
+        fb.mistakes.forEach(m => {
+          html += `<div class="mistake-card">
+            <span class="mistake-original">${SP.escapeHtml(m.original)}</span> → <span class="mistake-correction">${SP.escapeHtml(m.correction)}</span>
+            ${m.explanation ? `<div class="mistake-explain">${SP.escapeHtml(m.explanation)}</div>` : ''}
+          </div>`;
+        });
+      }
+
+      // Score breakdown
+      if (fb.scores) {
+        html += `<div class="fb-list-title" style="margin-top:14px;">Poängfördelning</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">`;
+        const labels = {
+          uppgiftsuppfyllelse:'Uppgift', koherens:'Koherens', ordförråd:'Ordförråd',
+          grammatik:'Grammatik', register:'Register',
+          förståelse:'Förståelse', interaktion:'Interaktion', flyt:'Flyt',
+          ordförråd_grammatik:'Ordförr./Gramm.', uttal:'Uttal'
+        };
+        for (const [k, v] of Object.entries(fb.scores)) {
+          const label = labels[k] || k;
+          html += `<div style="text-align:center;min-width:60px;">
+            <div style="font-size:0.68rem;color:var(--muted)">${label}</div>
+            <div style="font-weight:700;font-size:1rem;">${v}/5</div>
+          </div>`;
+        }
+        html += `</div>`;
+      }
+      html += `</div>`;
+    } else if (fb.too_short) {
+      html += `<div style="color:var(--muted);font-size:0.85rem;">${SP.escapeHtml(fb.summary || 'Svaret var för kort för att bedömas.')}</div>`;
+    }
+
+    html += `</div>`;
+  });
+
+  html += `<div style="text-align:center;margin-top:24px;">
+    <a href="/svenskaprov/dashboard/index.html" style="color:var(--blue);font-weight:600;font-size:0.9rem;text-decoration:none;">← Tillbaka till simuleringar</a>
+  </div>`;
+
+  wrap.innerHTML = html;
+  SP.hideLoading();
+});
+</script>
+</body>
+</html>

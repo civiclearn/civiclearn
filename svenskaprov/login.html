@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SvenskaProv — Logga in</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--blue:#006AA7;--blue-dim:#e8f1f8;--yellow:#FECC02;--navy:#0f172a;--muted:#64748b;--border:#e2e8f0;--surface:#fff;--bg:#f8f7f4;--red:#dc2626;--pass:#166534}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+
+    .login-card{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:36px 32px;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(0,0,0,0.06)}
+
+    .brand{text-align:center;margin-bottom:28px}
+    .brand-flag{width:48px;height:34px;background:var(--blue);border-radius:4px;position:relative;overflow:hidden;margin:0 auto 12px;display:block}
+    .brand-flag::before{content:'';position:absolute;top:0;left:14px;width:6px;height:100%;background:var(--yellow)}
+    .brand-flag::after{content:'';position:absolute;top:14px;left:0;width:100%;height:6px;background:var(--yellow)}
+    .brand-title{font-size:1.3rem;font-weight:700}
+    .brand-sub{font-size:0.82rem;color:var(--muted);margin-top:2px}
+
+    .form-group{margin-bottom:16px}
+    .form-label{display:block;font-size:0.78rem;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em}
+    .form-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.9rem;color:var(--navy);background:var(--bg);transition:border-color 0.15s}
+    .form-input:focus{outline:none;border-color:var(--blue)}
+    .pw-wrap{position:relative}
+    .pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:0.8rem;color:var(--muted)}
+
+    .btn-primary{width:100%;padding:12px;border:none;border-radius:8px;background:var(--blue);color:#fff;font-family:inherit;font-size:0.92rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;margin-top:4px}
+    .btn-primary:hover{opacity:0.88}
+    .btn-primary:disabled{opacity:0.4;cursor:not-allowed}
+    .btn-secondary{width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--navy);font-family:inherit;font-size:0.85rem;font-weight:500;cursor:pointer;transition:background 0.15s;margin-top:8px}
+    .btn-secondary:hover{background:#f1f5f9}
+
+    .link-row{text-align:center;margin-top:14px;font-size:0.82rem}
+    .link-row a{color:var(--blue);text-decoration:none;font-weight:500}
+    .link-row a:hover{text-decoration:underline}
+
+    .error-msg{background:#fee2e2;color:var(--red);border:1px solid #fecaca;border-radius:8px;padding:10px 14px;font-size:0.82rem;margin-bottom:14px;display:none}
+    .success-msg{background:#dcfce7;color:var(--pass);border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:0.82rem;margin-bottom:14px;display:none}
+
+    .pin-display{background:var(--navy);color:var(--yellow);font-size:1.8rem;font-weight:700;text-align:center;padding:16px;border-radius:10px;letter-spacing:0.15em;margin:12px 0;font-variant-numeric:tabular-nums}
+
+    .state{display:none}
+    .state.active{display:block}
+
+    .footer-gear{position:fixed;bottom:12px;right:12px;background:none;border:none;font-size:0.9rem;cursor:pointer;opacity:0.2;transition:opacity 0.2s}
+    .footer-gear:hover{opacity:0.6}
+
+    #adminPanel{display:none;margin-top:16px;padding:16px;background:#f8fafc;border:1px solid var(--border);border-radius:10px}
+    #adminPanel .form-label{color:var(--red)}
+  </style>
+</head>
+<body>
+
+<div class="login-card">
+  <div class="brand">
+    <div class="brand-flag"></div>
+    <div class="brand-title">SvenskaProv</div>
+    <div class="brand-sub">Provsimulering</div>
+  </div>
+
+  <div id="errorMsg" class="error-msg"></div>
+  <div id="successMsg" class="success-msg"></div>
+
+  <!-- STATE 1: Login -->
+  <div id="stateLogin" class="state active">
+    <div class="form-group">
+      <label class="form-label">E-post</label>
+      <input class="form-input" type="email" id="loginEmail" placeholder="din@epost.se" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Lösenord</label>
+      <div class="pw-wrap">
+        <input class="form-input" type="password" id="loginPassword" placeholder="Ditt lösenord" autocomplete="current-password">
+        <button class="pw-toggle" type="button" onclick="togglePw('loginPassword', this)">Visa</button>
+      </div>
+    </div>
+    <button class="btn-primary" id="loginBtn" onclick="handleLogin()">Logga in</button>
+    <div class="link-row"><a href="#" onclick="showState('stateForgot');return false;">Glömt lösenord?</a></div>
+  </div>
+
+  <!-- STATE 2: Forgot - enter email -->
+  <div id="stateForgot" class="state">
+    <div class="form-group">
+      <label class="form-label">E-post</label>
+      <input class="form-input" type="email" id="forgotEmail" placeholder="din@epost.se">
+    </div>
+    <button class="btn-primary" id="forgotBtn" onclick="handleForgotEmail()">Skicka</button>
+    <div class="link-row"><a href="#" onclick="showState('stateLogin');return false;">← Tillbaka till inloggning</a></div>
+  </div>
+
+  <!-- STATE 3: Forgot - PIN + new password -->
+  <div id="statePin" class="state">
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:10px;">Ange koden nedan och välj ett nytt lösenord:</p>
+    <div class="pin-display" id="pinDisplay">------</div>
+    <div class="form-group">
+      <label class="form-label">Bekräftelsekod</label>
+      <input class="form-input" type="text" id="pinInput" placeholder="Ange 6-siffrig kod" maxlength="6">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nytt lösenord</label>
+      <div class="pw-wrap">
+        <input class="form-input" type="password" id="newPassword" placeholder="Minst 6 tecken">
+        <button class="pw-toggle" type="button" onclick="togglePw('newPassword', this)">Visa</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Bekräfta lösenord</label>
+      <input class="form-input" type="password" id="confirmPassword" placeholder="Ange igen">
+    </div>
+    <button class="btn-primary" id="resetBtn" onclick="handleReset()">Uppdatera lösenord</button>
+    <div class="link-row"><a href="#" onclick="showState('stateLogin');return false;">← Tillbaka till inloggning</a></div>
+  </div>
+
+  <!-- STATE 4: Success -->
+  <div id="stateSuccess" class="state">
+    <div style="text-align:center;padding:20px 0;">
+      <div style="font-size:2rem;">✅</div>
+      <h3 style="margin:12px 0 6px;">Lösenordet uppdaterat!</h3>
+      <p style="color:var(--muted);font-size:0.85rem;">Du kan nu logga in med ditt nya lösenord.</p>
+    </div>
+    <button class="btn-primary" onclick="showState('stateLogin')">Logga in</button>
+  </div>
+
+  <!-- Admin panel (hidden behind gear icon) -->
+  <div id="adminPanel">
+    <div class="form-group">
+      <label class="form-label" style="color:var(--red);">Admin — Logga in som</label>
+      <input class="form-input" type="email" id="adminEmail" placeholder="Användarens e-post">
+    </div>
+    <div class="form-group">
+      <label class="form-label" style="color:var(--red);">Admin-nyckel</label>
+      <input class="form-input" type="password" id="adminKey" placeholder="Nyckel">
+    </div>
+    <button class="btn-primary" style="background:var(--red)" onclick="handleAdminImpersonate()">Impersonera</button>
+  </div>
+</div>
+
+<button class="footer-gear" onclick="document.getElementById('adminPanel').style.display = document.getElementById('adminPanel').style.display === 'none' ? 'block' : 'none'">⚙</button>
+
+<script>
+const SUPABASE_URL = 'https://htgliokekeaovdiafrgs.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+const FN = slug => `${SUPABASE_URL}/functions/v1/${slug}`;
+const DASHBOARD_URL = '/svenskaprov/dashboard/index.html';
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let forgotEmailStored = '';
+
+// Auto-redirect if already logged in
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    const returnUrl = new URLSearchParams(location.search).get('return');
+    window.location.href = returnUrl || DASHBOARD_URL;
+  }
+})();
+
+function showState(id) {
+  document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  clearMessages();
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg; el.style.display = 'block';
+  document.getElementById('successMsg').style.display = 'none';
+}
+function showSuccess(msg) {
+  const el = document.getElementById('successMsg');
+  el.textContent = msg; el.style.display = 'block';
+  document.getElementById('errorMsg').style.display = 'none';
+}
+function clearMessages() {
+  document.getElementById('errorMsg').style.display = 'none';
+  document.getElementById('successMsg').style.display = 'none';
+}
+
+function togglePw(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? 'Visa' : 'Dölj';
+}
+
+async function handleLogin() {
+  clearMessages();
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) { showError('Ange e-post och lösenord.'); return; }
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Loggar in…';
+
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+
+    // Log login
+    fetch(FN('sp-reset-password'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: '{}' // just a ping, logging happens server-side
+    }).catch(() => {});
+
+    const returnUrl = new URLSearchParams(location.search).get('return');
+    window.location.href = returnUrl || DASHBOARD_URL;
+  } catch (err) {
+    showError(err.message === 'Invalid login credentials' ? 'Felaktig e-post eller lösenord.' : err.message);
+    btn.disabled = false; btn.textContent = 'Logga in';
+  }
+}
+
+async function handleForgotEmail() {
+  clearMessages();
+  const email = document.getElementById('forgotEmail').value.trim().toLowerCase();
+  if (!email) { showError('Ange din e-post.'); return; }
+
+  const btn = document.getElementById('forgotBtn');
+  btn.disabled = true; btn.textContent = 'Kontrollerar…';
+
+  try {
+    const res = await fetch(FN('sp-reset-password'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'check_email', email }),
+    });
+    const data = await res.json();
+
+    if (!data.exists) {
+      showError(data.message || 'E-post hittades inte.');
+      btn.disabled = false; btn.textContent = 'Skicka';
+      return;
+    }
+
+    forgotEmailStored = email;
+    document.getElementById('pinDisplay').textContent = data.pin;
+    showState('statePin');
+
+  } catch (err) {
+    showError('Något gick fel. Försök igen.');
+  }
+  btn.disabled = false; btn.textContent = 'Skicka';
+}
+
+async function handleReset() {
+  clearMessages();
+  const pin = document.getElementById('pinInput').value.trim();
+  const newPw = document.getElementById('newPassword').value;
+  const confirmPw = document.getElementById('confirmPassword').value;
+
+  if (!pin) { showError('Ange bekräftelsekoden.'); return; }
+  if (!newPw) { showError('Ange ett nytt lösenord.'); return; }
+  if (newPw.length < 6) { showError('Lösenordet måste vara minst 6 tecken.'); return; }
+  if (newPw !== confirmPw) { showError('Lösenorden matchar inte.'); return; }
+
+  const btn = document.getElementById('resetBtn');
+  btn.disabled = true; btn.textContent = 'Uppdaterar…';
+
+  try {
+    const res = await fetch(FN('sp-reset-password'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'reset', email: forgotEmailStored, pin, new_password: newPw }),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showState('stateSuccess');
+    } else {
+      showError(data.error || 'Kunde inte uppdatera lösenordet.');
+    }
+  } catch (err) {
+    showError('Något gick fel.');
+  }
+  btn.disabled = false; btn.textContent = 'Uppdatera lösenord';
+}
+
+async function handleAdminImpersonate() {
+  const email = document.getElementById('adminEmail').value.trim().toLowerCase();
+  const key = document.getElementById('adminKey').value;
+  if (!email || !key) { showError('Ange e-post och nyckel.'); return; }
+
+  try {
+    const res = await fetch(FN('admin-impersonate'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, admin_key: key }),
+    });
+    const data = await res.json();
+    if (data.error) { showError(data.error); return; }
+    if (data.access_token) {
+      await sb.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
+      window.location.href = DASHBOARD_URL;
+    }
+  } catch (err) { showError('Impersonering misslyckades.'); }
+}
+
+// Pre-fill forgot email from login email
+document.getElementById('loginEmail').addEventListener('input', function() {
+  document.getElementById('forgotEmail').value = this.value;
+});
+
+// Enter key handlers
+document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+document.getElementById('forgotEmail').addEventListener('keydown', e => { if (e.key === 'Enter') handleForgotEmail(); });
+document.getElementById('confirmPassword').addEventListener('keydown', e => { if (e.key === 'Enter') handleReset(); });
+</script>
+</body>
+</html>
