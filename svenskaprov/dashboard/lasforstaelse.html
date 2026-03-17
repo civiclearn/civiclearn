@@ -36,6 +36,10 @@
     .task-title{font-weight:700;font-size:1rem}
 
     .passage{background:#fafaf8;border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:20px;font-size:0.88rem;line-height:1.7;white-space:pre-line}
+    .passage-title{font-weight:700;font-size:0.95rem;margin-bottom:8px;color:var(--navy)}
+
+    .excerpt-box{background:#fffbeb;border:1px solid #fde68a;border-left:4px solid #f59e0b;border-radius:8px;padding:14px 16px;margin-bottom:12px;font-size:0.85rem;line-height:1.65;color:#78350f}
+    .excerpt-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#92400e;margin-bottom:6px}
 
     .question{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #f1f5f9}
     .question:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
@@ -97,7 +101,7 @@
 
 <script>
 let simId, attemptId, user, examData;
-let userAnswers = {}; // { q_id: selected_option_text }
+let userAnswers = {};
 let submitted = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -106,7 +110,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('backLink').href = `/svenskaprov/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
 
-  // Check if already submitted
   const alreadyDone = await SP.isSubmitted(user.id, attemptId, 'reading');
   if (alreadyDone) {
     document.getElementById('examContent').innerHTML = `
@@ -121,7 +124,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // Load JSON
   const simNum = ctx.simNum;
   const jsonPath = `/svenskaprov/data/sp-${String(simNum).padStart(2,'0')}-reading.json`;
   try {
@@ -140,37 +142,56 @@ document.addEventListener('DOMContentLoaded', async () => {
 function renderExam() {
   const wrap = document.getElementById('examContent');
   let html = '';
+  let globalQNum = 0;
 
   examData.tasks.forEach((task, ti) => {
     html += `<div class="task-card">
       <div class="task-header">
         <div class="task-num">${ti + 1}</div>
-        <div class="task-title">${SP.escapeHtml(task.title)}</div>
+        <div class="task-title">${esc(task.title)}</div>
       </div>`;
 
-    // Some questions have passage text embedded in their prompt (the first question of each task)
-    // We need to detect and separate passage from question
-    task.questions.forEach((q, qi) => {
-      const prompt = q.prompt || '';
-      // Check if prompt is very long (likely contains passage + question)
-      const isPassageQuestion = prompt.length > 300;
+    // Render passage if available in task.content.text
+    const passageText = task.content?.text;
+    if (passageText) {
+      // Split title from body if first line looks like a title (short, no period)
+      const lines = passageText.split('\n');
+      const firstLine = lines[0].trim();
+      const isTitle = firstLine.length < 80 && !firstLine.endsWith('.') && !firstLine.endsWith(':');
 
-      if (isPassageQuestion && qi === 0) {
-        // First question likely has passage embedded - show it
-        html += `<div class="passage">${SP.escapeHtml(prompt)}</div>`;
+      if (isTitle && lines.length > 1) {
+        html += `<div class="passage"><div class="passage-title">${esc(firstLine)}</div>${esc(lines.slice(1).join('\n').trim())}</div>`;
+      } else {
+        html += `<div class="passage">${esc(passageText)}</div>`;
+      }
+    }
+
+    // Render questions
+    task.questions.forEach((q, qi) => {
+      globalQNum++;
+      const hasExcerpt = q.excerpt;
+
+      html += `<div class="question" data-qid="${q.id}">`;
+
+      // Question prompt
+      html += `<div class="q-prompt">${globalQNum}. ${esc(q.prompt)}</div>`;
+
+      // Excerpt box (for "Vilken rubrik..." questions)
+      if (hasExcerpt) {
+        html += `<div class="excerpt-box">
+          <div class="excerpt-label">Stycke:</div>
+          ${esc(q.excerpt)}
+        </div>`;
       }
 
-      html += `<div class="question" data-qid="${q.id}">
-        <div class="q-prompt">${qi + 1}. ${isPassageQuestion && qi === 0 ? SP.escapeHtml(task.instructions || 'Välj det rätta svaret.') : SP.escapeHtml(prompt)}</div>
-        <div class="q-options">`;
-
+      // Options
+      html += `<div class="q-options">`;
       q.options.forEach((opt, oi) => {
         html += `<div class="q-option" data-qid="${q.id}" data-opt="${oi}" onclick="selectOption('${q.id}', ${oi})">
           <div class="q-radio"></div>
-          <div>${SP.escapeHtml(opt)}</div>
+          <div>${esc(opt)}</div>
         </div>`;
       });
-
       html += `</div></div>`;
     });
 
@@ -181,14 +202,16 @@ function renderExam() {
   updateProgress();
 }
 
+function esc(str) { return SP.escapeHtml(str); }
+
 function selectOption(qId, optIdx) {
   if (submitted) return;
-  const task = examData.tasks.flatMap(t => t.questions).find(q => q.id === qId);
-  if (!task) return;
+  const allQs = examData.tasks.flatMap(t => t.questions);
+  const q = allQs.find(q => q.id === qId);
+  if (!q) return;
 
-  userAnswers[qId] = task.options[optIdx];
+  userAnswers[qId] = q.options[optIdx];
 
-  // Update UI
   document.querySelectorAll(`.q-option[data-qid="${qId}"]`).forEach(el => el.classList.remove('selected'));
   document.querySelector(`.q-option[data-qid="${qId}"][data-opt="${optIdx}"]`).classList.add('selected');
   updateProgress();
@@ -202,10 +225,8 @@ function updateProgress() {
 }
 
 function gradeExam() {
-  let correct = 0;
-  let total = 0;
-  const allQuestions = examData.tasks.flatMap(t => t.questions);
-  allQuestions.forEach(q => {
+  let correct = 0, total = 0;
+  examData.tasks.flatMap(t => t.questions).forEach(q => {
     total++;
     if (userAnswers[q.id] === q.correct_option) correct++;
   });
@@ -232,19 +253,16 @@ async function handleSubmit() {
     });
   });
 
-  // Show result banner
   const banner = document.createElement('div');
   banner.className = 'result-banner';
   const pctClass = result.percentage >= 60 ? 'high' : result.percentage >= 40 ? 'mid' : 'low';
   banner.innerHTML = `
     <div style="font-size:1.5rem;">📖</div>
     <div class="result-score ${pctClass}">${result.correct}/${result.total}</div>
-    <div style="font-size:0.88rem;color:var(--muted);margin-top:4px;">${result.percentage}% rätt</div>
-  `;
+    <div style="font-size:0.88rem;color:var(--muted);margin-top:4px;">${result.percentage}% rätt</div>`;
   document.getElementById('examContent').prepend(banner);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // Submit to server
   try {
     await SP.submit({
       attemptId, elemKey: 'reading',
@@ -258,7 +276,6 @@ async function handleSubmit() {
     SP.toast('Fel vid inskickning, men dina svar är sparade lokalt.');
   }
 
-  // Replace bottom bar
   document.getElementById('bottomBar').innerHTML = `
     <div class="progress-text">${result.percentage}% rätt (${result.correct}/${result.total})</div>
     <div class="btn-row">
@@ -269,9 +286,7 @@ async function handleSubmit() {
 async function handleSkip() {
   if (submitted) return;
   if (!confirm('Vill du hoppa över läsförståelsen? Du får 0 poäng.')) return;
-  try {
-    await SP.skip({ attemptId, elemKey: 'reading' });
-  } catch (e) { console.warn('Skip failed:', e); }
+  try { await SP.skip({ attemptId, elemKey: 'reading' }); } catch (e) {}
   window.location.href = `/svenskaprov/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
 }
 </script>
