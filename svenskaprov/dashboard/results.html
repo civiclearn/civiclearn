@@ -49,6 +49,13 @@
     .el-score-badge.low{background:var(--fail-bg);color:var(--fail)}
     .el-score-badge.skip{background:#f1f5f9;color:#94a3b8}
 
+    .criteria-grid{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+    .criteria-row{display:flex;align-items:center;gap:8px;font-size:0.82rem}
+    .criteria-name{flex:0 0 110px;color:var(--muted)}
+    .criteria-bar-wrap{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+    .criteria-bar-fill{height:100%;border-radius:3px;background:var(--blue);transition:width 0.5s ease}
+    .criteria-score{width:36px;text-align:right;font-weight:600;font-size:0.78rem}
+
     .feedback-section{margin-top:14px}
     .fb-summary{font-size:0.88rem;line-height:1.6;color:var(--navy);margin-bottom:14px}
     .fb-list-title{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:6px}
@@ -92,10 +99,19 @@ const ELEM_LABELS = {
   speaking: '🎤 Muntlig färdighet',
 };
 
+const POLL_INTERVAL = 6000;
+let pollTimer = null;
+let user, simId, attemptId, simNum;
+
 document.addEventListener('DOMContentLoaded', async () => {
   const ctx = await SP.init();
-  const { user, simId, attemptId } = ctx;
+  user = ctx.user; simId = ctx.simId; attemptId = ctx.attemptId; simNum = ctx.simNum;
 
+  await renderResults();
+  SP.hideLoading();
+});
+
+async function renderResults() {
   const data = await SP.hydrateData(user.id, attemptId, true);
   if (!data) { SP.showError('Kunde inte ladda data.'); return; }
 
@@ -104,6 +120,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const elems = attempt.elements || [];
   const wrap = document.getElementById('resultsContent');
+
+  // Check if any evals are still pending
+  const pendingEvals = elems.filter(el =>
+    el.submission_status === 'submitted' &&
+    el.eval_status !== 'complete' && el.eval_status !== 'skipped'
+  );
+
+  if (pendingEvals.length > 0) {
+    // Show waiting state with auto-refresh
+    wrap.innerHTML = `
+      <div style="text-align:center;padding:60px 20px;">
+        <div class="loading-spinner" style="margin:0 auto 16px;width:36px;height:36px;border-width:4px;"></div>
+        <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:8px;">Bearbetar resultat…</h2>
+        <p style="color:var(--muted);font-size:0.88rem;">AI-bedömning pågår för ${pendingEvals.length} del${pendingEvals.length > 1 ? 'ar' : ''}.</p>
+        <p style="color:var(--muted);font-size:0.78rem;margin-top:8px;">Sidan uppdateras automatiskt.</p>
+      </div>`;
+
+    if (!pollTimer) {
+      pollTimer = setInterval(renderResults, POLL_INTERVAL);
+    }
+    return;
+  }
+
+  // All evals done — stop polling and render full results
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+
   let html = '';
 
   // Summary card
@@ -116,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   html += `<div class="summary-card">
     <div style="font-size:2rem;">${isPass ? '🎉' : '📋'}</div>
     <div class="summary-level ${isPass ? 'pass' : 'fail'}">${SP.escapeHtml(level)}</div>
-    <div style="font-size:0.88rem;color:var(--muted);margin-top:4px;">Simulering ${ctx.simNum}</div>
+    <div style="font-size:0.88rem;color:var(--muted);margin-top:4px;">Simulering ${simNum}</div>
     <div class="summary-scores">
       <div class="ss-item"><div class="ss-label">Läsning</div><div class="ss-value ${pctClass(attempt.grade_reading || 0)}">${attempt.grade_reading != null ? Math.round(attempt.grade_reading) + '%' : '—'}</div></div>
       <div class="ss-item"><div class="ss-label">Hörförståelse</div><div class="ss-value ${pctClass(attempt.grade_listening || 0)}">${attempt.grade_listening != null ? Math.round(attempt.grade_listening) + '%' : '—'}</div></div>
@@ -189,21 +231,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       }
 
-      // Score breakdown
+      // Score breakdown with visual bars
       if (fb.scores) {
-        html += `<div class="fb-list-title" style="margin-top:14px;">Poängfördelning</div>
-          <div style="display:flex;gap:12px;flex-wrap:wrap;">`;
+        html += `<div class="fb-list-title" style="margin-top:14px;">Poängfördelning</div>`;
         const labels = {
           uppgiftsuppfyllelse:'Uppgift', koherens:'Koherens', ordförråd:'Ordförråd',
           grammatik:'Grammatik', register:'Register',
           förståelse:'Förståelse', interaktion:'Interaktion', flyt:'Flyt',
           ordförråd_grammatik:'Ordförr./Gramm.', uttal:'Uttal'
         };
+        html += `<div class="criteria-grid">`;
         for (const [k, v] of Object.entries(fb.scores)) {
           const label = labels[k] || k;
-          html += `<div style="text-align:center;min-width:60px;">
-            <div style="font-size:0.68rem;color:var(--muted)">${label}</div>
-            <div style="font-weight:700;font-size:1rem;">${v}/5</div>
+          const pct = (v / 5) * 100;
+          html += `<div class="criteria-row">
+            <div class="criteria-name">${label}</div>
+            <div class="criteria-bar-wrap"><div class="criteria-bar-fill" style="width:${pct}%"></div></div>
+            <div class="criteria-score">${v}/5</div>
           </div>`;
         }
         html += `</div>`;
@@ -221,8 +265,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   </div>`;
 
   wrap.innerHTML = html;
-  SP.hideLoading();
-});
+}
 </script>
 </body>
 </html>

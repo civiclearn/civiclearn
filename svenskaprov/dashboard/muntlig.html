@@ -51,6 +51,15 @@
     .playback{margin-top:12px}
     .playback audio{width:100%;max-width:400px}
 
+    .text-fallback{margin-top:12px;text-align:left}
+    .text-fallback-toggle{font-size:0.78rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline}
+    .text-fallback-toggle:hover{color:var(--navy)}
+    .text-fallback-area{display:none;margin-top:8px}
+    .text-fallback-area.visible{display:block}
+    .text-fallback-input{width:100%;min-height:80px;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.88rem;color:var(--navy);background:var(--bg);resize:vertical;outline:none}
+    .text-fallback-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
+    .text-fallback-note{font-size:0.72rem;color:var(--muted);margin-top:4px}
+
     .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;z-index:100}
     .btn-row{display:flex;gap:10px}
     .btn{padding:10px 24px;border-radius:8px;font-size:0.88rem;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity 0.15s}
@@ -154,6 +163,13 @@ function renderExam() {
         <div class="rec-timer" id="recTimer${ti}" style="display:none">0:00</div>
         <div class="playback" id="playback${ti}" style="display:none"></div>
       </div>
+      <div class="text-fallback">
+        <button class="text-fallback-toggle" onclick="toggleFallback(${ti})">Kan du inte spela in? Skriv ditt svar istället</button>
+        <div class="text-fallback-area" id="fallbackArea${ti}">
+          <textarea class="text-fallback-input" id="fallbackText${ti}" placeholder="Skriv ditt svar här…" oninput="onFallbackInput()"></textarea>
+          <div class="text-fallback-note">Ditt skrivna svar bedöms om ingen inspelning görs.</div>
+        </div>
+      </div>
     </div>`;
   });
 
@@ -243,52 +259,100 @@ async function toggleRecording(taskId, idx) {
   }
 }
 
+function toggleFallback(idx) {
+  const area = document.getElementById(`fallbackArea${idx}`);
+  area.classList.toggle('visible');
+  if (area.classList.contains('visible')) {
+    document.getElementById(`fallbackText${idx}`).focus();
+  }
+}
+
+function onFallbackInput() {
+  // Enable submit if any recording OR any fallback text exists
+  const hasRecording = Object.keys(recordings).length > 0;
+  const hasFallback = examData.tasks.some((_, ti) => {
+    const el = document.getElementById(`fallbackText${ti}`);
+    return el && el.value.trim().length > 5;
+  });
+  document.getElementById('submitBtn').disabled = !hasRecording && !hasFallback;
+}
+
+function getTextFallbacks() {
+  const fallbacks = {};
+  examData.tasks.forEach((task, ti) => {
+    const el = document.getElementById(`fallbackText${ti}`);
+    if (el && el.value.trim().length > 0 && !recordings[task.task_id]) {
+      fallbacks[task.task_id] = el.value.trim();
+    }
+  });
+  return fallbacks;
+}
+
 async function handleSubmit() {
   if (submitted) return;
-  if (Object.keys(recordings).length === 0) {
-    SP.toast('Spela in minst en uppgift innan du skickar in.');
+
+  const textFallbacks = getTextFallbacks();
+  const hasRecording = Object.keys(recordings).length > 0;
+  const hasFallback = Object.keys(textFallbacks).length > 0;
+
+  if (!hasRecording && !hasFallback) {
+    SP.toast('Spela in eller skriv minst ett svar innan du skickar in.');
     return;
   }
 
-  if (!confirm('Vill du skicka in dina inspelningar? De kommer bedömas av AI.')) return;
+  if (!confirm('Vill du skicka in? Dina svar kommer bedömas av AI.')) return;
 
   submitted = true;
   document.getElementById('submitBtn').disabled = true;
   document.getElementById('submitBtn').textContent = 'Skickar…';
+  document.querySelectorAll('.rec-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
+  document.querySelectorAll('.text-fallback-input').forEach(t => { t.disabled = true; });
 
-  // Concatenate all recorded blobs into a single audio blob
   const taskEntries = examData.tasks.map(t => ({
     task_id: t.task_id,
     title: t.title,
     prompt: t.instructions || t.prompt || '',
     has_recording: !!recordings[t.task_id],
+    has_text_fallback: !!textFallbacks[t.task_id],
     duration: recordings[t.task_id]?.duration || 0,
   }));
 
-  // Merge all blobs in task order
-  const orderedBlobs = examData.tasks
-    .filter(t => recordings[t.task_id])
-    .map(t => recordings[t.task_id].blob);
-
-  const combinedBlob = new Blob(orderedBlobs, { type: orderedBlobs[0]?.type || 'audio/webm' });
-
-  // Convert combined blob to base64
-  const combinedBase64 = await new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.readAsDataURL(combinedBlob);
-  });
-
   try {
-    await SP.submitAudio({
-      attemptId, elemKey: 'speaking',
-      audioBase64: combinedBase64,
-      responseJson: {
-        tasks: taskEntries,
-        total_recordings: Object.keys(recordings).length,
-        total_duration: Object.values(recordings).reduce((s, r) => s + r.duration, 0),
-      }
-    });
+    if (hasRecording) {
+      // Merge all blobs in task order
+      const orderedBlobs = examData.tasks
+        .filter(t => recordings[t.task_id])
+        .map(t => recordings[t.task_id].blob);
+
+      const combinedBlob = new Blob(orderedBlobs, { type: orderedBlobs[0]?.type || 'audio/webm' });
+      const combinedBase64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(combinedBlob);
+      });
+
+      await SP.submitAudio({
+        attemptId, elemKey: 'speaking',
+        audioBase64: combinedBase64,
+        responseJson: {
+          tasks: taskEntries,
+          text_responses: hasFallback ? textFallbacks : undefined,
+          total_recordings: Object.keys(recordings).length,
+          total_duration: Object.values(recordings).reduce((s, r) => s + r.duration, 0),
+        }
+      });
+    } else {
+      // Text-only submission (no audio at all)
+      await SP.submit({
+        attemptId, elemKey: 'speaking',
+        text: Object.values(textFallbacks).join('\n\n---\n\n'),
+        json: {
+          tasks: taskEntries,
+          text_responses: textFallbacks,
+          text_only: true,
+        }
+      });
+    }
     SP.toast('Inskickat! AI bedömer dina inspelningar…');
   } catch (err) {
     console.error('Submit error:', err);
