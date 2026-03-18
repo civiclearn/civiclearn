@@ -88,6 +88,8 @@
     .table-btn-start{background:var(--blue);color:#fff}
     .table-btn-resume{background:var(--navy);color:#fff}
     .table-btn-results{background:#f1f5f9;color:var(--navy);border:1px solid var(--border)}
+    .table-btn-redo{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue)}
+    .action-group{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
 
     @media (max-width:768px) {
       .dashboard-wrap{padding:20px 16px 60px}
@@ -186,7 +188,10 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 function renderStats(attempts) {
   var completed = attempts.filter(function(a) { return a.status === 'complete'; });
-  var count = completed.length;
+  // Count unique completed simulations (not total attempts, since redos create multiple)
+  var uniqueSims = {};
+  completed.forEach(function(a) { uniqueSims[a.simulation_id] = true; });
+  var count = Object.keys(uniqueSims).length;
   document.getElementById('doneSims').textContent = count + '/10';
   document.getElementById('progressBar').style.width = (count / 10 * 100) + '%';
 
@@ -213,7 +218,7 @@ function renderTable(attempts) {
 
   SIMS.forEach(function(sim) {
     var simAttempts = attempts.filter(function(a) { return a.simulation_id === sim.id; });
-    var latest = simAttempts[0];
+    var latest = simAttempts[simAttempts.length - 1];
     var num = parseInt(sim.id.replace('sim', ''), 10);
 
     var status, statusCls;
@@ -250,7 +255,10 @@ function renderTable(attempts) {
     if (!latest) {
       actionHtml = '<button class="table-btn table-btn-start" onclick="startSim(\'' + sim.id + '\',this)">Starta</button>';
     } else if (latest.status === 'complete') {
-      actionHtml = '<a class="table-btn table-btn-results" href="/svenskaprov/dashboard/results.html?sim=' + sim.id + '&attempt=' + latest.id + '">Resultat</a>';
+      actionHtml = '<div class="action-group">' +
+        '<a class="table-btn table-btn-results" href="/svenskaprov/dashboard/results.html?sim=' + sim.id + '&attempt=' + latest.id + '">Resultat</a>' +
+        '<button class="table-btn table-btn-redo" onclick="startSim(\'' + sim.id + '\',this)">Göra om</button>' +
+        '</div>';
     } else {
       actionHtml = '<a class="table-btn table-btn-resume" href="/svenskaprov/dashboard/exam.html?sim=' + sim.id + '&attempt=' + latest.id + '">Fortsätt</a>';
     }
