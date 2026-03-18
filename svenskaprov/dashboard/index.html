@@ -174,17 +174,40 @@ for (var i = 1; i <= 10; i++) {
 
 var ELEM_KEYS = ['reading', 'listening', 'writing', 'speaking'];
 
+var _userId = null;
+var _pollTimer = null;
+
 document.addEventListener('DOMContentLoaded', async function() {
   var ctx = await SP.init();
+  _userId = ctx.user.id;
   document.getElementById('userEmail').textContent = ctx.user.email;
 
-  var data = await SP.hydrateData(ctx.user.id, 'any');
+  // Show page immediately — don't wait for hydrate (cold starts can take 20s)
+  SP.hideLoading();
+  await refreshDashboard();
+});
+
+async function refreshDashboard() {
+  var data = await SP.hydrateData(_userId, 'any', true);
   var attempts = (data && data.attempts) || [];
 
   renderStats(attempts);
   renderTable(attempts);
-  SP.hideLoading();
-});
+
+  // Check if any elements are still being evaluated
+  var hasPending = attempts.some(function(a) {
+    return a.status !== 'complete' && (a.elements || []).some(function(e) {
+      return e.submission_status === 'submitted' && e.eval_status !== 'complete' && e.eval_status !== 'skipped';
+    });
+  });
+
+  if (hasPending && !_pollTimer) {
+    _pollTimer = setInterval(refreshDashboard, 12000);
+  } else if (!hasPending && _pollTimer) {
+    clearInterval(_pollTimer);
+    _pollTimer = null;
+  }
+}
 
 function renderStats(attempts) {
   var completed = attempts.filter(function(a) { return a.status === 'complete'; });

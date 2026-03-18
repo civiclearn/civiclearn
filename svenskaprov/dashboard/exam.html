@@ -166,8 +166,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('topbarSim').textContent = `Simulering ${ctx.simNum}`;
   document.getElementById('hubEyebrow').textContent = `SIMULERING ${ctx.simNum}`;
 
-  await refreshHub();
+  // Show page immediately — don't wait for hydrate (cold starts can take 20s)
   SP.hideLoading();
+
+  // Load data in background
+  await refreshHub();
   pollTimer = setInterval(refreshHub, 15000);
 });
 
