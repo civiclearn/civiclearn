@@ -198,17 +198,12 @@ async function handleSubmit() {
       text: combined,
       json: { tasks }
     });
-    SP.toast('Inskickat! AI bedömer dina svar…');
   } catch (err) {
     console.error('Submit error:', err);
-    SP.toast('Fel vid inskickning.');
   }
 
-  document.getElementById('bottomBar').innerHTML = `
-    <div class="progress-text">✓ Inskickat — AI bedömer dina svar</div>
-    <div class="btn-row">
-      <a class="btn" style="background:var(--navy);color:#fff" href="/svenskaprov/dashboard/exam.html?sim=${simId}&attempt=${attemptId}">← Tillbaka till provet</a>
-    </div>`;
+  // Redirect immediately — AI evaluation happens in background
+  window.location.href = `/svenskaprov/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
 }
 
 async function handleSkip() {

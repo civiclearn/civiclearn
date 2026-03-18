@@ -353,17 +353,12 @@ async function handleSubmit() {
         }
       });
     }
-    SP.toast('Inskickat! AI bedömer dina inspelningar…');
   } catch (err) {
     console.error('Submit error:', err);
-    SP.toast('Fel vid inskickning.');
   }
 
-  document.getElementById('bottomBar').innerHTML = `
-    <div style="font-size:0.82rem;color:var(--muted)">✓ Inskickat — AI bedömer dina inspelningar</div>
-    <div class="btn-row">
-      <a class="btn" style="background:var(--navy);color:#fff" href="/svenskaprov/dashboard/exam.html?sim=${simId}&attempt=${attemptId}">← Tillbaka till provet</a>
-    </div>`;
+  // Redirect immediately — AI evaluation happens in background
+  window.location.href = `/svenskaprov/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
 }
 
 async function handleSkip() {
