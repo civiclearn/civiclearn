@@ -1,5 +1,5 @@
 /* ============================================
-   CivicLearn Sync v1.0
+   CivicLearn Sync v1.1
    Drop-in sync for all CivicLearn sites.
    ============================================
 
@@ -16,6 +16,11 @@
      <script src="/assets/js/sync.js"></script>
 
    The script auto-runs on load. No extra setup needed.
+
+   v1.1 changes:
+   - Push only keys that actually changed during merge
+   - Debounce push() calls (2s) — rapid saves collapse into one write
+   - Skip push entirely if local data matches remote (no-op UPSERTs eliminated)
    ============================================ */
 
 (function () {
@@ -28,7 +33,7 @@
 
   // The site code is determined from <html lang="...">
   // Override with window.CIVIC_SITE_CODE if needed
-    function getSiteCode() {
+  function getSiteCode() {
     return window.CIVIC_SITE_CODE || "unknown";
   }
 
@@ -56,9 +61,9 @@
     return (localStorage.getItem("cl_email") || "").toLowerCase().trim();
   }
 
- function getEndpoint() {
+  function getEndpoint() {
     return "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/sync";
-}
+  }
 
   function readLS(key) {
     try {
@@ -78,11 +83,29 @@
     }
   }
 
+  // Stable JSON stringify for comparison (sorted keys)
+  function stableStringify(obj) {
+    try {
+      if (obj === null || obj === undefined) return String(obj);
+      if (typeof obj !== "object") return JSON.stringify(obj);
+      if (Array.isArray(obj)) return "[" + obj.map(stableStringify).join(",") + "]";
+      var keys = Object.keys(obj).sort();
+      return "{" + keys.map(function (k) {
+        return JSON.stringify(k) + ":" + stableStringify(obj[k]);
+      }).join(",") + "}";
+    } catch (e) {
+      return JSON.stringify(obj);
+    }
+  }
+
+  function dataEqual(a, b) {
+    return stableStringify(a) === stableStringify(b);
+  }
+
   // ---- Merge Logic ----
   // Smart merging so no data is lost from either device
 
   function mergeProgress(local, remote) {
-    // Both are objects: { "topic:questionText": { attempts, rights, wrongs, correct, ... } }
     var merged = Object.assign({}, remote || {});
 
     Object.keys(local || {}).forEach(function (key) {
@@ -90,12 +113,10 @@
       var r = merged[key];
 
       if (!r) {
-        // Only exists locally — keep it
         merged[key] = l;
         return;
       }
 
-      // Both exist — keep the best of each field
       merged[key] = {
         attempts: Math.max(l.attempts || 0, r.attempts || 0),
         rights: Math.max(l.rights || 0, r.rights || 0),
@@ -105,7 +126,6 @@
         lastSeen: Math.max(l.lastSeen || 0, r.lastSeen || 0),
       };
 
-      // Preserve _raw if present
       if (l._raw || r._raw) {
         merged[key]._raw = l._raw || r._raw;
       }
@@ -115,11 +135,9 @@
   }
 
   function mergeStats(local, remote) {
-    // Both are objects: { history: [ ...sessions ] }
     var localHist = (local && local.history) || [];
     var remoteHist = (remote && remote.history) || [];
 
-    // Deduplicate by session ID
     var seen = {};
     var merged = [];
 
@@ -131,7 +149,6 @@
       }
     });
 
-    // Sort by startedAt (oldest first, matching engine behavior)
     merged.sort(function (a, b) {
       return (a.startedAt || 0) - (b.startedAt || 0);
     });
@@ -139,45 +156,34 @@
     return { history: merged };
   }
 
-function mergeSaved(local, remote) {
-  var merged = {};
-  var allKeys = new Set(
-    Object.keys(local || {}).concat(Object.keys(remote || {}))
-  );
-  allKeys.forEach(function (k) {
-    var l = (local || {})[k];
-    var r = (remote || {})[k];
-    // Both exist: highest timestamp wins; false (removed) beats true but loses to a newer timestamp
-    if (l === undefined || l === null) { merged[k] = r; return; }
-    if (r === undefined || r === null) { merged[k] = l; return; }
-    // Normalize: old `true` values treated as timestamp 1
-    var lv = (l === true) ? 1 : (l || 0);
-    var rv = (r === true) ? 1 : (r || 0);
-    // false = 0, so a newer save timestamp always wins over a removal
-    merged[k] = (lv >= rv) ? l : r;
-  });
-  return merged;
-}
+  function mergeSaved(local, remote) {
+    var merged = {};
+    var allKeys = new Set(
+      Object.keys(local || {}).concat(Object.keys(remote || {}))
+    );
+    allKeys.forEach(function (k) {
+      var l = (local || {})[k];
+      var r = (remote || {})[k];
+      if (l === undefined || l === null) { merged[k] = r; return; }
+      if (r === undefined || r === null) { merged[k] = l; return; }
+      var lv = (l === true) ? 1 : (l || 0);
+      var rv = (r === true) ? 1 : (r || 0);
+      merged[k] = (lv >= rv) ? l : r;
+    });
+    return merged;
+  }
 
   function mergeKey(key, local, remote) {
-    if (key === "civicedge_progress") {
-      return mergeProgress(local, remote);
-    }
-    if (key === "civicedge_stats") {
-      return mergeStats(local, remote);
-    }
-    if (key === "civicedge_saved") {
-      return mergeSaved(local, remote);
-    }
+    if (key === "civicedge_progress") return mergeProgress(local, remote);
+    if (key === "civicedge_stats") return mergeStats(local, remote);
+    if (key === "civicedge_saved") return mergeSaved(local, remote);
 
-    // One-way unlock flags: true always wins (cannot re-lock)
     if (key === "dk_phase2_unlocked") {
       return (local === true || local === "true" || remote === true || remote === "true")
         ? true
         : (local !== null && local !== undefined ? local : remote);
     }
 
-    // For simple keys (strings, booleans, etc.): prefer local if it exists
     return local !== null && local !== undefined ? local : remote;
   }
 
@@ -213,31 +219,53 @@ function mergeSaved(local, remote) {
         var rows = result.rows || [];
         if (!rows.length) {
           console.log("[Sync] No remote data found. First sync — will push local data.");
-          // First time: push everything local to server
           return pushAll();
         }
 
-        // Merge each key
+        // Two separate tracking sets:
+        // - keysToWrite: merged result differs from local → update localStorage
+        // - keysToPush:  merged result differs from remote → server is behind, push needed
+        //
+        // Critically, keysToPush catches the case where local was AHEAD of remote
+        // (e.g. a push was missed because the user closed the tab during the debounce window).
+        // In that case merged === local (local wins), so keysToWrite is empty,
+        // but merged !== remote, so we still push to bring the server up to date.
+        var keysToWrite = [];
+        var keysToPush = [];
+        var localDataSnapshot = {};
+
         rows.forEach(function (row) {
           var remoteData = row.data;
           var localData = readLS(row.key);
           var merged = mergeKey(row.key, localData, remoteData);
-          writeLS(row.key, merged);
-        });
 
-        console.log("[Sync] Pull complete. Merged", rows.length, "keys.");
+          localDataSnapshot[row.key] = localData;
 
-        // After merging, push merged state back so server has the latest
-        return pushAll().then(function () {
-          // Reload once so dashboard picks up the synced data
-          if (!sessionStorage.getItem("civicsync_loaded")) {
-            sessionStorage.setItem("civicsync_loaded", "1");
-            location.reload();
+          if (!dataEqual(localData, merged)) {
+            writeLS(row.key, merged);
+            keysToWrite.push(row.key);
+          }
+
+          if (!dataEqual(remoteData, merged)) {
+            keysToPush.push(row.key);
           }
         });
+
+        console.log("[Sync] Pull complete.", keysToWrite.length, "key(s) updated locally,", keysToPush.length, "key(s) to push.");
+
+        if (keysToPush.length > 0) {
+          return pushKeys(keysToPush).then(function () {
+            // Only reload if local data actually changed (i.e. remote had something new)
+            if (keysToWrite.length > 0 && !sessionStorage.getItem("civicsync_loaded")) {
+              sessionStorage.setItem("civicsync_loaded", "1");
+              location.reload();
+            }
+          });
+        } else {
+          console.log("[Sync] Server already up to date. No push needed.");
+        }
       })
       .catch(function (err) {
-        // Fail silently — sync is best-effort, never blocks the app
         console.warn("[Sync] Pull failed (non-blocking):", err.message);
       });
   }
@@ -251,7 +279,6 @@ function mergeSaved(local, remote) {
     var site = getSiteCode();
     var data = readLS(key);
 
-    // Don't push null/empty
     if (data === null || data === undefined) return Promise.resolve();
 
     return callSync({
@@ -265,14 +292,39 @@ function mergeSaved(local, remote) {
     });
   }
 
-  function pushAll() {
-    var keys = getAllSyncKeys();
-    var promises = keys.map(function (key) {
+  function pushKeys(keys) {
+    return Promise.all(keys.map(function (key) {
       return pushOne(key);
+    })).then(function () {
+      console.log("[Sync] Pushed", keys.length, "key(s).");
     });
-    return Promise.all(promises).then(function () {
+  }
+
+  function pushAll() {
+    return pushKeys(getAllSyncKeys()).then(function () {
       console.log("[Sync] Push complete.");
     });
+  }
+
+  // ---- Debounced Push ----
+  // Collapses rapid-fire push() calls (e.g. answering multiple questions quickly)
+  // into a single write after DEBOUNCE_MS of inactivity.
+
+  var DEBOUNCE_MS = 2000;
+  var _debounceTimer = null;
+  var _pendingKeys = {};
+
+  function schedulePush(keys) {
+    keys.forEach(function (k) { _pendingKeys[k] = true; });
+
+    clearTimeout(_debounceTimer);
+    _debounceTimer = setTimeout(function () {
+      var toFlush = Object.keys(_pendingKeys);
+      _pendingKeys = {};
+      if (toFlush.length > 0) {
+        pushKeys(toFlush);
+      }
+    }, DEBOUNCE_MS);
   }
 
   // ---- Public API ----
@@ -280,12 +332,17 @@ function mergeSaved(local, remote) {
   window.CivicSync = {
     // Call after a test finishes or any important save.
     // Pass specific keys, or call with no args to push everything.
+    // Calls are debounced — rapid saves collapse into one write.
     push: function (keys) {
-      if (!keys) return pushAll();
-      if (typeof keys === "string") return pushOne(keys);
-      return Promise.all(keys.map(pushOne)).then(function () {
-        console.log("[Sync] Push complete.");
-      });
+      var toSync;
+      if (!keys) {
+        toSync = getAllSyncKeys();
+      } else if (typeof keys === "string") {
+        toSync = [keys];
+      } else {
+        toSync = keys;
+      }
+      schedulePush(toSync);
     },
 
     // Manually trigger a full pull + merge (normally auto-runs on load)
@@ -298,19 +355,15 @@ function mergeSaved(local, remote) {
   };
 
   // ---- Auto-run on page load ----
-  // Wait for auth to be confirmed, then pull
 
   function autoSync() {
-    // Only sync if user is authenticated
     if (localStorage.getItem("cl_auth") !== "ok") return;
     if (!getEmail()) return;
     if (!window.SUPABASE_URL) return;
 
-    // Small delay to let auth-guard finish
     pull();
   }
 
-  // Run when DOM is ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", function () {
       setTimeout(autoSync, 500);
