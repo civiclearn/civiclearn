@@ -102,7 +102,8 @@
 
       // Mount
       var mount = function () {
-        document.body.prepend(bar);
+        var main = document.querySelector("main") || document.querySelector(".main") || document.body;
+        main.prepend(bar);
         // Auto-link URLs in the text
         var safeText = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
         var linked = safeText.replace(/(https?:\/\/[^\s]+|[a-z0-9][-a-z0-9]*\.[a-z]{2,}(?:\/[^\s]*)?)/gi, function(url) {
