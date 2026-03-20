@@ -152,21 +152,44 @@ const CIPLEEngine = {
   // =============================================================================
   // SPEAKING SECTION
   // =============================================================================
-  
-  saveSpeakingRecording(taskId, audioBlob) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64Audio = reader.result;
-        this.currentTest.sections.speaking.recordings[taskId] = base64Audio;
-        this.saveTestState(this.currentExamId, this.currentTest);
-        resolve();
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(audioBlob);
+
+  // Transient blob URLs for in-session playback — not persisted to localStorage
+  _blobUrls: {},
+
+  async saveSpeakingRecording(taskId, audioBlob) {
+    // 1. Create a local object URL for immediate in-session playback
+    this._blobUrls[taskId] = URL.createObjectURL(audioBlob);
+
+    // 2. Upload blob to Supabase Storage via edge function
+    const form = new FormData();
+    form.append('file', audioBlob, `${taskId}.webm`);
+    form.append('task_id', taskId);
+    form.append('exam_id', this.currentExamId);
+    form.append('user_id', this.getCurrentUserId());
+
+    const res = await fetch(`${this.SUPABASE_URL}/functions/v1/ciple-upload-audio`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${this.SUPABASE_KEY}` },
+      body: form
     });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(`Audio upload failed: ${err.error || res.status}`);
+    }
+
+    const { path } = await res.json();
+
+    // 3. Store path (not base64) — tiny string in localStorage
+    this.currentTest.sections.speaking.recordings[taskId] = path;
+    this.saveTestState(this.currentExamId, this.currentTest);
   },
-  
+
+  // Returns blob URL for playback (in-session only); null if page was refreshed
+  getPlaybackUrl(taskId) {
+    return this._blobUrls[taskId] || null;
+  },
+
   completeSpeakingSection() {
     this.currentTest.sections.speaking.completed = true;
     this.saveTestState(this.currentExamId, this.currentTest);
@@ -202,7 +225,7 @@ const CIPLEEngine = {
           responses: this.currentTest.sections.writing.responses
         },
         speaking: {
-          recordings: this.currentTest.sections.speaking.recordings
+          speaking_storage_paths: this.currentTest.sections.speaking.recordings
         }
       },
       submitted_at: new Date().toISOString()

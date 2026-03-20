@@ -288,10 +288,17 @@
         
         container.appendChild(taskDiv);
         
-        // Check if already recorded
+        // Check if already recorded (path stored from previous session)
         const saved = CIPLEEngine.currentTest.sections.speaking.recordings[task.task_id];
         if (saved) {
-          showPlayback(task.task_id, saved);
+          // If we have an in-session blob URL use it; otherwise show saved confirmation
+          const playbackUrl = CIPLEEngine.getPlaybackUrl(task.task_id);
+          if (playbackUrl) {
+            showPlayback(task.task_id, playbackUrl);
+          } else {
+            // Page was refreshed — blob is gone but path is saved; show confirmation
+            showSavedConfirmation(task.task_id);
+          }
         }
       });
       
@@ -355,8 +362,17 @@
         
         mediaRecorder.onstop = async () => {
           const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
-          await CIPLEEngine.saveSpeakingRecording(taskId, audioBlob);
-          showPlayback(taskId, CIPLEEngine.currentTest.sections.speaking.recordings[taskId]);
+
+          const stopBtn = document.getElementById(`stop-btn-${taskId}`);
+          if (stopBtn) { stopBtn.textContent = '⏳ A guardar…'; stopBtn.disabled = true; }
+
+          try {
+            await CIPLEEngine.saveSpeakingRecording(taskId, audioBlob);
+            // Use the in-session blob URL for playback
+            showPlayback(taskId, CIPLEEngine.getPlaybackUrl(taskId));
+          } catch (err) {
+            alert('Erro ao guardar gravação: ' + err.message);
+          }
           updateSubmitButton();
           stream.getTracks().forEach(track => track.stop());
         };
@@ -388,13 +404,27 @@
       }
     }
     
-    function showPlayback(taskId, base64Audio) {
+    function showPlayback(taskId, blobUrl) {
       const playbackDiv = document.getElementById(`playback-${taskId}`);
       playbackDiv.innerHTML = `
         <div class="alert alert-success" style="margin-top: 1rem;">
           ✅ Gravação completa
-          <audio controls src="${base64Audio}" style="width: 100%; margin-top: 0.5rem;"></audio>
+          <audio controls src="${blobUrl}" style="width: 100%; margin-top: 0.5rem;"></audio>
           <button class="btn btn-secondary" style="margin-top: 0.5rem;" 
+                  onclick="startRecording('${taskId}')">
+            🔄 Gravar Novamente
+          </button>
+        </div>
+      `;
+    }
+
+    function showSavedConfirmation(taskId) {
+      const playbackDiv = document.getElementById(`playback-${taskId}`);
+      playbackDiv.innerHTML = `
+        <div class="alert alert-success" style="margin-top: 1rem;">
+          ✅ Gravação guardada
+          <p style="font-size:0.85rem;margin-top:0.4rem;opacity:0.8;">A gravação foi submetida com sucesso.</p>
+          <button class="btn btn-secondary" style="margin-top: 0.5rem;"
                   onclick="startRecording('${taskId}')">
             🔄 Gravar Novamente
           </button>
