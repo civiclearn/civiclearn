@@ -30,6 +30,45 @@
     .bundle-banner-btn{background:#C8102E;color:#fff;text-decoration:none;padding:8px 18px;border-radius:8px;font-size:.85rem;font-weight:600;white-space:nowrap;transition:background .15s;}
     .bundle-banner-btn:hover{background:#9E0B22;}
     @media(max-width:600px){.bundle-banner{flex-direction:column;text-align:center;}.bundle-banner-btn{width:100%;text-align:center;}}
+
+    /* PD3 Addon Banner */
+    .pd3-addon-banner{display:none;background:linear-gradient(135deg,#eef2ff 0%,#e0e7ff 100%);border:1px solid #c7d2fe;border-radius:12px;padding:14px 20px;margin:0 0 20px 0;align-items:center;gap:14px;flex-wrap:wrap;position:relative;}
+    .pd3-addon-banner.show{display:flex;}
+    .pd3-addon-icon{font-size:1.3rem;flex-shrink:0;}
+    .pd3-addon-text{flex:1;min-width:200px;}
+    .pd3-addon-text strong{color:#3730a3;font-size:.92rem;}
+    .pd3-addon-text span{display:block;color:#4338ca;font-size:.82rem;margin-top:2px;}
+    .pd3-addon-btn{background:#4f46e5;color:#fff;border:none;cursor:pointer;padding:8px 18px;border-radius:8px;font-size:.85rem;font-weight:600;white-space:nowrap;transition:background .15s;font-family:inherit;}
+    .pd3-addon-btn:hover{background:#4338ca;}
+    .pd3-addon-dismiss{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:#6366f1;font-size:.8rem;opacity:.5;transition:opacity .15s;font-family:inherit;}
+    .pd3-addon-dismiss:hover{opacity:1;}
+    @media(max-width:600px){.pd3-addon-banner{flex-direction:column;text-align:center;padding-right:20px;}.pd3-addon-btn{width:100%;text-align:center;}.pd3-addon-dismiss{top:6px;right:8px;}}
+
+    /* PD3 Payment Modal */
+    .pd3-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;justify-content:center;align-items:center;padding:20px;}
+    .pd3-modal-overlay.open{display:flex;}
+    .pd3-modal{background:#fff;border-radius:16px;padding:32px;max-width:440px;width:100%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto;font-family:'Space Grotesk',sans-serif;}
+    .pd3-modal-close{position:absolute;top:12px;right:16px;background:none;border:none;cursor:pointer;font-size:1.2rem;color:#94a3b8;transition:color .15s;}
+    .pd3-modal-close:hover{color:#475569;}
+    .pd3-modal-title{margin:0 0 20px;font-size:1.2rem;color:#1e293b;font-weight:700;}
+    .pd3-modal-price{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-bottom:16px;}
+    .pd3-price-row{display:flex;justify-content:space-between;align-items:center;font-size:.9rem;color:#334155;}
+    .pd3-price{font-weight:700;color:#4f46e5;font-size:1.05rem;}
+    .pd3-price-note{font-size:.75rem;color:#64748b;margin-top:6px;}
+    .pd3-modal-email{font-size:.82rem;color:#64748b;margin-bottom:16px;padding:0 2px;}
+    .pd3-payment-element{min-height:80px;margin-bottom:16px;}
+    .pd3-error{color:#dc2626;font-size:.82rem;margin-bottom:12px;}
+    .pd3-pay-btn{width:100%;padding:14px;border:none;border-radius:10px;background:#4f46e5;color:#fff;font-size:.95rem;font-weight:600;cursor:pointer;transition:background .15s;display:flex;justify-content:center;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;}
+    .pd3-pay-btn:hover:not(:disabled){background:#4338ca;}
+    .pd3-pay-btn:disabled{opacity:.55;cursor:not-allowed;}
+    .pd3-spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:pd3spin .6s linear infinite;display:inline-block;}
+    @keyframes pd3spin{to{transform:rotate(360deg);}}
+    .pd3-success{text-align:center;padding:20px 0;}
+    .pd3-success-icon{font-size:2.5rem;margin-bottom:12px;}
+    .pd3-success h3{margin:0 0 12px;color:#1e293b;font-size:1.15rem;}
+    .pd3-success p{color:#475569;font-size:.88rem;margin:0 0 24px;line-height:1.5;}
+    .pd3-success-btn{display:inline-block;background:#4f46e5;color:#fff;text-decoration:none;padding:12px 28px;border-radius:10px;font-weight:600;font-size:.92rem;transition:background .15s;}
+    .pd3-success-btn:hover{background:#4338ca;}
   </style>
 
   <!-- 1. Supabase project config (safe to load early) -->
@@ -118,6 +157,47 @@
     <span>Du har også adgang til Prøve i Dansk 3 — samme e-mail og adgangskode.</span>
   </div>
   <a href="https://civiclearn.com/dansk3/dashboard/" class="bundle-banner-btn">Åbn Dansk 3 →</a>
+</div>
+
+<!-- PD3 Addon Banner (shown to non-bundle Denmark users) -->
+<div class="pd3-addon-banner" id="pd3AddonBanner">
+  <div class="pd3-addon-icon">📘</div>
+  <div class="pd3-addon-text">
+    <strong>Også til Prøve i Dansk 3?</strong>
+    <span>Tilkøb som eksisterende kunde — kun 500 kr. (spar 499 kr.)</span>
+  </div>
+  <button class="pd3-addon-btn" id="pd3AddonBtn">Tilkøb nu →</button>
+  <button class="pd3-addon-dismiss" id="pd3AddonDismiss" title="Skjul">✕</button>
+</div>
+
+<!-- PD3 Payment Modal -->
+<div class="pd3-modal-overlay" id="pd3ModalOverlay">
+  <div class="pd3-modal">
+    <button class="pd3-modal-close" id="pd3ModalClose">✕</button>
+    <div id="pd3Step1">
+      <h3 class="pd3-modal-title">Tilkøb Prøve i Dansk 3</h3>
+      <div class="pd3-modal-price">
+        <div class="pd3-price-row">
+          <span>Prøve i Dansk 3 — tilkøb</span>
+          <span class="pd3-price">500 kr.</span>
+        </div>
+        <div class="pd3-price-note">Normalpris 999 kr. · Du sparer 499 kr. som eksisterende kunde</div>
+      </div>
+      <div class="pd3-modal-email" id="pd3EmailDisplay"></div>
+      <div id="pd3PaymentElement" class="pd3-payment-element"></div>
+      <div id="pd3Error" class="pd3-error"></div>
+      <button class="pd3-pay-btn" id="pd3PayBtn" disabled>
+        <span id="pd3PayText">Betal 500 kr.</span>
+        <span id="pd3PaySpinner" class="pd3-spinner" style="display:none;"></span>
+      </button>
+    </div>
+    <div id="pd3Step2" style="display:none;" class="pd3-success">
+      <div class="pd3-success-icon">✅</div>
+      <h3>Betaling gennemført!</h3>
+      <p>Du har nu adgang til Prøve i Dansk 3. Du kan logge ind med samme e-mail og adgangskode.</p>
+      <a href="https://civiclearn.com/dansk3/dashboard/" class="pd3-success-btn">Åbn Dansk 3 →</a>
+    </div>
+  </div>
 </div>
 
 
@@ -511,7 +591,6 @@ WonderPush.push(["addTag", "country:dk"]);
       el.classList.add('show');
       return;
     }
-    // Fallback: check Supabase (uses userId to satisfy RLS policy)
     try {
       if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
       var sb = window.denmarkAuth && window.denmarkAuth.supabase;
@@ -524,6 +603,186 @@ WonderPush.push(["addTag", "country:dk"]);
       }
     } catch(e) { /* silent */ }
   })();
+</script>
+
+<!-- PD3 Addon: cross-sell for Denmark customers -->
+<script>
+(function() {
+  var SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+  var STRIPE_PK    = "pk_live_FLDkT3LcdsvBJu0zHmR91TVE";
+  var EDGE_FN_BASE = SUPABASE_URL + "/functions/v1";
+
+  var banner     = document.getElementById("pd3AddonBanner");
+  var addonBtn   = document.getElementById("pd3AddonBtn");
+  var dismissBtn = document.getElementById("pd3AddonDismiss");
+  var overlay    = document.getElementById("pd3ModalOverlay");
+  var closeBtn   = document.getElementById("pd3ModalClose");
+  var emailEl    = document.getElementById("pd3EmailDisplay");
+  var payBtn     = document.getElementById("pd3PayBtn");
+  var payText    = document.getElementById("pd3PayText");
+  var paySpinner = document.getElementById("pd3PaySpinner");
+  var errorEl    = document.getElementById("pd3Error");
+  var step1      = document.getElementById("pd3Step1");
+  var step2      = document.getElementById("pd3Step2");
+
+  var stripe, elements, paymentElement;
+  var clientSecret = null, paymentIntentId = null;
+  var userEmail = null, accessToken = null;
+
+  // 1. Show banner if eligible
+  async function initBanner() {
+    if (sessionStorage.getItem("pd3_addon_dismissed")) return;
+    if (localStorage.getItem("cl_bundle") === "dk") return;
+
+    try {
+      if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
+      var sb = window.denmarkAuth && window.denmarkAuth.supabase;
+      var userId = window.denmarkAuth && window.denmarkAuth.userId;
+      if (!sb || !userId) return;
+
+      var sess = await sb.auth.getSession();
+      if (!sess.data.session) return;
+      accessToken = sess.data.session.access_token;
+      userEmail = sess.data.session.user.email;
+
+      var result = await sb.from("users").select("bundle").eq("id", userId).maybeSingle();
+      if (result.data && result.data.bundle === "dk") {
+        localStorage.setItem("cl_bundle", "dk");
+        return;
+      }
+      banner.classList.add("show");
+    } catch(e) { /* silent */ }
+  }
+
+  // 2. Load Stripe.js on demand
+  function loadStripe() {
+    return new Promise(function(resolve) {
+      if (window.Stripe) { resolve(window.Stripe(STRIPE_PK)); return; }
+      var s = document.createElement("script");
+      s.src = "https://js.stripe.com/v3/";
+      s.onload = function() { resolve(window.Stripe(STRIPE_PK)); };
+      document.head.appendChild(s);
+    });
+  }
+
+  // 3. Open modal
+  async function openModal() {
+    overlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+    errorEl.textContent = "";
+    emailEl.textContent = "Konto: " + (userEmail || "");
+
+    if (!stripe) stripe = await loadStripe();
+
+    try {
+      payBtn.disabled = true;
+      payText.textContent = "Forbereder betaling...";
+
+      var res = await fetch(EDGE_FN_BASE + "/pd3-addon-create-payment-intent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + accessToken,
+          "apikey": window.SUPABASE_KEY
+        },
+        body: JSON.stringify({})
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Kunne ikke oprette betaling");
+
+      clientSecret = data.client_secret;
+      paymentIntentId = data.payment_intent_id;
+
+      elements = stripe.elements({
+        clientSecret: clientSecret,
+        appearance: {
+          theme: "stripe",
+          variables: { colorPrimary: "#4f46e5", fontFamily: "'Space Grotesk', sans-serif", borderRadius: "8px" }
+        }
+      });
+      paymentElement = elements.create("payment");
+      paymentElement.mount("#pd3PaymentElement");
+
+      paymentElement.on("ready", function() {
+        payBtn.disabled = false;
+        payText.textContent = "Betal 500 kr.";
+      });
+      paymentElement.on("change", function(e) {
+        errorEl.textContent = e.error ? e.error.message : "";
+      });
+    } catch(err) {
+      errorEl.textContent = err.message;
+      payText.textContent = "Betal 500 kr.";
+    }
+  }
+
+  // 4. Close modal
+  function closeModal() {
+    overlay.classList.remove("open");
+    document.body.style.overflow = "";
+    if (paymentElement) { try { paymentElement.unmount(); } catch(e) {} paymentElement = null; }
+    elements = null; clientSecret = null;
+  }
+
+  // 5. Submit payment
+  async function submitPayment() {
+    if (!stripe || !elements || !clientSecret) return;
+    payBtn.disabled = true;
+    payText.textContent = "Behandler...";
+    paySpinner.style.display = "inline-block";
+    errorEl.textContent = "";
+
+    try {
+      var result = await stripe.confirmPayment({
+        elements: elements,
+        confirmParams: { receipt_email: userEmail, return_url: window.location.href },
+        redirect: "if_required"
+      });
+      if (result.error) throw new Error(result.error.message);
+
+      payText.textContent = "Aktiverer adgang...";
+      var setupRes = await fetch(EDGE_FN_BASE + "/pd3-addon-setup-account", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + accessToken,
+          "apikey": window.SUPABASE_KEY
+        },
+        body: JSON.stringify({ payment_intent_id: paymentIntentId })
+      });
+      var setupData = await setupRes.json();
+      if (!setupRes.ok) throw new Error(setupData.error || "Kunne ikke aktivere adgang");
+
+      localStorage.setItem("cl_bundle", "dk");
+      step1.style.display = "none";
+      step2.style.display = "block";
+      banner.classList.remove("show");
+
+      // Show the existing bundle banner
+      var bundleBanner = document.getElementById("bundleBanner");
+      if (bundleBanner) bundleBanner.classList.add("show");
+    } catch(err) {
+      errorEl.textContent = err.message;
+      payBtn.disabled = false;
+      payText.textContent = "Betal 500 kr.";
+      paySpinner.style.display = "none";
+    }
+  }
+
+  // 6. Dismiss
+  function dismissBanner() {
+    banner.classList.remove("show");
+    sessionStorage.setItem("pd3_addon_dismissed", "1");
+  }
+
+  addonBtn.addEventListener("click", openModal);
+  dismissBtn.addEventListener("click", dismissBanner);
+  closeBtn.addEventListener("click", closeModal);
+  overlay.addEventListener("click", function(e) { if (e.target === overlay) closeModal(); });
+  payBtn.addEventListener("click", submitPayment);
+
+  initBanner();
+})();
 </script>
 </body>
 </html>

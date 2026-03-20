@@ -9,7 +9,7 @@
 
 const NOTICE = {
   id: "aktuelle_2026_03",   // new id = shows again for everyone
-  enabled: true,             // was false
+  enabled: false,             // was false
   type: "info"
 };
 
