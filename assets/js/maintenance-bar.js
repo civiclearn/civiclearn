@@ -92,6 +92,8 @@
         "#maintenance-bar{position:sticky;top:0;z-index:1000;padding:10px 16px;display:flex;align-items:center;gap:12px;font-size:14px;border-bottom:1px solid transparent;font-family:'Space Grotesk',sans-serif;}" +
         "#maintenance-bar span{flex:1;}" +
         "#maintenance-close{background:none;border:none;font-size:18px;cursor:pointer;line-height:1;}" +
+        "#maintenance-bar a{color:inherit;font-weight:600;text-decoration:underline;}" +
+        "#maintenance-bar a:hover{opacity:.8;}" +
         '#maintenance-bar[data-type="info"]{background:#e0f2fe;color:#075985;border-bottom-color:#bae6fd;}' +
         '#maintenance-bar[data-type="warning"]{background:#fff3cd;color:#4b3f00;border-bottom-color:#e6d8a8;}' +
         '#maintenance-bar[data-type="outage"]{background:#fee2e2;color:#7f1d1d;border-bottom-color:#fecaca;}' +
@@ -101,7 +103,13 @@
       // Mount
       var mount = function () {
         document.body.prepend(bar);
-        bar.querySelector("#maintenance-text").textContent = text;
+        // Auto-link URLs in the text
+        var safeText = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+        var linked = safeText.replace(/(https?:\/\/[^\s]+|[a-z0-9][-a-z0-9]*\.[a-z]{2,}(?:\/[^\s]*)?)/gi, function(url) {
+          var href = url.match(/^https?:\/\//) ? url : "https://" + url;
+          return '<a href="' + href + '" target="_blank" rel="noopener">' + url + '</a>';
+        });
+        bar.querySelector("#maintenance-text").innerHTML = linked;
         bar.querySelector("#maintenance-close").addEventListener("click", function () {
           try { localStorage.setItem(storageKey, "1"); } catch (e) {}
           bar.remove();
