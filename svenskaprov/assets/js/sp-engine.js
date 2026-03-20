@@ -119,16 +119,39 @@ window.SP = (function () {
       return data;
     },
 
-    async submitAudio({ attemptId, elemKey, audioBase64, responseJson }) {
+    async submitAudio({ attemptId, elemKey, audioBlob, responseJson }) {
       const token = _user?.access_token || '';
+      const userId = _user?.id || '';
+
+      // Upload blob to Supabase Storage (sp-audio bucket)
+      // Path: {user_id}/{attempt_id}/speaking.webm
+      const storagePath = `${userId}/${attemptId}/speaking.webm`;
+      const storageUrl = `${SUPABASE_URL}/storage/v1/object/sp-audio/${storagePath}`;
+
+      const uploadRes = await fetch(storageUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': audioBlob.type || 'audio/webm',
+          'x-upsert': 'true',  // allow re-recording overwrite
+        },
+        body: audioBlob,
+      });
+
+      if (!uploadRes.ok) {
+        const text = await uploadRes.text().catch(() => '');
+        throw new Error(`Audio upload failed ${uploadRes.status}: ${text}`);
+      }
+
+      // Send storage path (not blob) to edge function
       const res = await fetch(FN('sp-submit-element'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
-          attempt_id:  attemptId,
-          element_key: elemKey,
-          audio_base64: audioBase64,
-          response_json: responseJson || {},
+          attempt_id:          attemptId,
+          element_key:         elemKey,
+          audio_storage_path:  storagePath,
+          response_json:       responseJson || {},
         }),
       });
       const data = await res.json();

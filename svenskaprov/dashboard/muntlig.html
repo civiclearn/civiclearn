@@ -206,30 +206,22 @@ async function toggleRecording(taskId, idx) {
       const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
       const duration = (Date.now() - recStartTime) / 1000;
 
-      // Convert to base64
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        recordings[taskId] = { blob, base64: reader.result, duration };
+      recordings[taskId] = { blob, duration };
 
-        // Show playback
-        const url = URL.createObjectURL(blob);
-        document.getElementById(`playback${idx}`).innerHTML = `<audio controls src="${url}"></audio>`;
-        document.getElementById(`playback${idx}`).style.display = 'block';
+      // Show playback
+      const url = URL.createObjectURL(blob);
+      document.getElementById(`playback${idx}`).innerHTML = `<audio controls src="${url}"></audio>`;
+      document.getElementById(`playback${idx}`).style.display = 'block';
 
-        // Update button
-        const btn = document.getElementById(`recBtn${idx}`);
-        btn.className = 'rec-btn done';
-        btn.textContent = '✓';
-        document.getElementById(`recLabel${idx}`).textContent = `Inspelat (${Math.round(duration)}s) — klicka för att spela in igen`;
-        document.getElementById(`recTimer${idx}`).style.display = 'none';
+      // Update button
+      const btn = document.getElementById(`recBtn${idx}`);
+      btn.className = 'rec-btn idle';
+      btn.textContent = '🎤';
+      document.getElementById(`recLabel${idx}`).textContent = `Inspelat (${Math.round(duration)}s) — klicka för att spela in igen`;
+      document.getElementById(`recTimer${idx}`).style.display = 'none';
 
-        btn.className = 'rec-btn idle';
-        btn.textContent = '🎤';
-
-        // Enable submit if at least one recording
-        document.getElementById('submitBtn').disabled = Object.keys(recordings).length === 0;
-      };
-      reader.readAsDataURL(blob);
+      // Enable submit if at least one recording
+      document.getElementById('submitBtn').disabled = Object.keys(recordings).length === 0;
 
       activeRecorder = null;
       activeTaskId = null;
@@ -325,15 +317,12 @@ async function handleSubmit() {
         .map(t => recordings[t.task_id].blob);
 
       const combinedBlob = new Blob(orderedBlobs, { type: orderedBlobs[0]?.type || 'audio/webm' });
-      const combinedBase64 = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(combinedBlob);
-      });
+
+      document.getElementById('submitBtn').textContent = 'Laddar upp…';
 
       await SP.submitAudio({
         attemptId, elemKey: 'speaking',
-        audioBase64: combinedBase64,
+        audioBlob: combinedBlob,
         responseJson: {
           tasks: taskEntries,
           text_responses: hasFallback ? textFallbacks : undefined,
