@@ -192,17 +192,13 @@ async function handleSubmit() {
     document.getElementById(`text${i}`).disabled = true;
   });
 
-  try {
-    await SP.submit({
-      attemptId, elemKey: 'writing',
-      text: combined,
-      json: { tasks }
-    });
-  } catch (err) {
-    console.error('Submit error:', err);
-  }
+  // Fire and forget — sp-evaluate runs in background, no waiting here
+  SP.submit({
+    attemptId, elemKey: 'writing',
+    text: combined,
+    json: { tasks }
+  }).catch(err => console.error('Submit error:', err));
 
-  // Redirect immediately — AI evaluation happens in background
   window.location.href = `/svenskaprov/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
 }
 
