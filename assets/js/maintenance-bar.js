@@ -1,174 +1,120 @@
 (function () {
-
-  // Abort if already injected
   if (document.getElementById("maintenance-bar")) return;
 
   /* =========================
-     NOTICE CONFIGURATION
+     CONFIG
      ========================= */
-
-const NOTICE = {
-  id: "aktuelle_2026_03",   // new id = shows again for everyone
-  enabled: false,             // was false
-  type: "info"
-};
-
-  const TARGET_COUNTRIES = ["denmark"];
-  
-  const MESSAGE_KEY = NOTICE.type
-
-  const STORAGE_KEY = "civiclearn_notice_dismissed_" + NOTICE.id;
-
-  if (!NOTICE.enabled) return;
-  
-  const currentCountry =
-  (window.CIVICEDGE_CONFIG &&
-   window.CIVICEDGE_CONFIG.country) || "";
-
-
-if (
-  TARGET_COUNTRIES.length > 0 &&
-  !TARGET_COUNTRIES.includes(currentCountry)
-) return;
-
-
-  try {
-    if (localStorage.getItem(STORAGE_KEY)) return;
-  } catch {}
+  var SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+  var SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
 
   /* =========================
-     LANGUAGE RESOLUTION
+     DETECT PRODUCT FROM URL
      ========================= */
+  // civiclearn.com/denmark/dashboard → "denmark"
+  // civiclearn.com/lux/login → "lux"
+  // dansk3.dk/dashboard → "pd3" (special case)
+  var pathParts = window.location.pathname.split("/").filter(Boolean);
+  var host = window.location.hostname;
+  var product = "";
 
-  const lang =
-    (window.CIVICEDGE_LANG ||
-     document.documentElement.lang ||
-     "en").split("-")[0];
-
-  /* =========================
-     MESSAGE CATALOG
-     ========================= */
-
-const MESSAGES = {
-  info: {
-    da: "Nye spørgsmål tilføjet: Aktuelle begivenheder er blevet opdateret med et nyt sæt spørgsmål om de seneste begivenheder.",
-	en: "A new feature has just been released on CivicLearn.",
-    fr: "Une nouvelle fonctionnalité vient d’être publiée sur CivicLearn.",
-    de: "Eine neue Funktion wurde soeben auf CivicLearn veröffentlicht."
-  },
-
-  warning: {
-    en: "We are currently working on improvements to the platform.",
-    fr: "Nous travaillons actuellement à l’amélioration de la plateforme.",
-    de: "Wir arbeiten derzeit an Verbesserungen der Plattform."
-  },
-
-  outage: {
-    en: "Some services are temporarily unavailable.",
-    fr: "Certains services sont temporairement indisponibles.",
-    de: "Einige Dienste sont derzeit nicht disponibles."
+  if (host === "dansk3.dk") {
+    product = "pd3";
+  } else if (pathParts.length > 0) {
+    product = pathParts[0];
   }
-};
 
   /* =========================
-     CREATE BAR
+     LANGUAGE
      ========================= */
-
-  const bar = document.createElement("div");
-  bar.id = "maintenance-bar";
-  bar.dataset.type = NOTICE.type;
-  bar.hidden = false;
-
-  bar.innerHTML = `
-    <span id="maintenance-text"></span>
-    <button id="maintenance-close" aria-label="Close">×</button>
-  `;
+  var lang = (
+    window.CIVICEDGE_LANG ||
+    document.documentElement.lang ||
+    "en"
+  ).split("-")[0];
 
   /* =========================
-     STYLES
+     FETCH NOTICES
      ========================= */
+  var url = SUPABASE_URL + "/rest/v1/site_notices?enabled=eq.true&order=priority.desc,created_at.desc&limit=5";
 
-  const style = document.createElement("style");
-  style.textContent = `
-    #maintenance-bar {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 14px;
-      border-bottom: 1px solid transparent;
+  fetch(url, {
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Accept": "application/json"
     }
+  })
+    .then(function (res) { return res.json(); })
+    .then(function (notices) {
+      if (!notices || !notices.length) return;
 
-    #maintenance-bar span {
-      flex: 1;
-    }
+      // Find first notice that targets this product (or all)
+      var notice = null;
+      for (var i = 0; i < notices.length; i++) {
+        var targets = notices[i].targets || [];
+        var matches = false;
+        for (var j = 0; j < targets.length; j++) {
+          if (targets[j] === "*" || targets[j] === product) {
+            matches = true;
+            break;
+          }
+        }
+        if (matches) {
+          notice = notices[i];
+          break;
+        }
+      }
 
-    #maintenance-close {
-      background: none;
-      border: none;
-      font-size: 18px;
-      cursor: pointer;
-      line-height: 1;
-    }
+      if (!notice) return;
 
-    #maintenance-bar[data-type="info"] {
-      background: #e0f2fe;
-      color: #075985;
-      border-bottom-color: #bae6fd;
-    }
+      // Check if dismissed
+      var storageKey = "civiclearn_notice_dismissed_" + notice.id;
+      try {
+        if (localStorage.getItem(storageKey)) return;
+      } catch (e) {}
 
-    #maintenance-bar[data-type="warning"] {
-      background: #fff3cd;
-      color: #4b3f00;
-      border-bottom-color: #e6d8a8;
-    }
+      // Get message in user's language
+      var messages = notice.messages || {};
+      var text = messages[lang] || messages["en"] || "";
+      if (!text) return;
 
-    #maintenance-bar[data-type="outage"] {
-      background: #fee2e2;
-      color: #7f1d1d;
-      border-bottom-color: #fecaca;
-    }
+      // Build bar
+      var bar = document.createElement("div");
+      bar.id = "maintenance-bar";
+      bar.dataset.type = notice.type || "info";
 
-    #maintenance-bar[data-type="success"] {
-      background: #dcfce7;
-      color: #14532d;
-      border-bottom-color: #bbf7d0;
-    }
-  `;
-  document.head.appendChild(style);
+      bar.innerHTML =
+        '<span id="maintenance-text"></span>' +
+        '<button id="maintenance-close" aria-label="Close">\u00d7</button>';
 
-  /* =========================
-     MOUNT
-     ========================= */
+      // Styles (inject once)
+      var style = document.createElement("style");
+      style.textContent =
+        "#maintenance-bar{position:sticky;top:0;z-index:1000;padding:10px 16px;display:flex;align-items:center;gap:12px;font-size:14px;border-bottom:1px solid transparent;font-family:'Space Grotesk',sans-serif;}" +
+        "#maintenance-bar span{flex:1;}" +
+        "#maintenance-close{background:none;border:none;font-size:18px;cursor:pointer;line-height:1;}" +
+        '#maintenance-bar[data-type="info"]{background:#e0f2fe;color:#075985;border-bottom-color:#bae6fd;}' +
+        '#maintenance-bar[data-type="warning"]{background:#fff3cd;color:#4b3f00;border-bottom-color:#e6d8a8;}' +
+        '#maintenance-bar[data-type="outage"]{background:#fee2e2;color:#7f1d1d;border-bottom-color:#fecaca;}' +
+        '#maintenance-bar[data-type="success"]{background:#dcfce7;color:#14532d;border-bottom-color:#bbf7d0;}';
+      document.head.appendChild(style);
 
-  if (document.body) {
-    document.body.prepend(bar);
-  } else {
-    document.addEventListener("DOMContentLoaded", () => {
-      document.body.prepend(bar);
+      // Mount
+      var mount = function () {
+        document.body.prepend(bar);
+        bar.querySelector("#maintenance-text").textContent = text;
+        bar.querySelector("#maintenance-close").addEventListener("click", function () {
+          try { localStorage.setItem(storageKey, "1"); } catch (e) {}
+          bar.remove();
+        });
+      };
+
+      if (document.body) {
+        mount();
+      } else {
+        document.addEventListener("DOMContentLoaded", mount);
+      }
+    })
+    .catch(function () {
+      // Silent fail — no notice is fine
     });
-  }
-
-  /* =========================
-     TEXT + DISMISS
-     ========================= */
-
-  const textEl = bar.querySelector("#maintenance-text");
-  const closeBtn = bar.querySelector("#maintenance-close");
-
-  textEl.textContent =
-    (MESSAGES[MESSAGE_KEY] && MESSAGES[MESSAGE_KEY][lang]) ||
-    (MESSAGES[MESSAGE_KEY] && MESSAGES[MESSAGE_KEY].en) ||
-    "";
-
-  closeBtn.addEventListener("click", () => {
-    try {
-      localStorage.setItem(STORAGE_KEY, "1");
-    } catch {}
-    bar.remove();
-  });
-
 })();
