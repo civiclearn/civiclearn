@@ -89,7 +89,7 @@
       // Styles (inject once)
       var style = document.createElement("style");
       style.textContent =
-        "#maintenance-bar{position:sticky;top:0;z-index:1000;padding:10px 16px;display:flex;align-items:center;gap:12px;font-size:14px;border-bottom:1px solid transparent;font-family:'Space Grotesk',sans-serif;}" +
+        "#maintenance-bar{position:sticky;top:0;z-index:1000;padding:10px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;font-size:14px;border-bottom:1px solid transparent;font-family:'Space Grotesk',sans-serif;}" +
         "#maintenance-bar span{flex:1;}" +
         "#maintenance-close{background:none;border:none;font-size:18px;cursor:pointer;line-height:1;}" +
         "#maintenance-bar a{color:inherit;font-weight:600;text-decoration:underline;}" +
