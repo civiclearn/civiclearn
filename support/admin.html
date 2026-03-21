@@ -343,6 +343,86 @@ body {
 
 /* ── SCROLLBAR GLOBAL ── */
 * { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+
+/* ── TEMPLATE MANAGER MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  z-index: 2000; display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 16px; width: 760px; max-width: 95vw; max-height: 85vh;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+}
+.modal-header {
+  padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-size: 0.95rem; font-weight: 700; }
+.modal-close {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--muted); cursor: pointer; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { color: var(--text); }
+.modal-body { flex: 1; overflow: hidden; display: flex; }
+.tpl-list-panel {
+  width: 220px; border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+}
+.tpl-list-scroll { flex: 1; overflow-y: auto; }
+.tpl-list-item {
+  padding: 0.7rem 1rem; cursor: pointer; font-size: 0.82rem;
+  border-bottom: 1px solid var(--border); transition: background 0.1s;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.tpl-list-item:hover { background: var(--surface2); }
+.tpl-list-item.active { background: var(--brand-dim); color: var(--brand); }
+.tpl-del-btn {
+  font-size: 0.7rem; color: var(--muted); background: none; border: none;
+  cursor: pointer; padding: 2px 4px; border-radius: 4px;
+}
+.tpl-del-btn:hover { color: var(--red); background: var(--red-dim); }
+.tpl-add-btn {
+  padding: 0.6rem 1rem; font-size: 0.78rem; font-weight: 600;
+  background: var(--brand-dim); color: var(--brand);
+  border: none; border-top: 1px solid var(--border);
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: background 0.15s;
+}
+.tpl-add-btn:hover { background: var(--brand); color: #fff; }
+.tpl-edit-panel { flex: 1; padding: 1.2rem; display: flex; flex-direction: column; gap: 0.7rem; overflow-y: auto; }
+.tpl-edit-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+.tpl-name-input, .tpl-subj-input {
+  width: 100%; padding: 0.55rem 0.9rem;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 8px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 0.84rem;
+  outline: none; transition: border-color 0.15s;
+}
+.tpl-name-input:focus, .tpl-subj-input:focus { border-color: var(--brand); }
+.tpl-body-input {
+  flex: 1; min-height: 220px; width: 100%;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 8px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 0.84rem;
+  line-height: 1.6; padding: 0.7rem 0.9rem;
+  outline: none; resize: vertical; transition: border-color 0.15s;
+}
+.tpl-body-input:focus { border-color: var(--brand); }
+.tpl-save-btn {
+  align-self: flex-end; padding: 0.55rem 1.4rem;
+  background: var(--brand); color: #fff; border: none;
+  border-radius: 8px; font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem; font-weight: 600; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.tpl-save-btn:hover { opacity: 0.85; }
+.tpl-placeholder { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 0.84rem; }
 </style>
 </head>
 <body>
@@ -376,6 +456,7 @@ body {
     </div>
     <div class="topbar-divider"></div>
     <div class="topbar-title">Support Dashboard</div>
+    <button class="tpl-btn" style="font-size:0.76rem;padding:4px 12px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif" onclick="openTemplateManager()">📋 Templates</button>
     <div class="topbar-stats">
       <div class="stat-pill active" onclick="setFilter('open')" id="filter-open">
         <div class="stat-dot dot-new"></div>
@@ -430,6 +511,20 @@ let adminPw = '';
 let allMessages = [];
 let currentFilter = 'open';
 let currentId = null;
+
+// ── DIRTY DRAFT TRACKING ──
+// When user manually edits subject/body, we store it here so reloads don't overwrite
+const dirtyDrafts = {};
+
+function markDirty(id) {
+  const subj = document.getElementById('subj-' + id);
+  const body = document.getElementById('draft-' + id);
+  dirtyDrafts[id] = {
+    subject: subj ? subj.value : null,
+    body: body ? body.value : null,
+  };
+}
+function clearDirty(id) { delete dirtyDrafts[id]; }
 
 // ── TEMPLATES ──
 const TEMPLATES = {
@@ -501,10 +596,11 @@ async function loadMessages() {
     allMessages = data.messages || [];
     updateStats(data.stats || {});
     renderList(allMessages);
-    // Restore selection
+    // Restore selection — but don't overwrite if user has edited the draft
     if (currentId) {
       const m = allMessages.find(x => x.id === currentId);
-      if (m) renderDetail(m); else clearDetail();
+      if (m && !dirtyDrafts[currentId]) renderDetail(m);
+      else if (!m) clearDetail();
     }
   } catch (e) {
     document.getElementById('msg-list').innerHTML = `<div class="empty-state">Error loading: ${e.message}</div>`;
@@ -596,10 +692,11 @@ function renderDetail(m) {
   const user = m.user;
   const isReplied = status === 'replied' || status === 'ignored' || status === 'spam';
 
-  // Build subject from template or default
+  // Build subject from template or default — prefer dirty (user-edited) version
   const defaultSubject = `Re: ${m.name ? 'Support request from ' + m.name : 'Your message to CivicLearn'}`;
-  const draft = m.ai_draft || '';
-  const subject = m.ai_subject || defaultSubject;
+  const dirty = dirtyDrafts[m.id];
+  const draft = dirty ? (dirty.body !== null ? dirty.body : (m.ai_draft || '')) : (m.ai_draft || '');
+  const subject = dirty ? (dirty.subject !== null ? dirty.subject : (m.ai_subject || defaultSubject)) : (m.ai_subject || defaultSubject);
 
   const userHtml = user
     ? `<div class="user-card">
@@ -611,9 +708,7 @@ function renderDetail(m) {
         <div class="user-card-stat"><div class="user-card-label">Status</div><div class="user-card-value missing">✗ Not in users table</div></div>
       </div>`;
 
-  const tplHtml = Object.keys(TEMPLATES).map(k =>
-    `<button class="tpl-btn" onclick="applyTemplate('${k.replace(/'/g,"\\'")}', '${m.id}')">${esc(k)}</button>`
-  ).join('');
+  const tplHtml = buildTplButtons(m.id);
 
   const actionsHtml = isReplied
     ? `<button class="btn btn-reopen" onclick="doReopen('${m.id}')">↩ Reopen</button>`
@@ -640,10 +735,11 @@ function renderDetail(m) {
 
         ${!isReplied ? `
         <div class="section-label">Reply <span>${m.ai_draft ? '· AI draft ready' : ''}</span></div>
-        <input type="text" class="subject-input" id="subj-${m.id}" value="${esc(subject)}" placeholder="Subject line…">
+        <input type="text" class="subject-input" id="subj-${m.id}" value="${esc(subject)}" placeholder="Subject line…" oninput="markDirty('${m.id}')">
         <div class="section-label" style="margin-top:0.4rem">Templates</div>
         <div class="templates-row">${tplHtml}</div>
-        <textarea class="draft-area" id="draft-${m.id}" placeholder="Type your reply here, or use a template above…">${esc(draft)}</textarea>
+        <textarea class="draft-area" id="draft-${m.id}" placeholder="Type your reply here, or use a template above…" oninput="markDirty('${m.id}')">${esc(draft)}</textarea>
+        <button class="tpl-btn" style="margin-top:0.4rem;color:var(--red);border-color:rgba(248,113,113,0.3)" onclick="clearAiDraft('${m.id}')">✕ Clear AI draft</button>
         ` : `
         ${m.sent_replies && m.sent_replies.length > 0 ? `
           <div class="section-label" style="margin-top:0.5rem">Sent reply <span style="color:var(--muted);font-weight:400">&nbsp;${fmtDateTime(m.sent_replies[0].sent_at)}</span></div>
@@ -690,8 +786,8 @@ async function doSend(msgId) {
   try {
     await api({ action: 'send', message_id: msgId, to: m.email, subject, message: body });
     showToast('Reply sent ✓', 'success');
+    clearDirty(msgId);
     document.getElementById('send-status-' + msgId).style.display = 'inline';
-    // Update local state
     const idx = allMessages.findIndex(x => x.id === msgId);
     if (idx >= 0) allMessages[idx].status = 'replied';
     setTimeout(() => loadMessages(), 800);
@@ -724,6 +820,25 @@ async function doReopen(msgId) {
   showToast('Reopened');
   currentId = null;
   loadMessages();
+}
+
+// ── CLEAR AI DRAFT ──
+async function clearAiDraft(msgId) {
+  await api({ action: 'update_draft', message_id: msgId, draft: null });
+  clearDirty(msgId);
+  const idx = allMessages.findIndex(x => x.id === msgId);
+  if (idx >= 0) {
+    allMessages[idx].ai_draft = null;
+    allMessages[idx].ai_subject = null;
+    allMessages[idx].ai_confidence = null;
+    allMessages[idx].ai_category = null;
+  }
+  // Update textarea directly without re-render
+  const ta = document.getElementById('draft-' + msgId);
+  const subj = document.getElementById('subj-' + msgId);
+  if (ta) ta.value = '';
+  if (subj) subj.value = '';
+  showToast('Draft cleared — Analyze will regenerate it', '');
 }
 
 // ── CHAT WITH CLAUDE ──
@@ -809,8 +924,178 @@ async function runAnalysis() {
   }
 }
 
+
+// ── TEMPLATE MANAGER ──
+const TPL_KEY = 'civiclearn_support_templates';
+
+function loadTemplates() {
+  try { return JSON.parse(localStorage.getItem(TPL_KEY)) || null; } catch { return null; }
+}
+
+function saveTemplates(tpls) {
+  localStorage.setItem(TPL_KEY, JSON.stringify(tpls));
+}
+
+function getTemplates() {
+  const stored = loadTemplates();
+  if (stored) return stored;
+  // Default templates
+  return [
+    { id: 'dk-login', name: 'Login Issue (DK)', subject: 'Re: Login problem', body: 'Hej {name},\n\nBesøg venligst denne side for at nulstille din adgang:\n\nhttps://civiclearn.com/denmark/reset-cache\n\nSiden guider dig automatisk videre til login. Klik derefter på \"Nulstil adgangskode\" for at oprette en ny adgangskode — du får vist en PIN-kode på skærmen med det samme.\n\nSkriv endelig, hvis du har brug for mere hjælp.\n\nVenlig hilsen,\nCivicLearn Support' },
+    { id: 'en-login', name: 'Login Issue (EN)', subject: 'Re: Login issue', body: 'Hi {name},\n\nPlease try the following:\n1. Open the login page in a private/incognito window\n2. Use the \"Forgot password?\" button to set a new password\n3. Log in with your new password\n\nDon\'t hesitate to reach out if this doesn\'t help.\n\nBest regards,\nCivicLearn Support' },
+    { id: 'fr-login', name: 'Login Issue (FR)', subject: 'Re: Problème de connexion', body: 'Bonjour {name},\n\nVeuillez essayer ceci :\n1. Ouvrez la page de connexion dans une fenêtre de navigation privée\n2. Utilisez \"Mot de passe oublié ?\" pour définir un nouveau mot de passe\n3. Connectez-vous avec votre nouveau mot de passe\n\nN\'hésitez pas à nous réécrire si cela ne fonctionne pas.\n\nCordialement,\nCivicLearn Support' },
+    { id: 'dk-notfound', name: 'Email not found (DK)', subject: 'Re: Adgang til din konto', body: 'Hej {name},\n\nJeg kan se, at den e-mail du har skrevet, ikke matcher vores systemer. Det kan skyldes en lille stavefejl ved købet.\n\nKan du bekræfte hvilken e-mailadresse du brugte da du betalte? (Tjek evt. din kvittering fra Stripe)\n\nNår vi har fundet den rigtige adresse, kan vi hurtigt oprette din adgang.\n\nMed venlig hilsen,\nCivicLearn Support' },
+    { id: 'dk-oldwp', name: 'Old WP Customer (DK)', subject: 'Re: Din adgang til CivicLearn', body: 'Hej {name},\n\nTak for din henvendelse. Din konto er fra vores tidligere platform, og vi er ved at overføre den manuelt.\n\nVi opretter din adgang og sender dig en bekræftelse inden for 24 timer.\n\nUndskyld besværet – og tak for tålmodigheden.\n\nMed venlig hilsen,\nCivicLearn Support' },
+    { id: 'en-refund', name: 'Refund Request', subject: 'Re: Your refund request', body: 'Hi {name},\n\nThank you for reaching out. We\'re sorry to hear that CivicLearn didn\'t meet your expectations.\n\nCould you tell us a bit more about what happened? We\'d like to understand the situation before processing anything, and in many cases we can resolve the issue directly.\n\nBest regards,\nCivicLearn Support' },
+  ];
+}
+
+let tplEditing = null;
+
+function openTemplateManager() {
+  renderTplList();
+  document.getElementById('tpl-modal').classList.add('open');
+}
+
+function closeTemplateManager() {
+  document.getElementById('tpl-modal').classList.remove('open');
+  tplEditing = null;
+  // Rebuild TEMPLATES from saved data so apply buttons work
+  rebuildTemplatesObj();
+}
+
+function renderTplList() {
+  const tpls = getTemplates();
+  const el = document.getElementById('tpl-list');
+  el.innerHTML = tpls.map(t => `
+    <div class="tpl-list-item ${tplEditing === t.id ? 'active' : ''}" onclick="editTemplate('${t.id}')">
+      <span>${esc(t.name)}</span>
+      <button class="tpl-del-btn" onclick="event.stopPropagation();deleteTemplate('${t.id}')">✕</button>
+    </div>`).join('');
+}
+
+function editTemplate(id) {
+  const tpls = getTemplates();
+  const t = tpls.find(x => x.id === id);
+  if (!t) return;
+  tplEditing = id;
+  renderTplList();
+  document.getElementById('tpl-edit-panel').innerHTML = `
+    <div>
+      <div class="tpl-edit-label">Template name</div>
+      <input class="tpl-name-input" id="tpl-name" value="${esc(t.name)}" placeholder="e.g. Login Issue (DK)">
+    </div>
+    <div>
+      <div class="tpl-edit-label">Subject line <span style="color:var(--muted);font-weight:400">(use {name} for customer name)</span></div>
+      <input class="tpl-subj-input" id="tpl-subj" value="${esc(t.subject)}" placeholder="Subject…">
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:0.3rem">
+      <div class="tpl-edit-label">Body <span style="color:var(--muted);font-weight:400">(use {name} for customer name)</span></div>
+      <textarea class="tpl-body-input" id="tpl-body">${esc(t.body)}</textarea>
+    </div>
+    <button class="tpl-save-btn" onclick="saveTplEdit('${id}')">Save template</button>`;
+}
+
+function saveTplEdit(id) {
+  const name = document.getElementById('tpl-name').value.trim();
+  const subj = document.getElementById('tpl-subj').value.trim();
+  const body = document.getElementById('tpl-body').value;
+  if (!name) { showToast('Name is required', 'error'); return; }
+  const tpls = getTemplates();
+  const idx = tpls.findIndex(x => x.id === id);
+  if (idx >= 0) { tpls[idx] = { id, name, subject: subj, body }; }
+  saveTemplates(tpls);
+  renderTplList();
+  showToast('Template saved ✓', 'success');
+}
+
+function newTemplate() {
+  const id = 'tpl-' + Date.now();
+  const tpls = getTemplates();
+  tpls.push({ id, name: 'New template', subject: 'Re: Your message', body: 'Hi {name},\n\n\n\nBest regards,\nCivicLearn Support' });
+  saveTemplates(tpls);
+  editTemplate(id);
+}
+
+function deleteTemplate(id) {
+  const tpls = getTemplates().filter(x => x.id !== id);
+  saveTemplates(tpls);
+  if (tplEditing === id) {
+    tplEditing = null;
+    document.getElementById('tpl-edit-panel').innerHTML = '<div class="tpl-placeholder">Select a template to edit, or create a new one</div>';
+  }
+  renderTplList();
+  showToast('Template deleted');
+}
+
+function rebuildTemplatesObj() {
+  // Nothing needed — applyTemplate reads from getTemplates() directly
+}
+
+// Override applyTemplate to use dynamic templates
+function applyTemplate(name, msgId) {
+  const m = allMessages.find(x => x.id === msgId);
+  if (!m) return;
+  if (name === 'Spam / Close') { doSpam(msgId); return; }
+  // Try dynamic templates first
+  const tpls = getTemplates();
+  const t = tpls.find(x => x.name === name);
+  if (t) {
+    const customerName = m.name || '';
+    const subject = t.subject.replace(/\{name\}/g, customerName);
+    const body = t.body.replace(/\{name\}/g, customerName);
+    const subjEl = document.getElementById('subj-' + msgId);
+    const draftEl = document.getElementById('draft-' + msgId);
+    if (subjEl) subjEl.value = subject;
+    if (draftEl) draftEl.value = body;
+    markDirty(msgId);
+    return;
+  }
+  // Fallback to static TEMPLATES object
+  const tpl = TEMPLATES[name];
+  if (!tpl) return;
+  const { subject, body } = tpl(m);
+  const subjEl = document.getElementById('subj-' + msgId);
+  const draftEl = document.getElementById('draft-' + msgId);
+  if (subjEl) subjEl.value = subject;
+  if (draftEl) draftEl.value = body;
+  markDirty(msgId);
+}
+
+// Close modal on overlay click
+document.getElementById('tpl-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeTemplateManager();
+});
+
+// ── BUILD TEMPLATE BUTTONS from dynamic list ──
+function buildTplButtons(msgId) {
+  const tpls = getTemplates();
+  return tpls.map(t =>
+    `<button class="tpl-btn" onclick="applyTemplate('${esc(t.name.replace(/'/g, "\\'\"))}', '${msgId}')">${esc(t.name)}</button>`
+  ).join('');
+}
+
 // Auto-refresh every 3 minutes
 setInterval(() => { if (adminPw) loadMessages(); }, 180000);
 </script>
+
+<!-- TEMPLATE MANAGER MODAL -->
+<div class="modal-overlay" id="tpl-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📋 Template Manager</div>
+      <button class="modal-close" onclick="closeTemplateManager()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="tpl-list-panel">
+        <div class="tpl-list-scroll" id="tpl-list"></div>
+        <button class="tpl-add-btn" onclick="newTemplate()">+ New template</button>
+      </div>
+      <div class="tpl-edit-panel" id="tpl-edit-panel">
+        <div class="tpl-placeholder">Select a template to edit, or create a new one</div>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
