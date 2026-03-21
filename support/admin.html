@@ -157,6 +157,16 @@ body {
   font-size: 0.9rem; transition: all 0.15s;
 }
 .refresh-btn:hover { border-color: var(--border2); color: var(--text); }
+.analyze-btn {
+  height: 32px; padding: 0 10px;
+  background: var(--brand-dim); border: 1px solid var(--brand);
+  border-radius: 8px; color: var(--brand);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 600; font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s; white-space: nowrap; gap: 5px;
+}
+.analyze-btn:hover { background: var(--brand); color: #fff; }
+.analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .msg-list { flex: 1; overflow-y: auto; }
 .msg-list::-webkit-scrollbar { width: 4px; }
 .msg-list::-webkit-scrollbar-track { background: transparent; }
@@ -393,6 +403,7 @@ body {
       <div class="search-bar">
         <input type="text" class="search-input" id="search-input" placeholder="Search messages…" oninput="filterList()">
         <button class="refresh-btn" onclick="loadMessages()" title="Refresh">↻</button>
+        <button class="analyze-btn" id="analyze-btn" onclick="runAnalysis()" title="Run AI pre-analysis now">⚡ Analyze</button>
       </div>
       <div class="msg-list" id="msg-list">
         <div class="loader"><span class="spin"></span>Loading…</div>
@@ -770,6 +781,31 @@ function showToast(msg, type = '') {
   t.textContent = msg;
   t.className = 'toast show ' + type;
   setTimeout(() => t.className = 'toast', 2500);
+}
+
+// ── RUN ANALYSIS ──
+async function runAnalysis() {
+  const btn = document.getElementById('analyze-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Running…';
+  try {
+    const res = await fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/support-preanalyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPw }
+    });
+    const data = await res.json();
+    if (data.processed !== undefined) {
+      showToast(`Analysis done — ${data.processed} message${data.processed !== 1 ? 's' : ''} processed`, 'success');
+      loadMessages();
+    } else {
+      showToast(data.message || 'Nothing to analyze', '');
+    }
+  } catch(e) {
+    showToast('Analysis failed: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '⚡ Analyze';
+  }
 }
 
 // Auto-refresh every 3 minutes
