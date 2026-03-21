@@ -760,19 +760,7 @@ function renderDetail(m) {
     </div>`;
 }
 
-// ── TEMPLATE APPLY ──
-function applyTemplate(name, msgId) {
-  const m = allMessages.find(x => x.id === msgId);
-  if (!m) return;
-  const tpl = TEMPLATES[name];
-  if (!tpl) return;
-  if (name === 'Spam / Close') { doSpam(msgId); return; }
-  const { subject, body } = tpl(m);
-  const subjEl = document.getElementById('subj-' + msgId);
-  const draftEl = document.getElementById('draft-' + msgId);
-  if (subjEl) subjEl.value = subject;
-  if (draftEl) draftEl.value = body;
-}
+// ── TEMPLATE APPLY — handled by dynamic applyTemplate below ──
 
 // ── ACTIONS ──
 async function doSend(msgId) {
@@ -1032,47 +1020,41 @@ function rebuildTemplatesObj() {
   // Nothing needed — applyTemplate reads from getTemplates() directly
 }
 
-// Override applyTemplate to use dynamic templates
+// applyTemplate kept for compatibility (called by Spam/Close if ever used)
 function applyTemplate(name, msgId) {
-  const m = allMessages.find(x => x.id === msgId);
-  if (!m) return;
   if (name === 'Spam / Close') { doSpam(msgId); return; }
-  // Try dynamic templates first
   const tpls = getTemplates();
-  const t = tpls.find(x => x.name === name);
-  if (t) {
-    const customerName = m.name || '';
-    const subject = t.subject.replace(/\{name\}/g, customerName);
-    const body = t.body.replace(/\{name\}/g, customerName);
-    const subjEl = document.getElementById('subj-' + msgId);
-    const draftEl = document.getElementById('draft-' + msgId);
-    if (subjEl) subjEl.value = subject;
-    if (draftEl) draftEl.value = body;
-    markDirty(msgId);
-    return;
-  }
-  // Fallback to static TEMPLATES object
-  const tpl = TEMPLATES[name];
-  if (!tpl) return;
-  const { subject, body } = tpl(m);
-  const subjEl = document.getElementById('subj-' + msgId);
-  const draftEl = document.getElementById('draft-' + msgId);
-  if (subjEl) subjEl.value = subject;
-  if (draftEl) draftEl.value = body;
-  markDirty(msgId);
+  const idx = tpls.findIndex(x => x.name === name);
+  if (idx >= 0) applyTemplateByIndex(idx, msgId);
 }
 
-// Close modal on overlay click
-document.getElementById('tpl-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeTemplateManager();
+// Close modal on overlay click — use delegation since modal renders after script
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.id === 'tpl-modal') closeTemplateManager();
 });
 
 // ── BUILD TEMPLATE BUTTONS from dynamic list ──
 function buildTplButtons(msgId) {
   const tpls = getTemplates();
-  return tpls.map(t =>
-    `<button class="tpl-btn" onclick="applyTemplate('${esc(t.name.replace(/'/g, "\\'\"))}', '${msgId}')">${esc(t.name)}</button>`
+  return tpls.map((t, i) =>
+    `<button class="tpl-btn" onclick="applyTemplateByIndex(${i}, '${msgId}')">${esc(t.name)}</button>`
   ).join('');
+}
+
+function applyTemplateByIndex(idx, msgId) {
+  const tpls = getTemplates();
+  const t = tpls[idx];
+  if (!t) return;
+  const m = allMessages.find(x => x.id === msgId);
+  if (!m) return;
+  const customerName = m.name || '';
+  const subject = t.subject.replace(/{name}/g, customerName);
+  const body = t.body.replace(/{name}/g, customerName);
+  const subjEl = document.getElementById('subj-' + msgId);
+  const draftEl = document.getElementById('draft-' + msgId);
+  if (subjEl) subjEl.value = subject;
+  if (draftEl) draftEl.value = body;
+  markDirty(msgId);
 }
 
 // Auto-refresh every 3 minutes
