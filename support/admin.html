@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CivicLearn · Support Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0c12;
+  --surface: #13131d;
+  --surface2: #1a1a28;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8e6f0;
+  --muted: #7c7a90;
+  --brand: #7c5ce8;
+  --brand-dim: rgba(124,92,232,0.15);
+  --green: #34d399;
+  --green-dim: rgba(52,211,153,0.12);
+  --amber: #fbbf24;
+  --amber-dim: rgba(251,191,36,0.12);
+  --red: #f87171;
+  --red-dim: rgba(248,113,113,0.12);
+  --blue: #60a5fa;
+  --blue-dim: rgba(96,165,250,0.12);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── LOGIN ── */
+#login-screen {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+.login-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: 340px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+}
+.login-logo {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 1.8rem;
+}
+.login-logo-mark {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: var(--brand);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 1rem; color: #fff;
+}
+.login-logo-text { font-weight: 700; font-size: 1rem; }
+.login-logo-sub { font-size: 0.72rem; color: var(--muted); }
+.login-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; }
+.login-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.6rem; }
+.login-input {
+  width: 100%; padding: 0.7rem 1rem;
+  background: var(--bg); border: 1.5px solid var(--border2);
+  border-radius: 10px; color: var(--text);
+  font-family: 'DM Mono', monospace; font-size: 0.9rem;
+  outline: none; margin-bottom: 0.9rem;
+  transition: border-color 0.15s;
+}
+.login-input:focus { border-color: var(--brand); }
+.login-btn {
+  width: 100%; padding: 0.75rem;
+  background: var(--brand); border: none;
+  border-radius: 10px; color: #fff;
+  font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+  font-weight: 600; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.login-btn:hover { opacity: 0.9; }
+.login-err { font-size: 0.78rem; color: var(--red); margin-top: 0.6rem; text-align: center; }
+
+/* ── TOP BAR ── */
+.topbar {
+  height: 52px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 1.25rem; gap: 1rem;
+  background: var(--surface);
+}
+.topbar-logo { display: flex; align-items: center; gap: 8px; }
+.topbar-mark {
+  width: 26px; height: 26px; border-radius: 6px;
+  background: var(--brand);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 0.78rem; color: #fff;
+}
+.topbar-name { font-weight: 700; font-size: 0.88rem; }
+.topbar-divider { width: 1px; height: 18px; background: var(--border); }
+.topbar-title { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+.topbar-stats { margin-left: auto; display: flex; gap: 0.6rem; align-items: center; }
+.stat-pill {
+  font-size: 0.72rem; font-weight: 600;
+  padding: 3px 10px; border-radius: 99px;
+  border: 1px solid var(--border);
+  cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; gap: 4px;
+}
+.stat-pill:hover { border-color: var(--border2); }
+.stat-pill.active { background: var(--brand-dim); border-color: var(--brand); color: var(--brand); }
+.stat-dot { width: 6px; height: 6px; border-radius: 50%; }
+.dot-new { background: var(--brand); }
+.dot-replied { background: var(--green); }
+.dot-ignored { background: var(--muted); }
+.dot-spam { background: var(--red); }
+.stat-count { font-weight: 700; }
+
+/* ── MAIN LAYOUT ── */
+.main {
+  flex: 1; display: flex; overflow: hidden;
+}
+
+/* ── LEFT PANEL ── */
+.left-panel {
+  width: 360px; flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.search-bar {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; gap: 0.5rem;
+  align-items: center;
+}
+.search-input {
+  flex: 1; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.45rem 0.8rem;
+  color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem; outline: none;
+  transition: border-color 0.15s;
+}
+.search-input:focus { border-color: var(--brand); }
+.search-input::placeholder { color: var(--muted); }
+.refresh-btn {
+  width: 32px; height: 32px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--muted);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; transition: all 0.15s;
+}
+.refresh-btn:hover { border-color: var(--border2); color: var(--text); }
+.msg-list { flex: 1; overflow-y: auto; }
+.msg-list::-webkit-scrollbar { width: 4px; }
+.msg-list::-webkit-scrollbar-track { background: transparent; }
+.msg-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.msg-item {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+  position: relative;
+}
+.msg-item:hover { background: var(--surface2); }
+.msg-item.active { background: var(--brand-dim); border-left: 2px solid var(--brand); }
+.msg-item-top { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; }
+.msg-name { font-weight: 600; font-size: 0.84rem; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msg-time { font-size: 0.7rem; color: var(--muted); flex-shrink: 0; }
+.msg-email { font-size: 0.74rem; color: var(--muted); margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msg-preview { font-size: 0.78rem; color: var(--muted); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.msg-footer { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.4rem; }
+.status-badge {
+  font-size: 0.64rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 2px 7px; border-radius: 99px;
+}
+.badge-new { background: var(--brand-dim); color: var(--brand); }
+.badge-replied { background: var(--green-dim); color: var(--green); }
+.badge-ignored { background: rgba(255,255,255,0.05); color: var(--muted); }
+.badge-spam { background: var(--red-dim); color: var(--red); }
+.site-tag { font-size: 0.66rem; color: var(--muted); background: var(--surface2); padding: 2px 6px; border-radius: 4px; }
+.has-draft-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--amber); margin-left: auto;
+  flex-shrink: 0;
+}
+.empty-state { padding: 3rem 1.5rem; text-align: center; color: var(--muted); font-size: 0.85rem; }
+
+/* ── RIGHT PANEL ── */
+.right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.empty-detail {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  color: var(--muted);
+}
+.empty-detail-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.4; }
+.empty-detail-text { font-size: 0.85rem; }
+
+/* ── DETAIL ── */
+.detail { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.detail-header {
+  padding: 1.1rem 1.4rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.detail-name { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.2rem; }
+.detail-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.meta-chip {
+  font-size: 0.72rem; padding: 2px 8px; border-radius: 6px;
+  background: var(--surface2); color: var(--muted);
+  display: flex; align-items: center; gap: 4px;
+}
+.meta-chip a { color: var(--blue); text-decoration: none; }
+.meta-chip a:hover { text-decoration: underline; }
+
+/* ── USER INFO CARD ── */
+.user-card {
+  margin: 0.9rem 1.4rem 0;
+  padding: 0.7rem 0.9rem;
+  background: var(--surface2); border-radius: 10px;
+  border: 1px solid var(--border);
+  display: flex; gap: 1.5rem; align-items: center;
+  flex-shrink: 0;
+}
+.user-card-stat { text-align: center; }
+.user-card-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.2rem; }
+.user-card-value { font-size: 0.82rem; font-weight: 600; }
+.user-card-value.exists { color: var(--green); }
+.user-card-value.missing { color: var(--red); }
+
+/* ── MESSAGE BODY ── */
+.detail-body { flex: 1; overflow-y: auto; padding: 1rem 1.4rem; }
+.detail-body::-webkit-scrollbar { width: 4px; }
+.detail-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.message-box {
+  background: var(--surface2); border-radius: 12px;
+  border: 1px solid var(--border); padding: 1rem 1.2rem;
+  font-size: 0.84rem; line-height: 1.7; white-space: pre-wrap;
+  margin-bottom: 1rem;
+}
+.section-label {
+  font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--muted); font-weight: 600; margin-bottom: 0.5rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.section-label span { color: var(--amber); }
+
+/* ── TEMPLATES ── */
+.templates-row {
+  display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem;
+}
+.tpl-btn {
+  font-size: 0.72rem; padding: 4px 10px; border-radius: 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s; white-space: nowrap;
+}
+.tpl-btn:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-dim); }
+
+/* ── DRAFT AREA ── */
+.draft-area {
+  width: 100%; min-height: 140px;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 0.9rem 1.1rem;
+  color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 0.84rem; line-height: 1.6; resize: vertical;
+  outline: none; transition: border-color 0.15s;
+}
+.draft-area:focus { border-color: var(--brand); }
+.subject-input {
+  width: 100%; padding: 0.55rem 0.9rem;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 8px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+  outline: none; margin-bottom: 0.5rem;
+  transition: border-color 0.15s;
+}
+.subject-input:focus { border-color: var(--brand); }
+
+/* ── ACTION BAR ── */
+.action-bar {
+  padding: 0.9rem 1.4rem;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 0.6rem; align-items: center;
+  flex-shrink: 0; flex-wrap: wrap;
+}
+.btn {
+  padding: 0.55rem 1.1rem; border-radius: 8px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+  font-weight: 600; cursor: pointer; border: none;
+  transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-send { background: var(--brand); color: #fff; }
+.btn-send:hover:not(:disabled) { opacity: 0.9; }
+.btn-ignore { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+.btn-ignore:hover { color: var(--text); border-color: var(--border2); }
+.btn-spam { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+.btn-spam:hover { opacity: 0.8; }
+.btn-claude { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(251,191,36,0.25); margin-left: auto; }
+.btn-claude:hover { opacity: 0.85; }
+.btn-reopen { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); font-size: 0.75rem; }
+.send-status { font-size: 0.78rem; color: var(--green); display: none; }
+
+/* ── LOADING ── */
+.loader { text-align: center; padding: 3rem; color: var(--muted); font-size: 0.85rem; }
+.spin { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--brand); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+  background: var(--surface2); border: 1px solid var(--border2);
+  padding: 0.65rem 1.4rem; border-radius: 10px;
+  font-size: 0.82rem; font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  opacity: 0; transition: opacity 0.25s;
+  pointer-events: none; z-index: 999; white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+.toast.success { border-color: rgba(52,211,153,0.3); color: var(--green); }
+.toast.error { border-color: rgba(248,113,113,0.3); color: var(--red); }
+
+/* ── SCROLLBAR GLOBAL ── */
+* { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-mark">CL</div>
+      <div>
+        <div class="login-logo-text">CivicLearn</div>
+        <div class="login-logo-sub">Support Admin</div>
+      </div>
+    </div>
+    <div class="login-title">Sign in</div>
+    <div class="login-sub">Admin access only</div>
+    <input type="password" class="login-input" id="pw-input" placeholder="Password" autocomplete="current-password">
+    <button class="login-btn" onclick="tryLogin()">Continue →</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none; flex:1; flex-direction:column; height:100vh; overflow:hidden; display:none;">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-mark">CL</div>
+      <div class="topbar-name">CivicLearn</div>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="topbar-title">Support Dashboard</div>
+    <div class="topbar-stats">
+      <div class="stat-pill active" onclick="setFilter('open')" id="filter-open">
+        <div class="stat-dot dot-new"></div>
+        <span>Open</span> <span class="stat-count" id="count-open">–</span>
+      </div>
+      <div class="stat-pill" onclick="setFilter('replied')" id="filter-replied">
+        <div class="stat-dot dot-replied"></div>
+        <span>Replied</span> <span class="stat-count" id="count-replied">–</span>
+      </div>
+      <div class="stat-pill" onclick="setFilter('spam')" id="filter-spam">
+        <div class="stat-dot dot-spam"></div>
+        <span>Spam</span> <span class="stat-count" id="count-spam">–</span>
+      </div>
+      <div class="stat-pill" onclick="setFilter('all')" id="filter-all">
+        All <span class="stat-count" id="count-total">–</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- LEFT: Message List -->
+    <div class="left-panel">
+      <div class="search-bar">
+        <input type="text" class="search-input" id="search-input" placeholder="Search messages…" oninput="filterList()">
+        <button class="refresh-btn" onclick="loadMessages()" title="Refresh">↻</button>
+      </div>
+      <div class="msg-list" id="msg-list">
+        <div class="loader"><span class="spin"></span>Loading…</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Detail -->
+    <div class="right-panel" id="right-panel">
+      <div class="empty-detail">
+        <div class="empty-detail-icon">📬</div>
+        <div class="empty-detail-text">Select a message to view</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/support-admin';
+const CS_PROJECT = 'https://claude.ai/project/019cce94-76d0-7564-9fb2-ace8f89b8d2c';
+let adminPw = '';
+let allMessages = [];
+let currentFilter = 'open';
+let currentId = null;
+
+// ── TEMPLATES ──
+const TEMPLATES = {
+  'Login Issue (DK)': (m) => ({
+    subject: `Re: Login problem – ${m.name || 'dit spørgsmål'}`,
+    body: `Hej ${m.name || ''},\n\nJeg kan se at du har problemer med at logge ind. Det sker typisk, fordi siden har gemt en gammel session.\n\nPrøv dette:\n1. Åbn vores login-side i et nyt "inkognitovindue"\n2. Indtast din e-mail og brug funktionen "Glemt adgangskode?" for at sætte en ny adgangskode\n3. Log ind med din nye adgangskode\n\nFungerer det ikke, er du velkommen til at skrive igen.\n\nMed venlig hilsen\nCivicLearn Support`
+  }),
+  'Login Issue (EN)': (m) => ({
+    subject: `Re: Login issue`,
+    body: `Hi ${m.name || ''},\n\nThank you for reaching out. Login issues are usually caused by a cached session in your browser.\n\nPlease try the following:\n1. Open our login page in a private/incognito window\n2. Enter your email and use "Forgot password?" to set a new password\n3. Log in with your new password\n\nLet us know if this doesn't work.\n\nBest regards\nCivicLearn Support`
+  }),
+  'Login Issue (FR)': (m) => ({
+    subject: `Re: Problème de connexion`,
+    body: `Bonjour ${m.name || ''},\n\nMerci de nous avoir contactés. Les problèmes de connexion sont généralement causés par une session en cache dans votre navigateur.\n\nVeuillez essayer ceci :\n1. Ouvrez notre page de connexion dans une fenêtre de navigation privée\n2. Entrez votre e-mail et utilisez "Mot de passe oublié ?" pour en définir un nouveau\n3. Connectez-vous avec votre nouveau mot de passe\n\nN'hésitez pas à nous recontacter si cela ne fonctionne pas.\n\nCordialement\nCivicLearn Support`
+  }),
+  'Email not found': (m) => ({
+    subject: `Re: Adgang til din konto`,
+    body: `Hej ${m.name || ''},\n\nJeg kan se, at den e-mail du har skrevet, ikke matcher vores systemer. Det kan skyldes en lille stavefejl ved købet.\n\nKan du bekræfte hvilken e-mailadresse du brugte da du betalte? (Tjek evt. din kvittering fra Stripe)\n\nNår vi har fundet den rigtige adresse, kan vi hurtigt oprette din adgang.\n\nMed venlig hilsen\nCivicLearn Support`
+  }),
+  'Old WP Customer': (m) => ({
+    subject: `Re: Din adgang til CivicLearn`,
+    body: `Hej ${m.name || ''},\n\nTak for din henvendelse. Din konto er fra vores tidligere platform, og vi er ved at overføre den manuelt.\n\nVi opretter din adgang og sender dig en bekræftelse inden for 24 timer.\n\nUndskyld besværet – og tak for tålmodigheden.\n\nMed venlig hilsen\nCivicLearn Support`
+  }),
+  'Refund Request': (m) => ({
+    subject: `Re: Your refund request`,
+    body: `Hi ${m.name || ''},\n\nThank you for reaching out. We're sorry to hear that CivicLearn didn't meet your expectations.\n\nCould you tell us a bit more about what happened? We'd like to understand the situation before processing anything, and in many cases we can resolve the issue directly.\n\nLooking forward to hearing from you.\n\nBest regards\nCivicLearn Support`
+  }),
+  'Progress Lost': (m) => ({
+    subject: `Re: Din fremgang`,
+    body: `Hej ${m.name || ''},\n\nJeg beklager ulejligheden. Din fremgang er gemt på vores server og er ikke tabt.\n\nDet du ser er sandsynligvis et synkroniseringsproblem. Prøv at:\n1. Logge ud og ind igen\n2. Åbne dashboardet i en frisk browser\n\nHvis fremgangen stadig mangler, hjælper vi dig med at gendanne den.\n\nMed venlig hilsen\nCivicLearn Support`
+  }),
+  'Spam / Close': () => ({
+    subject: '',
+    body: ''
+  }),
+};
+
+// ── AUTH ──
+function tryLogin() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === 'Den21973') {
+    adminPw = pw;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    loadMessages();
+  } else {
+    document.getElementById('login-err').textContent = 'Incorrect password.';
+    document.getElementById('pw-input').value = '';
+  }
+}
+document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+// ── API ──
+async function api(body) {
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPw },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+// ── LOAD ──
+async function loadMessages() {
+  document.getElementById('msg-list').innerHTML = '<div class="loader"><span class="spin"></span>Loading…</div>';
+  try {
+    const data = await api({ action: 'list', filter: currentFilter });
+    allMessages = data.messages || [];
+    updateStats(data.stats || {});
+    renderList(allMessages);
+    // Restore selection
+    if (currentId) {
+      const m = allMessages.find(x => x.id === currentId);
+      if (m) renderDetail(m); else clearDetail();
+    }
+  } catch (e) {
+    document.getElementById('msg-list').innerHTML = `<div class="empty-state">Error loading: ${e.message}</div>`;
+  }
+}
+
+function updateStats(s) {
+  document.getElementById('count-open').textContent = (s.new || 0) + (s.null || 0);
+  document.getElementById('count-replied').textContent = s.replied || 0;
+  document.getElementById('count-spam').textContent = s.spam || 0;
+  document.getElementById('count-total').textContent = s.total || 0;
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  currentId = null;
+  ['open','replied','spam','all'].forEach(x => {
+    document.getElementById('filter-' + x).classList.toggle('active', x === f);
+  });
+  loadMessages();
+}
+
+// ── RENDER LIST ──
+function renderList(msgs) {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const filtered = msgs.filter(m =>
+    !search ||
+    (m.name||'').toLowerCase().includes(search) ||
+    (m.email||'').toLowerCase().includes(search) ||
+    (m.message||'').toLowerCase().includes(search)
+  );
+
+  if (!filtered.length) {
+    document.getElementById('msg-list').innerHTML = '<div class="empty-state">No messages found</div>';
+    return;
+  }
+
+  const html = filtered.map(m => {
+    const status = m.status || 'new';
+    const hasDraft = !!m.ai_draft;
+    const name = m.name || m.email || 'Unknown';
+    const preview = (m.message || '').replace(/\n/g, ' ').slice(0, 90);
+    const site = m.site ? m.site.replace('civiclearn.com','CL').replace('indfodsretsprove.dk','DK').replace('medborgerskabsprove.dk','DK-PR').replace('vivre-ensemble.lu','LU') : '';
+    const ago = timeAgo(m.created_at);
+    return `
+      <div class="msg-item ${m.id === currentId ? 'active' : ''}" onclick="selectMsg('${m.id}')">
+        <div class="msg-item-top">
+          <div class="msg-name">${esc(name)}</div>
+          <div class="msg-time">${ago}</div>
+        </div>
+        <div class="msg-email">${esc(m.email||'')}</div>
+        <div class="msg-preview">${esc(preview)}</div>
+        <div class="msg-footer">
+          <span class="status-badge badge-${status}">${status}</span>
+          ${site ? `<span class="site-tag">${esc(site)}</span>` : ''}
+          ${hasDraft ? '<span class="has-draft-dot" title="AI draft ready"></span>' : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('msg-list').innerHTML = html;
+}
+
+function filterList() { renderList(allMessages); }
+
+// ── SELECT MESSAGE ──
+function selectMsg(id) {
+  currentId = id;
+  const m = allMessages.find(x => x.id === id);
+  if (m) {
+    renderList(allMessages); // re-render to show active state
+    renderDetail(m);
+  }
+}
+
+function clearDetail() {
+  document.getElementById('right-panel').innerHTML = `
+    <div class="empty-detail">
+      <div class="empty-detail-icon">📬</div>
+      <div class="empty-detail-text">Select a message to view</div>
+    </div>`;
+}
+
+// ── RENDER DETAIL ──
+function renderDetail(m) {
+  const status = m.status || 'new';
+  const user = m.user;
+  const isReplied = status === 'replied' || status === 'ignored' || status === 'spam';
+
+  // Build subject from template or default
+  const defaultSubject = `Re: ${m.name ? 'Support request from ' + m.name : 'Your message to CivicLearn'}`;
+  const draft = m.ai_draft || '';
+  const subject = m.ai_subject || defaultSubject;
+
+  const userHtml = user
+    ? `<div class="user-card">
+        <div class="user-card-stat"><div class="user-card-label">Status</div><div class="user-card-value exists">✓ User found</div></div>
+        <div class="user-card-stat"><div class="user-card-label">Bundle</div><div class="user-card-value">${esc(user.bundle||'—')}</div></div>
+        <div class="user-card-stat"><div class="user-card-label">Member since</div><div class="user-card-value">${fmtDate(user.created_at)}</div></div>
+      </div>`
+    : `<div class="user-card">
+        <div class="user-card-stat"><div class="user-card-label">Status</div><div class="user-card-value missing">✗ Not in users table</div></div>
+      </div>`;
+
+  const tplHtml = Object.keys(TEMPLATES).map(k =>
+    `<button class="tpl-btn" onclick="applyTemplate('${k.replace(/'/g,"\\'")}', '${m.id}')">${esc(k)}</button>`
+  ).join('');
+
+  const actionsHtml = isReplied
+    ? `<button class="btn btn-reopen" onclick="doReopen('${m.id}')">↩ Reopen</button>`
+    : `<button class="btn btn-send" onclick="doSend('${m.id}')" id="btn-send-${m.id}">✓ Approve & Send</button>
+       <button class="btn btn-ignore" onclick="doIgnore('${m.id}')">Ignore</button>
+       <button class="btn btn-spam" onclick="doSpam('${m.id}')">Spam</button>`;
+
+  document.getElementById('right-panel').innerHTML = `
+    <div class="detail">
+      <div class="detail-header">
+        <div class="detail-name">${esc(m.name || m.email || 'Unknown')}</div>
+        <div class="detail-meta">
+          <span class="meta-chip"><a href="mailto:${esc(m.email||'')}">${esc(m.email||'')}</a></span>
+          <span class="meta-chip">📍 ${esc(m.site||'unknown')} · ${esc(m.page||'')}</span>
+          <span class="meta-chip">🕐 ${fmtDateTime(m.created_at)}</span>
+          <span class="status-badge badge-${status}">${status}</span>
+        </div>
+      </div>
+      ${userHtml}
+      <div class="detail-body">
+        <div class="section-label">Message</div>
+        <div class="message-box">${esc(m.message||'')}</div>
+
+        ${!isReplied ? `
+        <div class="section-label">Reply <span>${m.ai_draft ? '· AI draft ready' : ''}</span></div>
+        <input type="text" class="subject-input" id="subj-${m.id}" value="${esc(subject)}" placeholder="Subject line…">
+        <div class="section-label" style="margin-top:0.4rem">Templates</div>
+        <div class="templates-row">${tplHtml}</div>
+        <textarea class="draft-area" id="draft-${m.id}" placeholder="Type your reply here, or use a template above…">${esc(draft)}</textarea>
+        ` : `
+        ${m.replied_at ? `<div class="section-label">Replied ${fmtDateTime(m.replied_at)}</div>` : ''}
+        `}
+
+        ${m.notes ? `<div class="section-label" style="margin-top:1rem">Notes</div><div class="message-box" style="font-size:0.78rem;color:var(--muted)">${esc(m.notes)}</div>` : ''}
+      </div>
+      <div class="action-bar">
+        ${actionsHtml}
+        <span class="send-status" id="send-status-${m.id}">✓ Sent</span>
+        ${!isReplied ? `<button class="btn btn-claude" onclick="chatWithClaude('${m.id}')">💬 Chat with Claude</button>` : ''}
+      </div>
+    </div>`;
+}
+
+// ── TEMPLATE APPLY ──
+function applyTemplate(name, msgId) {
+  const m = allMessages.find(x => x.id === msgId);
+  if (!m) return;
+  const tpl = TEMPLATES[name];
+  if (!tpl) return;
+  if (name === 'Spam / Close') { doSpam(msgId); return; }
+  const { subject, body } = tpl(m);
+  const subjEl = document.getElementById('subj-' + msgId);
+  const draftEl = document.getElementById('draft-' + msgId);
+  if (subjEl) subjEl.value = subject;
+  if (draftEl) draftEl.value = body;
+}
+
+// ── ACTIONS ──
+async function doSend(msgId) {
+  const m = allMessages.find(x => x.id === msgId);
+  if (!m) return;
+  const subject = document.getElementById('subj-' + msgId)?.value?.trim();
+  const body = document.getElementById('draft-' + msgId)?.value?.trim();
+  if (!subject || !body) { showToast('Subject and message are required', 'error'); return; }
+  const btn = document.getElementById('btn-send-' + msgId);
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  try {
+    await api({ action: 'send', message_id: msgId, to: m.email, subject, message: body });
+    showToast('Reply sent ✓', 'success');
+    document.getElementById('send-status-' + msgId).style.display = 'inline';
+    // Update local state
+    const idx = allMessages.findIndex(x => x.id === msgId);
+    if (idx >= 0) allMessages[idx].status = 'replied';
+    setTimeout(() => loadMessages(), 800);
+  } catch (e) {
+    showToast('Send failed: ' + e.message, 'error');
+    if (btn) { btn.disabled = false; btn.textContent = '✓ Approve & Send'; }
+  }
+}
+
+async function doIgnore(msgId) {
+  await api({ action: 'ignore', message_id: msgId });
+  showToast('Marked as ignored');
+  const idx = allMessages.findIndex(x => x.id === msgId);
+  if (idx >= 0) allMessages[idx].status = 'ignored';
+  currentId = null;
+  loadMessages();
+}
+
+async function doSpam(msgId) {
+  await api({ action: 'spam', message_id: msgId });
+  showToast('Marked as spam');
+  const idx = allMessages.findIndex(x => x.id === msgId);
+  if (idx >= 0) allMessages[idx].status = 'spam';
+  currentId = null;
+  loadMessages();
+}
+
+async function doReopen(msgId) {
+  await api({ action: 'reopen', message_id: msgId });
+  showToast('Reopened');
+  currentId = null;
+  loadMessages();
+}
+
+// ── CHAT WITH CLAUDE ──
+function chatWithClaude(msgId) {
+  const m = allMessages.find(x => x.id === msgId);
+  if (!m) return;
+  const user = m.user;
+  const ctx = [
+    `=== CIVICLEARN SUPPORT MESSAGE ===`,
+    `From: ${m.name || '(no name)'} <${m.email}>`,
+    `Site: ${m.site} | Page: ${m.page}`,
+    `Received: ${fmtDateTime(m.created_at)}`,
+    `Status: ${m.status || 'new'}`,
+    user ? `User: EXISTS in system | Bundle: ${user.bundle||'—'} | Member since: ${fmtDate(user.created_at)}` : `User: NOT FOUND in users table`,
+    ``,
+    `--- MESSAGE ---`,
+    m.message || '',
+    ``,
+    `--- CURRENT DRAFT ---`,
+    document.getElementById('draft-' + msgId)?.value || '(none)',
+    ``,
+    `Please help me craft an appropriate reply.`,
+  ].join('\n');
+
+  navigator.clipboard.writeText(ctx).then(() => {
+    showToast('Context copied to clipboard — opening CS Project', 'success');
+    setTimeout(() => window.open(CS_PROJECT, '_blank'), 400);
+  }).catch(() => {
+    window.open(CS_PROJECT, '_blank');
+  });
+}
+
+// ── UTILS ──
+function esc(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function timeAgo(iso) {
+  if (!iso) return '';
+  const d = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (d < 60) return 'just now';
+  if (d < 3600) return Math.floor(d/60) + 'm ago';
+  if (d < 86400) return Math.floor(d/3600) + 'h ago';
+  return Math.floor(d/86400) + 'd ago';
+}
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+}
+function fmtDateTime(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+}
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 2500);
+}
+
+// Auto-refresh every 3 minutes
+setInterval(() => { if (adminPw) loadMessages(); }, 180000);
+</script>
+</body>
+</html>
