@@ -734,7 +734,7 @@ function renderDetail(m) {
         ${m.thread_messages && m.thread_messages.length > 1 ? `
         <div class="section-label">Thread history <span style="color:var(--muted);font-weight:400">${m.thread_messages.length} messages</span></div>
         ${m.thread_messages.map((tm, i) => {
-          const replies = (m.sent_replies || []).filter(r => r.contact_message_id === tm.id);
+          const replies = (m.replies_by_message && m.replies_by_message[tm.id]) || [];
           return `<div style="margin-bottom:0.5rem">
             <div style="font-size:0.68rem;color:var(--muted);margin-bottom:0.25rem">${fmtDateTime(tm.created_at)} · ${esc(tm.site||'')}</div>
             <div class="message-box" style="${i < m.thread_messages.length-1 ? 'opacity:0.65;' : ''}">${esc(tm.message||'')}</div>
