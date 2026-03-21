@@ -3,27 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CivicLearn · Support Admin</title>
+<title>CivicLearn · Support Admin (Light)</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0c0c12;
-  --surface: #13131d;
-  --surface2: #1a1a28;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --text: #e8e6f0;
-  --muted: #7c7a90;
-  --brand: #7c5ce8;
-  --brand-dim: rgba(124,92,232,0.15);
-  --green: #34d399;
-  --green-dim: rgba(52,211,153,0.12);
-  --amber: #fbbf24;
-  --amber-dim: rgba(251,191,36,0.12);
-  --red: #f87171;
-  --red-dim: rgba(248,113,113,0.12);
-  --blue: #60a5fa;
-  --blue-dim: rgba(96,165,250,0.12);
+  --bg: #f5f5f8;
+  --surface: #ffffff;
+  --surface2: #f0f0f5;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #1a1828;
+  --muted: #8a88a0;
+  --brand: #6d4ed6;
+  --brand-dim: rgba(109,78,214,0.1);
+  --green: #059669;
+  --green-dim: rgba(5,150,105,0.1);
+  --amber: #d97706;
+  --amber-dim: rgba(217,119,6,0.1);
+  --red: #dc2626;
+  --red-dim: rgba(220,38,38,0.1);
+  --blue: #2563eb;
+  --blue-dim: rgba(37,99,235,0.1);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 15px; }
@@ -50,7 +50,7 @@ body {
   border-radius: 16px;
   padding: 2.5rem;
   width: 340px;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.12);
 }
 .login-logo {
   display: flex; align-items: center; gap: 10px;
@@ -333,7 +333,7 @@ body {
   background: var(--surface2); border: 1px solid var(--border2);
   padding: 0.65rem 1.4rem; border-radius: 10px;
   font-size: 0.82rem; font-weight: 500;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
   opacity: 0; transition: opacity 0.25s;
   pointer-events: none; z-index: 999; white-space: nowrap;
 }
@@ -346,7 +346,7 @@ body {
 
 /* ── TEMPLATE MANAGER MODAL ── */
 .modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  position: fixed; inset: 0; background: rgba(0,0,0,0.35);
   z-index: 2000; display: flex; align-items: center; justify-content: center;
   opacity: 0; pointer-events: none; transition: opacity 0.2s;
 }
@@ -355,7 +355,7 @@ body {
   background: var(--surface); border: 1px solid var(--border2);
   border-radius: 16px; width: 760px; max-width: 95vw; max-height: 85vh;
   display: flex; flex-direction: column; overflow: hidden;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.15);
 }
 .modal-header {
   padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border);
@@ -535,7 +535,7 @@ body {
     border-radius: 16px 16px 0 0; z-index: 3000;
     transform: translateY(100%); transition: transform 0.3s ease;
     max-height: 70vh; overflow-y: auto;
-    box-shadow: 0 -8px 32px rgba(0,0,0,0.4);
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.1);
   }
   .mob-tpl-sheet.open { transform: translateY(0); }
   .mob-tpl-sheet-header {
@@ -569,6 +569,8 @@ body {
 .mob-secondary-row { display: none; }
 .mob-tpl-sheet { display: none; }
 .mob-tpl-sheet-overlay { display: none; }
+.mob-send-btn { display: none; }
+.mob-tpl-action-btn { display: none; }
 @media (max-width: 768px) {
   .mob-tpl-sheet { display: block; }
   /* NOTE: .mob-tpl-sheet-overlay must NOT be set to display:block here —
@@ -583,6 +585,18 @@ body {
   .mob-secondary-row { display: flex; }
   /* Hide desktop-only analyze btn in search bar on mobile */
   .analyze-btn { display: none; }
+  /* Action bar: hide desktop buttons, show mobile ones */
+  .mob-hide { display: none !important; }
+  .mob-send-btn {
+    display: flex; width: 100%; justify-content: center;
+    padding: 0.85rem; font-size: 0.9rem; border-radius: 10px;
+  }
+  .mob-tpl-action-btn {
+    display: flex; width: 100%; justify-content: center;
+    background: var(--surface2); color: var(--text);
+    border: 1px solid var(--border2); border-radius: 10px;
+    padding: 0.7rem; font-size: 0.85rem; font-weight: 600;
+  }
 }
 </style>
 </head>
@@ -881,14 +895,11 @@ function renderDetail(m) {
   const mobDraftText = (dirtyDrafts[m.id] && dirtyDrafts[m.id].body) || m.ai_draft || '';
   const actionsHtml = isReplied
     ? `<button class="btn btn-reopen" onclick="doReopen('${m.id}')">↩ Reopen</button>`
-    : `<button class="btn btn-send" onclick="doSend('${m.id}')" id="btn-send-${m.id}">✓ Approve & Send</button>
-       <button class="btn btn-ignore" onclick="doIgnore('${m.id}')">Ignore</button>
-       <button class="btn btn-spam" onclick="doSpam('${m.id}')">Spam</button>
-       <div class="mob-secondary-row" style="margin-top:0.3rem">
-         <button class="btn" style="flex:1;justify-content:center;background:var(--brand-dim);color:var(--brand);border:1px solid rgba(109,92,232,0.3)" onclick="openMobTplSheet('${m.id}')">📋 Template</button>
-         <button class="btn" style="flex:1;justify-content:center;background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,0.2)" onclick="mobClearDraft('${m.id}')">✕ Clear</button>
-       </div>
-       <button class="btn btn-send" id="mob-send-${m.id}" onclick="mobSend('${m.id}')" style="width:100%;justify-content:center">✓ Send</button>`;
+    : `<button class="btn btn-send mob-hide" onclick="doSend('${m.id}')" id="btn-send-${m.id}">✓ Approve &amp; Send</button>
+       <button class="btn btn-ignore mob-hide" onclick="doIgnore('${m.id}')">Ignore</button>
+       <button class="btn btn-spam mob-hide" onclick="doSpam('${m.id}')">Spam</button>
+       <button class="btn btn-send mob-send-btn" id="mob-send-${m.id}" onclick="mobSend('${m.id}')">✓ Approve &amp; Send</button>
+       <button class="btn mob-tpl-action-btn" onclick="openMobTplSheet('${m.id}')">📋 Template</button>`;
 
   document.getElementById('right-panel').innerHTML = `
     <div class="detail">
@@ -944,8 +955,8 @@ function renderDetail(m) {
       </div>
       ${!isReplied ? `
       <div class="detail-body" style="padding-top:0">
-        <div class="mob-draft-label" id="mob-draft-label-\${m.id}" style="\${mobDraftText ? '' : 'display:none'}">AI Draft / Template</div>
-        <div class="mob-draft-preview" id="mob-draft-\${m.id}">\${esc(mobDraftText)}</div>
+        <div class="mob-draft-label" id="mob-draft-label-${m.id}" style="${mobDraftText ? '' : 'display:none'}">AI Draft / Template</div>
+        <div class="mob-draft-preview" id="mob-draft-${m.id}">${esc(mobDraftText)}</div>
       </div>` : ''}
       <div class="action-bar">
         ${actionsHtml}
