@@ -657,6 +657,7 @@ function renderList(msgs) {
         <div class="msg-footer">
           <span class="status-badge badge-${status}">${status}</span>
           ${site ? `<span class="site-tag">${esc(site)}</span>` : ''}
+          ${m.message_count > 1 ? `<span class="site-tag" style="background:var(--amber-dim);color:var(--amber)">↩ ${m.message_count} msgs</span>` : ''}
           ${m.ai_confidence ? `<span class="confidence-${m.ai_confidence.toLowerCase()}">${m.ai_confidence}</span>` : ''}
           ${hasDraft ? '<span class="has-draft-dot" title="AI draft ready"></span>' : ''}
         </div>
@@ -730,8 +731,23 @@ function renderDetail(m) {
       </div>
       ${userHtml}
       <div class="detail-body">
+        ${m.thread_messages && m.thread_messages.length > 1 ? `
+        <div class="section-label">Thread history <span style="color:var(--muted);font-weight:400">${m.thread_messages.length} messages</span></div>
+        ${m.thread_messages.map((tm, i) => {
+          const replies = (m.sent_replies || []).filter(r => r.contact_message_id === tm.id);
+          return `<div style="margin-bottom:0.5rem">
+            <div style="font-size:0.68rem;color:var(--muted);margin-bottom:0.25rem">${fmtDateTime(tm.created_at)} · ${esc(tm.site||'')}</div>
+            <div class="message-box" style="${i < m.thread_messages.length-1 ? 'opacity:0.65;' : ''}">${esc(tm.message||'')}</div>
+            ${replies.map(r => `<div class="message-box" style="border-color:rgba(52,211,153,0.2);background:rgba(52,211,153,0.04);margin-top:0.3rem;font-size:0.78rem">
+              <div style="font-size:0.68rem;color:var(--green);margin-bottom:0.3rem">↳ Sent ${fmtDateTime(r.sent_at)}</div>
+              ${esc(r.message||'').replace(/\n/g,'<br>')}
+            </div>`).join('')}
+          </div>`;
+        }).join('')}
+        ` : `
         <div class="section-label">Message</div>
         <div class="message-box">${esc(m.message||'')}</div>
+        `}
 
         ${!isReplied ? `
         <div class="section-label">Reply <span>${m.ai_draft ? '· AI draft ready' : ''}</span></div>
