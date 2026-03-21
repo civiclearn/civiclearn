@@ -432,6 +432,13 @@ body {
   /* Lock body only when app is visible */
   body.app-visible { overflow: hidden; }
 
+  /* App container: full height */
+  #app {
+    height: 100vh;
+    overflow: hidden;
+    flex-direction: column;
+  }
+
   /* Topbar: compact */
   .topbar { padding: 0 0.75rem; height: 48px; }
   .topbar-title { display: none; }
@@ -464,8 +471,12 @@ body {
   /* Hide desktop templates button */
   .topbar > .tpl-btn { display: none; }
 
-  /* Main: stack vertically, full screen */
-  .main { position: relative; overflow: hidden; }
+  /* Main: stack vertically, full screen — explicit height needed for absolute children */
+  .main {
+    position: relative; overflow: hidden;
+    height: calc(100vh - 48px);
+    flex: none;
+  }
 
   /* LEFT PANEL: full width list, slides out when detail shown */
   .left-panel {
