@@ -789,9 +789,10 @@ async function runAnalysis() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spin"></span> Running…';
   try {
-    const res = await fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/support-preanalyze', {
+    const res = await fetch('https://htgliokekeaovdiafrgs.supabase.co/functions/v1/support-admin', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPw }
+      headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPw },
+      body: JSON.stringify({ action: 'analyze' })
     });
     const data = await res.json();
     if (data.processed !== undefined) {
