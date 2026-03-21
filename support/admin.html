@@ -186,6 +186,9 @@ body {
 .badge-ignored { background: rgba(255,255,255,0.05); color: var(--muted); }
 .badge-spam { background: var(--red-dim); color: var(--red); }
 .site-tag { font-size: 0.66rem; color: var(--muted); background: var(--surface2); padding: 2px 6px; border-radius: 4px; }
+.confidence-high { font-size: 0.64rem; font-weight: 700; padding: 2px 7px; border-radius: 99px; background: var(--green-dim); color: var(--green); }
+.confidence-medium { font-size: 0.64rem; font-weight: 700; padding: 2px 7px; border-radius: 99px; background: var(--amber-dim); color: var(--amber); }
+.confidence-low { font-size: 0.64rem; font-weight: 700; padding: 2px 7px; border-radius: 99px; background: var(--red-dim); color: var(--red); }
 .has-draft-dot {
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--amber); margin-left: auto;
@@ -547,6 +550,7 @@ function renderList(msgs) {
         <div class="msg-footer">
           <span class="status-badge badge-${status}">${status}</span>
           ${site ? `<span class="site-tag">${esc(site)}</span>` : ''}
+          ${m.ai_confidence ? `<span class="confidence-${m.ai_confidence.toLowerCase()}">${m.ai_confidence}</span>` : ''}
           ${hasDraft ? '<span class="has-draft-dot" title="AI draft ready"></span>' : ''}
         </div>
       </div>`;
@@ -615,6 +619,7 @@ function renderDetail(m) {
           <span class="meta-chip">📍 ${esc(m.site||'unknown')} · ${esc(m.page||'')}</span>
           <span class="meta-chip">🕐 ${fmtDateTime(m.created_at)}</span>
           <span class="status-badge badge-${status}">${status}</span>
+          ${m.ai_confidence ? `<span class="confidence-${m.ai_confidence.toLowerCase()}">${m.ai_confidence} · Cat ${m.ai_category||'?'}</span>` : ''}
         </div>
       </div>
       ${userHtml}
