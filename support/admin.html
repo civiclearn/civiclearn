@@ -42,7 +42,7 @@ body {
   position: fixed; inset: 0;
   background: var(--bg);
   display: flex; align-items: center; justify-content: center;
-  z-index: 1000;
+  z-index: 5000;
 }
 .login-card {
   background: var(--surface);
@@ -429,8 +429,8 @@ body {
    ═══════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-  /* Lock body, prevent overflow */
-  body { overflow: hidden; }
+  /* Lock body only when app is visible */
+  body.app-visible { overflow: hidden; }
 
   /* Topbar: compact */
   .topbar { padding: 0 0.75rem; height: 48px; }
@@ -796,6 +796,7 @@ function tryLogin() {
     adminPw = pw;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
+    document.body.classList.add('app-visible');
     loadMessages();
   } else {
     document.getElementById('login-err').textContent = 'Incorrect password.';
