@@ -35,6 +35,12 @@
      the newer object wholesale — no per-key union. This means deletions
      (which reduce the set) are never resurrected by a stale session on
      another device. mergeProgress and mergeStats are completely unchanged.
+   - FIX: page reload after pull now triggers whenever local data was updated
+     from remote, not just when there was also something to push back. Previously
+     a brand-new device (empty localStorage, nothing to push) would pull remote
+     data into localStorage but never reload — so the page stayed showing the
+     empty pre-sync state (e.g. My List appeared empty despite saved questions
+     existing in Supabase).
    ============================================ */
 
 (function () {
@@ -261,16 +267,22 @@
 
         console.log("[Sync] Pull complete.", keysToWrite.length, "key(s) updated locally,", keysToPush.length, "key(s) to push.");
 
+        // Reload if local data was updated from remote, regardless of whether we need to push.
+        // Previously the reload was gated inside the keysToPush block, which meant a brand-new
+        // device (empty localStorage, nothing to push) would pull remote data into localStorage
+        // but never reload — so the page stayed showing the empty pre-sync state.
+        var needsReload = keysToWrite.length > 0 && !sessionStorage.getItem("civicsync_loaded");
+        if (needsReload) {
+          sessionStorage.setItem("civicsync_loaded", "1");
+        }
+
         if (keysToPush.length > 0) {
           return pushKeys(keysToPush).then(function () {
-            // Only reload if local data actually changed (i.e. remote had something new)
-            if (keysToWrite.length > 0 && !sessionStorage.getItem("civicsync_loaded")) {
-              sessionStorage.setItem("civicsync_loaded", "1");
-              location.reload();
-            }
+            if (needsReload) location.reload();
           });
         } else {
           console.log("[Sync] Server already up to date. No push needed.");
+          if (needsReload) location.reload();
         }
       })
       .catch(function (err) {
