@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CivicLearn · Support Admin</title>
+<title>CivicLearn · Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root {
   --bg: #0c0c12;
@@ -598,6 +599,123 @@ body {
     padding: 0.7rem; font-size: 0.85rem; font-weight: 600;
   }
 }
+/* ── TABS ── */
+.tab-nav {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  margin-right: auto;
+}
+.tab-btn {
+  padding: 5px 14px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.tab-btn:hover { background: var(--surface2); color: var(--text); }
+.tab-btn.active { background: var(--brand-dim); color: var(--brand); }
+
+.tab-panel { display: none; flex: 1; overflow: hidden; flex-direction: column; }
+.tab-panel.active { display: flex; }
+
+/* ── REVENUE TAB ── */
+#tab-revenue {
+  overflow-y: auto;
+  padding: 1.5rem;
+  background: var(--bg);
+}
+.rev-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.rev-kpi-card {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 1.1rem 1.1rem 0.9rem;
+  border: 1px solid var(--border);
+}
+.rev-kpi-label {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 0.5rem;
+}
+.rev-kpi-value {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 0.45rem;
+}
+.rev-kpi-value.pending { color: var(--muted); }
+.rev-kpi-yoy {
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.rev-kpi-yoy.up   { color: var(--green); }
+.rev-kpi-yoy.down { color: var(--red); }
+.rev-kpi-yoy.flat { color: var(--muted); }
+.rev-chart-card, .rev-table-card {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  margin-bottom: 1.25rem;
+}
+.rev-card-title {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 1rem;
+}
+.rev-chart-wrap { position: relative; height: 200px; }
+.rev-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.rev-table thead th {
+  text-align: right;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0 0.6rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+.rev-table thead th:first-child { text-align: left; }
+.rev-table tbody tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
+.rev-table tbody td { padding: 0.55rem 0.6rem; text-align: right; color: var(--muted); }
+.rev-table tbody td:first-child { text-align: left; font-weight: 500; color: var(--text); }
+.rev-table tbody tr:first-child td { color: var(--brand); font-weight: 600; }
+.rev-live-dot {
+  display: inline-block; width: 6px; height: 6px;
+  background: var(--green); border-radius: 50%; margin-left: 5px;
+  vertical-align: middle; animation: rev-pulse 1.5s infinite;
+}
+@keyframes rev-pulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
+.rev-load-bar {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 0.7rem 1rem;
+  margin-bottom: 1.25rem; font-size: 0.82rem; color: var(--muted);
+}
+.rev-load-bar span { flex: 1; }
+.rev-note { font-size: 0.72rem; color: var(--muted); margin-top: 0.6rem; line-height: 1.5; opacity: 0.7; }
+
 </style>
 </head>
 <body>
@@ -609,7 +727,7 @@ body {
       <div class="login-logo-mark">CL</div>
       <div>
         <div class="login-logo-text">CivicLearn</div>
-        <div class="login-logo-sub">Support Admin</div>
+        <div class="login-logo-sub">Admin Dashboard</div>
       </div>
     </div>
     <div class="login-title">Sign in</div>
@@ -630,13 +748,16 @@ body {
       <div class="topbar-name">CivicLearn</div>
     </div>
     <div class="topbar-divider"></div>
-    <div class="topbar-title">Support Dashboard</div>
-    <button class="tpl-btn" style="font-size:0.76rem;padding:4px 12px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif" onclick="openTemplateManager()">📋 Templates</button>
+    <div class="tab-nav">
+      <button class="tab-btn active" id="tab-btn-support" onclick="switchTab('support')">Support</button>
+      <button class="tab-btn" id="tab-btn-revenue" onclick="switchTab('revenue')">Revenue</button>
+    </div>
+    <button class="tpl-btn" id="tpl-btn-topbar" style="font-size:0.76rem;padding:4px 12px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif" onclick="openTemplateManager()">📋 Templates</button>
     <div class="mob-topbar-actions">
         <button class="mob-analyze-btn" onclick="runAnalysis()">⚡ Analyze</button>
         <button class="mob-tpl-btn" onclick="openMobTplSheet(null)">📋</button>
       </div>
-    <div class="topbar-stats">
+    <div class="topbar-stats" id="support-topbar-stats">
       <div class="stat-pill active" onclick="setFilter('open')" id="filter-open">
         <div class="stat-dot dot-new"></div>
         <span>Open</span> <span class="stat-count" id="count-open">–</span>
@@ -655,6 +776,8 @@ body {
     </div>
   </div>
 
+  <!-- SUPPORT TAB -->
+  <div class="tab-panel active" id="tab-support">
   <!-- MAIN -->
   <div class="main">
 
@@ -679,6 +802,25 @@ body {
     </div>
 
   </div>
+  </div><!-- /tab-support -->
+
+  <!-- REVENUE TAB -->
+  <div class="tab-panel" id="tab-revenue">
+    <div class="rev-load-bar">
+      <span id="rev-status">Historical data loaded · enter password to fetch live March figures</span>
+      <button onclick="loadRevLive()" id="rev-load-btn" style="background:var(--brand);color:#fff;border:none;border-radius:6px;padding:4px 14px;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:500;cursor:pointer">Load live</button>
+    </div>
+    <div class="rev-kpi-grid" id="rev-kpi-grid"></div>
+    <div class="rev-chart-card">
+      <div class="rev-card-title">Monthly revenue — last 24 months</div>
+      <div class="rev-chart-wrap"><canvas id="rev-chart"></canvas></div>
+    </div>
+    <div class="rev-table-card">
+      <div class="rev-card-title">Year-over-year comparison</div>
+      <table class="rev-table" id="rev-yoy-table"></table>
+      <div class="rev-note">Historical (up to Feb 2026) from Stripe payouts export — net of fees. Live figures from charges API on demand.</div>
+    </div>
+  </div><!-- /tab-revenue -->
 </div>
 
 <div class="toast" id="toast"></div>
@@ -779,6 +921,7 @@ async function tryLogin() {
     document.getElementById('app').style.display = 'flex';
     document.body.classList.add('app-visible');
     loadMessages();
+    renderRevenue();
   } catch(e) {
     errEl.textContent = 'Connection error. Try again.';
     btn.disabled = false;
@@ -1411,6 +1554,168 @@ async function mobClearDraft(msgId) {
 
 // Auto-refresh every 3 minutes
 setInterval(() => { if (adminPw) loadMessages(); }, 180000);
+
+// ── TAB SWITCHING ─────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('tab-btn-' + name).classList.add('active');
+  // Show/hide support-only topbar elements
+  const supportOnly = ['support-topbar-stats', 'tpl-btn-topbar'];
+  supportOnly.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = name === 'support' ? '' : 'none';
+  });
+  if (name === 'revenue') renderRevenue();
+}
+
+// ── REVENUE ───────────────────────────────────────────────────────────────────
+const REV_HISTORY = [
+  { month: '2024-04', eur: 15081.65 },
+  { month: '2024-05', eur: 21369.35 },
+  { month: '2024-06', eur: 19916.16 },
+  { month: '2024-07', eur:  7500.99 },
+  { month: '2024-08', eur:  6353.04 },
+  { month: '2024-09', eur: 10873.29 },
+  { month: '2024-10', eur: 12523.55 },
+  { month: '2024-11', eur: 20671.70 },
+  { month: '2024-12', eur: 19192.93 },
+  { month: '2025-01', eur:  4877.82 },
+  { month: '2025-02', eur: 10247.71 },
+  { month: '2025-03', eur: 12303.46 },
+  { month: '2025-04', eur: 14893.30 },
+  { month: '2025-05', eur: 21010.02 },
+  { month: '2025-06', eur: 19547.69 },
+  { month: '2025-07', eur:  5418.83 },
+  { month: '2025-08', eur:  6639.11 },
+  { month: '2025-09', eur:  9263.03 },
+  { month: '2025-10', eur: 15028.99 },
+  { month: '2025-11', eur: 23586.24 },
+  { month: '2025-12', eur: 21525.76 },
+  { month: '2026-01', eur: 19433.01 },
+  { month: '2026-02', eur: 16523.80 },
+];
+const REV_PREV_JAN_FEB = 4877.82 + 10247.71; // Jan+Feb 2025
+const REV_FN = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/stripe_metrics_summary';
+let revLiveData = null;
+let revChart = null;
+
+function revFmt(n) {
+  if (n == null) return '—';
+  return n >= 1000 ? '€' + (n / 1000).toFixed(1) + 'k' : '€' + Math.round(n);
+}
+function revFmtFull(n) {
+  if (n == null) return '—';
+  return '€' + Math.round(n).toLocaleString('en');
+}
+function revYoyBadge(cur, prev) {
+  if (cur == null) return `<span class="rev-kpi-yoy flat">— load for live data</span>`;
+  if (!prev)       return `<span class="rev-kpi-yoy flat">—</span>`;
+  const p = (cur - prev) / prev * 100;
+  const cls = p > 0 ? 'up' : p < 0 ? 'down' : 'flat';
+  const arrow = p > 0 ? '▲' : p < 0 ? '▼' : '–';
+  return `<div class="rev-kpi-yoy ${cls}">${arrow} ${Math.abs(p).toFixed(1)}% vs prior year</div>`;
+}
+
+function renderRevenue() {
+  const L = revLiveData;
+  const today = L ? L.today : null;
+  const wtd   = L ? L.wtd   : null;
+  const mtd   = L ? L.mtd   : null;
+  const ytd2026 = 19433.01 + 16523.80 + (mtd || 0);
+  const ytd2025 = L ? (REV_PREV_JAN_FEB + L.mtd_prev) : null;
+
+  document.getElementById('rev-kpi-grid').innerHTML = [
+    { label: 'Today',         cur: today,   prev: L ? L.today_prev : null },
+    { label: 'Week to date',  cur: wtd,     prev: L ? L.wtd_prev   : null },
+    { label: 'Month to date', cur: mtd,     prev: L ? L.mtd_prev   : null },
+    { label: 'Year to date',  cur: ytd2026, prev: ytd2025 },
+  ].map(k => `
+    <div class="rev-kpi-card">
+      <div class="rev-kpi-label">${k.label}</div>
+      <div class="rev-kpi-value ${k.cur == null ? 'pending' : ''}">${revFmt(k.cur)}</div>
+      ${revYoyBadge(k.cur, k.prev)}
+    </div>`).join('');
+
+  const chartData = [...REV_HISTORY, { month: '2026-03', eur: mtd || 0, partial: true }];
+  const labels = chartData.map(({ month }) => {
+    const [y, mo] = month.split('-');
+    return new Date(+y, +mo - 1, 1).toLocaleString('default', { month: 'short' }) + " '" + String(+y).slice(2);
+  });
+
+  if (revChart) revChart.destroy();
+  revChart = new Chart(document.getElementById('rev-chart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: chartData.map(d => d.eur),
+        backgroundColor: chartData.map(d => d.partial ? 'rgba(124,92,232,0.3)' : 'rgba(124,92,232,0.7)'),
+        borderRadius: 4,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => revFmtFull(ctx.raw) + (chartData[ctx.dataIndex].partial ? ' (in progress)' : '')
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#7c7a90', font: { size: 10 }, maxRotation: 45 } },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#7c7a90', font: { size: 10 }, callback: v => v >= 1000 ? '€' + (v/1000).toFixed(0) + 'k' : '€' + v }
+        }
+      }
+    }
+  });
+
+  let html = `<thead><tr><th>Year</th><th>Day</th><th>WTD</th><th>MTD</th><th>YTD</th></tr></thead><tbody>`;
+  html += `<tr>
+    <td>2026${L ? '<span class="rev-live-dot"></span>' : ''}</td>
+    <td>${revFmtFull(today)}</td><td>${revFmtFull(wtd)}</td>
+    <td>${revFmtFull(mtd)}</td><td>${revFmtFull(ytd2026)}</td></tr>`;
+  html += `<tr><td>2025</td>
+    <td>${revFmtFull(L ? L.today_prev : null)}</td><td>${revFmtFull(L ? L.wtd_prev : null)}</td>
+    <td>${revFmtFull(L ? L.mtd_prev : null)}</td><td>${revFmtFull(ytd2025)}</td></tr>`;
+  html += '</tbody>';
+  document.getElementById('rev-yoy-table').innerHTML = html;
+}
+
+async function loadRevLive() {
+  if (!adminPw) return;
+  const btn = document.getElementById('rev-load-btn');
+  btn.disabled = true; btn.textContent = 'Loading…';
+  document.getElementById('rev-status').textContent = 'Fetching live data…';
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90000);
+    let res;
+    try {
+      res = await fetch(REV_FN, { signal: controller.signal, headers: { 'X-Admin-Key': adminPw, 'Content-Type': 'application/json' } });
+    } finally { clearTimeout(timeout); }
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Request failed');
+    const cur = data.summary[0], prev = data.summary[1];
+    revLiveData = { today: cur.day_eur, wtd: cur.week_eur, mtd: cur.mtd_eur, today_prev: prev.day_eur, wtd_prev: prev.week_eur, mtd_prev: prev.mtd_eur };
+    document.getElementById('rev-status').textContent = 'Live · as of ' + data.as_of;
+    btn.textContent = 'Refresh';
+    renderRevenue();
+  } catch(e) {
+    document.getElementById('rev-status').textContent = 'Error: ' + e.message;
+    btn.textContent = 'Retry';
+  } finally {
+    btn.disabled = false;
+  }
+}
 </script>
 
 <!-- TEMPLATE MANAGER MODAL -->
