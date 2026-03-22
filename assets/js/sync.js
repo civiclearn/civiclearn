@@ -1,5 +1,5 @@
 /* ============================================
-   CivicLearn Sync v1.2
+   CivicLearn Sync v1.3
    Drop-in sync for all CivicLearn sites.
    ============================================
 
@@ -23,10 +23,18 @@
    - Skip push entirely if local data matches remote (no-op UPSERTs eliminated)
 
    v1.2 changes:
-   - FIX: mergeSaved now uses "deletion wins" logic (Math.min).
-     Previously used Math.max so an unsaved state on one device
-     was always overwritten by a saved state from Supabase,
-     making it impossible to permanently remove saved questions.
+   - FIX (incomplete): mergeSaved attempted "deletion wins" via Math.min.
+     This did not work because deleted questions are removed from the object
+     entirely (key absent), so the Math.min branch never ran — the remote
+     value always won via the undefined-guard at the top of the loop.
+
+   v1.3 changes:
+   - FIX: mergeSaved replaced with last-write-wins using a _ts timestamp.
+     schedulePush now stamps _ts = Date.now() onto civicedge_saved in
+     localStorage before any push. mergeSaved compares _ts values and returns
+     the newer object wholesale — no per-key union. This means deletions
+     (which reduce the set) are never resurrected by a stale session on
+     another device. mergeProgress and mergeStats are completely unchanged.
    ============================================ */
 
 (function () {
@@ -163,23 +171,14 @@
   }
 
   function mergeSaved(local, remote) {
-    var merged = {};
-    var allKeys = new Set(
-      Object.keys(local || {}).concat(Object.keys(remote || {}))
-    );
-    allKeys.forEach(function (k) {
-      var l = (local || {})[k];
-      var r = (remote || {})[k];
-      if (l === undefined || l === null) { merged[k] = r; return; }
-      if (r === undefined || r === null) { merged[k] = l; return; }
-      var lv = (l === true) ? 1 : (l || 0);
-      var rv = (r === true) ? 1 : (r || 0);
-      // FIX v1.2: Use Math.min so "unsaved/removed" always wins over "saved".
-      // Previously Math.max caused Supabase's saved=true to override local removals,
-      // making it impossible to permanently delete questions from My List.
-      merged[k] = (lv <= rv) ? l : r;
-    });
-    return merged;
+    // Last-write-wins: compare _ts timestamps and return the newer object wholesale.
+    // This is the only strategy that correctly handles deletions — per-key union
+    // approaches always resurrect deleted questions from stale sessions on other devices,
+    // because a deleted question has its key removed entirely from the object (not set to 0),
+    // so any union logic sees it as "missing locally" and restores the remote copy.
+    var lts = (local && local._ts) || 0;
+    var rts = (remote && remote._ts) || 0;
+    return lts >= rts ? local : remote;
   }
 
   function mergeKey(key, local, remote) {
@@ -324,6 +323,17 @@
   var _pendingKeys = {};
 
   function schedulePush(keys) {
+    // Stamp _ts on civicedge_saved so last-write-wins works correctly in mergeSaved.
+    // This must happen before the debounce fires so the timestamp reflects when the
+    // user actually made the change, not when the network write eventually goes out.
+    if (keys.indexOf("civicedge_saved") !== -1) {
+      var saved = readLS("civicedge_saved");
+      if (saved && typeof saved === "object") {
+        saved._ts = Date.now();
+        writeLS("civicedge_saved", saved);
+      }
+    }
+
     keys.forEach(function (k) { _pendingKeys[k] = true; });
 
     clearTimeout(_debounceTimer);
