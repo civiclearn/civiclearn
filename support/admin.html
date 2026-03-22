@@ -804,6 +804,135 @@ body {
 .kb-status.info { color: var(--muted); }
 .kb-char-count  { font-size: 0.72rem; color: var(--muted); margin-left: auto; }
 
+/* ── CONTENT TAB ── */
+#tab-content {
+  overflow-y: auto;
+  padding: 1.5rem;
+  background: var(--bg);
+}
+.ct-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+.ct-header h2 { font-size: 1rem; font-weight: 600; color: var(--text); }
+.ct-header p  { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+.ct-new-btn {
+  background: var(--brand); color: #fff; border: none;
+  border-radius: 8px; padding: 0.5rem 1.1rem;
+  font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; transition: opacity 0.15s; white-space: nowrap;
+}
+.ct-new-btn:hover { opacity: 0.88; }
+
+/* Notice list */
+.ct-notice-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
+.ct-notice-row {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 0.9rem 1rem;
+  display: flex; align-items: flex-start; gap: 0.75rem;
+}
+.ct-notice-row.enabled  { border-left: 3px solid var(--green); }
+.ct-notice-row.disabled { border-left: 3px solid var(--border2); opacity: 0.7; }
+.ct-notice-body { flex: 1; min-width: 0; }
+.ct-notice-top  { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.3rem; }
+.ct-type-badge {
+  font-size: 0.65rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 2px 7px; border-radius: 4px;
+}
+.ct-type-badge.info    { background: #e0f2fe; color: #075985; }
+.ct-type-badge.warning { background: #fff3cd; color: #4b3f00; }
+.ct-type-badge.outage  { background: #fee2e2; color: #7f1d1d; }
+.ct-type-badge.success { background: #dcfce7; color: #14532d; }
+.ct-targets { font-size: 0.72rem; color: var(--muted); }
+.ct-notice-text {
+  font-size: 0.8rem; color: var(--text); line-height: 1.4;
+  white-space: pre-wrap; word-break: break-word;
+}
+.ct-notice-meta { font-size: 0.7rem; color: var(--muted); margin-top: 0.35rem; }
+.ct-notice-actions { display: flex; flex-direction: column; gap: 0.4rem; align-items: flex-end; }
+.ct-toggle-btn {
+  font-size: 0.72rem; font-weight: 600; border-radius: 5px; border: none;
+  padding: 3px 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap;
+}
+.ct-toggle-btn.enable  { background: var(--green-dim); color: var(--green); }
+.ct-toggle-btn.disable { background: var(--red-dim); color: var(--red); }
+.ct-edit-btn, .ct-del-btn {
+  font-size: 0.72rem; border-radius: 5px; border: 1px solid var(--border2);
+  padding: 3px 10px; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  background: transparent; color: var(--muted); transition: color 0.15s;
+}
+.ct-edit-btn:hover { color: var(--text); }
+.ct-del-btn:hover  { color: var(--red); border-color: var(--red); }
+
+/* Editor form */
+.ct-editor {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem; display: none;
+}
+.ct-editor.open { display: block; }
+.ct-editor h3 { font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 1rem; }
+.ct-field { margin-bottom: 0.9rem; }
+.ct-label {
+  display: block; font-size: 0.72rem; font-weight: 500; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.35rem;
+}
+.ct-select, .ct-input {
+  background: var(--bg); border: 1px solid var(--border2); border-radius: 7px;
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+  padding: 0.45rem 0.7rem; outline: none; transition: border-color 0.15s;
+}
+.ct-select:focus, .ct-input:focus { border-color: var(--brand); }
+.ct-select { width: 100%; }
+.ct-input  { width: 100%; }
+.ct-textarea {
+  width: 100%; background: var(--bg); border: 1px solid var(--border2);
+  border-radius: 7px; color: var(--text); font-family: 'DM Mono', monospace;
+  font-size: 0.8rem; line-height: 1.5; padding: 0.6rem 0.75rem;
+  resize: vertical; outline: none; transition: border-color 0.15s; min-height: 72px;
+}
+.ct-textarea:focus { border-color: var(--brand); }
+.ct-targets-grid {
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+}
+.ct-target-chip {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 5px; padding: 3px 9px; cursor: pointer;
+  font-size: 0.75rem; color: var(--muted); transition: all 0.12s;
+}
+.ct-target-chip input { display: none; }
+.ct-target-chip.checked { background: var(--brand-dim); border-color: var(--brand); color: var(--brand); }
+.ct-lang-tabs { display: flex; gap: 4px; margin-bottom: 0.6rem; flex-wrap: wrap; }
+.ct-lang-tab {
+  font-size: 0.72rem; font-weight: 500; padding: 3px 10px;
+  border-radius: 5px; border: 1px solid var(--border2);
+  background: transparent; color: var(--muted); cursor: pointer;
+  font-family: 'DM Sans', sans-serif; transition: all 0.12s;
+}
+.ct-lang-tab.active { background: var(--brand-dim); border-color: var(--brand); color: var(--brand); }
+.ct-lang-pane { display: none; }
+.ct-lang-pane.active { display: block; }
+.ct-editor-footer { display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem; }
+.ct-save-btn {
+  background: var(--brand); color: #fff; border: none; border-radius: 8px;
+  padding: 0.55rem 1.3rem; font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s;
+}
+.ct-save-btn:hover { opacity: 0.88; }
+.ct-save-btn:disabled { opacity: 0.4; cursor: default; }
+.ct-cancel-btn {
+  background: transparent; color: var(--muted); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 0.5rem 1rem; font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem; cursor: pointer; transition: color 0.15s;
+}
+.ct-cancel-btn:hover { color: var(--text); }
+.ct-editor-status { font-size: 0.78rem; margin-left: auto; }
+.ct-editor-status.ok  { color: var(--green); }
+.ct-editor-status.err { color: var(--red); }
+.ct-empty { font-size: 0.82rem; color: var(--muted); padding: 1.5rem 0; text-align: center; }
+
 </style>
 </head>
 <body>
@@ -840,6 +969,7 @@ body {
       <button class="tab-btn active" id="tab-btn-support" onclick="switchTab('support')">Support</button>
       <button class="tab-btn" id="tab-btn-revenue" onclick="switchTab('revenue')">Revenue</button>
       <button class="tab-btn" id="tab-btn-kb" onclick="switchTab('kb')">Knowledge Base</button>
+      <button class="tab-btn" id="tab-btn-content" onclick="switchTab('content')">Content</button>
     </div>
     <button class="tpl-btn" id="tpl-btn-topbar" style="font-size:0.76rem;padding:4px 12px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif" onclick="openTemplateManager()">📋 Templates</button>
     <div class="mob-topbar-actions">
@@ -929,6 +1059,66 @@ body {
       <span class="kb-status info" id="kb-status"></span>
     </div>
   </div><!-- /tab-kb -->
+
+  <!-- CONTENT TAB -->
+  <div class="tab-panel" id="tab-content">
+
+    <div class="ct-header">
+      <div>
+        <h2>Site Notices</h2>
+        <p>Banners shown on product pages via maintenance-bar.js · Targets specific products or all · Dismissible by user</p>
+      </div>
+      <button class="ct-new-btn" onclick="ctNewNotice()">+ New notice</button>
+    </div>
+
+    <!-- Editor (hidden until new/edit) -->
+    <div class="ct-editor" id="ct-editor">
+      <h3 id="ct-editor-title">New notice</h3>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;">
+        <div class="ct-field">
+          <label class="ct-label">Type</label>
+          <select class="ct-select" id="ct-type">
+            <option value="info">Info (blue)</option>
+            <option value="warning">Warning (yellow)</option>
+            <option value="outage">Outage (red)</option>
+            <option value="success">Success (green)</option>
+          </select>
+        </div>
+        <div class="ct-field">
+          <label class="ct-label">Priority (higher = shown first)</label>
+          <input class="ct-input" type="number" id="ct-priority" value="5" min="1" max="20">
+        </div>
+        <div class="ct-field">
+          <label class="ct-label">Expires (optional)</label>
+          <input class="ct-input" type="date" id="ct-expires">
+        </div>
+      </div>
+
+      <div class="ct-field">
+        <label class="ct-label">Targets (which products see this)</label>
+        <div class="ct-targets-grid" id="ct-targets-grid"></div>
+      </div>
+
+      <div class="ct-field">
+        <label class="ct-label">Message text per language</label>
+        <div class="ct-lang-tabs" id="ct-lang-tabs"></div>
+        <div id="ct-lang-panes"></div>
+      </div>
+
+      <div class="ct-editor-footer">
+        <button class="ct-save-btn" id="ct-save-btn" onclick="ctSave()">Save</button>
+        <button class="ct-cancel-btn" onclick="ctCancelEdit()">Cancel</button>
+        <span class="ct-editor-status" id="ct-editor-status"></span>
+      </div>
+    </div>
+
+    <!-- Notice list -->
+    <div class="ct-notice-list" id="ct-notice-list">
+      <div class="ct-empty">Loading…</div>
+    </div>
+
+  </div><!-- /tab-content -->
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1676,6 +1866,7 @@ function switchTab(name) {
   });
   if (name === 'revenue') renderRevenue();
   if (name === 'kb' && !kbLoaded) kbLoad();
+  if (name === 'content' && !ctLoaded) ctLoad();
 }
 
 // ── REVENUE ───────────────────────────────────────────────────────────────────
@@ -1909,6 +2100,255 @@ function kbRevert() {
   document.getElementById('kb-status').textContent = 'Reverted';
   document.getElementById('kb-status').className = 'kb-status info';
   setTimeout(() => { document.getElementById('kb-status').textContent = ''; }, 2000);
+}
+
+// ── CONTENT / NOTICES ─────────────────────────────────────────────────────────
+const CT_FN = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/notices-admin';
+
+const CT_PRODUCTS = [
+  { id: '*',          label: 'All' },
+  { id: 'denmark',    label: 'Denmark' },
+  { id: 'denmark-pr', label: 'DK-PR' },
+  { id: 'pd3',        label: 'PD3' },
+  { id: 'lux',        label: 'Luxembourg' },
+  { id: 'sproochentest', label: 'Sproochentest' },
+  { id: 'ciple',      label: 'CIPLE' },
+  { id: 'celpe',      label: 'CELPE' },
+  { id: 'france',     label: 'France' },
+  { id: 'geneva',     label: 'Geneva' },
+  { id: 'rik',        label: 'Iceland' },
+  { id: 'ykifinnish', label: 'YKI Finnish' },
+  { id: 'ykisvenska', label: 'YKI Svenska' },
+];
+
+const CT_LANGS = [
+  { code: 'en', label: 'EN' },
+  { code: 'da', label: 'DA' },
+  { code: 'fr', label: 'FR' },
+  { code: 'de', label: 'DE' },
+  { code: 'pt', label: 'PT' },
+  { code: 'fi', label: 'FI' },
+  { code: 'sv', label: 'SV' },
+  { code: 'is', label: 'IS' },
+];
+
+let ctNotices = [];
+let ctEditId = null; // null = new, number = editing existing
+let ctLoaded = false;
+let ctActiveLang = 'en';
+
+async function ctLoad() {
+  const list = document.getElementById('ct-notice-list');
+  try {
+    const res = await fetch(CT_FN, { headers: { 'X-Admin-Key': adminPw } });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Load failed');
+    ctNotices = data;
+    ctLoaded = true;
+    ctRenderList();
+  } catch(e) {
+    list.innerHTML = `<div class="ct-empty" style="color:var(--red)">Error: ${e.message}</div>`;
+  }
+}
+
+function ctRenderList() {
+  const list = document.getElementById('ct-notice-list');
+  if (!ctNotices.length) {
+    list.innerHTML = '<div class="ct-empty">No notices yet. Create one above.</div>';
+    return;
+  }
+  list.innerHTML = ctNotices.map(n => {
+    const msgs = n.messages || {};
+    const preview = msgs.en || msgs.da || msgs.fr || Object.values(msgs)[0] || '';
+    const targets = (n.targets || []).join(', ');
+    const expires = n.expires_at ? ` · Expires ${n.expires_at.slice(0,10)}` : '';
+    const statusClass = n.enabled ? 'enabled' : 'disabled';
+    return `<div class="ct-notice-row ${statusClass}" id="ct-row-${n.id}">
+      <div class="ct-notice-body">
+        <div class="ct-notice-top">
+          <span class="ct-type-badge ${n.type}">${n.type}</span>
+          <span class="ct-targets">→ ${targets}</span>
+          ${n.enabled ? '<span style="font-size:0.68rem;color:var(--green);font-weight:600">● LIVE</span>' : ''}
+        </div>
+        <div class="ct-notice-text">${esc(preview.slice(0, 160))}${preview.length > 160 ? '…' : ''}</div>
+        <div class="ct-notice-meta">Priority ${n.priority}${expires} · id ${n.id}</div>
+      </div>
+      <div class="ct-notice-actions">
+        <button class="ct-toggle-btn ${n.enabled ? 'disable' : 'enable'}"
+          onclick="ctToggle(${n.id}, ${!n.enabled})">${n.enabled ? 'Disable' : 'Enable'}</button>
+        <button class="ct-edit-btn" onclick="ctEdit(${n.id})">Edit</button>
+        <button class="ct-del-btn" onclick="ctDelete(${n.id})">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function ctBuildEditor() {
+  // Targets grid
+  const grid = document.getElementById('ct-targets-grid');
+  grid.innerHTML = CT_PRODUCTS.map(p =>
+    `<label class="ct-target-chip" id="ct-chip-${p.id}">
+      <input type="checkbox" value="${p.id}" onchange="ctChipChange(this)"> ${p.label}
+    </label>`
+  ).join('');
+
+  // Lang tabs + panes
+  document.getElementById('ct-lang-tabs').innerHTML = CT_LANGS.map((l, i) =>
+    `<button class="ct-lang-tab${i===0?' active':''}" id="ct-ltab-${l.code}"
+      onclick="ctSwitchLang('${l.code}')">${l.label}</button>`
+  ).join('');
+  document.getElementById('ct-lang-panes').innerHTML = CT_LANGS.map((l, i) =>
+    `<div class="ct-lang-pane${i===0?' active':''}" id="ct-lpane-${l.code}">
+      <textarea class="ct-textarea" id="ct-msg-${l.code}"
+        placeholder="${l.code === 'en' ? 'Required' : 'Optional — leave blank to skip'}"
+        rows="3"></textarea>
+    </div>`
+  ).join('');
+  ctActiveLang = 'en';
+}
+
+function ctChipChange(cb) {
+  const chip = cb.closest('.ct-target-chip');
+  chip.classList.toggle('checked', cb.checked);
+  // If "All" (*) selected, uncheck others
+  if (cb.value === '*' && cb.checked) {
+    document.querySelectorAll('#ct-targets-grid input[type=checkbox]').forEach(c => {
+      if (c.value !== '*') { c.checked = false; c.closest('.ct-target-chip').classList.remove('checked'); }
+    });
+  } else if (cb.value !== '*' && cb.checked) {
+    const all = document.querySelector('#ct-targets-grid input[value="*"]');
+    if (all) { all.checked = false; all.closest('.ct-target-chip').classList.remove('checked'); }
+  }
+}
+
+function ctSwitchLang(code) {
+  ctActiveLang = code;
+  document.querySelectorAll('.ct-lang-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ct-lang-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('ct-ltab-' + code).classList.add('active');
+  document.getElementById('ct-lpane-' + code).classList.add('active');
+}
+
+function ctNewNotice() {
+  ctEditId = null;
+  ctBuildEditor();
+  document.getElementById('ct-editor-title').textContent = 'New notice';
+  document.getElementById('ct-type').value = 'info';
+  document.getElementById('ct-priority').value = '5';
+  document.getElementById('ct-expires').value = '';
+  document.getElementById('ct-editor-status').textContent = '';
+  const editor = document.getElementById('ct-editor');
+  editor.classList.add('open');
+  editor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function ctEdit(id) {
+  const n = ctNotices.find(x => x.id === id);
+  if (!n) return;
+  ctEditId = id;
+  ctBuildEditor();
+  document.getElementById('ct-editor-title').textContent = 'Edit notice #' + id;
+  document.getElementById('ct-type').value = n.type || 'info';
+  document.getElementById('ct-priority').value = n.priority || 5;
+  document.getElementById('ct-expires').value = n.expires_at ? n.expires_at.slice(0,10) : '';
+  // Set targets
+  (n.targets || []).forEach(t => {
+    const cb = document.querySelector(`#ct-targets-grid input[value="${t}"]`);
+    if (cb) { cb.checked = true; cb.closest('.ct-target-chip').classList.add('checked'); }
+  });
+  // Set messages
+  const msgs = n.messages || {};
+  CT_LANGS.forEach(l => {
+    const ta = document.getElementById('ct-msg-' + l.code);
+    if (ta) ta.value = msgs[l.code] || '';
+  });
+  document.getElementById('ct-editor-status').textContent = '';
+  const editor = document.getElementById('ct-editor');
+  editor.classList.add('open');
+  editor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function ctCancelEdit() {
+  document.getElementById('ct-editor').classList.remove('open');
+  ctEditId = null;
+}
+
+async function ctSave() {
+  const btn = document.getElementById('ct-save-btn');
+  const status = document.getElementById('ct-editor-status');
+  // Collect targets
+  const targets = [...document.querySelectorAll('#ct-targets-grid input:checked')].map(c => c.value);
+  if (!targets.length) { status.textContent = 'Select at least one target'; status.className = 'ct-editor-status err'; return; }
+  // Collect messages
+  const messages = {};
+  CT_LANGS.forEach(l => {
+    const v = (document.getElementById('ct-msg-' + l.code)?.value || '').trim();
+    if (v) messages[l.code] = v;
+  });
+  if (!messages.en) { status.textContent = 'English message is required'; status.className = 'ct-editor-status err'; return; }
+
+  const payload = {
+    action: ctEditId ? 'update' : 'create',
+    id: ctEditId,
+    type: document.getElementById('ct-type').value,
+    targets,
+    messages,
+    priority: parseInt(document.getElementById('ct-priority').value) || 5,
+    expires_at: document.getElementById('ct-expires').value || null,
+    enabled: ctEditId ? ctNotices.find(x => x.id === ctEditId)?.enabled ?? false : false,
+  };
+
+  btn.disabled = true; btn.textContent = 'Saving…'; status.textContent = '';
+  try {
+    const res = await fetch(CT_FN, {
+      method: 'POST',
+      headers: { 'X-Admin-Key': adminPw, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Save failed');
+    document.getElementById('ct-editor').classList.remove('open');
+    ctEditId = null;
+    showToast(payload.action === 'create' ? 'Notice created (disabled)' : 'Notice updated');
+    await ctLoad();
+  } catch(e) {
+    status.textContent = 'Error: ' + e.message;
+    status.className = 'ct-editor-status err';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save';
+  }
+}
+
+async function ctToggle(id, enabled) {
+  try {
+    const res = await fetch(CT_FN, {
+      method: 'POST',
+      headers: { 'X-Admin-Key': adminPw, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'toggle', id, enabled }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error);
+    const n = ctNotices.find(x => x.id === id);
+    if (n) n.enabled = enabled;
+    ctRenderList();
+    showToast(enabled ? 'Notice is now LIVE' : 'Notice disabled');
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+async function ctDelete(id) {
+  if (!confirm('Delete this notice permanently?')) return;
+  try {
+    const res = await fetch(CT_FN, {
+      method: 'POST',
+      headers: { 'X-Admin-Key': adminPw, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', id }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error);
+    ctNotices = ctNotices.filter(x => x.id !== id);
+    ctRenderList();
+    showToast('Notice deleted');
+  } catch(e) { showToast('Error: ' + e.message); }
 }
 </script>
 
