@@ -716,6 +716,94 @@ body {
 .rev-load-bar span { flex: 1; }
 .rev-note { font-size: 0.72rem; color: var(--muted); margin-top: 0.6rem; line-height: 1.5; opacity: 0.7; }
 
+/* ── KNOWLEDGE BASE TAB ── */
+#tab-kb {
+  overflow-y: auto;
+  padding: 1.5rem;
+  background: var(--bg);
+}
+.kb-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.kb-header-left h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+.kb-header-left p {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.kb-meta {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: right;
+  white-space: nowrap;
+}
+.kb-meta span { color: var(--green); }
+.kb-textarea {
+  width: 100%;
+  min-height: 520px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  padding: 1rem 1.1rem;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.kb-textarea:focus { border-color: var(--brand); }
+.kb-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+.kb-save-btn {
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 1.4rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.kb-save-btn:hover { opacity: 0.88; }
+.kb-save-btn:disabled { opacity: 0.4; cursor: default; }
+.kb-revert-btn {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.kb-revert-btn:hover { color: var(--text); border-color: var(--muted); }
+.kb-status {
+  font-size: 0.78rem;
+  margin-left: auto;
+}
+.kb-status.ok   { color: var(--green); }
+.kb-status.err  { color: var(--red); }
+.kb-status.info { color: var(--muted); }
+.kb-char-count  { font-size: 0.72rem; color: var(--muted); margin-left: auto; }
+
 </style>
 </head>
 <body>
@@ -751,6 +839,7 @@ body {
     <div class="tab-nav">
       <button class="tab-btn active" id="tab-btn-support" onclick="switchTab('support')">Support</button>
       <button class="tab-btn" id="tab-btn-revenue" onclick="switchTab('revenue')">Revenue</button>
+      <button class="tab-btn" id="tab-btn-kb" onclick="switchTab('kb')">Knowledge Base</button>
     </div>
     <button class="tpl-btn" id="tpl-btn-topbar" style="font-size:0.76rem;padding:4px 12px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif" onclick="openTemplateManager()">📋 Templates</button>
     <div class="mob-topbar-actions">
@@ -821,6 +910,25 @@ body {
       <div class="rev-note">Historical (up to Feb 2026) from Stripe payouts export — net of fees. Live figures from charges API on demand.</div>
     </div>
   </div><!-- /tab-revenue -->
+
+  <!-- KNOWLEDGE BASE TAB -->
+  <div class="tab-panel" id="tab-kb">
+    <div class="kb-header">
+      <div class="kb-header-left">
+        <h2>AI Support Knowledge Base</h2>
+        <p>This is the system prompt read by Claude before analyzing every incoming support message.<br>
+           Changes take effect immediately on the next ⚡ Analyze run — no deployment needed.</p>
+      </div>
+      <div class="kb-meta" id="kb-meta">—</div>
+    </div>
+    <textarea class="kb-textarea" id="kb-textarea" spellcheck="false" placeholder="Loading…"></textarea>
+    <div class="kb-actions">
+      <button class="kb-save-btn" id="kb-save-btn" onclick="kbSave()">Save changes</button>
+      <button class="kb-revert-btn" id="kb-revert-btn" onclick="kbRevert()">Revert</button>
+      <span class="kb-char-count" id="kb-char-count"></span>
+      <span class="kb-status info" id="kb-status"></span>
+    </div>
+  </div><!-- /tab-kb -->
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1561,13 +1669,13 @@ function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.getElementById('tab-btn-' + name).classList.add('active');
-  // Show/hide support-only topbar elements
   const supportOnly = ['support-topbar-stats', 'tpl-btn-topbar'];
   supportOnly.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = name === 'support' ? '' : 'none';
   });
   if (name === 'revenue') renderRevenue();
+  if (name === 'kb' && !kbLoaded) kbLoad();
 }
 
 // ── REVENUE ───────────────────────────────────────────────────────────────────
@@ -1715,6 +1823,92 @@ async function loadRevLive() {
   } finally {
     btn.disabled = false;
   }
+}
+
+// ── KNOWLEDGE BASE ────────────────────────────────────────────────────────────
+const KB_FN = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/kb-admin';
+let kbLoaded = false;
+let kbOriginal = '';
+
+async function kbLoad() {
+  const ta = document.getElementById('kb-textarea');
+  const status = document.getElementById('kb-status');
+  ta.value = 'Loading…';
+  ta.disabled = true;
+  status.textContent = '';
+  try {
+    const res = await fetch(KB_FN, { headers: { 'X-Admin-Key': adminPw } });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Load failed');
+    kbOriginal = data.content;
+    ta.value = data.content;
+    ta.disabled = false;
+    kbLoaded = true;
+    kbUpdateCount();
+    const updated = new Date(data.updated_at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+    document.getElementById('kb-meta').innerHTML = `Last saved<br><span>${updated}</span>`;
+    status.textContent = 'Loaded';
+    status.className = 'kb-status ok';
+    setTimeout(() => { status.textContent = ''; }, 2000);
+  } catch(e) {
+    ta.value = '';
+    ta.disabled = false;
+    status.textContent = 'Error: ' + e.message;
+    status.className = 'kb-status err';
+  }
+}
+
+function kbUpdateCount() {
+  const ta = document.getElementById('kb-textarea');
+  const n = ta.value.length;
+  const lines = ta.value.split('\n').length;
+  document.getElementById('kb-char-count').textContent = `${n.toLocaleString()} chars · ${lines} lines`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('kb-textarea');
+  if (ta) ta.addEventListener('input', kbUpdateCount);
+});
+
+async function kbSave() {
+  const content = document.getElementById('kb-textarea').value.trim();
+  const btn = document.getElementById('kb-save-btn');
+  const status = document.getElementById('kb-status');
+  if (!content) return;
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  status.textContent = '';
+  try {
+    const res = await fetch(KB_FN, {
+      method: 'POST',
+      headers: { 'X-Admin-Key': adminPw, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Save failed');
+    kbOriginal = content;
+    const updated = new Date(data.updated_at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+    document.getElementById('kb-meta').innerHTML = `Last saved<br><span>${updated}</span>`;
+    status.textContent = '✓ Saved — effective on next Analyze run';
+    status.className = 'kb-status ok';
+    showToast('Knowledge base saved');
+  } catch(e) {
+    status.textContent = 'Error: ' + e.message;
+    status.className = 'kb-status err';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save changes';
+  }
+}
+
+function kbRevert() {
+  if (!kbOriginal) return;
+  if (!confirm('Revert all unsaved changes?')) return;
+  document.getElementById('kb-textarea').value = kbOriginal;
+  kbUpdateCount();
+  document.getElementById('kb-status').textContent = 'Reverted';
+  document.getElementById('kb-status').className = 'kb-status info';
+  setTimeout(() => { document.getElementById('kb-status').textContent = ''; }, 2000);
 }
 </script>
 
