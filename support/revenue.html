@@ -214,13 +214,21 @@ async function load() {
   const btn = document.getElementById('loadBtn');
   btn.disabled = true;
   btn.textContent = 'Loading…';
-  document.getElementById('status').textContent = '';
+  document.getElementById('status').textContent = 'Fetching from Stripe, this may take 20-30s...';
   document.getElementById('error').innerHTML = '';
 
   try {
-    const res = await fetch(FN_URL, {
-      headers: { 'X-Admin-Key': key, 'Content-Type': 'application/json' }
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90000);
+    let res;
+    try {
+      res = await fetch(FN_URL, {
+        signal: controller.signal,
+        headers: { 'X-Admin-Key': key, 'Content-Type': 'application/json' }
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || 'Request failed');
     renderDashboard(data);
