@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicLearn — Revenue</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f5f4fb;
+  color: #1a1730;
+  min-height: 100vh;
+  padding: 2rem;
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2rem;
+}
+.logo {
+  width: 36px; height: 36px;
+  background: #6d5ce8;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 600; font-size: 16px;
+}
+h1 { font-size: 1.1rem; font-weight: 600; color: #1a1730; }
+.subtitle { font-size: 0.8rem; color: #888; margin-top: 1px; }
+
+.auth-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: white;
+  border: 1px solid #e5e2f5;
+  border-radius: 12px;
+  padding: 0.875rem 1.25rem;
+  margin-bottom: 1.75rem;
+}
+.auth-bar label { font-size: 0.8rem; color: #888; white-space: nowrap; }
+.auth-bar input {
+  flex: 1;
+  max-width: 320px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.auth-bar input:focus { border-color: #6d5ce8; }
+.auth-bar button {
+  background: #6d5ce8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 1.25rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.auth-bar button:hover { background: #5a4bd4; }
+.auth-bar button:disabled { background: #bbb; cursor: default; }
+#status { font-size: 0.8rem; color: #aaa; margin-left: 4px; }
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.kpi-card {
+  background: white;
+  border-radius: 14px;
+  padding: 1.25rem 1.25rem 1rem;
+  border: 1px solid #eae8f5;
+}
+.kpi-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.6rem;
+}
+.kpi-value {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #1a1730;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+.kpi-yoy {
+  font-size: 0.78rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.kpi-yoy.up { color: #16a34a; }
+.kpi-yoy.down { color: #dc2626; }
+.kpi-yoy.flat { color: #aaa; }
+.kpi-yoy .arrow { font-size: 0.7rem; }
+.kpi-yoy .prev { color: #bbb; font-weight: 400; margin-left: 2px; }
+
+.chart-card {
+  background: white;
+  border-radius: 14px;
+  padding: 1.5rem;
+  border: 1px solid #eae8f5;
+  margin-bottom: 1.5rem;
+}
+.chart-card h2 {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1.25rem;
+}
+
+.yoy-table-card {
+  background: white;
+  border-radius: 14px;
+  padding: 1.5rem;
+  border: 1px solid #eae8f5;
+}
+.yoy-table-card h2 {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1.25rem;
+}
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead th {
+  text-align: right;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 0.75rem 0.75rem;
+  border-bottom: 1px solid #f0eef8;
+}
+thead th:first-child { text-align: left; }
+tbody tr:not(:last-child) td { border-bottom: 1px solid #f7f6fc; }
+tbody td { padding: 0.65rem 0.75rem; text-align: right; color: #444; }
+tbody td:first-child { text-align: left; font-weight: 500; color: #1a1730; }
+tbody tr:first-child td { color: #6d5ce8; font-weight: 600; }
+
+.error-msg {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  font-size: 0.85rem;
+}
+
+#dashboard { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">C</div>
+  <div>
+    <h1>Revenue Dashboard</h1>
+    <div class="subtitle">CivicLearn · Stripe · EUR (SGD × 0.68)</div>
+  </div>
+</header>
+
+<div class="auth-bar">
+  <label for="key">Admin password</label>
+  <input type="password" id="key" placeholder="Enter admin password..." autocomplete="off" />
+  <button id="loadBtn" onclick="load()">Load data</button>
+  <span id="status"></span>
+</div>
+
+<div id="error"></div>
+<div id="dashboard">
+  <div class="kpi-grid" id="kpiGrid"></div>
+  <div class="chart-card">
+    <h2>Monthly revenue — last 24 months</h2>
+    <canvas id="chart"></canvas>
+  </div>
+  <div class="yoy-table-card">
+    <h2>Year-over-year comparison</h2>
+    <table id="yoyTable"></table>
+  </div>
+</div>
+
+<script>
+const FN_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/stripe_metrics_summary';
+let chartInstance = null;
+
+document.getElementById('key').addEventListener('keydown', e => {
+  if (e.key === 'Enter') load();
+});
+
+async function load() {
+  const key = document.getElementById('key').value.trim();
+  if (!key) return;
+  const btn = document.getElementById('loadBtn');
+  btn.disabled = true;
+  btn.textContent = 'Loading…';
+  document.getElementById('status').textContent = '';
+  document.getElementById('error').innerHTML = '';
+
+  try {
+    const res = await fetch(FN_URL, {
+      headers: { 'X-Admin-Key': key, 'Content-Type': 'application/json' }
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Request failed');
+    renderDashboard(data);
+    document.getElementById('status').textContent = 'As of ' + data.as_of;
+    document.getElementById('dashboard').style.display = 'block';
+  } catch (e) {
+    document.getElementById('error').innerHTML = `<div class="error-msg">Error: ${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Refresh';
+  }
+}
+
+function fmt(n) {
+  if (n >= 1000) return '€' + (n / 1000).toFixed(1) + 'k';
+  return '€' + Math.round(n).toLocaleString('en');
+}
+
+function fmtFull(n) {
+  return '€' + Math.round(n).toLocaleString('en');
+}
+
+function yoyBadge(cur, prev) {
+  if (!prev) return `<span class="kpi-yoy flat">— no prior data</span>`;
+  const p = ((cur - prev) / prev * 100);
+  const cls = p > 0 ? 'up' : p < 0 ? 'down' : 'flat';
+  const arrow = p > 0 ? '▲' : p < 0 ? '▼' : '–';
+  return `<div class="kpi-yoy ${cls}"><span class="arrow">${arrow}</span> ${Math.abs(p).toFixed(1)}% vs prior year</div>`;
+}
+
+function renderDashboard(data) {
+  const cur = data.summary[0];
+  const prev = data.summary[1];
+
+  // KPI cards
+  const kpis = [
+    { label: 'Today', cur: cur.day_eur, prev: prev.day_eur },
+    { label: 'Week to date', cur: cur.week_eur, prev: prev.week_eur },
+    { label: 'Month to date', cur: cur.mtd_eur, prev: prev.mtd_eur },
+    { label: 'Year to date', cur: cur.ytd_eur, prev: prev.ytd_eur },
+  ];
+  document.getElementById('kpiGrid').innerHTML = kpis.map(k => `
+    <div class="kpi-card">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${fmt(k.cur)}</div>
+      ${yoyBadge(k.cur, k.prev)}
+    </div>`).join('');
+
+  // Monthly bar chart
+  const labels = data.monthly.map(m => {
+    const [y, mo] = m.month.split('-');
+    const d = new Date(+y, +mo - 1, 1);
+    return d.toLocaleString('default', { month: 'short' }) + ' '' + String(+y).slice(2);
+  });
+  const values = data.monthly.map(m => m.revenue_eur);
+  const isPartial = data.monthly.map(m => m.partial);
+
+  if (chartInstance) chartInstance.destroy();
+  const ctx = document.getElementById('chart').getContext('2d');
+  chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: isPartial.map(p => p ? 'rgba(109,92,232,0.35)' : 'rgba(109,92,232,0.75)'),
+        borderRadius: 5,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => fmtFull(ctx.raw) + (isPartial[ctx.dataIndex] ? ' (month in progress)' : '')
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, maxRotation: 45 } },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          ticks: {
+            font: { size: 11 },
+            callback: v => v >= 1000 ? '€' + (v/1000).toFixed(0) + 'k' : '€' + v
+          }
+        }
+      }
+    }
+  });
+
+  // YoY table
+  const cols = ['Year', 'Day', 'WTD', 'MTD', 'YTD'];
+  let html = `<thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+  html += data.summary.map(row => `<tr>
+    <td>${row.year}</td>
+    <td>${fmtFull(row.day_eur)}</td>
+    <td>${fmtFull(row.week_eur)}</td>
+    <td>${fmtFull(row.mtd_eur)}</td>
+    <td>${fmtFull(row.ytd_eur)}</td>
+  </tr>`).join('');
+  html += '</tbody>';
+  document.getElementById('yoyTable').innerHTML = html;
+}
+</script>
+</body>
+</html>
