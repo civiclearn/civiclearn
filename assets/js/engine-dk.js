@@ -212,7 +212,7 @@ function isQuestionSaved(questionId) {
 function toggleSavedQuestion(questionId) {
   const map = getSavedMap();
   if (map[questionId] && map[questionId] !== false) {
-    map[questionId] = false;  // mark removed, don't delete
+    delete map[questionId];  // truly remove so push sends object without this key
   } else {
     map[questionId] = Date.now();  // timestamp when saved
   }
@@ -223,7 +223,7 @@ function toggleSavedQuestion(questionId) {
 
 function getSavedQuestionIds() {
   const map = getSavedMap();
-  return Object.keys(map).filter(k => map[k] && map[k] !== false);
+  return Object.keys(map).filter(k => k !== "_ts" && map[k] && map[k] !== false);
 }
 
 
