@@ -1,5 +1,5 @@
 /* ============================================
-   CivicLearn Sync v1.1
+   CivicLearn Sync v1.2
    Drop-in sync for all CivicLearn sites.
    ============================================
 
@@ -21,6 +21,12 @@
    - Push only keys that actually changed during merge
    - Debounce push() calls (2s) — rapid saves collapse into one write
    - Skip push entirely if local data matches remote (no-op UPSERTs eliminated)
+
+   v1.2 changes:
+   - FIX: mergeSaved now uses "deletion wins" logic (Math.min).
+     Previously used Math.max so an unsaved state on one device
+     was always overwritten by a saved state from Supabase,
+     making it impossible to permanently remove saved questions.
    ============================================ */
 
 (function () {
@@ -168,7 +174,10 @@
       if (r === undefined || r === null) { merged[k] = l; return; }
       var lv = (l === true) ? 1 : (l || 0);
       var rv = (r === true) ? 1 : (r || 0);
-      merged[k] = (lv >= rv) ? l : r;
+      // FIX v1.2: Use Math.min so "unsaved/removed" always wins over "saved".
+      // Previously Math.max caused Supabase's saved=true to override local removals,
+      // making it impossible to permanently delete questions from My List.
+      merged[k] = (lv <= rv) ? l : r;
     });
     return merged;
   }

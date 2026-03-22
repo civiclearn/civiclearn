@@ -65,6 +65,8 @@ removeBtn.className = "mylist-remove";
 removeBtn.textContent = CivicLearnI18n.t("my_list_remove", "Remove");
 removeBtn.onclick = () => {
   CivicEdgeEngine.toggleSavedQuestion(q.id);
+  // FIX: push the updated saved list to Supabase so removals persist across devices/logins
+  if (window.CivicSync) CivicSync.push("civicedge_saved");
   render();
 };
 
@@ -266,4 +268,3 @@ ids.slice(start, end).forEach((id) => {
 
 
 })();
-
