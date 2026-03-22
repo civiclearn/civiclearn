@@ -182,9 +182,15 @@
     // approaches always resurrect deleted questions from stale sessions on other devices,
     // because a deleted question has its key removed entirely from the object (not set to 0),
     // so any union logic sees it as "missing locally" and restores the remote copy.
+    //
+    // Tiebreaker: if _ts is equal (including both 0, e.g. pre-v1.3 data with no stamp),
+    // prefer whichever is non-null. This handles the new-device case where local is null
+    // and remote has existing data but no _ts yet — without this, lts >= rts (0 >= 0)
+    // would return local (null) and the remote data would never be loaded.
     var lts = (local && local._ts) || 0;
     var rts = (remote && remote._ts) || 0;
-    return lts >= rts ? local : remote;
+    if (lts === rts) return (local !== null && local !== undefined) ? local : remote;
+    return lts > rts ? local : remote;
   }
 
   function mergeKey(key, local, remote) {
