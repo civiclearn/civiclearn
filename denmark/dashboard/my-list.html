@@ -217,6 +217,36 @@
 .mylist-list {
   padding-bottom: 24px;
 }
+
+/* Fix notice */
+.mylist-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  background: #fefce8;
+  border: 1px solid #fde68a;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #713f12;
+}
+.mylist-notice a {
+  color: #4338ca;
+  text-decoration: underline;
+}
+.mylist-notice-dismiss {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #a16207;
+  padding: 0 2px;
+  line-height: 1;
+  flex-shrink: 0;
+}
   </style>
  <script>
   document.documentElement.classList.add("i18n-hidden");
@@ -291,6 +321,11 @@
         <div id="myListCount" class="mylist-count"></div>
       </header>
 
+      <div id="myListNotice" class="mylist-notice" style="display:none">
+        <span>En teknisk fejl fik slettede spørgsmål til at dukke op igen i Min Liste. Fejlen er nu rettet. <a href="https://civiclearn.com/denmark/reset-cache">Ryd venligst cachen</a>, hvis du stadig oplever problemet.</span>
+        <button class="mylist-notice-dismiss" aria-label="Dismiss" id="dismissNotice">×</button>
+      </div>
+
       <div id="myList" class="mylist-list"></div>
 
     </div>
@@ -336,5 +371,17 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <script src="/assets/js/signout.js"></script>
+<script>
+(function() {
+  if (localStorage.getItem("mylist_notice_dismissed")) return;
+  var el = document.getElementById("myListNotice");
+  if (el) el.style.display = "";
+  var btn = document.getElementById("dismissNotice");
+  if (btn) btn.addEventListener("click", function() {
+    el.style.display = "none";
+    localStorage.setItem("mylist_notice_dismissed", "1");
+  });
+})();
+</script>
 </body>
 </html>
