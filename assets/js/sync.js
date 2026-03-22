@@ -382,6 +382,28 @@
       schedulePush(toSync);
     },
 
+    // Immediate (non-debounced) push — use for deletions or critical saves
+    // where the user might navigate away before the 2s debounce fires.
+    pushNow: function (keys) {
+      var toSync;
+      if (!keys) {
+        toSync = getAllSyncKeys();
+      } else if (typeof keys === "string") {
+        toSync = [keys];
+      } else {
+        toSync = keys;
+      }
+      // Stamp _ts if civicedge_saved is included (same as schedulePush)
+      if (toSync.indexOf("civicedge_saved") !== -1) {
+        var saved = readLS("civicedge_saved");
+        if (saved && typeof saved === "object") {
+          saved._ts = Date.now();
+          writeLS("civicedge_saved", saved);
+        }
+      }
+      return pushKeys(toSync);
+    },
+
     // Manually trigger a full pull + merge (normally auto-runs on load)
     pull: pull,
 
