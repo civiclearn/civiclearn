@@ -371,21 +371,21 @@
     const progress = getProgress();
     const bank = getBank();
 
-    let answered = 0, mastered = 0;
+    let totalAttempts = 0, mastered = 0;
     bank.forEach(q => {
       const microKey = q.microtopic && typeof q.microtopic === "object"
         ? q.microtopic.en : (q.microtopic || "");
       const key = `${microKey}:${q.id}`;
       const entry = progress[key];
-      if (entry && entry.attempts > 0) answered++;
+      if (entry) totalAttempts += (entry.attempts || 0);
       if (entry && entry.correct === 1) mastered++;
     });
 
     const tmAnswered = document.getElementById("tmAnswered");
     const tmAccuracy = document.getElementById("tmAccuracy");
-    if (tmAnswered) tmAnswered.textContent = String(answered);
+    if (tmAnswered) tmAnswered.textContent = String(totalAttempts);
     if (tmAccuracy) {
-      const pct = answered > 0 ? Math.round((mastered / bank.length) * 100) : 0;
+      const pct = bank.length > 0 ? Math.round((mastered / bank.length) * 100) : 0;
       tmAccuracy.textContent = pct + "%";
     }
   }
