@@ -587,7 +587,10 @@ function maybeShowReviewCard({ mastery }) {
 };
 
 
-    cancelBtn.onclick = restore;
+    cancelBtn.onclick = () => {
+      localStorage.setItem(REVIEW_SHOWN_KEY, "dismissed");
+      restore();
+    };
 
     sendBtn.onclick = async () => {
       const text = textEl.value.trim();
@@ -681,7 +684,6 @@ setTimeout(restore, 1500);
 
       // Keep __ceMastery meaningful: Phase 1 ratio
       window.__ceMastery = phaseData.global.phase1Ratio;
-	  maybeShowReviewCard({ mastery: phaseData.global.phase1Ratio });
 
       // Main label under donut = Phase 1 %
       safeText(document.getElementById("globalPct"), phaseData.global.phase1Pct + "%");
@@ -766,6 +768,9 @@ setTimeout(restore, 1500);
       globalMetrics.phase2Pct = phaseData.global.phase2Pct;
 
       initCharts(globalMetrics, perTopic, trendPoints);
+
+      // Show review card only AFTER charts are rendered
+      maybeShowReviewCard({ mastery: phaseData.global.phase1Ratio });
     } catch (err) {
       console.error("Dashboard init error:", err);
     }
