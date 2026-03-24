@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────────────────────
-   CivicLearn Dashboard Extra — Sweden (final)
-   Computes estimated score → caches to localStorage
-   Renders radar chart with mastery % in center
+   CivicLearn Dashboard Extra — Sweden
+   Gauge bar + Radar with center % + Celebration + Study time
+   Supports live updates when sequential widget answers questions.
    ───────────────────────────────────────────────────────── */
 
 (function () {
@@ -9,6 +9,9 @@
 
   const CACHE_KEY = "cl_gauge_cache";
   const lang = window.CIVICEDGE_LANG || "en";
+
+  // Stored chart instance for live updates
+  let radarInstance = null;
 
   function t(key, fallback) {
     if (window.CivicLearnI18n && typeof window.CivicLearnI18n.t === "function") {
@@ -64,8 +67,15 @@
     return topics;
   }
 
+  function computeOverall() {
+    const topics = computeTopicMastery();
+    let total = 0, mastered = 0;
+    Object.values(topics).forEach(t => { total += t.total; mastered += t.mastered; });
+    return { topics, total, mastered, pct: total > 0 ? Math.round((mastered / total) * 100) : 0 };
+  }
+
   // ════════════════════════════════════════════════════════
-  // 1. COMPUTE & CACHE ESTIMATED SCORE
+  // 1. COMPUTE & CACHE GAUGE
   // ════════════════════════════════════════════════════════
 
   function computeAndCacheGauge() {
@@ -109,11 +119,8 @@
 
     const cache = { estimated, total: totalQ, passScore, state, badgeText };
 
-    try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
-    } catch {}
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch {}
 
-    // Notify the shared gauge-bar.js to re-render
     window.dispatchEvent(new CustomEvent("cl:gauge-updated"));
   }
 
@@ -121,12 +128,10 @@
   // 2. RADAR WITH CENTER MASTERY %
   // ════════════════════════════════════════════════════════
 
-  // Chart.js plugin to draw text in the center of a radar
   const centerTextPlugin = {
     id: "radarCenterText",
     afterDraw(chart) {
       if (chart.config.type !== "radar") return;
-
       const meta = chart.config.options?.plugins?.radarCenterText;
       if (!meta || !meta.text) return;
 
@@ -134,7 +139,6 @@
       const cx = (chartArea.left + chartArea.right) / 2;
       const cy = (chartArea.top + chartArea.bottom) / 2;
 
-      // Big percentage
       ctx.save();
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
@@ -143,7 +147,6 @@
       ctx.fillStyle = meta.color || "#1a1816";
       ctx.fillText(meta.text, cx, cy - 6);
 
-      // Sub label
       if (meta.sub) {
         ctx.font = "500 11px 'Plus Jakarta Sans', sans-serif";
         ctx.fillStyle = meta.subColor || "#a8a29e";
@@ -154,40 +157,39 @@
     }
   };
 
+  function getRadarData() {
+    const overall = computeOverall();
+    const keys = Object.keys(overall.topics);
+    return {
+      labels: keys.map(k => overall.topics[k].label),
+      data: keys.map(k => {
+        const t = overall.topics[k];
+        return t.total > 0 ? Math.round((t.mastered / t.total) * 100) : 0;
+      }),
+      overallPct: overall.pct,
+      masteredAll: overall.mastered,
+      totalAll: overall.total
+    };
+  }
+
   function renderRadar() {
     const canvas = document.getElementById("radarChart");
     if (!canvas || typeof Chart === "undefined") return;
 
-    // Register plugin
     Chart.register(centerTextPlugin);
 
-    const topics = computeTopicMastery();
-    const keys = Object.keys(topics);
-    if (!keys.length) return;
-
-    const labels = keys.map(k => topics[k].label);
-    const data = keys.map(k => {
-      const t = topics[k];
-      return t.total > 0 ? Math.round((t.mastered / t.total) * 100) : 0;
-    });
-
-    // Overall mastery for center text
-    let totalAll = 0, masteredAll = 0;
-    Object.values(topics).forEach(t => {
-      totalAll += t.total;
-      masteredAll += t.mastered;
-    });
-    const overallPct = totalAll > 0 ? Math.round((masteredAll / totalAll) * 100) : 0;
+    const rd = getRadarData();
+    if (!rd.labels.length) return;
 
     const ctx = canvas.getContext("2d");
 
-    new Chart(ctx, {
+    radarInstance = new Chart(ctx, {
       type: "radar",
       data: {
-        labels: labels,
+        labels: rd.labels,
         datasets: [{
           label: lang === "sv" ? "Behärskning" : "Mastery",
-          data: data,
+          data: rd.data,
           backgroundColor: "rgba(13, 115, 119, 0.12)",
           borderColor: "rgba(13, 115, 119, 0.75)",
           borderWidth: 2,
@@ -201,6 +203,7 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: { duration: 400 },
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -209,9 +212,9 @@
             }
           },
           radarCenterText: {
-            text: overallPct + "%",
+            text: rd.overallPct + "%",
             color: "#1a1816",
-            sub: masteredAll + " / " + totalAll,
+            sub: rd.masteredAll + " / " + rd.totalAll,
             subColor: "#a8a29e"
           }
         },
@@ -237,26 +240,34 @@
     });
   }
 
+  function updateRadar() {
+    if (!radarInstance) return;
+
+    const rd = getRadarData();
+
+    // Update dataset
+    radarInstance.data.datasets[0].data = rd.data;
+
+    // Update center text plugin config
+    radarInstance.options.plugins.radarCenterText.text = rd.overallPct + "%";
+    radarInstance.options.plugins.radarCenterText.sub = rd.masteredAll + " / " + rd.totalAll;
+
+    radarInstance.update();
+  }
+
   // ════════════════════════════════════════════════════════
   // 3. CELEBRATE 100% MASTERY
   // ════════════════════════════════════════════════════════
 
   function checkCelebration() {
-    const topics = computeTopicMastery();
-    let totalAll = 0, masteredAll = 0;
-    Object.values(topics).forEach(t => {
-      totalAll += t.total;
-      masteredAll += t.mastered;
-    });
+    const overall = computeOverall();
 
-    if (totalAll > 0 && masteredAll >= totalAll) {
+    if (overall.total > 0 && overall.mastered >= overall.total) {
       const CELEBRATED_KEY = "cl_celebrated_100";
       const alreadyCelebrated = localStorage.getItem(CELEBRATED_KEY);
 
-      // Visual state — always apply when at 100%
       document.body.classList.add("mastery-complete");
 
-      // One-time confetti
       if (!alreadyCelebrated) {
         localStorage.setItem(CELEBRATED_KEY, "1");
         launchConfetti();
@@ -313,7 +324,7 @@
   }
 
   // ════════════════════════════════════════════════════════
-  // 4. PATCH STUDY TIME — use visibility-based timer
+  // 4. PATCH STUDY TIME
   // ════════════════════════════════════════════════════════
 
   function patchStudyTime() {
@@ -324,15 +335,11 @@
       const raw = localStorage.getItem("civicedge_stats");
       const stats = raw ? JSON.parse(raw) : {};
 
-      // Session-based time
       const history = Array.isArray(stats.history) ? stats.history : [];
       let sessionSec = 0;
       history.forEach(s => { sessionSec += Number(s.durationSec || 0); });
 
-      // Visibility-based time (from study-timer.js)
       const visibleSec = Number(stats.totalVisibleSec || 0);
-
-      // Use whichever is larger (visibility timer is more accurate)
       const totalSec = Math.max(sessionSec, visibleSec);
       const mins = Math.round(totalSec / 60);
 
@@ -350,6 +357,40 @@
   }
 
   // ════════════════════════════════════════════════════════
+  // 5. LIVE REFRESH — called by sequential widget + engine
+  // ════════════════════════════════════════════════════════
+
+  function refreshAll() {
+    computeAndCacheGauge();
+    updateRadar();
+    checkCelebration();
+    patchStudyTime();
+
+    // Also refresh the stat cards that dashboard-v2-lu.js manages
+    // by re-reading civicedge_progress
+    const progress = getProgress();
+    const bank = getBank();
+
+    let answered = 0, mastered = 0;
+    bank.forEach(q => {
+      const microKey = q.microtopic && typeof q.microtopic === "object"
+        ? q.microtopic.en : (q.microtopic || "");
+      const key = `${microKey}:${q.id}`;
+      const entry = progress[key];
+      if (entry && entry.attempts > 0) answered++;
+      if (entry && entry.correct === 1) mastered++;
+    });
+
+    const tmAnswered = document.getElementById("tmAnswered");
+    const tmAccuracy = document.getElementById("tmAccuracy");
+    if (tmAnswered) tmAnswered.textContent = String(answered);
+    if (tmAccuracy) {
+      const pct = answered > 0 ? Math.round((mastered / bank.length) * 100) : 0;
+      tmAccuracy.textContent = pct + "%";
+    }
+  }
+
+  // ════════════════════════════════════════════════════════
   // INIT
   // ════════════════════════════════════════════════════════
 
@@ -360,6 +401,9 @@
       renderRadar();
       checkCelebration();
       patchStudyTime();
+
+      // Listen for live updates from sequential widget
+      window.addEventListener("civiclearn:progress-updated", refreshAll);
     } else {
       setTimeout(tryInit, 500);
     }

@@ -798,9 +798,10 @@ const topicLabelMap = buildTopicLabelMap(window.__ceBank || [], lang);
 
       // 2. Metrics
       const entries = Object.values(progressRaw);
-      const masteredQuestions = entries.filter(
+      const masteredQuestionsRaw = entries.filter(
   (e) => Number(e.rights || 0) > 0
 ).length + seqCorrect;
+      const masteredQuestions = Math.min(masteredQuestionsRaw, bankSize);
 
       const mastery = bankSize > 0 ? masteredQuestions / bankSize : 0;
 	  maybeShowReviewCard({ mastery });
