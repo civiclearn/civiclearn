@@ -140,6 +140,15 @@
       const cy = (chartArea.top + chartArea.bottom) / 2;
 
       ctx.save();
+
+      // White backdrop to mask grid lines and low-value data points
+      const bgW = 80;
+      const bgH = 46;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+      ctx.beginPath();
+      ctx.roundRect(cx - bgW / 2, cy - bgH / 2 - 2, bgW, bgH, 8);
+      ctx.fill();
+
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
