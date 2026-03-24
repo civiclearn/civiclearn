@@ -680,7 +680,10 @@ initCharts(globalMetrics, perTopic, trendPoints, topicLabelMap);
       } catch {}
     };
 
-    cancelBtn.onclick = restore;
+    cancelBtn.onclick = () => {
+      localStorage.setItem(REVIEW_SHOWN_KEY, "dismissed");
+      restore();
+    };
 
     sendBtn.onclick = async () => {
       const text = textEl.value.trim();
@@ -804,7 +807,6 @@ const topicLabelMap = buildTopicLabelMap(window.__ceBank || [], lang);
       const masteredQuestions = Math.min(masteredQuestionsRaw, bankSize);
 
       const mastery = bankSize > 0 ? masteredQuestions / bankSize : 0;
-	  maybeShowReviewCard({ mastery });
 
       // Global mastery percentage (donut + label)
       safeText(document.getElementById("globalPct"), Math.round(mastery * 100) + "%");
@@ -939,6 +941,9 @@ try {
       globalMetrics.masteryPct = Math.round(mastery * 100);
 
       initCharts(globalMetrics, perTopic, trendPoints, topicLabelMap);
+
+      // Show review card only AFTER charts are rendered
+      maybeShowReviewCard({ mastery });
     } catch (err) {
       console.error("Dashboard init error:", err);
     }
