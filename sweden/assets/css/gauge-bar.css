@@ -1,0 +1,97 @@
+/* ══════════════════════════════════════════════════════════
+   CivicLearn v2 — Shared Gauge Bar
+   Sits inside the standard content width on all pages.
+   ══════════════════════════════════════════════════════════ */
+
+.cl-gauge {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  max-width: 1100px;
+  box-shadow: var(--shadow);
+}
+
+.cl-gauge-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cl-gauge-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+
+.cl-gauge-track {
+  flex: 1;
+  height: 5px;
+  background: var(--surface-alt);
+  border-radius: 3px;
+  position: relative;
+  overflow: visible;
+}
+
+.cl-gauge-fill {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s cubic-bezier(0.22,1,0.36,1), background 0.4s;
+  min-width: 0;
+}
+
+.cl-gauge-fill[data-state="red"]    { background: #dc2626; }
+.cl-gauge-fill[data-state="orange"] { background: #ea580c; }
+.cl-gauge-fill[data-state="green"]  { background: #16a34a; }
+
+.cl-gauge-pass {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 13px;
+  background: var(--text);
+  opacity: 0.2;
+  border-radius: 1px;
+  z-index: 2;
+}
+
+.cl-gauge-score {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+  min-width: 40px;
+  text-align: center;
+}
+
+.cl-gauge-badge {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.cl-gauge-badge[data-state="pass"]  { background: #dcfce7; color: #166534; }
+.cl-gauge-badge[data-state="close"] { background: #fff7ed; color: #9a3412; }
+.cl-gauge-badge[data-state="fail"]  { background: #fee2e2; color: #991b1b; }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .cl-gauge {
+    padding: 8px 14px;
+  }
+
+  .cl-gauge-label { display: none; }
+
+  .cl-gauge-badge {
+    font-size: 9.5px;
+    padding: 2px 7px;
+  }
+}

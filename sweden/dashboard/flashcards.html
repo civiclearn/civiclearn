@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title_flashcards">Flashcards</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="/sweden/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/sweden/assets/css/gauge-bar.css">
+  <link rel="stylesheet" href="/sweden/assets/css/test-v2.css">
+  <link rel="stylesheet" href="/sweden/assets/css/flashcards-v2.css">
+  <script>document.documentElement.classList.add("i18n-hidden");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- <script src="/sweden/assets/js/se-auth.js"></script> -->
+</head>
+<body class="test-page">
+<button class="menu-toggle" aria-label="Menu">☰</button>
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Sweden">
+        <rect width="640" height="400" fill="#006AA7"/>
+        <rect x="176" y="0" width="64" height="400" fill="#FECC02"/>
+        <rect x="0" y="168" width="640" height="64" fill="#FECC02"/>
+      </svg>
+    </div>
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav_dashboard">Dashboard</a>
+      <a href="simulation.html" data-i18n="nav_simulation">Test Simulation</a>
+      <a href="quick.html" data-i18n="nav_quick">Quick Test</a>
+      <a href="topics.html" data-i18n="nav_topics">Tests by Topic</a>
+      <a href="traps.html" data-i18n="nav_traps">Frequent Traps</a>
+      <a href="flashcards.html" class="active" data-i18n="nav_flashcards">Flashcards</a>
+      <div class="nav-sep"></div>
+      <a href="history.html" data-i18n="nav_history">History</a>
+      <a href="my-list.html" data-i18n="nav_my_list">My List</a>
+      <a href="help.html" data-i18n="nav_help">Help & Contact</a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink">Log out</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="global-controls">
+      <div class="lang-switch">
+        <button data-lang="sv">SV</button>
+        <button data-lang="en">EN</button>
+      </div>
+    </div>
+  </aside>
+  <div class="overlay" id="menuOverlay"></div>
+  <main>
+    <!-- Gauge bar -->
+    <div class="cl-gauge"><div class="cl-gauge-inner"><span class="cl-gauge-label" data-i18n="dashboard_estimated_score">Estimated Score</span><div class="cl-gauge-track"><div class="cl-gauge-fill" id="clGaugeFill"></div><div class="cl-gauge-pass" id="clGaugePass"></div></div><span class="cl-gauge-score" id="clGaugeScore">–</span><span class="cl-gauge-badge" id="clGaugeBadge"></span></div></div>
+    <div class="flashcards-layout left">
+    <header class="ce-header"><h1 data-i18n="title_flashcards">Flashcards</h1></header>
+    <section id="flashcardsApp">
+      <div id="topicsWrapper" class="fc-topics-wrapper">
+        <p class="muted" data-i18n="flashcards_select_topics"></p>
+        <div class="fc-segmented">
+          <button id="fcAllTopics" class="active" data-i18n="flashcards_all_topics"></button>
+          <button id="fcWeakTopics" data-i18n="flashcards_focus_weak"></button>
+        </div>
+        <div id="topicContainer" class="fc-topic-toggles"></div>
+        <button id="startBtn" class="btn fc-btn-primary" data-i18n="flashcards_start"></button>
+      </div>
+      <div class="flashcard" id="card">
+        <div class="card-inner">
+          <div class="card-front" id="qText"></div>
+          <div class="card-back" id="aText"></div>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="flipBtn" data-i18n="flashcards_flip"></button>
+        <button id="knownBtn" class="primary" data-i18n="flashcards_known"></button>
+        <button id="againBtn" data-i18n="flashcards_again"></button>
+      </div>
+      <div class="controls-row">
+        <button id="fcPrev" class="fc-nav"><svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" stroke="var(--accent)" stroke-width="2" fill="none"/><path d="M11 6 L7 10 L11 14" stroke="var(--accent)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button id="fcNext" class="fc-nav"><svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" stroke="var(--accent)" stroke-width="2" fill="none"/><path d="M9 6 L13 10 L9 14" stroke="var(--accent)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+      <div id="status" class="fc-status"></div>
+    </section>
+    </div>
+  </main>
+</div>
+<script src="/sweden/assets/js/lang-bootstrap-se.js"></script>
+<script src="/sweden/assets/js/config-se.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>CivicLearnI18n.init();</script>
+<script src="/assets/js/engine-lu.js"></script>
+<script src="/assets/js/sync.js"></script>
+<script>
+CivicLearnI18n.onReady(() => {
+  const s = document.createElement("script");
+  s.src = "/sweden/assets/js/flashcards-se.js";
+  document.body.appendChild(s);
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+  const current = window.CIVICEDGE_LANG;
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    if (btn.dataset.lang === current) btn.classList.add("active");
+    btn.addEventListener("click", () => {
+      if (btn.dataset.lang === current) return;
+      localStorage.setItem("civicedge_lang", btn.dataset.lang);
+      location.reload();
+    });
+  });
+});
+</script>
+<script src="/sweden/assets/js/gauge-bar.js"></script>
+<script src="/sweden/assets/js/study-timer.js"></script>
+<script src="/assets/js/maintenance-bar.js"></script>
+<script src="/assets/js/signout.js"></script>
+</body></html>

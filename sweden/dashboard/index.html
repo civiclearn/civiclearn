@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title_dashboard">Dashboard</title>
+  <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <link rel="stylesheet" href="/sweden/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/sweden/assets/css/gauge-bar.css">
+  <link rel="stylesheet" href="/sweden/assets/css/dashboard-v2.css">
+
+  <script>document.documentElement.classList.add("i18n-hidden");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <!-- <script src="/sweden/assets/js/se-auth.js"></script> -->
+</head>
+
+<body>
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Sweden">
+        <rect width="640" height="400" fill="#006AA7"/>
+        <rect x="176" y="0" width="64" height="400" fill="#FECC02"/>
+        <rect x="0" y="168" width="640" height="64" fill="#FECC02"/>
+      </svg>
+    </div>
+    <nav class="nav">
+      <a href="index.html" class="active" data-i18n="nav_dashboard">Dashboard</a>
+      <a href="simulation.html" data-i18n="nav_simulation">Test Simulation</a>
+      <a href="quick.html" data-i18n="nav_quick">Quick Test</a>
+      <a href="topics.html" data-i18n="nav_topics">Tests by Topic</a>
+      <a href="traps.html" data-i18n="nav_traps">Frequent Traps</a>
+      <a href="flashcards.html" data-i18n="nav_flashcards">Flashcards</a>
+      <div class="nav-sep"></div>
+      <a href="history.html" data-i18n="nav_history">History</a>
+      <a href="my-list.html" data-i18n="nav_my_list">My List</a>
+      <a href="help.html" data-i18n="nav_help">Help & Contact</a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink">Log out</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="global-controls">
+      <div class="lang-switch">
+        <button data-lang="sv">SV</button>
+        <button data-lang="en">EN</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="overlay" id="menuOverlay"></div>
+
+  <main>
+    <div id="quiz" style="display:none"></div>
+
+    <div class="dashboard-container">
+
+      <!-- ① Gauge bar -->
+      <div class="cl-gauge">
+        <div class="cl-gauge-inner">
+          <span class="cl-gauge-label" data-i18n="dashboard_estimated_score">Estimated Score</span>
+          <div class="cl-gauge-track">
+            <div class="cl-gauge-fill" id="clGaugeFill"></div>
+            <div class="cl-gauge-pass" id="clGaugePass"></div>
+          </div>
+          <span class="cl-gauge-score" id="clGaugeScore">–</span>
+          <span class="cl-gauge-badge" id="clGaugeBadge"></span>
+        </div>
+      </div>
+
+      <!-- ② Stats (5 cards, time-card hidden on mobile) -->
+      <div class="db-stats-row anim d1">
+        <div class="db-stat-card cd" id="countdownCard">
+          <div class="db-stat-value" id="examCountdown"></div>
+          <div class="db-stat-label" id="examNoDate" data-i18n="countdown_enter_date"></div>
+          <button class="db-stat-label" id="openDateSheet" style="background:none;border:none;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11.5px;font-weight:600;padding:0" data-i18n="countdown_set_date_btn"></button>
+        </div>
+        <div class="db-stat-card ans">
+          <div class="db-stat-value" id="tmAnswered">0</div>
+          <div class="db-stat-label" data-i18n="dashboard_questions_answered">Questions answered</div>
+        </div>
+        <div class="db-stat-card acc">
+          <div class="db-stat-value" id="tmAccuracy">0%</div>
+          <div class="db-stat-label" data-i18n="dashboard_mastery_rate">Mastery rate</div>
+        </div>
+        <div class="db-stat-card time-card">
+          <div class="db-stat-value" id="tmTime">0m</div>
+          <div class="db-stat-label" data-i18n="dashboard_study_time">Total study time</div>
+        </div>
+        <div class="db-stat-card streak">
+          <div class="db-stat-value" id="tmStreak">0</div>
+          <div class="db-stat-label" data-i18n="dashboard_streak">Study streak</div>
+        </div>
+      </div>
+
+      <!-- Date picker sheet -->
+      <div class="date-sheet-overlay" id="dateSheetOverlay"></div>
+      <div class="date-sheet" id="dateSheet">
+        <h3 data-i18n="countdown_sheet_title">Set your exam date</h3>
+        <input type="date" id="examDateInput">
+        <div class="date-sheet-actions">
+          <button class="btn secondary" id="sheetCancel" data-i18n="countdown_cancel">Cancel</button>
+          <button class="btn" id="sheetSave" data-i18n="countdown_save">Save</button>
+        </div>
+      </div>
+
+      <!-- ③ Launchers -->
+      <div class="db-actions-row anim d2">
+        <a href="simulation.html" class="db-action-card">
+          <div class="db-action-icon">⏱</div>
+          <div class="db-action-title" data-i18n="action_sim_title">Timed Simulation</div>
+          <div class="db-action-desc" data-i18n="action_sim_desc">Practise under real exam conditions. 25 questions, 45 minutes.</div>
+          <div class="db-action-go" data-i18n="action_start">Start →</div>
+        </a>
+        <a href="quick.html" class="db-action-card">
+          <div class="db-action-icon">⚡</div>
+          <div class="db-action-title" data-i18n="action_quick_title">Quick Test</div>
+          <div class="db-action-desc" data-i18n="action_quick_desc">5 random questions. Perfect for a short break.</div>
+          <div class="db-action-go" data-i18n="action_start">Start →</div>
+        </a>
+        <a href="topics.html" class="db-action-card">
+          <div class="db-action-icon">📚</div>
+          <div class="db-action-title" data-i18n="action_topics_title">Tests by Topic</div>
+          <div class="db-action-desc" data-i18n="action_topics_desc">Select topics. Master them progressively with wave logic.</div>
+          <div class="db-action-go" data-i18n="action_start">Start →</div>
+        </a>
+        <a href="flashcards.html" class="db-action-card">
+          <div class="db-action-icon">🗂</div>
+          <div class="db-action-title" data-i18n="action_fc_title">Flashcards</div>
+          <div class="db-action-desc" data-i18n="action_fc_desc">Flip through questions and answers by topic.</div>
+          <div class="db-action-go" data-i18n="action_open">Open →</div>
+        </a>
+      </div>
+
+      <!-- ④ Radar (with center %) + Sequential Practice -->
+      <div class="db-insight-row anim d3">
+        <div class="db-chart-card">
+          <div class="db-chart-title" data-i18n="dashboard_readiness_radar">Exam Readiness</div>
+          <div class="chart-wrap" style="height:280px"><canvas id="radarChart"></canvas></div>
+        </div>
+        <div class="db-chart-card" id="seqCard">
+          <div class="seq-header">
+            <div class="db-chart-title" data-i18n="dashboard_sequential_title" style="margin-bottom:0">Practice</div>
+            <div class="seq-counter" id="seqCounter"></div>
+          </div>
+          <div class="seq-question" id="seqQuestion"></div>
+          <div class="seq-options" id="seqOptions"></div>
+          <div class="seq-nav">
+            <button class="seq-nav-btn" id="seqPrev" aria-label="Previous">
+              <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M10 5.5L7 9l3 3.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="seq-nav-btn" id="seqNext" aria-label="Next">
+              <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 5.5l3 3.5-3 3.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ⑤ Tips (permanent) -->
+      <div class="db-tips-row anim d4" id="tipsRow">
+        <div class="db-tip-card">
+          <div class="db-tip-title" data-i18n="tip_topics_title">Start with topics</div>
+          <div class="db-tip-text" data-i18n="tip_topics_text">Topic-based tests use progressive mastery. Mistakes come back until you get them right.</div>
+        </div>
+        <div class="db-tip-card">
+          <div class="db-tip-title" data-i18n="tip_star_title">Mark difficult questions</div>
+          <div class="db-tip-text" data-i18n="tip_star_text">Use the ☆ star on any question to build a personal revision list for focused study.</div>
+        </div>
+        <div class="db-tip-card">
+          <div class="db-tip-title" data-i18n="tip_sim_title">Simulations are rehearsals</div>
+          <div class="db-tip-text" data-i18n="tip_sim_text">After a few days of topic practice, test yourself under real timed conditions.</div>
+        </div>
+      </div>
+
+      <div class="db-footer">
+        © 2026 — CivicLearn by Testrada — All rights reserved.
+      </div>
+
+    </div>
+
+    <!-- Hidden canvases — dashboard-v2-lu.js needs these IDs -->
+    <div style="display:none">
+      <canvas id="globalChart"></canvas>
+      <canvas id="topicsChart"></canvas>
+      <canvas id="trendChart"></canvas>
+      <canvas id="accuracyChart"></canvas>
+      <div id="globalPct"></div>
+      <div id="globalAnswered"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="/sweden/assets/js/lang-bootstrap-se.js"></script>
+<script src="/sweden/assets/js/config-se.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>CivicLearnI18n.init();</script>
+<script src="/assets/js/engine-lu.js"></script>
+<script src="/assets/js/sync.js"></script>
+
+<!-- Shared: gauge + study timer -->
+<script src="/sweden/assets/js/gauge-bar.js"></script>
+<script src="/sweden/assets/js/study-timer.js"></script>
+
+<!-- Dashboard logic -->
+<script>
+CivicLearnI18n.onReady(() => {
+  const s = document.createElement("script");
+  s.src = "/assets/js/dashboard-v2-lu.js";
+  document.body.appendChild(s);
+});
+</script>
+
+<!-- Dashboard extra (computes + caches gauge, renders radar) -->
+<script src="/sweden/assets/js/dashboard-extra-se.js"></script>
+
+<!-- Sequential practice widget -->
+<script src="/sweden/assets/js/dashboard-sequential-se.js"></script>
+
+<!-- Mobile menu + lang switch -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+
+  const current = window.CIVICEDGE_LANG;
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    if (btn.dataset.lang === current) btn.classList.add("active");
+    btn.addEventListener("click", () => {
+      if (btn.dataset.lang === current) return;
+      localStorage.setItem("civicedge_lang", btn.dataset.lang);
+      location.reload();
+    });
+  });
+});
+</script>
+<script src="/assets/js/maintenance-bar.js"></script>
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>
