@@ -57,6 +57,47 @@
     @media (max-width: 640px) {
       .bundle-banner { flex-direction: column; text-align: center; }
     }
+
+    /* ─── SPROOCHENTEST ADDON BANNER ─── */
+    .st-addon-banner{display:none;background:linear-gradient(135deg,#eef2ff 0%,#e0e7ff 100%);border:1px solid #c7d2fe;border-radius:12px;padding:14px 20px;margin:0 0 20px 0;align-items:center;gap:14px;flex-wrap:wrap;position:relative;}
+    .st-addon-banner.show{display:flex;}
+    .st-addon-icon{font-size:1.3rem;flex-shrink:0;}
+    .st-addon-text{flex:1;min-width:200px;}
+    .st-addon-text strong{color:#3730a3;font-size:.92rem;}
+    .st-addon-text span{display:block;color:#4338ca;font-size:.82rem;margin-top:2px;}
+    .st-addon-btn{background:#6b4eff;color:#fff;border:none;cursor:pointer;padding:8px 18px;border-radius:8px;font-size:.85rem;font-weight:600;white-space:nowrap;transition:background .15s;font-family:inherit;}
+    .st-addon-btn:hover{background:#5a3de6;}
+    .st-addon-dismiss{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:#6366f1;font-size:.8rem;opacity:.5;transition:opacity .15s;font-family:inherit;}
+    .st-addon-dismiss:hover{opacity:1;}
+    @media(max-width:600px){.st-addon-banner{flex-direction:column;text-align:center;padding-right:20px;}.st-addon-btn{width:100%;text-align:center;}.st-addon-dismiss{top:6px;right:8px;}}
+
+    /* ─── SPROOCHENTEST ADDON PAYMENT MODAL ─── */
+    .st-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;justify-content:center;align-items:center;padding:20px;}
+    .st-modal-overlay.open{display:flex;}
+    .st-modal{background:#fff;border-radius:16px;padding:32px;max-width:440px;width:100%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto;font-family:'Space Grotesk',sans-serif;}
+    .st-modal-close{position:absolute;top:12px;right:16px;background:none;border:none;cursor:pointer;font-size:1.2rem;color:#94a3b8;transition:color .15s;}
+    .st-modal-close:hover{color:#475569;}
+    .st-modal-title{margin:0 0 20px;font-size:1.2rem;color:#1e293b;font-weight:700;}
+    .st-modal-features{margin-bottom:16px;}
+    .st-feature{font-size:.85rem;color:#334155;padding:4px 0;}
+    .st-modal-price{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-bottom:16px;}
+    .st-price-row{display:flex;justify-content:space-between;align-items:center;font-size:.9rem;color:#334155;}
+    .st-price{font-weight:700;color:#6b4eff;font-size:1.05rem;}
+    .st-price-note{font-size:.75rem;color:#64748b;margin-top:6px;}
+    .st-modal-email{font-size:.82rem;color:#64748b;margin-bottom:16px;padding:0 2px;}
+    .st-payment-element{min-height:80px;margin-bottom:16px;}
+    .st-error{color:#dc2626;font-size:.82rem;margin-bottom:12px;}
+    .st-pay-btn{width:100%;padding:14px;border:none;border-radius:10px;background:#6b4eff;color:#fff;font-size:.95rem;font-weight:600;cursor:pointer;transition:background .15s;display:flex;justify-content:center;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;}
+    .st-pay-btn:hover:not(:disabled){background:#5a3de6;}
+    .st-pay-btn:disabled{opacity:.55;cursor:not-allowed;}
+    .st-spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:stspin .6s linear infinite;display:inline-block;}
+    @keyframes stspin{to{transform:rotate(360deg);}}
+    .st-success{text-align:center;padding:20px 0;}
+    .st-success-icon{font-size:2.5rem;margin-bottom:12px;}
+    .st-success h3{margin:0 0 12px;color:#1e293b;font-size:1.15rem;}
+    .st-success p{color:#475569;font-size:.88rem;margin:0 0 24px;line-height:1.5;}
+    .st-success-btn{display:inline-block;background:#6b4eff;color:#fff;text-decoration:none;padding:12px 28px;border-radius:10px;font-weight:600;font-size:.92rem;transition:background .15s;}
+    .st-success-btn:hover{background:#5a3de6;}
   </style>
 
   <script>
@@ -182,6 +223,45 @@
     <span class="bundle-banner-icon">🎁</span>
     <div class="bundle-banner-text" id="bundleBannerText"></div>
     <a href="https://civiclearn.com/sproochentest/dashboard/" class="bundle-banner-btn" id="bundleBannerBtn"></a>
+  </div>
+
+  <!-- Sproochentest Addon Banner (shown to non-bundle VE users) -->
+  <div class="st-addon-banner" id="stAddonBanner">
+    <div class="st-addon-icon">🗣️</div>
+    <div class="st-addon-text" id="stAddonText"></div>
+    <button class="st-addon-btn" id="stAddonBtn"></button>
+    <button class="st-addon-dismiss" id="stAddonDismiss" title="✕">✕</button>
+  </div>
+
+  <!-- Sproochentest Addon Payment Modal -->
+  <div class="st-modal-overlay" id="stModalOverlay">
+    <div class="st-modal">
+      <button class="st-modal-close" id="stModalClose">✕</button>
+      <div id="stStep1">
+        <h3 class="st-modal-title" id="stModalTitle"></h3>
+        <div class="st-modal-features" id="stModalFeatures"></div>
+        <div class="st-modal-price">
+          <div class="st-price-row">
+            <span id="stPriceLabel"></span>
+            <span class="st-price">30 €</span>
+          </div>
+          <div class="st-price-note" id="stPriceNote"></div>
+        </div>
+        <div class="st-modal-email" id="stEmailDisplay"></div>
+        <div id="stPaymentElement" class="st-payment-element"></div>
+        <div id="stError" class="st-error"></div>
+        <button class="st-pay-btn" id="stPayBtn" disabled>
+          <span id="stPayText"></span>
+          <span id="stPaySpinner" class="st-spinner" style="display:none;"></span>
+        </button>
+      </div>
+      <div id="stStep2" style="display:none;" class="st-success">
+        <div class="st-success-icon">✅</div>
+        <h3 id="stSuccessTitle"></h3>
+        <p id="stSuccessText"></p>
+        <a href="https://civiclearn.com/sproochentest/dashboard/" class="st-success-btn" id="stSuccessBtn"></a>
+      </div>
+    </div>
   </div>
 
   <!-- TOP METRICS -->
@@ -536,6 +616,285 @@ CivicLearnI18n.onReady(() => {
   document.getElementById('bundleBannerText').innerHTML = t.text;
   document.getElementById('bundleBannerBtn').textContent = t.btn;
   document.getElementById('bundleBanner').classList.add('show');
+})();
+</script>
+
+<!-- Sproochentest Addon: cross-sell for VE customers -->
+<script>
+(function() {
+  var SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+  var STRIPE_PK    = "pk_live_FLDkT3LcdsvBJu0zHmR91TVE";
+  var EDGE_FN_BASE = SUPABASE_URL + "/functions/v1";
+
+  var banner     = document.getElementById("stAddonBanner");
+  var addonText  = document.getElementById("stAddonText");
+  var addonBtn   = document.getElementById("stAddonBtn");
+  var dismissBtn = document.getElementById("stAddonDismiss");
+  var overlay    = document.getElementById("stModalOverlay");
+  var closeBtn   = document.getElementById("stModalClose");
+  var emailEl    = document.getElementById("stEmailDisplay");
+  var payBtn     = document.getElementById("stPayBtn");
+  var payText    = document.getElementById("stPayText");
+  var paySpinner = document.getElementById("stPaySpinner");
+  var errorEl    = document.getElementById("stError");
+  var step1      = document.getElementById("stStep1");
+  var step2      = document.getElementById("stStep2");
+
+  var stripe, elements, paymentElement;
+  var clientSecret = null, paymentIntentId = null;
+  var userEmail = null, accessToken = null;
+
+  // i18n texts
+  var lang = window.CIVICEDGE_LANG || 'fr';
+
+  var i18n = {
+    fr: {
+      banner_title: "Entraînement au Sproochentest — 10 simulations complètes",
+      banner_sub: "Prix normal 69 €. En tant que client existant, seulement 30 € (économisez 39 €).",
+      banner_btn: "Ajouter maintenant →",
+      modal_title: "Ajouter : Entraînement au Sproochentest",
+      features: [
+        "10 simulations complètes du Sproochentest",
+        "Expression orale (A2) avec évaluation IA",
+        "Compréhension orale (B1) avec audio",
+        "Accès illimité · tous les appareils"
+      ],
+      price_label: "Prix client existant",
+      price_note: "Prix normal 69 €. Vous économisez 39 € en tant que client existant.",
+      account_prefix: "Compte : ",
+      pay_btn: "Payer 30 €",
+      preparing: "Préparation du paiement…",
+      processing: "Traitement…",
+      activating: "Activation de l'accès…",
+      success_title: "Paiement effectué !",
+      success_text: "Vous avez maintenant accès au Sproochentest Training avec 10 simulations complètes. Connectez-vous avec le même e-mail et mot de passe.",
+      success_btn: "Ouvrir Sproochentest →"
+    },
+    de: {
+      banner_title: "Sproochentest-Training — 10 komplette Simulationen",
+      banner_sub: "Normalpreis 69 €. Als bestehender Kunde nur 30 € (sparen Sie 39 €).",
+      banner_btn: "Jetzt hinzufügen →",
+      modal_title: "Hinzufügen: Sproochentest-Training",
+      features: [
+        "10 komplette Sproochentest-Simulationen",
+        "Mündlicher Ausdruck (A2) mit KI-Bewertung",
+        "Hörverstehen (B1) mit Audio",
+        "Unbegrenzter Zugang · alle Geräte"
+      ],
+      price_label: "Bestandskundenpreis",
+      price_note: "Normalpreis 69 €. Sie sparen 39 € als bestehender Kunde.",
+      account_prefix: "Konto: ",
+      pay_btn: "30 € bezahlen",
+      preparing: "Zahlung wird vorbereitet…",
+      processing: "Verarbeitung…",
+      activating: "Zugang wird aktiviert…",
+      success_title: "Zahlung abgeschlossen!",
+      success_text: "Sie haben jetzt Zugang zum Sproochentest Training mit 10 kompletten Simulationen. Melden Sie sich mit derselben E-Mail und demselben Passwort an.",
+      success_btn: "Sproochentest öffnen →"
+    },
+    en: {
+      banner_title: "Sproochentest Training — 10 complete simulations",
+      banner_sub: "Normal price €69. As an existing customer, only €30 (save €39).",
+      banner_btn: "Add now →",
+      modal_title: "Add-on: Sproochentest Training",
+      features: [
+        "10 complete Sproochentest simulations",
+        "Speaking (A2) with AI evaluation",
+        "Listening comprehension (B1) with audio",
+        "Unlimited access · all devices"
+      ],
+      price_label: "Existing customer price",
+      price_note: "Normal price €69. You save €39 as an existing customer.",
+      account_prefix: "Account: ",
+      pay_btn: "Pay €30",
+      preparing: "Preparing payment…",
+      processing: "Processing…",
+      activating: "Activating access…",
+      success_title: "Payment completed!",
+      success_text: "You now have access to Sproochentest Training with 10 complete simulations. Log in with the same email and password.",
+      success_btn: "Open Sproochentest →"
+    }
+  };
+
+  var t = i18n[lang] || i18n.fr;
+
+  // Populate static text
+  addonText.innerHTML = '<strong>' + t.banner_title + '</strong><span>' + t.banner_sub + '</span>';
+  addonBtn.textContent = t.banner_btn;
+  document.getElementById("stModalTitle").textContent = t.modal_title;
+  var featuresHtml = t.features.map(function(f) { return '<div class="st-feature">✓ ' + f + '</div>'; }).join('');
+  document.getElementById("stModalFeatures").innerHTML = featuresHtml;
+  document.getElementById("stPriceLabel").textContent = t.price_label;
+  document.getElementById("stPriceNote").textContent = t.price_note;
+  payText.textContent = t.pay_btn;
+  document.getElementById("stSuccessTitle").textContent = t.success_title;
+  document.getElementById("stSuccessText").textContent = t.success_text;
+  document.getElementById("stSuccessBtn").textContent = t.success_btn;
+
+  // 1. Show banner if eligible (non-bundle VE user)
+  async function initBanner() {
+    if (sessionStorage.getItem("st_addon_dismissed")) return;
+    if (localStorage.getItem("cl_bundle") === "lu") return;
+
+    try {
+      if (window.luxAuth && window.luxAuth.ready) await window.luxAuth.ready;
+      var sb = window.luxAuth && window.luxAuth.supabase;
+      var userId = window.luxAuth && window.luxAuth.userId;
+      if (!sb || !userId) return;
+
+      var sess = await sb.auth.getSession();
+      if (!sess.data.session) return;
+      accessToken = sess.data.session.access_token;
+      userEmail = sess.data.session.user.email;
+
+      var result = await sb.from("users").select("bundle").eq("id", userId).maybeSingle();
+      if (result.data && result.data.bundle === "lux") {
+        localStorage.setItem("cl_bundle", "lu");
+        return;
+      }
+      banner.classList.add("show");
+    } catch(e) { /* silent */ }
+  }
+
+  // 2. Load Stripe.js on demand
+  function loadStripe() {
+    return new Promise(function(resolve) {
+      if (window.Stripe) { resolve(window.Stripe(STRIPE_PK)); return; }
+      var s = document.createElement("script");
+      s.src = "https://js.stripe.com/v3/";
+      s.onload = function() { resolve(window.Stripe(STRIPE_PK)); };
+      document.head.appendChild(s);
+    });
+  }
+
+  // 3. Open modal
+  async function openModal() {
+    overlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+    errorEl.textContent = "";
+    emailEl.textContent = t.account_prefix + (userEmail || "");
+
+    if (!stripe) stripe = await loadStripe();
+
+    try {
+      payBtn.disabled = true;
+      payText.textContent = t.preparing;
+
+      var res = await fetch(EDGE_FN_BASE + "/sproochentest-addon-create-payment-intent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + accessToken,
+          "apikey": window.SUPABASE_KEY
+        },
+        body: JSON.stringify({})
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Payment setup failed");
+
+      clientSecret = data.client_secret;
+      paymentIntentId = data.payment_intent_id;
+
+      elements = stripe.elements({
+        clientSecret: clientSecret,
+        appearance: {
+          theme: "stripe",
+          variables: { colorPrimary: "#6b4eff", fontFamily: "'Space Grotesk', sans-serif", borderRadius: "8px" }
+        }
+      });
+      paymentElement = elements.create("payment");
+      paymentElement.mount("#stPaymentElement");
+
+      paymentElement.on("ready", function() {
+        payBtn.disabled = false;
+        payText.textContent = t.pay_btn;
+      });
+      paymentElement.on("change", function(e) {
+        errorEl.textContent = e.error ? e.error.message : "";
+      });
+    } catch(err) {
+      errorEl.textContent = err.message;
+      payText.textContent = t.pay_btn;
+    }
+  }
+
+  // 4. Close modal
+  function closeModal() {
+    overlay.classList.remove("open");
+    document.body.style.overflow = "";
+    if (paymentElement) { try { paymentElement.unmount(); } catch(e) {} paymentElement = null; }
+    elements = null; clientSecret = null;
+  }
+
+  // 5. Submit payment
+  async function submitPayment() {
+    if (!stripe || !elements || !clientSecret) return;
+    payBtn.disabled = true;
+    payText.textContent = t.processing;
+    paySpinner.style.display = "inline-block";
+    errorEl.textContent = "";
+
+    try {
+      var result = await stripe.confirmPayment({
+        elements: elements,
+        confirmParams: { receipt_email: userEmail, return_url: window.location.href },
+        redirect: "if_required"
+      });
+      if (result.error) throw new Error(result.error.message);
+
+      payText.textContent = t.activating;
+      var setupRes = await fetch(EDGE_FN_BASE + "/sproochentest-addon-setup-account", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + accessToken,
+          "apikey": window.SUPABASE_KEY
+        },
+        body: JSON.stringify({ payment_intent_id: paymentIntentId })
+      });
+      var setupData = await setupRes.json();
+      if (!setupRes.ok) throw new Error(setupData.error || "Access activation failed");
+
+      localStorage.setItem("cl_bundle", "lu");
+      step1.style.display = "none";
+      step2.style.display = "block";
+      banner.classList.remove("show");
+
+      // Show the existing bundle banner
+      var bundleBanner = document.getElementById("bundleBanner");
+      if (bundleBanner) {
+        var bt = (i18n[lang] || i18n.fr);
+        var bundleTexts = {
+          fr: { text: '<strong>Votre offre pack est active !</strong> Vous avez également accès au <strong>Sproochentest Training</strong> — même e-mail et mot de passe.', btn: 'Ouvrir Sproochentest →' },
+          de: { text: '<strong>Ihr Paketangebot ist aktiv!</strong> Sie haben auch Zugang zum <strong>Sproochentest Training</strong> — gleiche E-Mail und Passwort.', btn: 'Sproochentest öffnen →' },
+          en: { text: '<strong>Your bundle offer is active!</strong> You also have access to <strong>Sproochentest Training</strong> — same email and password.', btn: 'Open Sproochentest →' }
+        };
+        var btt = bundleTexts[lang] || bundleTexts.fr;
+        document.getElementById('bundleBannerText').innerHTML = btt.text;
+        document.getElementById('bundleBannerBtn').textContent = btt.btn;
+        bundleBanner.classList.add("show");
+      }
+    } catch(err) {
+      errorEl.textContent = err.message;
+      payBtn.disabled = false;
+      payText.textContent = t.pay_btn;
+      paySpinner.style.display = "none";
+    }
+  }
+
+  // 6. Dismiss
+  function dismissBanner() {
+    banner.classList.remove("show");
+    sessionStorage.setItem("st_addon_dismissed", "1");
+  }
+
+  addonBtn.addEventListener("click", openModal);
+  dismissBtn.addEventListener("click", dismissBanner);
+  closeBtn.addEventListener("click", closeModal);
+  overlay.addEventListener("click", function(e) { if (e.target === overlay) closeModal(); });
+  payBtn.addEventListener("click", submitPayment);
+
+  initBanner();
 })();
 </script>
 </body>
