@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────────────────────
    CivicLearn Dashboard Extra — Sweden
-   Gauge bar + Radar with center % + Celebration + Study time
-   Supports live updates when sequential widget answers questions.
+   Vertical Bar Chart + Gauge + Celebration + Study time
+   + Live updates from sequential widget
    ───────────────────────────────────────────────────────── */
 
 (function () {
@@ -10,8 +10,18 @@
   const CACHE_KEY = "cl_gauge_cache";
   const lang = window.CIVICEDGE_LANG || "en";
 
-  // Stored chart instance for live updates
-  let radarInstance = null;
+  let __barChart = null;
+
+  const TOPIC_COLORS = [
+    "#1D9E75", // teal
+    "#378ADD", // blue
+    "#D85A30", // coral
+    "#BA7517", // amber
+    "#7F77DD", // purple
+    "#D4537E", // pink
+    "#639922", // green
+    "#EF9F27", // gold
+  ];
 
   function t(key, fallback) {
     if (window.CivicLearnI18n && typeof window.CivicLearnI18n.t === "function") {
@@ -125,51 +135,14 @@
   }
 
   // ════════════════════════════════════════════════════════
-  // 2. RADAR WITH CENTER MASTERY %
+  // 2. VERTICAL BAR CHART
   // ════════════════════════════════════════════════════════
 
-  const centerTextPlugin = {
-    id: "radarCenterText",
-    afterDraw(chart) {
-      if (chart.config.type !== "radar") return;
-      const meta = chart.config.options?.plugins?.radarCenterText;
-      if (!meta || !meta.text) return;
-
-      const { ctx, chartArea } = chart;
-      const cx = (chartArea.left + chartArea.right) / 2;
-      const cy = (chartArea.top + chartArea.bottom) / 2;
-
-      ctx.save();
-
-      // White backdrop to mask grid lines and low-value data points
-      const bgW = 80;
-      const bgH = 46;
-      ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
-      ctx.beginPath();
-      ctx.roundRect(cx - bgW / 2, cy - bgH / 2 - 2, bgW, bgH, 8);
-      ctx.fill();
-
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      ctx.font = "800 28px 'Plus Jakarta Sans', sans-serif";
-      ctx.fillStyle = meta.color || "#1a1816";
-      ctx.fillText(meta.text, cx, cy - 6);
-
-      if (meta.sub) {
-        ctx.font = "500 11px 'Plus Jakarta Sans', sans-serif";
-        ctx.fillStyle = meta.subColor || "#a8a29e";
-        ctx.fillText(meta.sub, cx, cy + 14);
-      }
-
-      ctx.restore();
-    }
-  };
-
-  function getRadarData() {
+  function getChartData() {
     const overall = computeOverall();
     const keys = Object.keys(overall.topics);
     return {
+      keys,
       labels: keys.map(k => overall.topics[k].label),
       data: keys.map(k => {
         const t = overall.topics[k];
@@ -181,87 +154,143 @@
     };
   }
 
-  function renderRadar() {
-    const canvas = document.getElementById("radarChart");
+  function renderChart() {
+    const canvas = document.getElementById("polarChart");
     if (!canvas || typeof Chart === "undefined") return;
 
-    Chart.register(centerTextPlugin);
+    const cd = getChartData();
+    if (!cd.labels.length) return;
 
-    const rd = getRadarData();
-    if (!rd.labels.length) return;
+    const colors = cd.labels.map((_, i) => TOPIC_COLORS[i % TOPIC_COLORS.length]);
+
+    if (__barChart) {
+      __barChart.destroy();
+      __barChart = null;
+    }
+
+    // Update overall mastery header
+    const hdr = document.getElementById("chartMasteryPct");
+    const sub = document.getElementById("chartMasterySub");
+    if (hdr) hdr.textContent = cd.overallPct + "%";
+    if (sub) sub.textContent = cd.masteredAll + " / " + cd.totalAll;
+
+    // Update background — faded flag reveal
+    const bgFill = document.getElementById("chartBgFill");
+    if (bgFill) {
+      // Set card width so flag proportions stay correct
+      const card = bgFill.parentElement;
+      if (card) bgFill.style.setProperty("--card-width", card.offsetWidth + "px");
+      requestAnimationFrame(() => { bgFill.style.width = cd.overallPct + "%"; });
+    }
 
     const ctx = canvas.getContext("2d");
 
-    radarInstance = new Chart(ctx, {
-      type: "radar",
+    __barChart = new Chart(ctx, {
+      type: "bar",
       data: {
-        labels: rd.labels,
+        labels: cd.labels,
         datasets: [{
-          label: lang === "sv" ? "Behärskning" : "Mastery",
-          data: rd.data,
-          backgroundColor: "rgba(13, 115, 119, 0.12)",
-          borderColor: "rgba(13, 115, 119, 0.75)",
-          borderWidth: 2,
-          pointBackgroundColor: "rgba(13, 115, 119, 1)",
-          pointBorderColor: "#fff",
-          pointBorderWidth: 1.5,
-          pointRadius: 4,
-          pointHoverRadius: 6
+          data: cd.data,
+          backgroundColor: colors.map(c => c + "CC"),
+          borderColor: colors,
+          borderWidth: 1.5,
+          borderRadius: 6,
+          borderSkipped: false,
+          maxBarThickness: 56
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: { duration: 400 },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: function (ctx) { return ctx.parsed.r + "%"; }
-            }
-          },
-          radarCenterText: {
-            text: rd.overallPct + "%",
-            color: "#1a1816",
-            sub: rd.masteredAll + " / " + rd.totalAll,
-            subColor: "#a8a29e"
-          }
+        animation: { duration: 500 },
+        layout: {
+          padding: { top: 24, bottom: 0, left: 0, right: 0 }
         },
         scales: {
-          r: {
+          y: {
             beginAtZero: true,
             max: 100,
             ticks: {
               stepSize: 25,
               font: { size: 10, family: "Plus Jakarta Sans" },
-              backdropColor: "transparent",
-              color: "#a8a29e"
+              color: "#aaa",
+              callback: function (v) { return v + "%"; }
             },
-            grid: { color: "#e7e5e1" },
-            angleLines: { color: "#e7e5e1" },
-            pointLabels: {
-              font: { size: 11.5, weight: "600", family: "Plus Jakarta Sans" },
-              color: "#57534e"
+            grid: {
+              color: "rgba(136, 135, 128, 0.12)"
+            },
+            border: { display: false }
+          },
+          x: {
+            ticks: {
+              font: { size: 11, weight: "500", family: "Plus Jakarta Sans" },
+              color: "#78716c",
+              maxRotation: 0,
+              autoSkip: false,
+              callback: function(value, index) {
+                if (window.innerWidth < 768) return "";
+                return this.getLabelForValue(value);
+              }
+            },
+            grid: { display: false },
+            border: { display: false }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function (ctx) {
+                return ctx.parsed.y + "% mastered";
+              }
             }
           }
         }
-      }
+      },
+      plugins: [{
+        // Plugin to draw percentage on top of each bar
+        id: "barTopLabels",
+        afterDatasetsDraw(chart) {
+          const { ctx } = chart;
+          const meta = chart.getDatasetMeta(0);
+
+          ctx.save();
+          ctx.textAlign = "center";
+          ctx.textBaseline = "bottom";
+          ctx.font = "700 12px 'Plus Jakarta Sans', sans-serif";
+
+          meta.data.forEach((bar, i) => {
+            const value = chart.data.datasets[0].data[i];
+            const color = TOPIC_COLORS[i % TOPIC_COLORS.length];
+            ctx.fillStyle = color;
+            ctx.fillText(value + "%", bar.x, bar.y - 4);
+          });
+
+          ctx.restore();
+        }
+      }]
     });
   }
 
-  function updateRadar() {
-    if (!radarInstance) return;
+  function updateChart() {
+    if (!__barChart) { renderChart(); return; }
 
-    const rd = getRadarData();
+    const cd = getChartData();
 
-    // Update dataset
-    radarInstance.data.datasets[0].data = rd.data;
+    __barChart.data.datasets[0].data = cd.data;
+    __barChart.update();
 
-    // Update center text plugin config
-    radarInstance.options.plugins.radarCenterText.text = rd.overallPct + "%";
-    radarInstance.options.plugins.radarCenterText.sub = rd.masteredAll + " / " + rd.totalAll;
+    const hdr = document.getElementById("chartMasteryPct");
+    const sub = document.getElementById("chartMasterySub");
+    if (hdr) hdr.textContent = cd.overallPct + "%";
+    if (sub) sub.textContent = cd.masteredAll + " / " + cd.totalAll;
 
-    radarInstance.update();
+    const bgFill = document.getElementById("chartBgFill");
+    if (bgFill) {
+      const card = bgFill.parentElement;
+      if (card) bgFill.style.setProperty("--card-width", card.offsetWidth + "px");
+      bgFill.style.width = cd.overallPct + "%";
+    }
   }
 
   // ════════════════════════════════════════════════════════
@@ -301,7 +330,7 @@
     canvas.height = H * dpr;
     ctx.scale(dpr, dpr);
 
-    const colors = ["#0d7377", "#16a34a", "#fbbf24", "#f87171", "#a78bfa"];
+    const colors = TOPIC_COLORS.slice(0, 5);
     const pieces = Array.from({ length: 200 }, () => ({
       x: Math.random() * W,
       y: -Math.random() * H * 0.5,
@@ -366,17 +395,19 @@
   }
 
   // ════════════════════════════════════════════════════════
-  // 5. LIVE REFRESH — called by sequential widget + engine
+  // 5. LIVE REFRESH
   // ════════════════════════════════════════════════════════
 
   function refreshAll() {
     computeAndCacheGauge();
-    updateRadar();
+    updateChart();
     checkCelebration();
     patchStudyTime();
+    // Delay so our values override dashboard-v2-lu.js which also reacts to this event
+    setTimeout(patchStatCards, 100);
+  }
 
-    // Also refresh the stat cards that dashboard-v2-lu.js manages
-    // by re-reading civicedge_progress
+  function patchStatCards() {
     const progress = getProgress();
     const bank = getBank();
 
@@ -407,11 +438,12 @@
     const bank = getBank();
     if (bank.length > 0) {
       computeAndCacheGauge();
-      renderRadar();
+      renderChart();
       checkCelebration();
       patchStudyTime();
+      // Override stat cards after dashboard-v2-lu.js has set its values
+      setTimeout(patchStatCards, 200);
 
-      // Listen for live updates from sequential widget
       window.addEventListener("civiclearn:progress-updated", refreshAll);
     } else {
       setTimeout(tryInit, 500);

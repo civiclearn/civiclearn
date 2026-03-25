@@ -1,6 +1,7 @@
 /* ──────────────────────────────────────────────────────
-   CivicLearn — Shared Gauge Bar (all pages)
-   Reads from localStorage cache. Dashboard writes cache.
+   CivicLearn — Sidebar Gauge (all pages)
+   Reads estimated score from localStorage cache.
+   Dashboard-extra-se.js writes the cache.
    ────────────────────────────────────────────────────── */
 
 (function () {
@@ -22,7 +23,6 @@
     catch { data = null; }
 
     if (!data) {
-      // No cache yet — hide or show defaults
       score.textContent = "–";
       badge.textContent = "";
       badge.removeAttribute("data-state");
@@ -46,13 +46,11 @@
     );
   }
 
-  // Run on load, and listen for updates from dashboard
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", render);
   } else {
     render();
   }
 
-  // Dashboard dispatches this event after computing the score
   window.addEventListener("cl:gauge-updated", render);
 })();

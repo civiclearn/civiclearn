@@ -53,6 +53,10 @@
 .db-stat-card.cd { cursor: pointer; transition: transform 0.15s; }
 .db-stat-card.cd:hover { transform: translateY(-1px); }
 
+/* Subtle tints on key cards */
+.db-stat-card.cd { background: #fdfcfb; } /* barely warm for countdown */
+.db-stat-card.acc { background: #fafdfb; } /* barely cool for mastery */
+
 /* ── DATE PICKER SHEET ── */
 .date-sheet-overlay {
   position: fixed; inset: 0;
@@ -163,6 +167,87 @@
   padding: 22px;
   box-shadow: var(--shadow);
   overflow: hidden;
+}
+
+/* Chart card with progress background fill */
+.db-polar-card {
+  padding: 20px;
+  background: #fafaf8;
+  border: 1.5px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Progress background — faded Swedish flag reveal */
+.chart-bg-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 0%;
+  overflow: hidden;
+  transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 0;
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+
+/* Swedish flag as SVG background */
+.chart-bg-fill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Reconstruct the container width so flag isn't squished */
+  width: var(--card-width, 700px);
+  background:
+    linear-gradient(#FECC02, #FECC02) no-repeat 27.5% 0 / 10% 100%,
+    linear-gradient(#FECC02, #FECC02) no-repeat 0 42% / 100% 16%,
+    linear-gradient(#006AA7, #006AA7) no-repeat 0 0 / 100% 100%;
+  opacity: 0.06;
+  border-radius: var(--radius);
+}
+
+.chart-mastery-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.chart-mastery-pct {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.chart-mastery-sub {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.polar-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 640px) {
+  .db-polar-card {
+    padding: 16px;
+  }
 }
 
 .db-chart-title {
@@ -367,16 +452,39 @@
 
 /* ── 100% MASTERY CELEBRATION ── */
 body.mastery-complete {
-  background: linear-gradient(180deg, #f0fdf4 0%, var(--bg) 120px);
+  background: linear-gradient(180deg, #e6f5f5 0%, var(--bg) 120px);
 }
 
-body.mastery-complete .cl-gauge {
-  border-color: var(--correct);
-  background: #f0fdf4;
+body.mastery-complete .sidebar-gauge-fill {
+  background: var(--accent) !important;
 }
 
-body.mastery-complete .db-chart-card:has(#radarChart) {
-  border: 1.5px solid var(--correct);
+body.mastery-complete .db-polar-card {
+  border: 1.5px solid var(--accent);
+}
+
+/* Flag becomes visible at 100% */
+body.mastery-complete .chart-bg-fill {
+  width: 100% !important;
+}
+
+body.mastery-complete .chart-bg-fill::before {
+  opacity: 0.28;
+}
+
+/* Bars hidden — flag is the hero now */
+body.mastery-complete .chart-wrap canvas {
+  opacity: 0 !important;
+}
+
+/* Mastery header celebrates */
+body.mastery-complete .chart-mastery-pct {
+  font-size: 38px;
+}
+
+body.mastery-complete .chart-mastery-sub::after {
+  content: " ★";
+  color: var(--accent);
 }
 
 /* ── V2 MAINTENANCE BAR (overrides maintenance-bar.js styles) ── */
@@ -404,18 +512,18 @@ body.mastery-complete .db-chart-card:has(#radarChart) {
 }
 
 #maintenance-bar[data-type="warning"] {
-  background: #fef3c7 !important;
-  color: #92400e !important;
+  background: #fdf4e8 !important;
+  color: #8a5a1e !important;
 }
 
 #maintenance-bar[data-type="outage"] {
-  background: #fee2e2 !important;
-  color: #7f1d1d !important;
+  background: #f9e4e1 !important;
+  color: #8b3028 !important;
 }
 
 #maintenance-bar[data-type="success"] {
-  background: #dcfce7 !important;
-  color: #14532d !important;
+  background: #e6f5f5 !important;
+  color: #0a5c5f !important;
 }
 
 #maintenance-close {
@@ -446,5 +554,36 @@ body.mastery-complete .db-chart-card:has(#radarChart) {
     display: none;
   }
 
-  .db-actions-row { grid-template-columns: 1fr; }
+  /* Compact launchers: 2-col, no desc, hide sim+flashcards */
+  .db-actions-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .db-action-card.hide-mobile {
+    display: none;
+  }
+
+  .db-action-card {
+    padding: 14px;
+  }
+
+  .db-action-icon {
+    width: 28px; height: 28px;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .db-action-title {
+    font-size: 13px;
+  }
+
+  .db-action-desc {
+    display: none;
+  }
+
+  .db-action-go {
+    margin-top: 6px;
+    font-size: 11.5px;
+  }
 }

@@ -7,7 +7,6 @@
   <meta name="apple-mobile-web-app-title" content="CivicLearn">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="/sweden/assets/css/civic-v2.css">
-  <link rel="stylesheet" href="/sweden/assets/css/gauge-bar.css">
   <link rel="stylesheet" href="/sweden/assets/css/test-v2.css">
   <script>document.documentElement.classList.add("i18n-hidden");</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -24,6 +23,18 @@
         <rect x="176" y="0" width="64" height="400" fill="#FECC02"/>
         <rect x="0" y="168" width="640" height="64" fill="#FECC02"/>
       </svg>
+    </div>
+    <!-- Sidebar gauge -->
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Est. score</span>
+        <span class="sidebar-gauge-score" id="clGaugeScore">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugePass"></div>
+      </div>
+      <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
     </div>
     <nav class="nav">
       <a href="index.html" data-i18n="nav_dashboard">Dashboard</a>
@@ -48,8 +59,6 @@
   </aside>
   <div class="overlay" id="menuOverlay"></div>
   <main>
-    <!-- Gauge bar -->
-    <div class="cl-gauge"><div class="cl-gauge-inner"><span class="cl-gauge-label" data-i18n="dashboard_estimated_score">Estimated Score</span><div class="cl-gauge-track"><div class="cl-gauge-fill" id="clGaugeFill"></div><div class="cl-gauge-pass" id="clGaugePass"></div></div><span class="cl-gauge-score" id="clGaugeScore">–</span><span class="cl-gauge-badge" id="clGaugeBadge"></span></div></div>
     <header class="ce-header">
       <h1 data-i18n="title_topics">Tests by Topic</h1>
     </header>
@@ -148,6 +157,9 @@ document.addEventListener("DOMContentLoaded", () => {
           chip.classList.toggle("active");
           chip.classList.contains("active") ? selected.add(microCanon) : selected.delete(microCanon);
           startBtn.style.display = selected.size > 0 ? "inline-block" : "none";
+          if (selected.size > 0 && window.innerWidth < 768) {
+            setTimeout(() => startBtn.scrollIntoView({ behavior: "smooth", block: "center" }), 150);
+          }
         });
         chipsWrap.appendChild(chip);
       });

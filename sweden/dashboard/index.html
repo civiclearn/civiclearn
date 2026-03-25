@@ -8,7 +8,6 @@
   <meta name="mobile-web-app-capable" content="yes">
 
   <link rel="stylesheet" href="/sweden/assets/css/civic-v2.css">
-  <link rel="stylesheet" href="/sweden/assets/css/gauge-bar.css">
   <link rel="stylesheet" href="/sweden/assets/css/dashboard-v2.css">
 
   <script>document.documentElement.classList.add("i18n-hidden");</script>
@@ -31,6 +30,18 @@
         <rect x="176" y="0" width="64" height="400" fill="#FECC02"/>
         <rect x="0" y="168" width="640" height="64" fill="#FECC02"/>
       </svg>
+    </div>
+    <!-- Sidebar gauge -->
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Est. score</span>
+        <span class="sidebar-gauge-score" id="clGaugeScore">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugePass"></div>
+      </div>
+      <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
     </div>
     <nav class="nav">
       <a href="index.html" class="active" data-i18n="nav_dashboard">Dashboard</a>
@@ -61,20 +72,7 @@
 
     <div class="dashboard-container">
 
-      <!-- ① Gauge bar -->
-      <div class="cl-gauge">
-        <div class="cl-gauge-inner">
-          <span class="cl-gauge-label" data-i18n="dashboard_estimated_score">Estimated Score</span>
-          <div class="cl-gauge-track">
-            <div class="cl-gauge-fill" id="clGaugeFill"></div>
-            <div class="cl-gauge-pass" id="clGaugePass"></div>
-          </div>
-          <span class="cl-gauge-score" id="clGaugeScore">–</span>
-          <span class="cl-gauge-badge" id="clGaugeBadge"></span>
-        </div>
-      </div>
-
-      <!-- ② Stats (5 cards, time-card hidden on mobile) -->
+      <!-- ① Stats (5 cards, time-card hidden on mobile) -->
       <div class="db-stats-row anim d1">
         <div class="db-stat-card cd" id="countdownCard">
           <div class="db-stat-value" id="examCountdown"></div>
@@ -112,7 +110,7 @@
 
       <!-- ③ Launchers -->
       <div class="db-actions-row anim d2">
-        <a href="simulation.html" class="db-action-card">
+        <a href="simulation.html" class="db-action-card hide-mobile">
           <div class="db-action-icon">⏱</div>
           <div class="db-action-title" data-i18n="action_sim_title">Timed Simulation</div>
           <div class="db-action-desc" data-i18n="action_sim_desc">Practise under real exam conditions. 25 questions, 45 minutes.</div>
@@ -130,19 +128,25 @@
           <div class="db-action-desc" data-i18n="action_topics_desc">Select topics. Master them progressively with wave logic.</div>
           <div class="db-action-go" data-i18n="action_start">Start →</div>
         </a>
-        <a href="flashcards.html" class="db-action-card">
-          <div class="db-action-icon">🗂</div>
+        <a href="flashcards.html" class="db-action-card hide-mobile">
+          <div class="db-action-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="3" width="12" height="9" rx="1.5" stroke="var(--accent)" stroke-width="1.5"/><rect x="5" y="6" width="12" height="9" rx="1.5" stroke="var(--accent)" stroke-width="1.5" fill="var(--accent-soft)"/></svg></div>
           <div class="db-action-title" data-i18n="action_fc_title">Flashcards</div>
           <div class="db-action-desc" data-i18n="action_fc_desc">Flip through questions and answers by topic.</div>
           <div class="db-action-go" data-i18n="action_open">Open →</div>
         </a>
       </div>
 
-      <!-- ④ Radar (with center %) + Sequential Practice -->
+      <!-- ④ Polar area chart + Sequential Practice -->
       <div class="db-insight-row anim d3">
-        <div class="db-chart-card">
-          <div class="db-chart-title" data-i18n="dashboard_readiness_radar">Exam Readiness</div>
-          <div class="chart-wrap" style="height:280px"><canvas id="radarChart"></canvas></div>
+        <div class="db-chart-card db-polar-card">
+          <div class="chart-bg-fill" id="chartBgFill"></div>
+          <div class="chart-mastery-header">
+            <span class="chart-mastery-pct" id="chartMasteryPct">0%</span>
+            <span class="chart-mastery-sub" id="chartMasterySub">0 / 0</span>
+          </div>
+          <div class="polar-wrap">
+            <div class="chart-wrap" style="height:260px"><canvas id="polarChart"></canvas></div>
+          </div>
         </div>
         <div class="db-chart-card" id="seqCard">
           <div class="seq-header">

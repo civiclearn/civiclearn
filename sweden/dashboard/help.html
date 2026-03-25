@@ -6,7 +6,6 @@
   <title data-i18n="title_help">Help & Contact</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="/sweden/assets/css/civic-v2.css">
-  <link rel="stylesheet" href="/sweden/assets/css/gauge-bar.css">
   <style>
     .help-container { max-width: 700px; }
     .help-section { margin-bottom: 28px; }
@@ -46,6 +45,18 @@
         <rect x="0" y="168" width="640" height="64" fill="#FECC02"/>
       </svg>
     </div>
+    <!-- Sidebar gauge -->
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Est. score</span>
+        <span class="sidebar-gauge-score" id="clGaugeScore">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugePass"></div>
+      </div>
+      <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
+    </div>
     <nav class="nav">
       <a href="index.html" data-i18n="nav_dashboard">Dashboard</a>
       <a href="simulation.html" data-i18n="nav_simulation">Test Simulation</a>
@@ -71,8 +82,6 @@
   <div class="overlay" id="menuOverlay"></div>
 
   <main>
-    <!-- Gauge bar -->
-    <div class="cl-gauge"><div class="cl-gauge-inner"><span class="cl-gauge-label" data-i18n="dashboard_estimated_score">Estimated Score</span><div class="cl-gauge-track"><div class="cl-gauge-fill" id="clGaugeFill"></div><div class="cl-gauge-pass" id="clGaugePass"></div></div><span class="cl-gauge-score" id="clGaugeScore">–</span><span class="cl-gauge-badge" id="clGaugeBadge"></span></div></div>
     <header class="ce-header">
       <h1 data-i18n="title_help">Help & Contact</h1>
     </header>
@@ -179,8 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Reset
   document.getElementById("resetBtn")?.addEventListener("click", () => {
     if (!confirm("Do you really want to erase all your training data?")) return;
-    ["civicedge_progress", "civicedge_stats", "civicedge_saved", "civiclearn_answered_mcqs", "cl_gauge_cache"
-    ].forEach(k => localStorage.removeItem(k));
+    ["civicedge_progress", "civicedge_stats", "civicedge_saved", "civiclearn_answered_mcqs", "cl_gauge_cache"].forEach(k => localStorage.removeItem(k));
     alert("Your data has been reset.");
     location.reload();
   });
