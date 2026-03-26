@@ -45,10 +45,13 @@ window.CIVICEDGE_CONFIG = {
     passScore: 20,   // 20 / 25 = 80%
 
     topicQuotas: {
-      "Democracy & Government": 8,
-      "Laws & Rights": 7,
-      "Swedish Society": 6,
-      "History & Geography": 4
+      "History & Geography": 4,
+      "Culture, Traditions & Religion": 4,
+      "Democracy & Government": 4,
+      "Laws, Rights & Equality": 4,
+      "Welfare, Integration & Citizenship": 4,
+      "Economy, Work & Environment": 3,
+      "Media & Sweden in the World": 2
     }
   },
 

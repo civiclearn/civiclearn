@@ -110,7 +110,8 @@
           recordToProgress(q, isCorrect);
 
           // Also track in civicedge_stats history for session counting
-          recordToStats(q, isCorrect);
+          const correctOpt = shuffled.find(o => o.correct);
+          recordToStats(q, isCorrect, opt.text, correctOpt ? correctOpt.text : "");
 
           const btns = optionsEl.querySelectorAll("button");
           btns.forEach(b => {
@@ -197,7 +198,7 @@
 
     // ── Lightweight stats entry for session/time tracking ──
 
-    function recordToStats(q, correct) {
+    function recordToStats(q, correct, userAnswerText, correctAnswerText) {
       try {
         const raw = localStorage.getItem("civicedge_stats");
         const stats = raw ? JSON.parse(raw) : { history: [] };
@@ -211,7 +212,7 @@
         if (!session) {
           session = {
             id: sessionId,
-            mode: "quick",
+            mode: "sequential",
             correct: 0,
             total: 0,
             percent: 0,
@@ -222,6 +223,7 @@
           };
           stats.history.push(session);
         }
+        session.mode = "sequential";
 
         session.total += 1;
         if (correct) session.correct += 1;
@@ -233,9 +235,12 @@
         session.questions.push({
           id: q.id,
           topic: q.microtopic?.en || "",
+          topic_i18n: q.microtopic || {},
           correct: !!correct,
           firstAttemptCorrect: correct ? 1 : 0,
-          qText: (typeof q.q === "object") ? (q.q[lang] || q.q.en || "") : (q.q || "")
+          qText: (typeof q.q === "object") ? (q.q[lang] || q.q.en || "") : (q.q || ""),
+          userAnswerText: userAnswerText || "—",
+          correctAnswerText: correctAnswerText || "—"
         });
 
         localStorage.setItem("civicedge_stats", JSON.stringify(stats));

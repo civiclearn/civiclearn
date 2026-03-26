@@ -28,14 +28,14 @@
   function lang() { return window.CIVICEDGE_LANG || "en"; }
 
   function canonical(q) {
-    if (!q || !q.microtopic) return "";
-    return (typeof q.microtopic === "object") ? (q.microtopic.en || "") : String(q.microtopic);
+    if (!q || !q.topic) return "";
+    return (typeof q.topic === "object") ? (q.topic.en || "") : String(q.topic);
   }
 
   function display(q) {
-    if (!q || !q.microtopic) return "";
-    if (typeof q.microtopic === "object") return q.microtopic[lang()] || q.microtopic.en || "";
-    return String(q.microtopic);
+    if (!q || !q.topic) return "";
+    if (typeof q.topic === "object") return q.topic[lang()] || q.topic.en || "";
+    return String(q.topic);
   }
 
   function questionText(q) {
@@ -87,14 +87,18 @@
     const mastered = {};
 
     bank.forEach(q => {
-      const c = canonical(q);
-      if (c) totals[c] = (totals[c] || 0) + 1;
-    });
+      const topicKey = canonical(q);
+      if (!topicKey) return;
+      totals[topicKey] = (totals[topicKey] || 0) + 1;
 
-    Object.entries(progress).forEach(([key, entry]) => {
-      if (!entry || entry.correct !== 1) return;
-      const c = key.split(":")[0];
-      mastered[c] = (mastered[c] || 0) + 1;
+      // Progress key uses microtopic:id
+      const microKey = q.microtopic && typeof q.microtopic === "object"
+        ? q.microtopic.en : (q.microtopic || "");
+      const pKey = `${microKey}:${q.id}`;
+      const entry = progress[pKey];
+      if (entry && entry.correct === 1) {
+        mastered[topicKey] = (mastered[topicKey] || 0) + 1;
+      }
     });
 
     const weak = new Set();

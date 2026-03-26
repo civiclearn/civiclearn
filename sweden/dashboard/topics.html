@@ -70,7 +70,7 @@
       <div id="quiz"></div>
     </div>
 
-    <section>
+    <section style="max-width:900px;">
       <div id="topicContainer"></div>
       <button id="startBtn" class="btn" data-i18n="topics_start_btn">Start</button>
     </section>
@@ -80,7 +80,7 @@
 <script src="/sweden/assets/js/config-se.js"></script>
 <script src="/assets/js/i18n.js"></script>
 <script>CivicLearnI18n.init();</script>
-<script src="/assets/js/engine-lu.js"></script>
+<script src="/assets/js/engine-se.js"></script>
 <script src="/assets/js/sync.js"></script>
 <script src="/assets/js/reading.js"></script>
 <script>
@@ -92,9 +92,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const bankPath = cfg.bank && cfg.bank.path;
   const lang = window.CIVICEDGE_LANG || "en";
 
-  function normalizeLabel(str) {
-    return (str || "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().trim().replace(/\s+/g, " ");
-  }
+  // Maps topic.en → array of microtopic.en keys (for engine)
+  const topicToMicros = {};
 
   async function loadBankTopics() {
     if (!bankPath) return [];
@@ -105,76 +104,99 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) { return []; }
   }
 
-  function isMicrotopicMastered(microCanon, bankQuestions, progress) {
-    const qs = bankQuestions.filter(q => q.microtopic && q.microtopic.en === microCanon);
+  function isTopicMastered(topicCanon, bankQuestions, progress) {
+    const qs = bankQuestions.filter(q => q.topic && q.topic.en === topicCanon);
     for (const q of qs) {
-      const key = `${microCanon}:${q.id}`;
+      const microKey = q.microtopic && typeof q.microtopic === "object" ? q.microtopic.en : "";
+      const key = `${microKey}:${q.id}`;
       const entry = progress[key];
       if (!(entry && entry.correct === 1)) return false;
     }
     return qs.length > 0;
   }
 
+  function getTopicProgress(topicCanon, bankQuestions, progress) {
+    const qs = bankQuestions.filter(q => q.topic && q.topic.en === topicCanon);
+    let mastered = 0;
+    for (const q of qs) {
+      const microKey = q.microtopic && typeof q.microtopic === "object" ? q.microtopic.en : "";
+      const key = `${microKey}:${q.id}`;
+      const entry = progress[key];
+      if (entry && entry.correct === 1) mastered++;
+    }
+    return { mastered, total: qs.length };
+  }
+
   async function initTopics() {
     const bankQuestions = await loadBankTopics();
     const progress = JSON.parse(localStorage.getItem("civicedge_progress") || "{}");
 
-    const groupedTopics = {};
+    const topics = {};
     bankQuestions.forEach(q => {
-      if (!q.topic || !q.microtopic || typeof q.topic !== "object" || typeof q.microtopic !== "object") return;
-      const realCanon = q.topic.en;
-      if (!realCanon) return;
-      const realLabel = q.topic[lang] || realCanon;
-      const microCanon = q.microtopic.en;
-      const microLabel = q.microtopic[lang] || microCanon;
-      if (!microCanon) return;
+      if (!q.topic || typeof q.topic !== "object") return;
+      const canon = q.topic.en;
+      if (!canon) return;
+      const label = q.topic[lang] || canon;
+      const microCanon = q.microtopic && typeof q.microtopic === "object" ? q.microtopic.en : "";
 
-      if (!groupedTopics[realCanon]) groupedTopics[realCanon] = { label: realLabel, total: 0, micros: {} };
-      groupedTopics[realCanon].total++;
-      if (!groupedTopics[realCanon].micros[microCanon]) groupedTopics[realCanon].micros[microCanon] = { label: microLabel, count: 0 };
-      groupedTopics[realCanon].micros[microCanon].count++;
+      if (!topics[canon]) topics[canon] = { label, total: 0, micros: new Set() };
+      topics[canon].total++;
+      if (microCanon) topics[canon].micros.add(microCanon);
+    });
+
+    // Build topicToMicros map
+    Object.entries(topics).forEach(([canon, t]) => {
+      topicToMicros[canon] = Array.from(t.micros);
     });
 
     container.innerHTML = "";
-    Object.values(groupedTopics).forEach(group => {
-      const groupWrap = document.createElement("div");
-      groupWrap.className = "topic-group";
 
-      const header = document.createElement("div");
-      header.className = "topic-group-title";
-      header.innerHTML = `<span>${group.label}</span><span class="topic-group-badge">${group.total}</span>`;
+    Object.entries(topics).forEach(([canon, topic]) => {
+      const prog = getTopicProgress(canon, bankQuestions, progress);
+      const pct = topic.total > 0 ? Math.round((prog.mastered / topic.total) * 100) : 0;
+      const mastered = isTopicMastered(canon, bankQuestions, progress);
 
-      const chipsWrap = document.createElement("div");
-      chipsWrap.className = "topic-chips";
+      const chip = document.createElement("button");
+      chip.className = "topic-card";
+      if (mastered) chip.classList.add("mastered");
 
-      Object.entries(group.micros).forEach(([microCanon, mt]) => {
-        const chip = document.createElement("button");
-        chip.className = "topic-chip";
-        if (isMicrotopicMastered(microCanon, bankQuestions, progress)) chip.classList.add("mastered");
-        chip.dataset.topic = mt.label;
-        chip.innerHTML = `${mt.label}<span class="chip-count">${mt.count}</span>`;
-        chip.addEventListener("click", () => {
-          chip.classList.toggle("active");
-          chip.classList.contains("active") ? selected.add(microCanon) : selected.delete(microCanon);
-          startBtn.style.display = selected.size > 0 ? "inline-block" : "none";
-          if (selected.size > 0 && window.innerWidth < 768) {
-            setTimeout(() => startBtn.scrollIntoView({ behavior: "smooth", block: "center" }), 150);
-          }
-        });
-        chipsWrap.appendChild(chip);
+      const qWord = lang === "sv" ? "frågor" : "questions";
+
+      chip.innerHTML = `
+        <div class="topic-card-name">${topic.label}</div>
+        <div class="topic-card-meta">
+          <span class="topic-card-count">${topic.total} ${qWord}</span>
+          <span class="topic-card-pct">${pct}%</span>
+        </div>
+        <div class="topic-card-bar"><div class="topic-card-bar-fill" style="width:${pct}%"></div></div>
+      `;
+
+      chip.addEventListener("click", () => {
+        chip.classList.toggle("active");
+        if (chip.classList.contains("active")) {
+          selected.add(canon);
+        } else {
+          selected.delete(canon);
+        }
+        startBtn.style.display = selected.size > 0 ? "inline-block" : "none";
+        if (selected.size > 0 && window.innerWidth < 768) {
+          setTimeout(() => startBtn.scrollIntoView({ behavior: "smooth", block: "center" }), 150);
+        }
       });
 
-      groupWrap.appendChild(header);
-      groupWrap.appendChild(chipsWrap);
-      container.appendChild(groupWrap);
+      container.appendChild(chip);
     });
 
     startBtn.addEventListener("click", () => {
-      const pick = Array.from(selected);
+      // Collect all microtopic keys for selected topics
+      const microKeys = [];
+      selected.forEach(topicCanon => {
+        if (topicToMicros[topicCanon]) microKeys.push(...topicToMicros[topicCanon]);
+      });
       const limit = (cfg.topics && cfg.topics.questionCount) || 10;
       document.getElementById("quizArea").style.display = "block";
       document.querySelector("section").style.display = "none";
-      CivicEdgeEngine.start("topics", { topics: pick, limit: limit });
+      CivicEdgeEngine.start("topics", { topics: microKeys, limit: limit });
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }

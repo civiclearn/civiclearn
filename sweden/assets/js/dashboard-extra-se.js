@@ -204,7 +204,7 @@
         maintainAspectRatio: false,
         animation: { duration: 500 },
         layout: {
-          padding: { top: 24, bottom: 0, left: 0, right: 0 }
+          padding: { top: 24, bottom: 8, left: 0, right: 0 }
         },
         scales: {
           y: {
@@ -223,13 +223,15 @@
           },
           x: {
             ticks: {
-              font: { size: 11, weight: "500", family: "Plus Jakarta Sans" },
+              font: { size: 9, weight: "500", family: "Plus Jakarta Sans" },
               color: "#78716c",
-              maxRotation: 0,
+              maxRotation: 45,
+              minRotation: 25,
               autoSkip: false,
               callback: function(value, index) {
                 if (window.innerWidth < 768) return "";
-                return this.getLabelForValue(value);
+                var lbl = this.getLabelForValue(value);
+                return lbl.length > 22 ? lbl.slice(0, 20) + "…" : lbl;
               }
             },
             grid: { display: false },
