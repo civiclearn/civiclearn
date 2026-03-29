@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log in – Kansalaisuuskoe – CivicLearn</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand:#7c3aed; --brand-dim:#f4f0ff; --brand-dark:#5b21b6;
+    --navy:#0f172a; --slate:#334155; --muted:#64748b;
+    --border:#e2e8f0; --surface:#ffffff; --bg:#f8f7f4;
+    --red:#dc2626; --green:#059669; --green-light:#f0fdf4; --red-light:#fef2f2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Lexend",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;}
+
+  .topbar{background:var(--navy);border-bottom:3px solid var(--brand);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar-brand{display:flex;align-items:center;gap:14px;}
+  .topbar-brand img{width:22px;height:auto;}
+  .brand-text{display:flex;flex-direction:column;line-height:1.1;}
+  .brand-title{font-size:1rem;font-weight:600;color:#fff;}
+  .brand-sub{font-size:0.72rem;color:#64748b;}
+
+  .topbar-right{display:flex;align-items:center;gap:12px;}
+  .lang-switch{display:flex;gap:.3rem;}
+  .lang-switch button{
+    font-family:"Lexend",sans-serif;font-size:.72rem;font-weight:600;
+    padding:.25rem .5rem;border:1.5px solid rgba(255,255,255,.2);border-radius:.4rem;
+    background:transparent;color:rgba(255,255,255,.6);cursor:pointer;transition:all .15s;
+  }
+  .lang-switch button:hover{border-color:rgba(255,255,255,.5);color:#fff;}
+  .lang-switch button.active{background:var(--brand);border-color:var(--brand);color:#fff;}
+
+  .main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:16px;}
+  .login-card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.04);}
+
+  .state{display:none;} .state.active{display:block;}
+
+  .view-header{text-align:center;margin-bottom:22px;}
+  .view-title{font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px;}
+  .view-subtitle{font-size:0.85rem;color:var(--muted);line-height:1.5;}
+
+  .form-group{margin-bottom:16px;}
+  .form-label{display:block;font-size:0.78rem;font-weight:600;color:var(--slate);margin-bottom:6px;}
+  .form-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:"Lexend",sans-serif;font-size:0.92rem;color:var(--navy);background:var(--bg);transition:border-color 0.15s;outline:none;}
+  .form-input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-dim);}
+  .form-input::placeholder{color:#94a3b8;}
+  .pwd-wrap{position:relative;}
+  .pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:0.75rem;color:var(--muted);cursor:pointer;font-family:inherit;font-weight:600;}
+  .pwd-toggle:hover{color:var(--navy);}
+
+  .action-btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:"Lexend",sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;margin-top:4px;background:var(--brand);color:#fff;}
+  .action-btn:hover:not(:disabled){opacity:0.85;}
+  .action-btn:disabled{opacity:0.4;cursor:default;}
+
+  .form-footer{text-align:center;margin-top:14px;}
+  .form-link{font-size:0.8rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline;}
+  .form-link:hover{color:var(--navy);}
+  .form-link.pulse-hint{color:var(--brand);font-weight:700;animation:pulse-link 1s ease-in-out 3;}
+  @keyframes pulse-link{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+  .msg{display:none;border-radius:10px;padding:10px 14px;font-size:0.82rem;margin-bottom:16px;text-align:center;}
+  .msg.visible{display:block;}
+  .msg.error{background:var(--red-light);border:1px solid #fecaca;color:var(--red);}
+  .msg.success{background:var(--green-light);border:1px solid #bbf7d0;color:#166534;}
+  .msg.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;}
+
+  .pin-box{background:var(--brand-dim);border:2px dashed var(--brand);border-radius:12px;padding:16px;text-align:center;margin-bottom:20px;}
+  .pin-label{font-size:0.78rem;font-weight:600;color:var(--brand-dark);margin-bottom:6px;}
+  .pin-value{font-size:2rem;font-weight:700;color:var(--brand);letter-spacing:0.15em;}
+
+  .success-icon{width:56px;height:56px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;}
+
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .page-footer{text-align:center;padding:20px;font-size:0.75rem;color:var(--muted);}
+  .page-footer a{color:var(--brand);text-decoration:none;font-weight:600;}
+
+  .admin-toggle{text-align:center;margin-top:16px;font-size:0.75rem;opacity:0.3;cursor:pointer;user-select:none;}
+  .admin-toggle:hover{opacity:0.6;}
+  .admin-panel{display:none;background:#fff;border:1px dashed var(--border);border-radius:12px;padding:20px;margin-top:12px;width:100%;max-width:420px;}
+  .admin-panel.open{display:block;}
+  .admin-panel h3{font-size:0.85rem;color:var(--muted);margin-bottom:12px;text-align:center;}
+  .admin-panel .form-group{margin-bottom:12px;}
+  .admin-panel .btn-admin{width:100%;padding:10px;background:#6b7280;color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:0.88rem;font-weight:600;cursor:pointer;transition:background 0.2s;}
+  .admin-panel .btn-admin:hover:not(:disabled){background:#4b5563;}
+  .admin-panel .btn-admin:disabled{opacity:0.6;cursor:not-allowed;}
+
+  .help-card{
+    margin-top:16px;width:100%;max-width:420px;
+    background:var(--surface);border:1.5px solid var(--border);border-radius:16px;
+    overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.03);
+  }
+  .help-toggle{
+    width:100%;padding:14px 18px;display:flex;align-items:center;gap:10px;
+    background:none;border:none;cursor:pointer;font-family:"Lexend",sans-serif;
+    font-size:0.82rem;font-weight:600;color:var(--slate);text-align:left;
+  }
+  .help-toggle:hover{color:var(--navy);}
+  .help-toggle .help-icon{font-size:1.1rem;}
+  .help-toggle .help-arrow{margin-left:auto;font-size:0.7rem;color:var(--muted);transition:transform 0.2s;}
+  .help-card.open .help-arrow{transform:rotate(180deg);}
+  .help-body{
+    display:none;padding:0 18px 18px;
+  }
+  .help-card.open .help-body{display:block;}
+  .help-item{
+    display:flex;align-items:flex-start;gap:10px;
+    font-size:0.82rem;color:var(--slate);line-height:1.55;
+    padding:8px 0;
+  }
+  .help-item:first-child{padding-top:0;}
+  .help-item .hi-icon{flex-shrink:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;}
+  .help-item a{color:var(--brand);font-weight:600;text-decoration:none;}
+  .help-item a:hover{text-decoration:underline;}
+  .help-divider{height:1px;background:var(--border);margin:4px 0;}
+
+  @media(max-width:480px){.login-card{padding:28px 22px;border-radius:16px;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <img src="/assets/images/fi.svg" alt="Finland">
+    <div class="brand-text">
+      <span class="brand-title">CivicLearn Finland</span>
+      <span class="brand-sub">Kansalaisuuskoe</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+  </div>
+</div>
+
+<div class="main">
+  <div class="login-card">
+
+    <!-- STATE 1: LOGIN -->
+    <div id="state-login" class="state active">
+      <div id="login-msg" class="msg"></div>
+      <div class="view-header">
+        <div class="view-title" data-t="login_title"></div>
+        <div class="view-subtitle" data-t="login_subtitle"></div>
+      </div>
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="login-email" data-t="email_label"></label>
+          <input class="form-input" id="login-email" type="email" placeholder="name@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password" data-t="pwd_label"></label>
+          <div class="pwd-wrap">
+            <input class="form-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
+            <button class="pwd-toggle" type="button" id="pwd-toggle-btn" data-t="show_pwd"></button>
+          </div>
+        </div>
+        <button type="submit" class="action-btn" id="login-btn" data-t="login_btn"></button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="show-forgot" data-t="forgot_link"></button>
+      </div>
+    </div>
+
+    <!-- STATE 2: FORGOT — ENTER EMAIL -->
+    <div id="state-forgotEmail" class="state">
+      <div id="forgot-msg" class="msg"></div>
+      <div class="view-header">
+        <div class="view-title" data-t="reset_title"></div>
+        <div class="view-subtitle" data-t="reset_subtitle"></div>
+      </div>
+      <form id="forgot-email-form">
+        <div class="form-group">
+          <label class="form-label" for="forgot-email" data-t="email_label"></label>
+          <input class="form-input" id="forgot-email" type="email" placeholder="name@example.com" autocomplete="email">
+        </div>
+        <button type="submit" class="action-btn" id="forgot-email-btn" data-t="continue_btn"></button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="back-to-login" data-t="back_to_login"></button>
+      </div>
+    </div>
+
+    <!-- STATE 3: FORGOT — PIN + NEW PASSWORD -->
+    <div id="state-forgotReset" class="state">
+      <div id="reset-msg" class="msg"></div>
+      <div class="view-header">
+        <div class="view-title" data-t="new_pwd_title"></div>
+        <div class="view-subtitle" data-t="new_pwd_subtitle"></div>
+      </div>
+      <div class="pin-box">
+        <div class="pin-label" data-t="pin_label"></div>
+        <div class="pin-value" id="pin-value">------</div>
+      </div>
+      <form id="reset-form">
+        <div class="form-group">
+          <label class="form-label" for="reset-pin" data-t="code_label"></label>
+          <input class="form-input" id="reset-pin" type="text" inputmode="numeric" maxlength="6" autocomplete="off" style="text-align:center;letter-spacing:0.15em;">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reset-password" data-t="new_pwd_label"></label>
+          <input class="form-input" id="reset-password" type="password" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reset-password-confirm" data-t="confirm_pwd_label"></label>
+          <input class="form-input" id="reset-password-confirm" type="password" autocomplete="new-password">
+        </div>
+        <button type="submit" class="action-btn" id="reset-btn" data-t="save_pwd_btn"></button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="back-to-forgot-email" data-t="back_btn"></button>
+      </div>
+    </div>
+
+    <!-- STATE 4: RESET SUCCESS -->
+    <div id="state-resetSuccess" class="state">
+      <div class="success-icon">✅</div>
+      <div class="view-header">
+        <div class="view-title" data-t="success_title"></div>
+        <div class="view-subtitle" data-t="success_subtitle"></div>
+      </div>
+      <button class="action-btn" id="go-to-login" data-t="login_btn"></button>
+    </div>
+
+    <!-- STATE 5: UNKNOWN EMAIL — CONFIRM BEFORE CONTACT -->
+    <div id="state-unknownConfirm" class="state">
+      <div class="view-header">
+        <div style="font-size:2rem;margin-bottom:10px;">🤔</div>
+        <div class="view-title" data-t="unknown_email_confirm_title"></div>
+        <div class="view-subtitle" data-t="unknown_email_confirm_subtitle"></div>
+      </div>
+      <div id="confirm-email-display" style="background:var(--brand-dim);border:1.5px solid var(--brand);border-radius:10px;padding:10px 14px;text-align:center;font-size:0.9rem;font-weight:600;color:var(--brand-dark);margin:16px 0;word-break:break-all;"></div>
+      <ul style="list-style:none;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:10px;">
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:0.88rem;color:var(--slate);">
+          <span style="color:var(--brand);font-size:1.1rem;line-height:1.3;">?</span>
+          <span data-t="unknown_email_confirm_check1"></span>
+        </li>
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:0.88rem;color:var(--slate);">
+          <span style="color:var(--brand);font-size:1.1rem;line-height:1.3;">?</span>
+          <span data-t="unknown_email_confirm_check2"></span>
+        </li>
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:0.88rem;color:var(--slate);">
+          <span style="color:var(--brand);font-size:1.1rem;line-height:1.3;">?</span>
+          <span data-t="unknown_email_confirm_check3"></span>
+        </li>
+      </ul>
+      <button class="action-btn" id="confirm-yes-btn" data-t="unknown_email_confirm_yes"></button>
+      <div class="form-footer" style="margin-top:14px;">
+        <button class="form-link" id="back-to-login-from-confirm" data-t="unknown_email_try_again"></button>
+      </div>
+    </div>
+
+    <!-- STATE 6: UNKNOWN EMAIL — CONTACT FORM -->
+    <div id="state-unknownContact" class="state">
+      <div id="contact-msg" class="msg"></div>
+      <div class="view-header">
+        <div style="font-size:2rem;margin-bottom:10px;">🔍</div>
+        <div class="view-title" data-t="unknown_email_contact_title"></div>
+        <div class="view-subtitle" data-t="unknown_email_contact_subtitle"></div>
+      </div>
+      <form id="contact-form">
+        <div class="form-group">
+          <label class="form-label" for="contact-email" data-t="contact_email_label"></label>
+          <input class="form-input" id="contact-email" type="email" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="contact-message" data-t="contact_msg_label"></label>
+          <textarea class="form-input" id="contact-message" rows="4" style="resize:vertical;line-height:1.5;"></textarea>
+        </div>
+        <button type="submit" class="action-btn" id="contact-send-btn" data-t="contact_send_btn"></button>
+      </form>
+      <div class="form-footer">
+        <button class="form-link" id="back-to-login-from-contact" data-t="contact_try_different"></button>
+      </div>
+    </div>
+
+    <!-- STATE 7: CONTACT SENT -->
+    <div id="state-contactSent" class="state">
+      <div class="success-icon">💬</div>
+      <div class="view-header">
+        <div class="view-title" data-t="contact_sent_title"></div>
+        <div class="view-subtitle" data-t="contact_sent_subtitle"></div>
+      </div>
+      <div class="form-footer" style="margin-top:20px;">
+        <button class="form-link" id="back-to-login-from-sent" data-t="back_to_login"></button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- HELP CARD -->
+  <div class="help-card" id="helpCard">
+    <button class="help-toggle" id="helpToggle">
+      <span class="help-icon">💡</span>
+      Having trouble logging in?
+      <span class="help-arrow">▼</span>
+    </button>
+    <div class="help-body">
+      <div class="help-item">
+        <span class="hi-icon">🔄</span>
+        <span>If the page isn't working properly, you can <a href="/kansalaisuuskoe/reset-cache.html">clear your cache here</a> and try again.</span>
+      </div>
+      <div class="help-divider"></div>
+      <div class="help-item">
+        <span class="hi-icon">🔑</span>
+        <span>Forgot your password? Click "Reset password" below — you'll see a code displayed directly on screen.</span>
+      </div>
+      <div class="help-divider"></div>
+      <div class="help-item">
+        <span class="hi-icon">📱</span>
+        <span>Using the app from your home screen? Try removing it and adding it again via Safari → Share → "Add to Home Screen".</span>
+      </div>
+      <div class="help-divider"></div>
+      <div class="help-item">
+        <span class="hi-icon">🌐</span>
+        <span>Seeing an error? Try from a different network (e.g. mobile data) or a different browser.</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ADMIN IMPERSONATE -->
+<div class="admin-toggle" id="admin-toggle">⚙</div>
+<div class="admin-panel" id="admin-panel">
+  <h3>Admin — Login as user</h3>
+  <div id="admin-msg" class="msg"></div>
+  <div class="form-group">
+    <label class="form-label" for="admin-email">User email</label>
+    <input class="form-input" id="admin-email" type="email" placeholder="user@example.com" autocomplete="off">
+  </div>
+  <div class="form-group">
+    <label class="form-label" for="admin-key">Admin key</label>
+    <input class="form-input" id="admin-key" type="password" placeholder="Admin key" autocomplete="off">
+  </div>
+  <button class="btn-admin" id="admin-btn">Impersonate</button>
+</div>
+
+<div class="page-footer">
+  <a href="https://civiclearn.com/kansalaisuuskoe/">civiclearn.com/kansalaisuuskoe</a> — Preparation for Finland's citizenship test
+</div>
+
+<!-- =========================
+     I18N DICTIONARY
+========================= -->
+<script>
+const I18N = {
+  login_title: "Log in",
+  login_subtitle: "Log in with your email and password",
+  email_label: "Email",
+  pwd_label: "Password",
+  show_pwd: "Show",
+  hide_pwd: "Hide",
+  login_btn: "Log in",
+  forgot_link: "Reset password",
+  reset_title: "Reset password",
+  reset_subtitle: "Enter the email address linked to your account",
+  continue_btn: "Continue",
+  back_to_login: "← Back to login",
+  new_pwd_title: "New password",
+  new_pwd_subtitle: "Enter the code below and choose a new password",
+  pin_label: "Confirmation code",
+  code_label: "Code",
+  code_placeholder: "Enter the code above",
+  new_pwd_label: "New password",
+  new_pwd_placeholder: "At least 6 characters",
+  confirm_pwd_label: "Confirm password",
+  confirm_pwd_placeholder: "Repeat the password",
+  save_pwd_btn: "Save new password",
+  back_btn: "← Back",
+  success_title: "Password updated!",
+  success_subtitle: "Your new password has been saved. Log in to continue.",
+  err_fill_all: "Please fill in all fields.",
+  err_invalid_email: "Please enter a valid email address.",
+  err_enter_code: "Please enter the confirmation code.",
+  err_pwd_short: "Password must be at least 6 characters.",
+  err_pwd_mismatch: "Passwords do not match.",
+  err_invalid_login: "Incorrect email or password.",
+  err_wrong_password: "Incorrect password. Use 'Reset password' below to create a new one.",
+  err_email_unknown: "We cannot find this email address.",
+  err_email_not_confirmed: "Email not confirmed.",
+  err_too_many: "Too many attempts. Please wait a moment.",
+  err_user_not_found: "No account found with this email.",
+  err_network: "Connection error.",
+  err_email_not_found: "Email address not found.",
+  err_wrong_code: "Incorrect code. Please try again.",
+  err_connection: "Connection error. Please try again.",
+  err_generic: "An error occurred. Please try again.",
+  loading: "Please wait…",
+  unknown_email_confirm_title: "Check your email address",
+  unknown_email_confirm_subtitle: "This address is not in our system. Before contacting us, please check:",
+  unknown_email_confirm_check1: "Is the address spelled correctly?",
+  unknown_email_confirm_check2: "Is it the same address you used when purchasing?",
+  unknown_email_confirm_check3: "Have you checked your other inboxes?",
+  unknown_email_try_again: "← Try a different email address",
+  unknown_email_confirm_yes: "Yes, this is correct — contact support",
+  unknown_email_contact_title: "Email address not found",
+  unknown_email_contact_subtitle: "This address is not in our system. Send us a message and we will help you find your account.",
+  contact_email_label: "Your email address",
+  contact_msg_label: "Your message",
+  contact_msg_placeholder: "Briefly describe your situation (e.g. different address, new purchase…)",
+  contact_send_btn: "Send message",
+  contact_sent_title: "Message sent!",
+  contact_sent_subtitle: "We have received your message and will get back to you as soon as possible.",
+  contact_try_different: "← Try a different email address"
+};
+</script>
+
+<!-- =========================
+     I18N ENGINE + LOGIC
+========================= -->
+<script>
+(function() {
+  'use strict';
+
+  let currentLang = 'en';
+  function t(key) { return I18N[key] || key; }
+
+  function applyLang() {
+    document.querySelectorAll('[data-t]').forEach(el => {
+      const key = el.dataset.t;
+      if (I18N[key]) el.textContent = I18N[key];
+    });
+    // Update placeholders
+    const rp = document.getElementById('reset-pin');
+    const rpw = document.getElementById('reset-password');
+    const rpc = document.getElementById('reset-password-confirm');
+    if (rp) rp.placeholder = t('code_placeholder');
+    if (rpw) rpw.placeholder = t('new_pwd_placeholder');
+    if (rpc) rpc.placeholder = t('confirm_pwd_placeholder');
+  }
+
+  applyLang();
+
+  /* ── Supabase ── */
+  const SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
+  const DASHBOARD_URL = '/kansalaisuuskoe/dashboard/';
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const params    = new URLSearchParams(location.search);
+  const returnUrl = params.get('return') || DASHBOARD_URL;
+
+  /* ── Auto-redirect if already logged in ── */
+  (async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) { window.location.href = returnUrl; }
+  })();
+
+  /* ── Helpers ── */
+  function showState(name) {
+    document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+    document.getElementById('state-' + name).classList.add('active');
+  }
+  function showMsg(id, text, type) { const el = document.getElementById(id); el.textContent = text; el.className = 'msg visible ' + type; }
+  function clearMsg(id) { const el = document.getElementById(id); el.className = 'msg'; el.textContent = ''; }
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    if (loading) { btn.disabled = true; btn.dataset.originalText = btn.textContent; btn.innerHTML = '<span class="spinner"></span>' + t('loading'); }
+    else { btn.disabled = false; btn.textContent = btn.dataset.originalText || btn.textContent; }
+  }
+
+  function translateError(msg) {
+    const l = msg.toLowerCase();
+    if (l.includes('invalid login'))       return t('err_invalid_login');
+    if (l.includes('email not confirmed')) return t('err_email_not_confirmed');
+    if (l.includes('too many requests'))   return t('err_too_many');
+    if (l.includes('user not found'))      return t('err_user_not_found');
+    if (l.includes('network'))             return t('err_network');
+    return msg;
+  }
+
+  /* ── Navigation ── */
+  document.getElementById('show-forgot').addEventListener('click', (e) => {
+    e.preventDefault(); clearMsg('login-msg');
+    const v = document.getElementById('login-email').value.trim();
+    if (v) document.getElementById('forgot-email').value = v;
+    showState('forgotEmail');
+  });
+  document.getElementById('back-to-login').addEventListener('click', () => { clearMsg('forgot-msg'); showState('login'); });
+  document.getElementById('back-to-forgot-email').addEventListener('click', () => { clearMsg('reset-msg'); showState('forgotEmail'); });
+  document.getElementById('go-to-login').addEventListener('click', () => showState('login'));
+
+  /* ── Password toggle ── */
+  document.getElementById('pwd-toggle-btn').addEventListener('click', () => {
+    const el = document.getElementById('login-password'); const btn = document.getElementById('pwd-toggle-btn');
+    if (el.type === 'password') { el.type = 'text'; btn.textContent = t('hide_pwd'); } else { el.type = 'password'; btn.textContent = t('show_pwd'); }
+  });
+
+  let resetEmail = '';
+
+  /* ── LOGIN ── */
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMsg('login-msg');
+    const email = document.getElementById('login-email').value.trim().toLowerCase();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) return showMsg('login-msg', t('err_fill_all'), 'error');
+    setLoading('login-btn', true);
+    try {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        if (error.message.toLowerCase().includes('invalid login')) {
+          // Differentiate: wrong password vs unknown email
+          try {
+            const res = await fetch(FUNCTIONS_URL + '/finland-reset-password', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'check_email', email }),
+            });
+            const data = await res.json();
+            if (data.exists) {
+              // Email found — it's a wrong password
+              showMsg('login-msg', t('err_wrong_password'), 'error');
+              // Pulse the reset link to draw attention to it
+              const resetLink = document.getElementById('show-forgot');
+              resetLink.classList.remove('pulse-hint');
+              void resetLink.offsetWidth; // force reflow to restart animation
+              resetLink.classList.add('pulse-hint');
+              resetLink.addEventListener('animationend', () => resetLink.classList.remove('pulse-hint'), { once: true });
+            } else {
+              // Email not in system — show confirmation screen first, pre-store email
+              document.getElementById('confirm-email-display').textContent = email;
+              document.getElementById('contact-email').value = email;
+              document.getElementById('contact-message').value = '';
+              showState('unknownConfirm');
+            }
+          } catch {
+            // Fallback if check_email call fails
+            showMsg('login-msg', t('err_invalid_login'), 'error');
+          }
+        } else {
+          showMsg('login-msg', translateError(error.message), 'error');
+        }
+        setLoading('login-btn', false);
+        return;
+      }
+      try { await sb.from('login_history').insert({ email, status: 'success', method: 'password' }); } catch(e) {}
+      localStorage.setItem('cl_auth', 'ok');
+      localStorage.setItem('cl_email', email);
+      window.location.href = returnUrl;
+    } catch (err) { showMsg('login-msg', t('err_generic'), 'error'); setLoading('login-btn', false); }
+  });
+
+  /* ── FORGOT — CHECK EMAIL ── */
+  document.getElementById('forgot-email-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMsg('forgot-msg');
+    resetEmail = document.getElementById('forgot-email').value.trim().toLowerCase();
+    if (!resetEmail || !resetEmail.includes('@')) return showMsg('forgot-msg', t('err_invalid_email'), 'error');
+    setLoading('forgot-email-btn', true);
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/finland-reset-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'check_email', email: resetEmail }),
+      });
+      const data = await res.json();
+      if (!data.exists) {
+        document.getElementById('confirm-email-display').textContent = resetEmail;
+        document.getElementById('contact-email').value = resetEmail;
+        showState('unknownConfirm');
+        setLoading('forgot-email-btn', false);
+        return;
+      }
+      document.getElementById('pin-value').textContent = data.pin;
+      showState('forgotReset');
+    } catch (err) { showMsg('forgot-msg', t('err_connection'), 'error'); }
+    setLoading('forgot-email-btn', false);
+  });
+
+  /* ── FORGOT — RESET WITH PIN ── */
+  document.getElementById('reset-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMsg('reset-msg');
+    const pin = document.getElementById('reset-pin').value.trim();
+    const newPassword = document.getElementById('reset-password').value;
+    const confirmPassword = document.getElementById('reset-password-confirm').value;
+    if (!pin) return showMsg('reset-msg', t('err_enter_code'), 'error');
+    if (newPassword.length < 6) return showMsg('reset-msg', t('err_pwd_short'), 'error');
+    if (newPassword !== confirmPassword) return showMsg('reset-msg', t('err_pwd_mismatch'), 'error');
+    setLoading('reset-btn', true);
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/finland-reset-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset', email: resetEmail, pin, new_password: newPassword }),
+      });
+      const data = await res.json();
+      if (data.success) showState('resetSuccess');
+      else showMsg('reset-msg', data.error || t('err_wrong_code'), 'error');
+    } catch (err) { showMsg('reset-msg', t('err_connection'), 'error'); }
+    setLoading('reset-btn', false);
+  });
+
+  /* ── ADMIN IMPERSONATE ── */
+  document.getElementById('admin-toggle').addEventListener('click', () => { document.getElementById('admin-panel').classList.toggle('open'); });
+  document.getElementById('admin-btn').addEventListener('click', async () => {
+    const email = document.getElementById('admin-email').value.trim().toLowerCase();
+    const key = document.getElementById('admin-key').value;
+    const msgEl = document.getElementById('admin-msg');
+    const btn = document.getElementById('admin-btn');
+    msgEl.className = 'msg';
+    if (!email || !key) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Both fields required.'; return; }
+    btn.disabled = true; btn.textContent = 'Impersonating…';
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/admin-impersonate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, admin_key: key }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) { msgEl.className = 'msg visible error'; msgEl.textContent = data.error || 'Failed.'; btn.disabled = false; btn.textContent = 'Impersonate'; return; }
+      const { error: otpError } = await sb.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' });
+      if (otpError) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Session failed: ' + otpError.message; btn.disabled = false; btn.textContent = 'Impersonate'; return; }
+      localStorage.setItem('cl_auth', 'ok');
+      localStorage.setItem('cl_email', data.email);
+      window.location.href = returnUrl;
+    } catch (err) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Error: ' + err.message; btn.disabled = false; btn.textContent = 'Impersonate'; }
+  });
+
+  document.getElementById('login-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-form').requestSubmit(); });
+
+  /* ── CONTACT FORM (unknown email) ── */
+  document.getElementById('contact-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMsg('contact-msg');
+    const email = document.getElementById('contact-email').value.trim().toLowerCase();
+    const message = document.getElementById('contact-message').value.trim();
+    if (!email || !message) return showMsg('contact-msg', t('err_fill_all'), 'error');
+    setLoading('contact-send-btn', true);
+    try {
+      await fetch('https://civiclearn.app.n8n.cloud/webhook/contact', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          site: 'finland',
+          page: 'login',
+          name: '',
+          email,
+          message: '[LOGIN – EMAIL NOT FOUND]\n' + message,
+          user_id: ''
+        }),
+      });
+      showState('contactSent');
+    } catch (err) {
+      showMsg('contact-msg', t('err_generic'), 'error');
+      setLoading('contact-send-btn', false);
+    }
+  });
+
+  document.getElementById('back-to-login-from-confirm').addEventListener('click', () => showState('login'));
+  document.getElementById('confirm-yes-btn').addEventListener('click', () => showState('unknownContact'));
+  document.getElementById('back-to-login-from-contact').addEventListener('click', () => { clearMsg('contact-msg'); showState('login'); });
+  document.getElementById('back-to-login-from-sent').addEventListener('click', () => showState('login'));
+
+  /* ── HELP CARD TOGGLE ── */
+  document.getElementById('helpToggle').addEventListener('click', () => {
+    document.getElementById('helpCard').classList.toggle('open');
+  });
+
+})();
+</script>
+</body>
+</html>
+

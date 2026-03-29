@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title_help">Help & Contact</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="/kansalaisuuskoe/assets/css/civic-v2.css">
+  <style>
+    .help-container { max-width: 700px; }
+    .help-section { margin-bottom: 28px; }
+    .help-section h2 { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; overflow: hidden; }
+    .faq-q { padding: 14px 18px; cursor: pointer; font-size: 14px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q:hover { background: var(--accent-soft); }
+    .faq-arrow { font-size: 12px; color: var(--text-muted); transition: transform 0.2s; }
+    .faq-item.open .faq-arrow { transform: rotate(90deg); }
+    .faq-a { display: none; padding: 0 18px 14px; font-size: 13px; color: var(--text-mid); line-height: 1.6; }
+    .faq-item.open .faq-a { display: block; }
+    .contact-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+    .contact-form label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
+    .contact-form input, .contact-form textarea { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font); font-size: 14px; margin-bottom: 14px; }
+    .contact-form input:focus, .contact-form textarea:focus { outline: none; border-color: var(--accent); }
+    .contact-form textarea { min-height: 100px; resize: vertical; }
+    .contact-success { text-align: center; padding: 20px 0; }
+    .contact-success h3 { font-size: 18px; margin-bottom: 4px; }
+    .contact-success p { color: var(--text-muted); font-size: 13px; }
+    .help-reset { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); }
+    .reset-btn { padding: 8px 20px; border-radius: var(--radius-sm); font-family: var(--font); font-size: 13px; font-weight: 600; background: var(--wrong-bg); color: #991b1b; border: 1px solid #fecaca; cursor: pointer; transition: all 0.15s; }
+    .reset-btn:hover { background: #fecaca; }
+  </style>
+  <script>document.documentElement.classList.add("i18n-hidden");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- <script src="/kansalaisuuskoe/assets/js/fi-auth.js"></script> -->
+</head>
+<body>
+<button class="menu-toggle" aria-label="Menu">☰</button>
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Finland">
+        <rect width="640" height="400" fill="#FFFFFF"/>
+        <rect x="176" y="0" width="64" height="400" fill="#003580"/>
+        <rect x="0" y="168" width="640" height="64" fill="#003580"/>
+      </svg>
+    </div>
+    <!-- Sidebar gauge -->
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Est. score</span>
+        <span class="sidebar-gauge-score" id="clGaugeScore">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugePass"></div>
+      </div>
+      <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
+    </div>
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav_dashboard">Dashboard</a>
+      <a href="simulation.html" data-i18n="nav_simulation">Test Simulation</a>
+      <a href="quick.html" data-i18n="nav_quick">Quick Test</a>
+      <a href="topics.html" data-i18n="nav_topics">Tests by Topic</a>
+      <a href="traps.html" data-i18n="nav_traps">Frequent Traps</a>
+      <a href="flashcards.html" data-i18n="nav_flashcards">Flashcards</a>
+      <div class="nav-sep"></div>
+      <a href="history.html" data-i18n="nav_history">History</a>
+      <a href="my-list.html" data-i18n="nav_my_list">My List</a>
+      <a href="help.html" class="active" data-i18n="nav_help">Help & Contact</a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink">Log out</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="global-controls">
+      <div class="lang-switch">
+        <button data-lang="fi">FI</button>
+        <button data-lang="sv">SV</button>
+        <button data-lang="en">EN</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="overlay" id="menuOverlay"></div>
+
+  <main>
+    <header class="ce-header">
+      <h1 data-i18n="title_help">Help & Contact</h1>
+    </header>
+
+    <div class="help-container">
+      <!-- FAQs -->
+      <div class="help-section">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+          <div class="faq-q">What does this training cover? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">This platform prepares you for the upcoming Finnish citizenship test (kansalaisuuskoe). Questions cover constitutional values, democracy, rights & obligations, Finnish history, culture, society, equality, and safety — based on topics announced by the Finnish government.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Is this the official test? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">No. The official test has not yet been published. Our questions are based on the government's announced topic areas and publicly available civic knowledge material. When the official test format is released, we will update accordingly.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">How does the wave system work in topic tests? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">When you practise by topic, questions you answer incorrectly come back in the next wave. This continues until you answer every question correctly. This ensures genuine mastery, not just memorisation.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">What is the simulation mode? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">The simulation presents 25 questions in 45 minutes with an 80% pass threshold (20/25), mirroring the expected format of the real test. Use it as a rehearsal after practising by topic.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Can I use this on my phone? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">Yes, the platform is fully responsive and works on phones, tablets, and desktops. You can add it to your home screen for app-like access.</div>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="help-section">
+        <h2 data-i18n="contact_title">Send a message</h2>
+        <div class="contact-form" id="contactForm">
+          <label data-i18n="contact_name_label">Your name</label>
+          <input type="text" id="contactName">
+          <label data-i18n="contact_email_label">Your email</label>
+          <input type="email" id="contactEmail">
+          <label data-i18n="contact_message_label">Your message</label>
+          <textarea id="contactMessage"></textarea>
+          <button class="btn" id="contactSubmit" data-i18n="contact_submit_btn">Send</button>
+        </div>
+      </div>
+
+      <!-- Reset -->
+      <div class="help-reset">
+        <button class="reset-btn" id="resetBtn" data-i18n="reset_button_label">Reset training</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/kansalaisuuskoe/assets/js/lang-bootstrap-fi.js"></script>
+<script src="/kansalaisuuskoe/assets/js/config-fi.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>CivicLearnI18n.init();</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Mobile menu
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+
+  // Lang switch
+  const current = window.CIVICEDGE_LANG;
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    if (btn.dataset.lang === current) btn.classList.add("active");
+    btn.addEventListener("click", () => {
+      if (btn.dataset.lang === current) return;
+      localStorage.setItem("civicedge_lang", btn.dataset.lang);
+      location.reload();
+    });
+  });
+
+  // FAQ accordion
+  document.querySelectorAll(".faq-q").forEach(q => {
+    q.addEventListener("click", () => q.closest(".faq-item").classList.toggle("open"));
+  });
+
+  // Contact form
+  document.getElementById("contactSubmit")?.addEventListener("click", async () => {
+    const name = document.getElementById("contactName").value.trim();
+    const email = document.getElementById("contactEmail").value.trim();
+    const message = document.getElementById("contactMessage").value.trim();
+    if (!name || !email || !message) return alert("Please fill in all fields.");
+    try {
+      await fetch("https://civiclearn.app.n8n.cloud/webhook/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message, product: "finland", language: current })
+      });
+      document.getElementById("contactForm").innerHTML = `<div class="contact-success"><h3 data-i18n="contact_success_title">Message sent!</h3><p data-i18n="contact_success_text">Thank you. We will reply shortly.</p></div>`;
+      CivicLearnI18n.apply();
+    } catch { alert("Could not send. Please try again."); }
+  });
+
+  // Reset
+  document.getElementById("resetBtn")?.addEventListener("click", () => {
+    if (!confirm("Do you really want to erase all your training data?")) return;
+    ["civicedge_progress", "civicedge_stats", "civicedge_saved", "civiclearn_answered_mcqs", "cl_gauge_cache", "civiclearn:fi:dashseq:index"].forEach(k => localStorage.removeItem(k));
+    alert("Your data has been reset.");
+    location.reload();
+  });
+});
+</script>
+<script src="/kansalaisuuskoe/assets/js/gauge-bar.js"></script>
+<script src="/kansalaisuuskoe/assets/js/study-timer.js"></script>
+<script src="/assets/js/maintenance-bar.js"></script>
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Premium Access – Kansalaisuuskoe | CivicLearn</title>
+<meta name="description" content="Activate your premium access to Finland's citizenship test preparation platform.">
+<link rel="canonical" href="https://civiclearn.com/kansalaisuuskoe/checkout.html">
+<meta property="og:title" content="Premium Access – Kansalaisuuskoe">
+<meta property="og:description" content="Full access to all training features. One-time payment – lifetime access.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://civiclearn.com/kansalaisuuskoe/checkout.html">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; overflow-x: clip; }
+body {
+  font-family: "Lexend", system-ui, sans-serif;
+  background: #f5efe6;
+  min-height: 100vh; color: #0f172a; overflow-x: clip; width: 100%;
+}
+a { color: inherit; }
+
+.checkout-header {
+  background: rgba(245,239,230,.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  position: sticky; top: 0; z-index: 100;
+}
+.checkout-header-inner {
+  max-width: 600px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .85rem 1.5rem; gap: .5rem;
+}
+.checkout-brand {
+  display: flex; align-items: center; gap: .55rem;
+  font-weight: 700; font-size: .88rem; color: #0f172a;
+}
+.checkout-brand .flag{width:22px;height:15px;background:#fff;border-radius:2px;position:relative;overflow:hidden;flex-shrink:0;border:1px solid #e0e0e0}
+.checkout-brand .flag::before{content:'';position:absolute;top:0;left:6px;width:2.5px;height:100%;background:#003580}
+.checkout-brand .flag::after{content:'';position:absolute;top:6px;left:0;width:100%;height:2.5px;background:#003580}
+.header-right { display: flex; align-items: center; gap: .75rem; }
+.header-contact {
+  font-size: .74rem; font-weight: 500; color: #a8a29e;
+  text-decoration: none; display: flex; align-items: center; gap: .28rem;
+  padding: .27rem .52rem; border: 1px solid #e8e0d4; border-radius: .45rem;
+  transition: all .15s; white-space: nowrap;
+}
+.header-contact:hover { border-color: #003580; color: #003580; background: #e8eef6; }
+.checkout-powered { font-size: .72rem; color: #a8a29e; }
+.checkout-powered a { color: #78716c; text-decoration: none; font-weight: 500; }
+.checkout-powered a:hover { color: #0f172a; }
+@media (max-width: 520px) {
+  .checkout-header-inner { padding: .65rem 1rem; }
+  .checkout-brand { font-size: .82rem; }
+  .header-contact span { display: none; }
+  .header-contact { padding: .25rem .4rem; }
+  .checkout-powered { display: none; }
+}
+
+main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+@media (max-width: 520px) { main { padding: 1.8rem 1.15rem 3rem; } }
+
+.page-title { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 1.5rem; line-height: 1.2; letter-spacing: -.025em; }
+
+/* ── PLAN TOGGLE ── */
+.plan-toggle {
+  display: grid; grid-template-columns: 1fr 1fr; gap: .65rem;
+  margin-bottom: 1.5rem;
+}
+.plan-card {
+  border: 1.5px solid #e8e0d4; border-radius: .95rem; padding: 1rem 1.1rem;
+  cursor: pointer; transition: all .18s; position: relative; background: #fff;
+}
+.plan-card:hover { border-color: #003580; }
+.plan-card.selected { border-color: #003580; background: #e8eef6; box-shadow: 0 0 0 2px rgba(0,53,128,.18); }
+.plan-name { font-size: .82rem; font-weight: 700; margin-bottom: .15rem; }
+.plan-meta { font-size: .68rem; color: #78716c; line-height: 1.4; }
+.plan-price { font-size: 1rem; font-weight: 700; margin-top: .45rem; }
+.plan-save {
+  position: absolute; top: -.55rem; right: .7rem;
+  background: #003580; color: #fff; font-size: .6rem; font-weight: 700;
+  padding: .15rem .55rem; border-radius: .4rem; letter-spacing: .02em;
+}
+
+.price-line {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding-bottom: 1.2rem; margin-bottom: 1.4rem; border-bottom: 1px solid #e8e0d4;
+}
+.price-line-label { font-size: .82rem; font-weight: 500; color: #78716c; }
+.price-line-meta { font-size: .72rem; color: #a8a29e; margin-top: .2rem; }
+.price-line-amount { font-size: 1.15rem; font-weight: 700; color: #0f172a; letter-spacing: -.01em; white-space: nowrap; }
+
+#link-auth-element { margin-bottom: 1.1rem; }
+#payment-element { margin-bottom: 1.4rem; }
+.stripe-loading { text-align: center; color: #a8a29e; font-size: .82rem; padding: 1.5rem 0; }
+
+.pay-btn {
+  width: 100%; padding: 1rem 1.2rem;
+  background: #003580; color: #fff; border: none; border-radius: .85rem;
+  font-family: "Lexend", sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: opacity .15s, transform .1s; letter-spacing: .01em;
+}
+.pay-btn:hover:not(:disabled) { opacity: .92; transform: translateY(-1px); }
+.pay-btn:active:not(:disabled) { transform: translateY(0); }
+.pay-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.trust-strip {
+  display: flex; align-items: center; justify-content: center; gap: 1.3rem;
+  margin-top: 1.1rem; flex-wrap: wrap;
+}
+.trust-item { display: flex; align-items: center; gap: .3rem; font-size: .7rem; color: #a8a29e; white-space: nowrap; }
+.trust-item span:first-child { font-size: .82rem; }
+
+.done-icon { font-size: 2.6rem; text-align: center; margin-bottom: .6rem; }
+.done-title { font-size: 1.2rem; font-weight: 700; text-align: center; margin-bottom: .35rem; }
+.done-sub { font-size: .82rem; color: #a8a29e; text-align: center; margin-bottom: 1.2rem; }
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: .82rem; font-weight: 500; margin-bottom: .3rem; color: #374151; }
+.field input {
+  width: 100%; padding: .75rem .9rem; border-radius: .85rem; border: 1.5px solid #e8e0d4;
+  font-size: .92rem; font-family: "Lexend", sans-serif; color: #0f172a;
+  outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.field input:focus { border-color: #003580; box-shadow: 0 0 0 3px rgba(0,53,128,.1); }
+
+.checkout-message { border-radius: .75rem; padding: .65rem .9rem; font-size: .82rem; margin-top: .75rem; display: none; line-height: 1.45; }
+.checkout-message.error { background: #fef2f2; color: #be123c; }
+.checkout-message.info { background: #e8eef6; color: #003580; }
+
+.footer-links {
+  margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e8e0d4;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem;
+}
+.after-text { font-size: .75rem; color: #a8a29e; }
+.after-text a { color: #003580; font-weight: 500; text-decoration: none; }
+.after-text a:hover { text-decoration: underline; }
+.details-toggle {
+  display: flex; align-items: center; gap: .3rem;
+  background: none; border: none; cursor: pointer;
+  font-family: "Lexend", sans-serif; font-size: .72rem; font-weight: 500;
+  color: #a8a29e; transition: color .15s;
+}
+.details-toggle:hover { color: #78716c; }
+.details-toggle .arrow { transition: transform .25s; font-size: .55rem; }
+.details-toggle.open .arrow { transform: rotate(180deg); }
+.details-list { display: none; margin-top: .8rem; columns: 2; column-gap: 1.5rem; }
+.details-list.open { display: block; }
+.details-list ul { list-style: none; }
+.details-list li {
+  font-size: .72rem; color: #78716c; display: flex; align-items: flex-start; gap: .4rem;
+  padding: .2rem 0; break-inside: avoid;
+}
+.details-list li::before { content: '✓'; color: #003580; font-weight: 700; font-size: .65rem; flex-shrink: 0; margin-top: .08rem; }
+@media (max-width: 420px) { .details-list { columns: 1; } }
+
+/* ── BUNDLE LANGUAGE SELECTOR ── */
+.bundle-lang-selector {
+  margin: -.75rem 0 1.5rem;
+  padding: .85rem 1rem;
+  background: #f0f4fa;
+  border: 1.5px solid #d4dde8;
+  border-radius: .75rem;
+}
+.bundle-lang-label {
+  font-size: .75rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: .5rem;
+}
+.bundle-lang-btns {
+  display: flex;
+  gap: .5rem;
+}
+.bundle-lang-btn {
+  flex: 1;
+  padding: .55rem .75rem;
+  font-family: "Lexend", sans-serif;
+  font-size: .8rem;
+  font-weight: 600;
+  border: 1.5px solid #d4dde8;
+  border-radius: .6rem;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+  transition: all .15s;
+}
+.bundle-lang-btn:hover { border-color: #003580; }
+.bundle-lang-btn.selected {
+  border-color: #003580;
+  background: #e8eef6;
+  color: #003580;
+  box-shadow: 0 0 0 2px rgba(0,53,128,.12);
+}
+
+@keyframes spin { to { transform: rotate(360deg) } }
+</style>
+</head>
+<body>
+
+<header class="checkout-header">
+  <div class="checkout-header-inner">
+    <div class="checkout-brand">
+      <div class="flag"></div>
+      Kansalaisuuskoe
+    </div>
+    <div class="header-right">
+      <a href="https://civiclearn.com/support" class="header-contact">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <span>Questions?</span>
+      </a>
+      <div class="checkout-powered">
+        <small>powered by </small>
+        <a href="https://civiclearn.com/kansalaisuuskoe/">CivicLearn</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <div class="page-title">Activate your premium access</div>
+
+  <!-- PLAN TOGGLE -->
+  <div class="plan-toggle" id="planToggle">
+    <div class="plan-card selected" id="planSolo">
+      <div class="plan-name">Citizenship Test</div>
+      <div class="plan-meta">800 questions · Simulations · Lifetime access</div>
+      <div class="plan-price">€69</div>
+    </div>
+    <div class="plan-card" id="planBundle">
+      <div class="plan-save">Save €39</div>
+      <div class="plan-name">Citizenship + YKI Language</div>
+      <div class="plan-meta">800 questions + language test prep · AI evaluation</div>
+      <div class="plan-price">€99</div>
+    </div>
+  </div>
+
+  <!-- BUNDLE LANGUAGE SELECTOR (visible only when bundle selected) -->
+  <div class="bundle-lang-selector" id="bundleLangSelector" style="display:none;">
+    <div class="bundle-lang-label">Which language test?</div>
+    <div class="bundle-lang-btns">
+      <button class="bundle-lang-btn selected" id="bundleLangFi" data-lang="fi">🇫🇮 YKI Finnish</button>
+      <button class="bundle-lang-btn" id="bundleLangSv" data-lang="sv">🇸🇪 YKI Svenska</button>
+    </div>
+  </div>
+
+  <!-- PRICE LINE -->
+  <div class="price-line" id="priceLine">
+    <div>
+      <div class="price-line-label" id="priceLabel">Citizenship Test · Premium</div>
+      <div class="price-line-meta" id="priceMeta">800 questions · Lifetime access</div>
+    </div>
+    <div style="flex-shrink:0;text-align:right"><span class="price-line-amount" id="priceAmount">€69</span></div>
+  </div>
+
+  <!-- CHECKOUT FORM -->
+  <div id="viewCheckout">
+    <div id="link-auth-element"></div>
+    <div id="payment-element"><div class="stripe-loading">Loading payment options…</div></div>
+    <button type="button" class="pay-btn" id="payBtn" disabled>Pay €69</button>
+    <div class="trust-strip">
+      <div class="trust-item"><span>🔒</span><span>Secured by Stripe</span></div>
+      <div class="trust-item"><span>⚡</span><span>Instant access</span></div>
+      <div class="trust-item"><span>✔</span><span>One-time payment</span></div>
+    </div>
+  </div>
+
+  <!-- PASSWORD -->
+  <div id="viewPassword" hidden>
+    <div style="text-align:center;font-size:2.4rem;margin-bottom:.6rem">🎉</div>
+    <div class="done-title">Payment confirmed!</div>
+    <p style="font-size:.85rem;color:#57534e;text-align:center;margin-bottom:1.1rem">Now choose a password for your account.</p>
+    <div class="field">
+      <label for="pw1">Password</label>
+      <input type="password" id="pw1" autocomplete="new-password" placeholder="At least 6 characters">
+    </div>
+    <div class="field">
+      <label for="pw2">Confirm password</label>
+      <input type="password" id="pw2" autocomplete="new-password" placeholder="Repeat password">
+    </div>
+    <button type="button" class="pay-btn" id="setupBtn">Create account</button>
+  </div>
+
+  <!-- DONE -->
+  <div id="viewDone" hidden>
+    <div class="done-icon">✅</div>
+    <div class="done-title">Your account is ready!</div>
+    <div class="done-sub" id="doneEmail"></div>
+    <a href="/kansalaisuuskoe/dashboard/index.html" class="pay-btn" id="doneCta"
+       style="text-align:center;text-decoration:none;display:block">Start training →</a>
+  </div>
+
+  <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
+
+  <!-- FOOTER -->
+  <div class="footer-links">
+    <div class="after-text">Already have an account? <a href="/kansalaisuuskoe/login.html">Log in here</a>.</div>
+    <button class="details-toggle" id="detailsToggle">
+      <span>What's included?</span>
+      <span class="arrow">▼</span>
+    </button>
+  </div>
+  <div class="details-list" id="detailsList">
+    <ul>
+      <li>800 questions on Finnish civic knowledge</li>
+      <li>Unlimited exam simulations</li>
+      <li>Quick tests, flashcards, and common traps</li>
+      <li>Progress and analysis per topic</li>
+      <li>Tests by topic with explanations</li>
+      <li>Cross-device sync</li>
+      <li>All devices — mobile, tablet, desktop</li>
+      <li>Lifetime access — no subscription</li>
+    </ul>
+  </div>
+
+</main>
+
+<script>
+(function(){
+  document.getElementById('detailsToggle').addEventListener('click', function(){
+    var list = document.getElementById('detailsList');
+    this.classList.toggle('open', list.classList.toggle('open'));
+  });
+})();
+</script>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<script>
+(function(){
+  'use strict';
+
+  var FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  var SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
+  var SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  var STRIPE_PK     = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
+  var RETURN_URL    = 'https://civiclearn.com/kansalaisuuskoe/checkout.html';
+
+  var stripe = Stripe(STRIPE_PK);
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  var PLANS = {
+    solo:      { amount: 6900, price: '€69', payLabel: 'Pay €69', label: 'Citizenship Test · Premium', meta: '800 questions · Lifetime access', createFn: 'fi-create-payment-intent', setupFn: 'fi-setup-account' },
+    'bundle-fi': { amount: 9900, price: '€99', payLabel: 'Pay €99', label: 'Citizenship + YKI Finnish · Bundle', meta: '800 questions + YKI Finnish prep · Lifetime access', createFn: 'fi-create-payment-intent', setupFn: 'fi-setup-account' },
+    'bundle-sv': { amount: 9900, price: '€99', payLabel: 'Pay €99', label: 'Citizenship + YKI Svenska · Bundle', meta: '800 questions + YKI Svenska prep · Lifetime access', createFn: 'fi-create-payment-intent', setupFn: 'fi-setup-account' },
+  };
+
+  var selectedPlan = 'solo';
+  var bundleLang = 'fi';
+  var urlPlan = new URLSearchParams(window.location.search).get('plan');
+  if (urlPlan === 'bundle' || urlPlan === 'bundle-fi') { selectedPlan = 'bundle-fi'; bundleLang = 'fi'; }
+  else if (urlPlan === 'bundle-sv') { selectedPlan = 'bundle-sv'; bundleLang = 'sv'; }
+
+  var currentEmail = '';
+  var paymentIntentId = '';
+  var stripeElements = null;
+  var isSubmitting = false;
+
+  var viewCheckout = document.getElementById('viewCheckout');
+  var viewPassword = document.getElementById('viewPassword');
+  var viewDone     = document.getElementById('viewDone');
+  var planToggle   = document.getElementById('planToggle');
+  var priceLine    = document.getElementById('priceLine');
+  var msg          = document.getElementById('checkoutMessage');
+  var bundleSelector = document.getElementById('bundleLangSelector');
+
+  function show(name) {
+    viewCheckout.hidden = (name !== 'checkout');
+    viewPassword.hidden = (name !== 'password');
+    viewDone.hidden     = (name !== 'done');
+    planToggle.style.display = (name === 'checkout') ? 'grid' : 'none';
+    priceLine.style.display  = (name === 'checkout') ? 'flex' : 'none';
+    bundleSelector.style.display = (name === 'checkout' && selectedPlan.startsWith('bundle')) ? 'block' : 'none';
+    msg.style.display = 'none';
+  }
+  function err(text)  { msg.textContent = text; msg.className = 'checkout-message error'; msg.style.display = 'block'; }
+  function info(text) { msg.textContent = text; msg.className = 'checkout-message info';  msg.style.display = 'block'; }
+
+  /* ── Plan selection ── */
+  var cardSolo   = document.getElementById('planSolo');
+  var cardBundle = document.getElementById('planBundle');
+  var btnFi = document.getElementById('bundleLangFi');
+  var btnSv = document.getElementById('bundleLangSv');
+
+  function selectPlan(plan) {
+    selectedPlan = plan;
+    var isBundle = plan.startsWith('bundle');
+    cardSolo.classList.toggle('selected', !isBundle);
+    cardBundle.classList.toggle('selected', isBundle);
+    bundleSelector.style.display = isBundle ? 'block' : 'none';
+    if (isBundle) {
+      btnFi.classList.toggle('selected', bundleLang === 'fi');
+      btnSv.classList.toggle('selected', bundleLang === 'sv');
+    }
+    document.getElementById('priceLabel').textContent = PLANS[plan].label;
+    document.getElementById('priceMeta').textContent = PLANS[plan].meta;
+    document.getElementById('priceAmount').textContent = PLANS[plan].price;
+    document.getElementById('payBtn').textContent = PLANS[plan].payLabel;
+    mountStripeElements();
+  }
+
+  cardSolo.addEventListener('click', function() { bundleLang = 'fi'; selectPlan('solo'); });
+  cardBundle.addEventListener('click', function() { selectPlan('bundle-' + bundleLang); });
+  btnFi.addEventListener('click', function() { bundleLang = 'fi'; selectPlan('bundle-fi'); });
+  btnSv.addEventListener('click', function() { bundleLang = 'sv'; selectPlan('bundle-sv'); });
+
+  /* ── Stripe — deferred intent ── */
+  function mountStripeElements() {
+    var plan = PLANS[selectedPlan];
+    stripeElements = stripe.elements({
+      mode: 'payment',
+      amount: plan.amount,
+      currency: 'eur',
+      appearance: {
+        theme: 'stripe',
+        variables: {
+          fontFamily: '"Lexend", system-ui, sans-serif',
+          borderRadius: '0.85rem',
+          colorPrimary: '#003580'
+        }
+      }
+    });
+
+    document.getElementById('link-auth-element').innerHTML = '';
+    var linkAuth = stripeElements.create('linkAuthentication');
+    linkAuth.mount('#link-auth-element');
+    linkAuth.on('change', function(ev) {
+      if (ev.value && ev.value.email) currentEmail = ev.value.email;
+    });
+
+    document.getElementById('payment-element').innerHTML = '';
+    var pe = stripeElements.create('payment', {
+      layout: { type: 'accordion', defaultCollapsed: false, radios: true, spacedAccordionItems: true }
+    });
+    pe.mount('#payment-element');
+    pe.on('ready', function() { document.getElementById('payBtn').disabled = false; });
+    pe.on('change', function(ev) { if (ev.complete) document.getElementById('payBtn').disabled = false; });
+  }
+
+  /* ── 3DS return ── */
+  var urlParams = new URLSearchParams(window.location.search);
+  var returnedPI = urlParams.get('payment_intent'), returnedSecret = urlParams.get('payment_intent_client_secret'), returnedStatus = urlParams.get('redirect_status');
+  if (returnedPI && returnedSecret) {
+    currentEmail = localStorage.getItem('finland_checkout_email') || '';
+    paymentIntentId = returnedPI;
+    if (returnedStatus === 'succeeded') { show('password'); }
+    else {
+      stripe.retrievePaymentIntent(returnedSecret).then(function(r) {
+        var pi = r.paymentIntent;
+        if (pi && pi.status === 'succeeded') show('password');
+        else { err('Payment was not completed.'); show('checkout'); }
+      });
+    }
+    window.history.replaceState({}, '', window.location.pathname);
+  } else {
+    selectPlan(selectedPlan);
+    show('checkout');
+  }
+
+  /* ── Pay ── */
+  document.getElementById('payBtn').onclick = async function() {
+    if (isSubmitting) return;
+    if (!currentEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(currentEmail)) { err('Please enter a valid email address.'); return; }
+    isSubmitting = true;
+    var btn = document.getElementById('payBtn'); btn.disabled = true;
+    btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px"></span>Processing…';
+    msg.style.display = 'none';
+    try {
+      var submitResult = await stripeElements.submit();
+      if (submitResult.error) { err(submitResult.error.message || 'An error occurred.'); btn.disabled = false; btn.textContent = PLANS[selectedPlan].payLabel; isSubmitting = false; return; }
+      var res = await fetch(FUNCTIONS_URL + '/' + PLANS[selectedPlan].createFn, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail, plan: selectedPlan })
+      });
+      var data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'An error occurred.');
+      paymentIntentId = data.payment_intent_id;
+      localStorage.setItem('finland_checkout_email', currentEmail);
+      var result = await stripe.confirmPayment({
+        elements: stripeElements,
+        clientSecret: data.client_secret,
+        confirmParams: { return_url: RETURN_URL, receipt_email: currentEmail },
+        redirect: 'if_required'
+      });
+      if (result.error) { err(result.error.message || 'Payment failed.'); btn.disabled = false; btn.textContent = PLANS[selectedPlan].payLabel; isSubmitting = false; return; }
+      if (result.paymentIntent && result.paymentIntent.status === 'succeeded') { paymentIntentId = result.paymentIntent.id; show('password'); }
+      else if (result.paymentIntent && result.paymentIntent.status === 'processing') { info('Payment is processing…'); }
+    } catch (e) {
+      err(e.message || 'An error occurred.');
+      btn.disabled = false; btn.textContent = PLANS[selectedPlan].payLabel;
+    }
+    isSubmitting = false;
+  };
+
+  /* ── Password ── */
+  document.getElementById('setupBtn').onclick = async function() {
+    var p1 = document.getElementById('pw1').value, p2 = document.getElementById('pw2').value;
+    if (!p1 || p1.length < 6) { err('At least 6 characters.'); return; }
+    if (p1 !== p2) { err('Passwords do not match.'); return; }
+    var btn = document.getElementById('setupBtn'); btn.disabled = true; btn.textContent = 'Creating account…'; msg.style.display = 'none';
+    try {
+      var res = await fetch(FUNCTIONS_URL + '/' + PLANS[selectedPlan].setupFn, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_intent_id: paymentIntentId, password: p1 })
+      });
+      var data = await res.json();
+      if (!data.success) { err(data.error || 'Could not create the account.'); btn.disabled = false; btn.textContent = 'Create account'; return; }
+      var signIn = await sb.auth.signInWithPassword({ email: data.email, password: p1 });
+      if (signIn.error) console.error('Auto-login failed:', signIn.error);
+      localStorage.removeItem('finland_checkout_email');
+      document.getElementById('doneEmail').textContent = 'Logged in as: ' + data.email;
+      if (data.plan && data.plan.startsWith('bundle')) localStorage.setItem('cl_bundle', data.plan === 'bundle-sv' ? 'fi+sv' : 'fi+fi');
+      show('done');
+    } catch (e) {
+      err('Connection error. Please try again.'); btn.disabled = false; btn.textContent = 'Create account';
+    }
+  };
+  document.getElementById('pw2').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('setupBtn').click(); });
+
+})();
+</script>
+
+</body>
+</html>
