@@ -933,6 +933,62 @@ body {
 .ct-editor-status.err { color: var(--red); }
 .ct-empty { font-size: 0.82rem; color: var(--muted); padding: 1.5rem 0; text-align: center; }
 
+/* ── USERS TAB ── */
+#tab-users { overflow-y: auto; padding: 1.5rem; background: var(--bg); }
+.usr-section { margin-bottom: 2.5rem; }
+.usr-section-title {
+  font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--muted); font-weight: 600; margin-bottom: 1rem;
+}
+.usr-search-row { display: flex; gap: 0.6rem; align-items: center; }
+.usr-input {
+  background: var(--surface); border: 1px solid var(--border2); border-radius: 8px;
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.84rem;
+  padding: 0.55rem 0.9rem; outline: none; transition: border-color 0.15s;
+}
+.usr-input:focus { border-color: var(--brand); }
+.usr-input.wide { width: 320px; }
+.usr-btn {
+  padding: 0.55rem 1.1rem; border-radius: 8px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.15s;
+}
+.usr-btn-primary { background: var(--brand); color: #fff; }
+.usr-btn-primary:hover { opacity: 0.88; }
+.usr-btn-primary:disabled { opacity: 0.4; cursor: default; }
+.usr-result {
+  margin-top: 1rem; background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 1rem 1.1rem; display: none;
+}
+.usr-result.show { display: block; }
+.usr-result-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.65rem; margin-bottom: 0.9rem;
+}
+.usr-field { background: var(--surface2); border-radius: 7px; padding: 0.5rem 0.7rem; }
+.usr-field-label { font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.2rem; }
+.usr-field-value { font-size: 0.82rem; font-weight: 500; word-break: break-all; }
+.usr-field-value.ok   { color: var(--green); }
+.usr-field-value.miss { color: var(--red); }
+.usr-login-history { border-top: 1px solid var(--border); padding-top: 0.75rem; margin-top: 0.5rem; }
+.usr-login-history-title { font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; margin-bottom: 0.4rem; }
+.usr-login-row { font-size: 0.78rem; color: var(--muted); padding: 0.3rem 0; border-top: 1px solid var(--border); display: flex; gap: 1rem; }
+.usr-err { font-size: 0.82rem; color: var(--red); margin-top: 0.6rem; display: none; }
+.usr-err.show { display: block; }
+.usr-form { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; max-width: 540px; }
+.usr-form-field { display: flex; flex-direction: column; gap: 0.3rem; }
+.usr-form-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); font-weight: 600; }
+.usr-form-select, .usr-form-input {
+  background: var(--surface); border: 1px solid var(--border2); border-radius: 8px;
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.84rem;
+  padding: 0.55rem 0.8rem; outline: none; transition: border-color 0.15s;
+}
+.usr-form-select:focus, .usr-form-input:focus { border-color: var(--brand); }
+.usr-form-full { grid-column: 1 / -1; }
+.usr-create-status { font-size: 0.82rem; margin-top: 0.75rem; }
+.usr-create-status.ok  { color: var(--green); }
+.usr-create-status.err { color: var(--red); }
+
 </style>
 </head>
 <body>
@@ -970,6 +1026,7 @@ body {
       <button class="tab-btn" id="tab-btn-revenue" onclick="switchTab('revenue')">Revenue</button>
       <button class="tab-btn" id="tab-btn-kb" onclick="switchTab('kb')">Knowledge Base</button>
       <button class="tab-btn" id="tab-btn-content" onclick="switchTab('content')">Content</button>
+      <button class="tab-btn" id="tab-btn-users" onclick="switchTab('users')">Users</button>
     </div>
     <button class="tpl-btn" id="tpl-btn-topbar" style="font-size:0.76rem;padding:4px 12px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif" onclick="openTemplateManager()">📋 Templates</button>
     <div class="mob-topbar-actions">
@@ -1120,6 +1177,70 @@ body {
 
   </div><!-- /tab-content -->
 </div>
+
+  <!-- USERS TAB -->
+  <div class="tab-panel" id="tab-users">
+
+    <!-- Look up -->
+    <div class="usr-section">
+      <div class="usr-section-title">Look up user</div>
+      <div class="usr-search-row">
+        <input type="email" class="usr-input wide" id="usr-search-email" placeholder="user@example.com"
+          onkeydown="if(event.key==='Enter') usrLookup()">
+        <button class="usr-btn usr-btn-primary" id="usr-search-btn" onclick="usrLookup()">Look up</button>
+      </div>
+      <div class="usr-err" id="usr-search-err"></div>
+      <div class="usr-result" id="usr-result">
+        <div class="usr-result-grid" id="usr-result-grid"></div>
+        <div class="usr-login-history" id="usr-login-history"></div>
+      </div>
+    </div>
+
+    <!-- Create user -->
+    <div class="usr-section">
+      <div class="usr-section-title">Create user</div>
+      <div class="usr-form">
+        <div class="usr-form-field">
+          <label class="usr-form-label">Email</label>
+          <input type="email" class="usr-form-input" id="usr-new-email" placeholder="user@example.com">
+        </div>
+        <div class="usr-form-field">
+          <label class="usr-form-label">Password</label>
+          <input type="password" class="usr-form-input" id="usr-new-pw" placeholder="Min. 8 characters">
+        </div>
+        <div class="usr-form-field">
+          <label class="usr-form-label">Product (site)</label>
+          <select class="usr-form-select" id="usr-new-site">
+            <option value="">— choose —</option>
+            <option value="denmark">Denmark</option>
+            <option value="denmark-pr">Denmark PR</option>
+            <option value="pd3">PD3 / Dansk3</option>
+            <option value="lux">Luxembourg (VE)</option>
+            <option value="sproochentest">Sproochentest</option>
+            <option value="ciple">CIPLE</option>
+            <option value="celpe">CELPE-BRAS</option>
+            <option value="france">France</option>
+            <option value="geneva">Geneva</option>
+            <option value="rik">Iceland (RIK)</option>
+            <option value="ykifinnish">YKI Finnish</option>
+            <option value="ykisvenska">YKI Svenska</option>
+            <option value="sweden">Sweden</option>
+            <option value="kansalaisuuskoe">Kansalaisuuskoe (FI)</option>
+            <option value="svenskaprov">SvenskaProv</option>
+          </select>
+        </div>
+        <div class="usr-form-field">
+          <label class="usr-form-label">Bundle</label>
+          <input type="text" class="usr-form-input" id="usr-new-bundle" placeholder="e.g. full">
+        </div>
+        <div class="usr-form-full">
+          <button class="usr-btn usr-btn-primary" id="usr-create-btn" onclick="usrCreate()">Create user</button>
+        </div>
+      </div>
+      <div class="usr-create-status" id="usr-create-status"></div>
+    </div>
+
+  </div><!-- /tab-users -->
 
 <div class="toast" id="toast"></div>
 
@@ -1867,6 +1988,7 @@ function switchTab(name) {
   if (name === 'revenue') renderRevenue();
   if (name === 'kb' && !kbLoaded) kbLoad();
   if (name === 'content' && !ctLoaded) ctLoad();
+  // 'users' tab needs no lazy load
 }
 
 // ── REVENUE ───────────────────────────────────────────────────────────────────
@@ -2349,6 +2471,94 @@ async function ctDelete(id) {
     ctRenderList();
     showToast('Notice deleted');
   } catch(e) { showToast('Error: ' + e.message); }
+}
+
+// ── USERS TAB ─────────────────────────────────────────────────────────────────
+const USERS_FN = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/admin-users';
+
+async function usrLookup() {
+  const email  = document.getElementById('usr-search-email').value.trim();
+  const err    = document.getElementById('usr-search-err');
+  const result = document.getElementById('usr-result');
+  const btn    = document.getElementById('usr-search-btn');
+  err.className = 'usr-err'; err.textContent = '';
+  result.className = 'usr-result';
+  if (!email) { err.textContent = 'Enter an email address.'; err.className = 'usr-err show'; return; }
+  btn.disabled = true; btn.textContent = 'Looking up…';
+  try {
+    const res = await fetch(USERS_FN, {
+      method: 'POST',
+      headers: { 'X-Admin-Key': adminPw, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'lookup', email }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'User not found');
+    const u = data.user;
+    const logins = data.logins || [];
+    document.getElementById('usr-result-grid').innerHTML = [
+      { label: 'Email',    value: u.email },
+      { label: 'Site',     value: u.site   || '—' },
+      { label: 'Bundle',   value: u.bundle || '—' },
+      { label: 'Auth UID', value: u.auth_uid || u.id || '—' },
+      { label: 'Created',  value: u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—' },
+      { label: 'Stripe',   value: u.stripe_customer_id || 'none', cls: u.stripe_customer_id ? 'ok' : 'miss' },
+    ].map(f => `<div class="usr-field">
+      <div class="usr-field-label">${f.label}</div>
+      <div class="usr-field-value ${f.cls||''}">${esc(String(f.value))}</div>
+    </div>`).join('');
+    document.getElementById('usr-login-history').innerHTML = logins.length
+      ? `<div class="usr-login-history-title">Recent logins</div>` +
+        logins.map(l => `<div class="usr-login-row">
+          <span>${new Date(l.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
+          <span>${esc(l.site||'—')}</span>
+          <span style="margin-left:auto;font-size:0.72rem;font-family:'DM Mono',monospace">${esc(l.ip||'')}</span>
+        </div>`).join('')
+      : `<div style="font-size:0.78rem;color:var(--muted);padding-top:0.4rem">No login history found.</div>`;
+    result.className = 'usr-result show';
+  } catch(e) {
+    err.textContent = e.message;
+    err.className = 'usr-err show';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Look up';
+  }
+}
+
+async function usrCreate() {
+  const email  = document.getElementById('usr-new-email').value.trim();
+  const pw     = document.getElementById('usr-new-pw').value;
+  const site   = document.getElementById('usr-new-site').value;
+  const bundle = document.getElementById('usr-new-bundle').value.trim();
+  const status = document.getElementById('usr-create-status');
+  const btn    = document.getElementById('usr-create-btn');
+  status.textContent = ''; status.className = 'usr-create-status';
+  if (!email || !pw || !site || !bundle) {
+    status.textContent = 'All fields are required.'; status.className = 'usr-create-status err'; return;
+  }
+  if (pw.length < 8) {
+    status.textContent = 'Password must be at least 8 characters.'; status.className = 'usr-create-status err'; return;
+  }
+  btn.disabled = true; btn.textContent = 'Creating…';
+  try {
+    const res = await fetch(USERS_FN, {
+      method: 'POST',
+      headers: { 'X-Admin-Key': adminPw, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', email, password: pw, site, bundle }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Create failed');
+    status.textContent = `✓ User created — auth UID: ${data.user?.id || '?'}`;
+    status.className = 'usr-create-status ok';
+    document.getElementById('usr-new-email').value = '';
+    document.getElementById('usr-new-pw').value = '';
+    document.getElementById('usr-new-bundle').value = '';
+    document.getElementById('usr-new-site').value = '';
+    showToast('User created ✓', 'success');
+  } catch(e) {
+    status.textContent = e.message;
+    status.className = 'usr-create-status err';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create user';
+  }
 }
 </script>
 
