@@ -39,13 +39,21 @@
     return false;
   }
 
-  // Default store is sessionStorage (safe until patron chooses)
-  window.CL_STORE = sessionStorage;
-
   // Promise that dashboard scripts await before reading storage
   window.CL_LIBRARY_READY = new Promise(function (resolve) {
     window._cl_library_resolve = resolve;
   });
+
+  // ── Already chose this session? Skip overlay entirely ─────────────────────
+  var existingCode = sessionStorage.getItem("cl_lib_code");
+  if (existingCode) {
+    window.CL_STORE = makeNamespacedStore(existingCode);
+    window._cl_library_resolve();
+    return;
+  }
+
+  // Default store is sessionStorage (safe until patron chooses)
+  window.CL_STORE = sessionStorage;
 
   // ── CSS ───────────────────────────────────────────────────────────────────
 
