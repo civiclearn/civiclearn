@@ -30,7 +30,12 @@
     document.head.appendChild(supabaseLoader);
   </script>
 
-  <!-- 3. Auth guard — safe, because it waits for window.supabase -->
+  <!-- 3. Library mode (must load before auth-guard) -->
+  <script src="/canadafr/assets/js/library-init.js"></script>
+  <script src="/canadafr/assets/js/library-entry.js"></script>
+  <script src="/canadafr/assets/js/store-patch.js"></script>
+
+  <!-- 4. Auth guard — safe, because it waits for window.supabase -->
   <script src="/assets/js/auth-guard.js"></script>
  
 </head>
@@ -370,7 +375,9 @@ function loadFactOfDay() {
   document.body.appendChild(s2);
 }
 
-CivicLearnI18n.onReady(() => {
+CivicLearnI18n.onReady(async () => {
+  if (window.CL_LIBRARY_READY) await window.CL_LIBRARY_READY;
+
   const s1 = document.createElement("script");
   s1.src = "/assets/js/dashboard-v2.js";
   document.body.appendChild(s1);
@@ -386,7 +393,7 @@ CivicLearnI18n.onReady(() => {
 
 <script>
   // Plan B: Force Chrome to flush any delayed textContent DOM updates
-  CivicLearnI18n.onReady(() => {
+  CivicLearnI18n.onReady(async () => {
     setTimeout(() => {
       // touch one translated node, causing forced reflow
       const test = document.querySelector('[data-i18n]');

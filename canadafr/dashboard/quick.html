@@ -12,6 +12,9 @@
    <script>
   document.documentElement.classList.add("i18n-hidden");
 </script>
+<script src="/canadafr/assets/js/library-init.js"></script>
+<script src="/canadafr/assets/js/library-entry.js"></script>
+<script src="/canadafr/assets/js/store-patch.js"></script>
 <script type="module" src="/assets/js/auth-guard.js"></script>
 </head>
 
@@ -128,9 +131,12 @@ document.addEventListener("DOMContentLoaded", () => {
   } catch {}
 
   /* START QUICK TEST */
-  setTimeout(() => {
-    CivicEdgeEngine.start("quick");
-  }, 300);
+  (async () => {
+    if (window.CL_LIBRARY_READY) await window.CL_LIBRARY_READY;
+    setTimeout(() => {
+      CivicEdgeEngine.start("quick");
+    }, 300);
+  })();
 
   /* END-SCREEN BUTTON FIX */
   document.addEventListener("click", e => {

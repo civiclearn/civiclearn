@@ -1,6 +1,7 @@
 (async () => {
   if (location.hostname === "localhost") return;
   if (location.pathname.includes("/login")) return;
+  if (sessionStorage.getItem("cl_library_mode")) return;   // library bypass
 
   if (localStorage.getItem("cl_auth") !== "ok") {
     const parts = location.pathname.split("/").filter(Boolean);

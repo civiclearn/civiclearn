@@ -12,6 +12,9 @@
     <script>
   document.documentElement.classList.add("i18n-hidden");
 </script>
+<script src="/canadafr/assets/js/library-init.js"></script>
+<script src="/canadafr/assets/js/library-entry.js"></script>
+<script src="/canadafr/assets/js/store-patch.js"></script>
 </head>
 
 <body class="test-page">
@@ -141,7 +144,8 @@
 
 <script>
   // Load flashcards logic ONLY when translations are ready
-  CivicLearnI18n.onReady(() => {
+  CivicLearnI18n.onReady(async () => {
+    if (window.CL_LIBRARY_READY) await window.CL_LIBRARY_READY;
     const s = document.createElement("script");
     s.src = "/assets/js/flashcards.js";
     document.body.appendChild(s);
