@@ -251,4 +251,21 @@
     });
   }
 
+
+  // ── Hijack logout button in library mode ─────────────────────────────────
+  // Repurposes "Déconnexion" as "Terminer ma session" for library users.
+  // Clears cl_lib_code and reloads → next patron sees the overlay fresh.
+  document.addEventListener("DOMContentLoaded", function () {
+    var logoutLink = document.getElementById("logoutLink");
+    if (!logoutLink) return;
+
+    logoutLink.addEventListener("click", function (e) {
+      if (!sessionStorage.getItem("cl_library_mode")) return;
+      e.preventDefault();
+      e.stopImmediatePropagation(); // fires before signout.js
+      sessionStorage.removeItem("cl_lib_code");
+      location.reload();
+    }, true); // capture phase
+  });
+
 })();
