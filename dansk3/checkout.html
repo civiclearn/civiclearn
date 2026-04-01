@@ -161,6 +161,19 @@ main { padding: 2.5rem 1.5rem 4rem; max-width: 100%; }
 .checkout-message { border-radius: .75rem; padding: .65rem .9rem; font-size: .82rem; margin-top: .75rem; display: none; line-height: 1.45; }
 .checkout-message.error { background: #fff1f2; color: #be123c; }
 .checkout-message.info { background: #fef2f2; color: #b91c1c; }
+/* PROMO CODE */
+.promo-row { margin: .75rem 0 .25rem; }
+.promo-toggle { background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: .78rem; color: #94a3b8; padding: 0; transition: color .15s; }
+.promo-toggle:hover { color: #475569; }
+.promo-input-row { display: none; margin-top: .5rem; gap: .5rem; }
+.promo-input-row.visible { display: flex; }
+.promo-input-row input { flex: 1; padding: .6rem .8rem; border-radius: .75rem; border: 1.5px solid #e5e7eb; font-size: .88rem; font-family: 'DM Sans', sans-serif; color: #0f172a; outline: none; text-transform: uppercase; letter-spacing: .05em; transition: border-color .15s, box-shadow .15s; }
+.promo-input-row input:focus { border-color: #c8102e; box-shadow: 0 0 0 3px rgba(200,16,46,.1); }
+.promo-apply-btn { padding: .6rem 1rem; background: #f1f5f9; border: 1.5px solid #e2e8f0; border-radius: .75rem; font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600; color: #475569; cursor: pointer; white-space: nowrap; transition: all .15s; }
+.promo-apply-btn:hover { background: #e2e8f0; color: #0f172a; }
+.promo-status { font-size: .78rem; margin-top: .4rem; line-height: 1.4; }
+.promo-status.ok { color: #059669; }
+.promo-status.bad { color: #dc2626; }
 .done-icon { font-size: 2.8rem; text-align: center; margin-bottom: .7rem; }
 .done-title { font-size: 1.2rem; font-weight: 700; text-align: center; margin-bottom: .4rem; }
 .done-sub { font-size: .85rem; color: #94a3b8; text-align: center; margin-bottom: 1.3rem; }
@@ -425,6 +438,14 @@ main { padding: 2.5rem 1.5rem 4rem; max-width: 100%; }
           <p class="confirm-text">Din konto oprettes med denne adresse:</p>
           <p class="email-display" id="emailDisplay"></p>
           <p class="confirm-warning">Tjek venligst nøje. Denne adresse bliver dit login.</p>
+          <div class="promo-row">
+            <button type="button" class="promo-toggle" id="promoToggle">Har du en rabatkode? →</button>
+            <div class="promo-input-row" id="promoInputRow">
+              <input type="text" id="promoCodeInput" placeholder="Indtast kode" autocomplete="off" spellcheck="false" maxlength="20">
+              <button type="button" class="promo-apply-btn" id="promoApplyBtn">Anvend</button>
+            </div>
+            <div class="promo-status" id="promoStatus"></div>
+          </div>
           <div class="confirm-actions">
             <button type="button" class="pay-btn" id="confirmEmail">Bekræft og fortsæt til betaling</button>
             <button type="button" class="link-btn" id="editEmail">← Ret e-mailadresse</button>
@@ -541,10 +562,48 @@ function toggleMobFeatures() {
   var selector=document.getElementById('planSelector');
   var msg=document.getElementById('checkoutMessage');
   var currentEmail='',paymentIntentId='',stripeElements=null,isSubmitting=false;
+  var appliedPromoCode='';
 
   function show(name){Object.values(steps).forEach(function(s){s.hidden=true;});steps[name].hidden=false;selector.style.display=(name==='initial'||name==='email')?'block':'none';msg.style.display='none';}
   function err(text){msg.textContent=text;msg.className='checkout-message error';msg.style.display='block';}
   function info(text){msg.textContent=text;msg.className='checkout-message info';msg.style.display='block';}
+
+  /* Promo code */
+  var promoToggle=document.getElementById('promoToggle');
+  var promoInputRow=document.getElementById('promoInputRow');
+  var promoCodeInput=document.getElementById('promoCodeInput');
+  var promoApplyBtn=document.getElementById('promoApplyBtn');
+  var promoStatus=document.getElementById('promoStatus');
+  var VALID_CODES={'PD3DIS26':500};
+
+  promoToggle.addEventListener('click',function(){
+    promoInputRow.classList.toggle('visible');
+    if(promoInputRow.classList.contains('visible')) promoCodeInput.focus();
+  });
+
+  function applyPromo(){
+    var code=promoCodeInput.value.trim().toUpperCase();
+    if(!code){promoStatus.textContent='';promoStatus.className='promo-status';return;}
+    if(VALID_CODES[code] && selectedPlan==='pd3'){
+      appliedPromoCode=code;
+      var discountedKr=VALID_CODES[code];
+      promoStatus.textContent='✓ Rabatkode godkendt — du betaler '+discountedKr+' kr i stedet for 899 kr';
+      promoStatus.className='promo-status ok';
+      promoApplyBtn.textContent='✓ Anvendt';
+      promoApplyBtn.disabled=true;
+    } else if(VALID_CODES[code] && selectedPlan!=='pd3'){
+      promoStatus.textContent='Denne kode gælder kun for Prøve i Dansk 3 (solo)';
+      promoStatus.className='promo-status bad';
+      appliedPromoCode='';
+    } else {
+      promoStatus.textContent='Ugyldig rabatkode';
+      promoStatus.className='promo-status bad';
+      appliedPromoCode='';
+    }
+  }
+
+  promoApplyBtn.addEventListener('click',applyPromo);
+  promoCodeInput.addEventListener('keydown',function(e){if(e.key==='Enter')applyPromo();});
 
   /* 3DS return */
   var urlParams=new URLSearchParams(window.location.search);
@@ -573,9 +632,19 @@ function toggleMobFeatures() {
     if(isSubmitting)return;isSubmitting=true;
     var btn=document.getElementById('confirmEmail');btn.disabled=true;btn.textContent='Forbereder…';info('Forbereder sikker betalingsformular…');
     try{
-      var res=await fetch(FUNCTIONS_URL+'/pd3-create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:currentEmail,product_type:selectedPlan})});
+      var piBody={email:currentEmail,product_type:selectedPlan};
+      if(appliedPromoCode) piBody.promo_code=appliedPromoCode;
+      var res=await fetch(FUNCTIONS_URL+'/pd3-create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(piBody)});
       var data=await res.json();if(!res.ok||data.error)throw new Error(data.error||'Kunne ikke oprette betalingssession.');
       paymentIntentId=data.payment_intent_id;
+
+      // Apply discount to UI if confirmed by server
+      if(data.discount_applied && data.final_amount){
+        var kr=Math.round(data.final_amount/100);
+        sidebarPrice.textContent=kr;
+        PLANS[selectedPlan]=Object.assign({},PLANS[selectedPlan],{payLabel:'Betal '+kr+' kr'});
+      }
+
       localStorage.setItem('pd3_checkout_email',currentEmail);
       localStorage.setItem('pd3_checkout_plan',selectedPlan);
       stripeElements=stripe.elements({clientSecret:data.client_secret,appearance:{theme:'stripe',variables:{fontFamily:'"DM Sans",system-ui,sans-serif',borderRadius:'0.85rem',colorPrimary:'#c8102e'}}});
