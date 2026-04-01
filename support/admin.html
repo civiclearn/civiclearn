@@ -2017,8 +2017,9 @@ const REV_HISTORY = [
   { month: '2025-12', eur: 21525.76 },
   { month: '2026-01', eur: 19433.01 },
   { month: '2026-02', eur: 16523.80 },
+  { month: '2026-03', eur: 17655.17 },
 ];
-const REV_PREV_JAN_FEB = 4877.82 + 10247.71; // Jan+Feb 2025
+const REV_PREV_JAN_MAR = 4877.82 + 10247.71 + 12303.46; // Jan+Feb+Mar 2025
 const REV_FN = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/stripe_metrics_summary';
 let revLiveData = null;
 let revChart = null;
@@ -2045,8 +2046,8 @@ function renderRevenue() {
   const today = L ? L.today : null;
   const wtd   = L ? L.wtd   : null;
   const mtd   = L ? L.mtd   : null;
-  const ytd2026 = 19433.01 + 16523.80 + (mtd || 0);
-  const ytd2025 = L ? (REV_PREV_JAN_FEB + L.mtd_prev) : null;
+  const ytd2026 = 19433.01 + 16523.80 + 17655.17 + (mtd || 0);
+  const ytd2025 = L ? (REV_PREV_JAN_MAR + L.mtd_prev) : null;
 
   document.getElementById('rev-kpi-grid').innerHTML = [
     { label: 'Today',         cur: today,   prev: L ? L.today_prev : null },
@@ -2060,7 +2061,7 @@ function renderRevenue() {
       ${revYoyBadge(k.cur, k.prev)}
     </div>`).join('');
 
-  const chartData = [...REV_HISTORY, { month: '2026-03', eur: mtd || 0, partial: true }];
+  const chartData = [...REV_HISTORY, { month: '2026-04', eur: mtd || 0, partial: true }];
   const labels = chartData.map(({ month }) => {
     const [y, mo] = month.split('-');
     return new Date(+y, +mo - 1, 1).toLocaleString('default', { month: 'short' }) + " '" + String(+y).slice(2);
