@@ -44,6 +44,20 @@
     window._cl_library_resolve = resolve;
   });
 
+  // ── Hijack logout button — always, regardless of session state ──────────────
+  // Must be BEFORE the early return so it registers on every page navigation.
+  document.addEventListener("DOMContentLoaded", function () {
+    var logoutLink = document.getElementById("logoutLink");
+    if (!logoutLink) return;
+    logoutLink.addEventListener("click", function (e) {
+      if (!sessionStorage.getItem("cl_library_mode")) return;
+      e.preventDefault();
+      e.stopImmediatePropagation(); // capture phase fires before signout.js bubble
+      sessionStorage.removeItem("cl_lib_code");
+      location.reload();
+    }, true); // capture phase
+  });
+
   // ── Already chose this session? Skip overlay entirely ─────────────────────
   var existingCode = sessionStorage.getItem("cl_lib_code");
   if (existingCode) {
@@ -250,22 +264,5 @@
       show("cl-lib-panel-main");
     });
   }
-
-
-  // ── Hijack logout button in library mode ─────────────────────────────────
-  // Repurposes "Déconnexion" as "Terminer ma session" for library users.
-  // Clears cl_lib_code and reloads → next patron sees the overlay fresh.
-  document.addEventListener("DOMContentLoaded", function () {
-    var logoutLink = document.getElementById("logoutLink");
-    if (!logoutLink) return;
-
-    logoutLink.addEventListener("click", function (e) {
-      if (!sessionStorage.getItem("cl_library_mode")) return;
-      e.preventDefault();
-      e.stopImmediatePropagation(); // fires before signout.js
-      sessionStorage.removeItem("cl_lib_code");
-      location.reload();
-    }, true); // capture phase
-  });
 
 })();
