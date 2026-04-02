@@ -1208,29 +1208,28 @@ body {
           <input type="password" class="usr-form-input" id="usr-new-pw" placeholder="Min. 8 characters">
         </div>
         <div class="usr-form-field">
-          <label class="usr-form-label">Product (site)</label>
+          <label class="usr-form-label">Product (access path)</label>
           <select class="usr-form-select" id="usr-new-site">
             <option value="">— choose —</option>
-            <option value="denmark">Denmark</option>
-            <option value="denmark-pr">Denmark PR</option>
-            <option value="pd3">PD3 / Dansk3</option>
-            <option value="lux">Luxembourg (VE)</option>
-            <option value="sproochentest">Sproochentest</option>
-            <option value="ciple">CIPLE</option>
-            <option value="celpe">CELPE-BRAS</option>
-            <option value="france">France</option>
-            <option value="geneva">Geneva</option>
-            <option value="rik">Iceland (RIK)</option>
-            <option value="ykifinnish">YKI Finnish</option>
-            <option value="ykisvenska">YKI Svenska</option>
-            <option value="sweden">Sweden</option>
-            <option value="kansalaisuuskoe">Kansalaisuuskoe (FI)</option>
-            <option value="svenskaprov">SvenskaProv</option>
+            <option value="/denmark/dashboard">Denmark</option>
+            <option value="/denmark-pr/dashboard">Denmark PR</option>
+            <option value="/dansk3/dashboard">PD3 / Dansk3</option>
+            <option value="/lux/dashboard">Luxembourg (VE)</option>
+            <option value="/sproochentest/dashboard">Sproochentest</option>
+            <option value="/ciple/dashboard">CIPLE</option>
+            <option value="/celpe/dashboard">CELPE-BRAS</option>
+            <option value="/france/cr/dashboard">France CR</option>
+            <option value="/france/csp/dashboard">France CSP</option>
+            <option value="/geneva/dashboard">Geneva</option>
+            <option value="/rikisborgaraprof/dashboard">Iceland (RIK)</option>
+            <option value="/ykifinnish/dashboard">YKI Finnish</option>
+            <option value="/ykisvenska/dashboard">YKI Svenska</option>
+            <option value="/svenskaprov/dashboard">SvenskaProv</option>
           </select>
         </div>
         <div class="usr-form-field">
-          <label class="usr-form-label">Bundle</label>
-          <input type="text" class="usr-form-input" id="usr-new-bundle" placeholder="e.g. full">
+          <label class="usr-form-label">Bundle <span style="color:var(--muted);font-weight:400;text-transform:none">(optional)</span></label>
+          <input type="text" class="usr-form-input" id="usr-new-bundle" placeholder="leave blank if none">
         </div>
         <div class="usr-form-full">
           <button class="usr-btn usr-btn-primary" id="usr-create-btn" onclick="usrCreate()">Create user</button>
@@ -2017,9 +2016,8 @@ const REV_HISTORY = [
   { month: '2025-12', eur: 21525.76 },
   { month: '2026-01', eur: 19433.01 },
   { month: '2026-02', eur: 16523.80 },
-  { month: '2026-03', eur: 17655.17 },
 ];
-const REV_PREV_JAN_MAR = 4877.82 + 10247.71 + 12303.46; // Jan+Feb+Mar 2025
+const REV_PREV_JAN_FEB = 4877.82 + 10247.71; // Jan+Feb 2025
 const REV_FN = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/stripe_metrics_summary';
 let revLiveData = null;
 let revChart = null;
@@ -2046,8 +2044,8 @@ function renderRevenue() {
   const today = L ? L.today : null;
   const wtd   = L ? L.wtd   : null;
   const mtd   = L ? L.mtd   : null;
-  const ytd2026 = 19433.01 + 16523.80 + 17655.17 + (mtd || 0);
-  const ytd2025 = L ? (REV_PREV_JAN_MAR + L.mtd_prev) : null;
+  const ytd2026 = 19433.01 + 16523.80 + (mtd || 0);
+  const ytd2025 = L ? (REV_PREV_JAN_FEB + L.mtd_prev) : null;
 
   document.getElementById('rev-kpi-grid').innerHTML = [
     { label: 'Today',         cur: today,   prev: L ? L.today_prev : null },
@@ -2061,7 +2059,7 @@ function renderRevenue() {
       ${revYoyBadge(k.cur, k.prev)}
     </div>`).join('');
 
-  const chartData = [...REV_HISTORY, { month: '2026-04', eur: mtd || 0, partial: true }];
+  const chartData = [...REV_HISTORY, { month: '2026-03', eur: mtd || 0, partial: true }];
   const labels = chartData.map(({ month }) => {
     const [y, mo] = month.split('-');
     return new Date(+y, +mo - 1, 1).toLocaleString('default', { month: 'short' }) + " '" + String(+y).slice(2);
@@ -2498,12 +2496,12 @@ async function usrLookup() {
     const u = data.user;
     const logins = data.logins || [];
     document.getElementById('usr-result-grid').innerHTML = [
-      { label: 'Email',    value: u.email },
-      { label: 'Site',     value: u.site   || '—' },
-      { label: 'Bundle',   value: u.bundle || '—' },
-      { label: 'Auth UID', value: u.auth_uid || u.id || '—' },
-      { label: 'Created',  value: u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—' },
-      { label: 'Stripe',   value: u.stripe_customer_id || 'none', cls: u.stripe_customer_id ? 'ok' : 'miss' },
+      { label: 'Email',       value: u.email },
+      { label: 'Access Path', value: u.access_path || '—' },
+      { label: 'Bundle',      value: u.bundle || '—' },
+      { label: 'Auth UID',    value: u.id || '—' },
+      { label: 'Created',     value: u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—' },
+      { label: 'Stripe',      value: u.stripe_customer_id || 'none', cls: u.stripe_customer_id ? 'ok' : 'miss' },
     ].map(f => `<div class="usr-field">
       <div class="usr-field-label">${f.label}</div>
       <div class="usr-field-value ${f.cls||''}">${esc(String(f.value))}</div>
@@ -2528,13 +2526,13 @@ async function usrLookup() {
 async function usrCreate() {
   const email  = document.getElementById('usr-new-email').value.trim();
   const pw     = document.getElementById('usr-new-pw').value;
-  const site   = document.getElementById('usr-new-site').value;
-  const bundle = document.getElementById('usr-new-bundle').value.trim();
+  const access_path = document.getElementById('usr-new-site').value;
+  const bundle = document.getElementById('usr-new-bundle').value.trim() || null;
   const status = document.getElementById('usr-create-status');
   const btn    = document.getElementById('usr-create-btn');
   status.textContent = ''; status.className = 'usr-create-status';
-  if (!email || !pw || !site || !bundle) {
-    status.textContent = 'All fields are required.'; status.className = 'usr-create-status err'; return;
+  if (!email || !pw || !access_path) {
+    status.textContent = 'Email, password and product are required.'; status.className = 'usr-create-status err'; return;
   }
   if (pw.length < 8) {
     status.textContent = 'Password must be at least 8 characters.'; status.className = 'usr-create-status err'; return;
@@ -2544,11 +2542,11 @@ async function usrCreate() {
     const res = await fetch(USERS_FN, {
       method: 'POST',
       headers: { 'X-Admin-Key': adminPw, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'create', email, password: pw, site, bundle }),
+      body: JSON.stringify({ action: 'create', email, password: pw, access_path, bundle }),
     });
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || 'Create failed');
-    status.textContent = `✓ User created — auth UID: ${data.user?.id || '?'}`;
+    status.textContent = `✓ User created — ${data.user?.access_path} · UID: ${data.user?.id || '?'}`;
     status.className = 'usr-create-status ok';
     document.getElementById('usr-new-email').value = '';
     document.getElementById('usr-new-pw').value = '';
