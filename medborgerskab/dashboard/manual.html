@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title_manual">Læremateriale</title>
+  <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <link rel="stylesheet" href="/medborgerskab/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/medborgerskab/assets/css/dashboard-v2.css">
+
+  <script>document.documentElement.classList.add("i18n-hidden");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <style>
+    /* ── Manual-specific styles ── */
+
+    .manual-container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    /* Header with PDF download */
+    .manual-hero {
+      margin-bottom: 28px;
+    }
+    .manual-hero h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 0 6px;
+      color: var(--text);
+    }
+    .manual-hero p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin: 0 0 16px;
+      line-height: 1.5;
+    }
+    .manual-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+    .manual-tab {
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: all .15s;
+    }
+    .manual-tab.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    .manual-tab:not(.active) {
+      background: var(--card-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .manual-tab:not(.active):hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    /* PDF download bar */
+    .pdf-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 24px;
+    }
+    .pdf-bar-icon {
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .pdf-bar-text {
+      flex: 1;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .pdf-bar-text strong {
+      color: var(--text);
+      display: block;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+    .pdf-bar a {
+      flex-shrink: 0;
+      padding: 8px 16px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      font-family: var(--font);
+      transition: opacity .15s;
+    }
+    .pdf-bar a:hover { opacity: .85; }
+
+    /* ── Chapter list (TOC view) ── */
+    .chapter-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .chapter-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all .15s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .chapter-item:hover {
+      border-color: var(--accent);
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .chapter-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--accent-soft, rgba(200,16,46,.08));
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .chapter-title {
+      flex: 1;
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .chapter-arrow {
+      color: var(--text-muted);
+      font-size: 16px;
+      opacity: .4;
+      transition: opacity .15s;
+    }
+    .chapter-item:hover .chapter-arrow { opacity: .8; }
+
+    /* ── Reading view ── */
+    .reading-view { display: none; }
+    .reading-view.active { display: block; }
+
+    .reading-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--accent);
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: var(--font);
+      padding: 0;
+      margin-bottom: 20px;
+    }
+    .reading-back:hover { opacity: .75; }
+    .reading-back svg { width: 16px; height: 16px; }
+
+    .reading-header {
+      margin-bottom: 24px;
+    }
+    .reading-header h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 4px;
+    }
+    .reading-header .reading-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Audio player card */
+    .reading-audio {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .reading-audio-icon {
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .reading-audio audio {
+      flex: 1;
+      height: 40px;
+      min-width: 0;
+    }
+
+    /* Chapter navigation arrows */
+    .reading-chapter-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .reading-chapter-nav button {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      transition: all .15s;
+      max-width: 48%;
+    }
+    .reading-chapter-nav button:hover {
+      border-color: var(--accent);
+    }
+    .reading-chapter-nav button:disabled {
+      opacity: .3;
+      cursor: default;
+    }
+    .reading-chapter-nav .nav-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Text content */
+    .reading-body {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 24px 32px;
+      margin-bottom: 28px;
+    }
+    .reading-body h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 32px 0 12px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .reading-body h3:first-child {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: none;
+    }
+    .reading-body p {
+      font-size: 15px;
+      line-height: 1.72;
+      color: var(--text);
+      margin: 0 0 14px;
+    }
+    .reading-body .intro-box {
+      background: var(--accent-soft, rgba(200,16,46,.06));
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin: 0 0 20px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .reading-body .intro-box strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--accent);
+    }
+    .reading-body ul {
+      margin: 0 0 14px;
+      padding-left: 20px;
+    }
+    .reading-body li {
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    /* ── Glossary view ── */
+    .glossary-view { display: none; }
+    .glossary-view.active { display: block; }
+
+    .glossary-search {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: var(--font);
+      background: var(--card-bg);
+      color: var(--text);
+      margin-bottom: 16px;
+      box-sizing: border-box;
+    }
+    .glossary-search:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .glossary-search::placeholder { color: var(--text-muted); }
+
+    .glossary-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .glossary-entry {
+      padding: 10px 14px;
+      border-radius: 8px;
+    }
+    .glossary-entry:nth-child(odd) {
+      background: var(--card-bg);
+    }
+    .glossary-term {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--accent);
+    }
+    .glossary-def {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--text);
+      margin-top: 2px;
+    }
+    .glossary-count {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    /* Footer */
+    .manual-footer {
+      text-align: center;
+      padding: 32px 0 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      margin-top: 32px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .manual-container { padding: 0 14px 40px; }
+      .reading-body { padding: 20px 16px 24px; }
+      .pdf-bar { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+
+<body>
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Danmark">
+        <rect width="640" height="400" fill="#C8102E"/>
+        <rect x="176" y="0" width="64" height="400" fill="#FFFFFF"/>
+        <rect x="0" y="168" width="640" height="64" fill="#FFFFFF"/>
+      </svg>
+    </div>
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Est. score</span>
+        <span class="sidebar-gauge-score" id="clGaugeScore">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugePass"></div>
+      </div>
+      <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
+    </div>
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav_dashboard">Dashboard</a>
+      <a href="simulation.html" data-i18n="nav_simulation">Test Simulation</a>
+      <a href="quick.html" data-i18n="nav_quick">Quick Test</a>
+      <a href="topics.html" data-i18n="nav_topics">Tests by Topic</a>
+      <a href="traps.html" data-i18n="nav_traps">Frequent Traps</a>
+      <a href="flashcards.html" data-i18n="nav_flashcards">Flashcards</a>
+      <a href="manual.html" class="active" data-i18n="nav_manual">Læremateriale</a>
+      <div class="nav-sep"></div>
+      <a href="history.html" data-i18n="nav_history">History</a>
+      <a href="my-list.html" data-i18n="nav_my_list">My List</a>
+      <a href="help.html" data-i18n="nav_help">Help & Contact</a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink">Log out</a>
+    </nav>
+    <div class="spacer"></div>
+  </aside>
+
+  <div class="overlay" id="menuOverlay"></div>
+
+  <main>
+    <div class="manual-container">
+
+      <!-- Hero -->
+      <div class="manual-hero anim d1">
+        <h1 id="manualTitle">Læremateriale til Medborgerskabsprøven</h1>
+        <p id="manualDesc">Læs og lyt til alle 26 fakta-ark. Det officielle læremateriale til Medborgerskabsprøven, udgivet af Udlændinge- og Integrationsministeriet.</p>
+      </div>
+
+      <!-- Tabs: Fakta-ark / Ordliste -->
+      <div class="manual-tabs anim d1" id="manualTabs">
+        <button class="manual-tab active" data-tab="chapters">26 Fakta-ark</button>
+        <button class="manual-tab" data-tab="glossary">Ordliste</button>
+      </div>
+
+      <!-- PDF download -->
+      <div class="pdf-bar anim d2" id="pdfBar">
+        <div class="pdf-bar-icon">📄</div>
+        <div class="pdf-bar-text">
+          <strong>Download som PDF</strong>
+          Det officielle læremateriale (155 sider, august 2025)
+        </div>
+        <a href="https://media.civiclearn.com/denmark-pr/laeremateriale-til-medborgerskabsproeven.pdf" target="_blank" rel="noopener">Download</a>
+      </div>
+
+      <!-- ─── Chapter list view ─── -->
+      <div class="chapter-list-view anim d2" id="chapterListView">
+        <div class="chapter-list" id="chapterList"></div>
+      </div>
+
+      <!-- ─── Reading view ─── -->
+      <div class="reading-view" id="readingView">
+        <button class="reading-back" id="readingBack">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Alle fakta-ark
+        </button>
+
+        <div class="reading-header">
+          <h2 id="readingTitle"></h2>
+          <div class="reading-sub" id="readingSub"></div>
+        </div>
+
+        <div class="reading-audio" id="readingAudio">
+          <div class="reading-audio-icon">🔊</div>
+          <audio controls preload="none" id="readingPlayer">
+            <source id="readingSource" src="" type="audio/mpeg">
+          </audio>
+        </div>
+
+        <div class="reading-body" id="readingBody"></div>
+
+        <div class="reading-chapter-nav">
+          <button id="navPrev" disabled>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="nav-title" id="navPrevTitle"></span>
+          </button>
+          <button id="navNext" disabled>
+            <span class="nav-title" id="navNextTitle"></span>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ─── Glossary view ─── -->
+      <div class="glossary-view" id="glossaryView">
+        <input type="text" class="glossary-search" id="glossarySearch" placeholder="Søg i ordlisten…">
+        <div class="glossary-count" id="glossaryCount"></div>
+        <div class="glossary-list" id="glossaryList"></div>
+      </div>
+
+      <div class="manual-footer">
+        Kilde: Styrelsen for International Rekruttering og Integration, august 2025.<br>
+        © 2026 — CivicLearn by Testrada — All rights reserved.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="/medborgerskab/assets/js/lang-bootstrap-dkpr.js"></script>
+<script src="/medborgerskab/assets/js/config-dkpr.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>CivicLearnI18n.init();</script>
+<script src="/assets/js/engine-dkpr.js"></script>
+<script src="/assets/js/sync.js"></script>
+<script src="/medborgerskab/assets/js/gauge-bar.js"></script>
+
+<!-- Manual reader logic -->
+<script>
+(function () {
+  "use strict";
+
+  let DATA = null;
+  let currentChapter = null;
+
+  /* ── DOM refs ── */
+  const chapterListView = document.getElementById("chapterListView");
+  const chapterList = document.getElementById("chapterList");
+  const readingView = document.getElementById("readingView");
+  const readingTitle = document.getElementById("readingTitle");
+  const readingSub = document.getElementById("readingSub");
+  const readingPlayer = document.getElementById("readingPlayer");
+  const readingSource = document.getElementById("readingSource");
+  const readingBody = document.getElementById("readingBody");
+  const readingBack = document.getElementById("readingBack");
+  const navPrev = document.getElementById("navPrev");
+  const navNext = document.getElementById("navNext");
+  const navPrevTitle = document.getElementById("navPrevTitle");
+  const navNextTitle = document.getElementById("navNextTitle");
+  const glossaryView = document.getElementById("glossaryView");
+  const glossaryList = document.getElementById("glossaryList");
+  const glossaryCount = document.getElementById("glossaryCount");
+  const glossarySearch = document.getElementById("glossarySearch");
+  const pdfBar = document.getElementById("pdfBar");
+  const tabs = document.querySelectorAll(".manual-tab");
+
+  /* ── Tab switching ── */
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      const target = tab.dataset.tab;
+      tabs.forEach(t => t.classList.toggle("active", t === tab));
+
+      if (target === "chapters") {
+        glossaryView.classList.remove("active");
+        if (currentChapter !== null) {
+          readingView.classList.add("active");
+          chapterListView.style.display = "none";
+        } else {
+          readingView.classList.remove("active");
+          chapterListView.style.display = "";
+        }
+        pdfBar.style.display = "";
+      } else {
+        chapterListView.style.display = "none";
+        readingView.classList.remove("active");
+        pdfBar.style.display = "none";
+        glossaryView.classList.add("active");
+      }
+    });
+  });
+
+  /* ── Build chapter list ── */
+  function buildChapterList(chapters) {
+    chapterList.innerHTML = chapters.map(ch => `
+      <div class="chapter-item" data-id="${ch.id}">
+        <div class="chapter-num">${ch.id}</div>
+        <div class="chapter-title">${ch.title}</div>
+        <div class="chapter-arrow">›</div>
+      </div>
+    `).join("");
+
+    chapterList.addEventListener("click", e => {
+      const item = e.target.closest(".chapter-item");
+      if (!item) return;
+      openChapter(parseInt(item.dataset.id));
+    });
+  }
+
+  /* ── Open a chapter ── */
+  function openChapter(id) {
+    const ch = DATA.chapters.find(c => c.id === id);
+    if (!ch) return;
+    currentChapter = id;
+
+    readingTitle.textContent = `Fakta-ark ${ch.id}: ${ch.title}`;
+    readingSub.textContent = `${ch.content.length} afsnit`;
+
+    /* Audio */
+    readingSource.src = ch.audio;
+    readingPlayer.load();
+
+    /* Content */
+    let html = "";
+    let inList = false;
+
+    ch.content.forEach(block => {
+      if (block.type === "li") {
+        if (!inList) { html += "<ul>"; inList = true; }
+        html += `<li>${esc(block.text)}</li>`;
+        return;
+      }
+      if (inList) { html += "</ul>"; inList = false; }
+
+      if (block.type === "h3") {
+        html += `<h3>${esc(block.text)}</h3>`;
+      } else if (block.type === "intro") {
+        const parts = block.text.replace(/^Dette fakta-ark handler om:\s*/, "").split("•").filter(Boolean);
+        html += `<div class="intro-box"><strong>Dette fakta-ark handler om:</strong>${parts.map(p => "• " + p.trim()).join("<br>")}</div>`;
+      } else {
+        html += `<p>${esc(block.text)}</p>`;
+      }
+    });
+    if (inList) html += "</ul>";
+
+    readingBody.innerHTML = html;
+
+    /* Nav buttons */
+    const prev = DATA.chapters.find(c => c.id === id - 1);
+    const next = DATA.chapters.find(c => c.id === id + 1);
+    navPrev.disabled = !prev;
+    navNext.disabled = !next;
+    navPrevTitle.textContent = prev ? prev.title : "";
+    navNextTitle.textContent = next ? next.title : "";
+
+    /* Show reading view */
+    chapterListView.style.display = "none";
+    readingView.classList.add("active");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    /* Update URL hash */
+    history.replaceState(null, "", `#fakta-ark-${id}`);
+  }
+
+  /* ── Back to list ── */
+  readingBack.addEventListener("click", () => {
+    currentChapter = null;
+    readingView.classList.remove("active");
+    chapterListView.style.display = "";
+    readingPlayer.pause();
+    history.replaceState(null, "", location.pathname);
+  });
+
+  /* ── Prev / Next ── */
+  navPrev.addEventListener("click", () => { if (currentChapter > 1) openChapter(currentChapter - 1); });
+  navNext.addEventListener("click", () => { if (currentChapter < 26) openChapter(currentChapter + 1); });
+
+  /* ── Glossary ── */
+  function buildGlossary(entries) {
+    renderGlossary(entries);
+
+    glossarySearch.addEventListener("input", () => {
+      const q = glossarySearch.value.toLowerCase().trim();
+      if (!q) { renderGlossary(entries); return; }
+      const filtered = entries.filter(e =>
+        e.term.toLowerCase().includes(q) || e.definition.toLowerCase().includes(q)
+      );
+      renderGlossary(filtered);
+    });
+  }
+
+  function renderGlossary(entries) {
+    glossaryCount.textContent = `${entries.length} ord`;
+    glossaryList.innerHTML = entries.map(e => `
+      <div class="glossary-entry">
+        <div class="glossary-term">${esc(e.term)}</div>
+        <div class="glossary-def">${esc(e.definition)}</div>
+      </div>
+    `).join("");
+  }
+
+  /* ── Escape HTML ── */
+  function esc(s) {
+    const d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  /* ── Load data ── */
+  fetch("/medborgerskab/assets/data/laerermateriale.json")
+    .then(r => r.json())
+    .then(data => {
+      DATA = data;
+      buildChapterList(data.chapters);
+      buildGlossary(data.glossary);
+
+      /* Open chapter from URL hash */
+      const m = location.hash.match(/^#fakta-ark-(\d+)$/);
+      if (m) openChapter(parseInt(m[1]));
+    })
+    .catch(err => console.error("Failed to load læremateriale:", err));
+
+})();
+</script>
+
+<!-- Mobile menu -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+});
+</script>
+<script src="/assets/js/maintenance-bar.js"></script>
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>
