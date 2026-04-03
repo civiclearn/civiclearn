@@ -430,6 +430,19 @@
       const pct = bank.length > 0 ? Math.round((mastered / bank.length) * 100) : 0;
       tmAccuracy.textContent = pct + "%";
     }
+
+    // Patch streak — dashboard-v2-lu.js leaves {n} uninterpolated
+    const tmStreak = document.getElementById("tmStreak");
+    if (tmStreak) {
+      try {
+        const raw = localStorage.getItem("civicedge_stats");
+        const stats = raw ? JSON.parse(raw) : {};
+        const streak = Number(stats.streakDays || 0);
+        const key = streak === 1 ? "dashboard_streak_day_singular" : "dashboard_streak_day_plural";
+        const tmpl = t(key, streak === 1 ? "{n} dag" : "{n} dage");
+        tmStreak.textContent = tmpl.replace("{n}", streak);
+      } catch {}
+    }
   }
 
   // ════════════════════════════════════════════════════════
