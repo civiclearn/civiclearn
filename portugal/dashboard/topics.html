@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title_topics">Tests by Topic</title>
+  <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="/portugal/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/portugal/assets/css/test-v2.css">
+  <script>document.documentElement.classList.add("i18n-hidden");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- <script src="/portugal/assets/js/pt-auth.js"></script> -->
+</head>
+<body class="test-page">
+<button class="menu-toggle" aria-label="Menu">☰</button>
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Portugal">
+        <rect x="0" y="0" width="246" height="400" fill="#006600"/>
+        <rect x="246" y="0" width="394" height="400" fill="#FF0000"/>
+        <circle cx="246" cy="200" r="64" fill="#FFCC00" stroke="#006600" stroke-width="2"/>
+      </svg>
+    </div>
+    <!-- Sidebar gauge -->
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Est. score</span>
+        <span class="sidebar-gauge-score" id="clGaugeScore">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugePass"></div>
+      </div>
+      <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
+    </div>
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav_dashboard">Dashboard</a>
+      <a href="simulation.html" data-i18n="nav_simulation">Test Simulation</a>
+      <a href="quick.html" data-i18n="nav_quick">Quick Test</a>
+      <a href="topics.html" class="active" data-i18n="nav_topics">Tests by Topic</a>
+      <a href="traps.html" data-i18n="nav_traps">Frequent Traps</a>
+      <a href="flashcards.html" data-i18n="nav_flashcards">Flashcards</a>
+      <div class="nav-sep"></div>
+      <a href="history.html" data-i18n="nav_history">History</a>
+      <a href="my-list.html" data-i18n="nav_my_list">My List</a>
+      <a href="help.html" data-i18n="nav_help">Help & Contact</a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink">Log out</a>
+    </nav>
+    <div class="spacer"></div>
+  </aside>
+  <div class="overlay" id="menuOverlay"></div>
+  <main>
+    <header class="ce-header">
+      <h1 data-i18n="title_topics">Tests by Topic</h1>
+    </header>
+
+    <div class="quiz-container" id="quizArea" style="display:none;">
+      <div class="ce-progress-global">
+        <div class="ce-progress-global-bar" id="topicsProgress"></div>
+      </div>
+      <div id="quiz"></div>
+    </div>
+
+    <section style="max-width:900px;">
+      <div id="topicContainer"></div>
+      <button id="startBtn" class="btn" data-i18n="topics_start_btn">Start</button>
+    </section>
+  </main>
+</div>
+<script src="/portugal/assets/js/lang-bootstrap-pt.js"></script>
+<script src="/portugal/assets/js/config-pt.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>CivicLearnI18n.init();</script>
+<script src="/assets/js/engine-pt.js"></script>
+<script src="/assets/js/sync.js"></script>
+<script src="/assets/js/reading.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const cfg = window.CIVICEDGE_CONFIG || {};
+  const container = document.getElementById("topicContainer");
+  const startBtn = document.getElementById("startBtn");
+  const selected = new Set();
+  const bankPath = cfg.bank && cfg.bank.path;
+  const lang = window.CIVICEDGE_LANG || "pt";
+
+  const topicToMicros = {};
+
+  async function loadBankTopics() {
+    if (!bankPath) return [];
+    try {
+      const res = await fetch(bankPath);
+      const raw = await res.json();
+      return Array.isArray(raw) ? raw : (raw.questions || []);
+    } catch (e) { return []; }
+  }
+
+  function isTopicMastered(topicCanon, bankQuestions, progress) {
+    const qs = bankQuestions.filter(q => q.topic && q.topic.en === topicCanon);
+    for (const q of qs) {
+      const microKey = q.microtopic && typeof q.microtopic === "object" ? q.microtopic.en : "";
+      const key = `${microKey}:${q.id}`;
+      const entry = progress[key];
+      if (!(entry && entry.correct === 1)) return false;
+    }
+    return qs.length > 0;
+  }
+
+  function getTopicProgress(topicCanon, bankQuestions, progress) {
+    const qs = bankQuestions.filter(q => q.topic && q.topic.en === topicCanon);
+    let mastered = 0;
+    for (const q of qs) {
+      const microKey = q.microtopic && typeof q.microtopic === "object" ? q.microtopic.en : "";
+      const key = `${microKey}:${q.id}`;
+      const entry = progress[key];
+      if (entry && entry.correct === 1) mastered++;
+    }
+    return { mastered, total: qs.length };
+  }
+
+  async function initTopics() {
+    const bankQuestions = await loadBankTopics();
+    const progress = JSON.parse(localStorage.getItem("civicedge_progress") || "{}");
+
+    const topics = {};
+    bankQuestions.forEach(q => {
+      if (!q.topic || typeof q.topic !== "object") return;
+      const canon = q.topic.en;
+      if (!canon) return;
+      const label = q.topic[lang] || canon;
+      const microCanon = q.microtopic && typeof q.microtopic === "object" ? q.microtopic.en : "";
+
+      if (!topics[canon]) topics[canon] = { label, total: 0, micros: new Set() };
+      topics[canon].total++;
+      if (microCanon) topics[canon].micros.add(microCanon);
+    });
+
+    Object.entries(topics).forEach(([canon, t]) => {
+      topicToMicros[canon] = Array.from(t.micros);
+    });
+
+    container.innerHTML = "";
+
+    Object.entries(topics).forEach(([canon, topic]) => {
+      const prog = getTopicProgress(canon, bankQuestions, progress);
+      const pct = topic.total > 0 ? Math.round((prog.mastered / topic.total) * 100) : 0;
+      const mastered = isTopicMastered(canon, bankQuestions, progress);
+
+      const chip = document.createElement("button");
+      chip.className = "topic-card";
+      if (mastered) chip.classList.add("mastered");
+
+      const qWord = "perguntas";
+
+      chip.innerHTML = `
+        <div class="topic-card-name">${topic.label}</div>
+        <div class="topic-card-meta">
+          <span class="topic-card-count">${topic.total} ${qWord}</span>
+          <span class="topic-card-pct">${pct}%</span>
+        </div>
+        <div class="topic-card-bar"><div class="topic-card-bar-fill" style="width:${pct}%"></div></div>
+      `;
+
+      chip.addEventListener("click", () => {
+        chip.classList.toggle("active");
+        if (chip.classList.contains("active")) {
+          selected.add(canon);
+        } else {
+          selected.delete(canon);
+        }
+        startBtn.style.display = selected.size > 0 ? "inline-block" : "none";
+        if (selected.size > 0 && window.innerWidth < 768) {
+          setTimeout(() => startBtn.scrollIntoView({ behavior: "smooth", block: "center" }), 150);
+        }
+      });
+
+      container.appendChild(chip);
+    });
+
+    startBtn.addEventListener("click", () => {
+      const microKeys = [];
+      selected.forEach(topicCanon => {
+        if (topicToMicros[topicCanon]) microKeys.push(...topicToMicros[topicCanon]);
+      });
+      const limit = (cfg.topics && cfg.topics.questionCount) || 10;
+      document.getElementById("quizArea").style.display = "block";
+      document.querySelector("section").style.display = "none";
+      CivicEdgeEngine.start("topics", { topics: microKeys, limit: limit });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
+  initTopics();
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+});
+</script>
+<script src="/portugal/assets/js/gauge-bar.js"></script>
+<script src="/portugal/assets/js/study-timer.js"></script>
+<script src="/assets/js/maintenance-bar.js"></script>
+<script src="/assets/js/signout.js"></script>
+</body></html>
