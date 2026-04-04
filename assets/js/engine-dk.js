@@ -7,6 +7,26 @@
   window.CivicEdgeEngine = Engine;
 
 let __normalizedBank = null;
+let __trickySet = null;
+
+// Load tricky questions list (static JSON, regenerated monthly)
+async function loadTrickySet() {
+  if (__trickySet) return __trickySet;
+  try {
+    const res = await fetch("/denmark/banks/tricky-dk.json");
+    if (!res.ok) { __trickySet = new Set(); return __trickySet; }
+    const data = await res.json();
+    __trickySet = new Set(data.questions || []);
+  } catch (e) {
+    console.warn("[Engine] Could not load tricky-dk.json:", e.message);
+    __trickySet = new Set();
+  }
+  return __trickySet;
+}
+
+function isTricky(questionText) {
+  return __trickySet && __trickySet.has(questionText);
+}
 
 // expose bank helpers (required by My List)
 Engine.getBank = () => __normalizedBank || [];
@@ -328,6 +348,9 @@ Engine.start = async function start(mode, options = {}) {
 
   Engine._activeBank = fullBank;
 __normalizedBank = fullBankRaw;
+
+  // Load tricky questions set (non-blocking, no auth)
+  await loadTrickySet();
 
   // ---- PHASE 1 FREEZE ----
   if (!readJsonLS("dk_exam_index", null)) {
@@ -814,6 +837,13 @@ if (q.source === "exam") {
   left.appendChild(
     createEl("span", "ce-pill ce-pill-exam", "Officiel")
   );
+}
+
+if (isTricky(q.text)) {
+  left.appendChild(
+    createEl("span", "ce-pill ce-pill-tricky", "Hyppigt forkert")
+  );
+  card.classList.add("ce-card-tricky");
 }
 
 header.appendChild(left);
