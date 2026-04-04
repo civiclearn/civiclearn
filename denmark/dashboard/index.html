@@ -624,6 +624,44 @@ WonderPush.push(["addTag", "country:dk"]);
   initBanner();
 })();
 </script>
+<!-- Trustpilot Silent Review Invitation -->
+<script>
+(function(w,d,s,r,n){w.TrustpilotObject=n;w[n]=w[n]||function(){(w[n].q=w[n].q||[]).push(arguments)};
+a=d.createElement(s);a.async=1;a.src=r;a.type='text/java'+s;f=d.getElementsByTagName(s)[0];
+f.parentNode.insertBefore(a,f)})(window,document,'script','https://invitejs.trustpilot.com/tp.min.js','tp');
+tp('register', 'lICAmjJMQXGuWAke');
+</script>
+<script>
+(async function(){
+  if (sessionStorage.getItem('tp_checked')) return;
+  try {
+    if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
+    var sb = window.denmarkAuth && window.denmarkAuth.supabase;
+    if (!sb) return;
+    var sess = await sb.auth.getSession();
+    if (!sess.data.session) return;
+    var email = sess.data.session.user.email;
+    if (!email) return;
+    sessionStorage.setItem('tp_checked', '1');
+
+    var res = await fetch(
+      'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/tp-check-eligibility',
+      { method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email }) }
+    );
+    var data = await res.json();
+    if (data.eligible && typeof tp === 'function') {
+      tp('createInvitation', {
+        recipientEmail: data.email,
+        recipientName: data.name,
+        referenceId: data.referenceId,
+        source: 'InvitationScript'
+      });
+    }
+  } catch(e) { /* silent */ }
+})();
+</script>
 </body>
 </html>
 
