@@ -1,13 +1,17 @@
+/* reset.js — CivicLearn full progress reset (universal)
+   Clears BOTH Supabase user_sync rows AND localStorage,
+   so sync.js cannot resurrect old data after the redirect.
+
+   Works for all products — DK-specific keys are harmless
+   no-ops on non-DK sites. */
+
 (function () {
-  const resetBtn = document.getElementById("resetAllFull");
+  var resetBtn = document.getElementById("resetAllFull");
   if (!resetBtn) return;
 
-  resetBtn.addEventListener("click", () => {
+  resetBtn.addEventListener("click", async function () {
 
-    // ------------------------------------------------------------------
-    // 1. i18n-friendly confirmation text
-    // ------------------------------------------------------------------
-    const confirmMessage =
+    var confirmMessage =
       (window.i18n && typeof window.i18n.t === "function"
         ? window.i18n.t("reset_confirm_message")
         : null) ||
@@ -15,31 +19,55 @@
 
     if (!window.confirm(confirmMessage)) return;
 
-    // ------------------------------------------------------------------
-    // 2. Clear all CivicLearn training keys
-    // ------------------------------------------------------------------
+    // Disable button while working
+    resetBtn.disabled = true;
+    var originalText = resetBtn.textContent;
+    resetBtn.textContent = "…";
+
+    // 1. Wipe Supabase sync rows (bypass merge protection)
+    var email = (localStorage.getItem("cl_email") || "").toLowerCase().trim();
+    var site  = window.CIVIC_SITE_CODE || "unknown";
+
+    if (email) {
+      try {
+        var endpoint = "https://htgliokekeaovdiafrgs.supabase.co/functions/v1/sync";
+        var apikey   = window.SUPABASE_KEY || "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
+
+        var res = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: apikey,
+          },
+          body: JSON.stringify({ action: "reset", email: email, site: site }),
+        });
+
+        if (!res.ok) {
+          console.warn("[Reset] Server reset failed:", res.status);
+        } else {
+          console.log("[Reset] Supabase sync rows deleted.");
+        }
+      } catch (err) {
+        console.warn("[Reset] Server reset error (continuing anyway):", err.message);
+      }
+    }
+
+    // 2. Clear all synced localStorage keys (superset across all products)
     localStorage.removeItem("civicedge_progress");
     localStorage.removeItem("civicedge_stats");
+    localStorage.removeItem("civicedge_saved");
     localStorage.removeItem("civicedge_testDate");
+    localStorage.removeItem("dk_active_phase");
+    localStorage.removeItem("dk_phase2_unlocked");
+    localStorage.removeItem("dk_phase1_progress");
 
+    // 3. Clear the sync reload guard
+    sessionStorage.removeItem("civicsync_loaded");
 
-    // Optional but recommended:
-    // localStorage.removeItem("civicedge_fontSize");
-    // localStorage.removeItem("civicedge_theme");
-
-    // ------------------------------------------------------------------
-    // 3. Universal redirect:
-    // Detect the root folder ("canadafr", "denmark-pr", etc.)
-    // ------------------------------------------------------------------
-    const parts = window.location.pathname.split("/").filter(Boolean);
-    const root = parts.length > 0 ? parts[0] : "";
-
-    // Fallback if site root is empty
-    const redirect = root ? `/${root}/dashboard/` : "/dashboard/";
-
-    // ------------------------------------------------------------------
-    // 4. Redirect to the correct dashboard for this country
-    // ------------------------------------------------------------------
+    // 4. Redirect to dashboard
+    var parts = window.location.pathname.split("/").filter(Boolean);
+    var root = parts.length > 0 ? parts[0] : "";
+    var redirect = root ? "/" + root + "/dashboard/" : "/dashboard/";
     window.location.href = redirect;
   });
 })();
