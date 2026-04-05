@@ -632,7 +632,17 @@ WonderPush.push(["addTag", "country:dk"]);
   initBanner();
 })();
 </script>
-<!-- Trustpilot Silent Review Invitation -->
+<!-- Trustpilot Review Invitation + Notice -->
+<div id="tpNoticeBanner" style="display:none;background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border:1px solid #86efac;border-radius:12px;padding:16px 20px;margin:0 20px 20px 20px;position:fixed;bottom:0;left:0;right:0;z-index:9999;box-shadow:0 -2px 16px rgba(0,0,0,.08);max-width:600px;margin:0 auto 20px auto;">
+  <div style="display:flex;align-items:flex-start;gap:12px;">
+    <span style="font-size:1.4rem;flex-shrink:0;">⭐</span>
+    <div style="flex:1;">
+      <strong style="color:#166534;font-size:.92rem;">Din mening betyder noget for os!</strong>
+      <p style="color:#15803d;font-size:.82rem;margin:4px 0 0 0;line-height:1.45;">Du har brugt CivicLearn i et stykke tid nu, og vi vil meget gerne høre, hvad du synes. Du modtager snart en e-mail fra <strong>Trustpilot</strong> — det tager kun et minut at dele din oplevelse.</p>
+    </div>
+    <button id="tpNoticeDismiss" style="background:none;border:none;cursor:pointer;color:#22c55e;font-size:.85rem;opacity:.6;padding:2px 6px;font-family:inherit;" title="Luk">✕</button>
+  </div>
+</div>
 <script>
 (async function(){
   if (sessionStorage.getItem('tp_checked')) return;
@@ -660,6 +670,16 @@ WonderPush.push(["addTag", "country:dk"]);
         referenceId: data.referenceId,
         source: 'InvitationScript'
       });
+      // Show notice banner
+      var banner = document.getElementById('tpNoticeBanner');
+      if (banner) {
+        banner.style.display = 'block';
+        document.getElementById('tpNoticeDismiss').addEventListener('click', function() {
+          banner.style.display = 'none';
+        });
+        // Auto-dismiss after 15 seconds
+        setTimeout(function() { banner.style.display = 'none'; }, 15000);
+      }
     }
   } catch(e) { /* silent */ }
 })();
