@@ -611,8 +611,14 @@ WonderPush.push(["addTag", "country:dk"]);
   var copyBtn     = document.getElementById("pd3CopyBtn");
   var CODE = "PD3DIS26";
 
+  var PD3_SINCE = "pd3_banner_since";
+  var PD3_DISMISSED = "pd3_banner_dismissed";
+  var PD3_72H = 72 * 60 * 60 * 1000;
+
   async function initBanner() {
-    if (sessionStorage.getItem("pd3_addon_dismissed")) return;
+    if (localStorage.getItem(PD3_DISMISSED)) return;
+    var since = localStorage.getItem(PD3_SINCE);
+    if (since && Date.now() - parseInt(since, 10) > PD3_72H) return;
     if (localStorage.getItem("cl_bundle") === "dk") return;
     try {
       if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
@@ -626,6 +632,7 @@ WonderPush.push(["addTag", "country:dk"]);
         localStorage.setItem("cl_bundle", "dk");
         return;
       }
+      if (!since) localStorage.setItem(PD3_SINCE, String(Date.now()));
       banner.classList.add("show");
     } catch(e) {}
   }
@@ -647,7 +654,7 @@ WonderPush.push(["addTag", "country:dk"]);
 
   dismissBtn.addEventListener("click", function() {
     banner.classList.remove("show");
-    sessionStorage.setItem("pd3_addon_dismissed", "1");
+    localStorage.setItem(PD3_DISMISSED, "1");
   });
 
   initBanner();
