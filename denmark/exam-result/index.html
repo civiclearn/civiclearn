@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CivicLearn — Eksamensresultat</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Trustpilot JS Integration -->
+<script>
+(function(w,d,s,r,n){w.TrustpilotObject=n;w[n]=w[n]||function(){(w[n].q=w[n].q||[]).push(arguments)};
+a=d.createElement(s);a.async=1;a.src=r;a.type='text/java'+s;f=d.getElementsByTagName(s)[0];
+f.parentNode.insertBefore(a,f)})(window,document,'script','https://invitejs.trustpilot.com/tp.min.js','tp');
+tp('register', 'llCAmjJMQXGuWAke');
+</script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    color: #1a1a2e;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.06);
+    max-width: 520px;
+    width: 100%;
+    padding: 40px 36px;
+    text-align: center;
+  }
+
+  .brand {
+    font-size: .85rem;
+    font-weight: 600;
+    color: #999;
+    letter-spacing: .04em;
+    margin-bottom: 8px;
+  }
+
+  .dk-flag {
+    display: inline-block;
+    width: 22px; height: 16px;
+    background: #c8102e;
+    position: relative;
+    border-radius: 2px;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+  .dk-flag::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 6px;
+    width: 3px; height: 100%;
+    background: #fff;
+  }
+  .dk-flag::after {
+    content: '';
+    position: absolute;
+    top: 6px; left: 0;
+    width: 100%; height: 3px;
+    background: #fff;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 16px 0 8px;
+    line-height: 1.3;
+  }
+
+  .subtitle {
+    font-size: .95rem;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 32px;
+  }
+
+  /* --- Vote buttons --- */
+  .vote-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .vote-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1a1a2e;
+    transition: all .15s;
+    text-align: left;
+  }
+
+  .vote-btn:hover {
+    border-color: #c8102e;
+    background: #fef2f2;
+  }
+
+  .vote-btn .vote-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    width: 40px;
+    text-align: center;
+  }
+
+  .vote-btn .vote-label {
+    flex: 1;
+  }
+
+  .vote-btn .vote-label small {
+    display: block;
+    font-size: .8rem;
+    font-weight: 400;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  .vote-btn.passed:hover { border-color: #16a34a; background: #f0fdf4; }
+  .vote-btn.failed:hover { border-color: #dc2626; background: #fef2f2; }
+  .vote-btn.not-taken:hover { border-color: #9ca3af; background: #f9fafb; }
+
+  /* --- Result screens --- */
+  .result-screen { display: none; }
+  .result-screen.active { display: block; }
+
+  .result-icon { font-size: 3rem; margin-bottom: 16px; }
+
+  .result-screen h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .result-screen p {
+    font-size: .92rem;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .tp-btn {
+    display: inline-block;
+    background: #00b67a;
+    color: #fff;
+    text-decoration: none;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: .95rem;
+    font-weight: 600;
+    transition: background .15s;
+  }
+  .tp-btn:hover { background: #009e69; }
+
+  .tp-star { color: #00b67a; }
+
+  .tp-note {
+    font-size: .78rem;
+    color: #999;
+    margin-top: 14px;
+    line-height: 1.4;
+  }
+
+  .november-link {
+    display: inline-block;
+    margin-top: 8px;
+    color: #c8102e;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: .9rem;
+  }
+  .november-link:hover { text-decoration: underline; }
+
+  /* --- States --- */
+  .loading { color: #999; font-size: .9rem; padding: 40px 0; }
+  .error-msg { color: #dc2626; font-size: .9rem; margin-top: 16px; }
+
+  /* --- Footer --- */
+  .footer {
+    margin-top: 32px;
+    font-size: .75rem;
+    color: #bbb;
+  }
+
+  @media (max-width: 480px) {
+    .card { padding: 28px 20px; }
+    h1 { font-size: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- VOTE SCREEN -->
+  <div id="voteScreen">
+    <div class="brand">CivicLearn <span class="dk-flag"></span></div>
+    <h1>Hvordan gik det til eksamen?</h1>
+    <p class="subtitle">
+      Vi vil meget gerne vide, hvordan det gik — uanset resultatet.
+      Det hjælper os med at forbedre vores platform.
+    </p>
+
+    <div class="vote-options">
+      <button class="vote-btn passed" onclick="vote('passed')">
+        <span class="vote-icon">🎉</span>
+        <span class="vote-label">
+          Bestået!
+          <small>Jeg bestod eksamen</small>
+        </span>
+      </button>
+
+      <button class="vote-btn failed" onclick="vote('failed')">
+        <span class="vote-icon">😔</span>
+        <span class="vote-label">
+          Ikke bestået
+          <small>Jeg bestod desværre ikke denne gang</small>
+        </span>
+      </button>
+
+      <button class="vote-btn not-taken" onclick="vote('not_taken')">
+        <span class="vote-icon">📅</span>
+        <span class="vote-label">
+          Gik ikke op
+          <small>Jeg tog ikke eksamen denne gang</small>
+        </span>
+      </button>
+    </div>
+
+    <div id="errorMsg" class="error-msg" style="display:none"></div>
+  </div>
+
+  <!-- PASSED SCREEN -->
+  <div id="passedScreen" class="result-screen">
+    <div class="result-icon">🎉</div>
+    <h2>Tillykke med at bestå!</h2>
+    <p>
+      Det er en fantastisk præstation — og vi er stolte over at have været en del af din forberedelse.
+      Hvis du har et minut, vil din anmeldelse hjælpe fremtidige kandidater med at finde os.
+    </p>
+    <a href="https://www.trustpilot.com/review/civiclearn.com" target="_blank" class="tp-btn">
+      ⭐ Del din oplevelse på Trustpilot
+    </a>
+    <p class="tp-note" id="tpNote"></p>
+  </div>
+
+  <!-- FAILED SCREEN -->
+  <div id="failedScreen" class="result-screen">
+    <div class="result-icon">💪</div>
+    <h2>Det kommer næste gang</h2>
+    <p>
+      Mange kandidater har brug for mere end ét forsøg — det er helt normalt.
+      Din konto er stadig aktiv, og du kan fortsætte med at øve dig mod næste eksamen.
+    </p>
+    <p style="font-weight:600;color:#1a1a2e;">
+      Næste eksamendato: 25. november 2026
+    </p>
+    <a href="https://civiclearn.com/denmark/dashboard/" class="november-link">
+      Tilbage til din træning →
+    </a>
+  </div>
+
+  <!-- NOT TAKEN SCREEN -->
+  <div id="notTakenScreen" class="result-screen">
+    <div class="result-icon">📅</div>
+    <h2>Tak for beskeden</h2>
+    <p>
+      Ingen problem — din konto er stadig aktiv.
+      Du kan fortsætte med at forberede dig til næste eksamen den 25. november 2026.
+    </p>
+    <a href="https://civiclearn.com/denmark/dashboard/" class="november-link">
+      Tilbage til din træning →
+    </a>
+  </div>
+
+  <!-- ALREADY VOTED SCREEN -->
+  <div id="alreadyScreen" class="result-screen">
+    <div class="result-icon">✅</div>
+    <h2>Tak — vi har allerede modtaget dit svar</h2>
+    <p id="alreadyMsg"></p>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loadingScreen" class="result-screen">
+    <div class="loading">Registrerer dit svar...</div>
+  </div>
+
+</div>
+
+<div class="footer">
+  © 2026 CivicLearn by Testrada Pte Ltd
+</div>
+
+<script>
+  const API = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/exam-result-vote';
+  const params = new URLSearchParams(window.location.search);
+  const email = params.get('email');
+  const token = params.get('token');
+
+  // Hide vote screen if no credentials
+  if (!email || !token) {
+    document.getElementById('voteScreen').innerHTML =
+      '<div class="result-icon">⚠️</div>' +
+      '<h2>Ugyldigt link</h2>' +
+      '<p>Linket er ugyldigt eller udløbet. Kontakt os på admin@civiclearn.com.</p>';
+  }
+
+  async function vote(result) {
+    var btns = document.querySelectorAll('.vote-btn');
+    btns.forEach(function(b) { b.disabled = true; b.style.opacity = '0.5'; });
+    document.getElementById('errorMsg').style.display = 'none';
+
+    try {
+      var res = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'vote', email: email, token: token, result: result })
+      });
+      var data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Ukendt fejl');
+      }
+
+      document.getElementById('voteScreen').style.display = 'none';
+
+      if (data.status === 'already_voted') {
+        document.getElementById('alreadyScreen').classList.add('active');
+        var msg = document.getElementById('alreadyMsg');
+        if (data.result === 'passed' && data.trustpilot_url) {
+          msg.innerHTML = 'Du har allerede fortalt os, at du bestod — tillykke igen! ' +
+            '<br><br><a href="' + data.trustpilot_url + '" target="_blank" class="tp-btn">⭐ Anmeld os på Trustpilot</a>';
+        } else {
+          msg.textContent = 'Tak fordi du allerede har delt dit resultat med os.';
+        }
+        return;
+      }
+
+      if (result === 'passed') {
+        document.getElementById('passedScreen').classList.add('active');
+
+        // Fire Trustpilot invitation for passers not yet invited
+        if (data.review_action === 'invite' && typeof tp === 'function') {
+          tp('createInvitation', {
+            recipientEmail: email,
+            recipientName: data.user_name || 'Customer',
+            referenceId: 'exam-passed-june2026',
+            source: 'InvitationScript'
+          });
+          document.getElementById('tpNote').textContent =
+            'Du modtager også en e-mail fra Trustpilot inden for kort tid.';
+        } else if (data.review_action === 'organic') {
+          document.getElementById('tpNote').textContent =
+            'Klik på knappen ovenfor for at skrive din anmeldelse.';
+        }
+      } else if (result === 'failed') {
+        document.getElementById('failedScreen').classList.add('active');
+      } else {
+        document.getElementById('notTakenScreen').classList.add('active');
+      }
+
+    } catch (e) {
+      btns.forEach(function(b) { b.disabled = false; b.style.opacity = '1'; });
+      var err = document.getElementById('errorMsg');
+      err.textContent = 'Der opstod en fejl. Prøv igen senere.';
+      err.style.display = 'block';
+    }
+  }
+</script>
+</body>
+</html>
