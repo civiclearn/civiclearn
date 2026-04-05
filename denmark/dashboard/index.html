@@ -54,6 +54,17 @@
     .pd3-goto-btn{background:#4f46e5;color:#fff;text-decoration:none;padding:6px 14px;border-radius:6px;font-size:.82rem;font-weight:600;white-space:nowrap;transition:background .15s;}
     .pd3-goto-btn:hover{background:#4338ca;}
     @media(max-width:600px){.pd3-addon-banner{flex-direction:column;text-align:center;padding-right:20px;}.pd3-code-block{width:100%;}.pd3-code-shown{justify-content:center;}.pd3-goto-btn{width:100%;text-align:center;}.pd3-addon-dismiss{top:6px;right:8px;}}
+
+    /* Trustpilot Review Notice */
+    .tp-notice{display:none;background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border:1px solid #86efac;border-radius:12px;padding:14px 20px;margin:0 0 20px 0;align-items:center;gap:14px;flex-wrap:wrap;position:relative;}
+    .tp-notice.show{display:flex;}
+    .tp-notice-icon{font-size:1.3rem;flex-shrink:0;}
+    .tp-notice-text{flex:1;min-width:200px;}
+    .tp-notice-text strong{color:#166534;font-size:.92rem;}
+    .tp-notice-text span{display:block;color:#15803d;font-size:.82rem;margin-top:2px;line-height:1.45;}
+    .tp-notice-dismiss{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:#22c55e;font-size:.8rem;opacity:.5;transition:opacity .15s;font-family:inherit;}
+    .tp-notice-dismiss:hover{opacity:1;}
+    @media(max-width:600px){.tp-notice{flex-direction:column;text-align:center;padding-right:20px;}}
   </style>
 
   <!-- 1. Supabase project config (safe to load early) -->
@@ -171,6 +182,16 @@
       <button class="pd3-copy-btn" id="pd3CopyBtn" title="Kopiér kode">📋</button>
       <a href="https://dansk3.dk/" target="_blank" class="pd3-goto-btn">Gå til Dansk 3 →</a>
     </div>
+  </div>
+</div>
+
+<!-- Trustpilot Review Notice (shown once to eligible users) -->
+<div class="tp-notice" id="tpNotice">
+  <button class="tp-notice-dismiss" id="tpNoticeDismiss" title="Luk">✕</button>
+  <div class="tp-notice-icon">⭐</div>
+  <div class="tp-notice-text">
+    <strong>Din mening betyder noget for os!</strong>
+    <span>Du har brugt CivicLearn i et stykke tid nu, og vi vil meget gerne høre, hvad du synes. Du modtager snart en e-mail fra <strong>Trustpilot</strong> — det tager kun et minut at dele din oplevelse.</span>
   </div>
 </div>
 
@@ -632,17 +653,7 @@ WonderPush.push(["addTag", "country:dk"]);
   initBanner();
 })();
 </script>
-<!-- Trustpilot Review Invitation + Notice -->
-<div id="tpNoticeBanner" style="display:none;background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border:1px solid #86efac;border-radius:12px;padding:16px 20px;margin:0 20px 20px 20px;position:fixed;bottom:0;left:0;right:0;z-index:9999;box-shadow:0 -2px 16px rgba(0,0,0,.08);max-width:600px;margin:0 auto 20px auto;">
-  <div style="display:flex;align-items:flex-start;gap:12px;">
-    <span style="font-size:1.4rem;flex-shrink:0;">⭐</span>
-    <div style="flex:1;">
-      <strong style="color:#166534;font-size:.92rem;">Din mening betyder noget for os!</strong>
-      <p style="color:#15803d;font-size:.82rem;margin:4px 0 0 0;line-height:1.45;">Du har brugt CivicLearn i et stykke tid nu, og vi vil meget gerne høre, hvad du synes. Du modtager snart en e-mail fra <strong>Trustpilot</strong> — det tager kun et minut at dele din oplevelse.</p>
-    </div>
-    <button id="tpNoticeDismiss" style="background:none;border:none;cursor:pointer;color:#22c55e;font-size:.85rem;opacity:.6;padding:2px 6px;font-family:inherit;" title="Luk">✕</button>
-  </div>
-</div>
+<!-- Trustpilot Review Invitation -->
 <script>
 (async function(){
   if (sessionStorage.getItem('tp_checked')) return;
@@ -670,15 +681,13 @@ WonderPush.push(["addTag", "country:dk"]);
         referenceId: data.referenceId,
         source: 'InvitationScript'
       });
-      // Show notice banner
-      var banner = document.getElementById('tpNoticeBanner');
-      if (banner) {
-        banner.style.display = 'block';
+      // Show inline notice banner
+      var notice = document.getElementById('tpNotice');
+      if (notice) {
+        notice.classList.add('show');
         document.getElementById('tpNoticeDismiss').addEventListener('click', function() {
-          banner.style.display = 'none';
+          notice.classList.remove('show');
         });
-        // Auto-dismiss after 15 seconds
-        setTimeout(function() { banner.style.display = 'none'; }, 15000);
       }
     }
   } catch(e) { /* silent */ }
