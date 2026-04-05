@@ -655,42 +655,66 @@ WonderPush.push(["addTag", "country:dk"]);
 </script>
 <!-- Trustpilot Review Invitation -->
 <script>
-(async function(){
-  if (sessionStorage.getItem('tp_checked')) return;
-  try {
-    if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
-    var sb = window.denmarkAuth && window.denmarkAuth.supabase;
-    if (!sb) return;
-    var sess = await sb.auth.getSession();
-    if (!sess.data.session) return;
-    var email = sess.data.session.user.email;
-    if (!email) return;
-    sessionStorage.setItem('tp_checked', '1');
+(function(){
+  // --- Banner persistence: show for 72 hours after first triggered ---
+  var TP_SINCE = 'tp_banner_since';
+  var TP_DISMISSED = 'tp_banner_dismissed';
+  var HOURS_72 = 72 * 60 * 60 * 1000;
 
-    var res = await fetch(
-      'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/tp-check-eligibility',
-      { method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email }) }
-    );
-    var data = await res.json();
-    if (data.eligible && typeof tp === 'function') {
-      tp('createInvitation', {
-        recipientEmail: data.email,
-        recipientName: data.name,
-        referenceId: data.referenceId,
-        source: 'InvitationScript'
+  function showBannerIfActive() {
+    var since = localStorage.getItem(TP_SINCE);
+    if (!since) return;
+    if (localStorage.getItem(TP_DISMISSED)) return;
+    if (Date.now() - parseInt(since, 10) > HOURS_72) return;
+    var notice = document.getElementById('tpNotice');
+    if (notice) {
+      notice.classList.add('show');
+      document.getElementById('tpNoticeDismiss').addEventListener('click', function() {
+        notice.classList.remove('show');
+        localStorage.setItem(TP_DISMISSED, '1');
       });
-      // Show inline notice banner
-      var notice = document.getElementById('tpNotice');
-      if (notice) {
-        notice.classList.add('show');
-        document.getElementById('tpNoticeDismiss').addEventListener('click', function() {
-          notice.classList.remove('show');
-        });
-      }
     }
-  } catch(e) { /* silent */ }
+  }
+
+  // Show banner on every page load if within 72h window
+  showBannerIfActive();
+
+  // --- Eligibility check: runs once per session ---
+  if (sessionStorage.getItem('tp_checked')) return;
+
+  (async function(){
+    try {
+      if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
+      var sb = window.denmarkAuth && window.denmarkAuth.supabase;
+      if (!sb) return;
+      var sess = await sb.auth.getSession();
+      if (!sess.data.session) return;
+      var email = sess.data.session.user.email;
+      if (!email) return;
+      sessionStorage.setItem('tp_checked', '1');
+
+      var res = await fetch(
+        'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/tp-check-eligibility',
+        { method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email }) }
+      );
+      var data = await res.json();
+      if (data.eligible && typeof tp === 'function') {
+        tp('createInvitation', {
+          recipientEmail: data.email,
+          recipientName: data.name,
+          referenceId: data.referenceId,
+          source: 'InvitationScript'
+        });
+        // Mark banner start time and show it
+        if (!localStorage.getItem(TP_SINCE)) {
+          localStorage.setItem(TP_SINCE, String(Date.now()));
+        }
+        showBannerIfActive();
+      }
+    } catch(e) { /* silent */ }
+  })();
 })();
 </script>
 </body>
