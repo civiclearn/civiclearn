@@ -1027,6 +1027,7 @@ body {
       <button class="tab-btn" id="tab-btn-kb" onclick="switchTab('kb')">Knowledge Base</button>
       <button class="tab-btn" id="tab-btn-content" onclick="switchTab('content')">Content</button>
       <button class="tab-btn" id="tab-btn-users" onclick="switchTab('users')">Users</button>
+      <button class="tab-btn" id="tab-btn-exam" onclick="switchTab('exam')">Exam</button>
     </div>
     <button class="tpl-btn" id="tpl-btn-topbar" style="font-size:0.76rem;padding:4px 12px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif" onclick="openTemplateManager()">📋 Templates</button>
     <div class="mob-topbar-actions">
@@ -1239,6 +1240,81 @@ body {
     </div>
 
   </div><!-- /tab-users -->
+
+  <div class="tab-panel" id="tab-exam" style="overflow-y:auto;padding:1.5rem;background:var(--bg);">
+
+    <div class="usr-section">
+      <div class="usr-section-title">Post-Exam Email Blast — Denmark June 2026</div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.2rem;" id="exam-stats">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:var(--brand);" id="exam-s-sent">—</div>
+          <div style="font-size:.75rem;color:var(--muted);">Emails sent</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:#16a34a;" id="exam-s-passed">—</div>
+          <div style="font-size:.75rem;color:var(--muted);">Passed</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:#dc2626;" id="exam-s-failed">—</div>
+          <div style="font-size:.75rem;color:var(--muted);">Failed</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:#9ca3af;" id="exam-s-nottaken">—</div>
+          <div style="font-size:.75rem;color:var(--muted);">Not taken</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:var(--text);" id="exam-s-pending">—</div>
+          <div style="font-size:.75rem;color:var(--muted);">No response</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:1rem;">
+        <label style="font-size:.82rem;color:var(--muted);">Active since:</label>
+        <input type="date" id="exam-active-since" value="2026-05-01"
+          style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.85rem;background:var(--surface);color:var(--text);">
+        <label style="font-size:.82rem;color:var(--muted);">Batch size:</label>
+        <input type="number" id="exam-batch-size" value="10" min="1" max="25"
+          style="width:60px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.85rem;background:var(--surface);color:var(--text);">
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1rem;">
+        <button class="usr-btn usr-btn-primary" onclick="examBlast(true)" id="exam-dry-btn">
+          Dry Run (preview)
+        </button>
+        <button class="usr-btn" onclick="examBlast(false)" id="exam-send-btn"
+          style="background:#c8102e;color:#fff;border-color:#c8102e;">
+          Send Batch
+        </button>
+        <button class="usr-btn" onclick="examLoadStats()" style="background:var(--surface);color:var(--text);">
+          Refresh Stats
+        </button>
+      </div>
+
+      <div id="exam-status" style="font-size:.85rem;color:var(--muted);margin-bottom:.8rem;"></div>
+
+      <div id="exam-log" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;max-height:400px;overflow-y:auto;font-family:monospace;font-size:.78rem;color:var(--text);white-space:pre-wrap;display:none;"></div>
+    </div>
+
+    <div class="usr-section" style="margin-top:1.5rem;">
+      <div class="usr-section-title">Trustpilot Invitation Status</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;" id="tp-stats">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:var(--brand);" id="tp-s-invited">—</div>
+          <div style="font-size:.75rem;color:var(--muted);">TP Invited (total)</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:var(--text);" id="tp-s-cap">0 / 50</div>
+          <div style="font-size:.75rem;color:var(--muted);">This month</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:#dc2626;" id="tp-s-excluded">—</div>
+          <div style="font-size:.75rem;color:var(--muted);">Excluded (failed)</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-exam -->
 
 </div><!-- /app -->
 
@@ -1988,6 +2064,7 @@ function switchTab(name) {
   if (name === 'revenue') renderRevenue();
   if (name === 'kb' && !kbLoaded) kbLoad();
   if (name === 'content' && !ctLoaded) ctLoad();
+  if (name === 'exam') examLoadStats();
   // 'users' tab needs no lazy load
 }
 
@@ -2558,6 +2635,98 @@ async function usrCreate() {
     status.className = 'usr-create-status err';
   } finally {
     btn.disabled = false; btn.textContent = 'Create user';
+  }
+}
+
+// ── EXAM TAB ─────────────────────────────────────────────────────────────────
+const EXAM_API = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/exam-email-blast';
+const EXAM_SB = 'https://htgliokekeaovdiafrgs.supabase.co';
+const EXAM_SB_KEY = 'sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp';
+
+async function examLoadStats() {
+  try {
+    const r = await fetch(EXAM_SB + '/rest/v1/rpc/exam_stats_summary', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': EXAM_SB_KEY,
+        'Authorization': 'Bearer ' + EXAM_SB_KEY
+      },
+      body: '{}'
+    });
+    if (r.ok) {
+      const d = await r.json();
+      if (d && d[0]) {
+        document.getElementById('exam-s-sent').textContent = d[0].emails_sent || 0;
+        document.getElementById('exam-s-passed').textContent = d[0].passed || 0;
+        document.getElementById('exam-s-failed').textContent = d[0].failed || 0;
+        document.getElementById('exam-s-nottaken').textContent = d[0].not_taken || 0;
+        document.getElementById('exam-s-pending').textContent = d[0].no_response || 0;
+        document.getElementById('tp-s-invited').textContent = d[0].tp_invited || 0;
+        document.getElementById('tp-s-cap').textContent = (d[0].tp_this_month || 0) + ' / 50';
+        document.getElementById('tp-s-excluded').textContent = d[0].tp_excluded || 0;
+      }
+    }
+  } catch(e) { console.error('Exam stats error:', e); }
+}
+
+async function examBlast(dryRun) {
+  const log = document.getElementById('exam-log');
+  const status = document.getElementById('exam-status');
+  const activeSince = document.getElementById('exam-active-since').value;
+  const batchSize = parseInt(document.getElementById('exam-batch-size').value) || 10;
+
+  log.style.display = 'block';
+  status.textContent = dryRun ? 'Running dry run...' : 'Sending batch...';
+
+  const dryBtn = document.getElementById('exam-dry-btn');
+  const sendBtn = document.getElementById('exam-send-btn');
+  dryBtn.disabled = true;
+  sendBtn.disabled = true;
+
+  try {
+    const r = await fetch(EXAM_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        password: adminPw,
+        batch_size: batchSize,
+        dry_run: dryRun,
+        active_since: activeSince
+      })
+    });
+    const data = await r.json();
+
+    if (!r.ok) {
+      status.textContent = 'Error: ' + (data.error || 'unknown');
+      log.textContent += '[ERROR] ' + JSON.stringify(data) + '\n';
+      return;
+    }
+
+    const prefix = dryRun ? '[DRY RUN]' : '[SENT]';
+    const ts = new Date().toLocaleTimeString();
+    log.textContent += `\n── ${prefix} ${ts} ──\n`;
+    log.textContent += `Batch: ${data.sent_this_batch} | Remaining: ${data.remaining}\n`;
+
+    if (data.results) {
+      data.results.forEach(function(r) {
+        log.textContent += `  ${r.status}: ${r.email}` + (r.link ? ` → ${r.link}` : '') + '\n';
+      });
+    }
+
+    status.textContent = dryRun
+      ? `Dry run complete. ${data.sent_this_batch} users in preview. ${data.remaining} remaining.`
+      : `Batch sent. ${data.sent_this_batch} emails. ${data.remaining} remaining.`;
+
+    log.scrollTop = log.scrollHeight;
+    if (!dryRun) examLoadStats();
+
+  } catch(e) {
+    status.textContent = 'Network error: ' + e.message;
+    log.textContent += '[NETWORK ERROR] ' + e.message + '\n';
+  } finally {
+    dryBtn.disabled = false;
+    sendBtn.disabled = false;
   }
 }
 </script>
