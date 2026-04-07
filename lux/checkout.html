@@ -500,12 +500,14 @@ applyLang('fr');
     pe.on('change', function(ev) { if (ev.complete) document.getElementById('payBtn').disabled = false; });
   }
 
-  /* ── 3DS return ── */
+  /* ── 3DS return + recovery ── */
   var urlParams = new URLSearchParams(window.location.search);
   var returnedPI = urlParams.get('payment_intent'), returnedSecret = urlParams.get('payment_intent_client_secret'), returnedStatus = urlParams.get('redirect_status');
   if (returnedPI && returnedSecret) {
     currentEmail = localStorage.getItem('lux_checkout_email') || '';
+    selectedPlan = localStorage.getItem('lux_checkout_plan') || selectedPlan;
     paymentIntentId = returnedPI;
+    localStorage.setItem('lux_checkout_pi', returnedPI);
     if (returnedStatus === 'succeeded') { show('password'); }
     else {
       stripe.retrievePaymentIntent(returnedSecret).then(function(r) {
@@ -514,10 +516,10 @@ applyLang('fr');
         else { err(t('msg_payment_incomplete')); show('checkout'); }
       });
     }
-    window.history.replaceState({}, '', window.location.pathname);
   } else {
-    selectPlan(selectedPlan);
-    show('checkout');
+    var savedPI = localStorage.getItem('lux_checkout_pi');
+    if (savedPI) { currentEmail = localStorage.getItem('lux_checkout_email') || ''; selectedPlan = localStorage.getItem('lux_checkout_plan') || selectedPlan; paymentIntentId = savedPI; show('password'); }
+    else { selectPlan(selectedPlan); show('checkout'); }
   }
 
   /* ── Pay ── */
@@ -538,7 +540,9 @@ applyLang('fr');
       var data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || t('msg_error'));
       paymentIntentId = data.payment_intent_id;
+      localStorage.setItem('lux_checkout_pi', data.payment_intent_id);
       localStorage.setItem('lux_checkout_email', currentEmail);
+      localStorage.setItem('lux_checkout_plan', selectedPlan);
       var result = await stripe.confirmPayment({
         elements: stripeElements,
         clientSecret: data.client_secret,
@@ -571,6 +575,9 @@ applyLang('fr');
       var signIn = await sb.auth.signInWithPassword({ email: data.email, password: p1 });
       if (signIn.error) console.error('Auto-login failed:', signIn.error);
       localStorage.removeItem('lux_checkout_email');
+      localStorage.removeItem('lux_checkout_pi');
+      localStorage.removeItem('lux_checkout_plan');
+      window.history.replaceState({}, '', window.location.pathname);
       document.getElementById('doneEmail').textContent = t('msg_logged_in') + data.email;
       if (data.plan === 'bundle') localStorage.setItem('cl_bundle', 'lu');
       show('done');

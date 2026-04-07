@@ -605,16 +605,19 @@ function toggleMobFeatures() {
   promoApplyBtn.addEventListener('click',applyPromo);
   promoCodeInput.addEventListener('keydown',function(e){if(e.key==='Enter')applyPromo();});
 
-  /* 3DS return */
+  /* 3DS return + recovery */
   var urlParams=new URLSearchParams(window.location.search);
   var returnedPI=urlParams.get('payment_intent'),returnedSecret=urlParams.get('payment_intent_client_secret'),returnedStatus=urlParams.get('redirect_status');
   if(returnedPI&&returnedSecret){
     currentEmail=localStorage.getItem('pd3_checkout_email')||'';
     selectedPlan=localStorage.getItem('pd3_checkout_plan')||'pd3';
     paymentIntentId=returnedPI;
+    localStorage.setItem('pd3_checkout_pi',returnedPI);
     if(returnedStatus==='succeeded'){show('password');}
     else{stripe.retrievePaymentIntent(returnedSecret).then(function(r){var pi=r.paymentIntent;if(pi&&pi.status==='succeeded')show('password');else{err('Betaling blev ikke gennemført. Prøv igen.');show('initial');}});}
-    window.history.replaceState({},'',window.location.pathname);
+  } else {
+    var savedPI=localStorage.getItem('pd3_checkout_pi');
+    if(savedPI){currentEmail=localStorage.getItem('pd3_checkout_email')||'';selectedPlan=localStorage.getItem('pd3_checkout_plan')||'pd3';paymentIntentId=savedPI;show('password');}
   }
 
   startBtn.onclick=function(){show('email');document.getElementById('checkoutEmail').focus();};
@@ -637,6 +640,7 @@ function toggleMobFeatures() {
       var res=await fetch(FUNCTIONS_URL+'/pd3-create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(piBody)});
       var data=await res.json();if(!res.ok||data.error)throw new Error(data.error||'Kunne ikke oprette betalingssession.');
       paymentIntentId=data.payment_intent_id;
+      localStorage.setItem('pd3_checkout_pi',data.payment_intent_id);
 
       // Apply discount to UI if confirmed by server
       if(data.discount_applied && data.final_amount){
@@ -683,6 +687,8 @@ function toggleMobFeatures() {
       if(signIn.error)console.error('Auto-login failed:',signIn.error);
       localStorage.removeItem('pd3_checkout_email');
       localStorage.removeItem('pd3_checkout_plan');
+      localStorage.removeItem('pd3_checkout_pi');
+      window.history.replaceState({},'',window.location.pathname);
       var comboNote=data.is_combo?' (inkl. '+((selectedPlan==='combo')?'Indfødsretsprøven':'Medborgerskabsprøven')+')':'';
       document.getElementById('doneEmail').textContent='Logget ind som: '+data.email+comboNote;
       show('done');

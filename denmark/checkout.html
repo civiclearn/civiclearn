@@ -551,7 +551,7 @@ main {
     paymentElement.on('change', function(ev) { if (ev.complete) document.getElementById('payBtn').disabled = false; });
   }
 
-  /* ── 3DS return ── */
+  /* ── 3DS return + recovery ── */
   var urlParams = new URLSearchParams(window.location.search);
   var returnedPI     = urlParams.get('payment_intent');
   var returnedSecret = urlParams.get('payment_intent_client_secret');
@@ -559,7 +559,9 @@ main {
 
   if (returnedPI && returnedSecret) {
     currentEmail = localStorage.getItem('denmark_checkout_email') || '';
+    selectedPlan = localStorage.getItem('denmark_checkout_plan') || selectedPlan;
     paymentIntentId = returnedPI;
+    localStorage.setItem('denmark_checkout_pi', returnedPI);
     if (returnedStatus === 'succeeded') { show('password'); }
     else {
       stripe.retrievePaymentIntent(returnedSecret).then(function(r) {
@@ -568,10 +570,10 @@ main {
         else { err('Betalingen blev ikke gennemført.'); show('checkout'); }
       });
     }
-    window.history.replaceState({}, '', window.location.pathname);
   } else {
-    selectPlan(selectedPlan);
-    show('checkout');
+    var savedPI = localStorage.getItem('denmark_checkout_pi');
+    if (savedPI) { currentEmail = localStorage.getItem('denmark_checkout_email') || ''; selectedPlan = localStorage.getItem('denmark_checkout_plan') || selectedPlan; paymentIntentId = savedPI; show('password'); }
+    else { selectPlan(selectedPlan); show('checkout'); }
   }
 
   /* ── Pay ── */
@@ -603,7 +605,9 @@ main {
       var data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'En fejl opstod.');
       paymentIntentId = data.payment_intent_id;
+      localStorage.setItem('denmark_checkout_pi', data.payment_intent_id);
       localStorage.setItem('denmark_checkout_email', currentEmail);
+      localStorage.setItem('denmark_checkout_plan', selectedPlan);
       var result = await stripe.confirmPayment({
         elements: stripeElements,
         clientSecret: data.client_secret,
@@ -642,6 +646,9 @@ main {
       var signIn = await sb.auth.signInWithPassword({ email: data.email, password: p1 });
       if (signIn.error) console.error('Auto-login failed:', signIn.error);
       localStorage.removeItem('denmark_checkout_email');
+      localStorage.removeItem('denmark_checkout_pi');
+      localStorage.removeItem('denmark_checkout_plan');
+      window.history.replaceState({}, '', window.location.pathname);
       document.getElementById('doneEmail').textContent = 'Logget ind som: ' + data.email;
       if (data.plan === 'bundle') localStorage.setItem('cl_bundle', 'dk');
       show('done');

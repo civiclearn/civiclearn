@@ -102,7 +102,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
       Prova de Cidadania
     </div>
     <div class="header-right">
-      <a href="mailto:admin@civiclearn.com" class="header-contact">
+      <a href="/cdn-cgi/l/email-protection#f9989d949097b99a908f909a959c988b97d79a9694" class="header-contact">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
         <span>Dúvidas?</span>
       </a>
@@ -188,7 +188,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
 
 </main>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 (function(){ document.getElementById('detailsToggle').addEventListener('click', function(){ var list = document.getElementById('detailsList'); this.classList.toggle('open', list.classList.toggle('open')); }); })();
 </script>
 
@@ -261,15 +261,21 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
     pe.on('change', function(ev) { if (ev.complete) document.getElementById('payBtn').disabled = false; });
   }
 
+  /* 3DS return + recovery */
   var urlParams = new URLSearchParams(window.location.search);
   var returnedPI = urlParams.get('payment_intent'), returnedSecret = urlParams.get('payment_intent_client_secret'), returnedStatus = urlParams.get('redirect_status');
   if (returnedPI && returnedSecret) {
     currentEmail = localStorage.getItem('portugal_checkout_email') || '';
+    selectedPlan = localStorage.getItem('portugal_checkout_plan') || selectedPlan;
     paymentIntentId = returnedPI;
+    localStorage.setItem('portugal_checkout_pi', returnedPI);
     if (returnedStatus === 'succeeded') { show('password'); }
     else { stripe.retrievePaymentIntent(returnedSecret).then(function(r) { var pi = r.paymentIntent; if (pi && pi.status === 'succeeded') show('password'); else { err('O pagamento não foi concluído.'); show('checkout'); } }); }
-    window.history.replaceState({}, '', window.location.pathname);
-  } else { selectPlan(selectedPlan); show('checkout'); }
+  } else {
+    var savedPI = localStorage.getItem('portugal_checkout_pi');
+    if (savedPI) { currentEmail = localStorage.getItem('portugal_checkout_email') || ''; selectedPlan = localStorage.getItem('portugal_checkout_plan') || selectedPlan; paymentIntentId = savedPI; show('password'); }
+    else { selectPlan(selectedPlan); show('checkout'); }
+  }
 
   document.getElementById('payBtn').onclick = async function() {
     if (isSubmitting) return;
@@ -285,7 +291,9 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
       var data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'Ocorreu um erro.');
       paymentIntentId = data.payment_intent_id;
+      localStorage.setItem('portugal_checkout_pi', data.payment_intent_id);
       localStorage.setItem('portugal_checkout_email', currentEmail);
+      localStorage.setItem('portugal_checkout_plan', selectedPlan);
       var result = await stripe.confirmPayment({ elements: stripeElements, clientSecret: data.client_secret, confirmParams: { return_url: RETURN_URL, receipt_email: currentEmail }, redirect: 'if_required' });
       if (result.error) { err(result.error.message || 'O pagamento falhou.'); btn.disabled = false; btn.textContent = PLANS[selectedPlan].payLabel; isSubmitting = false; return; }
       if (result.paymentIntent && result.paymentIntent.status === 'succeeded') { paymentIntentId = result.paymentIntent.id; show('password'); }
@@ -306,13 +314,12 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
       var signIn = await sb.auth.signInWithPassword({ email: data.email, password: p1 });
       if (signIn.error) console.error('Auto-login failed:', signIn.error);
       localStorage.removeItem('portugal_checkout_email');
+      localStorage.removeItem('portugal_checkout_pi');
+      localStorage.removeItem('portugal_checkout_plan');
+      window.history.replaceState({}, '', window.location.pathname);
       document.getElementById('doneEmail').textContent = 'Sessão iniciada como: ' + data.email;
       if (data.plan === 'bundle') localStorage.setItem('cl_bundle', 'pt');
       show('done');
     } catch (e) { err('Erro de ligação. Tente novamente.'); btn.disabled = false; btn.textContent = 'Criar conta'; }
   };
-  document.getElementById('pw2')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('setupBtn').click(); });
-})();
-</script>
-</body>
-</html>
+  document.getElementB

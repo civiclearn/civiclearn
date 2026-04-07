@@ -416,15 +416,18 @@ function toggleMobFeatures() {
   function err(text){msg.textContent=text;msg.className='checkout-message error';msg.style.display='block';}
   function info(text){msg.textContent=text;msg.className='checkout-message info';msg.style.display='block';}
 
-  /* 3DS return */
+  /* 3DS return + recovery */
   var urlParams=new URLSearchParams(window.location.search);
   var returnedPI=urlParams.get('payment_intent'),returnedSecret=urlParams.get('payment_intent_client_secret'),returnedStatus=urlParams.get('redirect_status');
   if(returnedPI&&returnedSecret){
     currentEmail=localStorage.getItem('celpe_checkout_email')||'';
     paymentIntentId=returnedPI;
+    localStorage.setItem('celpe_checkout_pi',returnedPI);
     if(returnedStatus==='succeeded'){show('password');}
     else{stripe.retrievePaymentIntent(returnedSecret).then(function(r){var pi=r.paymentIntent;if(pi&&pi.status==='succeeded')show('password');else{err('O pagamento não foi concluído. Tente novamente.');show('initial');}});}
-    window.history.replaceState({},'',window.location.pathname);
+  } else {
+    var savedPI=localStorage.getItem('celpe_checkout_pi');
+    if(savedPI){currentEmail=localStorage.getItem('celpe_checkout_email')||'';paymentIntentId=savedPI;show('password');}
   }
 
   document.getElementById('startCheckout').onclick=function(){show('email');document.getElementById('checkoutEmail').focus();};
@@ -446,6 +449,7 @@ function toggleMobFeatures() {
       var res=await fetch(FUNCTIONS_URL+'/celpe-create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:currentEmail})});
       var data=await res.json();if(!res.ok||data.error)throw new Error(data.error||'Falha ao criar sessão de pagamento.');
       paymentIntentId=data.payment_intent_id;
+      localStorage.setItem('celpe_checkout_pi',data.payment_intent_id);
       localStorage.setItem('celpe_checkout_email',currentEmail);
       stripeElements=stripe.elements({clientSecret:data.client_secret,appearance:{theme:'stripe',variables:{fontFamily:'"DM Sans",system-ui,sans-serif',borderRadius:'0.85rem',colorPrimary:'#009c3b'}}});
       var pe=stripeElements.create('payment',{layout:'tabs'});document.getElementById('payment-element').innerHTML='';pe.mount('#payment-element');
@@ -483,6 +487,8 @@ function toggleMobFeatures() {
       var signIn=await sb.auth.signInWithPassword({email:data.email,password:p1});
       if(signIn.error)console.error('Auto-login failed:',signIn.error);
       localStorage.removeItem('celpe_checkout_email');
+      localStorage.removeItem('celpe_checkout_pi');
+      window.history.replaceState({},'',window.location.pathname);
       document.getElementById('doneEmail').textContent='Conectado como: '+data.email;
       show('done');
     }catch(e){err('Erro de conexão. Tente novamente.');btn.disabled=false;btn.textContent='Criar conta';}

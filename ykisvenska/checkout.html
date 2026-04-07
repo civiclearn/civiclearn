@@ -326,12 +326,13 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
     pe.on('change', function(ev) { if (ev.complete) document.getElementById('payBtn').disabled = false; });
   }
 
-  /* ── 3DS return ── */
+  /* ── 3DS return + recovery ── */
   var urlParams = new URLSearchParams(window.location.search);
   var returnedPI = urlParams.get('payment_intent'), returnedSecret = urlParams.get('payment_intent_client_secret'), returnedStatus = urlParams.get('redirect_status');
   if (returnedPI && returnedSecret) {
     currentEmail = localStorage.getItem('ykisvenska_checkout_email') || '';
     paymentIntentId = returnedPI;
+    localStorage.setItem('ykisvenska_checkout_pi', returnedPI);
     if (returnedStatus === 'succeeded') { show('password'); }
     else {
       stripe.retrievePaymentIntent(returnedSecret).then(function(r) {
@@ -340,10 +341,10 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
         else { err('Betalningen slutfördes inte.'); show('checkout'); }
       });
     }
-    window.history.replaceState({}, '', window.location.pathname);
   } else {
-    mountStripeElements();
-    show('checkout');
+    var savedPI = localStorage.getItem('ykisvenska_checkout_pi');
+    if (savedPI) { currentEmail = localStorage.getItem('ykisvenska_checkout_email') || ''; paymentIntentId = savedPI; show('password'); }
+    else { mountStripeElements(); show('checkout'); }
   }
 
   /* ── Pay ── */
@@ -364,6 +365,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
       var data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'Ett fel uppstod.');
       paymentIntentId = data.payment_intent_id;
+      localStorage.setItem('ykisvenska_checkout_pi', data.payment_intent_id);
       localStorage.setItem('ykisvenska_checkout_email', currentEmail);
       var result = await stripe.confirmPayment({
         elements: stripeElements,
@@ -397,6 +399,8 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
       var signIn = await sb.auth.signInWithPassword({ email: data.email, password: p1 });
       if (signIn.error) console.error('Auto-login failed:', signIn.error);
       localStorage.removeItem('ykisvenska_checkout_email');
+      localStorage.removeItem('ykisvenska_checkout_pi');
+      window.history.replaceState({}, '', window.location.pathname);
       document.getElementById('doneEmail').textContent = 'Inloggad som: ' + data.email;
       show('done');
     } catch (e) {

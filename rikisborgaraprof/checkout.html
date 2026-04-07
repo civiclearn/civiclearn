@@ -387,11 +387,13 @@ applyLang('en');
     pe.on('change', function(ev) { if (ev.complete) document.getElementById('payBtn').disabled = false; });
   }
 
+  /* 3DS return + recovery */
   var urlParams = new URLSearchParams(window.location.search);
   var returnedPI = urlParams.get('payment_intent'), returnedSecret = urlParams.get('payment_intent_client_secret'), returnedStatus = urlParams.get('redirect_status');
   if (returnedPI && returnedSecret) {
     currentEmail = localStorage.getItem('rik_checkout_email') || '';
     paymentIntentId = returnedPI;
+    localStorage.setItem('rik_checkout_pi', returnedPI);
     if (returnedStatus === 'succeeded') { show('password'); }
     else {
       stripe.retrievePaymentIntent(returnedSecret).then(function(r) {
@@ -400,10 +402,10 @@ applyLang('en');
         else { err(t('msg_payment_incomplete')); show('checkout'); }
       });
     }
-    window.history.replaceState({}, '', window.location.pathname);
   } else {
-    mountStripeElements();
-    show('checkout');
+    var savedPI = localStorage.getItem('rik_checkout_pi');
+    if (savedPI) { currentEmail = localStorage.getItem('rik_checkout_email') || ''; paymentIntentId = savedPI; show('password'); }
+    else { mountStripeElements(); show('checkout'); }
   }
 
   document.getElementById('payBtn').onclick = async function() {
@@ -423,6 +425,7 @@ applyLang('en');
       var data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || t('msg_error'));
       paymentIntentId = data.payment_intent_id;
+      localStorage.setItem('rik_checkout_pi', data.payment_intent_id);
       localStorage.setItem('rik_checkout_email', currentEmail);
       var result = await stripe.confirmPayment({
         elements: stripeElements,
@@ -455,6 +458,8 @@ applyLang('en');
       var signIn = await sb.auth.signInWithPassword({ email: data.email, password: p1 });
       if (signIn.error) console.error('Auto-login failed:', signIn.error);
       localStorage.removeItem('rik_checkout_email');
+      localStorage.removeItem('rik_checkout_pi');
+      window.history.replaceState({}, '', window.location.pathname);
       document.getElementById('doneEmail').textContent = t('msg_logged_in') + data.email;
       show('done');
     } catch (e) {
