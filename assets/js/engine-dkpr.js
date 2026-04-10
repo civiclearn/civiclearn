@@ -400,6 +400,13 @@ state = {
         5;
       questions = sample(fullBank, n);
 
+} else if (mode === "official") {
+      const n = options.limit || 25;
+      const officialBank = fullBank.filter(q => q._raw && q._raw.official === true);
+      const seenIds = new Set(readJsonLS("civiclearn_answered_mcqs", []));
+      questions = samplePreferUnseen(officialBank, Math.min(n, officialBank.length), seenIds);
+      console.log(`[OFFICIAL] pool=${officialBank.length}, picked=${questions.length}`);
+
 } else if (mode === "simulation") {
   const simCfg = (cfg && cfg.simulation) || {};
   const n = simCfg.questionCount || options.limit || 20;
@@ -1007,6 +1014,7 @@ if (state.mode === "simulation" && question._raw?.topic) {
     let barId = null;
     if (state.mode === "simulation") barId = "simProgress";
     else if (state.mode === "quick") barId = "quickProgress";
+    else if (state.mode === "official") barId = "officialProgress";
     else if (state.mode === "traps") barId = "trapsProgress";
     else if (state.mode === "topics") barId = "topicsProgress";
     else return;
