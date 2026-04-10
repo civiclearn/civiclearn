@@ -6,6 +6,32 @@
   const Engine = {};
   window.CivicEdgeEngine = Engine;
 
+  // ------------- Tricky questions (100 hardest) -------------
+  let __trickySet = null;
+
+  async function loadTrickySet() {
+    if (__trickySet) return __trickySet;
+    try {
+      const site = window.CIVIC_SITE_CODE || "";
+      let path = "";
+      if (site === "dk") path = "/denmark/banks/tricky-dk.json";
+      else if (site === "dk-pr") path = "/denmark-pr/banks/tricky-dk-pr.json";
+      if (!path) { __trickySet = new Set(); return __trickySet; }
+      const res = await fetch(path);
+      if (!res.ok) { __trickySet = new Set(); return __trickySet; }
+      const data = await res.json();
+      __trickySet = new Set(data.questions || []);
+    } catch (e) {
+      console.warn("[Engine] Could not load tricky set:", e.message);
+      __trickySet = new Set();
+    }
+    return __trickySet;
+  }
+
+  function isTricky(questionText) {
+    return __trickySet && __trickySet.has(questionText);
+  }
+
   // ------------- Helpers -------------
 
   function getConfig() {
@@ -175,6 +201,9 @@ Engine.start = async function start(mode, options = {}) {
 
     const cfg = getConfig();
     const fullBank = await loadBankIfNeeded(options);
+
+    // Load tricky questions set (non-blocking, no auth)
+    await loadTrickySet();
 
     let questions;
 	
@@ -469,6 +498,13 @@ function renderQuestion() {
 if (q.subtopic) {
   const subEl = createEl("div", "ce-q-subtopic", q.subtopic);
   card.appendChild(subEl);
+}
+
+// ---- "Hyppigt forkert" pill for commonly missed questions ----
+if (isTricky(q.text)) {
+  const trickyBadge = createEl("div", "ce-q-tricky", "Hyppigt forkert");
+  card.appendChild(trickyBadge);
+  card.classList.add("ce-card-tricky");
 }
 
   // ---- Question text ----
