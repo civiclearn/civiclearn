@@ -321,27 +321,6 @@ function getTopicDisplay(rawQ) {
   }
 
   let __normalizedBank = null;
-let __trickySet = null;
-
-// Load tricky questions list (static JSON, regenerated monthly)
-async function loadTrickySet() {
-  if (__trickySet) return __trickySet;
-  try {
-    const res = await fetch("/denmark-pr/banks/tricky-dk-pr.json");
-    if (!res.ok) { __trickySet = new Set(); return __trickySet; }
-    const data = await res.json();
-    __trickySet = new Set(data.questions || []);
-  } catch (e) {
-    console.warn("[Engine] Could not load tricky-dk-pr.json:", e.message);
-    __trickySet = new Set();
-  }
-  return __trickySet;
-}
-
-function isTricky(questionText) {
-  return __trickySet && __trickySet.has(questionText);
-}
-
   // ------------- State -------------
  
   let state = { lang: window.CIVICEDGE_LANG || "en" };
@@ -381,9 +360,6 @@ state = {
     const cfg = getConfig();
     const fullBank = await loadBankIfNeeded(options);
 	__normalizedBank = fullBank;
-
-    // Load tricky questions set (non-blocking, no auth)
-    await loadTrickySet();
 
     let questions;
 	let filtered = null;
@@ -754,13 +730,6 @@ if (micro) {
 if (q._raw?.official === true) {
   const officialBadge = createEl("div", "ce-q-official", "Officielt");
   header.appendChild(officialBadge);
-}
-
-// "Hyppigt forkert" pill for commonly missed questions
-if (isTricky(q._raw?.q)) {
-  const trickyBadge = createEl("div", "ce-q-tricky", "Hyppigt forkert");
-  header.appendChild(trickyBadge);
-  card.classList.add("ce-card-tricky");
 }
 
 card.appendChild(header);
