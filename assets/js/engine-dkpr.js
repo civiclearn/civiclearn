@@ -22,6 +22,30 @@ Engine.ensureBankLoaded = async function () {
 
   // ------------- Helpers -------------
 
+  // ------------- Tricky questions (100 hardest) -------------
+  let __trickySet = null;
+
+  async function loadTrickySet() {
+    if (__trickySet) return __trickySet;
+    try {
+      const res = await fetch("/medborgerskab/banks/tricky-dk-pr.json");
+      if (!res.ok) { __trickySet = new Set(); return __trickySet; }
+      const data = await res.json();
+      __trickySet = new Set(data.questions || []);
+    } catch (e) {
+      console.warn("[Engine] Could not load tricky set:", e.message);
+      __trickySet = new Set();
+    }
+    return __trickySet;
+  }
+
+  function isTricky(rawQ) {
+    if (!__trickySet || !rawQ) return false;
+    const qObj = rawQ.q || rawQ.text;
+    const da = (qObj && typeof qObj === "object") ? qObj.da : qObj;
+    return da && __trickySet.has(da);
+  }
+
   function getConfig() {
     return window.CIVICEDGE_CONFIG || {};
   }
@@ -360,6 +384,9 @@ state = {
     const cfg = getConfig();
     const fullBank = await loadBankIfNeeded(options);
 	__normalizedBank = fullBank;
+
+    // Load tricky questions set
+    await loadTrickySet();
 
     let questions;
 	let filtered = null;
@@ -730,6 +757,12 @@ if (micro) {
 if (q._raw?.official === true) {
   const officialBadge = createEl("div", "ce-q-official", "Officielt");
   header.appendChild(officialBadge);
+}
+
+// "Hyppigt forkert" pill
+if (isTricky(q._raw)) {
+  const trickyBadge = createEl("div", "ce-q-official ce-q-tricky", "Hyppigt forkert");
+  header.appendChild(trickyBadge);
 }
 
 card.appendChild(header);
