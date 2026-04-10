@@ -12,6 +12,51 @@
 
   <script>document.documentElement.classList.add("i18n-hidden");</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <style>
+    .official-landing { max-width: 540px; margin: 0 auto; padding: 1.5rem 0; }
+    .official-hero {
+      display: flex; align-items: center; gap: 2rem;
+      background: var(--card-bg, #fff); border-radius: 14px;
+      padding: 1.5rem 2rem; box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      margin-bottom: 1.25rem;
+    }
+    .official-ring-wrap { position: relative; flex-shrink: 0; }
+    .official-ring-label {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      text-align: center; line-height: 1.2;
+    }
+    .official-ring-pct { font-size: 1.6rem; font-weight: 700; color: var(--text, #1a1a1a); }
+    .official-ring-sub { font-size: .72rem; color: var(--text-muted, #888); text-transform: uppercase; letter-spacing: .03em; }
+    .official-stats { flex: 1; }
+    .official-stats h2 { margin: 0 0 .5rem; font-size: 1.15rem; font-weight: 700; }
+    .official-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem .75rem; }
+    .official-stat-val { font-size: 1.35rem; font-weight: 700; }
+    .official-stat-lbl { font-size: .75rem; color: var(--text-muted, #888); }
+    .official-stat-val.mastered { color: #16a34a; }
+    .official-stat-val.seen { color: #2563eb; }
+    .official-stat-val.remaining { color: #d97706; }
+    .official-stat-val.total { color: var(--text, #1a1a1a); }
+    .official-bar-track {
+      height: 10px; border-radius: 5px; background: var(--bg-muted, #f0f0f0);
+      overflow: hidden; display: flex; margin-bottom: 1.25rem;
+    }
+    .official-bar-mastered { background: #16a34a; transition: width .4s; }
+    .official-bar-seen { background: #93c5fd; transition: width .4s; }
+    .official-start-btn {
+      display: block; width: 100%; padding: .9rem; border: none; border-radius: 10px;
+      background: #C8102E; color: #fff; font-size: 1.05rem; font-weight: 600;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .official-start-btn:hover { opacity: .9; }
+    .official-note {
+      margin-top: 1rem; font-size: .8rem; color: var(--text-muted, #888);
+      text-align: center; line-height: 1.5;
+    }
+    @media (max-width: 480px) {
+      .official-hero { flex-direction: column; gap: 1rem; text-align: center; }
+    }
+  </style>
 </head>
 
 <body>
@@ -28,7 +73,6 @@
         <rect x="0" y="168" width="640" height="64" fill="#FFFFFF"/>
       </svg>
     </div>
-    <!-- Sidebar gauge -->
     <div class="sidebar-gauge">
       <div class="sidebar-gauge-header">
         <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Est. score</span>
@@ -66,14 +110,66 @@
   <main>
     <header class="ce-header">
       <h1 data-i18n="title_official">Officielle spørgsmål</h1>
-      <p class="ce-header-sub" data-i18n="official_subtitle">Træn kun med spørgsmål fra tidligere officielle prøver</p>
     </header>
 
-    <div class="ce-progress-global">
+    <!-- Landing panel -->
+    <div class="official-landing" id="officialLanding">
+      <div class="official-hero">
+        <div class="official-ring-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120" id="officialRing">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#e5e7eb" stroke-width="10"/>
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#16a34a" stroke-width="10"
+                    stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327"
+                    transform="rotate(-90 60 60)" id="officialRingFill"/>
+          </svg>
+          <div class="official-ring-label">
+            <div class="official-ring-pct" id="officialPct">–</div>
+            <div class="official-ring-sub" data-i18n="official_mastered_label">mestret</div>
+          </div>
+        </div>
+        <div class="official-stats">
+          <h2 data-i18n="official_pool_title">Din fremgang</h2>
+          <div class="official-stats-grid">
+            <div class="official-stat">
+              <div class="official-stat-val mastered" id="officialMastered">–</div>
+              <div class="official-stat-lbl" data-i18n="official_stat_mastered">Mestret</div>
+            </div>
+            <div class="official-stat">
+              <div class="official-stat-val seen" id="officialSeen">–</div>
+              <div class="official-stat-lbl" data-i18n="official_stat_seen">Set (ikke mestret)</div>
+            </div>
+            <div class="official-stat">
+              <div class="official-stat-val remaining" id="officialRemaining">–</div>
+              <div class="official-stat-lbl" data-i18n="official_stat_remaining">Ikke set endnu</div>
+            </div>
+            <div class="official-stat">
+              <div class="official-stat-val total" id="officialTotal">–</div>
+              <div class="official-stat-lbl" data-i18n="official_stat_total">Samlet pool</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="official-bar-track">
+        <div class="official-bar-mastered" id="officialBarMastered" style="width:0"></div>
+        <div class="official-bar-seen" id="officialBarSeen" style="width:0"></div>
+      </div>
+
+      <button class="official-start-btn" id="officialStartBtn" data-i18n="official_start_btn">
+        Start — 25 spørgsmål
+      </button>
+
+      <p class="official-note" data-i18n="official_note">
+        Alle spørgsmål stammer fra tidligere officielle medborgerskabsprøver. Spørgsmål du allerede har mestret prioriteres lavest.
+      </p>
+    </div>
+
+    <!-- Quiz area — hidden until start -->
+    <div class="ce-progress-global" style="display:none" id="officialProgressWrap">
       <div class="ce-progress-global-bar" id="officialProgress"></div>
     </div>
 
-    <div class="quiz-container" id="quizArea">
+    <div class="quiz-container" id="quizArea" style="display:none">
       <div id="quiz"></div>
     </div>
   </main>
@@ -88,14 +184,66 @@
 <script src="/assets/js/sync.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const toggle = document.querySelector(".menu-toggle");
   const overlay = document.getElementById("menuOverlay");
   if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
   if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
 
-  setTimeout(() => CivicEdgeEngine.start("official"), 300);
+  // Load bank and compute stats
+  await CivicEdgeEngine.ensureBankLoaded();
+  const bank = CivicEdgeEngine.getBank();
+  const officialQs = bank.filter(q => q._raw && q._raw.official === true);
+  const totalCount = officialQs.length;
 
+  // Read progress
+  let progress = {};
+  try { progress = JSON.parse(localStorage.getItem("civicedge_progress") || "{}"); } catch(e) {}
+  let seenIds = [];
+  try { seenIds = JSON.parse(localStorage.getItem("civiclearn_answered_mcqs") || "[]"); } catch(e) {}
+  const seenSet = new Set(seenIds);
+
+  let masteredCount = 0, seenNotMastered = 0, unseenCount = 0;
+
+  officialQs.forEach(q => {
+    const key = (q.topicLabel || "topic") + ":" + q.id;
+    const entry = progress[key];
+    const isMastered = entry && entry.correct === 1;
+    const isSeen = seenSet.has(q.id);
+    if (isMastered) masteredCount++;
+    else if (isSeen) seenNotMastered++;
+    else unseenCount++;
+  });
+
+  const pct = totalCount > 0 ? Math.round((masteredCount / totalCount) * 100) : 0;
+
+  // Update numbers
+  document.getElementById("officialPct").textContent = pct + "%";
+  document.getElementById("officialMastered").textContent = masteredCount;
+  document.getElementById("officialSeen").textContent = seenNotMastered;
+  document.getElementById("officialRemaining").textContent = unseenCount;
+  document.getElementById("officialTotal").textContent = totalCount;
+
+  // Ring animation
+  const circumference = 2 * Math.PI * 52;
+  document.getElementById("officialRingFill").style.strokeDashoffset =
+    circumference - (circumference * pct / 100);
+
+  // Stacked bar
+  const mPct = totalCount > 0 ? (masteredCount / totalCount * 100) : 0;
+  const sPct = totalCount > 0 ? (seenNotMastered / totalCount * 100) : 0;
+  document.getElementById("officialBarMastered").style.width = mPct + "%";
+  document.getElementById("officialBarSeen").style.width = sPct + "%";
+
+  // Start quiz
+  document.getElementById("officialStartBtn").addEventListener("click", () => {
+    document.getElementById("officialLanding").style.display = "none";
+    document.getElementById("officialProgressWrap").style.display = "";
+    document.getElementById("quizArea").style.display = "";
+    CivicEdgeEngine.start("official");
+  });
+
+  // Restart reloads page to refresh stats
   document.addEventListener("click", e => {
     if (["changeTheme","returnBtn","restartBtn","ce-return"].includes(e.target?.id)) {
       e.preventDefault();
