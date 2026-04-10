@@ -757,7 +757,7 @@ if (q._raw?.official === true) {
 }
 
 // "Hyppigt forkert" pill for commonly missed questions
-if (isTricky(q._raw?.id)) {
+if (isTricky(q._raw?.q)) {
   const trickyBadge = createEl("div", "ce-q-tricky", "Hyppigt forkert");
   header.appendChild(trickyBadge);
   card.classList.add("ce-card-tricky");
