@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title_dashboard">Dashboard</title>
+  <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/indfodsret/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <link rel="stylesheet" href="/indfodsret/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/indfodsret/assets/css/dashboard-v2.css">
+
+  <script>document.documentElement.classList.add("i18n-hidden");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="/indfodsret/assets/js/denmark-auth.js?v=3"></script>
+
+  <!-- Trustpilot JS Integration -->
+  <script>
+    (function(w,d,s,r,n){w.TrustpilotObject=n;w[n]=w[n]||function(){(w[n].q=w[n].q||[]).push(arguments)};
+    a=d.createElement(s);a.async=1;a.src=r;a.type='text/java'+s;f=d.getElementsByTagName(s)[0];
+    f.parentNode.insertBefore(a,f)})(window,document,'script','https://invitejs.trustpilot.com/tp.min.js','tp');
+    tp('register', 'llCAmjJMQXGuWAke');
+  </script>
+
+  <style>
+    /* Bundle banner */
+    .bundle-banner{display:none;background:var(--accent-soft,#f5f3ff);border:1px solid var(--border,#ddd6fe);border-radius:var(--radius,14px);padding:14px 20px;margin:0 0 16px 0;align-items:center;gap:14px;flex-wrap:wrap;}
+    .bundle-banner.show{display:flex;}
+    .bundle-banner-icon{font-size:1.3rem;flex-shrink:0;}
+    .bundle-banner-text{flex:1;min-width:200px;}
+    .bundle-banner-text strong{color:var(--accent,#0d7377);font-size:.92rem;}
+    .bundle-banner-text span{display:block;color:var(--text-mid);font-size:.82rem;margin-top:2px;}
+    .bundle-banner-btn{background:var(--accent,#0d7377);color:#fff;text-decoration:none;padding:8px 18px;border-radius:8px;font-size:.85rem;font-weight:600;white-space:nowrap;transition:background .15s;}
+    .bundle-banner-btn:hover{background:#0b6265;}
+
+    /* PD3 Addon banner */
+    .pd3-addon-banner{display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px;margin:0 0 16px 0;align-items:center;gap:14px;flex-wrap:wrap;position:relative;}
+    .pd3-addon-banner.show{display:flex;}
+    .pd3-addon-icon{font-size:1.3rem;flex-shrink:0;}
+    .pd3-addon-text{flex:1;min-width:200px;}
+    .pd3-addon-text strong{color:var(--text);font-size:.92rem;}
+    .pd3-addon-text span{display:block;color:var(--text-mid);font-size:.82rem;margin-top:2px;}
+    .pd3-addon-dismiss{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:.8rem;opacity:.5;transition:opacity .15s;font-family:inherit;}
+    .pd3-addon-dismiss:hover{opacity:1;}
+    .pd3-code-block{background:var(--accent-soft);border:1px solid var(--border);border-radius:8px;padding:10px 14px;min-width:210px;}
+    .pd3-code-label{font-size:.7rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+    .pd3-code-reveal{display:flex;align-items:center;gap:8px;}
+    .pd3-code-masked{font-size:1.05rem;color:var(--text-muted);letter-spacing:.15em;font-family:monospace;}
+    .pd3-code-show-btn{background:var(--accent);color:#fff;border:none;cursor:pointer;padding:5px 12px;border-radius:6px;font-size:.78rem;font-weight:600;font-family:inherit;transition:background .15s;}
+    .pd3-code-show-btn:hover{background:#0b6265;}
+    .pd3-code-shown{display:none;align-items:center;gap:8px;flex-wrap:wrap;}
+    .pd3-code-value{font-family:monospace;font-size:1rem;font-weight:700;color:var(--accent);letter-spacing:.1em;background:var(--accent-soft);padding:4px 10px;border-radius:6px;}
+    .pd3-copy-btn{background:none;border:none;cursor:pointer;font-size:.95rem;padding:2px 4px;opacity:.65;transition:opacity .15s;line-height:1;}
+    .pd3-copy-btn:hover{opacity:1;}
+    .pd3-goto-btn{background:var(--accent);color:#fff;text-decoration:none;padding:6px 14px;border-radius:6px;font-size:.82rem;font-weight:600;white-space:nowrap;transition:background .15s;}
+    .pd3-goto-btn:hover{background:#0b6265;}
+
+    /* Trustpilot notice */
+    .tp-notice{display:none;background:#e6f5f5;border:1px solid #b2dfdb;border-radius:var(--radius);padding:14px 20px;margin:0 0 16px 0;align-items:center;gap:14px;flex-wrap:wrap;position:relative;}
+    .tp-notice.show{display:flex;}
+    .tp-notice-icon{font-size:1.3rem;flex-shrink:0;}
+    .tp-notice-text{flex:1;min-width:200px;}
+    .tp-notice-text strong{color:#0a5c5f;font-size:.92rem;}
+    .tp-notice-text span{display:block;color:#0d7377;font-size:.82rem;margin-top:2px;line-height:1.45;}
+    .tp-notice-dismiss{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:#0d7377;font-size:.8rem;opacity:.5;transition:opacity .15s;font-family:inherit;}
+    .tp-notice-dismiss:hover{opacity:1;}
+
+    /* Bonus row (Advanced questions) */
+    .bonus-row{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border-left:3px solid var(--accent);margin-bottom:20px;}
+    .bonus-row-title{font-size:13.5px;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px;}
+    .bonus-row-desc{font-size:12px;color:var(--text-mid);line-height:1.5;margin-bottom:12px;}
+    .bonus-row-stat{font-size:12px;color:var(--text-muted);margin-bottom:10px;}
+    .bonus-row-stat strong{color:var(--text);font-weight:700;}
+
+    /* Date picker radio cards */
+    .exam-date-cards{display:flex;flex-direction:column;gap:8px;padding:16px 0;}
+    .exam-date-card{display:flex;align-items:center;gap:10px;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;}
+    .exam-date-card:has(input:checked){border-color:var(--accent);background:var(--accent-soft);}
+    .exam-date-card input{accent-color:var(--accent);}
+    .exam-date-label{font-size:14px;font-weight:500;}
+    .exam-date-card.muted .exam-date-label{color:var(--text-muted);}
+
+    @media(max-width:600px){
+      .bundle-banner,.pd3-addon-banner,.tp-notice{flex-direction:column;text-align:center;}
+      .bundle-banner-btn,.pd3-goto-btn{width:100%;text-align:center;}
+      .pd3-code-block{width:100%;}
+      .pd3-code-shown{justify-content:center;}
+    }
+  </style>
+</head>
+
+<body>
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Danmark">
+        <rect width="640" height="400" fill="#C8102E"/>
+        <rect x="176" y="0" width="64" height="400" fill="#FFFFFF"/>
+        <rect x="0" y="168" width="640" height="64" fill="#FFFFFF"/>
+      </svg>
+    </div>
+
+    <!-- Sidebar gauge -->
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Est. score</span>
+        <span class="sidebar-gauge-score" id="clGaugeScore">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugePass"></div>
+      </div>
+      <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
+    </div>
+
+    <nav class="nav">
+      <a href="index.html" class="active" data-i18n="nav_dashboard">Dashboard</a>
+      <a href="simulation.html" data-i18n="nav_simulation">Prøvesimulation</a>
+      <a href="quick.html" data-i18n="nav_quick">Hurtig test</a>
+      <a href="topics.html" data-i18n="nav_topics">Test efter emne</a>
+      <a href="traps.html" data-i18n="nav_traps">Typiske fælder</a>
+      <a href="flashcards.html" data-i18n="nav_flashcards">Flashcards</a>
+      <a href="manual.html">Læremateriale</a>
+      <a href="audio.html">Lyd</a>
+      <a href="advanced.html" id="advancedNavLink" style="display:none">Avancerede spørgsmål</a>
+      <div class="nav-sep"></div>
+      <a href="history.html" data-i18n="nav_history">Historik</a>
+      <a href="my-list.html" data-i18n="nav_my_list">Min liste</a>
+      <a href="help.html" data-i18n="nav_help">Hjælp & Kontakt</a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink">Log ud</a>
+    </nav>
+
+    <div class="spacer"></div>
+  </aside>
+
+  <div class="overlay" id="menuOverlay"></div>
+
+  <main>
+    <div id="quiz" style="display:none"></div>
+
+    <div class="dashboard-container">
+
+      <!-- Trustpilot Review Notice -->
+      <div class="tp-notice" id="tpNotice">
+        <button class="tp-notice-dismiss" id="tpNoticeDismiss" title="Luk">✕</button>
+        <div class="tp-notice-icon">⭐</div>
+        <div class="tp-notice-text">
+          <strong>Din mening betyder noget for os!</strong>
+          <span>Du modtager snart en e-mail fra <strong>Trustpilot</strong> — det tager kun et minut at dele din oplevelse.</span>
+        </div>
+      </div>
+
+      <!-- Bundle banner -->
+      <div class="bundle-banner" id="bundleBanner">
+        <div class="bundle-banner-icon">🎁</div>
+        <div class="bundle-banner-text">
+          <strong>Du har også adgang til Prøve i Dansk 3 Træning</strong>
+          <span>Din kombipakke inkluderer 10 simulationer med AI-evaluering og karakterer</span>
+        </div>
+        <a href="https://civiclearn.com/dansk3/dashboard/" class="bundle-banner-btn">Åbn Dansk 3 →</a>
+      </div>
+
+      <!-- PD3 Addon Banner -->
+      <div class="pd3-addon-banner" id="pd3AddonBanner">
+        <button class="pd3-addon-dismiss" id="pd3AddonDismiss" title="Skjul">✕</button>
+        <div class="pd3-addon-icon">📘</div>
+        <div class="pd3-addon-text">
+          <strong>Har du også brug for Prøve i Dansk 3?</strong>
+          <span>10 komplette simulationer · alle 9 delprøver · 7-trins evaluering · Normalpris 899 kr.</span>
+        </div>
+        <div class="pd3-code-block">
+          <div class="pd3-code-label">Din rabatkode</div>
+          <div class="pd3-code-reveal" id="pd3CodeReveal">
+            <span class="pd3-code-masked">••••••••</span>
+            <button class="pd3-code-show-btn" id="pd3ShowCodeBtn">Vis kode</button>
+          </div>
+          <div class="pd3-code-shown" id="pd3CodeShown">
+            <span class="pd3-code-value">PD3DIS26</span>
+            <button class="pd3-copy-btn" id="pd3CopyBtn" title="Kopiér kode">📋</button>
+            <a href="https://dansk3.dk/" target="_blank" class="pd3-goto-btn">Gå til Dansk 3 →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ① Stats (5 cards) -->
+      <div class="db-stats-row anim d1">
+        <div class="db-stat-card cd" id="countdownCard">
+          <div class="db-stat-value" id="examCountdown"></div>
+          <div class="db-stat-label" id="examNoDate" data-i18n="countdown_enter_date"></div>
+          <button class="db-stat-label" id="openDateSheet" style="background:none;border:none;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11.5px;font-weight:600;padding:0" data-i18n="countdown_set_date_btn"></button>
+        </div>
+        <div class="db-stat-card ans">
+          <div class="db-stat-value" id="tmAnswered">0</div>
+          <div class="db-stat-label" data-i18n="dashboard_questions_answered">Besvarede spørgsmål</div>
+        </div>
+        <div class="db-stat-card acc">
+          <div class="db-stat-value" id="tmAccuracy">0%</div>
+          <div class="db-stat-label" data-i18n="dashboard_mastery_rate">Samlet mestring</div>
+        </div>
+        <div class="db-stat-card time-card">
+          <div class="db-stat-value" id="tmTime">0m</div>
+          <div class="db-stat-label" data-i18n="dashboard_study_time">Samlet studietid</div>
+        </div>
+        <div class="db-stat-card streak">
+          <div class="db-stat-value" id="tmStreak">0</div>
+          <div class="db-stat-label" data-i18n="dashboard_streak">Streak</div>
+        </div>
+      </div>
+
+      <!-- Date picker sheet -->
+      <div class="date-sheet-overlay" id="dateSheetOverlay"></div>
+      <div class="date-sheet" id="dateSheet">
+        <h3 data-i18n="dashboard_datepicker_title">Vælg prøvedato</h3>
+        <div class="exam-date-cards">
+          <label class="exam-date-card">
+            <input type="radio" name="examDate" value="2026-06-03">
+            <span class="exam-date-label">3. juni 2026</span>
+          </label>
+          <label class="exam-date-card">
+            <input type="radio" name="examDate" value="2026-11-25">
+            <span class="exam-date-label">25. november 2026</span>
+          </label>
+          <label class="exam-date-card muted">
+            <input type="radio" name="examDate" value="">
+            <span class="exam-date-label">Senere / ikke besluttet endnu</span>
+          </label>
+        </div>
+        <div class="date-sheet-actions">
+          <button class="btn secondary" id="sheetCancel" data-i18n="countdown_cancel">Annuller</button>
+          <button class="btn" id="sheetSave" data-i18n="countdown_save">Bekræft</button>
+        </div>
+      </div>
+
+      <!-- ② Launchers -->
+      <div class="db-actions-row anim d2">
+        <a href="simulation.html" class="db-action-card hide-mobile">
+          <div class="db-action-icon">⏱</div>
+          <div class="db-action-title" data-i18n="action_sim_title">Tidsbegrænset simulation</div>
+          <div class="db-action-desc" data-i18n="action_sim_desc">Øv dig under realistiske forhold. 45 spørgsmål, 45 minutter.</div>
+          <div class="db-action-go" data-i18n="action_start">Start →</div>
+        </a>
+        <a href="quick.html" class="db-action-card">
+          <div class="db-action-icon">⚡</div>
+          <div class="db-action-title" data-i18n="action_quick_title">Daglig test</div>
+          <div class="db-action-desc" data-i18n="action_quick_desc">Kort test · kan tages ubegrænset antal gange.</div>
+          <div class="db-action-go" data-i18n="action_start">Start →</div>
+        </a>
+        <a href="topics.html" class="db-action-card">
+          <div class="db-action-icon">📚</div>
+          <div class="db-action-title" data-i18n="action_topics_title">Test efter emne</div>
+          <div class="db-action-desc" data-i18n="action_topics_desc">Vælg emner. Mestrer dem progressivt med bølgelogik.</div>
+          <div class="db-action-go" data-i18n="action_start">Start →</div>
+        </a>
+        <a href="flashcards.html" class="db-action-card hide-mobile">
+          <div class="db-action-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="3" width="12" height="9" rx="1.5" stroke="var(--accent)" stroke-width="1.5"/><rect x="5" y="6" width="12" height="9" rx="1.5" stroke="var(--accent)" stroke-width="1.5" fill="var(--accent-soft)"/></svg></div>
+          <div class="db-action-title" data-i18n="action_fc_title">Flashcards</div>
+          <div class="db-action-desc" data-i18n="action_fc_desc">Gennemgå spørgsmål og svar efter emne.</div>
+          <div class="db-action-go" data-i18n="action_open">Åbn →</div>
+        </a>
+      </div>
+
+      <!-- ③ Bar chart + Sequential Practice -->
+      <div class="db-insight-row anim d3">
+        <div class="db-chart-card db-polar-card">
+          <div class="chart-bg-fill" id="chartBgFill"></div>
+          <div class="chart-mastery-header">
+            <span class="chart-mastery-pct" id="chartMasteryPct">0%</span>
+            <span class="chart-mastery-sub" id="chartMasterySub">0 / 0</span>
+          </div>
+          <div class="polar-wrap">
+            <div class="chart-wrap" style="height:260px"><canvas id="polarChart"></canvas></div>
+          </div>
+        </div>
+        <div class="db-chart-card" id="seqCard">
+          <div class="seq-header">
+            <div class="db-chart-title" data-i18n="dashboard_sequential_title" style="margin-bottom:0">Øvelse</div>
+            <div class="seq-counter" id="seqCounter"></div>
+          </div>
+          <div class="seq-question" id="seqQuestion"></div>
+          <div class="seq-options" id="seqOptions"></div>
+          <div class="seq-nav">
+            <button class="seq-nav-btn" id="seqPrev" aria-label="Forrige">
+              <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M10 5.5L7 9l3 3.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="seq-nav-btn" id="seqNext" aria-label="Næste">
+              <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 5.5l3 3.5-3 3.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ④ Bonus / Advanced (hidden until 100% mastery) -->
+      <div id="bonusRow" class="bonus-row anim d4" style="display:none">
+        <div class="bonus-row-title">🎯 Avancerede bonusspørgsmål</div>
+        <div class="bonus-row-desc">
+          Du har mestret alle kernespørgsmål. Udfordre dig selv med
+          <strong id="bonusCount">0</strong> avancerede spørgsmål til den ekstra forberedelse.
+        </div>
+        <div class="bonus-row-stat">Besvaret: <strong id="bonusMastered">0</strong> / <span id="bonusCount2">0</span></div>
+        <a href="advanced.html" class="btn">Åbn avancerede spørgsmål →</a>
+      </div>
+
+      <!-- ⑤ Tips -->
+      <div class="db-tips-row anim d4" id="tipsRow">
+        <div class="db-tip-card">
+          <div class="db-tip-title" data-i18n="tip_topics_title">Start med emner</div>
+          <div class="db-tip-text" data-i18n="tip_topics_text">Emnebaserede tests bruger progressiv mestring. Fejl kommer tilbage, indtil du svarer rigtigt.</div>
+        </div>
+        <div class="db-tip-card">
+          <div class="db-tip-title" data-i18n="tip_star_title">Markér svære spørgsmål</div>
+          <div class="db-tip-text" data-i18n="tip_star_text">Brug ☆ stjerne på ethvert spørgsmål for at bygge en personlig gennemgangsliste.</div>
+        </div>
+        <div class="db-tip-card">
+          <div class="db-tip-title" data-i18n="tip_sim_title">Simulationer er generalprøver</div>
+          <div class="db-tip-text" data-i18n="tip_sim_text">Efter et par dages emneøvelse, test dig selv under rigtige tidsforhold.</div>
+        </div>
+      </div>
+
+      <div class="db-footer">
+        © 2026 — CivicLearn by Testrada — Alle rettigheder forbeholdes.
+      </div>
+
+    </div>
+
+    <!-- Hidden canvases for legacy compatibility -->
+    <div style="display:none">
+      <canvas id="globalChart"></canvas>
+      <canvas id="topicsChart"></canvas>
+      <canvas id="trendChart"></canvas>
+      <canvas id="accuracyChart"></canvas>
+      <div id="globalPct"></div>
+      <div id="globalAnswered"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="/indfodsret/assets/js/lang-bootstrap-dk.js"></script>
+<script src="/indfodsret/assets/js/config-dk.js?v=3"></script>
+<script src="/indfodsret/assets/js/i18n.js"></script>
+<script>CivicLearnI18n.init();</script>
+<script src="/indfodsret/assets/js/engine-dk.js?v=3"></script>
+<script src="/indfodsret/assets/js/sync.js"></script>
+
+<!-- Shared: gauge + study timer -->
+<script src="/indfodsret/assets/js/gauge-bar.js"></script>
+<script src="/indfodsret/assets/js/study-timer.js"></script>
+
+<!-- Dashboard logic: bank loader -->
+<script>
+CivicLearnI18n.onReady(() => {
+  // Load bank for dashboard metrics
+  (async function() {
+    try {
+      const bankPath = window.CIVICEDGE_CONFIG?.bank?.path;
+      if (!bankPath) return;
+      const res = await fetch(bankPath);
+      const raw = await res.json();
+      window.__ceBank = Array.isArray(raw) ? raw : (raw.questions || []);
+      window.__ceTotalQuestions = window.__ceBank.length;
+    } catch(e) {
+      console.error("Bank load error:", e);
+      window.__ceBank = [];
+    }
+  })();
+});
+</script>
+
+<!-- Dashboard extra (gauge, bar chart, celebration) -->
+<script src="/indfodsret/assets/js/dashboard-extra-dk.js"></script>
+
+<!-- Sequential practice widget -->
+<script src="/indfodsret/assets/js/dashboard-sequential-dk.js"></script>
+
+<!-- Countdown tile -->
+<script>
+CivicLearnI18n.onReady(() => {
+  const card = document.getElementById("countdownCard");
+  const countdownValue = document.getElementById("examCountdown");
+  const examNoDate = document.getElementById("examNoDate");
+  const openDateSheet = document.getElementById("openDateSheet");
+  const sheet = document.getElementById("dateSheet");
+  const sheetOverlay = document.getElementById("dateSheetOverlay");
+  const sheetCancel = document.getElementById("sheetCancel");
+  const sheetSave = document.getElementById("sheetSave");
+
+  function t(key, fb) {
+    if (window.CivicLearnI18n && typeof window.CivicLearnI18n.t === "function") {
+      const v = window.CivicLearnI18n.t(key); if (v && v !== key) return v;
+    }
+    return fb || key;
+  }
+
+  function renderCountdown() {
+    let saved = localStorage.getItem("civicedge_testDate");
+
+    if (!saved) {
+      const today = new Date();
+      const nextExam = new Date("2026-06-03");
+      saved = today <= nextExam ? "2026-06-03" : "2026-11-25";
+      localStorage.setItem("civicedge_testDate", saved);
+    }
+
+    const today = new Date();
+    const examDate = new Date(saved);
+    const diff = Math.ceil((examDate - today) / 86400000);
+
+    countdownValue.style.display = "block";
+    examNoDate.style.display = "none";
+    openDateSheet.textContent = t("countdown_modify_date_btn", "Rediger prøvedato");
+
+    if (diff >= 0) {
+      countdownValue.textContent = "J-" + diff;
+    } else {
+      countdownValue.textContent = t("dashboard_countdown_finished", "Afsluttet");
+    }
+  }
+
+  function openSheet() {
+    sheet.classList.add("active");
+    sheetOverlay.classList.add("active");
+    const saved = localStorage.getItem("civicedge_testDate") || "";
+    const radios = sheet.querySelectorAll('input[name="examDate"]');
+    radios.forEach(r => { r.checked = r.value === saved; });
+  }
+
+  function closeSheet() {
+    sheet.classList.remove("active");
+    sheetOverlay.classList.remove("active");
+  }
+
+  if (openDateSheet) openDateSheet.addEventListener("click", openSheet);
+  if (card) card.addEventListener("click", (e) => {
+    if (e.target.closest("button")) return;
+    openSheet();
+  });
+  if (sheetOverlay) sheetOverlay.addEventListener("click", closeSheet);
+  if (sheetCancel) sheetCancel.addEventListener("click", closeSheet);
+
+  if (sheetSave) {
+    sheetSave.addEventListener("click", () => {
+      const v = document.querySelector('input[name="examDate"]:checked')?.value;
+      if (!v) {
+        localStorage.removeItem("civicedge_testDate");
+      } else {
+        localStorage.setItem("civicedge_testDate", v);
+      }
+      closeSheet();
+      renderCountdown();
+    });
+  }
+
+  renderCountdown();
+});
+</script>
+
+<!-- Mobile menu -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+});
+</script>
+
+<script src="/indfodsret/assets/js/maintenance-bar.js"></script>
+<script src="/indfodsret/assets/js/signout.js"></script>
+
+<!-- Bundle banner -->
+<script>
+(async function(){
+  var el = document.getElementById('bundleBanner');
+  if (!el) return;
+  if (localStorage.getItem('cl_bundle') === 'dk') { el.classList.add('show'); return; }
+  try {
+    if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
+    var sb = window.denmarkAuth && window.denmarkAuth.supabase;
+    var userId = window.denmarkAuth && window.denmarkAuth.userId;
+    if (!sb || !userId) return;
+    var result = await sb.from('users').select('bundle').eq('id', userId).maybeSingle();
+    if (result.data && result.data.bundle === 'dk') {
+      localStorage.setItem('cl_bundle', 'dk');
+      el.classList.add('show');
+    }
+  } catch(e) {}
+})();
+</script>
+
+<!-- PD3 Addon -->
+<script>
+(function() {
+  var banner = document.getElementById("pd3AddonBanner");
+  var dismissBtn = document.getElementById("pd3AddonDismiss");
+  var showCodeBtn = document.getElementById("pd3ShowCodeBtn");
+  var codeReveal = document.getElementById("pd3CodeReveal");
+  var codeShown = document.getElementById("pd3CodeShown");
+  var copyBtn = document.getElementById("pd3CopyBtn");
+  var CODE = "PD3DIS26";
+
+  var PD3_DISMISSED = "pd3_banner_dismissed";
+
+  async function initBanner() {
+    if (localStorage.getItem(PD3_DISMISSED)) return;
+    if (localStorage.getItem("cl_bundle") === "dk") return;
+    try {
+      if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
+      var sb = window.denmarkAuth && window.denmarkAuth.supabase;
+      var userId = window.denmarkAuth && window.denmarkAuth.userId;
+      if (!sb || !userId) return;
+      var sess = await sb.auth.getSession();
+      if (!sess.data.session) return;
+      var result = await sb.from("users").select("bundle").eq("id", userId).maybeSingle();
+      if (result.data && result.data.bundle === "dk") {
+        localStorage.setItem("cl_bundle", "dk");
+        return;
+      }
+      banner.classList.add("show");
+    } catch(e) {}
+  }
+
+  showCodeBtn.addEventListener("click", function() {
+    codeReveal.style.display = "none";
+    codeShown.style.display = "flex";
+  });
+
+  copyBtn.addEventListener("click", function() {
+    navigator.clipboard.writeText(CODE).then(function() {
+      copyBtn.textContent = "✓";
+      setTimeout(function() { copyBtn.textContent = "📋"; }, 1500);
+    }).catch(function() {
+      copyBtn.textContent = "✓";
+      setTimeout(function() { copyBtn.textContent = "📋"; }, 1500);
+    });
+  });
+
+  dismissBtn.addEventListener("click", function() {
+    banner.classList.remove("show");
+    localStorage.setItem(PD3_DISMISSED, "1");
+  });
+
+  initBanner();
+})();
+</script>
+
+<!-- Trustpilot -->
+<script>
+(function(){
+  var TP_SINCE = 'tp_banner_since';
+  var TP_DISMISSED = 'tp_banner_dismissed';
+  var HOURS_72 = 72 * 60 * 60 * 1000;
+
+  function showBannerIfActive() {
+    var since = localStorage.getItem(TP_SINCE);
+    if (!since) return;
+    if (localStorage.getItem(TP_DISMISSED)) return;
+    if (Date.now() - parseInt(since, 10) > HOURS_72) return;
+    var notice = document.getElementById('tpNotice');
+    if (notice) {
+      notice.classList.add('show');
+      document.getElementById('tpNoticeDismiss').addEventListener('click', function() {
+        notice.classList.remove('show');
+        localStorage.setItem(TP_DISMISSED, '1');
+      });
+    }
+  }
+
+  showBannerIfActive();
+
+  if (sessionStorage.getItem('tp_checked')) return;
+
+  (async function(){
+    try {
+      if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
+      var sb = window.denmarkAuth && window.denmarkAuth.supabase;
+      if (!sb) return;
+      var sess = await sb.auth.getSession();
+      if (!sess.data.session) return;
+      var email = sess.data.session.user.email;
+      if (!email) return;
+      sessionStorage.setItem('tp_checked', '1');
+
+      var res = await fetch(
+        'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/tp-check-eligibility',
+        { method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email }) }
+      );
+      var data = await res.json();
+      if (data.eligible && typeof tp === 'function') {
+        tp('createInvitation', {
+          recipientEmail: data.email,
+          recipientName: data.name,
+          referenceId: data.referenceId,
+          source: 'InvitationScript'
+        });
+        if (!localStorage.getItem(TP_SINCE)) {
+          localStorage.setItem(TP_SINCE, String(Date.now()));
+        }
+        showBannerIfActive();
+      }
+    } catch(e) {}
+  })();
+})();
+</script>
+
+<!-- WonderPush notifications -->
+<script src="https://cdn.by.wonderpush.com/sdk/1.1/wonderpush-loader.min.js" async></script>
+<script>
+window.WonderPush = window.WonderPush || [];
+WonderPush.push(["init", { webKey: "256f5d8dc847c1f1f9a267c4d77a121616a872c88e1618da8097a0d20b43fbfd" }]);
+WonderPush.push(["addTag", "country:dk"]);
+</script>
+
+</body>
+</html>

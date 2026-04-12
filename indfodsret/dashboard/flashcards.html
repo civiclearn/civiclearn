@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title_flashcards">Flashcards</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="/indfodsret/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/indfodsret/assets/css/test-v2.css">
+  <link rel="stylesheet" href="/indfodsret/assets/css/flashcards-v2.css">
+  <script>document.documentElement.classList.add("i18n-hidden");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- <script src="/indfodsret/assets/js/denmark-auth.js"></script> -->
+</head>
+<body class="test-page">
+<button class="menu-toggle" aria-label="Menu">☰</button>
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Danmark">
+        <rect width="640" height="400" fill="#C8102E"/>
+        <rect x="176" y="0" width="64" height="400" fill="#FFFFFF"/>
+        <rect x="0" y="168" width="640" height="64" fill="#FFFFFF"/>
+      </svg>
+    </div>
+    <!-- Sidebar gauge -->
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Est. score</span>
+        <span class="sidebar-gauge-score" id="clGaugeScore">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugePass"></div>
+      </div>
+      <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
+    </div>
+        <nav class="nav">
+      <a href="index.html" data-i18n="nav_dashboard">Dashboard</a>
+      <a href="simulation.html" data-i18n="nav_simulation">Prøvesimulation</a>
+      <a href="quick.html" data-i18n="nav_quick">Hurtig test</a>
+      <a href="topics.html" data-i18n="nav_topics">Test efter emne</a>
+      <a href="traps.html" data-i18n="nav_traps">Typiske fælder</a>
+      <a href="flashcards.html" class="active" data-i18n="nav_flashcards">Flashcards</a>
+      <a href="manual.html">Læremateriale</a>
+      <a href="audio.html">Lyd</a>
+      <a href="advanced.html" id="advancedNavLink" style="display:none">Avancerede spørgsmål</a>
+      <div class="nav-sep"></div>
+      <a href="history.html" data-i18n="nav_history">Historik</a>
+      <a href="my-list.html" data-i18n="nav_my_list">Min liste</a>
+      <a href="help.html" data-i18n="nav_help">Hjælp & Kontakt</a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink">Log ud</a>
+    </nav>
+    <div class="spacer"></div>
+  </aside>
+  <div class="overlay" id="menuOverlay"></div>
+  <main class="flashcards-layout left">
+    <header class="ce-header"><h1 data-i18n="title_flashcards">Flashcards</h1></header>
+    <section id="flashcardsApp">
+      <div id="topicsWrapper" class="fc-topics-wrapper">
+        <p class="muted" data-i18n="flashcards_select_topics"></p>
+        <div class="fc-segmented">
+          <button id="fcAllTopics" class="active" data-i18n="flashcards_all_topics"></button>
+          <button id="fcWeakTopics" data-i18n="flashcards_focus_weak"></button>
+        </div>
+        <div id="topicContainer" class="fc-topic-toggles"></div>
+        <button id="startBtn" class="btn fc-btn-primary" data-i18n="flashcards_start"></button>
+      </div>
+      <div class="flashcard" id="card">
+        <div class="card-inner">
+          <div class="card-front" id="qText"></div>
+          <div class="card-back" id="aText"></div>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="flipBtn" data-i18n="flashcards_flip"></button>
+        <button id="knownBtn" class="primary" data-i18n="flashcards_known"></button>
+        <button id="againBtn" data-i18n="flashcards_again"></button>
+      </div>
+      <div class="controls-row">
+        <button id="fcPrev" class="fc-nav"><svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" stroke="var(--accent)" stroke-width="2" fill="none"/><path d="M11 6 L7 10 L11 14" stroke="var(--accent)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button id="fcNext" class="fc-nav"><svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" stroke="var(--accent)" stroke-width="2" fill="none"/><path d="M9 6 L13 10 L9 14" stroke="var(--accent)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+      <div id="status" class="fc-status"></div>
+    </section>
+  </main>
+</div>
+<script src="/indfodsret/assets/js/lang-bootstrap-dk.js"></script>
+<script src="/indfodsret/assets/js/config-dk.js"></script>
+<script src="/indfodsret/assets/js/i18n.js"></script>
+<script>CivicLearnI18n.init();</script>
+<script src="/indfodsret/assets/js/engine-dk.js"></script>
+<script src="/indfodsret/assets/js/sync.js"></script>
+<script>
+CivicLearnI18n.onReady(() => {
+  const s = document.createElement("script");
+  s.src = "/indfodsret/assets/js/flashcards-dk.js";
+  document.body.appendChild(s);
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+});
+</script>
+<script src="/indfodsret/assets/js/gauge-bar.js"></script>
+<script src="/indfodsret/assets/js/study-timer.js"></script>
+<script src="/indfodsret/assets/js/maintenance-bar.js"></script>
+<script src="/indfodsret/assets/js/signout.js"></script>
+</body></html>

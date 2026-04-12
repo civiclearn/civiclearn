@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title_traps">Frequent Traps</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="/indfodsret/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/indfodsret/assets/css/test-v2.css">
+  <style>
+    .traps-tabs {
+      display: flex;
+      gap: 0;
+      max-width: 900px;
+      margin: 0 0 18px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border, #e5e7eb);
+      background: var(--bg-muted, #f3f4f6);
+    }
+    .traps-tab {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted, #6b7280);
+      cursor: pointer;
+      transition: all .2s ease;
+      text-align: center;
+    }
+    .traps-tab.active {
+      background: var(--card, #fff);
+      color: var(--ink, #111827);
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+    .traps-tab-count {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--bg-muted, #e5e7eb);
+      color: var(--muted, #6b7280);
+    }
+    .traps-tab.active .traps-tab-count {
+      background: var(--brand, #4f46e5);
+      color: #fff;
+    }
+  </style>
+  <script>document.documentElement.classList.add("i18n-hidden");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- <script src="/indfodsret/assets/js/denmark-auth.js"></script> -->
+</head>
+<body>
+<button class="menu-toggle" aria-label="Menu">&#9776;</button>
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn&reg;
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Danmark">
+        <rect width="640" height="400" fill="#C8102E"/>
+        <rect x="176" y="0" width="64" height="400" fill="#FFFFFF"/>
+        <rect x="0" y="168" width="640" height="64" fill="#FFFFFF"/>
+      </svg>
+    </div>
+    <!-- Sidebar gauge -->
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Est. score</span>
+        <span class="sidebar-gauge-score" id="clGaugeScore">&ndash;</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugePass"></div>
+      </div>
+      <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
+    </div>
+        <nav class="nav">
+      <a href="index.html" data-i18n="nav_dashboard">Dashboard</a>
+      <a href="simulation.html" data-i18n="nav_simulation">Prøvesimulation</a>
+      <a href="quick.html" data-i18n="nav_quick">Hurtig test</a>
+      <a href="topics.html" data-i18n="nav_topics">Test efter emne</a>
+      <a href="traps.html" class="active" data-i18n="nav_traps">Typiske fælder</a>
+      <a href="flashcards.html" data-i18n="nav_flashcards">Flashcards</a>
+      <a href="manual.html">Læremateriale</a>
+      <a href="audio.html">Lyd</a>
+      <a href="advanced.html" id="advancedNavLink" style="display:none">Avancerede spørgsmål</a>
+      <div class="nav-sep"></div>
+      <a href="history.html" data-i18n="nav_history">Historik</a>
+      <a href="my-list.html" data-i18n="nav_my_list">Min liste</a>
+      <a href="help.html" data-i18n="nav_help">Hjælp & Kontakt</a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink">Log ud</a>
+    </nav>
+    <div class="spacer"></div>
+  </aside>
+  <div class="overlay" id="menuOverlay"></div>
+  <main>
+    <header class="ce-header"><h1 data-i18n="title_traps">Frequent Traps</h1></header>
+
+    <!-- TABS: Personal traps vs 100 hardest -->
+    <div class="traps-tabs" id="trapsTabs">
+      <button class="traps-tab active" data-tab="mine">
+        Mine f&aelig;lder<span class="traps-tab-count" id="mineCount">&ndash;</span>
+      </button>
+      <button class="traps-tab" data-tab="common">
+        100 sv&aelig;reste<span class="traps-tab-count" id="commonCount">&ndash;</span>
+      </button>
+    </div>
+
+    <div class="ce-progress-global"><div class="ce-progress-global-bar" id="trapsProgress"></div></div>
+    <div class="quiz-container" id="quizArea"><div id="quiz"></div></div>
+  </main>
+</div>
+<script src="/indfodsret/assets/js/lang-bootstrap-dk.js"></script>
+<script src="/indfodsret/assets/js/config-dk.js"></script>
+<script src="/indfodsret/assets/js/i18n.js"></script>
+<script>CivicLearnI18n.init();</script>
+<script src="/indfodsret/assets/js/engine-dk.js"></script>
+<script src="/indfodsret/assets/js/sync.js"></script>
+<script src="/indfodsret/assets/js/reading.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  CivicLearnI18n.onReady(async () => {
+    const bankPath = window.CIVICEDGE_CONFIG?.bank?.path;
+    if (!bankPath) return;
+    let fullBank = [];
+    try { const res = await fetch(bankPath); const raw = await res.json(); fullBank = Array.isArray(raw) ? raw : (raw.questions || []); } catch { return; }
+
+    /* ============================================
+       TAB A: PERSONAL TRAPS
+       ============================================ */
+    let progress = {};
+    try { progress = JSON.parse(localStorage.getItem("civicedge_progress") || "{}"); } catch {}
+
+    const trickyKeys = Object.keys(progress).filter(id => (progress[id].wrongs || 0) >= 3 && (progress[id].rights || 0) < 2);
+    const normalizedSet = new Set(trickyKeys);
+    const personalTraps = fullBank.filter(q => {
+      const qKey = `${q.microtopic?.en || q.topic?.en || ""}:${q.id}`;
+      return normalizedSet.has(qKey);
+    });
+
+    /* ============================================
+       TAB B: 100 HARDEST (from tricky-dk.json)
+       ============================================ */
+    let commonTraps = [];
+    try {
+      const res = await fetch("/indfodsret/banks/tricky-dk.json");
+      if (res.ok) {
+        const data = await res.json();
+        const commonSet = new Set(data.questions || []);
+        // Match on q.da since the new bank uses multilingual {da, en}
+        commonTraps = fullBank.filter(q => {
+          const qText = typeof q.q === "object" ? q.q.da : q.q;
+          return commonSet.has(qText);
+        });
+      }
+    } catch (e) {
+      console.warn("[Traps] Could not load tricky-dk.json:", e.message);
+    }
+
+    /* UPDATE COUNTS */
+    document.getElementById("mineCount").textContent = personalTraps.length;
+    document.getElementById("commonCount").textContent = commonTraps.length;
+
+    /* ============================================
+       TAB SWITCHING + ENGINE START
+       ============================================ */
+    const quizArea = document.getElementById("quizArea");
+    let activeTab = "mine";
+
+    function startTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll(".traps-tab").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.tab === tab);
+      });
+
+      const bank = tab === "mine" ? personalTraps : commonTraps;
+
+      if (bank.length === 0) {
+        const emptyTitle = tab === "mine"
+          ? (CivicLearnI18n.t("traps_none_title") || "Ingen f\u00e6lder endnu")
+          : "Ingen hyppigt forkerte sp\u00f8rgsm\u00e5l endnu";
+        const emptyBody = tab === "mine"
+          ? (CivicLearnI18n.t("traps_none_body") || "Du har ikke nok fejl endnu. Bliv ved med at \u00f8ve!")
+          : "Denne funktion aktiveres n\u00e5r vi har nok brugerdata. Bliv ved med at \u00f8ve!";
+
+        quizArea.innerHTML = `
+          <div class="ce-card">
+            <h2>${emptyTitle}</h2>
+            <p>${emptyBody}</p>
+          </div>`;
+        return;
+      }
+
+      quizArea.innerHTML = '<div id="quiz"></div>';
+      CivicEdgeEngine.start("traps", { bank: bank, limit: 20, timed: false, simulation: false, recursive: false, showFeedback: true });
+    }
+
+    document.getElementById("trapsTabs").addEventListener("click", (e) => {
+      const tab = e.target.closest(".traps-tab");
+      if (!tab || tab.dataset.tab === activeTab) return;
+      startTab(tab.dataset.tab);
+    });
+
+    startTab("mine");
+  });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+});
+</script>
+<script src="/indfodsret/assets/js/gauge-bar.js"></script>
+<script src="/indfodsret/assets/js/study-timer.js"></script>
+<script src="/indfodsret/assets/js/maintenance-bar.js"></script>
+<script src="/indfodsret/assets/js/signout.js"></script>
+</body></html>
