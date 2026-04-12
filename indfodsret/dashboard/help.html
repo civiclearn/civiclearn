@@ -105,7 +105,23 @@
 
         <div class="faq-item">
           <div class="faq-q">Hvad er simuleringsmodus? <span class="faq-arrow">›</span></div>
-          <div class="faq-a">Simuleringen præsenterer 25 spørgsmål på 30 minutter med en beståelsesgrænse på 80% (20/25), som efterligner det officielle format.</div>
+          <div class="faq-a">Simuleringen præsenterer 45 spørgsmål på 45 minutter med en beståelsesgrænse på 80% (36/45), som efterligner det officielle format.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Hvorfor har nogle spørgsmål 4 valgmuligheder? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Den officielle indfødsretsprøve har 3 valgmuligheder per spørgsmål. Vores træningsspørgsmål bruger nogle gange 4 valgmuligheder for at gøre træningen sværere end den rigtige prøve — så du er bedre forberedt.
+            <div style="margin-top:14px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;">
+                <input type="checkbox" id="officialFormatToggle" style="accent-color:var(--accent);width:18px;height:18px;">
+                <span>Officielt prøveformat (3 valgmuligheder) <span style="color:var(--text-muted);">(valgfrit)</span></span>
+              </label>
+              <div id="officialFormatNote" style="margin-top:8px;font-size:13px;color:var(--text-muted);display:none;">
+                ✓ Officielt format er aktiveret. Alle spørgsmål vises nu med højst 3 valgmuligheder.
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="faq-item">
@@ -174,13 +190,33 @@ document.addEventListener("DOMContentLoaded", () => {
   // Reset
   document.getElementById("resetBtn")?.addEventListener("click", () => {
     if (!confirm("Er du sikker på, at du vil slette alle dine træningsdata?")) return;
-    ["civicedge_progress", "civicedge_stats", "civicedge_saved", "civiclearn_answered_mcqs", "cl_gauge_cache", "civiclearn:dk:dashseq:index"].forEach(k => localStorage.removeItem(k));
+    ["civicedge_progress", "civicedge_stats", "civicedge_saved", "civiclearn_answered_mcqs", "cl_gauge_cache", "civiclearn:dk:dashseq:index", "dk_official_format"].forEach(k => localStorage.removeItem(k));
     alert("Dine data er blevet nulstillet.");
     location.reload();
   });
 });
 </script>
 <script src="/indfodsret/assets/js/gauge-bar.js"></script>
+<script>
+(function () {
+  const toggle = document.getElementById("officialFormatToggle");
+  const note = document.getElementById("officialFormatNote");
+  if (!toggle) return;
+  const KEY = "dk_official_format";
+  const isActive = localStorage.getItem(KEY) === "true";
+  toggle.checked = isActive;
+  if (isActive && note) note.style.display = "block";
+  toggle.addEventListener("change", () => {
+    if (toggle.checked) {
+      localStorage.setItem(KEY, "true");
+      if (note) note.style.display = "block";
+    } else {
+      localStorage.removeItem(KEY);
+      if (note) note.style.display = "none";
+    }
+  });
+})();
+</script>
 <script src="/indfodsret/assets/js/study-timer.js"></script>
 <script src="/indfodsret/assets/js/maintenance-bar.js"></script>
 <script src="/indfodsret/assets/js/signout.js"></script>

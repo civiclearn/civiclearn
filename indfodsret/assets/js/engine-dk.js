@@ -787,38 +787,10 @@ function renderQuestion() {
   const q = state.questions[state.currentIndex];
   const card = createEl("div", "ce-card");
   
-  // ===== DK SIMULATION INFO BANNER (DISMISSIBLE) =====
-if (state.mode === "simulation" && !readJsonLS("dk_sim_info_dismissed", false)) {
-  const info = createEl("div", "ce-sim-info");
-
-  const text = createEl(
-    "div",
-    "ce-sim-info-text",
-    "ℹ️ Vi anbefaler at bruge prøvesimulationer sidst i din træning. " +
-    "De sidste 10 spørgsmål (danske værdier og aktuelle begivenheder) " +
-    "har en begrænset databank og vil derfor ofte gentage sig."
-  );
-
-  const closeBtn = createEl("button", "ce-sim-info-close", "×");
-  closeBtn.type = "button";
-  closeBtn.addEventListener("click", () => {
-    writeJsonLS("dk_sim_info_dismissed", true);
-    info.remove();
-  });
-
-  info.appendChild(text);
-  info.appendChild(closeBtn);
-
-  card.appendChild(info);
-}
-
-  
-// ===== QUESTION HEADER (DK, LU-style) =====
+// ===== QUESTION HEADER (v2 style) =====
 const header = createEl("div", "ce-q-header");
 
-// LEFT: topic + question index (+ exam)
-const left = createEl("div", "ce-q-header-left");
-
+// LEFT: topic label
 let topicLabel = "";
 const cfg = getConfig();
 const topicsCfg = cfg.topics || {};
@@ -831,65 +803,53 @@ if (q.topicKey && topicLabels[q.topicKey]) {
 }
 
 if (topicLabel) {
-  left.appendChild(createEl("span", "ce-pill ce-pill-topic", topicLabel));
+  const main = createEl("div", "ce-q-main", topicLabel);
+  header.appendChild(main);
 }
 
+// MIDDLE: question counter
 const idxText = t("question_x_of_y", "Spørgsmål {x} af {y}")
   .replace("{x}", String(state.currentIndex + 1))
   .replace("{y}", String(state.questions.length));
 
-left.appendChild(createEl("span", "ce-pill ce-pill-meta", idxText));
+const meta = createEl("div", "ce-q-meta", idxText);
+header.appendChild(meta);
 
-if (q.source === "exam") {
-  left.appendChild(
-    createEl("span", "ce-pill ce-pill-exam", "Officiel")
-  );
+// RIGHT: subtopic + save star
+const subtopicText = q.subtopic || "";
+if (subtopicText || q.id) {
+  const wrap = createEl("div", "ce-q-subtopic-wrap");
+
+  if (subtopicText) {
+    wrap.appendChild(createEl("div", "ce-q-subtopic", subtopicText));
+  }
+
+  const saveBtn = createEl("button", "ce-save-btn", "");
+  const qid = q.id;
+  if (Engine.isQuestionSaved(qid)) {
+    saveBtn.classList.add("active");
+  }
+  saveBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const saved = Engine.toggleSavedQuestion(qid);
+    saveBtn.classList.toggle("active", saved);
+  });
+  wrap.appendChild(saveBtn);
+  header.appendChild(wrap);
 }
 
+// Official exam question badge
+if (q.source === "exam") {
+  header.appendChild(createEl("div", "ce-q-official", "Officiel"));
+}
+
+// Tricky badge
 if (isTricky(q.text)) {
-  left.appendChild(
-    createEl("span", "ce-pill ce-pill-tricky", "Hyppigt forkert")
-  );
+  header.appendChild(createEl("div", "ce-q-official ce-q-tricky", "Hyppigt forkert"));
   card.classList.add("ce-card-tricky");
 }
 
-header.appendChild(left);
-
-// RIGHT: subtopic + star
-const right = createEl("div", "ce-q-header-right");
-
-if (q.subtopic) {
-  right.appendChild(
-    createEl("span", "ce-pill ce-pill-subtopic", q.subtopic)
-  );
-}
-
-if (q.id) {
-  right.appendChild(
-    createEl("span", "ce-pill ce-pill-id", `ID: ${q.id}`)
-  );
-}
-
-const saveBtn = createEl("button", "ce-save-btn");
-const qid = q.id;
-
-function updateSaveBtn() {
-  saveBtn.textContent = Engine.isQuestionSaved(qid) ? "★" : "☆";
-}
-updateSaveBtn();
-
-saveBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  Engine.toggleSavedQuestion(qid);
-  updateSaveBtn();
-});
-
-right.appendChild(saveBtn);
-
-header.appendChild(right);
 card.appendChild(header);
-
-
 
   // ---- Question text ----
 
@@ -924,6 +884,13 @@ card.appendChild(questionWrap);
 
   // Shuffle a copy so question.options stays stable for review/stats
   const shuffledOptions = shuffle(q.options.slice());
+
+  // Official format: reduce to 3 options by removing one random wrong answer
+  if (readJsonLS("dk_official_format", false) && shuffledOptions.length > 3) {
+    const wrongIndexes = [];
+    shuffledOptions.forEach((o, i) => { if (!o.correct) wrongIndexes.push(i); });
+    if (wrongIndexes.length > 1) shuffledOptions.splice(wrongIndexes[Math.floor(Math.random() * wrongIndexes.length)], 1);
+  }
 
 shuffledOptions.forEach((opt) => {
 
