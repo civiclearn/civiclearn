@@ -252,6 +252,38 @@ textarea,
 </div>
 
 
+<div class="faq-item">
+  <div class="faq-question">Hvorfor har nogle spørgsmål 4 valgmuligheder?</div>
+  <div class="faq-answer">
+    Den officielle indfødsretsprøve har 3 valgmuligheder per spørgsmål.
+    Vores træningsspørgsmål i Fase 2 bruger dog nogle gange 4 valgmuligheder
+    for at gøre træningen en smule sværere end den rigtige prøve.
+    Det giver dig en fordel, når du sidder til den faktiske eksamen.
+
+    <br><br>
+
+    Hvis du foretrækker at træne med præcis 3 valgmuligheder — som i den
+    officielle prøve — kan du slå det til nedenfor. Når funktionen er aktiv,
+    fjernes én forkert valgmulighed automatisk fra spørgsmål med 4 svar.
+
+    <br><br>
+
+<label class="advanced-toggle">
+  <input type="checkbox" id="officialFormatToggle">
+  <span class="advanced-toggle-box"></span>
+  <span class="advanced-toggle-text">
+    Officielt prøveformat (3 valgmuligheder) <span class="muted">(valgfrit)</span>
+  </span>
+</label>
+
+    <div id="officialFormatNote"
+         style="margin-top:8px; font-size:13px; color:#6b7280; display:none;">
+      Officielt format er aktiveret. Alle spørgsmål vises nu med højst 3 valgmuligheder.
+    </div>
+  </div>
+</div>
+
+
   <div class="faq-item">
     <div class="faq-question">Hvad er forskellen mellem de forskellige testtilstande?</div>
     <div class="faq-answer">
@@ -607,6 +639,33 @@ if (contactForm) {
 
     // Reload to re-evaluate phase logic
     location.reload();
+  });
+})();
+</script>
+
+
+<script>
+(function () {
+  const toggle = document.getElementById("officialFormatToggle");
+  const note = document.getElementById("officialFormatNote");
+
+  if (!toggle) return;
+
+  const KEY = "dk_official_format";
+
+  // Init state
+  const isActive = localStorage.getItem(KEY) === "true";
+  toggle.checked = isActive;
+  if (isActive && note) note.style.display = "block";
+
+  toggle.addEventListener("change", () => {
+    if (toggle.checked) {
+      localStorage.setItem(KEY, "true");
+      if (note) note.style.display = "block";
+    } else {
+      localStorage.removeItem(KEY);
+      if (note) note.style.display = "none";
+    }
   });
 })();
 </script>

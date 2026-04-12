@@ -918,6 +918,13 @@ card.appendChild(questionWrap);
   // Shuffle a copy so question.options stays stable for review/stats
   const shuffledOptions = shuffle(q.options.slice());
 
+  // Official format: reduce to 3 options by removing one random wrong answer
+  if (readJsonLS("dk_official_format", false) && shuffledOptions.length > 3) {
+    const wrongIndexes = [];
+    shuffledOptions.forEach((o, i) => { if (!o.correct) wrongIndexes.push(i); });
+    if (wrongIndexes.length > 1) shuffledOptions.splice(wrongIndexes[Math.floor(Math.random() * wrongIndexes.length)], 1);
+  }
+
 shuffledOptions.forEach((opt) => {
 
   const btn = createEl("button", "ce-option");
