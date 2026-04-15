@@ -950,7 +950,7 @@ if (
   const nextBtn = createEl(
     "button",
     "btn ce-next-btn",
-    t("test_next", "Suivant")
+    t("test_next", "Næste")
   );
   nextBtn.disabled = true;
   nextBtn.addEventListener("click", () => goNext());
@@ -1218,7 +1218,7 @@ async function computeTopicsRemaining() {
         <path
           class="fill"
           fill="none"
-          stroke="var(--brand)"
+          stroke="var(--accent)"
           stroke-width="3.2"
           stroke-linecap="round"
           stroke-dasharray="${dash}, 100"
@@ -1246,7 +1246,7 @@ async function computeTopicsRemaining() {
       "ce-topics-ring-caption",
       t(
         "topics_ring_caption",
-        "{n} questions restantes dans les sujets sélectionnés"
+        "{n} spørgsmål tilbage i de valgte emner"
       ).replace("{n}", String(safeRemaining))
     );
 
@@ -1369,18 +1369,18 @@ function finishQuiz(timeUp) {
 
     const h2 = createEl("h2");
     h2.setAttribute("data-i18n", "topics_mastered_title");
-    h2.textContent = t("topics_mastered_title", "Ensemble maîtrisé 🎉");
+    h2.textContent = t("topics_mastered_title", "Sæt mestret 🎉");
 
     const sub = createEl("p", "muted");
     sub.setAttribute("data-i18n", "topics_mastered_sub");
     sub.textContent = t(
       "topics_mastered_sub",
-      "Vous avez répondu correctement à toutes les questions de ce lot."
+      "Du har besvaret alle spørgsmål korrekt."
     );
 
     const list = createEl("ul", "ce-result-list");
     const liTime = createEl("li");
-    liTime.innerHTML = `<strong>${t("result_time", "Temps passé")}:</strong> ${durationLabel}`;
+    liTime.innerHTML = `<strong>${t("result_time", "Tid brugt")}:</strong> ${durationLabel}`;
     list.appendChild(liTime);
 
     const btnBar = createEl("div", "ce-result-actions");
@@ -1389,7 +1389,7 @@ function finishQuiz(timeUp) {
     const practiceBtn = createEl(
       "button",
       "btn",
-      t("topics_practice_again", "Refaire ce sujet")
+      t("topics_practice_again", "Øv dette emne igen")
     );
     practiceBtn.style.display = "none";
     practiceBtn.addEventListener("click", () => {
@@ -1415,7 +1415,7 @@ function finishQuiz(timeUp) {
     const continueBtn = createEl(
       "button",
       "btn",
-      t("topics_continue", "Continuer")
+      t("topics_continue", "Fortsæt")
     );
     continueBtn.id = "topicsContinueBtn";
     continueBtn.style.display = "none";
@@ -1440,7 +1440,7 @@ if (state.fromTopicsUI === true) {
   const backBtn = createEl(
     "button",
     "btn secondary",
-    t("topics_back_to_select", "Retour aux sujets")
+    t("topics_back_to_select", "Tilbage til emner")
   );
 
   backBtn.addEventListener("click", () => {
@@ -1492,7 +1492,7 @@ if (state.fromTopicsUI === true) {
 
   const h2 = createEl("h2");
   h2.setAttribute("data-i18n", "result_title");
-  h2.textContent = t("result_title", "Résultats");
+  h2.textContent = t("result_title", "Resultater");
 
   const sub = createEl("p", "muted");
   sub.setAttribute("data-i18n", "result_subtitle");
@@ -1513,7 +1513,7 @@ if (state.fromTopicsUI === true) {
   liWrong.innerHTML = `<strong>${t("result_wrong_answers", "Mauvaises réponses")}:</strong> ${incorrect}`;
 
   const liTime = createEl("li");
-  liTime.innerHTML = `<strong>${t("result_time", "Temps passé")}:</strong> ${durationLabel}`;
+  liTime.innerHTML = `<strong>${t("result_time", "Tid brugt")}:</strong> ${durationLabel}`;
 
   list.appendChild(liScore);
   list.appendChild(liCorrect);
@@ -1524,7 +1524,7 @@ if (state.fromTopicsUI === true) {
   if (timeUp) {
     const timeNote = createEl("p", "muted");
     timeNote.setAttribute("data-i18n", "test_time_up");
-    timeNote.textContent = t("test_time_up", "Temps écoulé !");
+    timeNote.textContent = t("test_time_up", "Tiden er udløbet!");
     card.appendChild(timeNote);
   }
 
@@ -1533,7 +1533,7 @@ if (state.fromTopicsUI === true) {
   const reviewBtn = createEl("button", "btn secondary", t("test_review_errors", "Revoir les erreurs"));
   reviewBtn.id = "reviewErrorsBtn";
 
-  const restartBtn = createEl("button", "btn", t("test_restart", "Recommencer"));
+  const restartBtn = createEl("button", "btn", t("test_restart", "Start forfra"));
   restartBtn.id = "restartBtn";
 
   btnBar.appendChild(reviewBtn);
@@ -1846,7 +1846,7 @@ function startReviewMode() {
   html += `
       <div style="text-align:center; margin-top:20px;">
         <button id="reviewRestartBtn" class="btn">
-          ${t("test_restart", "Recommencer")}
+          ${t("test_restart", "Start forfra")}
         </button>
       </div>
     </div>

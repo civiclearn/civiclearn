@@ -87,11 +87,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const startBtn = document.getElementById("startBtn");
   const selected = new Set();
   const bankPath = cfg.bank && cfg.bank.path;
-  const lang = window.CIVICEDGE_LANG || "pt";
 
-  const topicToMicros = {};
+  // Topic keys from config (defines which topics to show + their labels)
+  const topicLabels = (cfg.topics && cfg.topics.topicLabels) || {};
 
-  async function loadBankTopics() {
+  function normalizeLabel(str) {
+    return (str || "").normalize("NFD").replace(/\p{Diacritic}/gu, "")
+      .toLowerCase().trim().replace(/\s+/g, " ");
+  }
+
+  function getProgressKey(q) {
+    return `${q.topic || "topic"}:${q.q || ""}`;
+  }
+
+  async function loadBank() {
     if (!bankPath) return [];
     try {
       const res = await fetch(bankPath);
@@ -100,67 +109,49 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) { return []; }
   }
 
-  function isTopicMastered(topicCanon, bankQuestions, progress) {
-    const qs = bankQuestions.filter(q => q.topic && q.topic.en === topicCanon);
-    for (const q of qs) {
-      const microKey = q.microtopic && typeof q.microtopic === "object" ? q.microtopic.en : "";
-      const key = `${microKey}:${q.id}`;
-      const entry = progress[key];
-      if (!(entry && entry.correct === 1)) return false;
-    }
-    return qs.length > 0;
-  }
-
-  function getTopicProgress(topicCanon, bankQuestions, progress) {
-    const qs = bankQuestions.filter(q => q.topic && q.topic.en === topicCanon);
-    let mastered = 0;
-    for (const q of qs) {
-      const microKey = q.microtopic && typeof q.microtopic === "object" ? q.microtopic.en : "";
-      const key = `${microKey}:${q.id}`;
-      const entry = progress[key];
-      if (entry && entry.correct === 1) mastered++;
-    }
-    return { mastered, total: qs.length };
-  }
-
   async function initTopics() {
-    const bankQuestions = await loadBankTopics();
+    const bank = await loadBank();
     const progress = JSON.parse(localStorage.getItem("civicedge_progress") || "{}");
 
-    const topics = {};
-    bankQuestions.forEach(q => {
-      if (!q.topic || typeof q.topic !== "object") return;
-      const canon = q.topic.en;
-      if (!canon) return;
-      const label = q.topic[lang] || canon;
-      const microCanon = q.microtopic && typeof q.microtopic === "object" ? q.microtopic.en : "";
+    // Exclude deep questions
+    const eligible = bank.filter(q => q.depth !== "deep");
 
-      if (!topics[canon]) topics[canon] = { label, total: 0, micros: new Set() };
-      topics[canon].total++;
-      if (microCanon) topics[canon].micros.add(microCanon);
+    // Build topic stats using config keys
+    const topicStats = {};
+    Object.keys(topicLabels).forEach(key => {
+      topicStats[key] = { label: topicLabels[key] || key, total: 0, mastered: 0 };
     });
 
-    Object.entries(topics).forEach(([canon, t]) => {
-      topicToMicros[canon] = Array.from(t.micros);
+    eligible.forEach(q => {
+      const qTopic = q.topic || "";
+      const normQ = normalizeLabel(qTopic);
+      const matchedKey = Object.keys(topicLabels).find(k => normalizeLabel(topicLabels[k]) === normQ);
+      if (!matchedKey || !topicStats[matchedKey]) return;
+
+      topicStats[matchedKey].total++;
+
+      const key = getProgressKey(q);
+      const entry = progress[key];
+      if (entry && (entry.correct === 1 || entry.rights > 0)) {
+        topicStats[matchedKey].mastered++;
+      }
     });
 
     container.innerHTML = "";
 
-    Object.entries(topics).forEach(([canon, topic]) => {
-      const prog = getTopicProgress(canon, bankQuestions, progress);
-      const pct = topic.total > 0 ? Math.round((prog.mastered / topic.total) * 100) : 0;
-      const mastered = isTopicMastered(canon, bankQuestions, progress);
+    Object.entries(topicStats).forEach(([key, topic]) => {
+      if (topic.total === 0) return;
+      const pct = Math.round((topic.mastered / topic.total) * 100);
+      const isMastered = topic.mastered >= topic.total;
 
       const chip = document.createElement("button");
       chip.className = "topic-card";
-      if (mastered) chip.classList.add("mastered");
-
-      const qWord = "spørgsmål";
+      if (isMastered) chip.classList.add("mastered");
 
       chip.innerHTML = `
         <div class="topic-card-name">${topic.label}</div>
         <div class="topic-card-meta">
-          <span class="topic-card-count">${topic.total} ${qWord}</span>
+          <span class="topic-card-count">${topic.total} spørgsmål</span>
           <span class="topic-card-pct">${pct}%</span>
         </div>
         <div class="topic-card-bar"><div class="topic-card-bar-fill" style="width:${pct}%"></div></div>
@@ -169,9 +160,9 @@ document.addEventListener("DOMContentLoaded", () => {
       chip.addEventListener("click", () => {
         chip.classList.toggle("active");
         if (chip.classList.contains("active")) {
-          selected.add(canon);
+          selected.add(key);
         } else {
-          selected.delete(canon);
+          selected.delete(key);
         }
         startBtn.style.display = selected.size > 0 ? "inline-block" : "none";
         if (selected.size > 0 && window.innerWidth < 768) {
@@ -183,14 +174,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     startBtn.addEventListener("click", () => {
-      const microKeys = [];
-      selected.forEach(topicCanon => {
-        if (topicToMicros[topicCanon]) microKeys.push(...topicToMicros[topicCanon]);
-      });
+      const topicKeys = Array.from(selected);
       const limit = (cfg.topics && cfg.topics.questionCount) || 10;
       document.getElementById("quizArea").style.display = "block";
       document.querySelector("section").style.display = "none";
-      CivicEdgeEngine.start("topics", { topics: microKeys, limit: limit });
+      CivicEdgeEngine.start("topics", { topics: topicKeys, limit: limit, fromTopicsUI: true });
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
