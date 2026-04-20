@@ -227,27 +227,18 @@ function computeRollingAccuracy(history) {
     const sheetSave = document.getElementById("sheetSave");
 
     function renderCountdown() {
-      const saved = localStorage.getItem("civicedge_testDate");
+      const saved = localStorage.getItem("cl_sk_examDate");
 
-// No date set → auto-preset next official Danish test date
-if (!saved) {
-  const today = new Date();
-
-  const nextExam = new Date("2026-06-03");
-  const followingExam = new Date("2026-11-25");
-
-  const preset =
-    today <= nextExam
-      ? "2026-06-03"
-      : "2026-11-25";
-
-  localStorage.setItem("civicedge_testDate", preset);
-
-  return renderCountdown();
-}
-
-
-
+      // No date set → show empty state, wait for user input.
+      // (No hardcoded preset — Slovak exam dates aren't fixed sessions like DK.)
+      if (!saved) {
+        countdownValue.style.display = "none";
+        countdownValue.textContent = "";
+        examNoDate.style.display = "block";
+        openDateSheet.textContent = "Nastaviť dátum →";
+        card.style.setProperty("--countdownColor", getCountdownColor(NaN));
+        return;
+      }
 
       const today = new Date();
       const examDate = new Date(saved);
@@ -255,21 +246,15 @@ if (!saved) {
 
       countdownValue.style.display = "block";
       examNoDate.style.display = "none";
-	  openDateSheet.textContent = "Upraviť dátum →";
+      openDateSheet.textContent = "Upraviť dátum →";
 
-      // Text update (Slovak-only product — simplified, no i18n indirection)
-      const applyText = () => {
-        if (diff >= 0) {
-          // "D-N" format: D = Deň (day), N = days until exam
-          countdownValue.textContent = `D-${diff}`;
-        } else {
-          countdownValue.textContent = "Skúška prebehla";
-        }
-      };
+      // "D-N" format: D = Deň (day), N = days until exam
+      if (diff >= 0) {
+        countdownValue.textContent = `D-${diff}`;
+      } else {
+        countdownValue.textContent = "Skúška prebehla";
+      }
 
-      applyText();
-
-      // Gradient tied directly to the numeric diff
       card.style.setProperty("--countdownColor", getCountdownColor(diff));
     }
 
@@ -279,7 +264,10 @@ if (!saved) {
       if (!sheet) return;
       sheet.classList.add("active");
       sheetOverlay.classList.add("active");
-      sheetInput.value = localStorage.getItem("civicedge_testDate") || "";
+      const examDateInput = document.getElementById("examDateInput");
+      if (examDateInput) {
+        examDateInput.value = localStorage.getItem("cl_sk_examDate") || "";
+      }
     }
 
     function closeSheet() {
@@ -293,12 +281,13 @@ if (!saved) {
 
     if (sheetSave) {
       sheetSave.addEventListener("click", () => {
-        const v = document.querySelector('input[name="examDate"]:checked')?.value;
+        const examDateInput = document.getElementById("examDateInput");
+        const v = examDateInput?.value;
         if (!v) {
-  localStorage.removeItem("civicedge_testDate");
-} else {
-  localStorage.setItem("civicedge_testDate", v);
-}
+          localStorage.removeItem("cl_sk_examDate");
+        } else {
+          localStorage.setItem("cl_sk_examDate", v);
+        }
         closeSheet();
         renderCountdown();
       });
