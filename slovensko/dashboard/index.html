@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prehľad — CivicLearn</title>
+  <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <link rel="stylesheet" href="/slovensko/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/slovensko/assets/css/dashboard-v2.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+
+  <style>
+    /* ========== Slovak accent override ========== */
+    :root {
+      --accent: #0B4EA2;
+      --accent-hover: #08407f;
+      --accent-soft: #e8efff;
+      --accent-soft-border: #b8cfee;
+    }
+
+    /* ========== Article training row (new section ②) ========== */
+    .db-article-row {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .db-art-card {
+      background: var(--card-bg, #fff);
+      border: 1px solid var(--border, #e5e7eb);
+      border-radius: var(--radius, 14px);
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      min-height: 160px;
+    }
+    .db-art-card .db-art-label {
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted, #6b7280);
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    /* Last result card */
+    .db-art-last-empty {
+      color: var(--text-muted, #6b7280);
+      font-size: 0.9rem;
+      line-height: 1.55;
+      flex: 1;
+    }
+    .db-art-last-filled {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+    }
+    .db-art-grade {
+      width: 68px; height: 68px;
+      border-radius: 50%;
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.9rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      letter-spacing: -0.02em;
+    }
+    .db-art-grade.g1 { background: #16a34a; }
+    .db-art-grade.g2 { background: #65a30d; }
+    .db-art-grade.g3 { background: #d97706; }
+    .db-art-grade.g4 { background: #ea580c; }
+    .db-art-grade.g5 { background: #dc2626; }
+    .db-art-last-meta { flex: 1; min-width: 0; }
+    .db-art-last-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .db-art-last-date {
+      font-size: 0.78rem;
+      color: var(--text-muted, #6b7280);
+      margin-bottom: 8px;
+    }
+    .db-art-dims {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .db-art-dim-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      color: var(--text-muted, #6b7280);
+    }
+    .db-art-dim-value {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      line-height: 18px;
+    }
+    .db-art-dim-value.g1 { background: #16a34a; }
+    .db-art-dim-value.g2 { background: #65a30d; }
+    .db-art-dim-value.g3 { background: #d97706; }
+    .db-art-dim-value.g4 { background: #ea580c; }
+    .db-art-dim-value.g5 { background: #dc2626; }
+    .db-art-last-link {
+      margin-top: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .db-art-last-link:hover { text-decoration: underline; }
+
+    /* Start-new card */
+    .db-art-start-heading {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 4px 0;
+    }
+    .db-art-start-sub {
+      font-size: 0.84rem;
+      color: var(--text-muted, #6b7280);
+      line-height: 1.5;
+      margin: 0 0 auto 0;
+      padding-bottom: 16px;
+    }
+    .db-art-start-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .db-art-start-btn-primary {
+      flex: 1;
+      min-width: 140px;
+      padding: 11px 16px;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .db-art-start-btn-primary:hover { background: var(--accent-hover); }
+    .db-art-start-note {
+      font-size: 0.72rem;
+      color: var(--text-muted, #9ca3af);
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    @media (max-width: 720px) {
+      .db-article-row { grid-template-columns: 1fr; }
+      .db-art-last-filled { flex-direction: column; align-items: flex-start; text-align: left; }
+      .db-art-grade { width: 54px; height: 54px; font-size: 1.6rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Slovensko">
+        <rect width="640" height="133" fill="#FFFFFF"/>
+        <rect y="133" width="640" height="134" fill="#0B4EA2"/>
+        <rect y="267" width="640" height="133" fill="#EE1C25"/>
+      </svg>
+    </div>
+
+    <!-- Two gauges: civic knowledge + language readiness -->
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label">Znalosti</span>
+        <span class="sidebar-gauge-score" id="clGaugeKnowledge">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeKnowledgeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugeKnowledgePass"></div>
+      </div>
+    </div>
+    <div class="sidebar-gauge" style="margin-top:10px;">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label">Jazyk</span>
+        <span class="sidebar-gauge-score" id="clGaugeLanguage">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeLanguageFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugeLanguagePass"></div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="index.html" class="active">Prehľad</a>
+      <a href="simulation.html">Simulácia testu</a>
+      <a href="quick.html">Rýchly test</a>
+      <a href="topics.html">Testy podľa témy</a>
+      <a href="traps.html">Časté chyby</a>
+      <a href="flashcards.html">Kartičky</a>
+      <a href="article.html">Článok a súhrn</a>
+      <div class="nav-sep"></div>
+      <a href="pohovor-tipy.html">Tipy na pohovor</a>
+      <a href="history.html">História</a>
+      <a href="my-list.html">Môj zoznam</a>
+      <a href="help.html">Pomoc</a>
+      <a href="#" id="logoutLink">Odhlásiť</a>
+    </nav>
+    <div class="spacer"></div>
+  </aside>
+
+  <div class="overlay" id="menuOverlay"></div>
+
+  <main>
+    <div id="quiz" style="display:none"></div>
+
+    <div class="dashboard-container">
+
+      <!-- ① Stats (unchanged from medborgerskab v2) -->
+      <div class="db-stats-row anim d1">
+        <div class="db-stat-card cd" id="countdownCard">
+          <div class="db-stat-value" id="examCountdown"></div>
+          <div class="db-stat-label" id="examNoDate">Zadajte dátum skúšky</div>
+          <button class="db-stat-label" id="openDateSheet" style="background:none;border:none;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11.5px;font-weight:600;padding:0">Nastaviť dátum →</button>
+        </div>
+        <div class="db-stat-card ans">
+          <div class="db-stat-value" id="tmAnswered">0</div>
+          <div class="db-stat-label">Zodpovedané otázky</div>
+        </div>
+        <div class="db-stat-card acc">
+          <div class="db-stat-value" id="tmAccuracy">0%</div>
+          <div class="db-stat-label">Miera zvládnutia</div>
+        </div>
+        <div class="db-stat-card time-card">
+          <div class="db-stat-value" id="tmTime">0m</div>
+          <div class="db-stat-label">Celkový čas štúdia</div>
+        </div>
+        <div class="db-stat-card streak">
+          <div class="db-stat-value" id="tmStreak">0</div>
+          <div class="db-stat-label">Denná séria</div>
+        </div>
+      </div>
+
+      <!-- Date picker sheet -->
+      <div class="date-sheet-overlay" id="dateSheetOverlay"></div>
+      <div class="date-sheet" id="dateSheet">
+        <h3>Nastaviť dátum skúšky</h3>
+        <input type="date" id="examDateInput">
+        <div class="date-sheet-actions">
+          <button class="btn secondary" id="sheetCancel">Zrušiť</button>
+          <button class="btn" id="sheetSave">Uložiť</button>
+        </div>
+      </div>
+
+      <!-- ② NEW: Article training row -->
+      <div class="db-article-row anim d2">
+        <!-- Card A: last article result -->
+        <div class="db-art-card">
+          <div class="db-art-label">Posledný článok</div>
+          <div id="artLastContent">
+            <!-- Empty state by default; replaced with filled version if user has done one -->
+            <div class="db-art-last-empty">
+              Ešte ste neskúšali žiaden článok. Začnite prvým tréningom a zistite, ako ste pripravený na písomnú časť skúšky.
+            </div>
+          </div>
+        </div>
+
+        <!-- Card B: start new -->
+        <div class="db-art-card">
+          <div class="db-art-label">Začať nový</div>
+          <div class="db-art-start-heading">Článok a súhrn</div>
+          <p class="db-art-start-sub">Prečítajte náhodne vybraný článok a napíšte jeho súhrn. Dostanete detailné hodnotenie v štyroch dimenziách.</p>
+          <div class="db-art-start-buttons">
+            <a href="article.html" class="db-art-start-btn-primary">Náhodný článok →</a>
+          </div>
+          <div class="db-art-start-note">Reálny čas na skúške: 30 minút na písomný súhrn</div>
+        </div>
+      </div>
+
+      <!-- ③ Launchers (MCQ training modes) -->
+      <div class="db-actions-row anim d2">
+        <a href="simulation.html" class="db-action-card hide-mobile">
+          <div class="db-action-icon">⏱</div>
+          <div class="db-action-title">Simulácia testu</div>
+          <div class="db-action-desc">Precvičte si MCQ otázky v prostredí podobnom skúške.</div>
+          <div class="db-action-go">Začať →</div>
+        </a>
+        <a href="quick.html" class="db-action-card">
+          <div class="db-action-icon">⚡</div>
+          <div class="db-action-title">Rýchly test</div>
+          <div class="db-action-desc">5 náhodných otázok. Ideálne na krátku prestávku.</div>
+          <div class="db-action-go">Začať →</div>
+        </a>
+        <a href="topics.html" class="db-action-card">
+          <div class="db-action-icon">📚</div>
+          <div class="db-action-title">Testy podľa témy</div>
+          <div class="db-action-desc">Vyberte si tému a zvládnite ju postupne. Chyby sa vracajú.</div>
+          <div class="db-action-go">Začať →</div>
+        </a>
+        <a href="flashcards.html" class="db-action-card hide-mobile">
+          <div class="db-action-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="3" width="12" height="9" rx="1.5" stroke="var(--accent)" stroke-width="1.5"/><rect x="5" y="6" width="12" height="9" rx="1.5" stroke="var(--accent)" stroke-width="1.5" fill="var(--accent-soft)"/></svg></div>
+          <div class="db-action-title">Kartičky</div>
+          <div class="db-action-desc">Prelistujte otázky a odpovede podľa témy.</div>
+          <div class="db-action-go">Otvoriť →</div>
+        </a>
+      </div>
+
+      <!-- ④ Polar area chart + Sequential Practice -->
+      <div class="db-insight-row anim d3">
+        <div class="db-chart-card db-polar-card">
+          <div class="chart-bg-fill" id="chartBgFill"></div>
+          <div class="chart-mastery-header">
+            <span class="chart-mastery-pct" id="chartMasteryPct">0%</span>
+            <span class="chart-mastery-sub" id="chartMasterySub">0 / 0</span>
+          </div>
+          <div class="polar-wrap">
+            <div class="chart-wrap" style="height:260px"><canvas id="polarChart"></canvas></div>
+          </div>
+        </div>
+        <div class="db-chart-card" id="seqCard">
+          <div class="seq-header">
+            <div class="db-chart-title" style="margin-bottom:0">Cvičenie</div>
+            <div class="seq-counter" id="seqCounter"></div>
+          </div>
+          <div class="seq-question" id="seqQuestion"></div>
+          <div class="seq-options" id="seqOptions"></div>
+          <div class="seq-nav">
+            <button class="seq-nav-btn" id="seqPrev" aria-label="Previous">
+              <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M10 5.5L7 9l3 3.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="seq-nav-btn" id="seqNext" aria-label="Next">
+              <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 5.5l3 3.5-3 3.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ⑤ Tips (one swapped for article-oriented advice) -->
+      <div class="db-tips-row anim d4" id="tipsRow">
+        <div class="db-tip-card">
+          <div class="db-tip-title">Začnite s témami</div>
+          <div class="db-tip-text">Testy podľa témy používajú progresívne zvládnutie. Chyby sa vracajú, kým neodpoviete správne.</div>
+        </div>
+        <div class="db-tip-card">
+          <div class="db-tip-title">Označte si ťažké otázky</div>
+          <div class="db-tip-text">Použite hviezdičku ☆ pri ktorejkoľvek otázke a vytvorte si osobný zoznam na opakovanie.</div>
+        </div>
+        <div class="db-tip-card">
+          <div class="db-tip-title">Čítajte nahlas pravidelne</div>
+          <div class="db-tip-text">Plynulosť pri čítaní sa prenesie aj do písomného súhrnu. Porozumenie sa upevní, keď text najprv vyslovíte.</div>
+        </div>
+      </div>
+
+      <div class="db-footer">
+        © 2026 — CivicLearn by Testrada — Všetky práva vyhradené.
+      </div>
+
+    </div>
+
+    <!-- Hidden canvases for charts (MCQ engine dependency, unchanged) -->
+    <div style="display:none">
+      <canvas id="globalChart"></canvas>
+      <canvas id="topicsChart"></canvas>
+      <canvas id="trendChart"></canvas>
+      <canvas id="accuracyChart"></canvas>
+      <div id="globalPct"></div>
+      <div id="globalAnswered"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ================================================================== -->
+<!-- MCQ engine scripts (Denis: clone from /medborgerskab/ to /slovensko/) -->
+<!-- ================================================================== -->
+<script src="/slovensko/assets/js/lang-bootstrap-sk.js"></script>
+<script src="/slovensko/assets/js/config-sk.js"></script>
+<script src="/slovensko/assets/js/engine-sk.js"></script>
+<script src="/slovensko/assets/js/sync.js"></script>
+
+<!-- Shared: study timer (MCQ gauge handled by our own script below) -->
+<script src="/slovensko/assets/js/gauge-bar-sk.js"></script>
+<script src="/slovensko/assets/js/study-timer.js"></script>
+
+<!-- Dashboard logic from medborgerskab, works once MCQ engine is ported -->
+<script src="/slovensko/assets/js/dashboard-v2-sk.js"></script>
+<script src="/slovensko/assets/js/dashboard-extra-sk.js"></script>
+<script src="/slovensko/assets/js/dashboard-sequential-sk.js"></script>
+
+<!-- Mobile menu -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+});
+</script>
+
+<!-- ================================================================== -->
+<!-- Article panel + language gauge (NEW, Slovak-specific)                -->
+<!-- ================================================================== -->
+<script>
+(async function() {
+  const SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs";
+  const PASS_THRESHOLD = 75;
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true }
+  });
+
+  // Logout
+  document.getElementById("logoutLink")?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await sb.auth.signOut();
+    location.href = "/slovensko/login.html";
+  });
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return; // nothing to populate
+
+  // Fetch user's article attempts (latest 5 for gauge avg, 1 for card)
+  const { data: attempts, error } = await sb
+    .from("sk_article_attempts")
+    .select("id, article_id, created_at, grade_overall, grade_fidelity, grade_completeness, grade_language, grade_coherence, eval_status")
+    .eq("user_id", session.user.id)
+    .eq("eval_status", "done")
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  if (error) {
+    console.warn("sk_article_attempts fetch:", error);
+    return;
+  }
+
+  // ---- Populate Card A: last result ----
+  if (attempts && attempts.length > 0) {
+    const last = attempts[0];
+    // Map article_id → title via articles.json
+    let title = last.article_id;
+    try {
+      const poolRes = await fetch("/slovensko/data/articles.json");
+      if (poolRes.ok) {
+        const pool = await poolRes.json();
+        const a = pool.articles.find(x => x.id === last.article_id);
+        if (a) title = a.title;
+      }
+    } catch {}
+
+    const date = new Date(last.created_at);
+    const dateStr = date.toLocaleDateString("sk-SK", { day: "numeric", month: "long", year: "numeric" });
+    const g = last.grade_overall;
+
+    document.getElementById("artLastContent").innerHTML = `
+      <div class="db-art-last-filled">
+        <div class="db-art-grade g${g}">${g}</div>
+        <div class="db-art-last-meta">
+          <div class="db-art-last-title">${escapeHtml(title)}</div>
+          <div class="db-art-last-date">${dateStr}</div>
+          <div class="db-art-dims">
+            ${dimDot("Vernosť", last.grade_fidelity)}
+            ${dimDot("Úplnosť", last.grade_completeness)}
+            ${dimDot("Jazyk", last.grade_language)}
+            ${dimDot("Súdržnosť", last.grade_coherence)}
+          </div>
+          <a href="history.html" class="db-art-last-link">Pozrieť všetky pokusy →</a>
+        </div>
+      </div>
+    `;
+  }
+
+  // ---- Populate Language gauge (avg of last 5 grades, mapped 0–100) ----
+  if (attempts && attempts.length >= 1) {
+    const grades = attempts.map(a => a.grade_overall).filter(g => g != null);
+    if (grades.length > 0) {
+      const avg = grades.reduce((s, g) => s + g, 0) / grades.length;
+      // Map 1–5 (best→worst) to 100–0 (best→worst)
+      // 1 → 100, 2 → 80, 3 → 60, 4 → 40, 5 → 20
+      const score = Math.round((6 - avg) * 20);
+      // Delegate to gauge-bar-sk.js which writes cache and renders.
+      // The cache is read by every other page's sidebar, keeping the
+      // Language gauge in sync across the whole product.
+      if (window.CLSKGauge) window.CLSKGauge.updateLanguage(score, grades.length);
+    }
+  }
+
+  // Knowledge gauge: gauge-bar-sk.js reads cl_gauge_cache (written by
+  // dashboard-extra-sk.js when that file is ported). Until then, stays "–".
+
+  function dimDot(name, grade) {
+    if (grade == null) return "";
+    return `<span class="db-art-dim-dot">
+      <span class="db-art-dim-value g${grade}">${grade}</span>
+      ${escapeHtml(name)}
+    </span>`;
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    }[c]));
+  }
+})();
+</script>
+
+<script src="/assets/js/maintenance-bar.js"></script>
+</body>
+</html>

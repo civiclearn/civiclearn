@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pomoc a kontakt — CivicLearn</title>
+  <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <link rel="stylesheet" href="/slovensko/assets/css/civic-v2.css">
+
+  <style>
+    :root {
+      --accent: #0B4EA2;
+      --accent-hover: #08407f;
+      --accent-soft: #e8efff;
+      --accent-soft-border: #b8cfee;
+    }
+    .help-container { max-width: 700px; }
+    .help-section { margin-bottom: 28px; }
+    .help-section h2 { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; overflow: hidden; }
+    .faq-q { padding: 14px 18px; cursor: pointer; font-size: 14px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q:hover { background: var(--accent-soft); }
+    .faq-arrow { font-size: 12px; color: var(--text-muted); transition: transform 0.2s; }
+    .faq-item.open .faq-arrow { transform: rotate(90deg); }
+    .faq-a { display: none; padding: 0 18px 14px; font-size: 13px; color: var(--text-mid); line-height: 1.6; }
+    .faq-item.open .faq-a { display: block; }
+    .contact-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+    .contact-form label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
+    .contact-form input, .contact-form textarea { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font); font-size: 14px; margin-bottom: 14px; }
+    .contact-form input:focus, .contact-form textarea:focus { outline: none; border-color: var(--accent); }
+    .contact-form textarea { min-height: 100px; resize: vertical; }
+    .contact-success { text-align: center; padding: 20px 0; }
+    .contact-success h3 { font-size: 18px; margin-bottom: 4px; }
+    .contact-success p { color: var(--text-muted); font-size: 13px; }
+    .help-reset { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); }
+    .reset-btn { padding: 8px 20px; border-radius: var(--radius-sm); font-family: var(--font); font-size: 13px; font-weight: 600; background: var(--wrong-bg); color: #991b1b; border: 1px solid #fecaca; cursor: pointer; transition: all 0.15s; }
+    .reset-btn:hover { background: #fecaca; }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+
+<body>
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Slovensko">
+        <rect width="640" height="133" fill="#FFFFFF"/>
+        <rect y="133" width="640" height="134" fill="#0B4EA2"/>
+        <rect y="267" width="640" height="133" fill="#EE1C25"/>
+      </svg>
+    </div>
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label">Znalosti</span>
+        <span class="sidebar-gauge-score" id="clGaugeKnowledge">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeKnowledgeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugeKnowledgePass"></div>
+      </div>
+    </div>
+    <div class="sidebar-gauge" style="margin-top:10px;">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label">Jazyk</span>
+        <span class="sidebar-gauge-score" id="clGaugeLanguage">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeLanguageFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugeLanguagePass"></div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="index.html">Prehľad</a>
+      <a href="simulation.html">Simulácia testu</a>
+      <a href="quick.html">Rýchly test</a>
+      <a href="topics.html">Testy podľa témy</a>
+      <a href="traps.html">Časté chyby</a>
+      <a href="flashcards.html">Kartičky</a>
+      <a href="article.html">Článok a súhrn</a>
+      <div class="nav-sep"></div>
+      <a href="pohovor-tipy.html">Tipy na pohovor</a>
+      <a href="history.html">História</a>
+      <a href="my-list.html">Môj zoznam</a>
+      <a href="help.html" class="active">Pomoc</a>
+      <a href="#" id="logoutLink">Odhlásiť</a>
+    </nav>
+    <div class="spacer"></div>
+  </aside>
+
+  <div class="overlay" id="menuOverlay"></div>
+
+  <main>
+    <header class="ce-header">
+      <h1>Pomoc a kontakt</h1>
+    </header>
+
+    <div class="help-container">
+      <!-- FAQs -->
+      <div class="help-section">
+        <h2>Často kladené otázky</h2>
+
+        <div class="faq-item">
+          <div class="faq-q">Čo pokrýva tento tréning? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">Táto platforma vás pripravuje na skúšku zo slovenského jazyka a reálií na získanie štátneho občianstva SR podľa § 8 zákona 40/1993 Z. z. MCQ otázky pokrývajú slovenské reálie, históriu, geografiu a spoločensko-politický vývoj. Modul „Článok a súhrn" simuluje písomnú časť skúšky.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Je toto oficiálna skúška? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">Nie. Sme nezávislá prípravná platforma. MCQ otázky sú založené na oficiálnych tematických oblastiach skúšky, no nejde o oficiálne otázky. Samotná skúška nemá pevný zoznam otázok — komisia na obvodnom úrade vám kladie otázky v rámci zákonom určených tém (§ 8 ods. 6 písm. a).</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Ako funguje vlnový systém pri testoch podľa témy? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">Keď precvičujete podľa témy, nesprávne odpovede sa vracajú v ďalšej vlne. To pokračuje, kým na všetky otázky v téme neodpoviete správne.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Čo hodnotí AI v module „Článok a súhrn"? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">AI porovnáva váš súhrn s pôvodným článkom v štyroch dimenziách: vernosť obsahu, úplnosť, jazyk a súdržnosť. Každú dimenziu ohodnotí slovenskou školskou známkou 1–5. Celková známka zodpovedá najhoršej z nich — tak ako to posudzuje skutočná komisia.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Prečo nehodnotíte moje hlasné čítanie? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">Na skúške komisia sleduje plynulosť čítania, nie dokonalú výslovnosť. Automatické hodnotenie prízvuku L2 hovorcov je nespoľahlivé a môže byť skôr zavádzajúce ako užitočné. Nahrávka pri čítaní slúži vám na vlastnú kontrolu — môžete si ju prehrať a počuť, ako plynulo ste článok prečítali.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Môžem platformu používať na telefóne? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">Áno. Platforma funguje na telefónoch, tabletoch aj počítačoch. Pre modul „Článok a súhrn" odporúčame počítač alebo tablet — pohodlnejšie sa na ňom píše dlhší súhrn.</div>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="help-section">
+        <h2>Napíšte nám</h2>
+        <div class="contact-form" id="contactForm">
+          <label>Vaše meno</label>
+          <input type="text" id="contactName">
+          <label>Váš e-mail</label>
+          <input type="email" id="contactEmail">
+          <label>Vaša správa</label>
+          <textarea id="contactMessage"></textarea>
+          <button class="btn" id="contactSubmit">Odoslať</button>
+        </div>
+      </div>
+
+      <!-- Reset -->
+      <div class="help-reset">
+        <button class="reset-btn" id="resetBtn">Resetovať tréningové údaje</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+
+  // FAQ accordion
+  document.querySelectorAll(".faq-q").forEach(q => {
+    q.addEventListener("click", () => q.closest(".faq-item").classList.toggle("open"));
+  });
+
+  // Contact form
+  document.getElementById("contactSubmit")?.addEventListener("click", async () => {
+    const name = document.getElementById("contactName").value.trim();
+    const email = document.getElementById("contactEmail").value.trim();
+    const message = document.getElementById("contactMessage").value.trim();
+    if (!name || !email || !message) return alert("Vyplňte prosím všetky polia.");
+    try {
+      await fetch("https://civiclearn.app.n8n.cloud/webhook/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message, product: "slovensko", language: "sk" })
+      });
+      document.getElementById("contactForm").innerHTML = `<div class="contact-success"><h3>Správa bola odoslaná</h3><p>Ďakujeme. Odpovieme vám čo najskôr.</p></div>`;
+    } catch {
+      alert("Správu sa nepodarilo odoslať. Skúste to znova.");
+    }
+  });
+
+  // Reset
+  document.getElementById("resetBtn")?.addEventListener("click", () => {
+    if (!confirm("Naozaj chcete resetovať všetky tréningové údaje? Toto zmaže váš pokrok v MCQ testoch. Pokusy o článok v databáze zostanú zachované.")) return;
+    ["civicedge_progress", "civicedge_stats", "civicedge_saved", "civiclearn_answered_mcqs", "cl_gauge_cache", "civiclearn:sk:dashseq:index"].forEach(k => localStorage.removeItem(k));
+    alert("Vaše údaje boli resetované.");
+    location.reload();
+  });
+});
+</script>
+
+<script src="/slovensko/assets/js/gauge-bar.js"></script>
+<script src="/slovensko/assets/js/study-timer.js"></script>
+<script src="/assets/js/maintenance-bar.js"></script>
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>

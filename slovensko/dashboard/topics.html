@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Testy podľa témy — CivicLearn</title>
+  <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <link rel="stylesheet" href="/slovensko/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/slovensko/assets/css/test-v2.css">
+
+  <style>
+    :root {
+      --accent: #0B4EA2;
+      --accent-hover: #08407f;
+      --accent-soft: #e8efff;
+      --accent-soft-border: #b8cfee;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+
+<body class="test-page">
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Slovensko">
+        <rect width="640" height="133" fill="#FFFFFF"/>
+        <rect y="133" width="640" height="134" fill="#0B4EA2"/>
+        <rect y="267" width="640" height="133" fill="#EE1C25"/>
+      </svg>
+    </div>
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label">Znalosti</span>
+        <span class="sidebar-gauge-score" id="clGaugeKnowledge">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeKnowledgeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugeKnowledgePass"></div>
+      </div>
+    </div>
+    <div class="sidebar-gauge" style="margin-top:10px;">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label">Jazyk</span>
+        <span class="sidebar-gauge-score" id="clGaugeLanguage">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeLanguageFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugeLanguagePass"></div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="index.html">Prehľad</a>
+      <a href="simulation.html">Simulácia testu</a>
+      <a href="quick.html">Rýchly test</a>
+      <a href="topics.html" class="active">Testy podľa témy</a>
+      <a href="traps.html">Časté chyby</a>
+      <a href="flashcards.html">Kartičky</a>
+      <a href="article.html">Článok a súhrn</a>
+      <div class="nav-sep"></div>
+      <a href="pohovor-tipy.html">Tipy na pohovor</a>
+      <a href="history.html">História</a>
+      <a href="my-list.html">Môj zoznam</a>
+      <a href="help.html">Pomoc</a>
+      <a href="#" id="logoutLink">Odhlásiť</a>
+    </nav>
+    <div class="spacer"></div>
+  </aside>
+  <div class="overlay" id="menuOverlay"></div>
+
+  <main>
+    <header class="ce-header">
+      <h1>Testy podľa témy</h1>
+    </header>
+
+    <div class="quiz-container" id="quizArea" style="display:none;">
+      <div class="ce-progress-global">
+        <div class="ce-progress-global-bar" id="topicsProgress"></div>
+      </div>
+      <div id="quiz"></div>
+    </div>
+
+    <section style="max-width:900px;">
+      <div id="topicContainer"></div>
+      <button id="startBtn" class="btn">Začať</button>
+    </section>
+  </main>
+</div>
+
+<script src="/slovensko/assets/js/lang-bootstrap-sk.js"></script>
+<script src="/slovensko/assets/js/config-sk.js"></script>
+<script src="/slovensko/assets/js/engine-sk.js"></script>
+<script src="/slovensko/assets/js/sync.js"></script>
+<script src="/slovensko/assets/js/reading.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const cfg = window.CIVICEDGE_CONFIG || {};
+  const container = document.getElementById("topicContainer");
+  const startBtn = document.getElementById("startBtn");
+  const selected = new Set();
+  const bankPath = cfg.bank && cfg.bank.path;
+  const lang = window.CIVICEDGE_LANG || "sk";
+
+  const topicToMicros = {};
+
+  // Slovak plural: 1 otázka, 2-4 otázky, 5+ otázok
+  function pluralOtazok(n) {
+    if (n === 1) return "otázka";
+    if (n >= 2 && n <= 4) return "otázky";
+    return "otázok";
+  }
+
+  async function loadBankTopics() {
+    if (!bankPath) return [];
+    try {
+      const res = await fetch(bankPath);
+      const raw = await res.json();
+      return Array.isArray(raw) ? raw : (raw.questions || []);
+    } catch (e) { return []; }
+  }
+
+  function isTopicMastered(topicCanon, bankQuestions, progress) {
+    const qs = bankQuestions.filter(q => q.topic && q.topic.en === topicCanon);
+    for (const q of qs) {
+      const microKey = q.microtopic && typeof q.microtopic === "object" ? q.microtopic.en : "";
+      const key = `${microKey}:${q.id}`;
+      const entry = progress[key];
+      if (!(entry && entry.correct === 1)) return false;
+    }
+    return qs.length > 0;
+  }
+
+  function getTopicProgress(topicCanon, bankQuestions, progress) {
+    const qs = bankQuestions.filter(q => q.topic && q.topic.en === topicCanon);
+    let mastered = 0;
+    for (const q of qs) {
+      const microKey = q.microtopic && typeof q.microtopic === "object" ? q.microtopic.en : "";
+      const key = `${microKey}:${q.id}`;
+      const entry = progress[key];
+      if (entry && entry.correct === 1) mastered++;
+    }
+    return { mastered, total: qs.length };
+  }
+
+  async function initTopics() {
+    const bankQuestions = await loadBankTopics();
+    const progress = JSON.parse(localStorage.getItem("civicedge_progress") || "{}");
+
+    const topics = {};
+    bankQuestions.forEach(q => {
+      if (!q.topic || typeof q.topic !== "object") return;
+      const canon = q.topic.en;
+      if (!canon) return;
+      const label = q.topic[lang] || q.topic.en;
+      const microCanon = q.microtopic && typeof q.microtopic === "object" ? q.microtopic.en : "";
+
+      if (!topics[canon]) topics[canon] = { label, total: 0, micros: new Set() };
+      topics[canon].total++;
+      if (microCanon) topics[canon].micros.add(microCanon);
+    });
+
+    Object.entries(topics).forEach(([canon, t]) => {
+      topicToMicros[canon] = Array.from(t.micros);
+    });
+
+    container.innerHTML = "";
+
+    Object.entries(topics).forEach(([canon, topic]) => {
+      const prog = getTopicProgress(canon, bankQuestions, progress);
+      const pct = topic.total > 0 ? Math.round((prog.mastered / topic.total) * 100) : 0;
+      const mastered = isTopicMastered(canon, bankQuestions, progress);
+
+      const chip = document.createElement("button");
+      chip.className = "topic-card";
+      if (mastered) chip.classList.add("mastered");
+
+      chip.innerHTML = `
+        <div class="topic-card-name">${topic.label}</div>
+        <div class="topic-card-meta">
+          <span class="topic-card-count">${topic.total} ${pluralOtazok(topic.total)}</span>
+          <span class="topic-card-pct">${pct}%</span>
+        </div>
+        <div class="topic-card-bar"><div class="topic-card-bar-fill" style="width:${pct}%"></div></div>
+      `;
+
+      chip.addEventListener("click", () => {
+        chip.classList.toggle("active");
+        if (chip.classList.contains("active")) {
+          selected.add(canon);
+        } else {
+          selected.delete(canon);
+        }
+        startBtn.style.display = selected.size > 0 ? "inline-block" : "none";
+        if (selected.size > 0 && window.innerWidth < 768) {
+          setTimeout(() => startBtn.scrollIntoView({ behavior: "smooth", block: "center" }), 150);
+        }
+      });
+
+      container.appendChild(chip);
+    });
+
+    startBtn.addEventListener("click", () => {
+      const microKeys = [];
+      selected.forEach(topicCanon => {
+        if (topicToMicros[topicCanon]) microKeys.push(...topicToMicros[topicCanon]);
+      });
+      const limit = (cfg.topics && cfg.topics.questionCount) || 10;
+      document.getElementById("quizArea").style.display = "block";
+      document.querySelector("section").style.display = "none";
+      CivicEdgeEngine.start("topics", { topics: microKeys, limit: limit });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
+  initTopics();
+
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+});
+</script>
+
+<script src="/slovensko/assets/js/gauge-bar-sk.js"></script>
+<script src="/slovensko/assets/js/study-timer.js"></script>
+<script src="/assets/js/maintenance-bar.js"></script>
+<script src="/assets/js/signout.js"></script>
+</body></html>

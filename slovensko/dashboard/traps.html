@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Časté chyby — CivicLearn</title>
+  <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <link rel="stylesheet" href="/slovensko/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/slovensko/assets/css/test-v2.css">
+
+  <style>
+    :root {
+      --accent: #0B4EA2;
+      --accent-hover: #08407f;
+      --accent-soft: #e8efff;
+      --accent-soft-border: #b8cfee;
+    }
+    .traps-tabs {
+      display: flex;
+      gap: 0;
+      max-width: 900px;
+      margin: 0 0 18px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border, #e5e7eb);
+      background: var(--bg-muted, #f3f4f6);
+    }
+    .traps-tab {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted, #6b7280);
+      cursor: pointer;
+      transition: all .2s ease;
+      text-align: center;
+    }
+    .traps-tab.active {
+      background: var(--card, #fff);
+      color: var(--ink, #111827);
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+    .traps-tab-count {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--bg-muted, #e5e7eb);
+      color: var(--muted, #6b7280);
+    }
+    .traps-tab.active .traps-tab-count {
+      background: var(--accent);
+      color: #fff;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+
+<body>
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Slovensko">
+        <rect width="640" height="133" fill="#FFFFFF"/>
+        <rect y="133" width="640" height="134" fill="#0B4EA2"/>
+        <rect y="267" width="640" height="133" fill="#EE1C25"/>
+      </svg>
+    </div>
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label">Znalosti</span>
+        <span class="sidebar-gauge-score" id="clGaugeKnowledge">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeKnowledgeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugeKnowledgePass"></div>
+      </div>
+    </div>
+    <div class="sidebar-gauge" style="margin-top:10px;">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label">Jazyk</span>
+        <span class="sidebar-gauge-score" id="clGaugeLanguage">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeLanguageFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugeLanguagePass"></div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="index.html">Prehľad</a>
+      <a href="simulation.html">Simulácia testu</a>
+      <a href="quick.html">Rýchly test</a>
+      <a href="topics.html">Testy podľa témy</a>
+      <a href="traps.html" class="active">Časté chyby</a>
+      <a href="flashcards.html">Kartičky</a>
+      <a href="article.html">Článok a súhrn</a>
+      <div class="nav-sep"></div>
+      <a href="pohovor-tipy.html">Tipy na pohovor</a>
+      <a href="history.html">História</a>
+      <a href="my-list.html">Môj zoznam</a>
+      <a href="help.html">Pomoc</a>
+      <a href="#" id="logoutLink">Odhlásiť</a>
+    </nav>
+    <div class="spacer"></div>
+  </aside>
+  <div class="overlay" id="menuOverlay"></div>
+
+  <main>
+    <header class="ce-header"><h1>Časté chyby</h1></header>
+
+    <!-- TABS: Personal traps vs 100 hardest -->
+    <div class="traps-tabs" id="trapsTabs">
+      <button class="traps-tab active" data-tab="mine">
+        Moje chyby<span class="traps-tab-count" id="mineCount">–</span>
+      </button>
+      <button class="traps-tab" data-tab="common">
+        100 najťažších<span class="traps-tab-count" id="commonCount">–</span>
+      </button>
+    </div>
+
+    <div class="ce-progress-global"><div class="ce-progress-global-bar" id="trapsProgress"></div></div>
+    <div class="quiz-container" id="quizArea"><div id="quiz"></div></div>
+  </main>
+</div>
+
+<script src="/slovensko/assets/js/lang-bootstrap-sk.js"></script>
+<script src="/slovensko/assets/js/config-sk.js"></script>
+<script src="/slovensko/assets/js/engine-sk.js"></script>
+<script src="/slovensko/assets/js/sync.js"></script>
+<script src="/slovensko/assets/js/reading.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const bankPath = window.CIVICEDGE_CONFIG?.bank?.path;
+  if (!bankPath) return;
+  let fullBank = [];
+  try {
+    const res = await fetch(bankPath);
+    const raw = await res.json();
+    fullBank = Array.isArray(raw) ? raw : (raw.questions || []);
+  } catch { return; }
+
+  /* TAB A: PERSONAL TRAPS */
+  let progress = {};
+  try { progress = JSON.parse(localStorage.getItem("civicedge_progress") || "{}"); } catch {}
+
+  const trickyKeys = Object.keys(progress).filter(
+    id => (progress[id].wrongs || 0) >= 3 && (progress[id].rights || 0) < 2
+  );
+  const normalizedSet = new Set(trickyKeys);
+  const personalTraps = fullBank.filter(q => {
+    const qKey = `${q.microtopic?.en || q.topic?.en || ""}:${q.id}`;
+    return normalizedSet.has(qKey);
+  });
+
+  /* TAB B: 100 HARDEST (from tricky-sk.json) */
+  let commonTraps = [];
+  try {
+    const res = await fetch("/slovensko/data/tricky-sk.json");
+    if (res.ok) {
+      const data = await res.json();
+      const commonSet = new Set(data.questions || []);
+      // Match on q.sk (multilingual {sk, en})
+      commonTraps = fullBank.filter(q => {
+        const qText = typeof q.q === "object" ? q.q.sk : q.q;
+        return commonSet.has(qText);
+      });
+    }
+  } catch (e) {
+    console.warn("[Traps] Could not load tricky-sk.json:", e.message);
+  }
+
+  document.getElementById("mineCount").textContent = personalTraps.length;
+  document.getElementById("commonCount").textContent = commonTraps.length;
+
+  const quizArea = document.getElementById("quizArea");
+  let activeTab = "mine";
+
+  function startTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll(".traps-tab").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.tab === tab);
+    });
+
+    const bank = tab === "mine" ? personalTraps : commonTraps;
+
+    if (bank.length === 0) {
+      const emptyTitle = tab === "mine"
+        ? "Zatiaľ žiadne časté chyby"
+        : "Zatiaľ žiadne často chybné otázky";
+      const emptyBody = tab === "mine"
+        ? "Ešte nemáte dosť nesprávnych odpovedí. Pokračujte v precvičovaní a táto sekcia sa naplní."
+        : "Táto funkcia sa aktivuje, keď nazbierame dosť používateľských dát. Pokračujte v precvičovaní!";
+
+      quizArea.innerHTML = `
+        <div class="ce-card">
+          <h2>${emptyTitle}</h2>
+          <p>${emptyBody}</p>
+        </div>`;
+      return;
+    }
+
+    quizArea.innerHTML = '<div id="quiz"></div>';
+    CivicEdgeEngine.start("traps", {
+      bank: bank,
+      limit: 20,
+      timed: false,
+      simulation: false,
+      recursive: false,
+      showFeedback: true
+    });
+  }
+
+  document.getElementById("trapsTabs").addEventListener("click", (e) => {
+    const tab = e.target.closest(".traps-tab");
+    if (!tab || tab.dataset.tab === activeTab) return;
+    startTab(tab.dataset.tab);
+  });
+
+  startTab("mine");
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+});
+</script>
+
+<script src="/slovensko/assets/js/gauge-bar-sk.js"></script>
+<script src="/slovensko/assets/js/study-timer.js"></script>
+<script src="/assets/js/maintenance-bar.js"></script>
+<script src="/assets/js/signout.js"></script>
+</body></html>

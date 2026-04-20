@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Môj zoznam — CivicLearn</title>
+  <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <link rel="stylesheet" href="/slovensko/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/slovensko/assets/css/history-v2.css">
+
+  <style>
+    :root {
+      --accent: #0B4EA2;
+      --accent-hover: #08407f;
+      --accent-soft: #e8efff;
+      --accent-soft-border: #b8cfee;
+    }
+    .mylist-wrapper { max-width: 780px; margin-left:0; margin-right:auto; }
+    .mylist-card { padding:14px; border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:10px; background:var(--surface); }
+    .mylist-question-row { display:flex; align-items:flex-start; gap:10px; }
+    .mylist-question { font-size:14px; font-weight:500; line-height:1.4; flex:1; }
+    .mylist-badge { font-size:11px; padding:3px 8px; border-radius:20px; background:var(--accent-soft); color:var(--accent); white-space:nowrap; font-weight:600; }
+    .mylist-remove { font-size:0; color:var(--text-muted); background:transparent; border:none; cursor:pointer; padding:4px; line-height:1; }
+    .mylist-remove::before { content:'✕'; font-size:13px; }
+    .mylist-remove:hover { color:var(--wrong); }
+    .mylist-options { display:flex; flex-direction:column; gap:5px; margin-top:8px; }
+    .mylist-option { font-size:13px; text-align:left; padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:var(--surface); cursor:pointer; transition:all 0.15s; font-family:var(--font); }
+    .mylist-option:hover:not(:disabled) { background:var(--accent-soft); }
+    .mylist-option.correct { background:var(--correct-bg); border-color:var(--correct); }
+    .mylist-option.wrong { background:var(--wrong-bg); border-color:var(--wrong); }
+    .mylist-option:disabled { cursor:default; opacity:0.95; }
+    .mylist-header { display:flex; align-items:flex-start; justify-content:space-between; }
+    .mylist-count { font-size:13px; color:var(--text-muted); margin-top:6px; }
+    .mylist-footer { display:flex; justify-content:space-between; align-items:center; margin-top:14px; gap:12px; }
+    .mylist-status { font-size:12px; color:var(--text-muted); }
+    .mylist-controls { display:flex; gap:6px; }
+    .mylist-page-btn { font-family:var(--font); font-size:12px; padding:5px 12px; border-radius:8px; border:1px solid var(--border); background:var(--surface); cursor:pointer; }
+    .mylist-page-btn:hover:not(:disabled) { background:var(--accent-soft); border-color:var(--accent); }
+    .mylist-page-btn:disabled { opacity:0.4; cursor:default; }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+
+<body>
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Slovensko">
+        <rect width="640" height="133" fill="#FFFFFF"/>
+        <rect y="133" width="640" height="134" fill="#0B4EA2"/>
+        <rect y="267" width="640" height="133" fill="#EE1C25"/>
+      </svg>
+    </div>
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label">Znalosti</span>
+        <span class="sidebar-gauge-score" id="clGaugeKnowledge">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeKnowledgeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugeKnowledgePass"></div>
+      </div>
+    </div>
+    <div class="sidebar-gauge" style="margin-top:10px;">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label">Jazyk</span>
+        <span class="sidebar-gauge-score" id="clGaugeLanguage">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeLanguageFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugeLanguagePass"></div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="index.html">Prehľad</a>
+      <a href="simulation.html">Simulácia testu</a>
+      <a href="quick.html">Rýchly test</a>
+      <a href="topics.html">Testy podľa témy</a>
+      <a href="traps.html">Časté chyby</a>
+      <a href="flashcards.html">Kartičky</a>
+      <a href="article.html">Článok a súhrn</a>
+      <div class="nav-sep"></div>
+      <a href="pohovor-tipy.html">Tipy na pohovor</a>
+      <a href="history.html">História</a>
+      <a href="my-list.html" class="active">Môj zoznam</a>
+      <a href="help.html">Pomoc</a>
+      <a href="#" id="logoutLink">Odhlásiť</a>
+    </nav>
+    <div class="spacer"></div>
+  </aside>
+  <div class="overlay" id="menuOverlay"></div>
+
+  <main>
+    <div id="quiz" style="display:none"></div>
+    <div class="dashboard-container">
+      <div class="mylist-wrapper">
+        <header class="ce-header mylist-header">
+          <div>
+            <h1>Môj zoznam</h1>
+            <div class="muted">Otázky, ktoré ste si označili hviezdičkou na opakovanie</div>
+          </div>
+          <div id="myListCount" class="mylist-count"></div>
+        </header>
+        <div id="myList" class="mylist-list"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/slovensko/assets/js/lang-bootstrap-sk.js"></script>
+<script src="/slovensko/assets/js/config-sk.js"></script>
+<script src="/slovensko/assets/js/engine-sk.js"></script>
+<script src="/slovensko/assets/js/sync.js"></script>
+<script src="/slovensko/assets/js/my-list.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+});
+</script>
+
+<script src="/slovensko/assets/js/gauge-bar-sk.js"></script>
+<script src="/slovensko/assets/js/study-timer.js"></script>
+<script src="/assets/js/maintenance-bar.js"></script>
+<script src="/assets/js/signout.js"></script>
+</body></html>
