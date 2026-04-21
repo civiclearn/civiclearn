@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>História článkov — CivicLearn</title>
+  <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <link rel="stylesheet" href="/slovensko/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/slovensko/assets/css/dashboard-v2.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <style>
+    :root {
+      --accent: #0B4EA2;
+      --accent-hover: #08407f;
+      --accent-soft: #e8efff;
+      --accent-soft-border: #b8cfee;
+    }
+
+    .ah-container { max-width: 900px; }
+
+    .ah-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .ah-stat {
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .ah-stat-value {
+      font-size: 22px; font-weight: 800;
+      letter-spacing: -0.04em; line-height: 1.1;
+      color: var(--text); margin-bottom: 3px;
+    }
+    .ah-stat-label {
+      font-size: 11px; color: var(--text-muted);
+      letter-spacing: -0.01em;
+    }
+
+    .ah-filter {
+      display: flex; gap: 8px;
+      margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .ah-filter-btn {
+      padding: 6px 14px; border-radius: 20px;
+      font-family: var(--font); font-size: 12px; font-weight: 600;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text-mid); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .ah-filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .ah-filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+    .ah-filter-btn .ah-filter-count { opacity: 0.7; margin-left: 4px; font-weight: 500; }
+
+    .ah-list { display: flex; flex-direction: column; gap: 10px; }
+    .ah-row {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: box-shadow 0.15s;
+    }
+    .ah-row:hover { box-shadow: var(--shadow-md); }
+
+    .ah-row-head {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px; cursor: pointer; user-select: none;
+    }
+    .ah-row-grade {
+      width: 44px; height: 44px; border-radius: 50%;
+      color: white; display: flex;
+      align-items: center; justify-content: center;
+      font-size: 19px; font-weight: 700;
+      flex-shrink: 0; letter-spacing: -0.02em;
+    }
+    .ah-row-grade.g1 { background: #16a34a; }
+    .ah-row-grade.g2 { background: #65a30d; }
+    .ah-row-grade.g3 { background: #d97706; }
+    .ah-row-grade.g4 { background: #ea580c; }
+    .ah-row-grade.g5 { background: #dc2626; }
+    .ah-row-grade.gx { background: var(--border); color: var(--text-muted); font-size: 14px; }
+
+    .ah-row-meta { flex: 1; min-width: 0; }
+    .ah-row-title {
+      font-size: 13.5px; font-weight: 600;
+      letter-spacing: -0.01em; line-height: 1.3;
+      color: var(--text); margin-bottom: 3px;
+      overflow: hidden; text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .ah-row-date { font-size: 11.5px; color: var(--text-muted); }
+
+    .ah-row-dims {
+      display: flex; gap: 6px;
+      align-items: center; flex-shrink: 0;
+    }
+    .ah-dim { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+    .ah-dim-val {
+      width: 22px; height: 22px; border-radius: 50%;
+      font-size: 11px; font-weight: 700; color: white;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ah-dim-val.g1 { background: #16a34a; }
+    .ah-dim-val.g2 { background: #65a30d; }
+    .ah-dim-val.g3 { background: #d97706; }
+    .ah-dim-val.g4 { background: #ea580c; }
+    .ah-dim-val.g5 { background: #dc2626; }
+    .ah-dim-label {
+      font-size: 8.5px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.03em;
+    }
+
+    .ah-row-caret {
+      color: var(--text-muted); font-size: 16px;
+      transition: transform 0.2s;
+      flex-shrink: 0; margin-left: 4px;
+    }
+    .ah-row.expanded .ah-row-caret { transform: rotate(180deg); }
+
+    .ah-row-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.3s ease;
+      border-top: 1px solid transparent;
+    }
+    .ah-row.expanded .ah-row-body {
+      max-height: 4000px;
+      border-top-color: var(--border-lt);
+    }
+    .ah-row-body-inner { padding: 18px 22px 22px; }
+    .ah-section-heading {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+    .ah-section { margin-bottom: 18px; }
+    .ah-section:last-child { margin-bottom: 0; }
+    .ah-section-heading.summary  { color: var(--text-muted); }
+    .ah-section-heading.good     { color: var(--correct); }
+    .ah-section-heading.missed   { color: #d97706; }
+    .ah-section-heading.lang     { color: var(--accent); }
+
+    .ah-section-text {
+      font-size: 13px; line-height: 1.65; color: var(--text);
+    }
+    .ah-summary-box {
+      line-height: 1.65; color: var(--text);
+      background: #fafaf8; border: 1px solid var(--border-lt);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      white-space: pre-wrap;
+      font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+      font-size: 12px;
+    }
+
+    .ah-row.failed .ah-row-title { color: var(--text-mid); }
+    .ah-row-status {
+      font-size: 11px; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+      letter-spacing: -0.01em;
+    }
+    .ah-row-status.failed { background: #fee2e2; color: #991b1b; }
+    .ah-row-status.pending { background: #fef3c7; color: #92400e; }
+
+    .ah-retry {
+      padding: 7px 14px; border-radius: var(--radius-sm);
+      font-family: var(--font); font-size: 12px; font-weight: 600;
+      background: var(--accent); color: white; border: none;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .ah-retry:hover { background: var(--accent-hover); }
+    .ah-retry:disabled { opacity: 0.5; cursor: not-allowed; }
+    .ah-retry-error {
+      font-size: 11.5px; color: var(--wrong); margin-top: 6px;
+    }
+
+    .ah-empty {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 48px 32px; text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .ah-empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.6; }
+    .ah-empty h2 {
+      font-size: 16px; font-weight: 700;
+      letter-spacing: -0.02em; margin-bottom: 6px;
+    }
+    .ah-empty p {
+      font-size: 13px; color: var(--text-mid);
+      line-height: 1.5; max-width: 420px;
+      margin: 0 auto 18px;
+    }
+    .ah-empty-cta {
+      display: inline-block; padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font); font-size: 13px; font-weight: 600;
+      background: var(--accent); color: white; text-decoration: none;
+      transition: background 0.15s;
+    }
+    .ah-empty-cta:hover { background: var(--accent-hover); }
+
+    .ah-loading, .ah-error {
+      padding: 40px 20px; text-align: center;
+      font-size: 13px; color: var(--text-muted);
+    }
+    .ah-error { color: var(--wrong); }
+
+    @media (max-width: 768px) {
+      .ah-stats { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+      .ah-stat { padding: 10px 6px; }
+      .ah-stat-value { font-size: 17px; }
+      .ah-row-head { padding: 12px 14px; gap: 10px; }
+      .ah-row-dims { display: none; }
+      .ah-row-grade { width: 38px; height: 38px; font-size: 16px; }
+      .ah-row-body-inner { padding: 14px 16px 18px; }
+      .ah-row-body .ah-row-dims {
+        display: flex; margin-bottom: 16px; justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Slovensko">
+        <rect width="640" height="133" fill="#FFFFFF"/>
+        <rect y="133" width="640" height="134" fill="#0B4EA2"/>
+        <rect y="267" width="640" height="133" fill="#EE1C25"/>
+        <g transform="translate(70,55)">
+          <path d="M0 0 H180 V175 Q180 270 90 300 Q0 270 0 175 Z" fill="#FFFFFF"/>
+          <path d="M10 10 H170 V175 Q170 260 90 288 Q10 260 10 175 Z" fill="#EE1C25"/>
+          <path d="M18 235 Q45 190 70 215 Q82 172 90 168 Q98 172 110 215 Q135 190 162 235 L162 273 L18 273 Z" fill="#0B4EA2"/>
+          <rect x="85" y="55" width="10" height="155" fill="#FFFFFF"/>
+          <rect x="67" y="88" width="46" height="9" fill="#FFFFFF"/>
+          <rect x="58" y="128" width="64" height="9" fill="#FFFFFF"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label">Znalosti</span>
+        <span class="sidebar-gauge-score" id="clGaugeKnowledge">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeKnowledgeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugeKnowledgePass"></div>
+      </div>
+    </div>
+    <div class="sidebar-gauge" style="margin-top:10px;">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label">Jazyk</span>
+        <span class="sidebar-gauge-score" id="clGaugeLanguage">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeLanguageFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugeLanguagePass"></div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="index.html">Prehľad</a>
+      <a href="simulation.html">Simulácia testu</a>
+      <a href="quick.html">Rýchly test</a>
+      <a href="topics.html">Testy podľa témy</a>
+      <a href="traps.html">Časté chyby</a>
+      <a href="flashcards.html">Kartičky</a>
+      <a href="article.html">Článok a súhrn</a>
+      <div class="nav-sep"></div>
+      <a href="pohovor-tipy.html">Tipy na pohovor</a>
+      <a href="history.html">História testov</a>
+      <a href="article-history.html" class="active">História článkov</a>
+      <a href="my-list.html">Môj zoznam</a>
+      <a href="help.html">Pomoc</a>
+      <a href="#" id="logoutLink">Odhlásiť</a>
+    </nav>
+    <div class="spacer"></div>
+  </aside>
+
+  <div class="overlay" id="menuOverlay"></div>
+
+  <main>
+    <div class="ah-container">
+
+      <div class="ce-header">
+        <h1>História článkov</h1>
+        <a href="article.html" style="font-size:13px; font-weight:600; color:var(--accent); text-decoration:none">Nový článok →</a>
+      </div>
+
+      <div class="ah-stats anim d1" id="statsRow" style="display:none">
+        <div class="ah-stat">
+          <div class="ah-stat-value" id="statTotal">0</div>
+          <div class="ah-stat-label">Celkom pokusov</div>
+        </div>
+        <div class="ah-stat">
+          <div class="ah-stat-value" id="statAvg">–</div>
+          <div class="ah-stat-label">Priemerná známka</div>
+        </div>
+        <div class="ah-stat">
+          <div class="ah-stat-value" id="statBest">–</div>
+          <div class="ah-stat-label">Najlepší výsledok</div>
+        </div>
+      </div>
+
+      <div class="ah-filter anim d2" id="filterBar" style="display:none">
+        <button class="ah-filter-btn active" data-filter="all">Všetky <span class="ah-filter-count" id="cntAll"></span></button>
+        <button class="ah-filter-btn" data-filter="done">Vyhodnotené <span class="ah-filter-count" id="cntDone"></span></button>
+        <button class="ah-filter-btn" data-filter="failed" id="btnFailed" style="display:none">Zlyhané <span class="ah-filter-count" id="cntFailed"></span></button>
+        <button class="ah-filter-btn" data-filter="pending" id="btnPending" style="display:none">Prebieha <span class="ah-filter-count" id="cntPending"></span></button>
+      </div>
+
+      <div id="listHost">
+        <div class="ah-loading" id="loadingState">Načítavam pokusy…</div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+});
+</script>
+
+<script>
+(async function() {
+  const SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs";
+  const EVAL_URL = SUPABASE_URL + "/functions/v1/sk-article-evaluate";
+  const ARTICLES_URL = "/slovensko/data/articles.json";
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true }
+  });
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    const returnUrl = window.location.pathname + window.location.search;
+    window.location.href = "/slovensko/login.html?return=" + encodeURIComponent(returnUrl);
+    return;
+  }
+
+  document.getElementById("logoutLink")?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await sb.auth.signOut();
+    location.href = "/slovensko/login.html";
+  });
+
+  hydrateGauge("clGaugeKnowledge", "clGaugeKnowledgeFill", "clGaugeKnowledgePass", "cl_gauge_cache");
+  hydrateGauge("clGaugeLanguage", "clGaugeLanguageFill", "clGaugeLanguagePass", "cl_language_cache");
+
+  function hydrateGauge(valId, fillId, passId, key) {
+    try {
+      const cache = JSON.parse(localStorage.getItem(key) || "null");
+      if (cache && typeof cache.score === "number") {
+        const pct = Math.max(0, Math.min(100, cache.score));
+        document.getElementById(valId).textContent = Math.round(pct) + "%";
+        const fill = document.getElementById(fillId);
+        fill.style.width = pct + "%";
+        fill.dataset.state = pct >= 75 ? "green" : pct >= 60 ? "orange" : "red";
+        document.getElementById(passId).style.left = "75%";
+      }
+    } catch {}
+  }
+
+  let attempts = [];
+  let titleMap = new Map();
+
+  try {
+    const [attemptsRes, articlesRes] = await Promise.all([
+      sb.from("sk_article_attempts")
+        .select("id, article_id, created_at, completed_at, eval_status, grade_overall, grade_fidelity, grade_completeness, grade_language, grade_coherence, feedback_captured, feedback_missed, feedback_language, summary_text")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false })
+        .limit(200),
+      fetch(ARTICLES_URL).then(r => r.ok ? r.json() : null).catch(() => null)
+    ]);
+
+    if (attemptsRes.error) throw attemptsRes.error;
+    attempts = attemptsRes.data || [];
+
+    if (articlesRes && Array.isArray(articlesRes.articles)) {
+      for (const a of articlesRes.articles) {
+        titleMap.set(a.id, a.title);
+      }
+    }
+  } catch (err) {
+    console.error("Fetch error:", err);
+    document.getElementById("listHost").innerHTML = `
+      <div class="ah-error">
+        Nepodarilo sa načítať históriu. Skúste obnoviť stránku alebo sa <a href="#" id="lnkLogout">prihláste znova</a>.
+      </div>
+    `;
+    document.getElementById("lnkLogout")?.addEventListener("click", async (e) => {
+      e.preventDefault();
+      await sb.auth.signOut();
+      location.href = "/slovensko/login.html";
+    });
+    return;
+  }
+
+  document.getElementById("loadingState").remove();
+
+  if (attempts.length === 0) {
+    document.getElementById("listHost").innerHTML = `
+      <div class="ah-empty">
+        <div class="ah-empty-icon">📄</div>
+        <h2>Ešte ste neskúšali žiaden článok</h2>
+        <p>
+          Prečítajte si náhodný článok a napíšte jeho súhrn. Po vyhodnotení tu uvidíte svoje
+          výsledky, spätnú väzbu a môžete sa kedykoľvek vrátiť k starším pokusom.
+        </p>
+        <a href="article.html" class="ah-empty-cta">Začať prvý článok →</a>
+      </div>
+    `;
+    return;
+  }
+
+  const doneRows = attempts.filter(a => a.eval_status === "done" && a.grade_overall != null);
+  const failedRows = attempts.filter(a => a.eval_status === "failed");
+  const pendingRows = attempts.filter(a => a.eval_status !== "done" && a.eval_status !== "failed");
+
+  document.getElementById("statTotal").textContent = attempts.length;
+  document.getElementById("statAvg").textContent = doneRows.length
+    ? (doneRows.reduce((s, r) => s + r.grade_overall, 0) / doneRows.length).toFixed(1)
+    : "–";
+  document.getElementById("statBest").textContent = doneRows.length
+    ? Math.min(...doneRows.map(r => r.grade_overall))
+    : "–";
+  document.getElementById("statsRow").style.display = "grid";
+
+  document.getElementById("cntAll").textContent = attempts.length;
+  document.getElementById("cntDone").textContent = doneRows.length;
+  if (failedRows.length > 0) {
+    document.getElementById("btnFailed").style.display = "";
+    document.getElementById("cntFailed").textContent = failedRows.length;
+  }
+  if (pendingRows.length > 0) {
+    document.getElementById("btnPending").style.display = "";
+    document.getElementById("cntPending").textContent = pendingRows.length;
+  }
+  document.getElementById("filterBar").style.display = "flex";
+
+  const filterBtns = document.querySelectorAll(".ah-filter-btn");
+  filterBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      filterBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      applyFilter(btn.dataset.filter);
+    });
+  });
+
+  renderList(attempts);
+
+  function applyFilter(filter) {
+    let subset = attempts;
+    if (filter === "done")    subset = doneRows;
+    if (filter === "failed")  subset = failedRows;
+    if (filter === "pending") subset = pendingRows;
+    renderList(subset);
+  }
+
+  function renderList(rows) {
+    const host = document.getElementById("listHost");
+    if (rows.length === 0) {
+      host.innerHTML = `<div class="ah-loading">Žiadne záznamy v tejto kategórii.</div>`;
+      return;
+    }
+    host.innerHTML = `<div class="ah-list">${rows.map(rowHtml).join("")}</div>`;
+    host.querySelectorAll(".ah-row-head").forEach(el => {
+      el.addEventListener("click", () => {
+        el.parentElement.classList.toggle("expanded");
+      });
+    });
+    host.querySelectorAll(".ah-retry").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        await retryEval(btn.dataset.id, btn);
+      });
+    });
+  }
+
+  function rowHtml(r) {
+    const title = escapeHtml(titleMap.get(r.article_id) || r.article_id || "Neznámy článok");
+    const date = formatDate(r.created_at);
+    const isDone    = r.eval_status === "done" && r.grade_overall != null;
+    const isFailed  = r.eval_status === "failed";
+
+    if (isDone) {
+      return `
+        <div class="ah-row" data-id="${escapeHtml(r.id)}">
+          <div class="ah-row-head">
+            <div class="ah-row-grade g${r.grade_overall}">${r.grade_overall}</div>
+            <div class="ah-row-meta">
+              <div class="ah-row-title">${title}</div>
+              <div class="ah-row-date">${date}</div>
+            </div>
+            <div class="ah-row-dims">
+              ${dimDot("V", r.grade_fidelity, "Vernosť")}
+              ${dimDot("Ú", r.grade_completeness, "Úplnosť")}
+              ${dimDot("J", r.grade_language, "Jazyk")}
+              ${dimDot("S", r.grade_coherence, "Súdržnosť")}
+            </div>
+            <div class="ah-row-caret">▾</div>
+          </div>
+          <div class="ah-row-body">
+            <div class="ah-row-body-inner">
+              ${r.summary_text ? `
+                <div class="ah-section">
+                  <div class="ah-section-heading summary">Váš súhrn</div>
+                  <div class="ah-summary-box">${escapeHtml(r.summary_text)}</div>
+                </div>
+              ` : ``}
+              ${r.feedback_captured ? `
+                <div class="ah-section">
+                  <div class="ah-section-heading good">✓ Čo sa vám podarilo</div>
+                  <div class="ah-section-text">${escapeHtml(r.feedback_captured)}</div>
+                </div>
+              ` : ``}
+              ${r.feedback_missed ? `
+                <div class="ah-section">
+                  <div class="ah-section-heading missed">⚠ Čo bolo nepresné alebo chýbalo</div>
+                  <div class="ah-section-text">${escapeHtml(r.feedback_missed)}</div>
+                </div>
+              ` : ``}
+              ${r.feedback_language ? `
+                <div class="ah-section">
+                  <div class="ah-section-heading lang">✎ Jazykové odporúčania</div>
+                  <div class="ah-section-text">${escapeHtml(r.feedback_language)}</div>
+                </div>
+              ` : ``}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (isFailed) {
+      return `
+        <div class="ah-row failed" data-id="${escapeHtml(r.id)}">
+          <div class="ah-row-head">
+            <div class="ah-row-grade gx">!</div>
+            <div class="ah-row-meta">
+              <div class="ah-row-title">${title}</div>
+              <div class="ah-row-date">${date} · <span class="ah-row-status failed">Vyhodnotenie zlyhalo</span></div>
+            </div>
+            <button class="ah-retry" data-id="${escapeHtml(r.id)}">Skúsiť znova</button>
+          </div>
+          <div class="ah-row-body">
+            <div class="ah-row-body-inner">
+              <div class="ah-section-text" style="color:var(--text-muted); font-size:12px">
+                Predošlé vyhodnotenie zlyhalo. Kliknutím na „Skúsiť znova“ sa pokus odošle na opätovné spracovanie.
+              </div>
+              ${r.summary_text ? `
+                <div class="ah-section" style="margin-top:14px">
+                  <div class="ah-section-heading summary">Váš súhrn</div>
+                  <div class="ah-summary-box">${escapeHtml(r.summary_text)}</div>
+                </div>
+              ` : ``}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Pending
+    return `
+      <div class="ah-row" data-id="${escapeHtml(r.id)}">
+        <div class="ah-row-head">
+          <div class="ah-row-grade gx">⋯</div>
+          <div class="ah-row-meta">
+            <div class="ah-row-title">${title}</div>
+            <div class="ah-row-date">${date} · <span class="ah-row-status pending">Prebieha vyhodnotenie</span></div>
+          </div>
+          <button class="ah-retry" data-id="${escapeHtml(r.id)}">Spustiť teraz</button>
+        </div>
+        <div class="ah-row-body">
+          <div class="ah-row-body-inner">
+            <div class="ah-section-text" style="color:var(--text-muted); font-size:12px">
+              Tento pokus zatiaľ nebol vyhodnotený. Kliknutím ho môžete spustiť teraz.
+            </div>
+            ${r.summary_text ? `
+              <div class="ah-section" style="margin-top:14px">
+                <div class="ah-section-heading summary">Váš súhrn</div>
+                <div class="ah-summary-box">${escapeHtml(r.summary_text)}</div>
+              </div>
+            ` : ``}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function dimDot(abbr, grade, fullLabel) {
+    if (grade == null) {
+      return `<div class="ah-dim" title="${fullLabel}"><div class="ah-dim-val" style="background:var(--border);color:var(--text-muted)">–</div><div class="ah-dim-label">${abbr}</div></div>`;
+    }
+    return `<div class="ah-dim" title="${fullLabel}: ${grade}"><div class="ah-dim-val g${grade}">${grade}</div><div class="ah-dim-label">${abbr}</div></div>`;
+  }
+
+  async function retryEval(attemptId, btnEl) {
+    const origText = btnEl.textContent;
+    btnEl.disabled = true;
+    btnEl.textContent = "Prebieha…";
+    const prevErr = btnEl.parentElement.querySelector(".ah-retry-error");
+    if (prevErr) prevErr.remove();
+
+    try {
+      const res = await fetch(EVAL_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
+          "apikey": SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({ attempt_id: attemptId })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+      location.reload();
+    } catch (err) {
+      console.error("Retry failed:", err);
+      btnEl.disabled = false;
+      btnEl.textContent = origText;
+      const errEl = document.createElement("div");
+      errEl.className = "ah-retry-error";
+      errEl.textContent = "Nepodarilo sa: " + (err?.message || "neznáma chyba");
+      btnEl.insertAdjacentElement("afterend", errEl);
+    }
+  }
+
+  function formatDate(iso) {
+    if (!iso) return "";
+    try {
+      const d = new Date(iso);
+      return d.toLocaleDateString("sk-SK", {
+        day: "numeric", month: "long", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
+      });
+    } catch { return iso; }
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    }[c]));
+  }
+})();
+</script>
+
+<script src="/assets/js/maintenance-bar.js"></script>
+</body>
+</html>
