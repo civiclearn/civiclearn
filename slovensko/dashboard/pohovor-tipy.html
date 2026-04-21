@@ -1,0 +1,1510 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tipy na pohovor — CivicLearn</title>
+  <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <link rel="stylesheet" href="/slovensko/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/slovensko/assets/css/dashboard-v2.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <style>
+    /* ========== Slovak accent override ========== */
+    :root {
+      --accent: #0B4EA2;
+      --accent-hover: #08407f;
+      --accent-soft: #e8efff;
+      --accent-soft-border: #b8cfee;
+    }
+
+    .pohovor-container {
+      max-width: 1000px;
+    }
+
+    /* ── Hero / intro ────────────────────────────────── */
+    .ph-hero {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .ph-hero h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+    .ph-hero .ph-subhead {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+    .ph-hero p {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--text-mid);
+      margin-bottom: 10px;
+    }
+    .ph-hero p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ── Stage overview band ─────────────────────────── */
+    .ph-stages {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .ph-stage {
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+      position: relative;
+      border-left: 3px solid var(--border);
+    }
+    .ph-stage.current {
+      border-left-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .ph-stage-num {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .ph-stage.current .ph-stage-num {
+      color: var(--accent);
+    }
+    .ph-stage-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: 2px;
+    }
+    .ph-stage-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* ── Topic cards ─────────────────────────────────── */
+    .ph-section-heading {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 28px 0 14px;
+      color: var(--text);
+    }
+    .ph-topic-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .ph-topic {
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .ph-topic-icon {
+      width: 32px; height: 32px;
+      border-radius: 9px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+      letter-spacing: -0.02em;
+    }
+    .ph-topic-body {
+      flex: 1;
+      min-width: 0;
+    }
+    .ph-topic-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: 2px;
+      color: var(--text);
+    }
+    .ph-topic-ex {
+      font-size: 11.5px;
+      color: var(--text-mid);
+      line-height: 1.5;
+      font-style: italic;
+    }
+
+    /* ── Practice CTA ────────────────────────────────── */
+    .ph-practice-cta {
+      background: linear-gradient(135deg, var(--accent) 0%, #0a5cbe 100%);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 14px rgba(11,78,162,0.18);
+    }
+    .ph-practice-cta-text {
+      flex: 1;
+    }
+    .ph-practice-cta-heading {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+    .ph-practice-cta-sub {
+      font-size: 13px;
+      line-height: 1.5;
+      opacity: 0.93;
+    }
+    .ph-practice-start {
+      background: white;
+      color: var(--accent);
+      border: none;
+      padding: 12px 22px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: -0.01em;
+      transition: transform 0.15s, box-shadow 0.15s;
+      flex-shrink: 0;
+    }
+    .ph-practice-start:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* ── Tips list ───────────────────────────────────── */
+    .ph-tips {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+    .ph-tips h2 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+    .ph-tip {
+      display: flex;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-lt);
+    }
+    .ph-tip:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .ph-tip-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-top: 7px;
+      flex-shrink: 0;
+    }
+    .ph-tip-body {
+      flex: 1;
+    }
+    .ph-tip-head {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .ph-tip-text {
+      font-size: 12.5px;
+      color: var(--text-mid);
+      line-height: 1.55;
+    }
+    .ph-tip-text em {
+      font-style: normal;
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    /* ── Simulation modal ────────────────────────────── */
+    .sim-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,24,22,0.68);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.2s ease;
+    }
+    .sim-overlay.active {
+      display: flex;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .sim-modal {
+      background: var(--surface);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px 32px 24px;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+
+    .sim-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-lt);
+    }
+    .sim-progress {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .sim-progress-bar {
+      flex: 1;
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 14px;
+      overflow: hidden;
+    }
+    .sim-progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .sim-close {
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: var(--text-muted);
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 4px;
+    }
+    .sim-close:hover {
+      color: var(--text);
+    }
+
+    .sim-area {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .sim-question {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.35;
+      color: var(--text);
+      margin-bottom: 22px;
+      min-height: 60px;
+    }
+
+    /* Timer + recording row */
+    .sim-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+      padding: 14px 16px;
+      background: #fafaf8;
+      border-radius: var(--radius-sm);
+    }
+
+    .sim-timer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+    .sim-timer-ring {
+      width: 44px;
+      height: 44px;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .sim-timer-ring svg {
+      transform: rotate(-90deg);
+      width: 44px; height: 44px;
+    }
+    .sim-timer-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 3;
+    }
+    .sim-timer-fg {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 3;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.25s linear;
+    }
+    .sim-timer-num {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .sim-timer-label {
+      font-size: 11.5px;
+      color: var(--text-mid);
+      line-height: 1.35;
+    }
+
+    .sim-rec {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sim-rec-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: all 0.15s;
+      color: var(--text-mid);
+    }
+    .sim-rec-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .sim-rec-btn.recording {
+      background: #dc2626;
+      border-color: #dc2626;
+      color: white;
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.5); }
+      50%      { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
+    }
+    .sim-rec audio {
+      height: 32px;
+      max-width: 180px;
+    }
+    .sim-rec-empty-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* Scaffold (hidden until revealed) */
+    .sim-scaffold {
+      background: #fafdfb;
+      border: 1px solid #e3eee7;
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      margin-bottom: 20px;
+      animation: slideDown 0.3s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .sim-scaffold-heading {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--correct);
+      margin-bottom: 6px;
+    }
+    .sim-scaffold-heading + div,
+    .sim-scaffold-heading + ul {
+      margin-bottom: 14px;
+    }
+    .sim-scaffold-heading + ul:last-child,
+    .sim-scaffold-heading + div:last-child {
+      margin-bottom: 0;
+    }
+    .sim-scaffold-text {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .sim-scaffold-answer {
+      font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.7;
+      background: white;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-lt);
+      color: var(--text);
+    }
+    .sim-scaffold-answer mark {
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 1px 3px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+    .sim-scaffold ul {
+      list-style: none;
+      padding: 0;
+    }
+    .sim-scaffold li {
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--text-mid);
+      padding: 3px 0 3px 14px;
+      position: relative;
+    }
+    .sim-scaffold li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--text-muted);
+    }
+
+    /* Navigation buttons */
+    .sim-nav {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sim-nav-left {
+      display: flex;
+      gap: 10px;
+    }
+    .sim-btn {
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      letter-spacing: -0.01em;
+    }
+    .sim-btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    .sim-btn-primary:hover {
+      background: var(--accent-hover);
+    }
+    .sim-btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .sim-btn-ghost {
+      background: transparent;
+      color: var(--text-mid);
+      border: 1px solid var(--border);
+    }
+    .sim-btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Finish screen */
+    .sim-finish {
+      text-align: center;
+      padding: 20px 0 10px;
+    }
+    .sim-finish-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+    .sim-finish h3 {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .sim-finish p {
+      font-size: 13.5px;
+      color: var(--text-mid);
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    /* Intro screen of the simulation */
+    .sim-intro {
+      padding: 10px 0 4px;
+    }
+    .sim-intro h3 {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+    .sim-intro p {
+      font-size: 13px;
+      color: var(--text-mid);
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    .sim-rec-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #fafaf8;
+      border-radius: var(--radius-sm);
+      margin: 16px 0 18px;
+    }
+    .sim-rec-toggle input {
+      margin: 0;
+    }
+    .sim-rec-toggle label {
+      font-size: 12.5px;
+      color: var(--text);
+      cursor: pointer;
+      flex: 1;
+    }
+    .sim-rec-toggle label small {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-style: italic;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .ph-stages {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .ph-topic-grid {
+        grid-template-columns: 1fr;
+      }
+      .ph-practice-cta {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+      }
+      .sim-question {
+        font-size: 18px;
+      }
+      .sim-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .sim-rec {
+        justify-content: center;
+      }
+      .sim-nav {
+        flex-direction: column-reverse;
+        align-items: stretch;
+      }
+      .sim-nav-left {
+        justify-content: stretch;
+      }
+      .sim-nav-left .sim-btn {
+        flex: 1;
+      }
+      .sim-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Slovensko">
+        <rect width="640" height="133" fill="#FFFFFF"/>
+        <rect y="133" width="640" height="134" fill="#0B4EA2"/>
+        <rect y="267" width="640" height="133" fill="#EE1C25"/>
+        <g transform="translate(70,55)">
+          <path d="M0 0 H180 V175 Q180 270 90 300 Q0 270 0 175 Z" fill="#FFFFFF"/>
+          <path d="M10 10 H170 V175 Q170 260 90 288 Q10 260 10 175 Z" fill="#EE1C25"/>
+          <path d="M18 235 Q45 190 70 215 Q82 172 90 168 Q98 172 110 215 Q135 190 162 235 L162 273 L18 273 Z" fill="#0B4EA2"/>
+          <rect x="85" y="55" width="10" height="155" fill="#FFFFFF"/>
+          <rect x="67" y="88" width="46" height="9" fill="#FFFFFF"/>
+          <rect x="58" y="128" width="64" height="9" fill="#FFFFFF"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label">Znalosti</span>
+        <span class="sidebar-gauge-score" id="clGaugeKnowledge">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeKnowledgeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugeKnowledgePass"></div>
+      </div>
+    </div>
+    <div class="sidebar-gauge" style="margin-top:10px;">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label">Jazyk</span>
+        <span class="sidebar-gauge-score" id="clGaugeLanguage">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeLanguageFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugeLanguagePass"></div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="index.html">Prehľad</a>
+      <a href="simulation.html">Simulácia testu</a>
+      <a href="quick.html">Rýchly test</a>
+      <a href="topics.html">Testy podľa témy</a>
+      <a href="traps.html">Časté chyby</a>
+      <a href="flashcards.html">Kartičky</a>
+      <a href="article.html">Článok a súhrn</a>
+      <div class="nav-sep"></div>
+      <a href="pohovor-tipy.html" class="active">Tipy na pohovor</a>
+      <a href="history.html">História</a>
+      <a href="my-list.html">Môj zoznam</a>
+      <a href="help.html">Pomoc</a>
+      <a href="#" id="logoutLink">Odhlásiť</a>
+    </nav>
+    <div class="spacer"></div>
+  </aside>
+
+  <div class="overlay" id="menuOverlay"></div>
+
+  <main>
+    <div class="pohovor-container">
+
+      <div class="ce-header">
+        <h1>Tipy na pohovor</h1>
+        <span class="muted">Prvá fáza — predstavenie a rozhovor o sebe</span>
+      </div>
+
+      <!-- ── Intro ────────────────────────────────────── -->
+      <div class="ph-hero anim d1">
+        <div class="ph-subhead">Čo vás čaká hneď po príchode</div>
+        <h1 style="font-size:22px; margin-bottom:12px;">Predstavenie a rozhovor o sebe</h1>
+        <p>
+          Pohovor sa začína neformálnym rozhovorom: skúšajúci vás požiada, aby ste sa predstavili
+          a odpovedali na niekoľko otázok o svojom živote. Táto časť trvá zvyčajne 5 až 10 minút
+          a predchádza samotným otázkam o Slovensku.
+        </p>
+        <p>
+          Skúšajúci nehľadá dokonalú slovenčinu — hľadá, či dokážete v slovenčine prirodzene
+          fungovať: povedať, kto ste, odkiaľ pochádzate, čo robíte, prečo žijete na Slovensku.
+          Táto časť je najjednoduchšia na prípravu, pretože otázky sú vopred odhadnuteľné. Zároveň
+          je to časť, ktorá urobí prvý dojem — a ten sa dá získať len raz.
+        </p>
+        <p>
+          Nižšie nájdete osem typických okruhov otázok, vzorové odpovede a živú simuláciu,
+          v ktorej si môžete nahovoriť svoje odpovede nanečisto.
+        </p>
+      </div>
+
+      <!-- ── Four stages of the interview ───────────────── -->
+      <div class="ph-stages anim d2">
+        <div class="ph-stage current">
+          <div class="ph-stage-num">Fáza 1 · ste tu</div>
+          <div class="ph-stage-title">Predstavenie</div>
+          <div class="ph-stage-desc">Rozhovor o vás a vašom živote</div>
+        </div>
+        <div class="ph-stage">
+          <div class="ph-stage-num">Fáza 2</div>
+          <div class="ph-stage-title">Čítanie nahlas</div>
+          <div class="ph-stage-desc">Krátky text od skúšajúceho</div>
+        </div>
+        <div class="ph-stage">
+          <div class="ph-stage-num">Fáza 3</div>
+          <div class="ph-stage-title">Parafráza</div>
+          <div class="ph-stage-desc">Prerozprávanie prečítaného</div>
+        </div>
+        <div class="ph-stage">
+          <div class="ph-stage-num">Fáza 4</div>
+          <div class="ph-stage-title">Znalosti o SR</div>
+          <div class="ph-stage-desc">Otázky z histórie, geografie a kultúry</div>
+        </div>
+      </div>
+
+      <!-- ── Topic cards ────────────────────────────────── -->
+      <div class="ph-section-heading">Osem okruhov, ktoré treba mať pripravené</div>
+      <div class="ph-topic-grid anim d3">
+        <div class="ph-topic">
+          <div class="ph-topic-icon">1</div>
+          <div class="ph-topic-body">
+            <div class="ph-topic-title">Identita a pôvod</div>
+            <div class="ph-topic-ex">Meno, dátum narodenia, odkiaľ pochádzate, kedy ste prišli na Slovensko.</div>
+          </div>
+        </div>
+        <div class="ph-topic">
+          <div class="ph-topic-icon">2</div>
+          <div class="ph-topic-body">
+            <div class="ph-topic-title">Rodina</div>
+            <div class="ph-topic-ex">Rodinný stav, manžel/manželka, deti, rodičia — žijú tu alebo v cudzine?</div>
+          </div>
+        </div>
+        <div class="ph-topic">
+          <div class="ph-topic-icon">3</div>
+          <div class="ph-topic-body">
+            <div class="ph-topic-title">Bývanie</div>
+            <div class="ph-topic-ex">Kde bývate, ako dlho, v akom type bytu alebo domu.</div>
+          </div>
+        </div>
+        <div class="ph-topic">
+          <div class="ph-topic-icon">4</div>
+          <div class="ph-topic-body">
+            <div class="ph-topic-title">Práca alebo štúdium</div>
+            <div class="ph-topic-ex">Čo robíte, ako dlho, v akej firme alebo škole, typický pracovný deň.</div>
+          </div>
+        </div>
+        <div class="ph-topic">
+          <div class="ph-topic-icon">5</div>
+          <div class="ph-topic-body">
+            <div class="ph-topic-title">Voľný čas</div>
+            <div class="ph-topic-ex">Záľuby, šport, čo radi robíte cez víkendy.</div>
+          </div>
+        </div>
+        <div class="ph-topic">
+          <div class="ph-topic-icon">6</div>
+          <div class="ph-topic-body">
+            <div class="ph-topic-title">Slovenčina v živote</div>
+            <div class="ph-topic-ex">Kde a s kým hovoríte po slovensky, či sledujete médiá.</div>
+          </div>
+        </div>
+        <div class="ph-topic">
+          <div class="ph-topic-icon">7</div>
+          <div class="ph-topic-body">
+            <div class="ph-topic-title">Motivácia</div>
+            <div class="ph-topic-ex">Prečo Slovensko, prečo občianstvo, čo pre vás znamená byť občanom SR.</div>
+          </div>
+        </div>
+        <div class="ph-topic">
+          <div class="ph-topic-icon">8</div>
+          <div class="ph-topic-body">
+            <div class="ph-topic-title">Budúcnosť</div>
+            <div class="ph-topic-ex">Plány na nasledujúce roky, čo vás tu drží.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Practice CTA ───────────────────────────────── -->
+      <div class="ph-practice-cta anim d4">
+        <div class="ph-practice-cta-text">
+          <div class="ph-practice-cta-heading">Živá simulácia prvej fázy</div>
+          <div class="ph-practice-cta-sub">
+            12 typických otázok, 30 sekúnd na odpoveď, vzorová odpoveď a tipy po každej otázke.
+            Odpovedajte nahlas — skúšajúci bude počúvať, ako znejete, nie ako viete písať.
+          </div>
+        </div>
+        <button class="ph-practice-start" id="startSim">Začať cvičenie →</button>
+      </div>
+
+      <!-- ── Tips ────────────────────────────────────────── -->
+      <div class="ph-tips anim d5">
+        <h2>Praktické tipy, ktoré naozaj pomôžu</h2>
+
+        <div class="ph-tip">
+          <div class="ph-tip-dot"></div>
+          <div class="ph-tip-body">
+            <div class="ph-tip-head">Dátumy si precvičte nahlas</div>
+            <div class="ph-tip-text">
+              Povedzte nahlas svoj dátum narodenia, rok príchodu, rok svadby. Slovenčina má zložité
+              skloňovanie čísloviek a väčšina kandidátov sa prvýkrát zasekne práve tu.
+              <em>„Dvadsiateho tretieho marca tisícdeväťstoosemdesiateho piateho“</em> — nie „23. 3. 85“.
+            </div>
+          </div>
+        </div>
+
+        <div class="ph-tip">
+          <div class="ph-tip-dot"></div>
+          <div class="ph-tip-body">
+            <div class="ph-tip-head">Nepíšte si súvislé odseky naspamäť</div>
+            <div class="ph-tip-text">
+              Skúšajúci pozná naučené odpovede a hneď ich odhalí doplňujúcou otázkou. Lepšie je mať
+              pripravené <em>body</em> a <em>vetné kostry</em>, ktoré dokážete prispôsobiť — nie súvislý text.
+            </div>
+          </div>
+        </div>
+
+        <div class="ph-tip">
+          <div class="ph-tip-dot"></div>
+          <div class="ph-tip-body">
+            <div class="ph-tip-head">„Prečo Slovensko?“ nemôže byť prázdne</div>
+            <div class="ph-tip-text">
+              Odpoveď „páči sa mi tu“ vyvolá okamžitú doplňujúcu otázku. Majte pripravený jeden
+              konkrétny dôvod: práca, rodina, štúdium, pokojný život, kvalita vzdelania pre deti.
+              Jeden konkrétny príklad stačí — nemusíte argumentovať ako politik.
+            </div>
+          </div>
+        </div>
+
+        <div class="ph-tip">
+          <div class="ph-tip-dot"></div>
+          <div class="ph-tip-body">
+            <div class="ph-tip-head">Pauza je v poriadku</div>
+            <div class="ph-tip-text">
+              Skúšajúci nehodnotí rýchlosť. Dve-tri sekundy ticha pred odpoveďou pôsobí lepšie
+              než začať rýchlo, pomýliť sa a opraviť sa trikrát. Zhlboka sa nadýchnite a hovorte
+              pomaly.
+            </div>
+          </div>
+        </div>
+
+        <div class="ph-tip">
+          <div class="ph-tip-dot"></div>
+          <div class="ph-tip-body">
+            <div class="ph-tip-head">Ak nerozumiete, povedzte to po slovensky</div>
+            <div class="ph-tip-text">
+              Použite jednu z týchto fráz: <em>„Prepáčte, mohli by ste to zopakovať?“</em> alebo
+              <em>„Nerozumel som otázke, môžete mi ju povedať inými slovami?“</em> Je to znak
+              komunikačnej istoty, nie slabosti.
+            </div>
+          </div>
+        </div>
+
+        <div class="ph-tip">
+          <div class="ph-tip-dot"></div>
+          <div class="ph-tip-body">
+            <div class="ph-tip-head">Nikdy sa neprepínajte do iného jazyka</div>
+            <div class="ph-tip-text">
+              Aj keby to „len na chvíľu“ zdalo jednoduchšie, neprejdite do angličtiny, ruštiny
+              ani češtiny. Pohovor prebieha v slovenčine od začiatku do konca. Radšej povedzte
+              jednoduchú vetu po slovensky, než zložitú v inom jazyku.
+            </div>
+          </div>
+        </div>
+
+        <div class="ph-tip">
+          <div class="ph-tip-dot"></div>
+          <div class="ph-tip-body">
+            <div class="ph-tip-head">Odpovedajte úprimne, nie „efektne“</div>
+            <div class="ph-tip-text">
+              Skúšajúci nerobí konkurz. Ak vaša práca nie je zaujímavá, priznajte to pokojne
+              („Som vodič, jazdím po Slovensku a je to stabilná práca.“). Vymyslené povolania
+              a falošné záľuby sa pri doplňujúcich otázkach okamžite prezradia.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="db-footer">
+        © 2026 — CivicLearn by Testrada — Všetky práva vyhradené.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- Simulation modal                                   -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="sim-overlay" id="simOverlay" role="dialog" aria-modal="true" aria-label="Simulácia pohovoru">
+  <div class="sim-modal" id="simModal">
+    <!-- Header injected by JS so we can hide during intro/finish -->
+    <div id="simContent"></div>
+  </div>
+</div>
+
+<!-- Mobile menu -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+});
+</script>
+
+<!-- Auth guard + gauge hydration -->
+<script>
+(async function() {
+  const SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs";
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true }
+  });
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    const returnUrl = window.location.pathname + window.location.search;
+    window.location.href = "/slovensko/login.html?return=" + encodeURIComponent(returnUrl);
+    return;
+  }
+
+  document.getElementById("logoutLink")?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await sb.auth.signOut();
+    location.href = "/slovensko/login.html";
+  });
+
+  // Hydrate sidebar gauges from cache (written by dashboard/article pages)
+  try {
+    const kCache = JSON.parse(localStorage.getItem("cl_gauge_cache") || "null");
+    if (kCache && typeof kCache.score === "number") {
+      const pct = Math.max(0, Math.min(100, kCache.score));
+      document.getElementById("clGaugeKnowledge").textContent = Math.round(pct) + "%";
+      const fill = document.getElementById("clGaugeKnowledgeFill");
+      fill.style.width = pct + "%";
+      fill.dataset.state = pct >= 75 ? "green" : pct >= 60 ? "orange" : "red";
+      document.getElementById("clGaugeKnowledgePass").style.left = "75%";
+    }
+  } catch {}
+  try {
+    const lCache = JSON.parse(localStorage.getItem("cl_language_cache") || "null");
+    if (lCache && typeof lCache.score === "number") {
+      const pct = Math.max(0, Math.min(100, lCache.score));
+      document.getElementById("clGaugeLanguage").textContent = Math.round(pct) + "%";
+      const fill = document.getElementById("clGaugeLanguageFill");
+      fill.style.width = pct + "%";
+      fill.dataset.state = pct >= 75 ? "green" : pct >= 60 ? "orange" : "red";
+      document.getElementById("clGaugeLanguagePass").style.left = "75%";
+    }
+  } catch {}
+})();
+</script>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- Interview simulation                               -->
+<!-- ══════════════════════════════════════════════════ -->
+<script>
+(function() {
+  const SECONDS_PER_Q = 30;
+
+  const QUESTIONS = [
+    {
+      area: "Identita",
+      q: "Predstavte sa, prosím.",
+      listens: "Istá a pokojná výslovnosť mena, dátumu narodenia a pôvodu. Skúšajúci počúva jasnosť a tempo, nie rýchlosť.",
+      answer: 'Volám sa <mark>meno priezvisko</mark>. Narodil som sa <mark>dátum</mark>. Pochádzam z <mark>mesto, krajina</mark>. Na Slovensko som prišiel v roku <mark>rok</mark>.',
+      tips: [
+        "Dátum povedzte celý po slovensky: „dvadsiateho tretieho marca tisícdeväťstoosemdesiateho piateho“.",
+        "Ženy hovoria „narodila som sa“ a „prišla som“ — nie „narodil“ a „prišiel“.",
+        "Pôvod uveďte stručne — stačí mesto a krajina, nie celá životná trasa."
+      ]
+    },
+    {
+      area: "Pôvod a príchod",
+      q: "Odkiaľ pochádzate a kedy ste prišli na Slovensko?",
+      listens: "Presný rok, prípadne mesiac príchodu. Krátke vysvetlenie okolností — na pracovné pozvanie, za rodinou, za štúdiom.",
+      answer: 'Pochádzam z <mark>krajina, mesto</mark>. Na Slovensko som prišiel v roku <mark>rok</mark>, pretože <mark>dôvod: práca / rodina / štúdium</mark>.',
+      tips: [
+        "„Od roku 2019“ — nie „od 2019“. Slovo „roku“ sa nevynecháva.",
+        "Ak ste prišli pred dávnym časom, použite tvar „už viac ako desať rokov“.",
+        "Skúšajúci často pokračuje otázkou „a predtým?“ — majte pripravené jedno miesto navyše."
+      ]
+    },
+    {
+      area: "Rodina",
+      q: "Povedzte mi niečo o svojej rodine.",
+      listens: "Schopnosť hovoriť o iných ľuďoch, nie len o sebe. Základná slovná zásoba: manžel, manželka, deti, rodičia, súrodenci.",
+      answer: 'Som <mark>ženatý / vydatá / slobodný / slobodná</mark>. Môj manžel / moja manželka sa volá <mark>meno</mark>. Máme <mark>počet</mark> detí. Moji rodičia žijú v <mark>mesto / krajina</mark>.',
+      tips: [
+        "„Dve deti“, „tri deti“ — nie „2 deti“ (čísla sa čítajú).",
+        "Ak máte zložitejšiu rodinnú situáciu, pripravte si zjednodušenú verziu — pohovor nie je čas na vysvetľovanie.",
+        "Vek detí v slovenčine: „má päť rokov“, „má jedenásť rokov“, „má dvadsať rokov“."
+      ]
+    },
+    {
+      area: "Bývanie",
+      q: "Kde bývate a ako dlho?",
+      listens: "Názov mesta a mestskej časti, typ bývania (byt, dom), dĺžka bývania v časových výrazoch.",
+      answer: 'Bývam v <mark>mesto</mark>, v mestskej časti <mark>štvrť</mark>. Bývame v <mark>byte / dome</mark> už <mark>počet</mark> rokov.',
+      tips: [
+        "„V Bratislave“ — nie „v Bratislava“. Mestá sa skloňujú.",
+        "„Už päť rokov“ znie prirodzenejšie ako „päť rokov“ samotné.",
+        "Ak sa pýtajú, či bývate sami alebo s niekým, odpovedzte priamo."
+      ]
+    },
+    {
+      area: "Zamestnanie",
+      q: "Čo robíte? Pracujete alebo študujete?",
+      listens: "Konkrétne povolanie alebo odbor, meno zamestnávateľa alebo školy, čas v tomto zamestnaní.",
+      answer: 'Pracujem ako <mark>povolanie</mark> vo firme <mark>názov</mark>. Robím túto prácu už <mark>počet</mark> rokov. / Študujem <mark>odbor</mark> na <mark>škola</mark>.',
+      tips: [
+        "Povolanie musí byť v mužskom alebo ženskom tvare: „pracujem ako učiteľ“ / „pracujem ako učiteľka“.",
+        "Skúšajúci sa často pýta doplnkovú otázku o náplni práce — pripravte si jednu vetu.",
+        "Ak ste nezamestnaný, povedzte to priamo a vysvetlite dôvod („momentálne hľadám prácu“, „som na materskej dovolenke“)."
+      ]
+    },
+    {
+      area: "Bežný deň",
+      q: "Popíšte mi svoj typický pracovný deň.",
+      listens: "Postupnosť udalostí, časové výrazy (ráno, potom, poobede, večer), jednoduché slovesá v prítomnom čase.",
+      answer: 'Ráno vstávam o <mark>čas</mark>. Raňajkujem a idem do práce. V práci <mark>hlavná činnosť</mark>. Obed mám o <mark>čas</mark>. Poobede <mark>činnosť</mark>. Večer sa vraciam domov a <mark>činnosť</mark>.',
+      tips: [
+        "Používajte prítomný čas — „vstávam“, nie „som vstal“.",
+        "Časy hovorte slovami: „o siedmej ráno“, „o pol deviatej“.",
+        "Nemusíte byť presný — ide o plynulosť, nie o rozvrh."
+      ]
+    },
+    {
+      area: "Voľný čas",
+      q: "Čo robíte vo voľnom čase a cez víkendy?",
+      listens: "Konkrétne aktivity, nie klišé. Ak poviete „čítam knihy“, buďte pripravený povedať, akú knihu práve čítate.",
+      answer: 'Vo voľnom čase <mark>aktivita</mark>. Cez víkendy <mark>aktivita</mark>. Mám rád <mark>koníček</mark>, pretože <mark>dôvod</mark>.',
+      tips: [
+        "Neuvádzajte aktivitu, ktorú reálne nerobíte — doplňujúce otázky vás odhalia.",
+        "„Rád“ (muž) / „rada“ (žena) — pozor na rod.",
+        "Jeden reálny koníček stačí. Dokonca aj „pozerám filmy s rodinou“ je plne akceptovateľná odpoveď."
+      ]
+    },
+    {
+      area: "Slovenčina v živote",
+      q: "Kde a s kým hovoríte po slovensky?",
+      listens: "Úprimná sebareflexia. Skúšajúci vie, že väčšina kandidátov má doma iný jazyk — chce počuť, ako ste si slovenčinu zvnútornili.",
+      answer: 'Po slovensky hovorím <mark>kde — práca, susedia, úrad, škola detí</mark>. Doma hovoríme <mark>jazyk</mark>. Slovenské správy / filmy / rádio <mark>sledujem / počúvam — uveďte konkrétny kanál</mark>.',
+      tips: [
+        "Ak doma hovoríte iným jazykom, priznajte to. Je to normálne.",
+        "Majte pripravený aspoň jeden konkrétny slovenský médium, ktoré sledujete (sme.sk, Markíza, Rádio Expres, RTVS).",
+        "Ak chodíte do slovenského kurzu, spomeňte to — ukazuje to aktívny prístup."
+      ]
+    },
+    {
+      area: "Motivácia",
+      q: "Prečo ste si vybrali práve Slovensko?",
+      listens: "Osobný príbeh, nie politická odpoveď. Skúšajúci chce vedieť, čo vás sem priviedlo ako človeka.",
+      answer: 'Na Slovensko som prišiel, pretože <mark>hlavný dôvod — práca, rodina, štúdium, bezpečnosť</mark>. Páči sa mi, že <mark>konkrétna vec — pokojný život, príroda, ľudia, práca</mark>.',
+      tips: [
+        "„Páči sa mi tu“ nestačí — pridajte jeden konkrétny dôvod.",
+        "Ak ste prišli za rodinou alebo prácou, povedzte to priamo. Úprimnosť je silnejšia než efektné frázy.",
+        "Vyhnite sa porovnávaniu Slovenska s inou krajinou v negatívnom svetle."
+      ]
+    },
+    {
+      area: "Občianstvo",
+      q: "Prečo žiadate o slovenské občianstvo?",
+      listens: "Vzťah ku krajine, nie len praktický záujem o pas. Skúšajúci hodnotí, či sa cítite byť súčasťou Slovenska.",
+      answer: 'Žiadam o občianstvo, pretože <mark>dôvod — rodina, domov, dlhodobé plány</mark>. Slovensko považujem za <mark>svoj domov / krajinu, kde chcem žiť</mark>.',
+      tips: [
+        "Vyhnite sa tomu, aby ste uviedli pas ako hlavný dôvod — aj keď to je pravda.",
+        "Pojem „domov“ znie silnejšie ako „miesto bydliska“.",
+        "Ak žijete na Slovensku viac ako 10 rokov, spomeňte to — je to silný argument."
+      ]
+    },
+    {
+      area: "Pocitová väzba",
+      q: "Čo sa vám na Slovensku najviac páči?",
+      listens: "Jednoduchá pozitívna odpoveď. Toto je „priateľská otázka“, cieľ je uvoľniť atmosféru — a skúšajúci počúva, či dokážete hovoriť pozitívne a prirodzene.",
+      answer: 'Najviac sa mi páči <mark>konkrétna vec — príroda, ľudia, pokoj, veľkosť krajiny, jedlo</mark>. Mám veľmi rád <mark>miesto alebo vec</mark>, pretože <mark>dôvod</mark>.',
+      tips: [
+        "Stačí jedna vec — nemusíte vymenovať zoznam.",
+        "Konkrétnosť funguje: „páči sa mi Vysoké Tatry“ je lepšie než „páči sa mi príroda“.",
+        "Úsmev a pokojný tón urobia viac než bezchybná gramatika."
+      ]
+    },
+    {
+      area: "Budúcnosť",
+      q: "Ako vidíte svoj život na Slovensku o päť rokov?",
+      listens: "Budúci čas, sloveso „chcieť“ v podmieňovacom spôsobe („chcel by som“), konkrétne plány.",
+      answer: 'O päť rokov by som chcel <mark>cieľ — bývať v rovnakom meste, mať vlastný byt, hovoriť lepšie po slovensky, pracovať v...</mark>. Plánujem zostať na Slovensku, pretože <mark>dôvod</mark>.',
+      tips: [
+        "„Chcel by som“ / „chcela by som“ — pozor na rod.",
+        "Konkrétne plány znejú dôveryhodnejšie než všeobecné frázy („chcem byť šťastný“).",
+        "Posolstvo: som tu dlhodobo, Slovensko je moja budúcnosť."
+      ]
+    }
+  ];
+
+  const simOverlay = document.getElementById("simOverlay");
+  const simContent = document.getElementById("simContent");
+  const startBtn = document.getElementById("startSim");
+
+  let state = {
+    phase: "intro",       // intro | question | finish
+    idx: 0,
+    revealed: false,
+    timerId: null,
+    secondsLeft: SECONDS_PER_Q,
+    recordEnabled: false,
+    mediaRecorder: null,
+    mediaStream: null,
+    recordedBlobs: new Map(),  // idx -> Blob URL
+    recording: false
+  };
+
+  startBtn.addEventListener("click", openSim);
+
+  function openSim() {
+    state = {
+      phase: "intro", idx: 0, revealed: false,
+      timerId: null, secondsLeft: SECONDS_PER_Q,
+      recordEnabled: false, mediaRecorder: null, mediaStream: null,
+      recordedBlobs: new Map(), recording: false
+    };
+    simOverlay.classList.add("active");
+    document.body.style.overflow = "hidden";
+    render();
+  }
+
+  function closeSim() {
+    stopTimer();
+    stopRecording();
+    releaseMic();
+    simOverlay.classList.remove("active");
+    document.body.style.overflow = "";
+    // Free object URLs
+    state.recordedBlobs.forEach(url => URL.revokeObjectURL(url));
+  }
+
+  function render() {
+    if (state.phase === "intro") renderIntro();
+    else if (state.phase === "question") renderQuestion();
+    else if (state.phase === "finish") renderFinish();
+  }
+
+  function renderIntro() {
+    simContent.innerHTML = `
+      <div class="sim-header">
+        <div class="sim-progress">Simulácia — prvá fáza pohovoru</div>
+        <button class="sim-close" id="btnClose" aria-label="Zavrieť">×</button>
+      </div>
+      <div class="sim-intro">
+        <h3>Ako to funguje</h3>
+        <p>
+          Zobrazí sa 12 typických otázok. Po každej máte 30 sekúnd na to, aby ste
+          <strong>nahlas</strong> odpovedali po slovensky. Po uplynutí času (alebo keď kliknete
+          na „Zobraziť odpoveď“) sa zobrazí vzorová odpoveď a tipy.
+        </p>
+        <p>
+          Odpovedajte nahlas — aj keď ste sami doma. Tréning ucha a úst je celý zmysel cvičenia.
+        </p>
+        <div class="sim-rec-toggle">
+          <input type="checkbox" id="recToggle">
+          <label for="recToggle">
+            Nahrávať si svoje odpovede pre vlastné prehratie
+            <small>Nahrávka zostane vo vašom prehliadači, neodosiela sa na server.</small>
+          </label>
+        </div>
+        <div class="sim-nav" style="justify-content:flex-end">
+          <button class="sim-btn sim-btn-primary" id="btnStart">Začať →</button>
+        </div>
+      </div>
+    `;
+    document.getElementById("btnClose").addEventListener("click", closeSim);
+    document.getElementById("btnStart").addEventListener("click", async () => {
+      state.recordEnabled = document.getElementById("recToggle").checked;
+      if (state.recordEnabled) {
+        const ok = await ensureMic();
+        if (!ok) {
+          state.recordEnabled = false;
+          alert("Mikrofón nie je dostupný. Cvičenie bude prebiehať bez nahrávania.");
+        }
+      }
+      state.phase = "question";
+      state.idx = 0;
+      render();
+    });
+  }
+
+  function renderQuestion() {
+    const q = QUESTIONS[state.idx];
+    const progressPct = ((state.idx) / QUESTIONS.length) * 100;
+    const total = QUESTIONS.length;
+    state.revealed = false;
+    state.secondsLeft = SECONDS_PER_Q;
+
+    simContent.innerHTML = `
+      <div class="sim-header">
+        <div class="sim-progress">Otázka ${state.idx + 1} / ${total}</div>
+        <div class="sim-progress-bar"><div class="sim-progress-fill" style="width:${progressPct}%"></div></div>
+        <button class="sim-close" id="btnClose" aria-label="Zavrieť">×</button>
+      </div>
+
+      <div class="sim-area">${escapeHtml(q.area)}</div>
+      <div class="sim-question">${escapeHtml(q.q)}</div>
+
+      <div class="sim-controls">
+        <div class="sim-timer">
+          <div class="sim-timer-ring">
+            <svg viewBox="0 0 44 44">
+              <circle class="sim-timer-bg" cx="22" cy="22" r="19"/>
+              <circle class="sim-timer-fg" id="timerFg" cx="22" cy="22" r="19"
+                      stroke-dasharray="${2*Math.PI*19}"
+                      stroke-dashoffset="0"/>
+            </svg>
+            <div class="sim-timer-num" id="timerNum">${SECONDS_PER_Q}</div>
+          </div>
+          <div class="sim-timer-label">Hovorte nahlas<br>po slovensky</div>
+        </div>
+        ${state.recordEnabled ? `
+          <div class="sim-rec" id="recBox">
+            <button class="sim-rec-btn" id="recBtn" title="Nahrať odpoveď" aria-label="Nahrať odpoveď">●</button>
+            <span class="sim-rec-empty-hint" id="recHint">Kliknite na ● pre nahrávanie</span>
+            <audio id="recAudio" controls style="display:none"></audio>
+          </div>
+        ` : ``}
+      </div>
+
+      <div id="scaffoldSlot"></div>
+
+      <div class="sim-nav">
+        <div class="sim-nav-left">
+          <button class="sim-btn sim-btn-ghost" id="btnPrev" ${state.idx === 0 ? "disabled" : ""}>← Späť</button>
+          <button class="sim-btn sim-btn-ghost" id="btnReveal">Zobraziť odpoveď</button>
+        </div>
+        <button class="sim-btn sim-btn-primary" id="btnNext">
+          ${state.idx === total - 1 ? "Dokončiť →" : "Ďalej →"}
+        </button>
+      </div>
+    `;
+
+    document.getElementById("btnClose").addEventListener("click", closeSim);
+    document.getElementById("btnPrev").addEventListener("click", () => {
+      stopTimer(); stopRecording();
+      if (state.idx > 0) { state.idx--; render(); }
+    });
+    document.getElementById("btnReveal").addEventListener("click", () => {
+      revealScaffold();
+    });
+    document.getElementById("btnNext").addEventListener("click", () => {
+      stopTimer(); stopRecording();
+      if (state.idx === total - 1) {
+        state.phase = "finish";
+      } else {
+        state.idx++;
+      }
+      render();
+    });
+
+    if (state.recordEnabled) {
+      const recBtn = document.getElementById("recBtn");
+      recBtn.addEventListener("click", toggleRecording);
+      // Restore previous recording if we have one
+      const prevUrl = state.recordedBlobs.get(state.idx);
+      if (prevUrl) showRecordedAudio(prevUrl);
+    }
+
+    startTimer();
+  }
+
+  function startTimer() {
+    const num = document.getElementById("timerNum");
+    const fg  = document.getElementById("timerFg");
+    const circumference = 2 * Math.PI * 19;
+    state.timerId = setInterval(() => {
+      state.secondsLeft--;
+      if (num) num.textContent = state.secondsLeft;
+      if (fg) {
+        const offset = circumference * (1 - state.secondsLeft / SECONDS_PER_Q);
+        fg.style.strokeDashoffset = offset;
+      }
+      if (state.secondsLeft <= 0) {
+        stopTimer();
+        if (!state.revealed) revealScaffold();
+      }
+    }, 1000);
+  }
+
+  function stopTimer() {
+    if (state.timerId) {
+      clearInterval(state.timerId);
+      state.timerId = null;
+    }
+  }
+
+  function revealScaffold() {
+    if (state.revealed) return;
+    state.revealed = true;
+    const q = QUESTIONS[state.idx];
+    const slot = document.getElementById("scaffoldSlot");
+    if (!slot) return;
+    slot.innerHTML = `
+      <div class="sim-scaffold">
+        <div class="sim-scaffold-heading">Čo skúšajúci počúva</div>
+        <div class="sim-scaffold-text">${escapeHtml(q.listens)}</div>
+
+        <div class="sim-scaffold-heading">Vzorová odpoveď</div>
+        <div class="sim-scaffold-answer">${q.answer}</div>
+
+        <div class="sim-scaffold-heading">Tipy</div>
+        <ul>
+          ${q.tips.map(t => `<li>${escapeHtml(t)}</li>`).join("")}
+        </ul>
+      </div>
+    `;
+  }
+
+  function renderFinish() {
+    stopTimer();
+    stopRecording();
+    releaseMic();
+    const hasRecordings = state.recordedBlobs.size > 0;
+    simContent.innerHTML = `
+      <div class="sim-header">
+        <div class="sim-progress">Dokončené · ${QUESTIONS.length} / ${QUESTIONS.length}</div>
+        <button class="sim-close" id="btnClose" aria-label="Zavrieť">×</button>
+      </div>
+      <div class="sim-finish">
+        <div class="sim-finish-icon">🎯</div>
+        <h3>Dokončené</h3>
+        <p>
+          Prešli ste všetkých 12 otázok. Ak ste sa pri niektorej zasekli alebo cítili neistotu,
+          spustite simuláciu znova a sústreďte sa práve na ňu. Opakovanie nahlas je jediný
+          spôsob, ako získať plynulosť.
+        </p>
+        ${hasRecordings ? `<p style="font-size:12px">Vaše nahrávky zostávajú v tomto prehliadači, kým simuláciu nezavriete.</p>` : ``}
+        <div style="display:flex; gap:10px; justify-content:center; margin-top:8px">
+          <button class="sim-btn sim-btn-ghost" id="btnRestart">Znova od začiatku</button>
+          <button class="sim-btn sim-btn-primary" id="btnDone">Zavrieť</button>
+        </div>
+      </div>
+    `;
+    document.getElementById("btnClose").addEventListener("click", closeSim);
+    document.getElementById("btnDone").addEventListener("click", closeSim);
+    document.getElementById("btnRestart").addEventListener("click", () => {
+      state.phase = "question"; state.idx = 0;
+      state.recordedBlobs.forEach(url => URL.revokeObjectURL(url));
+      state.recordedBlobs.clear();
+      render();
+    });
+  }
+
+  // ── Recording (client-side only) ────────────────────
+  async function ensureMic() {
+    try {
+      if (!state.mediaStream) {
+        state.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
+      return true;
+    } catch (err) {
+      console.warn("Mic access denied:", err);
+      return false;
+    }
+  }
+
+  function releaseMic() {
+    if (state.mediaStream) {
+      state.mediaStream.getTracks().forEach(t => t.stop());
+      state.mediaStream = null;
+    }
+  }
+
+  async function toggleRecording() {
+    if (state.recording) {
+      stopRecording();
+    } else {
+      await startRecording();
+    }
+  }
+
+  async function startRecording() {
+    if (!state.mediaStream) {
+      const ok = await ensureMic();
+      if (!ok) return;
+    }
+    const chunks = [];
+    state.mediaRecorder = new MediaRecorder(state.mediaStream);
+    state.mediaRecorder.ondataavailable = (e) => {
+      if (e.data && e.data.size) chunks.push(e.data);
+    };
+    state.mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks, { type: "audio/webm" });
+      const url = URL.createObjectURL(blob);
+      // Revoke previous recording for this question if any
+      const prev = state.recordedBlobs.get(state.idx);
+      if (prev) URL.revokeObjectURL(prev);
+      state.recordedBlobs.set(state.idx, url);
+      showRecordedAudio(url);
+    };
+    state.mediaRecorder.start();
+    state.recording = true;
+    const btn = document.getElementById("recBtn");
+    const hint = document.getElementById("recHint");
+    if (btn) btn.classList.add("recording");
+    if (hint) hint.textContent = "Nahrávam... kliknite pre zastavenie";
+  }
+
+  function stopRecording() {
+    if (state.mediaRecorder && state.recording) {
+      try { state.mediaRecorder.stop(); } catch {}
+    }
+    state.recording = false;
+    const btn = document.getElementById("recBtn");
+    if (btn) btn.classList.remove("recording");
+  }
+
+  function showRecordedAudio(url) {
+    const audio = document.getElementById("recAudio");
+    const hint  = document.getElementById("recHint");
+    if (audio) {
+      audio.src = url;
+      audio.style.display = "inline-block";
+    }
+    if (hint) hint.style.display = "none";
+  }
+
+  // Escape on close
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && simOverlay.classList.contains("active")) {
+      closeSim();
+    }
+  });
+
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    }[c]));
+  }
+})();
+</script>
+
+<script src="/assets/js/maintenance-bar.js"></script>
+</body>
+</html>
