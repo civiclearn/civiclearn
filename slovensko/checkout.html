@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="sk-SK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prémiový prístup – Skúška občianstva SR | CivicLearn Slovensko</title>
+<meta name="description" content="Aktivujte prémiový prístup k príprave na skúšku zo slovenských reálií a štátneho občianstva SR.">
+<link rel="canonical" href="https://civiclearn.com/slovensko/checkout.html">
+<meta property="og:title" content="Prémiový prístup – Skúška občianstva SR">
+<meta property="og:description" content="Úplný prístup ku všetkým tréningovým funkciám. Jednorazová platba – doživotný prístup.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://civiclearn.com/slovensko/checkout.html">
+<meta property="og:image" content="https://civiclearn.com/slovensko/assets/img/og-cover.webp">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; overflow-x: clip; }
+body {
+  font-family: "Lexend", system-ui, sans-serif;
+  background: #f7f8fa;
+  min-height: 100vh; color: #0f172a; overflow-x: clip; width: 100%;
+}
+a { color: inherit; }
+
+/* ── HEADER ── */
+.checkout-header {
+  background: rgba(247,248,250,.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  position: sticky; top: 0; z-index: 100;
+}
+.checkout-header-inner {
+  max-width: 600px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .85rem 1.5rem; gap: .5rem;
+}
+.checkout-brand {
+  display: flex; align-items: center; gap: .55rem;
+  font-weight: 700; font-size: .88rem; color: #0f172a;
+}
+.checkout-brand img { width: 24px; height: auto; border-radius: 3px; }
+.header-right { display: flex; align-items: center; gap: .75rem; }
+.header-contact {
+  font-size: .74rem; font-weight: 500; color: #94a3b8;
+  text-decoration: none; display: flex; align-items: center; gap: .28rem;
+  padding: .27rem .52rem; border: 1px solid #e2e8f0; border-radius: .45rem;
+  transition: all .15s; white-space: nowrap;
+}
+.header-contact:hover { border-color: #0B4EA2; color: #0B4EA2; background: #e8efff; }
+.checkout-powered { font-size: .72rem; color: #94a3b8; }
+.checkout-powered a { color: #64748b; text-decoration: none; font-weight: 500; }
+.checkout-powered a:hover { color: #0f172a; }
+@media (max-width: 520px) {
+  .checkout-header-inner { padding: .65rem 1rem; }
+  .checkout-brand { font-size: .82rem; }
+  .header-contact span { display: none; }
+  .header-contact { padding: .25rem .4rem; }
+  .checkout-powered { display: none; }
+}
+
+/* ── LAYOUT ── */
+main {
+  max-width: 600px; margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+@media (max-width: 520px) {
+  main { padding: 1.8rem 1.15rem 3rem; }
+}
+
+/* ── TITLE ── */
+.page-title { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2rem; line-height: 1.2; letter-spacing: -.025em; }
+
+/* ── PRICE LINE ── */
+.price-line {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding-bottom: 1.6rem; margin-bottom: 1.6rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+.price-line-label { font-size: .82rem; font-weight: 500; color: #64748b; }
+.price-line-meta { font-size: .72rem; color: #94a3b8; margin-top: .2rem; }
+.price-line-amount { font-size: 1.15rem; font-weight: 700; color: #0f172a; letter-spacing: -.01em; white-space: nowrap; }
+
+/* ── STRIPE ELEMENTS ── */
+#link-auth-element { margin-bottom: 1.1rem; }
+#payment-element { margin-bottom: 1.4rem; }
+.stripe-loading { text-align: center; color: #94a3b8; font-size: .82rem; padding: 1.5rem 0; }
+
+/* ── PAY BUTTON ── */
+.pay-btn {
+  width: 100%; padding: 1rem 1.2rem;
+  background: #0B4EA2; color: #fff; border: none; border-radius: .85rem;
+  font-family: "Lexend", sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: opacity .15s, transform .1s; letter-spacing: .01em;
+}
+.pay-btn:hover:not(:disabled) { opacity: .92; transform: translateY(-1px); }
+.pay-btn:active:not(:disabled) { transform: translateY(0); }
+.pay-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── TRUST ── */
+.trust-strip {
+  display: flex; align-items: center; justify-content: center; gap: 1.3rem;
+  margin-top: 1.1rem; flex-wrap: wrap;
+}
+.trust-item { display: flex; align-items: center; gap: .3rem; font-size: .7rem; color: #94a3b8; white-space: nowrap; }
+.trust-item span:first-child { font-size: .82rem; }
+
+/* ── DIVIDER ── */
+.section-divider { height: 1px; background: #e2e8f0; margin: 1.8rem 0; }
+
+/* ── LEGAL NOTE ── */
+.legal-note {
+  background: #e8efff;
+  border-left: 3px solid #0B4EA2;
+  border-radius: 0 6px 6px 0;
+  padding: 10px 14px;
+  font-size: .76rem;
+  color: #334155;
+  margin-bottom: 1.4rem;
+  line-height: 1.5;
+}
+
+/* ── PASSWORD / DONE ── */
+.done-icon { font-size: 2.6rem; text-align: center; margin-bottom: .6rem; }
+.done-title { font-size: 1.2rem; font-weight: 700; text-align: center; margin-bottom: .35rem; }
+.done-sub { font-size: .82rem; color: #94a3b8; text-align: center; margin-bottom: 1.2rem; }
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: .82rem; font-weight: 500; margin-bottom: .3rem; color: #374151; }
+.field input {
+  width: 100%; padding: .75rem .9rem; border-radius: .85rem; border: 1.5px solid #e2e8f0;
+  font-size: .92rem; font-family: "Lexend", sans-serif; color: #0f172a;
+  outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.field input:focus { border-color: #0B4EA2; box-shadow: 0 0 0 3px rgba(11,78,162,.1); }
+
+/* ── MESSAGES ── */
+.checkout-message { border-radius: .75rem; padding: .65rem .9rem; font-size: .82rem; margin-top: .75rem; display: none; line-height: 1.45; }
+.checkout-message.error { background: #fef2f2; color: #b91c1c; }
+.checkout-message.info { background: #eff6ff; color: #1d4ed8; }
+.checkout-message.success { background: #f0fdf4; color: #15803d; }
+
+/* ── FOOTER LINKS ── */
+.footer-links {
+  margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem;
+}
+.after-text { font-size: .75rem; color: #94a3b8; }
+.after-text a { color: #0B4EA2; font-weight: 500; text-decoration: none; }
+.after-text a:hover { text-decoration: underline; }
+.details-toggle {
+  display: flex; align-items: center; gap: .3rem;
+  background: none; border: none; cursor: pointer;
+  font-family: "Lexend", sans-serif; font-size: .72rem; font-weight: 500;
+  color: #94a3b8; transition: color .15s;
+}
+.details-toggle:hover { color: #64748b; }
+.details-toggle .arrow { transition: transform .25s; font-size: .55rem; }
+.details-toggle.open .arrow { transform: rotate(180deg); }
+.details-list {
+  display: none; margin-top: .8rem;
+  columns: 2; column-gap: 1.5rem;
+}
+.details-list.open { display: block; }
+.details-list ul { list-style: none; }
+.details-list li {
+  font-size: .72rem; color: #64748b; display: flex; align-items: flex-start; gap: .4rem;
+  padding: .2rem 0; break-inside: avoid;
+}
+.details-list li::before { content: '✓'; color: #0B4EA2; font-weight: 700; font-size: .65rem; flex-shrink: 0; margin-top: .08rem; }
+@media (max-width: 420px) {
+  .details-list { columns: 1; }
+}
+
+@keyframes spin { to { transform: rotate(360deg) } }
+</style>
+</head>
+<body>
+
+<header class="checkout-header">
+  <div class="checkout-header-inner">
+    <div class="checkout-brand">
+      <img src="/assets/images/sk.svg" alt="Slovensko">
+      Štátne občianstvo SR
+    </div>
+    <div class="header-right">
+      <a href="https://civiclearn.com/slovensko/help.html" target="_blank" class="header-contact">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <span>Otázky?</span>
+      </a>
+      <div class="checkout-powered">
+        <small>poháňa </small>
+        <a href="https://civiclearn.com/slovensko/">CivicLearn</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <div class="page-title">Aktivujte prémiový prístup</div>
+
+  <!-- LEGAL NOTE -->
+  <div class="legal-note">
+    Príprava podľa § 8 ods. 6 zákona č. 40/1993 Z. z. — pohovor pred komisiou obvodného úradu. Nezávislá prípravná platforma, nie oficiálna skúška.
+  </div>
+
+  <!-- PRICE LINE -->
+  <div class="price-line" id="priceLine">
+    <div>
+      <div class="price-line-label" id="priceLabel">Štátne občianstvo SR · Prémium</div>
+      <div class="price-line-meta" id="priceMeta">800+ otázok · 300 článkov · Doživotný prístup</div>
+    </div>
+    <div style="flex-shrink:0;text-align:right"><span class="price-line-amount" id="priceAmount">59 €</span></div>
+  </div>
+
+  <!-- ══ CHECKOUT FORM — all visible on load ══ -->
+  <div id="viewCheckout">
+    <div id="link-auth-element"></div>
+    <div id="payment-element"><div class="stripe-loading">Načítavajú sa platobné metódy…</div></div>
+    <button type="button" class="pay-btn" id="payBtn" disabled>Zaplatiť 59 €</button>
+    <div class="trust-strip">
+      <div class="trust-item"><span>🔒</span><span>Chránené Stripe</span></div>
+      <div class="trust-item"><span>⚡</span><span>Okamžitý prístup</span></div>
+      <div class="trust-item"><span>✔</span><span>Jednorazová platba</span></div>
+    </div>
+  </div>
+
+  <!-- ══ PASSWORD ══ -->
+  <div id="viewPassword" hidden>
+    <div style="text-align:center;font-size:2.4rem;margin-bottom:.6rem">🎉</div>
+    <div class="done-title">Platba potvrdená!</div>
+    <p style="font-size:.85rem;color:#475569;text-align:center;margin-bottom:1.1rem">Teraz si zvoľte heslo pre svoj účet.</p>
+    <div class="field">
+      <label for="pw1">Heslo</label>
+      <input type="password" id="pw1" autocomplete="new-password" placeholder="Minimálne 6 znakov">
+    </div>
+    <div class="field">
+      <label for="pw2">Potvrďte heslo</label>
+      <input type="password" id="pw2" autocomplete="new-password" placeholder="Zopakujte heslo">
+    </div>
+    <button type="button" class="pay-btn" id="setupBtn">Vytvoriť účet</button>
+  </div>
+
+  <!-- ══ DONE ══ -->
+  <div id="viewDone" hidden>
+    <div class="done-icon">✅</div>
+    <div class="done-title">Váš účet je pripravený!</div>
+    <div class="done-sub" id="doneEmail"></div>
+    <a href="/slovensko/" class="pay-btn" id="doneCta"
+       style="text-align:center;text-decoration:none;display:block">Začať tréning →</a>
+  </div>
+
+  <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
+
+  <!-- FOOTER -->
+  <div class="footer-links">
+    <div class="after-text">Už máte účet? <a href="/slovensko/login.html">Prihláste sa tu</a>.</div>
+    <button class="details-toggle" id="detailsToggle">
+      <span>Čo je zahrnuté?</span>
+      <span class="arrow">▼</span>
+    </button>
+  </div>
+  <div class="details-list" id="detailsList">
+    <ul id="featureItems"></ul>
+  </div>
+
+</main>
+
+<script>
+(function(){
+  document.getElementById('detailsToggle').addEventListener('click', function(){
+    var list = document.getElementById('detailsList');
+    this.classList.toggle('open', list.classList.toggle('open'));
+  });
+})();
+</script>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<script>
+(function(){
+  'use strict';
+
+  var FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  var SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
+  var SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  var STRIPE_PK     = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
+  var RETURN_URL    = 'https://civiclearn.com/slovensko/checkout.html';
+
+  var stripe = Stripe(STRIPE_PK);
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Single plan — Slovak product integrates language training into MCQ dashboard
+  var PLAN = {
+    amount: 5900,                                  // €59.00 in cents
+    price: '59 €',
+    payLabel: 'Zaplatiť 59 €',
+    label: 'Štátne občianstvo SR · Prémium',
+    meta: '800+ otázok · 300 článkov · Doživotný prístup',
+    createFn: 'sk-create-payment-intent',
+    setupFn: 'sk-setup-account'
+  };
+
+  var features = [
+    '800+ otázok zo slovenských reálií a histórie',
+    'Integrovaný tréning jazyka: 300 autentických článkov',
+    'AI hodnotenie písomných súhrnov v 4 dimenziách',
+    'Nahrávanie hlasného čítania na vlastnú kontrolu',
+    'Tipy na pohovor pred komisiou obvodného úradu',
+    'Simulácie, rýchle testy, kartičky a testy podľa tém',
+    'Časté chyby a osobné „trápenia“ na opakovanie',
+    'Sledovanie pokroku a míľniky zvládnutia',
+    'Synchronizácia medzi zariadeniami',
+    'Doživotný prístup — bez predplatného'
+  ];
+
+  var currentEmail = '';
+  var paymentIntentId = '';
+  var stripeElements = null;
+  var linkAuthElement = null;
+  var paymentElement = null;
+  var isSubmitting = false;
+
+  /* ── Views ── */
+  var viewCheckout = document.getElementById('viewCheckout');
+  var viewPassword = document.getElementById('viewPassword');
+  var viewDone     = document.getElementById('viewDone');
+  var priceLine    = document.getElementById('priceLine');
+  var msg          = document.getElementById('checkoutMessage');
+
+  function show(name) {
+    viewCheckout.hidden = (name !== 'checkout');
+    viewPassword.hidden = (name !== 'password');
+    viewDone.hidden     = (name !== 'done');
+    priceLine.style.display  = (name === 'checkout') ? 'flex' : 'none';
+    msg.style.display = 'none';
+  }
+  function err(text)  { msg.textContent = text; msg.className = 'checkout-message error'; msg.style.display = 'block'; }
+  function info(text) { msg.textContent = text; msg.className = 'checkout-message info';  msg.style.display = 'block'; }
+
+  function renderFeatures() {
+    document.getElementById('featureItems').innerHTML = features.map(function(t) { return '<li>' + t + '</li>'; }).join('');
+  }
+  renderFeatures();
+
+  /* ── Stripe — deferred intent ── */
+  function mountStripeElements() {
+    stripeElements = stripe.elements({
+      mode: 'payment',
+      amount: PLAN.amount,
+      currency: 'eur',
+      appearance: {
+        theme: 'stripe',
+        variables: {
+          fontFamily: '"Lexend", system-ui, sans-serif',
+          borderRadius: '0.85rem',
+          colorPrimary: '#0B4EA2'
+        }
+      }
+    });
+
+    document.getElementById('link-auth-element').innerHTML = '';
+    linkAuthElement = stripeElements.create('linkAuthentication');
+    linkAuthElement.mount('#link-auth-element');
+    linkAuthElement.on('change', function(ev) {
+      if (ev.value && ev.value.email) currentEmail = ev.value.email;
+    });
+
+    document.getElementById('payment-element').innerHTML = '';
+    paymentElement = stripeElements.create('payment', {
+      layout: {
+        type: 'accordion',
+        defaultCollapsed: false,
+        radios: true,
+        spacedAccordionItems: true
+      }
+    });
+    paymentElement.mount('#payment-element');
+    paymentElement.on('ready', function() { document.getElementById('payBtn').disabled = false; });
+    paymentElement.on('change', function(ev) { if (ev.complete) document.getElementById('payBtn').disabled = false; });
+  }
+
+  /* ── 3DS return ── */
+  var urlParams = new URLSearchParams(window.location.search);
+  var returnedPI     = urlParams.get('payment_intent');
+  var returnedSecret = urlParams.get('payment_intent_client_secret');
+  var returnedStatus = urlParams.get('redirect_status');
+
+  if (returnedPI && returnedSecret) {
+    currentEmail = localStorage.getItem('sk_checkout_email') || '';
+    paymentIntentId = returnedPI;
+    if (returnedStatus === 'succeeded') { show('password'); }
+    else {
+      stripe.retrievePaymentIntent(returnedSecret).then(function(r) {
+        var pi = r.paymentIntent;
+        if (pi && pi.status === 'succeeded') show('password');
+        else { err('Platba nebola úspešne dokončená.'); show('checkout'); }
+      });
+    }
+    window.history.replaceState({}, '', window.location.pathname);
+  } else {
+    mountStripeElements();
+    show('checkout');
+  }
+
+  /* ── Pay ── */
+  document.getElementById('payBtn').onclick = async function() {
+    if (isSubmitting) return;
+    if (!currentEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(currentEmail)) {
+      err('Zadajte, prosím, platnú e-mailovú adresu.');
+      return;
+    }
+    isSubmitting = true;
+    var btn = document.getElementById('payBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px"></span>Spracúva sa platba…';
+    msg.style.display = 'none';
+    try {
+      var submitResult = await stripeElements.submit();
+      if (submitResult.error) {
+        err(submitResult.error.message || 'Skontrolujte platobné údaje.');
+        btn.disabled = false; btn.textContent = PLAN.payLabel; isSubmitting = false; return;
+      }
+      var res = await fetch(FUNCTIONS_URL + '/' + PLAN.createFn, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail })
+      });
+      var data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Vyskytla sa chyba.');
+      paymentIntentId = data.payment_intent_id;
+      localStorage.setItem('sk_checkout_email', currentEmail);
+      var result = await stripe.confirmPayment({
+        elements: stripeElements,
+        clientSecret: data.client_secret,
+        confirmParams: { return_url: RETURN_URL, receipt_email: currentEmail },
+        redirect: 'if_required'
+      });
+      if (result.error) {
+        err(result.error.message || 'Platba zlyhala.');
+        btn.disabled = false; btn.textContent = PLAN.payLabel; isSubmitting = false; return;
+      }
+      if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
+        paymentIntentId = result.paymentIntent.id; show('password');
+      } else if (result.paymentIntent && result.paymentIntent.status === 'processing') {
+        info('Vaša platba sa spracováva…');
+      }
+    } catch (e) {
+      err(e.message || 'Vyskytla sa chyba.');
+      btn.disabled = false; btn.textContent = PLAN.payLabel;
+    }
+    isSubmitting = false;
+  };
+
+  /* ── Password ── */
+  document.getElementById('setupBtn').onclick = async function() {
+    var p1 = document.getElementById('pw1').value, p2 = document.getElementById('pw2').value;
+    if (!p1 || p1.length < 6) { err('Heslo musí mať aspoň 6 znakov.'); return; }
+    if (p1 !== p2) { err('Heslá sa nezhodujú.'); return; }
+    var btn = document.getElementById('setupBtn'); btn.disabled = true; btn.textContent = 'Vytvára sa účet…'; msg.style.display = 'none';
+    try {
+      var res = await fetch(FUNCTIONS_URL + '/' + PLAN.setupFn, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_intent_id: paymentIntentId, password: p1 })
+      });
+      var data = await res.json();
+      if (!data.success) { err(data.error || 'Vytvorenie účtu zlyhalo.'); btn.disabled = false; btn.textContent = 'Vytvoriť účet'; return; }
+      var signIn = await sb.auth.signInWithPassword({ email: data.email, password: p1 });
+      if (signIn.error) console.error('Auto-login failed:', signIn.error);
+      localStorage.removeItem('sk_checkout_email');
+      document.getElementById('doneEmail').textContent = 'Prihlásený ako: ' + data.email;
+      show('done');
+    } catch (e) {
+      err('Chyba pripojenia. Skúste znova.'); btn.disabled = false; btn.textContent = 'Vytvoriť účet';
+    }
+  };
+  document.getElementById('pw2').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('setupBtn').click(); });
+
+})();
+</script>
+
+</body>
+</html>

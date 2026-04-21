@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Čistenie vyrovnávacej pamäte – CivicLearn Slovensko</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand:#0B4EA2; --brand-dim:#e8efff; --brand-dark:#08407f;
+    --navy:#0f172a; --slate:#334155; --muted:#64748b;
+    --border:#e2e8f0; --surface:#ffffff; --bg:#f7f8fa;
+    --green:#059669; --green-light:#f0fdf4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Lexend",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;}
+
+  .topbar{background:var(--navy);border-bottom:3px solid var(--brand);padding:0 28px;height:56px;display:flex;align-items:center;}
+  .topbar-brand{display:flex;align-items:center;gap:14px;}
+  .topbar-brand img{width:22px;height:auto;}
+  .brand-text{display:flex;flex-direction:column;line-height:1.1;}
+  .brand-title{font-size:1rem;font-weight:600;color:#fff;}
+  .brand-sub{font-size:0.72rem;color:#64748b;}
+
+  .main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:16px;}
+
+  .card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.04);text-align:center;}
+
+  .card-icon{font-size:2.5rem;margin-bottom:16px;}
+  .card h1{font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:6px;}
+  .card p{font-size:0.85rem;color:var(--muted);line-height:1.6;margin-bottom:24px;}
+
+  .steps{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:24px;text-align:left;}
+  .step{display:flex;align-items:center;gap:10px;font-size:0.82rem;color:var(--muted);transition:color 0.3s;}
+  .step.done{color:var(--green);}
+  .step.active{color:var(--navy);}
+  .step-icon{width:22px;height:22px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.65rem;font-weight:600;transition:background 0.3s,border-color 0.3s;}
+  .step.done .step-icon{background:var(--green);border-color:var(--green);color:#fff;}
+  .step.active .step-icon{border-color:var(--navy);animation:pulse 1s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
+
+  .bar-wrap{height:3px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:24px;}
+  .bar{height:100%;background:var(--brand);width:0%;transition:width 0.4s ease;border-radius:3px;}
+
+  .status{border-radius:12px;padding:12px 16px;font-size:0.84rem;line-height:1.5;display:none;margin-bottom:16px;}
+  .status.success{display:block;background:var(--green-light);border:1px solid #bbf7d0;color:#166534;}
+
+  .redirect-msg{font-size:0.82rem;color:var(--muted);display:none;}
+  .redirect-msg.visible{display:block;}
+  .redirect-msg .countdown{color:var(--brand);font-weight:700;}
+
+  .action-btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:"Lexend",sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;background:var(--brand);color:#fff;}
+  .action-btn:hover:not(:disabled){opacity:0.85;}
+  .action-btn:disabled{opacity:0.4;cursor:default;}
+
+  .page-footer{text-align:center;padding:20px;font-size:0.75rem;color:var(--muted);}
+  .page-footer a{color:var(--brand);text-decoration:none;font-weight:600;}
+
+  @media(max-width:480px){.card{padding:28px 22px;border-radius:16px;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <img src="/assets/images/sk.svg" alt="Slovensko">
+    <div class="brand-text">
+      <span class="brand-title">CivicLearn Slovensko</span>
+      <span class="brand-sub">Štátne občianstvo SR</span>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="card">
+    <div class="card-icon" id="cardIcon">🔄</div>
+    <h1 id="cardTitle">Aktualizuje sa aplikácia</h1>
+    <p id="cardSubtitle">Čistíme staré údaje, aby ste mali najnovšiu verziu. Potrvá to len chvíľu.</p>
+
+    <button class="action-btn" id="startBtn">Vyčistiť a aktualizovať</button>
+
+    <div class="bar-wrap" id="barWrap" style="display:none"><div class="bar" id="bar"></div></div>
+
+    <ul class="steps" id="steps" style="display:none">
+      <li class="step" id="s1"><span class="step-icon">1</span> Odstraňujú sa staré súbory</li>
+      <li class="step" id="s2"><span class="step-icon">2</span> Čistí sa vyrovnávacia pamäť</li>
+      <li class="step" id="s3"><span class="step-icon">3</span> Čistí sa relácia</li>
+      <li class="step" id="s4"><span class="step-icon">✓</span> Hotovo</li>
+    </ul>
+
+    <div class="status" id="status"></div>
+    <div class="redirect-msg" id="redirectMsg">
+      Presmerujeme vás na prihlásenie o <span class="countdown" id="countdown">3</span> sekúnd…
+    </div>
+  </div>
+</div>
+
+<div class="page-footer">
+  <a href="https://civiclearn.com/slovensko/">civiclearn.com/slovensko</a> — Príprava na skúšku zo štátneho občianstva SR
+</div>
+
+<script>
+(function () {
+  const LOGIN_URL = '/slovensko/login.html';
+  const bar = document.getElementById('bar');
+  const statusEl = document.getElementById('status');
+  const redirectMsg = document.getElementById('redirectMsg');
+  const countdownEl = document.getElementById('countdown');
+
+  function setStep(id, state) {
+    const el = document.getElementById(id);
+    el.className = 'step ' + state;
+    const icon = el.querySelector('.step-icon');
+    if (state === 'done') icon.innerHTML = '✓';
+  }
+
+  function setBar(pct) { bar.style.width = pct + '%'; }
+  function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  document.getElementById('startBtn').addEventListener('click', async function () {
+    this.disabled = true;
+    this.textContent = 'Čistenie…';
+    document.getElementById('barWrap').style.display = 'block';
+    document.getElementById('steps').style.display = 'flex';
+
+    let errors = [];
+
+    // Step 1 — Unregister service workers
+    setStep('s1', 'active');
+    setBar(10);
+    try {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+      setStep('s1', 'done');
+    } catch (e) { errors.push(e.message); }
+    setBar(30);
+    await delay(300);
+
+    // Step 2 — Clear Cache API
+    setStep('s2', 'active');
+    try {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+      setStep('s2', 'done');
+    } catch (e) { errors.push(e.message); }
+    setBar(65);
+    await delay(300);
+
+    // Step 3 — Clear localStorage (auth keys only) & sessionStorage & cookies
+    setStep('s3', 'active');
+    try {
+      // Only clear auth-related keys, preserve progress data
+      const authPrefixes = ['sb-', 'supabase', 'cl_auth', 'cl_email', 'cl_login_at', 'cl_bundle', 'cl_redirect_ts'];
+      const toRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && authPrefixes.some(p => k.startsWith(p) || k === p)) {
+          toRemove.push(k);
+        }
+      }
+      toRemove.forEach(k => localStorage.removeItem(k));
+      sessionStorage.clear();
+      document.cookie.split(';').forEach(c => {
+        document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
+      });
+      setStep('s3', 'done');
+    } catch (e) { errors.push(e.message); }
+    setBar(90);
+    await delay(300);
+
+    setStep('s4', 'done');
+    setBar(100);
+
+    // Update UI
+    document.getElementById('cardIcon').textContent = '✅';
+    document.getElementById('cardTitle').textContent = 'Všetko je aktualizované';
+    document.getElementById('cardSubtitle').textContent = 'Váš prehliadač je pripravený. Presmerujeme vás na prihlasovaciu stránku.';
+    this.style.display = 'none';
+
+    statusEl.className = 'status success';
+    statusEl.innerHTML = '<strong>Dokončené.</strong> Staré údaje boli vyčistené.';
+
+    // Countdown redirect
+    redirectMsg.classList.add('visible');
+    let seconds = 3;
+    countdownEl.textContent = seconds;
+    const timer = setInterval(() => {
+      seconds--;
+      countdownEl.textContent = seconds;
+      if (seconds <= 0) {
+        clearInterval(timer);
+        window.location.href = LOGIN_URL;
+      }
+    }, 1000);
+  });
+})();
+</script>
+</body>
+</html>
