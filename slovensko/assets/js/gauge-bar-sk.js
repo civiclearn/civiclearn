@@ -31,9 +31,17 @@
     red:    "#dc2626"
   };
 
-  const BADGE_TEXT = {
-    green:  "Pripravený",
-    orange: "Takmer",
+  // Per-gauge badge text. Only the "ready" state needs disambiguation —
+  // for orange/red the user's action ("practice more") is universal, so
+  // those strings are shared.
+  const KNOWLEDGE_BADGE_TEXT = {
+    green:  "Pripravený na pohovor",
+    orange: "Takmer pripravený",
+    red:    "Treba cvičiť"
+  };
+  const LANGUAGE_BADGE_TEXT = {
+    green:  "Pripravený na súhrn",
+    orange: "Takmer pripravený",
     red:    "Treba cvičiť"
   };
 
@@ -114,11 +122,13 @@
     }
 
     const pct = Math.max(0, Math.min(100, (data.estimated / data.total) * 100));
-    // Prefer the richer state/badge computed by dashboard-extra-sk.js
+    // Prefer the richer state computed by dashboard-extra-sk.js
     // (it uses passScore ± 3, not the 50/75 percent bands). Fall back
-    // to percent-band logic if those fields are absent.
+    // to percent-band logic if that field is absent. Badge text is
+    // always the per-gauge map here, ignoring any stale `badgeText`
+    // that dashboard-extra-sk.js may have written to the cache.
     const state = data.state || stateForPct(pct);
-    const text  = data.badgeText || BADGE_TEXT[state];
+    const text  = KNOWLEDGE_BADGE_TEXT[state];
 
     fill.style.width = pct + "%";
     fill.style.background = colorForState(state);
@@ -159,7 +169,7 @@
 
     if (pass) pass.style.left = PASS_THRESHOLD + "%";
 
-    applyBadge(badge, state, BADGE_TEXT[state]);
+    applyBadge(badge, state, LANGUAGE_BADGE_TEXT[state]);
   }
 
   function render() {
