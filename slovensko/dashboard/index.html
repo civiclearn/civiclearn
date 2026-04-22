@@ -23,31 +23,54 @@
       --accent-soft-border: #b8cfee;
     }
 
-    /* ========== Article training row (new section ②) ========== */
+    /* ========== Article training module — unified card (new section ②) ========== */
     .db-article-row {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-    .db-art-card {
       background: var(--card-bg, #fff);
       border: 1px solid var(--border, #e5e7eb);
       border-radius: var(--radius, 14px);
-      padding: 20px 24px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .db-art-header {
+      padding: 18px 24px 14px 24px;
+      border-bottom: 1px solid var(--border, #e5e7eb);
+    }
+    .db-art-kicker {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted, #6b7280);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .db-art-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .db-art-body {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+    }
+    .db-art-half {
+      padding: 18px 24px 20px 24px;
       display: flex;
       flex-direction: column;
       min-height: 160px;
     }
-    .db-art-card .db-art-label {
-      font-size: 0.74rem;
+    .db-art-half + .db-art-half {
+      border-left: 1px solid var(--border, #e5e7eb);
+    }
+    .db-art-sub-label {
+      font-size: 0.72rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-muted, #6b7280);
       font-weight: 600;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
-    /* Last result card */
+
+    /* Last result half */
     .db-art-last-empty {
       color: var(--text-muted, #6b7280);
       font-size: 0.9rem;
@@ -97,62 +120,55 @@
       color: var(--text-muted, #6b7280);
       margin-bottom: 8px;
     }
+    /* Dimension pills now distribute evenly across the half */
     .db-art-dims {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: 8px;
-      flex-wrap: wrap;
     }
     .db-art-dim-dot {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       font-size: 0.72rem;
       color: var(--text-muted, #6b7280);
     }
     .db-art-dim-value {
       display: inline-block;
-      width: 18px; height: 18px;
+      width: 20px; height: 20px;
       border-radius: 50%;
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       font-weight: 700;
       color: #fff;
       text-align: center;
-      line-height: 18px;
+      line-height: 20px;
+      flex-shrink: 0;
     }
     .db-art-dim-value.g1 { background: #16a34a; }
     .db-art-dim-value.g2 { background: #65a30d; }
     .db-art-dim-value.g3 { background: #d97706; }
     .db-art-dim-value.g4 { background: #ea580c; }
     .db-art-dim-value.g5 { background: #dc2626; }
+    /* Demoted to subtle text link so it doesn't compete with the primary CTA on the right */
     .db-art-last-link {
       display: inline-flex;
       align-items: center;
       align-self: flex-start;
       margin-top: auto;
-      padding: 10px 18px;
-      border: 1.5px solid var(--accent);
-      background: transparent;
+      padding-top: 12px;
       color: var(--accent);
-      border-radius: 8px;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 600;
       text-decoration: none;
-      transition: background 0.15s, color 0.15s;
+      transition: opacity 0.15s;
     }
-    .db-art-last-link:hover {
-      background: var(--accent-soft);
-    }
+    .db-art-last-link:hover { opacity: 0.75; }
 
-    /* Start-new card */
-    .db-art-start-heading {
-      font-size: 1rem;
-      font-weight: 600;
-      margin: 0 0 4px 0;
-    }
+    /* Start-new half */
     .db-art-start-sub {
-      font-size: 0.84rem;
+      font-size: 0.88rem;
       color: var(--text-muted, #6b7280);
-      line-height: 1.5;
+      line-height: 1.55;
       margin: 0 0 auto 0;
       padding-bottom: 16px;
     }
@@ -186,7 +202,11 @@
     }
 
     @media (max-width: 720px) {
-      .db-article-row { grid-template-columns: 1fr; }
+      .db-art-body { grid-template-columns: 1fr; }
+      .db-art-half + .db-art-half {
+        border-left: none;
+        border-top: 1px solid var(--border, #e5e7eb);
+      }
       .db-art-grade { width: 54px; height: 54px; font-size: 1.6rem; }
     }
   </style>
@@ -302,28 +322,34 @@
         </div>
       </div>
 
-      <!-- ② NEW: Article training row -->
+      <!-- ② Article training module — unified card -->
       <div class="db-article-row anim d2">
-        <!-- Card A: last article result -->
-        <div class="db-art-card">
-          <div class="db-art-label">Posledný článok</div>
-          <div id="artLastContent">
-            <!-- Empty state by default; replaced with filled version if user has done one -->
-            <div class="db-art-last-empty">
-              Ešte ste neskúšali žiaden článok. Začnite prvým tréningom a zistite, ako ste pripravený na písomnú časť skúšky.
-            </div>
-          </div>
+        <div class="db-art-header">
+          <div class="db-art-kicker">Písomný súhrn</div>
+          <div class="db-art-title">Článok a súhrn</div>
         </div>
 
-        <!-- Card B: start new -->
-        <div class="db-art-card">
-          <div class="db-art-label">Začať nový</div>
-          <div class="db-art-start-heading">Článok a súhrn</div>
-          <p class="db-art-start-sub">Prečítajte náhodne vybraný článok a napíšte jeho súhrn. Dostanete detailné hodnotenie v štyroch dimenziách.</p>
-          <div class="db-art-start-buttons">
-            <a href="article.html" class="db-art-start-btn-primary">Náhodný článok →</a>
+        <div class="db-art-body">
+          <!-- Left half: last article result -->
+          <div class="db-art-half">
+            <div class="db-art-sub-label">Posledný pokus</div>
+            <div id="artLastContent">
+              <!-- Empty state by default; replaced with filled version if user has done one -->
+              <div class="db-art-last-empty">
+                Ešte ste neskúšali žiaden článok. Začnite prvým tréningom a zistite, ako ste pripravený na písomnú časť skúšky.
+              </div>
+            </div>
           </div>
-          <div class="db-art-start-note">Reálny čas na skúške: 30 minút na písomný súhrn</div>
+
+          <!-- Right half: start new -->
+          <div class="db-art-half">
+            <div class="db-art-sub-label">Začať nový</div>
+            <p class="db-art-start-sub">Prečítajte náhodne vybraný článok a napíšte jeho súhrn. Dostanete detailné hodnotenie v štyroch dimenziách.</p>
+            <div class="db-art-start-buttons">
+              <a href="article.html" class="db-art-start-btn-primary">Náhodný článok →</a>
+            </div>
+            <div class="db-art-start-note">Reálny čas na skúške: 30 minút na písomný súhrn</div>
+          </div>
         </div>
       </div>
 
