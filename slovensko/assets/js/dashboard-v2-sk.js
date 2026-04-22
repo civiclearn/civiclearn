@@ -605,11 +605,39 @@ function computePhaseAwareDashboardData(bank, progressRaw) {
   const progress = progressRaw || {};
 
   // ----------------------------
+  // Bilingual-field helpers
+  // Slovak bank uses { sk, en } objects for q.topic / q.microtopic / q.q.
+  // pickKey   = canonical English key (used for progress lookups + map keys).
+  // pickLabel = display label in current UI language (fallback to English).
+  // pickText  = free-text question body in current UI language.
+  // All three always return a STRING, so callers can .trim() / .normalize() safely.
+  // ----------------------------
+  const _lang = (typeof window !== "undefined" && window.CIVICEDGE_LANG) || "sk";
+
+  function pickKey(v) {
+    if (v == null) return "";
+    if (typeof v === "string") return v;
+    if (typeof v === "object") return String(v.en || v[_lang] || v.sk || "");
+    return String(v);
+  }
+
+  function pickLabel(v) {
+    if (v == null) return "";
+    if (typeof v === "string") return v;
+    if (typeof v === "object") return String(v[_lang] || v.en || v.sk || "");
+    return String(v);
+  }
+
+  function pickText(v) {
+    return pickLabel(v);
+  }
+
+  // ----------------------------
   // Normalizers + keying (MUST MATCH ENGINE)
   // key = `${topicLabel || topicKey || "topic"}:${text}`
   // ----------------------------
   function normalizeTopic(str) {
-    return (str || "")
+    return pickKey(str)
       .normalize("NFD")
       .replace(/\p{Diacritic}/gu, "")
       .toLowerCase()
@@ -618,17 +646,19 @@ function computePhaseAwareDashboardData(bank, progressRaw) {
   }
 
   function makeKey(topicLabel, text) {
-    const a = (topicLabel || "topic").trim();
-    const b = (text || "").trim();
+    const a = (pickKey(topicLabel) || "topic").trim();
+    const b = pickText(text).trim();
     return `${a}:${b}`;
   }
 
   function getTopicLabelForQuestion(q) {
-    return q.topicLabel || q.topicKey || q.topic || "topic";
+    // Prefer an explicit engine-set canonical key, otherwise read q.topic
+    // (which may be a {sk,en} object).  Always returns a string.
+    return pickKey(q.topicLabel || q.topicKey || q.topic || "topic");
   }
 
   function getTextForQuestion(q) {
-    return q.text || q.q || "";
+    return pickText(q.text != null ? q.text : q.q);
   }
 
   // Build a lookup from canonical key -> question
@@ -639,31 +669,15 @@ function computePhaseAwareDashboardData(bank, progressRaw) {
   });
 
   // ----------------------------
-  // Phase classifier (POLICY FROZEN)
+  // Phase classifier — SLOVAK VERSION
+  // The Slovak bank has no source/depth/values/events carve-outs; every
+  // question counts as Phase 1.  Phase 2 is retained at zero so downstream
+  // chart/counter code keeps working unchanged.
   // ----------------------------
   function classifyQuestion(q) {
-    const topicRaw = q.topic || q.topicLabel || q.topicKey || "";
-    const topicNorm = normalizeTopic(topicRaw);
-
-    const isValues = topicNorm === "danske værdier";
-    const isEvents = topicNorm === "aktuelle begivenheder";
-
-    const depth = q.depth;
-    const source = q.source;
-
-    if (depth === "deep") return { ignore: true };
-
-    // Phase 1: exam ONLY, excluding values/events
-    if (source === "exam" && !isValues && !isEvents) {
-      return { phase: 1, topicEligible: true };
-    }
-
-    // Phase 2: manual/core OR values/events
-    if (source === "manual" || source === "core" || isValues || isEvents) {
-      return { phase: 2, topicEligible: !(isValues || isEvents) };
-    }
-
-    return { ignore: true };
+    if (!q) return { ignore: true };
+    if (q.depth === "deep") return { ignore: true };
+    return { phase: 1, topicEligible: true };
   }
 
 // ----------------------------
@@ -680,9 +694,18 @@ const topicOrder = Array.isArray(cfg.topics?.topicOrder)
 // We work ONLY with canonical topic keys here
 const topicsToShow = topicOrder.slice(0, 6);
 
-// Helper: normalize a label for comparison
+// Helper: normalize a label for comparison — string-safe for {sk,en} objects
 function norm(s) {
-  return (s || "")
+  // Route through pickKey so we never call .normalize() on an object.
+  // pickKey is defined in the parent closure (computePhaseAwareDashboardData)
+  // but norm() may run outside it, so inline the same fallback here.
+  let str;
+  if (s == null) str = "";
+  else if (typeof s === "string") str = s;
+  else if (typeof s === "object") str = String(s.en || s.sk || "");
+  else str = String(s);
+
+  return str
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
     .toLowerCase()
@@ -696,15 +719,20 @@ function getCanonicalTopicKey(q) {
     return q.topicKey;
   }
 
-  // Otherwise, match by label text
+  // Otherwise, match by label text.  q.topic may be {sk,en}; q.topicLabel
+  // may be a plain string — norm() handles both.
   const raw = q?.topicLabel || q?.topic || "";
   const n = norm(raw);
+  if (!n) return null;
 
   for (const [key, label] of Object.entries(topicLabels)) {
     if (norm(label) === n) return key;
+    // Also match against the canonical English key itself, in case the bank
+    // stores topics as { sk, en } and config's topicLabels are Slovak strings.
+    if (norm(key) === n) return key;
   }
 
-  return null; // values, events, misc → excluded
+  return null;
 }
 
 
