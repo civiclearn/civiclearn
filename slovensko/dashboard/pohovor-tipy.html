@@ -994,30 +994,6 @@ document.addEventListener("DOMContentLoaded", () => {
     await sb.auth.signOut();
     location.href = "/slovensko/login.html";
   });
-
-  // Hydrate sidebar gauges from cache (written by dashboard/article pages)
-  try {
-    const kCache = JSON.parse(localStorage.getItem("cl_gauge_cache") || "null");
-    if (kCache && typeof kCache.score === "number") {
-      const pct = Math.max(0, Math.min(100, kCache.score));
-      document.getElementById("clGaugeKnowledge").textContent = Math.round(pct) + "%";
-      const fill = document.getElementById("clGaugeKnowledgeFill");
-      fill.style.width = pct + "%";
-      fill.dataset.state = pct >= 75 ? "green" : pct >= 60 ? "orange" : "red";
-      document.getElementById("clGaugeKnowledgePass").style.left = "75%";
-    }
-  } catch {}
-  try {
-    const lCache = JSON.parse(localStorage.getItem("cl_language_cache") || "null");
-    if (lCache && typeof lCache.score === "number") {
-      const pct = Math.max(0, Math.min(100, lCache.score));
-      document.getElementById("clGaugeLanguage").textContent = Math.round(pct) + "%";
-      const fill = document.getElementById("clGaugeLanguageFill");
-      fill.style.width = pct + "%";
-      fill.dataset.state = pct >= 75 ? "green" : pct >= 60 ? "orange" : "red";
-      document.getElementById("clGaugeLanguagePass").style.left = "75%";
-    }
-  } catch {}
 })();
 </script>
 
@@ -1506,6 +1482,7 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 </script>
 
+<script src="/slovensko/assets/js/gauge-bar-sk.js"></script>
 <script src="/assets/js/maintenance-bar.js"></script>
 </body>
 </html>

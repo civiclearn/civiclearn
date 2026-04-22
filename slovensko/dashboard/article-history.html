@@ -366,23 +366,6 @@ document.addEventListener("DOMContentLoaded", () => {
     location.href = "/slovensko/login.html";
   });
 
-  hydrateGauge("clGaugeKnowledge", "clGaugeKnowledgeFill", "clGaugeKnowledgePass", "cl_gauge_cache");
-  hydrateGauge("clGaugeLanguage", "clGaugeLanguageFill", "clGaugeLanguagePass", "cl_language_cache");
-
-  function hydrateGauge(valId, fillId, passId, key) {
-    try {
-      const cache = JSON.parse(localStorage.getItem(key) || "null");
-      if (cache && typeof cache.score === "number") {
-        const pct = Math.max(0, Math.min(100, cache.score));
-        document.getElementById(valId).textContent = Math.round(pct) + "%";
-        const fill = document.getElementById(fillId);
-        fill.style.width = pct + "%";
-        fill.dataset.state = pct >= 75 ? "green" : pct >= 60 ? "orange" : "red";
-        document.getElementById(passId).style.left = "75%";
-      }
-    } catch {}
-  }
-
   let attempts = [];
   let titleMap = new Map();
 
@@ -668,6 +651,7 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 </script>
 
+<script src="/slovensko/assets/js/gauge-bar-sk.js"></script>
 <script src="/assets/js/maintenance-bar.js"></script>
 </body>
 </html>
