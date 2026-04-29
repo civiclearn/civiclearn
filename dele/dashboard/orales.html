@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DELE A2 — Expresión oral</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/dele/assets/js/dele-auth.js"></script>
+  <script src="/dele/assets/js/dele-engine.js?v=2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--brand:#AA151B;--brand-dim:#fce8ea;--yellow:#F1BF00;--navy:#0f172a;--muted:#64748b;--border:#e2e8f0;--surface:#fff;--bg:#f8f7f4;--red:#dc2626;--pass:#166534;--pass-bg:#dcfce7}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
+
+    .topbar{background:var(--navy);border-bottom:3px solid var(--brand);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+    .topbar-left{display:flex;align-items:center;gap:12px}
+    .back-link{color:#64748b;text-decoration:none;font-size:0.8rem;display:flex;align-items:center;gap:5px}
+    .back-link:hover{color:#fff}
+    .topbar-divider{width:1px;height:20px;background:#1e293b}
+    .topbar-title{font-size:0.9rem;font-weight:700;color:#fff}
+    .topbar-flag{width:22px;height:16px;background:var(--brand);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0}
+    .topbar-flag::before{content:'';position:absolute;top:4px;left:0;right:0;height:8px;background:var(--yellow)}
+
+    #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity 0.35s}
+    #loading-overlay.hidden{opacity:0;pointer-events:none}
+    .loading-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--brand);animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .exam-wrap{max-width:820px;margin:0 auto;padding:28px 24px 80px}
+
+    .task-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:24px;margin-bottom:28px}
+    .task-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+    .task-num{width:32px;height:32px;border-radius:8px;background:var(--brand-dim);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0}
+    .task-title{font-weight:700;font-size:1rem}
+
+    .prompt-card{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;font-size:0.88rem;color:#92400e;line-height:1.6;margin-bottom:16px}
+    .task-image{width:100%;max-height:360px;object-fit:contain;border-radius:10px;border:1px solid var(--border);margin-bottom:16px}
+    .guidance{font-size:0.78rem;color:var(--muted);margin-bottom:16px;line-height:1.5}
+
+    .rec-area{text-align:center;padding:20px}
+    .rec-btn{width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;font-size:1.4rem;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center}
+    .rec-btn.idle{background:var(--brand);color:#fff}
+    .rec-btn.recording{background:var(--red);color:#fff;animation:pulse 1.2s infinite}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.4)}50%{box-shadow:0 0 0 12px rgba(220,38,38,0)}}
+    .rec-btn.done{background:var(--pass);color:#fff}
+    .rec-label{font-size:0.82rem;color:var(--muted);margin-top:8px}
+    .rec-timer{font-size:0.85rem;font-weight:600;color:var(--red);margin-top:4px;font-variant-numeric:tabular-nums}
+
+    .playback{margin-top:12px}
+    .playback audio{width:100%;max-width:400px}
+
+    .text-fallback{margin-top:12px;text-align:left}
+    .text-fallback-toggle{font-size:0.78rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline}
+    .text-fallback-toggle:hover{color:var(--navy)}
+    .text-fallback-area{display:none;margin-top:8px}
+    .text-fallback-area.visible{display:block}
+    .text-fallback-input{width:100%;min-height:80px;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.88rem;color:var(--navy);background:var(--bg);resize:vertical;outline:none}
+    .text-fallback-input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-dim)}
+    .text-fallback-note{font-size:0.72rem;color:var(--muted);margin-top:4px}
+
+    .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;z-index:100}
+    .btn-row{display:flex;gap:10px}
+    .btn{padding:10px 24px;border-radius:8px;font-size:0.88rem;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity 0.15s}
+    .btn:hover{opacity:0.85}
+    .btn-skip{background:#f1f5f9;color:var(--navy)}
+    .btn-submit{background:var(--brand);color:#fff}
+    .btn-submit:disabled{opacity:0.4;cursor:not-allowed}
+
+    @media(max-width:600px){.exam-wrap{padding:20px 14px 80px}.task-card{padding:18px 16px}}
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div style="font-size:0.9rem;color:var(--muted)">Cargando taluppgifter…</div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" id="backLink" href="#">← Volver</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-flag"></div>
+    <span class="topbar-title">Expresión e interacción orales</span>
+  </div>
+</div>
+
+<div class="exam-wrap" id="examContent"></div>
+
+<div class="bottom-bar" id="bottomBar">
+  <div style="font-size:0.82rem;color:var(--muted)">Grabar tus respuestas ovan</div>
+  <div class="btn-row">
+    <button class="btn btn-skip" onclick="handleSkip()">Saltar</button>
+    <button class="btn btn-submit" id="submitBtn" onclick="handleSubmit()" disabled>Enviar</button>
+  </div>
+</div>
+
+<script>
+let simId, attemptId, user, examData;
+let submitted = false;
+let recordings = {}; // { task_id: { blob, base64, duration } }
+let activeRecorder = null;
+let activeTaskId = null;
+let recStartTime = null;
+let recTimerInterval = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const ctx = await DELE.init('orales');
+  user = ctx.user; simId = ctx.simId; attemptId = ctx.attemptId;
+  document.getElementById('backLink').href = `/dele/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
+
+  const alreadyDone = await DELE.isSubmitted(user.id, attemptId, 'orales');
+  if (alreadyDone) {
+    document.getElementById('examContent').innerHTML = `
+      <div style="text-align:center;padding:60px 20px;">
+        <div style="font-size:2rem;">✅</div>
+        <h2 style="margin:12px 0;">Expresión oral ya enviada</h2>
+        <p style="color:var(--muted);">Tus grabaciones son evaluadas por IA.</p>
+        <a href="/dele/dashboard/exam.html?sim=${simId}&attempt=${attemptId}" style="display:inline-block;margin-top:16px;color:var(--brand);font-weight:600;">← Volver al examen</a>
+      </div>`;
+    document.getElementById('bottomBar').style.display = 'none';
+    DELE.hideLoading(); return;
+  }
+
+  const simNum = ctx.simNum;
+  const jsonPath = `/dele/data/${ctx.simId}-orales.json`;
+  try {
+    const res = await fetch(jsonPath);
+    if (!res.ok) throw new Error('JSON not found');
+    examData = await res.json();
+  } catch (err) {
+    DELE.showError(`No se pudieron cargar los datos parte examen: ${err.message}`, simId, attemptId);
+    return;
+  }
+
+  renderExam();
+  DELE.hideLoading();
+});
+
+function renderExam() {
+  const wrap = document.getElementById('examContent');
+  let html = '';
+
+  examData.tasks.forEach((task, ti) => {
+    const hasImage = task.content?.image;
+    html += `<div class="task-card">
+      <div class="task-header">
+        <div class="task-num">${ti + 1}</div>
+        <div class="task-title">${DELE.escapeHtml(task.title)}</div>
+      </div>
+      <div class="prompt-card">${DELE.escapeHtml(task.instructions || task.prompt || '')}</div>`;
+
+    if (hasImage) {
+      html += `<img class="task-image" src="${task.content.image}" alt="Bild att beskriva" loading="lazy">`;
+    }
+
+    html += `<div class="guidance">Tips: Habla con claridad y en oraciones completas. Intenta usar un vocabulario variado.</div>
+      <div class="rec-area" id="recArea${ti}">
+        <button class="rec-btn idle" id="recBtn${ti}" onclick="toggleRecording('${task.task_id}', ${ti})">🎤</button>
+        <div class="rec-label" id="recLabel${ti}">Haz clic para empezar a grabar</div>
+        <div class="rec-timer" id="recTimer${ti}" style="display:none">0:00</div>
+        <div class="playback" id="playback${ti}" style="display:none"></div>
+      </div>
+      <div class="text-fallback">
+        <button class="text-fallback-toggle" onclick="toggleFallback(${ti})">¿No puedes grabar? Escribe tu respuesta en su lugar</button>
+        <div class="text-fallback-area" id="fallbackArea${ti}">
+          <textarea class="text-fallback-input" id="fallbackText${ti}" placeholder="Escribe tu respuesta aquí…" oninput="onFallbackInput()"></textarea>
+          <div class="text-fallback-note">Tu respuesta escrita se evalúa si no haces una grabación.</div>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  wrap.innerHTML = html;
+}
+
+async function toggleRecording(taskId, idx) {
+  if (submitted) return;
+
+  // If currently recording this task → stop
+  if (activeRecorder && activeTaskId === taskId) {
+    activeRecorder.stop();
+    return;
+  }
+
+  // If recording another task → stop first
+  if (activeRecorder) {
+    activeRecorder.stop();
+    await new Promise(r => setTimeout(r, 200));
+  }
+
+  // Start recording
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
+    const recorder = new MediaRecorder(stream, { mimeType });
+    const chunks = [];
+
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    recorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      clearInterval(recTimerInterval);
+
+      const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
+      const duration = (Date.now() - recStartTime) / 1000;
+
+      recordings[taskId] = { blob, duration };
+
+      // Show playback
+      const url = URL.createObjectURL(blob);
+      document.getElementById(`playback${idx}`).innerHTML = `<audio controls src="${url}"></audio>`;
+      document.getElementById(`playback${idx}`).style.display = 'block';
+
+      // Update button
+      const btn = document.getElementById(`recBtn${idx}`);
+      btn.className = 'rec-btn idle';
+      btn.textContent = '🎤';
+      document.getElementById(`recLabel${idx}`).textContent = `Grabado (${Math.round(duration)}s) — haz clic para grabar de nuevo`;
+      document.getElementById(`recTimer${idx}`).style.display = 'none';
+
+      // Enable submit if at least one recording
+      document.getElementById('submitBtn').disabled = Object.keys(recordings).length === 0;
+
+      activeRecorder = null;
+      activeTaskId = null;
+    };
+
+    recorder.start();
+    activeRecorder = recorder;
+    activeTaskId = taskId;
+    recStartTime = Date.now();
+
+    const btn = document.getElementById(`recBtn${idx}`);
+    btn.className = 'rec-btn recording';
+    btn.textContent = '⏹';
+    document.getElementById(`recLabel${idx}`).textContent = 'Grabando… Haz clic para detener';
+    document.getElementById(`recTimer${idx}`).style.display = 'block';
+
+    recTimerInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - recStartTime) / 1000);
+      const m = Math.floor(elapsed / 60);
+      const s = elapsed % 60;
+      document.getElementById(`recTimer${idx}`).textContent = `${m}:${String(s).padStart(2, '0')}`;
+    }, 500);
+
+  } catch (err) {
+    DELE.toast('No se pudo acceder al micrófono. Comprueba tus ajustes.');
+    console.error('Mic error:', err);
+  }
+}
+
+function toggleFallback(idx) {
+  const area = document.getElementById(`fallbackArea${idx}`);
+  area.classList.toggle('visible');
+  if (area.classList.contains('visible')) {
+    document.getElementById(`fallbackText${idx}`).focus();
+  }
+}
+
+function onFallbackInput() {
+  // Enable submit if any recording OR any fallback text exists
+  const hasRecording = Object.keys(recordings).length > 0;
+  const hasFallback = examData.tasks.some((_, ti) => {
+    const el = document.getElementById(`fallbackText${ti}`);
+    return el && el.value.trim().length > 5;
+  });
+  document.getElementById('submitBtn').disabled = !hasRecording && !hasFallback;
+}
+
+function getTextFallbacks() {
+  const fallbacks = {};
+  examData.tasks.forEach((task, ti) => {
+    const el = document.getElementById(`fallbackText${ti}`);
+    if (el && el.value.trim().length > 0 && !recordings[task.task_id]) {
+      fallbacks[task.task_id] = el.value.trim();
+    }
+  });
+  return fallbacks;
+}
+
+async function handleSubmit() {
+  if (submitted) return;
+
+  const textFallbacks = getTextFallbacks();
+  const hasRecording = Object.keys(recordings).length > 0;
+  const hasFallback = Object.keys(textFallbacks).length > 0;
+
+  if (!hasRecording && !hasFallback) {
+    DELE.toast('Grabar eller skriv minst ett respuestas innan tú skickar in.');
+    return;
+  }
+
+  if (!confirm('Quiere tú enviar in? Tus respuestas serán evaluadas por IA.')) return;
+
+  submitted = true;
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('submitBtn').textContent = 'Enviando…';
+  document.querySelectorAll('.rec-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
+  document.querySelectorAll('.text-fallback-input').forEach(t => { t.disabled = true; });
+
+  const taskEntries = examData.tasks.map(t => ({
+    task_id: t.task_id,
+    title: t.title,
+    prompt: t.instructions || t.prompt || '',
+    has_recording: !!recordings[t.task_id],
+    has_text_fallback: !!textFallbacks[t.task_id],
+    duration: recordings[t.task_id]?.duration || 0,
+  }));
+
+  try {
+    if (hasRecording) {
+      // Merge all blobs in task order
+      const orderedBlobs = examData.tasks
+        .filter(t => recordings[t.task_id])
+        .map(t => recordings[t.task_id].blob);
+
+      const combinedBlob = new Blob(orderedBlobs, { type: orderedBlobs[0]?.type || 'audio/webm' });
+
+      document.getElementById('submitBtn').textContent = 'Cargando upp…';
+
+      await DELE.submitAudio({
+        attemptId, elemKey: 'orales',
+        audioBlob: combinedBlob,
+        responseJson: {
+          tasks: taskEntries,
+          text_responses: hasFallback ? textFallbacks : undefined,
+          total_recordings: Object.keys(recordings).length,
+          total_duration: Object.values(recordings).reduce((s, r) => s + r.duration, 0),
+        }
+      });
+    } else {
+      // Text-only submission (no audio at all)
+      await DELE.submit({
+        attemptId, elemKey: 'orales',
+        text: Object.values(textFallbacks).join('\n\n---\n\n'),
+        json: {
+          tasks: taskEntries,
+          text_responses: textFallbacks,
+          text_only: true,
+        }
+      });
+    }
+  } catch (err) {
+    console.error('Submit error:', err);
+  }
+
+  // Redirect immediately — AI evaluation happens in background
+  window.location.href = `/dele/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
+}
+
+async function handleSkip() {
+  if (submitted) return;
+  if (!confirm('¿Quieres saltar la expresión oral? Recibirás 0 puntos.')) return;
+  try { await DELE.skip({ attemptId, elemKey: 'orales' }); } catch (e) {}
+  window.location.href = `/dele/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
+}
+</script>
+</body>
+</html>

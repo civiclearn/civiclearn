@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DELE A2 — Simuleringar</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/dele/assets/js/dele-auth.js"></script>
+  <script src="/dele/assets/js/dele-engine.js?v=2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand:#AA151B; --brand-dim:#fce8ea; --yellow:#F1BF00;
+      --navy:#0f172a; --slate:#334155; --muted:#64748b; --border:#e2e8f0;
+      --surface:#ffffff; --bg:#f8f7f4;
+      --pass:#166534; --pass-bg:#dcfce7;
+      --fail:#991b1b; --fail-bg:#fee2e2;
+      --amber:#92400e; --amber-bg:#fef9c3;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
+
+    .topbar{background:var(--navy);border-bottom:3px solid var(--brand);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .topbar-brand{display:flex;align-items:center;gap:14px}
+    .topbar-flag{width:28px;height:20px;background:var(--brand);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0}
+    .topbar-flag::before{content:'';position:absolute;top:5px;left:0;right:0;height:10px;background:var(--yellow)}
+    .brand-text{display:flex;flex-direction:column;line-height:1.1}
+    .brand-title{font-size:1rem;font-weight:700;color:#fff}
+    .brand-sub{font-size:0.72rem;color:#64748b}
+    .topbar-right{display:flex;align-items:center;gap:12px}
+    .user-pill{background:#1e293b;border-radius:99px;padding:5px 14px;font-size:0.75rem;color:#94a3b8}
+    .signout-link{background:none;border:none;color:#64748b;font-size:0.75rem;cursor:pointer;font-family:inherit}
+    .signout-link:hover{color:#fff}
+
+    #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity 0.35s}
+    #loading-overlay.hidden{opacity:0;pointer-events:none}
+    .loading-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--brand);animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .dashboard-wrap{max-width:1040px;margin:0 auto;padding:32px 28px 80px}
+    .dashboard-header{margin-bottom:28px}
+    .dashboard-header h1{font-size:1.5rem;font-weight:700;margin-bottom:4px}
+    .dashboard-header p{font-size:0.88rem;color:var(--muted)}
+
+    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+    .stat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:18px 20px}
+    .stat-label{font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:8px}
+    .stat-value{font-size:1.6rem;font-weight:700;line-height:1}
+    .stat-sub{font-size:0.78rem;color:var(--muted);margin-top:6px}
+    .stat-progress{height:4px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden}
+    .stat-progress-fill{height:100%;background:var(--brand);border-radius:2px;transition:width 0.6s ease}
+
+    .table-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;overflow:hidden}
+    .table-title{padding:18px 22px 14px;font-size:1.05rem;font-weight:700;border-bottom:1px solid var(--border)}
+    .sim-table{width:100%;border-collapse:collapse;font-size:0.82rem}
+    .sim-table thead{background:#f8fafc}
+    .sim-table th{padding:10px 12px;text-align:center;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);border-bottom:1px solid var(--border)}
+    .sim-table th:first-child{text-align:left;padding-left:22px}
+    .sim-table th:last-child{text-align:right;padding-right:22px}
+    .sim-table td{padding:12px 12px;text-align:center;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+    .sim-table td:first-child{text-align:left;padding-left:22px}
+    .sim-table td:last-child{text-align:right;padding-right:22px}
+    .sim-table tbody tr{transition:background 0.1s}
+    .sim-table tbody tr:hover{background:#fafaf8}
+    .sim-table tbody tr:last-child td{border-bottom:none}
+
+    .sim-id{font-weight:700;color:var(--navy);display:block;font-size:0.84rem}
+    .badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:0.68rem;font-weight:600;white-space:nowrap}
+    .badge-idle{background:#f1f5f9;color:#475569}
+    .badge-progress{background:var(--amber-bg);color:var(--amber)}
+    .badge-complete{background:var(--pass-bg);color:var(--pass)}
+
+    .score-cell{font-weight:600;font-variant-numeric:tabular-nums}
+    .score-cell.na{color:var(--border);font-weight:400}
+    .score-cell.low{color:var(--fail)}
+    .score-cell.mid{color:var(--amber)}
+    .score-cell.high{color:var(--pass)}
+
+    .level-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:0.72rem;font-weight:700;white-space:nowrap}
+    .level-pass{background:var(--pass-bg);color:var(--pass)}
+    .level-fail{background:var(--fail-bg);color:var(--fail)}
+
+    .table-btn{display:inline-block;padding:6px 16px;border-radius:6px;font-size:0.78rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;font-family:inherit;white-space:nowrap;transition:opacity 0.15s}
+    .table-btn:hover{opacity:0.85}
+    .table-btn-start{background:var(--brand);color:#fff}
+    .table-btn-resume{background:var(--navy);color:#fff}
+    .table-btn-results{background:#f1f5f9;color:var(--navy);border:1px solid var(--border)}
+    .table-btn-listo{background:var(--brand-dim);color:var(--brand);border:1px solid var(--brand)}
+    .action-group{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+
+    @media (max-width:768px) {
+      .dashboard-wrap{padding:20px 16px 60px}
+      .stat-grid{grid-template-columns:1fr}
+      .sim-table .hide-mobile{display:none}
+      .sim-table th:first-child,.sim-table td:first-child{padding-left:14px}
+      .sim-table th:last-child,.sim-table td:last-child{padding-right:14px}
+      .topbar{padding:0 16px}
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div style="font-size:0.85rem;color:var(--muted)">Cargando…</div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-flag"></div>
+    <div class="brand-text">
+      <span class="brand-title">DELE A2</span>
+      <span class="brand-sub">Provsimulering</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="user-pill" id="userEmail"></div>
+    <a href="https://nacionalidadespanola.com/contacto" class="signout-link" style="text-decoration:none" target="_blank" rel="noopener">Contacto</a>
+    <button class="signout-link" onclick="deleAuth.signOut()">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="dashboard-wrap">
+  <div class="dashboard-header">
+    <h1>Vista general</h1>
+    <p>Practica para tu examen DELE A2 con evaluación por IA.</p>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-label">Avklarade simuleringar</div>
+      <div class="stat-value" id="doneSims">0/10</div>
+      <div class="stat-progress"><div class="stat-progress-fill" id="progressBar" style="width:0%"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Senaste resultat</div>
+      <div class="stat-value" id="lastResult">—</div>
+      <div class="stat-sub" id="lastResultSub">Ingen simulación avklarad</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Puntuación total (más reciente)</div>
+      <div class="stat-value" id="lastScore">—</div>
+      <div class="stat-sub" id="lastScoreSub">&nbsp;</div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-title">Simuleringar</div>
+    <table class="sim-table">
+      <thead>
+        <tr>
+          <th>Nr</th>
+          <th>Status</th>
+          <th class="hide-mobile">Lectura</th>
+          <th class="hide-mobile">Audición</th>
+          <th class="hide-mobile">Escribe</th>
+          <th class="hide-mobile">Tal</th>
+          <th>Nivel</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="simTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+var SIMS = [];
+for (var i = 1; i <= 10; i++) {
+  SIMS.push({ id: 'sim' + String(i).padStart(2, '0'), title: 'Simulación ' + i });
+}
+
+var ELEM_KEYS = ['lectura', 'auditiva', 'escritas', 'orales'];
+
+var _userId = null;
+var _pollTimer = null;
+
+document.addEventListener('DOMContentLoaded', async function() {
+  var ctx = await DELE.init();
+  _userId = ctx.user.id;
+  document.getElementById('userEmail').textContent = ctx.user.email;
+
+  // Show page immediately — don't wait for hydrate (cold starts can take 20s)
+  DELE.hideLoading();
+  await refreshDashboard();
+});
+
+async function refreshDashboard() {
+  var data = await DELE.hydrateData(_userId, 'any', true);
+  var attempts = (data && data.attempts) || [];
+
+  renderStats(attempts);
+  renderTable(attempts);
+
+  // Check if any elements are still being evaluated
+  var hasPending = attempts.some(function(a) {
+    return a.status !== 'complete' && (a.elements || []).some(function(e) {
+      return e.submission_status === 'submitted' && e.eval_status !== 'complete' && e.eval_status !== 'skipped';
+    });
+  });
+
+  if (hasPending && !_pollTimer) {
+    _pollTimer = setInterval(refreshDashboard, 12000);
+  } else if (!hasPending && _pollTimer) {
+    clearInterval(_pollTimer);
+    _pollTimer = null;
+  }
+}
+
+function renderStats(attempts) {
+  var completed = attempts.filter(function(a) { return a.status === 'complete'; });
+  // Count unique completed simulations (not total attempts, since redos create multiple)
+  var uniqueSims = {};
+  completed.forEach(function(a) { uniqueSims[a.simulation_id] = true; });
+  var count = Object.keys(uniqueSims).length;
+  document.getElementById('doneSims').textContent = count + '/10';
+  document.getElementById('progressBar').style.width = (count / 10 * 100) + '%';
+
+  if (count > 0) {
+    var latest = completed.sort(function(a, b) {
+      return new Date(b.completed_at || b.updated_at) - new Date(a.completed_at || a.updated_at);
+    })[0];
+    var level = latest.result_level || '—';
+    document.getElementById('lastResult').textContent = level;
+    document.getElementById('lastResultSub').textContent =
+      'Lectura ' + (latest.grade_reading != null ? Math.round(latest.grade_reading) + '%' : '—') +
+      ' · Audición ' + (latest.grade_listening != null ? Math.round(latest.grade_listening) + '%' : '—');
+    document.getElementById('lastScore').textContent =
+      (latest.grade_overall != null ? Math.round(latest.grade_overall) + '%' : '—');
+    document.getElementById('lastScoreSub').textContent =
+      'Escribe ' + (latest.grade_writing != null ? latest.grade_writing + '/25' : '—') +
+      ' · Tal ' + (latest.grade_speaking != null ? latest.grade_speaking + '/25' : '—');
+  }
+}
+
+function renderTable(attempts) {
+  var tbody = document.getElementById('simTableBody');
+  var html = '';
+
+  SIMS.forEach(function(sim) {
+    var simAttempts = attempts.filter(function(a) { return a.simulation_id === sim.id; });
+    var latest = simAttempts[simAttempts.length - 1];
+    var num = parseInt(sim.id.replace('sim', ''), 10);
+
+    var status, statusCls;
+    if (!latest) { status = 'No iniciada'; statusCls = 'badge-idle'; }
+    else if (latest.status === 'complete') { status = 'Avklarad'; statusCls = 'badge-complete'; }
+    else { status = 'En curso'; statusCls = 'badge-progress'; }
+
+    var elems = (latest && latest.elements) || [];
+    var elemMap = {};
+    elems.forEach(function(e) { elemMap[e.element_key] = e; });
+
+    var scoreCells = ELEM_KEYS.map(function(key) {
+      var el = elemMap[key];
+      if (!el || el.submission_status === 'not_started') return '<td class="score-cell na hide-mobile">—</td>';
+      if (el.submission_status === 'skipped') return '<td class="score-cell low hide-mobile">0</td>';
+      if (el.eval_status !== 'complete') return '<td class="score-cell hide-mobile" style="color:var(--muted)">⏳</td>';
+      var score = Number(el.ai_score_internal) || 0;
+      var display = (key === 'lectura' || key === 'auditiva') ? Math.round(score) + '%' : score + '/25';
+      var pct = (key === 'lectura' || key === 'auditiva') ? score : (score / 25) * 100;
+      var cls = pct >= 60 ? 'high' : pct >= 40 ? 'mid' : 'low';
+      return '<td class="score-cell ' + cls + ' hide-mobile">' + display + '</td>';
+    }).join('');
+
+    var levelHtml;
+    if (latest && latest.status === 'complete') {
+      var level = latest.result_level || '—';
+      var isPass = level !== 'No apto' && level !== '—';
+      levelHtml = '<span class="level-badge ' + (isPass ? 'level-pass' : 'level-fail') + '">' + DELE.escapeHtml(level) + '</span>';
+    } else {
+      levelHtml = '<span style="color:var(--border)">—</span>';
+    }
+
+    var actionHtml;
+    if (!latest) {
+      actionHtml = '<button class="table-btn table-btn-start" onclick="startSim(\'' + sim.id + '\',this)">Comenzar</button>';
+    } else if (latest.status === 'complete') {
+      actionHtml = '<div class="action-group">' +
+        '<a class="table-btn table-btn-results" href="/dele/dashboard/results.html?sim=' + sim.id + '&attempt=' + latest.id + '">Resultados</a>' +
+        '<button class="table-btn table-btn-listo" onclick="startSim(\'' + sim.id + '\',this)">Repetir</button>' +
+        '</div>';
+    } else {
+      actionHtml = '<a class="table-btn table-btn-resume" href="/dele/dashboard/exam.html?sim=' + sim.id + '&attempt=' + latest.id + '">Continuar</a>';
+    }
+
+    html += '<tr>' +
+      '<td><span class="sim-id">' + num + '</span></td>' +
+      '<td><span class="badge ' + statusCls + '">' + status + '</span></td>' +
+      scoreCells +
+      '<td>' + levelHtml + '</td>' +
+      '<td>' + actionHtml + '</td>' +
+      '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+async function startSim(simId, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Creando…';
+  try {
+    var result = await DELE.apiFetch('dele-submit-test', {
+      simulation_id: simId,
+      user_id: deleAuth.userId,
+    });
+    if (result.success) {
+      window.location.href = '/dele/dashboard/exam.html?sim=' + simId + '&attempt=' + result.attempt.id;
+    } else {
+      throw new Error(result.error || 'Falló');
+    }
+  } catch (err) {
+    console.error('Start sim error:', err);
+    btn.disabled = false;
+    btn.textContent = 'Comenzar';
+    DELE.toast('Kunde no skapa simulación. Inténtalo de nuevo.');
+  }
+}
+</script>
+<script src="/assets/js/maintenance-bar.js"></script>
+</body>
+</html>

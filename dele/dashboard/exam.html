@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DELE A2 — Examen</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/dele/assets/js/dele-auth.js"></script>
+  <script src="/dele/assets/js/dele-engine.js?v=2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand:#AA151B; --brand-dim:#fce8ea; --yellow:#F1BF00;
+      --navy:#0f172a; --slate:#334155; --muted:#64748b; --border:#e2e8f0;
+      --surface:#ffffff; --bg:#f8f7f4;
+      --pass-bg:#dcfce7; --pass-fg:#166534;
+      --fail-bg:#fee2e2; --fail-fg:#991b1b;
+      --warn-bg:#fef9c3; --warn-fg:#854d0e;
+      --idle-bg:#f1f5f9; --idle-fg:#475569;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
+
+    .topbar{background:var(--navy);border-bottom:3px solid var(--brand);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+    .topbar-left{display:flex;align-items:center;gap:12px}
+    .back-link{color:#64748b;text-decoration:none;font-size:0.8rem;display:flex;align-items:center;gap:5px;transition:color 0.15s}
+    .back-link:hover{color:#fff}
+    .topbar-divider{width:1px;height:20px;background:#1e293b}
+    .topbar-flag{width:22px;height:16px;background:var(--brand);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0}
+    .topbar-flag::before{content:'';position:absolute;top:4px;left:0;right:0;height:8px;background:var(--yellow)}
+    .topbar-brand{display:flex;align-items:center;gap:10px}
+    .topbar-title{font-size:0.9rem;font-weight:700;color:#fff}
+    .topbar-sub{font-size:0.75rem;color:#64748b}
+    .topbar-right{display:flex;align-items:center;gap:12px}
+    .user-pill{background:#1e293b;border-radius:99px;padding:4px 12px;font-size:0.75rem;color:#94a3b8}
+
+    #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity 0.35s}
+    #loading-overlay.hidden{opacity:0;pointer-events:none}
+    .loading-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--brand);animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .progress-strip{max-width:800px;margin:32px auto 0;padding:0 28px;display:flex;align-items:center;gap:6px}
+    .ps-dot{flex:1;height:6px;border-radius:3px;background:var(--border);transition:background 0.3s}
+    .ps-dot.done{background:var(--brand)}
+    .ps-dot.active{background:var(--yellow)}
+    .ps-dot.skipped{background:#94a3b8}
+
+    .hub{max-width:800px;margin:0 auto;padding:24px 28px 80px}
+    .hub-header{margin-bottom:32px}
+    .hub-eyebrow{font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.09em;color:var(--brand);display:flex;align-items:center;gap:8px;margin-bottom:10px}
+    .hub-eyebrow-dot{width:5px;height:5px;border-radius:50%;background:var(--brand)}
+    .hub-title{font-size:clamp(1.3rem,3vw,1.7rem);font-weight:700;letter-spacing:-0.025em;margin-bottom:6px}
+    .hub-subtitle{font-size:0.88rem;color:var(--muted);line-height:1.5}
+
+    .section{margin-bottom:36px}
+    .section-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:14px}
+
+    .elem-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:14px;transition:border-color 0.15s,box-shadow 0.15s;cursor:pointer}
+    .elem-card:hover{border-color:#94a3b8;box-shadow:0 2px 12px rgba(0,0,0,0.05)}
+    .ec-left{display:flex;align-items:center;gap:14px;flex:1;min-width:0}
+    .ec-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;background:var(--brand-dim);color:var(--brand)}
+    .ec-info{min-width:0}
+    .ec-title{font-weight:600;font-size:0.9rem;margin-bottom:2px}
+    .ec-desc{font-size:0.78rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    .ec-badge{border-radius:99px;padding:4px 12px;font-size:0.7rem;font-weight:600;flex-shrink:0}
+    .ec-badge.todo{background:var(--idle-bg);color:var(--idle-fg)}
+    .ec-badge.done{background:var(--pass-bg);color:var(--pass-fg)}
+    .ec-badge.skipped{background:#f1f5f9;color:#94a3b8}
+    .ec-badge.eval{background:var(--warn-bg);color:var(--warn-fg)}
+    .ec-badge.failed{background:var(--fail-bg);color:var(--fail-fg)}
+
+    #resultsSection{display:none}
+    .results-card{background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:28px;text-align:center;margin-bottom:24px}
+    .results-level{font-size:1.6rem;font-weight:700;margin:12px 0 6px}
+    .results-level.pass{color:var(--pass-fg)}
+    .results-level.fail{color:var(--fail-fg)}
+    .results-scores{display:flex;justify-content:center;gap:24px;margin-top:16px;flex-wrap:wrap}
+    .rs-item{text-align:center}
+    .rs-label{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em}
+    .rs-value{font-size:1.3rem;font-weight:700}
+
+    @media (max-width:600px){
+      .hub{padding:20px 16px 60px}
+      .progress-strip{padding:0 16px}
+      .topbar{padding:0 16px}
+      .ec-desc{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div style="font-size:0.9rem;color:var(--muted)">Cargando prov…</div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" href="/dele/dashboard/index.html">← Simuleringar</a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-flag"></div>
+    <div class="topbar-brand">
+      <span class="topbar-title">DELE A2</span>
+      <span class="topbar-sub" id="topbarSim"></span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="user-pill" id="userEmail"></div>
+  </div>
+</div>
+
+<div class="progress-strip" id="progressStrip"></div>
+
+<div class="hub" id="hubPhase">
+  <div class="hub-header">
+    <div class="hub-eyebrow">
+      <div class="hub-eyebrow-dot"></div>
+      <span id="hubEyebrow">SIMULACIÓN 1</span>
+    </div>
+    <h1 class="hub-title" id="hubTitle">Vista general del examen</h1>
+    <p class="hub-subtitle">Haz clic en cada parte para empezar. Puedes hacer las partes en cualquier orden.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">📖 Habilidades receptivas</div>
+    <div id="receptiveCards"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">✍️ Habilidades productivas</div>
+    <div id="productiveCards"></div>
+  </div>
+</div>
+
+<div class="hub" id="resultsSection">
+  <div class="hub-header">
+    <div class="hub-eyebrow"><div class="hub-eyebrow-dot"></div>RESULTAT</div>
+    <h1 class="hub-title">Resultados</h1>
+  </div>
+  <div class="results-card" id="resultsCard"></div>
+  <div style="text-align:center;margin-top:24px;">
+    <a href="/dele/dashboard/index.html" style="color:var(--brand);font-weight:600;font-size:0.9rem;">← Volver a simulaciones</a>
+  </div>
+</div>
+
+<script>
+const ELEMENTS = [
+  { key:'lectura',   section:'receptive',  icon:'📖', title:'Comprensión de lectura',    desc:'4 tareas, 25 ítems',   page:'/dele/dashboard/lectura.html', timer:'~60 min' },
+  { key:'auditiva', section:'receptive',  icon:'🎧', title:'Comprensión auditiva',    desc:'4 tareas, 25 ítems', page:'/dele/dashboard/auditiva.html', timer:'~40 min' },
+  { key:'escritas',   section:'productive', icon:'✍️', title:'Expresión e interacción escritas', desc:'2 tareas escritas',           page:'/dele/dashboard/escritas.html',     timer:'~45 min' },
+  { key:'orales',  section:'productive', icon:'🎤', title:'Expresión e interacción orales',  desc:'3 tareas orales',              page:'/dele/dashboard/orales.html',       timer:'~12 min' },
+];
+
+let simId, attemptId, user;
+let pollTimer = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const ctx = await DELE.init();
+  user      = ctx.user;
+  simId     = ctx.simId;
+  attemptId = ctx.attemptId;
+
+  document.getElementById('userEmail').textContent = user.email;
+  document.getElementById('topbarSim').textContent = `Simulación ${ctx.simNum}`;
+  document.getElementById('hubEyebrow').textContent = `SIMULACIÓN ${ctx.simNum}`;
+
+  // Show page immediately — don't wait for hydrate (cold starts can take 20s)
+  DELE.hideLoading();
+
+  // Load data in background
+  await refreshHub();
+  pollTimer = setInterval(refreshHub, 15000);
+});
+
+async function refreshHub() {
+  try {
+    const data = await DELE.hydrateData(user.id, attemptId, true);
+    if (!data) return;
+
+    const attempt = (data.attempts || []).find(a => a.id === attemptId);
+    if (!attempt) return;
+
+    const elems = attempt.elements || [];
+
+    if (attempt.status === 'complete') {
+      showResults(attempt, elems);
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+      return;
+    }
+
+    const allDone = elems.length >= 4 && elems.every(el =>
+      el.submission_status === 'submitted' || el.submission_status === 'skipped'
+    );
+
+    // Progress strip
+    document.getElementById('progressStrip').innerHTML = ELEMENTS.map(def => {
+      const el = elems.find(e => e.element_key === def.key);
+      let cls = '';
+      if (!el || el.submission_status === 'not_started') cls = '';
+      else if (el.submission_status === 'skipped') cls = 'skipped';
+      else if (el.eval_status === 'complete') cls = 'done';
+      else if (el.submission_status === 'submitted') cls = 'active';
+      return `<div class="ps-dot ${cls}"></div>`;
+    }).join('');
+
+    if (allDone) {
+      document.getElementById('hubPhase').style.display = 'block';
+      document.getElementById('resultsSection').style.display = 'none';
+      const pendingEvals = elems.filter(el =>
+        el.submission_status === 'submitted' && el.eval_status !== 'complete' && el.eval_status !== 'skipped'
+      );
+      document.getElementById('receptiveCards').innerHTML = '';
+      document.getElementById('productiveCards').innerHTML = `
+        <div style="text-align:center;padding:40px 20px;">
+          <div class="loading-spinner" style="width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--brand);animation:spin 0.8s linear infinite;margin:0 auto 16px;"></div>
+          <p style="font-weight:600;color:var(--navy);">¡Todas las partes han sido enviadas!</p>
+          <p style="color:var(--muted);font-size:0.85rem;margin-top:6px;">
+            ${pendingEvals.length > 0
+              ? `Esperando evaluación de ${pendingEvals.length} parte(ar)…`
+              : 'Calculando tu resultado final…'}
+          </p>
+          <p style="font-size:0.78rem;color:#94a3b8;margin-top:12px;">Sidan uppdateras automatiskt.</p>
+          <a href="/dele/dashboard/index.html" style="display:inline-block;margin-top:18px;padding:10px 24px;background:var(--brand-dim);color:var(--brand);border-radius:8px;font-size:0.85rem;font-weight:600;text-decoration:none;">← Volver a simulaciones</a>
+        </div>`;
+      document.getElementById('hubTitle').textContent = 'Bearbetar resultat…';
+
+      if (pollTimer) clearInterval(pollTimer);
+      pollTimer = setInterval(refreshHub, 5000);
+      return;
+    }
+
+    // Normal hub
+    document.getElementById('hubTitle').textContent = 'Vista general del examen';
+    const receptiveHtml = [];
+    const productiveHtml = [];
+
+    ELEMENTS.forEach(def => {
+      const el = elems.find(e => e.element_key === def.key);
+      const status = el?.submission_status || 'not_started';
+      const evalSt = el?.eval_status || 'pending';
+
+      let badge;
+      if (status === 'not_started')       badge = '<span class="ec-badge todo">No iniciada</span>';
+      else if (status === 'skipped')      badge = '<span class="ec-badge skipped">Saltado</span>';
+      else if (evalSt === 'complete')     badge = '<span class="ec-badge done">✓ Completada</span>';
+      else if (evalSt === 'failed')       badge = '<span class="ec-badge failed">Fel</span>';
+      else if (evalSt === 'evaluating')   badge = '<span class="ec-badge eval">Evaluando…</span>';
+      else                                badge = '<span class="ec-badge eval">Bearbetar…</span>';
+
+      let href = `${def.page}?sim=${simId}&attempt=${attemptId}&key=${def.key}`;
+
+      const card = `
+        <div class="elem-card" onclick="window.location.href='${href}'">
+          <div class="ec-left">
+            <div class="ec-icon">${def.icon}</div>
+            <div class="ec-info">
+              <div class="ec-title">${def.title}</div>
+              <div class="ec-desc">${def.desc} · ${def.timer}</div>
+            </div>
+          </div>
+          ${badge}
+        </div>`;
+
+      if (def.section === 'receptive') receptiveHtml.push(card);
+      else productiveHtml.push(card);
+    });
+
+    document.getElementById('receptiveCards').innerHTML = receptiveHtml.join('');
+    document.getElementById('productiveCards').innerHTML = productiveHtml.join('');
+
+  } catch (err) {
+    console.error('[exam] refreshHub error:', err);
+  }
+}
+
+function showResults(attempt, elems) {
+  document.getElementById('hubPhase').style.display = 'none';
+  document.getElementById('resultsSection').style.display = 'block';
+
+  const level = attempt.result_level || '—';
+  const isPass = level !== 'No apto' && level !== '—';
+
+  document.getElementById('resultsCard').innerHTML = `
+    <div style="font-size:2rem;">${isPass ? '🎉' : '📋'}</div>
+    <div class="results-level ${isPass ? 'pass' : 'fail'}">${DELE.escapeHtml(level)}</div>
+    <div style="font-size:0.85rem;color:var(--muted);margin-top:4px;">
+      ${isPass ? '¡Buen trabajo! Has alcanzado este nivel.' : 'Sigue practicando para mejorar tu resultado.'}
+    </div>
+    <div class="results-scores">
+      <div class="rs-item"><div class="rs-label">Lectura</div><div class="rs-value">${attempt.grade_reading != null ? Math.round(attempt.grade_reading) + '%' : '—'}</div></div>
+      <div class="rs-item"><div class="rs-label">Comprensión auditiva</div><div class="rs-value">${attempt.grade_listening != null ? Math.round(attempt.grade_listening) + '%' : '—'}</div></div>
+      <div class="rs-item"><div class="rs-label">Expresión escrita</div><div class="rs-value">${attempt.grade_writing ?? '—'}<span style="font-size:0.7rem;color:var(--muted)">/25</span></div></div>
+      <div class="rs-item"><div class="rs-label">Expresión oral</div><div class="rs-value">${attempt.grade_speaking ?? '—'}<span style="font-size:0.7rem;color:var(--muted)">/25</span></div></div>
+      <div class="rs-item"><div class="rs-label">Total</div><div class="rs-value">${attempt.grade_overall != null ? Math.round(attempt.grade_overall) + '%' : '—'}</div></div>
+    </div>
+    <a href="results.html?sim=${simId}&attempt=${attemptId}" style="display:block;width:100%;margin-top:18px;padding:13px;background:var(--brand);color:#fff;border:none;border-radius:10px;font-size:0.92rem;font-weight:600;text-align:center;text-decoration:none;">Ver resultados detallados →</a>
+  `;
+
+  document.getElementById('progressStrip').innerHTML = ELEMENTS.map(() => '<div class="ps-dot done"></div>').join('');
+}
+</script>
+</body>
+</html>
