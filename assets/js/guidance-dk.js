@@ -18,26 +18,31 @@
   // Exam schedule
   // ----------------------------------------------------------------------
   // Add new exam terms here as SIRI publishes them on danskogproever.dk.
-  // Order doesn't matter — getNextExam() picks the soonest upcoming one
-  // and the card auto-advances to the next term once an exam date passes.
+  // Order doesn't matter — getUpcomingExams() sorts by date. The card shows
+  // the soonest exam and auto-advances once that date passes; when its
+  // registration is closed and a following exam is in the array, the card
+  // also points users at the next deadline.
   // ----------------------------------------------------------------------
   const DK_EXAM_SCHEDULE = [
     { testDate: "2026-06-03", registrationDeadline: "2026-04-29" }, // sommer 2026
     { testDate: "2026-11-25", registrationDeadline: "2026-10-21" }  // vinter 2026
   ];
 
-  function getNextExam() {
+  function getUpcomingExams() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return DK_EXAM_SCHEDULE
       .filter(e => new Date(e.testDate) >= today)
-      .sort((a, b) => new Date(a.testDate) - new Date(b.testDate))[0];
+      .sort((a, b) => new Date(a.testDate) - new Date(b.testDate));
   }
 
   function getDynamicTips() {
     const out = [];
-    const exam = getNextExam();
+    const upcoming = getUpcomingExams();
+    const exam = upcoming[0];
     if (!exam) return out;
+
+    const followingExam = upcoming[1] || null;
 
     const now = new Date();
     const testDate = new Date(exam.testDate);
@@ -46,8 +51,9 @@
     const daysToTest = daysBetween(now, testDate);
     const daysToRegistrationEnd = daysBetween(now, registrationDeadline);
 
-    const registrationInfo = daysToRegistrationEnd > 0
-      ? `
+    let registrationInfo;
+    if (daysToRegistrationEnd > 0) {
+      registrationInfo = `
 Tilmeldingsfristen er den ${formatDate(exam.registrationDeadline)}
 (${daysToRegistrationEnd} dage tilbage).
 
@@ -55,14 +61,16 @@ Husk at tilmelde dig i tide og finde dit teststed via
 <a href="https://indfodsretsprove.dk/find-dit-testcenter/" target="_blank" rel="noopener">
 testcenter-oversigten
 </a>.
-`.trim()
-      : `
-Tilmeldingen til denne prøve er lukket. Hvis du allerede er tilmeldt,
-kan du finde dit teststed via
-<a href="https://indfodsretsprove.dk/find-dit-testcenter/" target="_blank" rel="noopener">
-testcenter-oversigten
-</a>.
 `.trim();
+    } else if (followingExam) {
+      registrationInfo = `
+Tilmeldingen til denne prøve er lukket — næste tilmeldingsfrist er den
+${formatDate(followingExam.registrationDeadline)} (til prøven den
+${formatDate(followingExam.testDate)}).
+`.trim();
+    } else {
+      registrationInfo = `Tilmeldingen til denne prøve er lukket.`;
+    }
 
     out.push({
       id: "dk-exam-info",
