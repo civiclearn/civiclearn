@@ -14,30 +14,41 @@
     return Math.ceil((b - a) / (1000 * 60 * 60 * 24));
   }
 
-  const DK_EXAM_SCHEDULE = {
-    testDate: "2026-06-03",
-    registrationDeadline: "2026-04-29"
-  };
+  // ----------------------------------------------------------------------
+  // Exam schedule
+  // ----------------------------------------------------------------------
+  // Add new exam terms here as SIRI publishes them on danskogproever.dk.
+  // Order doesn't matter — getNextExam() picks the soonest upcoming one
+  // and the card auto-advances to the next term once an exam date passes.
+  // ----------------------------------------------------------------------
+  const DK_EXAM_SCHEDULE = [
+    { testDate: "2026-06-03", registrationDeadline: "2026-04-29" }, // sommer 2026
+    { testDate: "2026-11-25", registrationDeadline: "2026-10-21" }  // vinter 2026
+  ];
+
+  function getNextExam() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return DK_EXAM_SCHEDULE
+      .filter(e => new Date(e.testDate) >= today)
+      .sort((a, b) => new Date(a.testDate) - new Date(b.testDate))[0];
+  }
 
   function getDynamicTips() {
     const out = [];
-    const now = new Date();
+    const exam = getNextExam();
+    if (!exam) return out;
 
-    const testDate = new Date(DK_EXAM_SCHEDULE.testDate);
-    const registrationDeadline = new Date(DK_EXAM_SCHEDULE.registrationDeadline);
+    const now = new Date();
+    const testDate = new Date(exam.testDate);
+    const registrationDeadline = new Date(exam.registrationDeadline);
 
     const daysToTest = daysBetween(now, testDate);
     const daysToRegistrationEnd = daysBetween(now, registrationDeadline);
 
-    if (daysToTest >= 0) {
-      out.push({
-        id: "dk-exam-info",
-        title: 'Næste officielle indfødsretsprøve <span class="gc-pill info">Officiel</span>',
-        text: `
-Den næste indfødsretsprøve afholdes den ${formatDate(DK_EXAM_SCHEDULE.testDate)}
-(${daysToTest} dage tilbage).
-
-Tilmeldingsfristen er den ${formatDate(DK_EXAM_SCHEDULE.registrationDeadline)}
+    const registrationInfo = daysToRegistrationEnd > 0
+      ? `
+Tilmeldingsfristen er den ${formatDate(exam.registrationDeadline)}
 (${daysToRegistrationEnd} dage tilbage).
 
 Husk at tilmelde dig i tide og finde dit teststed via
@@ -45,8 +56,24 @@ Husk at tilmelde dig i tide og finde dit teststed via
 testcenter-oversigten
 </a>.
 `.trim()
-      });
-    }
+      : `
+Tilmeldingen til denne prøve er lukket. Hvis du allerede er tilmeldt,
+kan du finde dit teststed via
+<a href="https://indfodsretsprove.dk/find-dit-testcenter/" target="_blank" rel="noopener">
+testcenter-oversigten
+</a>.
+`.trim();
+
+    out.push({
+      id: "dk-exam-info",
+      title: 'Næste officielle indfødsretsprøve <span class="gc-pill info">Officiel</span>',
+      text: `
+Den næste indfødsretsprøve afholdes den ${formatDate(exam.testDate)}
+(${daysToTest} dage tilbage).
+
+${registrationInfo}
+`.trim()
+    });
 
     return out;
   }
