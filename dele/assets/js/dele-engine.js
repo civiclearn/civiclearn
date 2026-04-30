@@ -134,6 +134,8 @@ window.DELE = (function () {
       const userId = _user?.id || '';
       if (!token || !userId) throw new Error('Not authenticated');
       if (!attemptId || !blob || !suffix) throw new Error('uploadAudio requires attemptId, blob, suffix');
+      if (blob.size === 0) throw new Error('La grabación está vacía. Comprueba el micrófono.');
+      if (blob.size < 2000) console.warn(`[DELE.uploadAudio] suspiciously small blob (${blob.size} bytes) for ${suffix}`);
 
       const storagePath = `${userId}/${attemptId}/${suffix}`;
       const storageUrl  = `${SUPABASE_URL}/storage/v1/object/dele-audio/${storagePath}`;

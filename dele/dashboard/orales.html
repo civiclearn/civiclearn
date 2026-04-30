@@ -387,7 +387,9 @@ function fmtTime(secs) {
 // ─── Mic permission probe ───────────────────────────────────────────────────
 async function checkMic() {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }
+    });
     stream.getTracks().forEach(t => t.stop());   // release immediately — RIK pattern
     micPermissionDenied = false;
   } catch (err) {
@@ -891,6 +893,14 @@ function renderRecorderArea(taskId, limitSecs) {
       <span id="recTimerText-${esc(taskId)}">${isActive ? fmtTime((Date.now() - recStartedAt) / 1000) : '0:00'}</span><span class="rec-timer-max"> / ${fmtTime(limitSecs)}</span>
     </div>`;
 
+  // Live VU meter (only visible while recording) — shows the user their voice is being captured
+  if (isActive) {
+    html += `<div style="margin-top:12px;height:6px;border-radius:3px;background:#e2e8f0;overflow:hidden">
+      <div id="vuMeter-${esc(taskId)}" style="height:100%;width:0%;background:linear-gradient(90deg,var(--pass) 0%,var(--yellow) 70%,var(--red) 100%);transition:width 80ms linear"></div>
+    </div>
+    <div style="margin-top:6px;font-size:0.72rem;color:var(--muted);font-style:italic">Habla normalmente — la barra debe moverse cuando hablas.</div>`;
+  }
+
   if (r?.blob && !isActive) {
     const url = r.blobUrl || URL.createObjectURL(r.blob);
     if (!r.blobUrl) r.blobUrl = url;
@@ -949,7 +959,20 @@ function getSupportedMime() {
 async function startRecording(taskId) {
   let stream;
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+        channelCount: 1,
+      }
+    });
+    // Diagnostic: log track state so silent-recording bugs become visible in console
+    const tracks = stream.getAudioTracks();
+    console.log('[orales] mic stream acquired:', tracks.map(t => ({
+      label: t.label, enabled: t.enabled, muted: t.muted,
+      settings: t.getSettings ? t.getSettings() : null
+    })));
     micPermissionDenied = false;
   } catch (err) {
     micPermissionDenied = true;
@@ -963,7 +986,10 @@ async function startRecording(taskId) {
   }
 
   const mime = getSupportedMime();
-  const opts = mime ? { mimeType: mime, audioBitsPerSecond: 16000 } : { audioBitsPerSecond: 16000 };
+  // No explicit audioBitsPerSecond — Chrome/Firefox default (~64-128 kbps opus) is what
+  // Whisper expects. The previous 16000 cap produced 13 kbps recordings with insufficient
+  // signal for transcription.
+  const opts = mime ? { mimeType: mime } : {};
   let recorder;
   try {
     recorder = new MediaRecorder(stream, opts);
@@ -994,6 +1020,42 @@ async function startRecording(taskId) {
 
   rerenderTask(taskId);
   startRecTick(taskId, limit);
+  startVuMeter(taskId, stream);
+}
+
+let _vuAudioContext = null, _vuAnalyser = null, _vuRaf = null;
+
+function startVuMeter(taskId, stream) {
+  try {
+    _vuAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = _vuAudioContext.createMediaStreamSource(stream);
+    _vuAnalyser = _vuAudioContext.createAnalyser();
+    _vuAnalyser.fftSize = 512;
+    source.connect(_vuAnalyser);
+    const buf = new Uint8Array(_vuAnalyser.frequencyBinCount);
+    const bar = () => document.getElementById(`vuMeter-${taskId}`);
+    const tick = () => {
+      _vuAnalyser.getByteTimeDomainData(buf);
+      let peak = 0;
+      for (let i = 0; i < buf.length; i++) {
+        const v = Math.abs(buf[i] - 128);
+        if (v > peak) peak = v;
+      }
+      const pct = Math.min(100, Math.round((peak / 128) * 200));   // ×2 so quiet voices look responsive
+      const el = bar();
+      if (el) el.style.width = `${pct}%`;
+      _vuRaf = requestAnimationFrame(tick);
+    };
+    tick();
+  } catch (err) {
+    console.warn('[orales] VU meter failed:', err.message);
+  }
+}
+
+function stopVuMeter() {
+  if (_vuRaf) { cancelAnimationFrame(_vuRaf); _vuRaf = null; }
+  if (_vuAudioContext) { try { _vuAudioContext.close(); } catch (_) {} _vuAudioContext = null; }
+  _vuAnalyser = null;
 }
 
 function startRecTick(taskId, limitSecs) {
@@ -1019,6 +1081,7 @@ function onRecordingStopped(taskId) {
 
   if (recTickInterval) { clearInterval(recTickInterval); recTickInterval = null; }
   if (hardStopTimer)   { clearTimeout(hardStopTimer); hardStopTimer = null; }
+  stopVuMeter();
 
   const blob = new Blob(activeChunks, { type: activeRecorder?.mimeType || 'audio/webm' });
   const durationSec = (Date.now() - recStartedAt) / 1000;
@@ -1254,6 +1317,23 @@ window.addEventListener('beforeunload', () => {
   }
   if (activeStream) activeStream.getTracks().forEach(t => t.stop());
 });
+
+// Fix Chrome MediaRecorder webm "Infinity duration" bug — seek to a huge time once
+// metadata loads, then back to 0, which forces the browser to compute real duration.
+// Without this, <audio> elements show "0:00" duration on review screen even though
+// the audio plays normally — making it impossible for users to tell if recordings
+// captured their voice before submitting.
+document.addEventListener('loadedmetadata', (e) => {
+  if (e.target.tagName !== 'AUDIO') return;
+  const a = e.target;
+  if (a.duration === Infinity || isNaN(a.duration)) {
+    a.currentTime = 1e101;
+    a.addEventListener('timeupdate', function once() {
+      a.removeEventListener('timeupdate', once);
+      a.currentTime = 0;
+    });
+  }
+}, true);
 </script>
 </body>
 </html>
