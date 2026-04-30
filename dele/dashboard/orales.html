@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DELE A2 — Expresión oral</title>
+  <title>DELE A2 — Expresión e interacción orales</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="/dele/assets/js/dele-auth.js"></script>
-  <script src="/dele/assets/js/dele-engine.js?v=2"></script>
+  <script src="/dele/assets/js/dele-engine.js?v=3"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{--brand:#AA151B;--brand-dim:#fce8ea;--yellow:#F1BF00;--navy:#0f172a;--muted:#64748b;--border:#e2e8f0;--surface:#fff;--bg:#f8f7f4;--red:#dc2626;--pass:#166534;--pass-bg:#dcfce7}
+    :root{--brand:#AA151B;--brand-dim:#fce8ea;--yellow:#F1BF00;--navy:#0f172a;--muted:#64748b;--border:#e2e8f0;--surface:#fff;--bg:#f8f7f4;--red:#dc2626;--pass:#166534;--pass-bg:#dcfce7;--fail:#991b1b;--fail-bg:#fee2e2;--amber:#92400e;--amber-bg:#fffbeb;--amber-border:#fde68a}
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
 
+    /* Topbar — identical to lectura/escritas for visual consistency */
     .topbar{background:var(--navy);border-bottom:3px solid var(--brand);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
     .topbar-left{display:flex;align-items:center;gap:12px}
     .back-link{color:#64748b;text-decoration:none;font-size:0.8rem;display:flex;align-items:center;gap:5px}
@@ -21,60 +22,238 @@
     .topbar-title{font-size:0.9rem;font-weight:700;color:#fff}
     .topbar-flag{width:22px;height:16px;background:var(--brand);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0}
     .topbar-flag::before{content:'';position:absolute;top:4px;left:0;right:0;height:8px;background:var(--yellow)}
+    .topbar-prep-pill{font-size:0.78rem;color:#cbd5e1;background:#1e293b;border-radius:99px;padding:4px 12px;font-variant-numeric:tabular-nums;display:none}
+    .topbar-prep-pill.visible{display:inline-block}
 
+    /* Loading */
     #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity 0.35s}
     #loading-overlay.hidden{opacity:0;pointer-events:none}
     .loading-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--brand);animation:spin 0.8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    .exam-wrap{max-width:820px;margin:0 auto;padding:28px 24px 80px}
+    .exam-wrap{max-width:820px;margin:0 auto;padding:24px 24px 100px}
 
-    .task-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:24px;margin-bottom:28px}
-    .task-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+    /* Mic banner */
+    .mic-banner{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:0.84rem;color:var(--amber);display:none;line-height:1.5}
+    .mic-banner.visible{display:block}
+
+    /* Prep phase */
+    .prep-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:28px 24px;margin-bottom:24px;text-align:center}
+    .prep-title{font-size:1.1rem;font-weight:700;margin-bottom:6px}
+    .prep-sub{font-size:0.86rem;color:var(--muted);margin-bottom:18px;line-height:1.6;max-width:560px;margin-left:auto;margin-right:auto}
+    .prep-clock{font-size:2.6rem;font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums;margin-bottom:14px}
+    .prep-skip{padding:10px 22px;border-radius:8px;background:var(--brand);color:#fff;font-size:0.88rem;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity 0.15s}
+    .prep-skip:hover{opacity:0.85}
+
+    .prep-overview{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:22px 24px;margin-bottom:24px}
+    .prep-overview-title{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:14px}
+    .prep-task{padding:18px 0;border-bottom:1px solid #f1f5f9;display:flex;gap:14px;align-items:flex-start}
+    .prep-task:last-child{border-bottom:none;padding-bottom:0}
+    .prep-task:first-child{padding-top:0}
+    .prep-task-num{width:28px;height:28px;border-radius:8px;background:var(--brand-dim);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0;margin-top:2px}
+    .prep-task-body{flex:1;min-width:0}
+    .prep-task-title{font-weight:700;font-size:1rem;margin-bottom:6px}
+    .prep-task-intro{font-size:0.85rem;color:var(--muted);line-height:1.55;margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed #e2e8f0}
+    .prep-hint{font-size:0.82rem;color:var(--muted);margin-bottom:10px;font-style:italic}
+    .prep-meta{font-size:0.78rem;color:var(--muted);margin-top:10px;font-weight:500}
+
+    /* T1 prep — both options shown */
+    .prep-option-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+    .prep-option-card{background:#fafaf8;border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+    .prep-option-label{font-weight:700;font-size:0.86rem;display:flex;align-items:center;gap:8px}
+    .prep-option-letter{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;background:var(--brand-dim);color:var(--brand);font-weight:700;font-size:0.76rem;flex-shrink:0}
+    .prep-option-instruction{font-size:0.84rem;line-height:1.6;color:var(--navy);white-space:pre-line}
+
+    /* T2 prep — photo */
+    .prep-photo{width:100%;max-height:340px;object-fit:contain;border-radius:10px;border:1px solid var(--border);margin-bottom:12px;background:#fafaf8;display:block}
+
+    /* T2 + T3 prep — bullet/context block */
+    .prep-bullet-block{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:10px;padding:12px 14px;font-size:0.86rem;color:var(--amber);line-height:1.65;white-space:pre-line;margin-bottom:6px}
+
+    /* T3 prep — 7 stages */
+    .prep-stages-list{margin-top:12px;background:#fafaf8;border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+    .prep-stages-title{font-size:0.74rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:10px}
+    .prep-stage-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #ebeef2}
+    .prep-stage-row:last-child{border-bottom:none;padding-bottom:0}
+    .prep-stage-row:first-child{padding-top:0}
+    .prep-stage-num{width:22px;height:22px;border-radius:6px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.74rem;flex-shrink:0;margin-top:2px}
+    .prep-stage-body{flex:1;min-width:0}
+    .prep-stage-label{font-size:0.78rem;font-weight:700;color:var(--navy);margin-bottom:2px}
+    .prep-stage-q{font-size:0.84rem;line-height:1.55;color:var(--muted);font-style:italic}
+
+    /* Task card (recording phase) */
+    .task-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:24px;margin-bottom:24px;transition:opacity 0.2s}
+    .task-card.locked{opacity:0.55;pointer-events:none;position:relative}
+    .task-card.locked::after{content:'';position:absolute;inset:0;background:rgba(248,247,244,0.45);border-radius:14px;pointer-events:none}
+    .task-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
     .task-num{width:32px;height:32px;border-radius:8px;background:var(--brand-dim);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0}
-    .task-title{font-weight:700;font-size:1rem}
+    .task-title{font-weight:700;font-size:1rem;flex:1}
+    .task-status{font-size:0.78rem;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:4px}
+    .task-status.done{color:var(--pass)}
+    .task-status.locked-text{color:var(--muted)}
+    .task-instructions{font-size:0.84rem;color:var(--muted);line-height:1.55;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #f1f5f9}
 
-    .prompt-card{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;font-size:0.88rem;color:#92400e;line-height:1.6;margin-bottom:16px}
-    .task-image{width:100%;max-height:360px;object-fit:contain;border-radius:10px;border:1px solid var(--border);margin-bottom:16px}
-    .guidance{font-size:0.78rem;color:var(--muted);margin-bottom:16px;line-height:1.5}
+    /* Bullet instruction block */
+    .bullet-instruction{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:0.88rem;color:var(--amber);line-height:1.65;white-space:pre-line}
 
-    .rec-area{text-align:center;padding:20px}
-    .rec-btn{width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;font-size:1.4rem;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center}
-    .rec-btn.idle{background:var(--brand);color:#fff}
-    .rec-btn.recording{background:var(--red);color:#fff;animation:pulse 1.2s infinite}
-    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.4)}50%{box-shadow:0 0 0 12px rgba(220,38,38,0)}}
-    .rec-btn.done{background:var(--pass);color:#fff}
-    .rec-label{font-size:0.82rem;color:var(--muted);margin-top:8px}
-    .rec-timer{font-size:0.85rem;font-weight:600;color:var(--red);margin-top:4px;font-variant-numeric:tabular-nums}
+    /* T1 option chooser cards (mirrors escritas T2 chooser) */
+    .option-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+    .option-card{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;gap:8px}
+    .option-card:hover:not(.locked){border-color:#94a3b8;background:#fafaf8}
+    .option-card.selected{border-color:var(--brand);background:var(--brand-dim);box-shadow:0 0 0 1px var(--brand) inset}
+    .option-card.locked{opacity:0.55}
+    .option-card-label{font-weight:700;font-size:0.86rem;display:flex;align-items:center;gap:8px}
+    .option-card.selected .option-card-label{color:var(--brand)}
+    .option-card-letter{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;background:var(--brand-dim);color:var(--brand);font-weight:700;font-size:0.76rem;flex-shrink:0}
+    .option-card.selected .option-card-letter{background:var(--brand);color:#fff}
+    .option-card-body{font-size:0.8rem;line-height:1.55;color:var(--muted);white-space:pre-line}
+    .option-card-pick{font-size:0.76rem;font-weight:600;color:var(--muted);margin-top:auto;padding-top:6px;border-top:1px solid #f1f5f9}
+    .option-card.selected .option-card-pick{color:var(--brand)}
 
-    .playback{margin-top:12px}
-    .playback audio{width:100%;max-width:400px}
+    /* T2 photo */
+    .task-photo{width:100%;max-height:380px;object-fit:contain;border-radius:10px;border:1px solid var(--border);margin-bottom:16px;background:#fafaf8}
 
-    .text-fallback{margin-top:12px;text-align:left}
-    .text-fallback-toggle{font-size:0.78rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline}
+    /* T3 stage navigation */
+    .stage-nav{background:#fafaf8;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+    .stage-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+    .stage-pill{flex:1;min-width:24px;height:6px;background:var(--border);border-radius:3px;transition:background 0.2s}
+    .stage-pill.active{background:var(--brand)}
+    .stage-pill.visited{background:#fca5a5}
+    .stage-current{font-size:0.76rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--brand);margin-bottom:6px}
+    .stage-question{font-size:0.95rem;line-height:1.6;color:var(--navy);font-weight:500}
+    .stage-controls{display:flex;justify-content:space-between;gap:10px;margin-top:14px}
+    .stage-btn{padding:8px 16px;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-family:inherit;font-size:0.84rem;font-weight:600;cursor:pointer;color:var(--navy);transition:all 0.15s}
+    .stage-btn:hover:not(:disabled){border-color:#94a3b8;background:#fafaf8}
+    .stage-btn:disabled{opacity:0.4;cursor:not-allowed}
+    .stage-btn.next{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .stage-btn.next:hover:not(:disabled){background:#1e293b}
+    .stage-btn.finish{background:var(--pass);color:#fff;border-color:var(--pass)}
+
+    /* Recorder UI */
+    .rec-area{background:#fafaf8;border:1px solid var(--border);border-radius:10px;padding:18px;text-align:center}
+    .rec-btn{width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;font-size:1.6rem;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;color:#fff}
+    .rec-btn.idle{background:var(--brand)}
+    .rec-btn.idle:hover{opacity:0.9}
+    .rec-btn.recording{background:var(--red);animation:pulse 1.2s infinite}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.4)}50%{box-shadow:0 0 0 14px rgba(220,38,38,0)}}
+    .rec-btn.done{background:var(--pass)}
+    .rec-btn:disabled{opacity:0.4;cursor:not-allowed}
+    .rec-label{font-size:0.84rem;color:var(--muted);margin-top:8px}
+    .rec-timer{font-size:0.92rem;font-weight:700;color:var(--red);margin-top:6px;font-variant-numeric:tabular-nums;display:none}
+    .rec-timer.visible{display:block}
+    .rec-timer-max{font-size:0.74rem;color:var(--muted);font-weight:500;margin-left:6px}
+
+    .playback{margin-top:14px;display:flex;justify-content:center;gap:8px;align-items:center;flex-wrap:wrap}
+    .playback audio{max-width:300px}
+    .playback-btn{padding:6px 14px;border-radius:7px;border:1.5px solid var(--border);background:#fff;font-family:inherit;font-size:0.78rem;font-weight:600;cursor:pointer;color:var(--navy)}
+    .playback-btn:hover{background:#fafaf8;border-color:#94a3b8}
+    .playback-btn.danger{color:var(--fail);border-color:#fecaca}
+    .playback-btn.danger:hover{background:var(--fail-bg);border-color:var(--fail)}
+
+    /* Text fallback */
+    .text-fallback{margin-top:14px;text-align:left}
+    .text-fallback-toggle{font-size:0.78rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline;padding:0}
     .text-fallback-toggle:hover{color:var(--navy)}
-    .text-fallback-area{display:none;margin-top:8px}
+    .text-fallback-area{display:none;margin-top:10px}
     .text-fallback-area.visible{display:block}
-    .text-fallback-input{width:100%;min-height:80px;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.88rem;color:var(--navy);background:var(--bg);resize:vertical;outline:none}
-    .text-fallback-input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-dim)}
-    .text-fallback-note{font-size:0.72rem;color:var(--muted);margin-top:4px}
+    .text-fallback-input{width:100%;min-height:100px;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.88rem;line-height:1.6;color:var(--navy);background:#fff;resize:vertical;transition:border-color 0.15s}
+    .text-fallback-input:focus{outline:none;border-color:var(--brand)}
+    .text-fallback-note{font-size:0.74rem;color:var(--muted);margin-top:5px;font-style:italic}
 
+    /* Bottom bar */
     .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;z-index:100}
+    .progress-text{font-size:0.82rem;color:var(--muted);font-weight:500}
     .btn-row{display:flex;gap:10px}
-    .btn{padding:10px 24px;border-radius:8px;font-size:0.88rem;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity 0.15s}
+    .btn{padding:10px 24px;border-radius:8px;font-size:0.88rem;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity 0.15s;text-decoration:none;display:inline-block}
     .btn:hover{opacity:0.85}
     .btn-skip{background:#f1f5f9;color:var(--navy)}
     .btn-submit{background:var(--brand);color:#fff}
     .btn-submit:disabled{opacity:0.4;cursor:not-allowed}
+    .btn-back{background:var(--navy);color:#fff}
 
-    @media(max-width:600px){.exam-wrap{padding:20px 14px 80px}.task-card{padding:18px 16px}}
+    /* Eval banner — shown after submit */
+    .eval-banner{background:var(--surface);border:2px solid var(--amber-border);border-radius:14px;padding:24px;text-align:center;margin-bottom:24px}
+    .eval-banner-icon{font-size:1.6rem;margin-bottom:8px}
+    .eval-banner-title{font-size:1.05rem;font-weight:700;margin-bottom:6px;color:var(--amber)}
+    .eval-banner-body{font-size:0.86rem;color:var(--muted);line-height:1.55;max-width:520px;margin:0 auto}
+
+    /* Stepper — visible during recording + review phases */
+    .stepper-wrap{max-width:820px;margin:0 auto;padding:18px 24px 0}
+    .stepper{display:flex;align-items:center;gap:0;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:14px 18px}
+    .step{flex:1;display:flex;align-items:center;gap:10px;font-size:0.82rem;color:var(--muted);min-width:0}
+    .step.clickable{cursor:pointer;transition:color 0.15s}
+    .step.clickable:hover{color:var(--navy)}
+    .step-circle{width:28px;height:28px;border-radius:50%;background:var(--border);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.78rem;flex-shrink:0;transition:background 0.2s}
+    .step.active .step-circle{background:var(--brand)}
+    .step.done .step-circle{background:var(--pass)}
+    .step.visited .step-circle{background:#94a3b8}
+    .step-label{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .step.active .step-label{color:var(--navy)}
+    .step.done .step-label{color:var(--pass)}
+    .step-divider{flex:0 0 auto;width:24px;height:2px;background:var(--border);margin:0 4px}
+    .step-divider.done{background:var(--pass)}
+
+    /* Task screen navigation footer */
+    .task-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:8px;padding:0 4px}
+    .task-nav-btn{padding:11px 22px;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-family:inherit;font-size:0.92rem;font-weight:600;cursor:pointer;color:var(--navy);transition:all 0.15s;display:inline-flex;align-items:center;gap:6px}
+    .task-nav-btn:hover:not(:disabled){border-color:#94a3b8;background:#fafaf8}
+    .task-nav-btn:disabled{opacity:0.4;cursor:not-allowed}
+    .task-nav-btn.next{background:var(--brand);color:#fff;border-color:var(--brand)}
+    .task-nav-btn.next:hover:not(:disabled){opacity:0.9}
+    .task-nav-btn.review-jump{background:var(--pass);color:#fff;border-color:var(--pass)}
+    .task-nav-spacer{flex:1}
+
+    /* Review phase */
+    .review-intro{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:22px 24px;margin-bottom:18px}
+    .review-intro-title{font-size:1.1rem;font-weight:700;margin-bottom:6px}
+    .review-intro-body{font-size:0.88rem;color:var(--muted);line-height:1.6}
+
+    .review-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:14px;display:flex;gap:14px;align-items:flex-start}
+    .review-card.empty{border-color:#fecaca;background:#fef9f9}
+    .review-card-num{width:32px;height:32px;border-radius:8px;background:var(--brand-dim);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0}
+    .review-card.empty .review-card-num{background:#fee2e2;color:var(--fail)}
+    .review-card-body{flex:1;min-width:0}
+    .review-card-title{font-size:0.95rem;font-weight:700;margin-bottom:4px}
+    .review-card-meta{font-size:0.82rem;color:var(--muted);margin-bottom:10px}
+    .review-card-empty-msg{font-size:0.84rem;color:var(--fail);margin-bottom:10px;font-style:italic}
+    .review-card-audio{width:100%;max-width:420px;margin-bottom:10px}
+    .review-card-text{background:#fafaf8;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:0.84rem;line-height:1.55;color:var(--navy);white-space:pre-wrap;margin-bottom:10px;max-width:600px}
+    .review-card-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .review-action-btn{padding:7px 14px;border-radius:7px;border:1.5px solid var(--border);background:#fff;font-family:inherit;font-size:0.8rem;font-weight:600;cursor:pointer;color:var(--navy)}
+    .review-action-btn:hover{background:#fafaf8;border-color:#94a3b8}
+    .review-action-btn.primary{background:var(--brand-dim);color:var(--brand);border-color:var(--brand-dim)}
+    .review-action-btn.primary:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+    .review-submit-row{margin-top:24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .review-submit{padding:14px 32px;border-radius:10px;background:var(--brand);color:#fff;font-family:inherit;font-size:1rem;font-weight:700;border:none;cursor:pointer;transition:opacity 0.15s}
+    .review-submit:hover:not(:disabled){opacity:0.9}
+    .review-submit:disabled{opacity:0.4;cursor:not-allowed}
+
+    @media(max-width:640px){
+      .exam-wrap{padding:18px 14px 100px}
+      .task-card{padding:18px 16px}
+      .option-cards{grid-template-columns:1fr}
+      .prep-card{padding:22px 16px}
+      .prep-clock{font-size:2.2rem}
+      .stage-controls{flex-direction:column-reverse}
+      .stage-btn{width:100%}
+      .stepper-wrap{padding:14px 14px 0}
+      .stepper{padding:10px 12px;gap:0}
+      .step-label{display:none}
+      .step-divider{width:12px}
+      .task-nav{flex-direction:column-reverse}
+      .task-nav-btn{width:100%;justify-content:center}
+      .review-card{padding:14px 16px;flex-direction:column}
+      .review-submit-row{flex-direction:column;align-items:stretch}
+      .review-submit{width:100%}
+    }
   </style>
 </head>
 <body>
 
 <div id="loading-overlay">
   <div class="loading-spinner"></div>
-  <div style="font-size:0.9rem;color:var(--muted)">Cargando taluppgifter…</div>
+  <div style="font-size:0.9rem;color:var(--muted)">Cargando expresión oral…</div>
 </div>
 
 <div class="topbar">
@@ -84,27 +263,59 @@
     <div class="topbar-flag"></div>
     <span class="topbar-title">Expresión e interacción orales</span>
   </div>
+  <span class="topbar-prep-pill" id="topbarPrep">⏱ Preparación 12:00</span>
 </div>
+
+<div class="stepper-wrap" id="stepperWrap" style="display:none"></div>
 
 <div class="exam-wrap" id="examContent"></div>
 
 <div class="bottom-bar" id="bottomBar">
-  <div style="font-size:0.82rem;color:var(--muted)">Grabar tus respuestas ovan</div>
+  <div class="progress-text" id="progressText">&nbsp;</div>
   <div class="btn-row">
-    <button class="btn btn-skip" onclick="handleSkip()">Saltar</button>
-    <button class="btn btn-submit" id="submitBtn" onclick="handleSubmit()" disabled>Enviar</button>
+    <button class="btn btn-skip" onclick="handleSkip()">Saltar la sección</button>
   </div>
 </div>
 
 <script>
+// ─── State ──────────────────────────────────────────────────────────────────
 let simId, attemptId, user, examData;
-let submitted = false;
-let recordings = {}; // { task_id: { blob, base64, duration } }
-let activeRecorder = null;
-let activeTaskId = null;
-let recStartTime = null;
-let recTimerInterval = null;
+// Phases:  prep → task1 → task2 → task3 → review → done.
+// User can navigate freely between visited phases; the stepper enforces no jumping ahead.
+let phase = 'prep';
+let furthestPhaseIdx = 0;             // 0=prep, 1=task1, 2=task2, 3=task3, 4=review
+const PHASE_INDEX = { prep: 0, task1: 1, task2: 2, task3: 3, review: 4, done: 5 };
+const TASK_BY_PHASE = { task1: 0, task2: 1, task3: 2 };
+let prepInterval = null;
+const PREP_SECONDS = 720;             // 12 min, locked per handover
 
+let chosenT1 = null;                  // 'A' | 'B' (T1 only — T2/T3 have implicit 'single')
+let t3Stage = 0;                      // 0..6 — current visible stage in T3
+let t3StagesVisited = 0;              // how many stages the candidate has read
+
+// recordings: { 'orales-1': {blob, durationSec, audioStoragePath?, mimeType, chosenOption}, ... }
+const recordings = {};
+const fallbackText = {};              // { 'orales-1': 'string', ... }
+
+// MediaRecorder state (only one task records at a time)
+let activeRecorder = null;
+let activeStream   = null;
+let activeTaskId   = null;
+let activeChunks   = [];
+let recStartedAt   = 0;
+let recTickInterval = null;
+let hardStopTimer  = null;
+
+let micPermissionDenied = false;
+let submitted = false;
+
+// localStorage keys
+const PREP_KEY = () => `dele:orales:prep_started_at:${attemptId}`;
+
+// Constants for hard-stops (read from JSON tasks at runtime, but cache here)
+const SPEAKING_LIMIT = { 'orales-1': 180, 'orales-2': 90, 'orales-3': 240 };
+
+// ─── Init ───────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   const ctx = await DELE.init('orales');
   user = ctx.user; simId = ctx.simId; attemptId = ctx.attemptId;
@@ -115,246 +326,934 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('examContent').innerHTML = `
       <div style="text-align:center;padding:60px 20px;">
         <div style="font-size:2rem;">✅</div>
-        <h2 style="margin:12px 0;">Expresión oral ya enviada</h2>
-        <p style="color:var(--muted);">Tus grabaciones son evaluadas por IA.</p>
-        <a href="/dele/dashboard/exam.html?sim=${simId}&attempt=${attemptId}" style="display:inline-block;margin-top:16px;color:var(--brand);font-weight:600;">← Volver al examen</a>
+        <h2 style="margin:12px 0;">Esta parte ya está enviada</h2>
+        <p style="color:var(--muted);">Tus grabaciones están siendo evaluadas o ya tienen resultado. Consulta la vista general del examen.</p>
+        <a href="/dele/dashboard/exam.html?sim=${simId}&attempt=${attemptId}"
+           style="display:inline-block;margin-top:16px;color:var(--brand);font-weight:600;">← Volver al examen</a>
       </div>`;
     document.getElementById('bottomBar').style.display = 'none';
-    DELE.hideLoading(); return;
+    DELE.hideLoading();
+    return;
   }
 
-  const simNum = ctx.simNum;
+  // Load JSON
   const jsonPath = `/dele/data/${ctx.simId}-orales.json`;
   try {
     const res = await fetch(jsonPath);
     if (!res.ok) throw new Error('JSON not found');
     examData = await res.json();
   } catch (err) {
-    DELE.showError(`No se pudieron cargar los datos parte examen: ${err.message}`, simId, attemptId);
+    DELE.showError(`No se pudieron cargar los datos del examen: ${err.message}`, simId, attemptId);
     return;
   }
 
-  renderExam();
+  // Cache speaking limits from JSON (override the const if JSON differs)
+  examData.tasks.forEach(t => {
+    if (typeof t.speaking_seconds === 'number' && t.speaking_seconds > 0) {
+      SPEAKING_LIMIT[t.task_id] = t.speaking_seconds;
+    }
+  });
+
+  // Determine phase from prep timer
+  const prepStartedAt = parseInt(localStorage.getItem(PREP_KEY()) || '0', 10);
+  if (!prepStartedAt) {
+    // First time landing on this page for this attempt — start the clock now
+    localStorage.setItem(PREP_KEY(), String(Date.now()));
+    phase = 'prep';
+  } else {
+    const elapsedMs = Date.now() - prepStartedAt;
+    if (elapsedMs >= PREP_SECONDS * 1000) {
+      phase = 'task1';
+      furthestPhaseIdx = PHASE_INDEX.task1;
+    } else {
+      phase = 'prep';
+    }
+  }
+
+  // Proactive mic permission check
+  await checkMic();
+
+  render();
   DELE.hideLoading();
 });
 
-function renderExam() {
+function esc(str) { return DELE.escapeHtml(str || ''); }
+function fmtTime(secs) {
+  if (!secs || isNaN(secs)) return '0:00';
+  const m = Math.floor(secs / 60), s = Math.floor(secs % 60);
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+// ─── Mic permission probe ───────────────────────────────────────────────────
+async function checkMic() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(t => t.stop());   // release immediately — RIK pattern
+    micPermissionDenied = false;
+  } catch (err) {
+    console.warn('[orales] mic check failed:', err.name, err.message);
+    micPermissionDenied = true;
+  }
+}
+
+// ─── Render dispatch ────────────────────────────────────────────────────────
+function render() {
+  const stepperWrap = document.getElementById('stepperWrap');
+  if (phase === 'prep') {
+    stepperWrap.style.display = 'none';
+    renderPrep();
+  } else if (phase === 'review') {
+    stepperWrap.style.display = '';
+    stepperWrap.innerHTML = renderStepper();
+    renderReview();
+  } else if (phase in TASK_BY_PHASE) {
+    stepperWrap.style.display = '';
+    stepperWrap.innerHTML = renderStepper();
+    renderTaskScreen(TASK_BY_PHASE[phase]);
+  }
+}
+
+// Phase transition with recorder cleanup
+function setPhase(newPhase) {
+  // Stop any active recorder cleanly before navigating away
+  if (activeRecorder?.state === 'recording') {
+    try { activeRecorder.stop(); } catch (_) {}
+  }
+  phase = newPhase;
+  const idx = PHASE_INDEX[newPhase] ?? 0;
+  if (idx > furthestPhaseIdx) furthestPhaseIdx = idx;
+  render();
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+// Sequential navigation
+function navPrev() {
+  if (phase === 'task2') setPhase('task1');
+  else if (phase === 'task3') setPhase('task2');
+  else if (phase === 'review') setPhase('task3');
+}
+function navNext() {
+  if (phase === 'task1') setPhase('task2');
+  else if (phase === 'task2') setPhase('task3');
+  else if (phase === 'task3') setPhase('review');
+}
+
+// Stepper jump — only to phases user has already reached
+function navJumpTo(phaseName) {
+  const targetIdx = PHASE_INDEX[phaseName];
+  if (targetIdx <= furthestPhaseIdx) setPhase(phaseName);
+}
+
+// ─── Prep phase ─────────────────────────────────────────────────────────────
+function renderPrep() {
   const wrap = document.getElementById('examContent');
+  const remainingSecs = computePrepRemainingSecs();
+
+  let html = '';
+  if (micPermissionDenied) {
+    html += `<div class="mic-banner visible">
+      ⚠️ El navegador no tiene acceso al micrófono. Cuando empieces a grabar, tu navegador te pedirá permiso. Si lo rechazas, podrás escribir tu respuesta en su lugar.
+    </div>`;
+  }
+
+  html += `<div class="prep-card">
+    <div class="prep-title">⏱ Tiempo de preparación</div>
+    <div class="prep-sub">Tienes 12 minutos para preparar las tres tareas antes de empezar a grabar. Lee las instrucciones de cada tarea y piensa qué quieres decir.</div>
+    <div class="prep-clock" id="prepClock">${fmtTime(remainingSecs)}</div>
+    <button class="prep-skip" onclick="endPrep()">Empezar a grabar ahora</button>
+  </div>`;
+
+  html += `<div class="prep-overview">
+    <div class="prep-overview-title">Las tres tareas — léelas y prepárate</div>`;
+  examData.tasks.forEach((t, ti) => {
+    html += renderPrepTaskBlock(t, ti);
+  });
+  html += `</div>`;
+
+  wrap.innerHTML = html;
+
+  // Top-bar pill
+  document.getElementById('topbarPrep').classList.add('visible');
+
+  // Tick the clock
+  if (prepInterval) clearInterval(prepInterval);
+  prepInterval = setInterval(() => {
+    const remaining = computePrepRemainingSecs();
+    const clockEl = document.getElementById('prepClock');
+    const pill    = document.getElementById('topbarPrep');
+    if (clockEl) clockEl.textContent = fmtTime(remaining);
+    if (pill)    pill.textContent    = `⏱ Preparación ${fmtTime(remaining)}`;
+    if (remaining <= 0) endPrep();
+  }, 1000);
+
+  updateProgress();
+}
+
+function computePrepRemainingSecs() {
+  const startedAt = parseInt(localStorage.getItem(PREP_KEY()) || '0', 10);
+  if (!startedAt) return PREP_SECONDS;
+  const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+  return Math.max(0, PREP_SECONDS - elapsed);
+}
+
+function renderPrepTaskBlock(t, ti) {
+  let body = '';
+
+  if (t.task_id === 'orales-1') {
+    // Both options as visible (non-interactive) cards so candidate can choose mentally
+    body += `<div class="prep-hint">Cuando empieces a grabar, elegirás UNA de estas dos opciones:</div>`;
+    body += `<div class="prep-option-cards">`;
+    t.prompts.forEach(p => {
+      body += `<div class="prep-option-card">
+        <div class="prep-option-label">
+          <span class="prep-option-letter">${esc(p.option_id)}</span>
+          <span>${esc(p.label || ('Opción ' + p.option_id))}</span>
+        </div>
+        <div class="prep-option-instruction">${esc(p.instruction)}</div>
+      </div>`;
+    });
+    body += `</div>`;
+    body += `<div class="prep-meta">⏱ Hablarás durante 2–3 minutos.</div>`;
+
+  } else if (t.task_id === 'orales-2') {
+    const p = t.prompts[0];
+    if (p.image_url) {
+      body += `<img class="prep-photo" src="${esc(p.image_url)}" alt="Foto para describir" loading="lazy">`;
+    }
+    body += `<div class="prep-bullet-block">${esc(p.instruction)}</div>`;
+    body += `<div class="prep-meta">⏱ Describirás la foto durante 1–2 minutos.</div>`;
+
+  } else if (t.task_id === 'orales-3') {
+    const ctx = t.examiner_script?.context || '';
+    const stages = t.examiner_script?.stages || [];
+    if (ctx) body += `<div class="prep-bullet-block">${esc(ctx)}</div>`;
+    body += `<div class="prep-stages-list">
+      <div class="prep-stages-title">Las 7 preguntas del examinador</div>`;
+    stages.forEach((s, i) => {
+      body += `<div class="prep-stage-row">
+        <div class="prep-stage-num">${i + 1}</div>
+        <div class="prep-stage-body">
+          <div class="prep-stage-label">${esc(s.label || '')}</div>
+          <div class="prep-stage-q">"${esc(s.examiner_question || '')}"</div>
+        </div>
+      </div>`;
+    });
+    body += `</div>`;
+    body += `<div class="prep-meta">⏱ Conversarás durante 3–4 minutos en total.</div>`;
+  }
+
+  return `<div class="prep-task">
+    <div class="prep-task-num">${ti + 1}</div>
+    <div class="prep-task-body">
+      <div class="prep-task-title">${esc(t.title)}</div>
+      ${t.instructions ? `<div class="prep-task-intro">${esc(t.instructions)}</div>` : ''}
+      ${body}
+    </div>
+  </div>`;
+}
+
+function endPrep() {
+  if (prepInterval) clearInterval(prepInterval);
+  document.getElementById('topbarPrep').classList.remove('visible');
+  // Mark prep as ended by setting startedAt to now - PREP_SECONDS (so future loads see it as done)
+  localStorage.setItem(PREP_KEY(), String(Date.now() - PREP_SECONDS * 1000 - 1000));
+  setPhase('task1');
+}
+
+// ─── Stepper ────────────────────────────────────────────────────────────────
+function renderStepper() {
+  const steps = [
+    { key: 'task1',  num: '1', label: 'Tarea 1' },
+    { key: 'task2',  num: '2', label: 'Tarea 2' },
+    { key: 'task3',  num: '3', label: 'Tarea 3' },
+    { key: 'review', num: '✓', label: 'Revisar' },
+  ];
+  const currentIdx = PHASE_INDEX[phase];
+  let html = '<div class="stepper">';
+  steps.forEach((s, i) => {
+    const stepIdx = PHASE_INDEX[s.key];
+    let cls = 'step';
+    let circleContent = s.num;
+    if (stepIdx === currentIdx) cls += ' active';
+    else if (stepIdx < currentIdx) {
+      // Past step — done if it has content (or is review with all content), else just visited
+      if (s.key === 'review') cls += ' visited';
+      else if (hasTaskContent(examData.tasks[stepIdx - 1].task_id)) {
+        cls += ' done';
+        circleContent = '✓';
+      } else cls += ' visited';
+    }
+    if (stepIdx <= furthestPhaseIdx && stepIdx !== currentIdx) cls += ' clickable';
+
+    const onclick = (stepIdx <= furthestPhaseIdx && stepIdx !== currentIdx)
+      ? ` onclick="navJumpTo('${s.key}')"` : '';
+    html += `<div class="${cls}"${onclick}>
+      <div class="step-circle">${circleContent}</div>
+      <div class="step-label">${s.label}</div>
+    </div>`;
+    if (i < steps.length - 1) {
+      const dividerCls = stepIdx < currentIdx ? 'step-divider done' : 'step-divider';
+      html += `<div class="${dividerCls}"></div>`;
+    }
+  });
+  html += '</div>';
+  return html;
+}
+
+// ─── Task screen (one task at a time) ───────────────────────────────────────
+function renderTaskScreen(taskIdx) {
+  const wrap = document.getElementById('examContent');
+  const task = examData.tasks[taskIdx];
+  if (!task) { wrap.innerHTML = ''; return; }
+
   let html = '';
 
-  examData.tasks.forEach((task, ti) => {
-    const hasImage = task.content?.image;
-    html += `<div class="task-card">
-      <div class="task-header">
-        <div class="task-num">${ti + 1}</div>
-        <div class="task-title">${DELE.escapeHtml(task.title)}</div>
-      </div>
-      <div class="prompt-card">${DELE.escapeHtml(task.instructions || task.prompt || '')}</div>`;
-
-    if (hasImage) {
-      html += `<img class="task-image" src="${task.content.image}" alt="Bild att beskriva" loading="lazy">`;
-    }
-
-    html += `<div class="guidance">Tips: Habla con claridad y en oraciones completas. Intenta usar un vocabulario variado.</div>
-      <div class="rec-area" id="recArea${ti}">
-        <button class="rec-btn idle" id="recBtn${ti}" onclick="toggleRecording('${task.task_id}', ${ti})">🎤</button>
-        <div class="rec-label" id="recLabel${ti}">Haz clic para empezar a grabar</div>
-        <div class="rec-timer" id="recTimer${ti}" style="display:none">0:00</div>
-        <div class="playback" id="playback${ti}" style="display:none"></div>
-      </div>
-      <div class="text-fallback">
-        <button class="text-fallback-toggle" onclick="toggleFallback(${ti})">¿No puedes grabar? Escribe tu respuesta en su lugar</button>
-        <div class="text-fallback-area" id="fallbackArea${ti}">
-          <textarea class="text-fallback-input" id="fallbackText${ti}" placeholder="Escribe tu respuesta aquí…" oninput="onFallbackInput()"></textarea>
-          <div class="text-fallback-note">Tu respuesta escrita se evalúa si no haces una grabación.</div>
-        </div>
-      </div>
+  if (micPermissionDenied) {
+    html += `<div class="mic-banner visible">
+      ⚠️ No se puede acceder al micrófono. Pulsa el botón rojo para conceder permiso. Si tu navegador no permite grabar, usa la opción "Escribir en lugar de grabar" al final de la tarea.
     </div>`;
-  });
+  }
+
+  html += renderTaskCard(task, taskIdx);
+  html += renderTaskNav(taskIdx);
 
   wrap.innerHTML = html;
 }
 
-async function toggleRecording(taskId, idx) {
+function renderTaskNav(taskIdx) {
+  const isFirst = taskIdx === 0;
+  const isLast  = taskIdx === examData.tasks.length - 1;
+  const nextLabel = isLast ? 'Revisar y enviar →' : 'Siguiente tarea →';
+  const nextCls   = isLast ? 'task-nav-btn review-jump' : 'task-nav-btn next';
+
+  return `<div class="task-nav">
+    <button class="task-nav-btn" onclick="navPrev()" ${isFirst ? 'disabled' : ''}>← Tarea anterior</button>
+    <div class="task-nav-spacer"></div>
+    <button class="${nextCls}" onclick="navNext()">${nextLabel}</button>
+  </div>`;
+}
+
+function hasTaskContent(taskId) {
+  if (recordings[taskId]?.blob) return true;
+  if ((fallbackText[taskId] || '').trim().length >= 10) return true;
+  return false;
+}
+
+function renderTaskCard(task, ti) {
+  const hasContent = hasTaskContent(task.task_id);
+
+  const statusHtml = hasContent
+    ? `<span class="task-status done">✓ Completada</span>`
+    : '';
+
+  let body = '';
+  if (task.task_id === 'orales-1') body = renderTaskOne(task);
+  else if (task.task_id === 'orales-2') body = renderTaskTwo(task);
+  else if (task.task_id === 'orales-3') body = renderTaskThree(task);
+  else body = `<div style="color:var(--fail)">Tipo de tarea desconocido: ${esc(task.task_id)}</div>`;
+
+  return `<div class="task-card" data-task-id="${esc(task.task_id)}">
+    <div class="task-header">
+      <div class="task-num">${ti + 1}</div>
+      <div class="task-title">${esc(task.title)}</div>
+      ${statusHtml}
+    </div>
+    ${task.instructions ? `<div class="task-instructions">${esc(task.instructions)}</div>` : ''}
+    ${body}
+  </div>`;
+}
+
+// ─── Review phase ───────────────────────────────────────────────────────────
+function renderReview() {
+  const wrap = document.getElementById('examContent');
+  const total = examData.tasks.length;
+  const recordedCount = examData.tasks.filter(t => recordings[t.task_id]?.blob).length;
+  const fallbackCount = examData.tasks.filter(t => !recordings[t.task_id]?.blob && (fallbackText[t.task_id] || '').trim().length >= 10).length;
+  const filledCount   = recordedCount + fallbackCount;
+  const emptyCount    = total - filledCount;
+
+  let html = `<div class="review-intro">
+    <div class="review-intro-title">Revisa tus respuestas antes de enviar</div>
+    <div class="review-intro-body">
+      Escucha tus grabaciones y comprueba que estás contento con cada una. Puedes volver a cualquier tarea para grabar de nuevo. Cuando estés listo, pulsa <strong>Enviar</strong> — la transcripción y evaluación por IA se harán en unos minutos.
+    </div>
+  </div>`;
+
+  examData.tasks.forEach((t, ti) => {
+    html += renderReviewCard(t, ti);
+  });
+
+  let warnLine = '';
+  if (emptyCount > 0) {
+    warnLine = `<div style="font-size:0.84rem;color:var(--fail);margin-top:6px">
+      ⚠️ Tienes ${emptyCount} tarea${emptyCount === 1 ? ' sin respuesta' : 's sin respuesta'} — recibirás 0 puntos en esa${emptyCount === 1 ? '' : 's'} tarea${emptyCount === 1 ? '' : 's'}.
+    </div>`;
+  }
+
+  html += `<div class="review-submit-row">
+    <div>
+      <div style="font-size:0.86rem;color:var(--muted)">${filledCount} de ${total} tareas con respuesta</div>
+      ${warnLine}
+    </div>
+    <button class="review-submit" id="reviewSubmitBtn" onclick="handleSubmit()" ${filledCount === 0 ? 'disabled' : ''}>
+      Enviar expresión oral
+    </button>
+  </div>`;
+
+  wrap.innerHTML = html;
+}
+
+function renderReviewCard(task, ti) {
+  const r = recordings[task.task_id];
+  const fb = (fallbackText[task.task_id] || '').trim();
+  const hasContent = !!r?.blob || fb.length >= 10;
+  const cardCls = `review-card${hasContent ? '' : ' empty'}`;
+
+  let bodyHtml = '';
+  let metaText = '';
+
+  if (r?.blob) {
+    const url = r.blobUrl || URL.createObjectURL(r.blob);
+    if (!r.blobUrl) r.blobUrl = url;
+    const opt = r.chosenOption !== 'single' ? ` · Opción ${esc(r.chosenOption)}` : '';
+    metaText = `Grabación de ${fmtTime(r.durationSec)}${opt}`;
+    bodyHtml = `<audio class="review-card-audio" controls src="${url}"></audio>`;
+  } else if (fb.length >= 10) {
+    const wc = fb.split(/\s+/).filter(Boolean).length;
+    metaText = `Respuesta escrita · ${wc} palabra${wc === 1 ? '' : 's'}`;
+    bodyHtml = `<div class="review-card-text">${esc(fb)}</div>`;
+  } else {
+    metaText = 'Sin respuesta';
+  }
+
+  const phaseKey = `task${ti + 1}`;
+  const actionLabel = hasContent ? '↺ Volver a grabar' : '✏ Grabar ahora';
+  const actionCls   = hasContent ? 'review-action-btn' : 'review-action-btn primary';
+
+  const emptyMsg = !hasContent
+    ? `<div class="review-card-empty-msg">Esta tarea quedará sin respuesta — recibirás 0 puntos.</div>`
+    : '';
+
+  return `<div class="${cardCls}">
+    <div class="review-card-num">${ti + 1}</div>
+    <div class="review-card-body">
+      <div class="review-card-title">${esc(task.title)}</div>
+      <div class="review-card-meta">${esc(metaText)}</div>
+      ${emptyMsg}
+      ${bodyHtml}
+      <div class="review-card-actions">
+        <button class="${actionCls}" onclick="navJumpTo('${phaseKey}')">${actionLabel}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── T1: Monólogo with chooser ──────────────────────────────────────────────
+function renderTaskOne(task) {
+  const limit = SPEAKING_LIMIT['orales-1'];
+  let html = `<div class="option-cards">`;
+  task.prompts.forEach(p => {
+    const isSelected = chosenT1 === p.option_id;
+    const isLocked   = chosenT1 && !isSelected;
+    const cls = `option-card${isSelected ? ' selected' : ''}${isLocked ? ' locked' : ''}`;
+    const pickLabel = isSelected ? '✓ Opción elegida' : (isLocked ? 'Cambiar a esta opción' : 'Elegir esta opción');
+    html += `<div class="${cls}"
+      data-option-id="${esc(p.option_id)}"
+      onclick="chooseT1Option('${esc(p.option_id)}')">
+      <div class="option-card-label">
+        <span class="option-card-letter">${esc(p.option_id)}</span>
+        <span>${esc(p.label || ('Opción ' + p.option_id))}</span>
+      </div>
+      <div class="option-card-body">${esc(p.instruction)}</div>
+      <div class="option-card-pick">${pickLabel}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  if (chosenT1) {
+    const chosen = task.prompts.find(p => p.option_id === chosenT1);
+    html += `<div class="bullet-instruction">${esc(chosen.instruction)}</div>`;
+    html += renderRecorderArea(task.task_id, limit);
+    html += renderTextFallback(task.task_id);
+  } else {
+    html += `<div style="text-align:center;padding:18px;background:#fafaf8;border:1.5px dashed var(--border);border-radius:10px;color:var(--muted);font-size:0.86rem">
+      Elige una de las dos opciones para empezar a grabar.
+    </div>`;
+  }
+
+  return html;
+}
+
+function chooseT1Option(optionId) {
+  if (submitted) return;
+  if (chosenT1 === optionId) return;
+
+  // If switching while a recording exists, warn
+  if (chosenT1 && recordings['orales-1']?.blob) {
+    const prevLabel = chosenT1;
+    if (!confirm(`¿Cambiar a Opción ${optionId}? Tu grabación de Opción ${prevLabel} se borrará.`)) return;
+    deleteRecording('orales-1', { silent: true });
+  }
+
+  chosenT1 = optionId;
+  rerenderTask('orales-1');
+  updateProgress();
+}
+
+// ─── T2: Photo description ──────────────────────────────────────────────────
+function renderTaskTwo(task) {
+  const limit = SPEAKING_LIMIT['orales-2'];
+  const p = task.prompts[0];
+  let html = '';
+  if (p.image_url) {
+    html += `<img class="task-photo" src="${esc(p.image_url)}" alt="Foto para describir" loading="lazy">`;
+  }
+  html += `<div class="bullet-instruction">${esc(p.instruction)}</div>`;
+  html += renderRecorderArea(task.task_id, limit);
+  html += renderTextFallback(task.task_id);
+  return html;
+}
+
+// ─── T3: Stage-by-stage dialogue ────────────────────────────────────────────
+function renderTaskThree(task) {
+  const stages = task.examiner_script?.stages || [];
+  const total = stages.length;
+  const limit = SPEAKING_LIMIT['orales-3'];
+  const stage = stages[t3Stage] || stages[0];
+
+  // Stage pill row
+  const pillsHtml = stages.map((_, i) => {
+    let cls = 'stage-pill';
+    if (i === t3Stage) cls += ' active';
+    else if (i < t3StagesVisited) cls += ' visited';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+
+  let html = `<div class="stage-nav">
+    <div class="stage-pills">${pillsHtml}</div>
+    <div class="stage-current">Etapa ${t3Stage + 1} de ${total} — ${esc(stage.label || '')}</div>
+    <div class="stage-question">"${esc(stage.examiner_question || '')}"</div>
+    <div class="stage-controls">
+      <button class="stage-btn" onclick="t3PrevStage()" ${t3Stage === 0 ? 'disabled' : ''}>← Anterior</button>
+      ${t3Stage < total - 1
+        ? `<button class="stage-btn next" onclick="t3NextStage()">Siguiente etapa →</button>`
+        : `<button class="stage-btn finish" onclick="t3FinishStages()">✓ Última etapa</button>`}
+    </div>
+  </div>`;
+
+  html += `<div style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;line-height:1.55">
+    Pulsa el micrófono para empezar a grabar la conversación. La grabación continúa mientras avanzas por las 7 etapas — no se detiene al cambiar de etapa. Pulsa "Detener" cuando termines la última etapa.
+  </div>`;
+  html += renderRecorderArea(task.task_id, limit);
+  html += renderTextFallback(task.task_id);
+  return html;
+}
+
+function t3NextStage() {
+  if (submitted) return;
+  const total = examData.tasks.find(t => t.task_id === 'orales-3').examiner_script.stages.length;
+  if (t3Stage < total - 1) {
+    t3Stage++;
+    if (t3Stage > t3StagesVisited) t3StagesVisited = t3Stage;
+    rerenderTask('orales-3');
+  }
+}
+function t3PrevStage() {
+  if (submitted) return;
+  if (t3Stage > 0) { t3Stage--; rerenderTask('orales-3'); }
+}
+function t3FinishStages() {
+  // Just mark visited; stays on stage 7. Candidate must still click Detener to stop recorder.
+  t3StagesVisited = examData.tasks.find(t => t.task_id === 'orales-3').examiner_script.stages.length;
+  rerenderTask('orales-3');
+  if (activeTaskId === 'orales-3') {
+    DELE.toast('Cuando termines, pulsa Detener para finalizar la grabación.');
+  }
+}
+
+// ─── Recorder area (shared T1/T2/T3) ────────────────────────────────────────
+function renderRecorderArea(taskId, limitSecs) {
+  const r = recordings[taskId];
+  const isActive = activeTaskId === taskId && activeRecorder?.state === 'recording';
+
+  let btnCls = 'rec-btn idle', btnIcon = '🎤', label = 'Pulsa para empezar a grabar';
+  if (isActive) {
+    btnCls = 'rec-btn recording'; btnIcon = '⏹'; label = 'Grabando… pulsa para detener';
+  } else if (r?.blob) {
+    btnCls = 'rec-btn done'; btnIcon = '🎤'; label = `Grabado (${fmtTime(r.durationSec)}) — pulsa para grabar de nuevo`;
+  }
+
+  let html = `<div class="rec-area">
+    <button class="${btnCls}" id="recBtn-${esc(taskId)}" onclick="toggleRecording('${esc(taskId)}')">${btnIcon}</button>
+    <div class="rec-label" id="recLabel-${esc(taskId)}">${esc(label)}</div>
+    <div class="rec-timer ${isActive ? 'visible' : ''}" id="recTimer-${esc(taskId)}">
+      <span id="recTimerText-${esc(taskId)}">${isActive ? fmtTime((Date.now() - recStartedAt) / 1000) : '0:00'}</span><span class="rec-timer-max"> / ${fmtTime(limitSecs)}</span>
+    </div>`;
+
+  if (r?.blob && !isActive) {
+    const url = r.blobUrl || URL.createObjectURL(r.blob);
+    if (!r.blobUrl) r.blobUrl = url;
+    html += `<div class="playback">
+      <audio controls src="${url}"></audio>
+      <button class="playback-btn danger" onclick="deleteRecording('${esc(taskId)}')">✕ Borrar</button>
+    </div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function rerenderTask(taskId) {
+  // In phase-focused mode the task being shown is implied by `phase`. Re-render
+  // just that task screen if it's the active one. Also refresh the stepper so
+  // the "done" badge appears once content is captured.
+  const ti = examData.tasks.findIndex(t => t.task_id === taskId);
+  if (ti < 0) return;
+  const expectedPhase = `task${ti + 1}`;
+  if (phase !== expectedPhase) return;   // user has navigated away
+  const task = examData.tasks[ti];
+  const card = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+  if (card) card.outerHTML = renderTaskCard(task, ti);
+  // Stepper may need updating because hasTaskContent for this task may have changed
+  const stepperWrap = document.getElementById('stepperWrap');
+  if (stepperWrap) stepperWrap.innerHTML = renderStepper();
+}
+
+// ─── Recorder primitives ────────────────────────────────────────────────────
+async function toggleRecording(taskId) {
   if (submitted) return;
 
-  // If currently recording this task → stop
-  if (activeRecorder && activeTaskId === taskId) {
+  // Currently recording this task → stop
+  if (activeTaskId === taskId && activeRecorder?.state === 'recording') {
     activeRecorder.stop();
     return;
   }
 
-  // If recording another task → stop first
-  if (activeRecorder) {
+  // Currently recording a DIFFERENT task → stop it first
+  if (activeRecorder?.state === 'recording') {
     activeRecorder.stop();
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 150));
   }
 
-  // Start recording
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
-    const recorder = new MediaRecorder(stream, { mimeType });
-    const chunks = [];
-
-    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-    recorder.onstop = async () => {
-      stream.getTracks().forEach(t => t.stop());
-      clearInterval(recTimerInterval);
-
-      const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
-      const duration = (Date.now() - recStartTime) / 1000;
-
-      recordings[taskId] = { blob, duration };
-
-      // Show playback
-      const url = URL.createObjectURL(blob);
-      document.getElementById(`playback${idx}`).innerHTML = `<audio controls src="${url}"></audio>`;
-      document.getElementById(`playback${idx}`).style.display = 'block';
-
-      // Update button
-      const btn = document.getElementById(`recBtn${idx}`);
-      btn.className = 'rec-btn idle';
-      btn.textContent = '🎤';
-      document.getElementById(`recLabel${idx}`).textContent = `Grabado (${Math.round(duration)}s) — haz clic para grabar de nuevo`;
-      document.getElementById(`recTimer${idx}`).style.display = 'none';
-
-      // Enable submit if at least one recording
-      document.getElementById('submitBtn').disabled = Object.keys(recordings).length === 0;
-
-      activeRecorder = null;
-      activeTaskId = null;
-    };
-
-    recorder.start();
-    activeRecorder = recorder;
-    activeTaskId = taskId;
-    recStartTime = Date.now();
-
-    const btn = document.getElementById(`recBtn${idx}`);
-    btn.className = 'rec-btn recording';
-    btn.textContent = '⏹';
-    document.getElementById(`recLabel${idx}`).textContent = 'Grabando… Haz clic para detener';
-    document.getElementById(`recTimer${idx}`).style.display = 'block';
-
-    recTimerInterval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - recStartTime) / 1000);
-      const m = Math.floor(elapsed / 60);
-      const s = elapsed % 60;
-      document.getElementById(`recTimer${idx}`).textContent = `${m}:${String(s).padStart(2, '0')}`;
-    }, 500);
-
-  } catch (err) {
-    DELE.toast('No se pudo acceder al micrófono. Comprueba tus ajustes.');
-    console.error('Mic error:', err);
-  }
+  await startRecording(taskId);
 }
 
-function toggleFallback(idx) {
-  const area = document.getElementById(`fallbackArea${idx}`);
+function getSupportedMime() {
+  const types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
+  for (const t of types) {
+    if (window.MediaRecorder?.isTypeSupported && MediaRecorder.isTypeSupported(t)) return t;
+  }
+  return '';
+}
+
+async function startRecording(taskId) {
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    micPermissionDenied = false;
+  } catch (err) {
+    micPermissionDenied = true;
+    if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError') {
+      DELE.toast('Permiso de micrófono denegado. Usa "Escribir en lugar de grabar" más abajo.');
+    } else {
+      DELE.toast('No se pudo acceder al micrófono. Comprueba la configuración del navegador.');
+    }
+    rerenderTask(taskId);
+    return;
+  }
+
+  const mime = getSupportedMime();
+  const opts = mime ? { mimeType: mime, audioBitsPerSecond: 16000 } : { audioBitsPerSecond: 16000 };
+  let recorder;
+  try {
+    recorder = new MediaRecorder(stream, opts);
+  } catch (err) {
+    console.warn('[orales] MediaRecorder construct failed, retrying default:', err.message);
+    recorder = new MediaRecorder(stream);
+  }
+
+  activeChunks = [];
+  recorder.ondataavailable = e => { if (e.data?.size > 0) activeChunks.push(e.data); };
+  recorder.onstop = () => onRecordingStopped(taskId);
+
+  activeRecorder = recorder;
+  activeStream   = stream;
+  activeTaskId   = taskId;
+  recStartedAt   = Date.now();
+  recorder.start(100);   // 100ms chunks for reliability (PD3 pattern)
+
+  // Hard-stop timer
+  const limit = SPEAKING_LIMIT[taskId] || 180;
+  if (hardStopTimer) clearTimeout(hardStopTimer);
+  hardStopTimer = setTimeout(() => {
+    if (activeTaskId === taskId && activeRecorder?.state === 'recording') {
+      DELE.toast(`Tiempo de ${taskTitleFor(taskId)} agotado.`);
+      activeRecorder.stop();
+    }
+  }, limit * 1000);
+
+  rerenderTask(taskId);
+  startRecTick(taskId, limit);
+}
+
+function startRecTick(taskId, limitSecs) {
+  if (recTickInterval) clearInterval(recTickInterval);
+  recTickInterval = setInterval(() => {
+    const elapsed = (Date.now() - recStartedAt) / 1000;
+    const el = document.getElementById(`recTimerText-${taskId}`);
+    if (el) el.textContent = fmtTime(elapsed);
+    // Color shift when approaching limit
+    if (elapsed >= limitSecs - 10) {
+      const t = document.getElementById(`recTimer-${taskId}`);
+      if (t) t.style.color = 'var(--red)';
+    }
+  }, 250);
+}
+
+function onRecordingStopped(taskId) {
+  // Release stream
+  if (activeStream) {
+    activeStream.getTracks().forEach(t => t.stop());
+    activeStream = null;
+  }
+
+  if (recTickInterval) { clearInterval(recTickInterval); recTickInterval = null; }
+  if (hardStopTimer)   { clearTimeout(hardStopTimer); hardStopTimer = null; }
+
+  const blob = new Blob(activeChunks, { type: activeRecorder?.mimeType || 'audio/webm' });
+  const durationSec = (Date.now() - recStartedAt) / 1000;
+
+  // Capture chosen_option for T1 (for T2/T3 it's 'single')
+  let chosenOption = 'single';
+  if (taskId === 'orales-1' && chosenT1) chosenOption = chosenT1;
+
+  recordings[taskId] = {
+    blob,
+    durationSec,
+    mimeType: activeRecorder?.mimeType || 'audio/webm',
+    chosenOption,
+    blobUrl: URL.createObjectURL(blob),
+  };
+
+  activeRecorder = null;
+  activeTaskId   = null;
+  activeChunks   = [];
+
+  rerenderTask(taskId);
+  updateProgress();
+}
+
+function deleteRecording(taskId, opts = {}) {
+  if (submitted) return;
+  if (!recordings[taskId]) return;
+  if (!opts.silent && !confirm('¿Borrar esta grabación? Podrás grabar de nuevo.')) return;
+
+  if (recordings[taskId].blobUrl) URL.revokeObjectURL(recordings[taskId].blobUrl);
+  delete recordings[taskId];
+  rerenderTask(taskId);
+  updateProgress();
+}
+
+function taskTitleFor(taskId) {
+  return examData.tasks.find(t => t.task_id === taskId)?.title || taskId;
+}
+
+// ─── Text fallback ──────────────────────────────────────────────────────────
+function renderTextFallback(taskId) {
+  const isOpen = (fallbackText[taskId] || '').length > 0;
+  const text = fallbackText[taskId] || '';
+  return `<div class="text-fallback">
+    <button class="text-fallback-toggle" onclick="toggleFallback('${esc(taskId)}')">📝 ¿No puedes grabar? Escribe tu respuesta</button>
+    <div class="text-fallback-area${isOpen ? ' visible' : ''}" id="fallbackArea-${esc(taskId)}">
+      <textarea class="text-fallback-input" id="fallbackInput-${esc(taskId)}"
+        placeholder="Escribe aquí lo que dirías…"
+        oninput="onFallbackInput('${esc(taskId)}')">${esc(text)}</textarea>
+      <div class="text-fallback-note">Si no grabas audio, tu texto se evaluará en su lugar. La grabación es la mejor opción de práctica.</div>
+    </div>
+  </div>`;
+}
+
+function toggleFallback(taskId) {
+  const area = document.getElementById(`fallbackArea-${taskId}`);
+  if (!area) return;
   area.classList.toggle('visible');
   if (area.classList.contains('visible')) {
-    document.getElementById(`fallbackText${idx}`).focus();
+    setTimeout(() => document.getElementById(`fallbackInput-${taskId}`)?.focus(), 50);
   }
 }
 
-function onFallbackInput() {
-  // Enable submit if any recording OR any fallback text exists
-  const hasRecording = Object.keys(recordings).length > 0;
-  const hasFallback = examData.tasks.some((_, ti) => {
-    const el = document.getElementById(`fallbackText${ti}`);
-    return el && el.value.trim().length > 5;
-  });
-  document.getElementById('submitBtn').disabled = !hasRecording && !hasFallback;
+function onFallbackInput(taskId) {
+  const el = document.getElementById(`fallbackInput-${taskId}`);
+  if (!el) return;
+  fallbackText[taskId] = el.value;
+  // Refresh stepper so "done" badge updates if content threshold crossed
+  const stepperWrap = document.getElementById('stepperWrap');
+  if (stepperWrap && phase !== 'prep') stepperWrap.innerHTML = renderStepper();
+  updateProgress();
 }
 
-function getTextFallbacks() {
-  const fallbacks = {};
-  examData.tasks.forEach((task, ti) => {
-    const el = document.getElementById(`fallbackText${ti}`);
-    if (el && el.value.trim().length > 0 && !recordings[task.task_id]) {
-      fallbacks[task.task_id] = el.value.trim();
-    }
-  });
-  return fallbacks;
+// ─── Progress text (bottom bar) ─────────────────────────────────────────────
+function updateProgress() {
+  const el = document.getElementById('progressText');
+  if (!el) return;
+  if (phase === 'prep') {
+    el.textContent = 'Tiempo de preparación';
+  } else if (phase === 'review') {
+    const total = examData?.tasks?.length || 0;
+    let done = 0;
+    examData.tasks.forEach(t => { if (hasTaskContent(t.task_id)) done++; });
+    el.textContent = `Revisar y enviar — ${done} de ${total} tarea${total === 1 ? '' : 's'}`;
+  } else if (phase in TASK_BY_PHASE) {
+    const ti = TASK_BY_PHASE[phase];
+    el.textContent = `Tarea ${ti + 1} de ${examData?.tasks?.length || 3}`;
+  } else {
+    el.textContent = '';
+  }
 }
 
+// ─── Submit ─────────────────────────────────────────────────────────────────
 async function handleSubmit() {
   if (submitted) return;
-
-  const textFallbacks = getTextFallbacks();
-  const hasRecording = Object.keys(recordings).length > 0;
-  const hasFallback = Object.keys(textFallbacks).length > 0;
-
-  if (!hasRecording && !hasFallback) {
-    DELE.toast('Grabar eller skriv minst ett respuestas innan tú skickar in.');
+  if (activeRecorder?.state === 'recording') {
+    DELE.toast('Detén la grabación antes de enviar.');
     return;
   }
 
-  if (!confirm('Quiere tú enviar in? Tus respuestas serán evaluadas por IA.')) return;
-
-  submitted = true;
-  document.getElementById('submitBtn').disabled = true;
-  document.getElementById('submitBtn').textContent = 'Enviando…';
-  document.querySelectorAll('.rec-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
-  document.querySelectorAll('.text-fallback-input').forEach(t => { t.disabled = true; });
-
-  const taskEntries = examData.tasks.map(t => ({
-    task_id: t.task_id,
-    title: t.title,
-    prompt: t.instructions || t.prompt || '',
-    has_recording: !!recordings[t.task_id],
-    has_text_fallback: !!textFallbacks[t.task_id],
-    duration: recordings[t.task_id]?.duration || 0,
-  }));
-
-  try {
-    if (hasRecording) {
-      // Merge all blobs in task order
-      const orderedBlobs = examData.tasks
-        .filter(t => recordings[t.task_id])
-        .map(t => recordings[t.task_id].blob);
-
-      const combinedBlob = new Blob(orderedBlobs, { type: orderedBlobs[0]?.type || 'audio/webm' });
-
-      document.getElementById('submitBtn').textContent = 'Cargando upp…';
-
-      await DELE.submitAudio({
-        attemptId, elemKey: 'orales',
-        audioBlob: combinedBlob,
-        responseJson: {
-          tasks: taskEntries,
-          text_responses: hasFallback ? textFallbacks : undefined,
-          total_recordings: Object.keys(recordings).length,
-          total_duration: Object.values(recordings).reduce((s, r) => s + r.duration, 0),
-        }
-      });
-    } else {
-      // Text-only submission (no audio at all)
-      await DELE.submit({
-        attemptId, elemKey: 'orales',
-        text: Object.values(textFallbacks).join('\n\n---\n\n'),
-        json: {
-          tasks: taskEntries,
-          text_responses: textFallbacks,
-          text_only: true,
-        }
-      });
-    }
-  } catch (err) {
-    console.error('Submit error:', err);
+  // Validate at least one task has content
+  const filled = examData.tasks.filter(t => hasTaskContent(t.task_id)).length;
+  if (filled === 0) {
+    DELE.toast('Graba o escribe al menos una respuesta antes de enviar.');
+    return;
   }
 
-  // Redirect immediately — AI evaluation happens in background
-  window.location.href = `/dele/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
+  submitted = true;
+  phase = 'done';
+  const reviewBtn = document.getElementById('reviewSubmitBtn');
+  if (reviewBtn) {
+    reviewBtn.disabled = true;
+    reviewBtn.textContent = 'Subiendo grabaciones…';
+  }
+  document.querySelectorAll('.review-action-btn, .step.clickable, .task-nav-btn')
+    .forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '0.5'; });
+
+  showEvalBanner();
+
+  try {
+    // 1) Parallel uploads of all recorded blobs
+    const uploadPromises = examData.tasks.map(async (t) => {
+      const r = recordings[t.task_id];
+      if (!r?.blob) return null;
+      const ext = (r.mimeType || '').includes('mp4') ? 'mp4'
+                 : (r.mimeType || '').includes('ogg') ? 'ogg' : 'webm';
+      const suffix = `${t.task_id}.${ext}`;
+      const path = await DELE.uploadAudio({ attemptId, blob: r.blob, suffix });
+      return { task_id: t.task_id, path, durationSec: r.durationSec, chosenOption: r.chosenOption, mimeType: r.mimeType };
+    });
+    const uploadResults = await Promise.all(uploadPromises);
+
+    // 2) Build response_json
+    const tasksPayload = examData.tasks.map(t => {
+      const ur = uploadResults.find(u => u && u.task_id === t.task_id);
+      const fb = (fallbackText[t.task_id] || '').trim();
+      const entry = { task_id: t.task_id };
+      if (ur) {
+        entry.chosen_option       = ur.chosenOption || 'single';
+        entry.audio_storage_path  = ur.path;
+        entry.duration_sec        = Math.round(ur.durationSec * 10) / 10;
+        entry.mime_type           = ur.mimeType || 'audio/webm';
+        if (t.task_id === 'orales-3') {
+          entry.stages_visited = t3StagesVisited;
+          entry.stages_total   = t.examiner_script?.stages?.length || 7;
+        }
+      } else if (fb.length >= 10) {
+        entry.chosen_option = (t.task_id === 'orales-1' && chosenT1) ? chosenT1 : 'single';
+        entry.text_response = fb;
+        entry.word_count    = fb.split(/\s+/).filter(Boolean).length;
+      } else {
+        entry.skipped = true;
+      }
+      return entry;
+    });
+
+    const audioCount = tasksPayload.filter(t => t.audio_storage_path).length;
+    const fallbackTexts = {};
+    tasksPayload.forEach(t => { if (t.text_response) fallbackTexts[t.task_id] = t.text_response; });
+
+    const responseJson = {
+      tasks: tasksPayload,
+      total_audio_clips: audioCount,
+      total_duration_sec: Math.round(uploadResults.filter(Boolean).reduce((s, u) => s + (u?.durationSec || 0), 0) * 10) / 10,
+      ...(audioCount === 0 && Object.keys(fallbackTexts).length > 0 ? { text_only: true, text_responses: fallbackTexts } : {}),
+    };
+
+    // For text-only fallback, populate response_text so dele-submit-element accepts it
+    const combinedText = audioCount === 0 && Object.keys(fallbackTexts).length > 0
+      ? Object.entries(fallbackTexts).map(([tid, txt]) => `[${tid}]\n${txt}`).join('\n\n---\n\n')
+      : '';
+
+    if (reviewBtn) reviewBtn.textContent = 'Enviando…';
+
+    await DELE.submit({
+      attemptId,
+      elemKey: 'orales',
+      text: combinedText,
+      json: responseJson,
+    });
+
+    // Clean up local prep timer key
+    try { localStorage.removeItem(PREP_KEY()); } catch (_) {}
+
+  } catch (err) {
+    console.error('[orales] submit error:', err);
+    DELE.toast('Hubo un problema al enviar. Tus grabaciones siguen guardadas en este dispositivo. Vuelve a intentarlo.');
+    submitted = false;
+    phase = 'review';
+    if (reviewBtn) {
+      reviewBtn.disabled = false;
+      reviewBtn.textContent = 'Enviar expresión oral';
+    }
+    document.querySelectorAll('.review-action-btn, .step.clickable, .task-nav-btn')
+      .forEach(b => { b.style.pointerEvents = ''; b.style.opacity = ''; });
+    const banner = document.querySelector('.eval-banner');
+    if (banner) banner.remove();
+    return;
+  }
+
+  document.getElementById('bottomBar').innerHTML = `
+    <div class="progress-text">Enviado — esperando evaluación</div>
+    <div class="btn-row">
+      <a class="btn btn-back" href="/dele/dashboard/exam.html?sim=${simId}&attempt=${attemptId}">← Volver al examen</a>
+    </div>`;
+}
+
+function showEvalBanner() {
+  const wrap = document.getElementById('examContent');
+  const banner = document.createElement('div');
+  banner.className = 'eval-banner';
+  banner.innerHTML = `
+    <div class="eval-banner-icon">🎤</div>
+    <div class="eval-banner-title">Tus grabaciones se están enviando y evaluando</div>
+    <div class="eval-banner-body">La transcripción y evaluación por IA pueden tardar unos minutos. Puedes volver al examen y consultar el estado más tarde — recibirás puntuación y comentarios detallados.</div>`;
+  wrap.prepend(banner);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function handleSkip() {
   if (submitted) return;
-  if (!confirm('¿Quieres saltar la expresión oral? Recibirás 0 puntos.')) return;
+  if (!confirm('¿Quieres saltar la expresión oral? Recibirás 0 puntos en esta sección.')) return;
+  if (activeRecorder?.state === 'recording') activeRecorder.stop();
   try { await DELE.skip({ attemptId, elemKey: 'orales' }); } catch (e) {}
+  try { localStorage.removeItem(PREP_KEY()); } catch (_) {}
   window.location.href = `/dele/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
 }
+
+// Cleanup on tab close
+window.addEventListener('beforeunload', () => {
+  if (activeRecorder?.state === 'recording') {
+    try { activeRecorder.stop(); } catch (_) {}
+  }
+  if (activeStream) activeStream.getTracks().forEach(t => t.stop());
+});
 </script>
 </body>
 </html>

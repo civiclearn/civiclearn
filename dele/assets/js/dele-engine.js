@@ -121,6 +121,40 @@ window.DELE = (function () {
       return data;
     },
 
+    /**
+     * Upload a single audio blob to dele-audio storage and return the path.
+     * Use this for multi-clip flows (e.g. Orales: T1 + T2 + T3 each as separate blobs).
+     * Caller is responsible for calling DELE.submit() once with all paths in response_json.
+     *
+     * Path convention: ${userId}/${attemptId}/${suffix}
+     * Suffix examples: "orales-1.webm", "orales-2.webm", "orales-3.webm"
+     */
+    async uploadAudio({ attemptId, blob, suffix }) {
+      const token  = _user?.access_token || '';
+      const userId = _user?.id || '';
+      if (!token || !userId) throw new Error('Not authenticated');
+      if (!attemptId || !blob || !suffix) throw new Error('uploadAudio requires attemptId, blob, suffix');
+
+      const storagePath = `${userId}/${attemptId}/${suffix}`;
+      const storageUrl  = `${SUPABASE_URL}/storage/v1/object/dele-audio/${storagePath}`;
+
+      const res = await fetch(storageUrl, {
+        method:  'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type':  blob.type || 'audio/webm',
+          'x-upsert':      'true',
+        },
+        body: blob,
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error(`Audio upload failed ${res.status}: ${text}`);
+      }
+      return storagePath;
+    },
+
     async submitAudio({ attemptId, elemKey, audioBlob, responseJson }) {
       const token = _user?.access_token || '';
       const userId = _user?.id || '';

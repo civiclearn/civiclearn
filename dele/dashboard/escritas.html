@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DELE A2 — Expresión escrita</title>
+  <title>DELE A2 — Expresión e interacción escritas</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="/dele/assets/js/dele-auth.js"></script>
   <script src="/dele/assets/js/dele-engine.js?v=2"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{--brand:#AA151B;--brand-dim:#fce8ea;--yellow:#F1BF00;--navy:#0f172a;--muted:#64748b;--border:#e2e8f0;--surface:#fff;--bg:#f8f7f4;--pass:#166534;--pass-bg:#dcfce7;--amber:#92400e;--amber-bg:#fffbeb;--amber-border:#fde68a}
+    :root{--brand:#AA151B;--brand-dim:#fce8ea;--yellow:#F1BF00;--navy:#0f172a;--muted:#64748b;--border:#e2e8f0;--surface:#fff;--bg:#f8f7f4;--pass:#166534;--pass-bg:#dcfce7;--fail:#991b1b;--fail-bg:#fee2e2;--amber:#92400e;--amber-bg:#fffbeb;--amber-border:#fde68a}
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
 
+    /* Topbar — identical to lectura.html */
     .topbar{background:var(--navy);border-bottom:3px solid var(--brand);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
     .topbar-left{display:flex;align-items:center;gap:12px}
     .back-link{color:#64748b;text-decoration:none;font-size:0.8rem;display:flex;align-items:center;gap:5px}
@@ -21,50 +22,95 @@
     .topbar-title{font-size:0.9rem;font-weight:700;color:#fff}
     .topbar-flag{width:22px;height:16px;background:var(--brand);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0}
     .topbar-flag::before{content:'';position:absolute;top:4px;left:0;right:0;height:8px;background:var(--yellow)}
-    .wc-pill{background:#1e293b;border-radius:99px;padding:4px 12px;font-size:0.75rem;color:#94a3b8}
-    .wc-pill span{color:#fff;font-weight:600}
 
+    /* Loading */
     #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity 0.35s}
     #loading-overlay.hidden{opacity:0;pointer-events:none}
     .loading-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--brand);animation:spin 0.8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    .exam-wrap{max-width:820px;margin:0 auto;padding:28px 24px 80px}
+    .exam-wrap{max-width:820px;margin:0 auto;padding:28px 24px 90px}
 
+    /* Task card — same structure as lectura.html */
     .task-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:24px;margin-bottom:28px}
-    .task-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+    .task-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
     .task-num{width:32px;height:32px;border-radius:8px;background:var(--brand-dim);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0}
     .task-title{font-weight:700;font-size:1rem}
+    .task-instructions{font-size:0.84rem;color:var(--muted);line-height:1.55;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #f1f5f9}
 
-    .prompt-card{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:10px;padding:14px 16px;font-size:0.88rem;color:var(--amber);line-height:1.6;margin-bottom:16px}
-    .constraints{font-size:0.78rem;color:var(--muted);margin-bottom:12px}
+    /* Stimulus — the email/text the candidate reads (T1 only) */
+    .stimulus{background:#fafaf8;border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:18px;font-size:0.9rem;line-height:1.7;white-space:pre-line;color:var(--navy)}
 
-    .text-area{width:100%;min-height:150px;padding:14px 16px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.88rem;line-height:1.6;resize:vertical;color:var(--navy);background:var(--bg);transition:border-color 0.15s}
+    /* Bullet instruction block — what the candidate must write */
+    .bullet-instruction{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:0.88rem;color:var(--amber);line-height:1.65;white-space:pre-line}
+
+    /* Word-count constraint reminder */
+    .constraints{font-size:0.8rem;color:var(--muted);margin-bottom:10px;font-weight:500}
+
+    /* Textarea */
+    .text-area{width:100%;min-height:200px;padding:14px 16px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.92rem;line-height:1.65;resize:vertical;color:var(--navy);background:#fff;transition:border-color 0.15s}
     .text-area:focus{outline:none;border-color:var(--brand)}
-    .text-area.short{min-height:100px}
-    .text-area.long{min-height:200px}
+    .text-area:disabled{background:#fafaf8;color:var(--muted);cursor:not-allowed}
 
-    .word-count{display:flex;justify-content:flex-end;margin-top:6px;font-size:0.75rem;color:var(--muted)}
-    .word-count.ok{color:var(--pass)}
-    .word-count.over{color:#991b1b}
+    /* Word counter row */
+    .wc-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:0.78rem}
+    .wc-count{color:var(--muted)}
+    .wc-count.under{color:var(--amber)}
+    .wc-count.ok{color:var(--pass);font-weight:600}
+    .wc-count.over{color:var(--fail);font-weight:600}
+    .wc-saved{color:var(--muted);font-style:italic;opacity:0;transition:opacity 0.3s}
+    .wc-saved.visible{opacity:1}
 
+    /* T2 chooser — option cards strip */
+    .option-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+    .option-card{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;gap:10px}
+    .option-card:hover:not(.locked){border-color:#94a3b8;background:#fafaf8}
+    .option-card.selected{border-color:var(--brand);background:var(--brand-dim);box-shadow:0 0 0 1px var(--brand) inset}
+    .option-card.locked{opacity:0.55}
+    .option-card.locked:hover{opacity:0.75}
+    .option-card-label{font-weight:700;font-size:0.88rem;color:var(--navy);display:flex;align-items:center;gap:8px}
+    .option-card.selected .option-card-label{color:var(--brand)}
+    .option-card-letter{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;background:var(--brand-dim);color:var(--brand);font-weight:700;font-size:0.78rem;flex-shrink:0}
+    .option-card.selected .option-card-letter{background:var(--brand);color:#fff}
+    .option-card-body{font-size:0.82rem;line-height:1.6;color:var(--muted);white-space:pre-line}
+    .option-card-pick{font-size:0.78rem;font-weight:600;color:var(--muted);margin-top:auto;padding-top:6px;border-top:1px solid #f1f5f9}
+    .option-card.selected .option-card-pick{color:var(--brand)}
+
+    /* T2 prompt-not-chosen empty state */
+    .pick-prompt{padding:30px 20px;text-align:center;background:#fafaf8;border:1.5px dashed var(--border);border-radius:10px;color:var(--muted);font-size:0.86rem}
+
+    /* Bottom bar */
     .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;z-index:100}
     .progress-text{font-size:0.82rem;color:var(--muted);font-weight:500}
     .btn-row{display:flex;gap:10px}
-    .btn{padding:10px 24px;border-radius:8px;font-size:0.88rem;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity 0.15s}
+    .btn{padding:10px 24px;border-radius:8px;font-size:0.88rem;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity 0.15s;text-decoration:none;display:inline-block}
     .btn:hover{opacity:0.85}
     .btn-skip{background:#f1f5f9;color:var(--navy)}
     .btn-submit{background:var(--brand);color:#fff}
     .btn-submit:disabled{opacity:0.4;cursor:not-allowed}
+    .btn-back{background:var(--navy);color:#fff}
 
-    @media(max-width:600px){.exam-wrap{padding:20px 14px 80px}.task-card{padding:18px 16px}}
+    /* Evaluating banner — shown after submit */
+    .eval-banner{background:var(--surface);border:2px solid var(--amber-border);border-radius:14px;padding:24px;text-align:center;margin-bottom:24px}
+    .eval-banner-icon{font-size:1.6rem;margin-bottom:8px}
+    .eval-banner-title{font-size:1.05rem;font-weight:700;margin-bottom:6px;color:var(--amber)}
+    .eval-banner-body{font-size:0.86rem;color:var(--muted);line-height:1.55;max-width:520px;margin:0 auto}
+
+    @media(max-width:640px){
+      .exam-wrap{padding:20px 14px 90px}
+      .task-card{padding:18px 16px}
+      .stimulus{padding:14px 16px;font-size:0.88rem}
+      .bullet-instruction{padding:12px 14px;font-size:0.86rem}
+      .option-cards{grid-template-columns:1fr}
+      .text-area{min-height:180px;font-size:0.9rem}
+    }
   </style>
 </head>
 <body>
 
 <div id="loading-overlay">
   <div class="loading-spinner"></div>
-  <div style="font-size:0.9rem;color:var(--muted)">Cargando skrivuppgifter…</div>
+  <div style="font-size:0.9rem;color:var(--muted)">Cargando expresión escrita…</div>
 </div>
 
 <div class="topbar">
@@ -79,7 +125,7 @@
 <div class="exam-wrap" id="examContent"></div>
 
 <div class="bottom-bar" id="bottomBar">
-  <div class="progress-text" id="progressText">Escribe tus respuestas ovan</div>
+  <div class="progress-text" id="progressText">0 de 2 tareas con respuesta</div>
   <div class="btn-row">
     <button class="btn btn-skip" onclick="handleSkip()">Saltar</button>
     <button class="btn btn-submit" id="submitBtn" onclick="handleSubmit()" disabled>Enviar</button>
@@ -88,8 +134,31 @@
 
 <script>
 let simId, attemptId, user, examData;
-let submitted = false;
+let chosenOption = {};   // { task_id: option_id }   e.g. { 'escritas-1': 'single', 'escritas-2': 'A' }
+let responses    = {};   // { 'task_id__option_id': text }   keeps drafts per option for T2 switching
+let saveTimers   = {};
+let submitted    = false;
 
+// ─── Draft persistence ──────────────────────────────────────────────────────
+function draftKey(tid, oid) { return `dele:draft:${attemptId}:escritas:${tid}:${oid}`; }
+function respKey(tid, oid)  { return `${tid}__${oid}`; }
+
+function saveDraft(tid, oid, text) {
+  try { localStorage.setItem(draftKey(tid, oid), text); } catch (_) {}
+}
+function loadDraft(tid, oid) {
+  try { return localStorage.getItem(draftKey(tid, oid)) || ''; } catch (_) { return ''; }
+}
+function clearAllDrafts() {
+  if (!examData) return;
+  examData.tasks.forEach(t => {
+    t.prompts.forEach(p => {
+      try { localStorage.removeItem(draftKey(t.task_id, p.option_id)); } catch (_) {}
+    });
+  });
+}
+
+// ─── Init ───────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   const ctx = await DELE.init('escritas');
   user = ctx.user; simId = ctx.simId; attemptId = ctx.attemptId;
@@ -100,111 +169,336 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('examContent').innerHTML = `
       <div style="text-align:center;padding:60px 20px;">
         <div style="font-size:2rem;">✅</div>
-        <h2 style="margin:12px 0;">Expresión escrita ya enviada</h2>
-        <p style="color:var(--muted);">Tus respuestas son evaluadas por IA. Consulta los resultados en la vista general parte examen.</p>
-        <a href="/dele/dashboard/exam.html?sim=${simId}&attempt=${attemptId}" style="display:inline-block;margin-top:16px;color:var(--brand);font-weight:600;">← Volver al examen</a>
+        <h2 style="margin:12px 0;">Esta parte ya está enviada</h2>
+        <p style="color:var(--muted);">Tus textos están siendo evaluados o ya tienen resultado. Consulta la vista general del examen.</p>
+        <a href="/dele/dashboard/exam.html?sim=${simId}&attempt=${attemptId}"
+           style="display:inline-block;margin-top:16px;color:var(--brand);font-weight:600;">← Volver al examen</a>
       </div>`;
     document.getElementById('bottomBar').style.display = 'none';
-    DELE.hideLoading(); return;
+    DELE.hideLoading();
+    return;
   }
 
-  const simNum = ctx.simNum;
   const jsonPath = `/dele/data/${ctx.simId}-escritas.json`;
   try {
     const res = await fetch(jsonPath);
     if (!res.ok) throw new Error('JSON not found');
     examData = await res.json();
   } catch (err) {
-    DELE.showError(`No se pudieron cargar los datos parte examen: ${err.message}`, simId, attemptId);
+    DELE.showError(`No se pudieron cargar los datos del examen: ${err.message}`, simId, attemptId);
     return;
   }
 
+  // For single-prompt tasks (T1) auto-set chosen_option; for chooser tasks, leave undefined.
+  // Pre-populate response cache from any localStorage drafts so refresh-mid-typing doesn't lose work.
+  examData.tasks.forEach(t => {
+    if (t.prompts.length === 1) chosenOption[t.task_id] = t.prompts[0].option_id;
+    t.prompts.forEach(p => {
+      const cached = loadDraft(t.task_id, p.option_id);
+      if (cached) responses[respKey(t.task_id, p.option_id)] = cached;
+    });
+  });
+
+  // If a chooser task has a draft for one option only, auto-select that option so the candidate
+  // returns to where they were. If both have drafts, leave it un-chosen so they pick consciously.
+  examData.tasks.forEach(t => {
+    if (t.prompts.length > 1 && !chosenOption[t.task_id]) {
+      const drafted = t.prompts.filter(p => (responses[respKey(t.task_id, p.option_id)] || '').length > 0);
+      if (drafted.length === 1) chosenOption[t.task_id] = drafted[0].option_id;
+    }
+  });
+
   renderExam();
+  updateProgress();
   DELE.hideLoading();
 });
 
+function esc(str) { return DELE.escapeHtml(str || ''); }
+
+// ─── Render ─────────────────────────────────────────────────────────────────
 function renderExam() {
   const wrap = document.getElementById('examContent');
   let html = '';
 
   examData.tasks.forEach((task, ti) => {
-    const isShort = task.title.toLowerCase().includes('kort');
-    const minW = task.constraints?.min_words || (isShort ? 30 : 70);
-    const maxW = task.constraints?.max_words || (isShort ? 60 : 150);
-
-    html += `<div class="task-card">
-      <div class="task-header">
-        <div class="task-num">${ti + 1}</div>
-        <div class="task-title">${DELE.escapeHtml(task.title)}</div>
-      </div>
-      <div class="prompt-card">${DELE.escapeHtml(task.instructions || task.prompt?.context || '')}</div>
-      <div class="constraints">Escribe al menos ${minW} y como máximo ${maxW} palabras.</div>
-      <textarea class="text-area ${isShort ? 'short' : 'long'}" id="text${ti}"
-        placeholder="Escribe tu respuesta aquí…"
-        oninput="onTextInput(${ti}, ${minW}, ${maxW})"></textarea>
-      <div class="word-count" id="wc${ti}">0 palabras</div>
-    </div>`;
+    html += `<div class="task-card" data-task-id="${esc(task.task_id)}">`
+         + buildTaskInner(task, ti)
+         + `</div>`;
   });
 
   wrap.innerHTML = html;
-}
 
-function onTextInput(idx, minW, maxW) {
-  const text = document.getElementById(`text${idx}`).value;
-  const wc = DELE.countWords(text);
-  const el = document.getElementById(`wc${idx}`);
-  el.textContent = `${wc} palabras`;
-  el.className = 'word-count' + (wc >= minW && wc <= maxW ? ' ok' : wc > maxW ? ' over' : '');
-
-  // Enable submit if at least one task has words
-  let anyContent = false;
-  examData.tasks.forEach((_, i) => {
-    if (DELE.countWords(document.getElementById(`text${i}`).value) > 0) anyContent = true;
+  // Restore draft text into textareas
+  examData.tasks.forEach(task => {
+    const oid = chosenOption[task.task_id];
+    if (oid) {
+      const ta = document.getElementById(`text-${task.task_id}`);
+      if (ta) ta.value = responses[respKey(task.task_id, oid)] || '';
+      updateWordCount(task.task_id);
+    }
   });
-  document.getElementById('submitBtn').disabled = !anyContent;
 }
 
+function buildTaskInner(task, ti) {
+  let html = `<div class="task-header">
+    <div class="task-num">${ti + 1}</div>
+    <div class="task-title">${esc(task.title)}</div>
+  </div>`;
+  if (task.instructions) {
+    html += `<div class="task-instructions">${esc(task.instructions)}</div>`;
+  }
+  html += task.prompts.length > 1 ? renderChooserBlock(task) : renderSinglePromptBlock(task);
+  return html;
+}
+
+function renderSinglePromptBlock(task) {
+  const p = task.prompts[0];
+  const min = task.constraints?.min_words ?? 0;
+  const max = task.constraints?.max_words ?? 999;
+  let html = '';
+  if (p.stimulus) {
+    html += `<div class="stimulus">${esc(p.stimulus)}</div>`;
+  }
+  html += `<div class="bullet-instruction">${esc(p.instruction)}</div>`;
+  html += `<div class="constraints">Escribe entre ${min} y ${max} palabras.</div>`;
+  html += `<textarea class="text-area" id="text-${esc(task.task_id)}"
+    placeholder="Escribe aquí tu respuesta…"
+    oninput="onTextInput('${esc(task.task_id)}')"
+    data-min="${min}" data-max="${max}"></textarea>`;
+  html += `<div class="wc-row">
+    <span class="wc-count" id="wc-${esc(task.task_id)}">0 palabras</span>
+    <span class="wc-saved" id="saved-${esc(task.task_id)}">borrador guardado</span>
+  </div>`;
+  return html;
+}
+
+function renderChooserBlock(task) {
+  const min = task.constraints?.min_words ?? 0;
+  const max = task.constraints?.max_words ?? 999;
+  let html = `<div class="option-cards">`;
+  task.prompts.forEach(p => {
+    const isSelected = chosenOption[task.task_id] === p.option_id;
+    const isLocked = chosenOption[task.task_id] && !isSelected;
+    const cls = `option-card${isSelected ? ' selected' : ''}${isLocked ? ' locked' : ''}`;
+    const pickLabel = isSelected ? '✓ Opción elegida'
+                                 : (isLocked ? 'Cambiar a esta opción' : 'Elegir esta opción');
+    html += `<div class="${cls}"
+      data-task-id="${esc(task.task_id)}" data-option-id="${esc(p.option_id)}"
+      onclick="chooseOption('${esc(task.task_id)}','${esc(p.option_id)}')">
+      <div class="option-card-label">
+        <span class="option-card-letter">${esc(p.option_id)}</span>
+        <span>${esc(p.label || ('Opción ' + p.option_id))}</span>
+      </div>
+      <div class="option-card-body">${esc(p.instruction)}</div>
+      <div class="option-card-pick">${pickLabel}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  if (chosenOption[task.task_id]) {
+    html += `<div class="constraints">Escribe entre ${min} y ${max} palabras.</div>`;
+    html += `<textarea class="text-area" id="text-${esc(task.task_id)}"
+      placeholder="Escribe aquí tu respuesta para la opción elegida…"
+      oninput="onTextInput('${esc(task.task_id)}')"
+      data-min="${min}" data-max="${max}"></textarea>`;
+    html += `<div class="wc-row">
+      <span class="wc-count" id="wc-${esc(task.task_id)}">0 palabras</span>
+      <span class="wc-saved" id="saved-${esc(task.task_id)}">borrador guardado</span>
+    </div>`;
+  } else {
+    html += `<div class="pick-prompt">Elige una de las dos opciones para empezar a escribir.</div>`;
+  }
+  return html;
+}
+
+// ─── Interaction handlers ───────────────────────────────────────────────────
+function chooseOption(taskId, optionId) {
+  if (submitted) return;
+  // Persist current text to its slot before switching
+  const prevOid = chosenOption[taskId];
+  if (prevOid) {
+    const ta = document.getElementById(`text-${taskId}`);
+    if (ta) {
+      responses[respKey(taskId, prevOid)] = ta.value;
+      saveDraft(taskId, prevOid, ta.value);
+    }
+  }
+  if (chosenOption[taskId] === optionId) return;
+  chosenOption[taskId] = optionId;
+  rerenderTask(taskId);
+  if (prevOid && prevOid !== optionId) {
+    DELE.toast(`Cambiado a Opción ${optionId}`);
+  }
+  updateProgress();
+}
+
+function rerenderTask(taskId) {
+  const task = examData.tasks.find(t => t.task_id === taskId);
+  if (!task) return;
+  const card = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+  if (!card) return;
+  card.innerHTML = buildTaskInner(task, examData.tasks.indexOf(task));
+  const oid = chosenOption[taskId];
+  if (oid) {
+    const ta = document.getElementById(`text-${taskId}`);
+    if (ta) ta.value = responses[respKey(taskId, oid)] || '';
+    updateWordCount(taskId);
+  }
+}
+
+function onTextInput(taskId) {
+  const ta = document.getElementById(`text-${taskId}`);
+  if (!ta) return;
+  const oid = chosenOption[taskId];
+  if (!oid) return;
+  responses[respKey(taskId, oid)] = ta.value;
+  updateWordCount(taskId);
+  updateProgress();
+  // Debounced localStorage save
+  clearTimeout(saveTimers[taskId]);
+  saveTimers[taskId] = setTimeout(() => {
+    saveDraft(taskId, oid, ta.value);
+    const savedEl = document.getElementById(`saved-${taskId}`);
+    if (savedEl) {
+      savedEl.classList.add('visible');
+      clearTimeout(saveTimers[taskId + '_fade']);
+      saveTimers[taskId + '_fade'] = setTimeout(() => savedEl.classList.remove('visible'), 1200);
+    }
+  }, 500);
+}
+
+function updateWordCount(taskId) {
+  const ta = document.getElementById(`text-${taskId}`);
+  const wcEl = document.getElementById(`wc-${taskId}`);
+  if (!ta || !wcEl) return;
+  const wc = DELE.countWords(ta.value);
+  const min = parseInt(ta.dataset.min, 10);
+  const max = parseInt(ta.dataset.max, 10);
+  let label = `${wc} palabra${wc === 1 ? '' : 's'}`;
+  let cls = 'wc-count';
+  if (wc === 0) {
+    // neutral
+  } else if (wc < min) {
+    cls += ' under';
+    label += ` — escribe ${min - wc} más`;
+  } else if (wc <= max) {
+    cls += ' ok';
+    label += ' ✓';
+  } else {
+    cls += ' over';
+    label += ` — te has pasado ${wc - max}`;
+  }
+  wcEl.className = cls;
+  wcEl.textContent = label;
+}
+
+function tasksWithContent() {
+  let n = 0;
+  examData.tasks.forEach(t => {
+    const oid = chosenOption[t.task_id];
+    if (!oid) return;
+    const txt = responses[respKey(t.task_id, oid)] || '';
+    if (DELE.countWords(txt) > 0) n++;
+  });
+  return n;
+}
+
+function updateProgress() {
+  const total = examData?.tasks?.length || 0;
+  const done = tasksWithContent();
+  document.getElementById('progressText').textContent =
+    `${done} de ${total} tarea${total === 1 ? '' : 's'} con respuesta`;
+  document.getElementById('submitBtn').disabled = done === 0;
+}
+
+// ─── Submit ─────────────────────────────────────────────────────────────────
 async function handleSubmit() {
   if (submitted) return;
 
-  // Gather responses
-  const tasks = examData.tasks.map((task, i) => ({
-    title: task.title,
-    prompt: task.instructions || task.prompt?.context || '',
-    response: document.getElementById(`text${i}`).value.trim(),
-  }));
+  const lines = [];
+  const payloadTasks = [];
+  examData.tasks.forEach(t => {
+    const oid = chosenOption[t.task_id];
+    const text = oid ? (responses[respKey(t.task_id, oid)] || '').trim() : '';
+    const wc = DELE.countWords(text);
+    if (oid && wc > 0) {
+      const optLabel = (t.prompts.length > 1) ? ` (Opción ${oid})` : '';
+      lines.push(`• ${t.title}${optLabel}: ${wc} palabras`);
+      payloadTasks.push({
+        task_id: t.task_id,
+        chosen_option: oid,
+        response_text: text,
+        word_count: wc,
+      });
+    } else {
+      lines.push(`• ${t.title}: sin respuesta — 0 puntos`);
+    }
+  });
 
-  const combined = tasks.map(t => t.response).join('\n\n');
-  if (combined.trim().length < 10) {
-    DELE.toast('Escribe al menos unas palabras antes de enviar.');
-    return;
-  }
-
-  if (!confirm('Quiere tú enviar in tus skriftliga respuestas? Serán evaluadas por IA.')) return;
+  const msg = `Vas a enviar tu expresión escrita:\n\n${lines.join('\n')}\n\n` +
+              `Una vez enviadas, no podrás cambiar tus respuestas. Tus textos se evaluarán por IA en unos minutos.\n\n¿Continuar?`;
+  if (!confirm(msg)) return;
 
   submitted = true;
   document.getElementById('submitBtn').disabled = true;
   document.getElementById('submitBtn').textContent = 'Enviando…';
 
-  // Disable textareas
-  examData.tasks.forEach((_, i) => {
-    document.getElementById(`text${i}`).disabled = true;
-  });
+  document.querySelectorAll('.text-area').forEach(ta => ta.disabled = true);
+  document.querySelectorAll('.option-card').forEach(c => c.style.pointerEvents = 'none');
 
-  // Fire and forget — dele-evaluate runs in background, no waiting here
-  DELE.submit({
-    attemptId, elemKey: 'escritas',
-    text: combined,
-    json: { tasks }
-  }).catch(err => console.error('Submit error:', err));
+  // Combined plain-text concat for legacy submit field — eval will read response_json.tasks
+  const combinedText = payloadTasks
+    .map(t => `[${t.task_id}${t.chosen_option !== 'single' ? ' / Opción ' + t.chosen_option : ''}]\n${t.response_text}`)
+    .join('\n\n---\n\n');
 
-  window.location.href = `/dele/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
+  showEvalBanner();
+
+  try {
+    await DELE.submit({
+      attemptId,
+      elemKey: 'escritas',
+      text: combinedText,
+      json: { tasks: payloadTasks },
+    });
+    clearAllDrafts();
+  } catch (err) {
+    console.error('Submit error:', err);
+    DELE.toast('Hubo un problema al enviar. Tus respuestas siguen guardadas localmente.');
+    submitted = false;
+    document.querySelectorAll('.text-area').forEach(ta => ta.disabled = false);
+    document.querySelectorAll('.option-card').forEach(c => c.style.pointerEvents = '');
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('submitBtn').textContent = 'Enviar';
+    // Remove the eval banner since submit failed
+    const banner = document.querySelector('.eval-banner');
+    if (banner) banner.remove();
+    return;
+  }
+
+  document.getElementById('bottomBar').innerHTML = `
+    <div class="progress-text">Enviado — esperando evaluación</div>
+    <div class="btn-row">
+      <a class="btn btn-back" href="/dele/dashboard/exam.html?sim=${simId}&attempt=${attemptId}">← Volver al examen</a>
+    </div>`;
+}
+
+function showEvalBanner() {
+  const wrap = document.getElementById('examContent');
+  const banner = document.createElement('div');
+  banner.className = 'eval-banner';
+  banner.innerHTML = `
+    <div class="eval-banner-icon">✍️</div>
+    <div class="eval-banner-title">Tus textos se están evaluando</div>
+    <div class="eval-banner-body">La evaluación por IA puede tardar unos minutos. Puedes volver al examen y consultar el estado más tarde — recibirás puntuación y comentarios detallados.</div>`;
+  wrap.prepend(banner);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function handleSkip() {
   if (submitted) return;
-  if (!confirm('¿Quieres saltar la expresión escrita? Recibirás 0 puntos.')) return;
+  if (!confirm('¿Quieres saltar la expresión escrita? Recibirás 0 puntos en esta sección.')) return;
   try { await DELE.skip({ attemptId, elemKey: 'escritas' }); } catch (e) {}
+  clearAllDrafts();
   window.location.href = `/dele/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
 }
 </script>
