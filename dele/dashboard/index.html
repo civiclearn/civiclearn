@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DELE A2 — Simuleringar</title>
+  <title>DELE A2 — Simulaciones</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="/dele/assets/js/dele-auth.js"></script>
   <script src="/dele/assets/js/dele-engine.js?v=2"></script>
@@ -112,7 +112,7 @@
     <div class="topbar-flag"></div>
     <div class="brand-text">
       <span class="brand-title">DELE A2</span>
-      <span class="brand-sub">Provsimulering</span>
+      <span class="brand-sub">Simulación de examen</span>
     </div>
   </div>
   <div class="topbar-right">
@@ -135,7 +135,7 @@
       <div class="stat-progress"><div class="stat-progress-fill" id="progressBar" style="width:0%"></div></div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Senaste resultat</div>
+      <div class="stat-label">Último resultado</div>
       <div class="stat-value" id="lastResult">—</div>
       <div class="stat-sub" id="lastResultSub">Ninguna simulación completada</div>
     </div>
@@ -147,16 +147,16 @@
   </div>
 
   <div class="table-card">
-    <div class="table-title">Simuleringar</div>
+    <div class="table-title">Simulaciones</div>
     <table class="sim-table">
       <thead>
         <tr>
-          <th>Nr</th>
-          <th>Status</th>
+          <th>Nº</th>
+          <th>Estado</th>
           <th class="hide-mobile">Lectura</th>
           <th class="hide-mobile">Audición</th>
-          <th class="hide-mobile">Escribe</th>
-          <th class="hide-mobile">Tal</th>
+          <th class="hide-mobile">Escritura</th>
+          <th class="hide-mobile">Habla</th>
           <th>Nivel</th>
           <th></th>
         </tr>
@@ -225,13 +225,13 @@ function renderStats(attempts) {
     var level = latest.result_level || '—';
     document.getElementById('lastResult').textContent = level;
     document.getElementById('lastResultSub').textContent =
-      'Lectura ' + (latest.grade_reading != null ? Math.round(latest.grade_reading) + '%' : '—') +
-      ' · Audición ' + (latest.grade_listening != null ? Math.round(latest.grade_listening) + '%' : '—');
+      'Lectura ' + (latest.grade_lectura != null ? Math.round((latest.grade_lectura / 25) * 100) + '%' : '—') +
+      ' · Audición ' + (latest.grade_auditiva != null ? Math.round((latest.grade_auditiva / 25) * 100) + '%' : '—');
     document.getElementById('lastScore').textContent =
       (latest.grade_overall != null ? Math.round(latest.grade_overall) + '%' : '—');
     document.getElementById('lastScoreSub').textContent =
-      'Escribe ' + (latest.grade_writing != null ? latest.grade_writing + '/25' : '—') +
-      ' · Tal ' + (latest.grade_speaking != null ? latest.grade_speaking + '/25' : '—');
+      'Escritura ' + (latest.grade_escritas != null ? latest.grade_escritas + '/25' : '—') +
+      ' · Habla ' + (latest.grade_orales != null ? latest.grade_orales + '/25' : '—');
   }
 }
 
@@ -259,8 +259,11 @@ function renderTable(attempts) {
       if (el.submission_status === 'skipped') return '<td class="score-cell low hide-mobile">0</td>';
       if (el.eval_status !== 'complete') return '<td class="score-cell hide-mobile" style="color:var(--muted)">⏳</td>';
       var score = Number(el.ai_score_internal) || 0;
-      var display = (key === 'lectura' || key === 'auditiva') ? Math.round(score) + '%' : score + '/25';
-      var pct = (key === 'lectura' || key === 'auditiva') ? score : (score / 25) * 100;
+      // All four sections store ai_score_internal on a 0-25 scale (raw correct count for
+      // auto-graded sections; AI-judged 0-25 for productive sections). Display reading and
+      // listening as a percentage; writing and speaking as a fraction.
+      var pct = (score / 25) * 100;
+      var display = (key === 'lectura' || key === 'auditiva') ? Math.round(pct) + '%' : score + '/25';
       var cls = pct >= 60 ? 'high' : pct >= 40 ? 'mid' : 'low';
       return '<td class="score-cell ' + cls + ' hide-mobile">' + display + '</td>';
     }).join('');
@@ -314,7 +317,7 @@ async function startSim(simId, btn) {
     console.error('Start sim error:', err);
     btn.disabled = false;
     btn.textContent = 'Comenzar';
-    DELE.toast('Kunde no skapa simulación. Inténtalo de nuevo.');
+    DELE.toast('No se pudo crear la simulación. Inténtalo de nuevo.');
   }
 }
 </script>

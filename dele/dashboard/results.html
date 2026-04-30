@@ -81,7 +81,7 @@
 
 <div class="topbar">
   <div class="topbar-left">
-    <a class="back-link" href="/dele/dashboard/index.html">← Simuleringar</a>
+    <a class="back-link" href="/dele/dashboard/index.html">← Simulaciones</a>
     <div class="topbar-divider"></div>
     <div class="topbar-flag"></div>
     <span class="topbar-title">Resultados</span>
@@ -92,10 +92,10 @@
 
 <script>
 const ELEM_LABELS = {
-  reading: '📖 Comprensión de lectura',
-  listening: '🎧 Comprensión auditiva',
-  writing: '✍️ Expresión e interacción escritas',
-  speaking: '🎤 Expresión e interacción orales',
+  lectura:  '📖 Comprensión de lectura',
+  auditiva: '🎧 Comprensión auditiva',
+  escritas: '✍️ Expresión e interacción escritas',
+  orales:   '🎤 Expresión e interacción orales',
 };
 
 const POLL_INTERVAL = 6000;
@@ -112,10 +112,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function renderResults() {
   const data = await DELE.hydrateData(user.id, attemptId, true);
-  if (!data) { DELE.showError('Kunde no ladda data.'); return; }
+  if (!data) { DELE.showError('No se pudieron cargar los datos.'); return; }
 
   const attempt = (data.attempts || []).find(a => a.id === attemptId);
-  if (!attempt) { DELE.showError('Simulación hittades no.'); return; }
+  if (!attempt) { DELE.showError('Simulación no encontrada.'); return; }
 
   const elems = attempt.elements || [];
   const wrap = document.getElementById('resultsContent');
@@ -131,9 +131,9 @@ async function renderResults() {
     wrap.innerHTML = `
       <div style="text-align:center;padding:60px 20px;">
         <div class="loading-spinner" style="margin:0 auto 16px;width:36px;height:36px;border-width:4px;"></div>
-        <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:8px;">Bearbetar resultat…</h2>
-        <p style="color:var(--muted);font-size:0.88rem;">Evaluación por IA en curso para ${pendingEvals.length} parte${pendingEvals.length > 1 ? 'ar' : ''}.</p>
-        <p style="color:var(--muted);font-size:0.78rem;margin-top:8px;">Sidan uppdateras automatiskt.</p>
+        <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:8px;">Procesando resultados…</h2>
+        <p style="color:var(--muted);font-size:0.88rem;">Evaluación por IA en curso para ${pendingEvals.length} parte${pendingEvals.length > 1 ? 's' : ''}.</p>
+        <p style="color:var(--muted);font-size:0.78rem;margin-top:8px;">La página se actualiza automáticamente.</p>
       </div>`;
 
     if (!pollTimer) {
@@ -159,10 +159,10 @@ async function renderResults() {
     <div class="summary-level ${isPass ? 'pass' : 'fail'}">${DELE.escapeHtml(level)}</div>
     <div style="font-size:0.88rem;color:var(--muted);margin-top:4px;">Simulación ${simNum}</div>
     <div class="summary-scores">
-      <div class="ss-item"><div class="ss-label">Lectura</div><div class="ss-value ${pctClass(attempt.grade_reading || 0)}">${attempt.grade_reading != null ? Math.round(attempt.grade_reading) + '%' : '—'}</div></div>
-      <div class="ss-item"><div class="ss-label">Comprensión auditiva</div><div class="ss-value ${pctClass(attempt.grade_listening || 0)}">${attempt.grade_listening != null ? Math.round(attempt.grade_listening) + '%' : '—'}</div></div>
-      <div class="ss-item"><div class="ss-label">Expresión escrita</div><div class="ss-value ${pctClass(((attempt.grade_writing || 0) / 25) * 100)}">${attempt.grade_writing ?? '—'}/25</div></div>
-      <div class="ss-item"><div class="ss-label">Expresión oral</div><div class="ss-value ${pctClass(((attempt.grade_speaking || 0) / 25) * 100)}">${attempt.grade_speaking ?? '—'}/25</div></div>
+      <div class="ss-item"><div class="ss-label">Lectura</div><div class="ss-value ${pctClass(((attempt.grade_lectura || 0) / 25) * 100)}">${attempt.grade_lectura != null ? Math.round((attempt.grade_lectura / 25) * 100) + '%' : '—'}</div></div>
+      <div class="ss-item"><div class="ss-label">Comprensión auditiva</div><div class="ss-value ${pctClass(((attempt.grade_auditiva || 0) / 25) * 100)}">${attempt.grade_auditiva != null ? Math.round((attempt.grade_auditiva / 25) * 100) + '%' : '—'}</div></div>
+      <div class="ss-item"><div class="ss-label">Expresión escrita</div><div class="ss-value ${pctClass(((attempt.grade_escritas || 0) / 25) * 100)}">${attempt.grade_escritas ?? '—'}/25</div></div>
+      <div class="ss-item"><div class="ss-label">Expresión oral</div><div class="ss-value ${pctClass(((attempt.grade_orales || 0) / 25) * 100)}">${attempt.grade_orales ?? '—'}/25</div></div>
       <div class="ss-item"><div class="ss-label">Total</div><div class="ss-value ${pctClass(overall || 0)}">${overall != null ? overall + '%' : '—'}</div></div>
     </div>
   </div>`;
@@ -184,8 +184,10 @@ async function renderResults() {
       scoreDisplay = 'Saltado';
       scoreClass = 'skip';
     } else if (isAuto) {
-      scoreDisplay = Math.round(score) + '%';
-      scoreClass = pctClass(score);
+      // ai_score_internal is raw count out of 25, NOT a percentage
+      const pct = Math.round((score / 25) * 100);
+      scoreDisplay = pct + '%';
+      scoreClass = pctClass(pct);
     } else {
       scoreDisplay = score + '/25';
       const pct = (score / 25) * 100;
@@ -204,56 +206,83 @@ async function renderResults() {
       html += `<div class="auto-result">
         <strong>${fb.correct_answers || 0}</strong> de <strong>${fb.total_questions || 0}</strong> preguntas correctas (${fb.percentage || 0}%)
       </div>`;
-    } else if (fb.summary || fb.strengths || fb.weaknesses || fb.mistakes) {
+    } else if (fb.tasks && fb.tasks.length > 0) {
+      // Productive sections (escritas/orales): per-task feedback breakdown.
+      // ai_feedback shape: { tasks: [{ task_id, chosen_option, bandas: { cumplimiento_tarea, uso_lengua },
+      //                       task_points (0-12.5), feedback_summary, strengths, weaknesses, mistakes }],
+      //                     element_score, overall_feedback }
       html += `<div class="feedback-section">`;
-      if (fb.summary) html += `<div class="fb-summary">${DELE.escapeHtml(fb.summary)}</div>`;
 
-      if (fb.strengths && fb.strengths.length > 0) {
-        html += `<div class="fb-list-title">Styrkor</div><ul class="fb-list">`;
-        fb.strengths.forEach(s => { html += `<li>${DELE.escapeHtml(s)}</li>`; });
-        html += `</ul>`;
+      if (fb.overall_feedback) {
+        html += `<div class="fb-summary">${DELE.escapeHtml(fb.overall_feedback)}</div>`;
       }
 
-      if (fb.weaknesses && fb.weaknesses.length > 0) {
-        html += `<div class="fb-list-title">Áreas de mejora</div><ul class="fb-list">`;
-        fb.weaknesses.forEach(w => { html += `<li>${DELE.escapeHtml(w)}</li>`; });
-        html += `</ul>`;
-      }
+      const BANDA_LABELS = {
+        cumplimiento_tarea: 'Cumplimiento de la tarea',
+        uso_lengua: 'Uso de la lengua',
+      };
 
-      if (fb.mistakes && fb.mistakes.length > 0) {
-        html += `<div class="fb-list-title">Errores a corregir</div>`;
-        fb.mistakes.forEach(m => {
-          html += `<div class="mistake-card">
-            <span class="mistake-original">${DELE.escapeHtml(m.original)}</span> → <span class="mistake-correction">${DELE.escapeHtml(m.correction)}</span>
-            ${m.explanation ? `<div class="mistake-explain">${DELE.escapeHtml(m.explanation)}</div>` : ''}
-          </div>`;
-        });
-      }
+      fb.tasks.forEach((task, idx) => {
+        if (task && task.skipped) return;
 
-      // Score breakdown with visual bars
-      if (fb.scores) {
-        html += `<div class="fb-list-title" style="margin-top:14px;">Distribución de puntos</div>`;
-        const labels = {
-          cumplimiento_de_tarea:'Tarea', coherencia:'Coherencia', vocabulario:'Vocabulario',
-          grammatik:'Grammatik', register:'Register',
-          comprensión:'Comprensión', interacción:'Interacción', fluidez:'Fluidez',
-          vocabulario_gramatica:'Vocab./Gram.', pronunciación:'Pronunciación'
-        };
-        html += `<div class="criteria-grid">`;
-        for (const [k, v] of Object.entries(fb.scores)) {
-          const label = labels[k] || k;
-          const pct = (v / 5) * 100;
-          html += `<div class="criteria-row">
-            <div class="criteria-name">${label}</div>
-            <div class="criteria-bar-wrap"><div class="criteria-bar-fill" style="width:${pct}%"></div></div>
-            <div class="criteria-score">${v}/5</div>
-          </div>`;
+        const taskNum = idx + 1;
+        const taskPoints = (task.task_points != null) ? task.task_points : 0;
+        const optLabel = (task.chosen_option && task.chosen_option !== 'single')
+          ? ` — Opción ${DELE.escapeHtml(String(task.chosen_option))}` : '';
+
+        html += `<div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);">`;
+        html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-weight:700;font-size:0.92rem;">Tarea ${taskNum}${optLabel}</div>
+          <div style="font-size:0.78rem;color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums;">${taskPoints}/12.5</div>
+        </div>`;
+
+        if (task.bandas && typeof task.bandas === 'object') {
+          html += `<div class="criteria-grid" style="margin-bottom:12px;">`;
+          for (const [k, v] of Object.entries(task.bandas)) {
+            const label = BANDA_LABELS[k] || k;
+            const numV = Number(v) || 0;
+            const pct = (numV / 3) * 100;
+            html += `<div class="criteria-row">
+              <div class="criteria-name">${DELE.escapeHtml(label)}</div>
+              <div class="criteria-bar-wrap"><div class="criteria-bar-fill" style="width:${pct}%"></div></div>
+              <div class="criteria-score">${numV}/3</div>
+            </div>`;
+          }
+          html += `</div>`;
         }
-        html += `</div>`;
-      }
-      html += `</div>`;
+
+        if (task.feedback_summary) {
+          html += `<div class="fb-summary">${DELE.escapeHtml(task.feedback_summary)}</div>`;
+        }
+
+        if (Array.isArray(task.strengths) && task.strengths.length > 0) {
+          html += `<div class="fb-list-title">Puntos fuertes</div><ul class="fb-list">`;
+          task.strengths.forEach(s => { html += `<li>${DELE.escapeHtml(s)}</li>`; });
+          html += `</ul>`;
+        }
+
+        if (Array.isArray(task.weaknesses) && task.weaknesses.length > 0) {
+          html += `<div class="fb-list-title">Áreas de mejora</div><ul class="fb-list">`;
+          task.weaknesses.forEach(w => { html += `<li>${DELE.escapeHtml(w)}</li>`; });
+          html += `</ul>`;
+        }
+
+        if (Array.isArray(task.mistakes) && task.mistakes.length > 0) {
+          html += `<div class="fb-list-title">Errores a corregir</div>`;
+          task.mistakes.forEach(m => {
+            html += `<div class="mistake-card">
+              <span class="mistake-original">${DELE.escapeHtml(m.original)}</span> → <span class="mistake-correction">${DELE.escapeHtml(m.correction)}</span>
+              ${m.explanation ? `<div class="mistake-explain">${DELE.escapeHtml(m.explanation)}</div>` : ''}
+            </div>`;
+          });
+        }
+
+        html += `</div>`;  // close task block
+      });
+
+      html += `</div>`;  // close feedback-section
     } else if (fb.too_short) {
-      html += `<div style="color:var(--muted);font-size:0.85rem;">${DELE.escapeHtml(fb.summary || 'La respuesta fue demasiado corta para ser evaluadas.')}</div>`;
+      html += `<div style="color:var(--muted);font-size:0.85rem;">${DELE.escapeHtml(fb.summary || 'La respuesta fue demasiado corta para ser evaluada.')}</div>`;
     }
 
     html += `</div>`;

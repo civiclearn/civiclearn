@@ -97,7 +97,7 @@
 
 <div class="topbar">
   <div class="topbar-left">
-    <a class="back-link" href="/dele/dashboard/index.html">← Simuleringar</a>
+    <a class="back-link" href="/dele/dashboard/index.html">← Simulaciones</a>
     <div class="topbar-divider"></div>
     <div class="topbar-flag"></div>
     <div class="topbar-brand">
@@ -217,13 +217,13 @@ async function refreshHub() {
           <p style="font-weight:600;color:var(--navy);">¡Todas las partes han sido enviadas!</p>
           <p style="color:var(--muted);font-size:0.85rem;margin-top:6px;">
             ${pendingEvals.length > 0
-              ? `Esperando evaluación de ${pendingEvals.length} parte(ar)…`
+              ? `Esperando evaluación de ${pendingEvals.length} parte${pendingEvals.length > 1 ? 's' : ''}…`
               : 'Calculando tu resultado final…'}
           </p>
-          <p style="font-size:0.78rem;color:#94a3b8;margin-top:12px;">Sidan uppdateras automatiskt.</p>
+          <p style="font-size:0.78rem;color:#94a3b8;margin-top:12px;">La página se actualiza automáticamente.</p>
           <a href="/dele/dashboard/index.html" style="display:inline-block;margin-top:18px;padding:10px 24px;background:var(--brand-dim);color:var(--brand);border-radius:8px;font-size:0.85rem;font-weight:600;text-decoration:none;">← Volver a simulaciones</a>
         </div>`;
-      document.getElementById('hubTitle').textContent = 'Bearbetar resultat…';
+      document.getElementById('hubTitle').textContent = 'Procesando resultados…';
 
       if (pollTimer) clearInterval(pollTimer);
       pollTimer = setInterval(refreshHub, 5000);
@@ -244,9 +244,9 @@ async function refreshHub() {
       if (status === 'not_started')       badge = '<span class="ec-badge todo">No iniciada</span>';
       else if (status === 'skipped')      badge = '<span class="ec-badge skipped">Saltado</span>';
       else if (evalSt === 'complete')     badge = '<span class="ec-badge done">✓ Completada</span>';
-      else if (evalSt === 'failed')       badge = '<span class="ec-badge failed">Fel</span>';
+      else if (evalSt === 'failed')       badge = '<span class="ec-badge failed">Error</span>';
       else if (evalSt === 'evaluating')   badge = '<span class="ec-badge eval">Evaluando…</span>';
-      else                                badge = '<span class="ec-badge eval">Bearbetar…</span>';
+      else                                badge = '<span class="ec-badge eval">Procesando…</span>';
 
       let href = `${def.page}?sim=${simId}&attempt=${attemptId}&key=${def.key}`;
 
@@ -288,10 +288,10 @@ function showResults(attempt, elems) {
       ${isPass ? '¡Buen trabajo! Has alcanzado este nivel.' : 'Sigue practicando para mejorar tu resultado.'}
     </div>
     <div class="results-scores">
-      <div class="rs-item"><div class="rs-label">Lectura</div><div class="rs-value">${attempt.grade_reading != null ? Math.round(attempt.grade_reading) + '%' : '—'}</div></div>
-      <div class="rs-item"><div class="rs-label">Comprensión auditiva</div><div class="rs-value">${attempt.grade_listening != null ? Math.round(attempt.grade_listening) + '%' : '—'}</div></div>
-      <div class="rs-item"><div class="rs-label">Expresión escrita</div><div class="rs-value">${attempt.grade_writing ?? '—'}<span style="font-size:0.7rem;color:var(--muted)">/25</span></div></div>
-      <div class="rs-item"><div class="rs-label">Expresión oral</div><div class="rs-value">${attempt.grade_speaking ?? '—'}<span style="font-size:0.7rem;color:var(--muted)">/25</span></div></div>
+      <div class="rs-item"><div class="rs-label">Lectura</div><div class="rs-value">${attempt.grade_lectura != null ? Math.round((attempt.grade_lectura / 25) * 100) + '%' : '—'}</div></div>
+      <div class="rs-item"><div class="rs-label">Comprensión auditiva</div><div class="rs-value">${attempt.grade_auditiva != null ? Math.round((attempt.grade_auditiva / 25) * 100) + '%' : '—'}</div></div>
+      <div class="rs-item"><div class="rs-label">Expresión escrita</div><div class="rs-value">${attempt.grade_escritas ?? '—'}<span style="font-size:0.7rem;color:var(--muted)">/25</span></div></div>
+      <div class="rs-item"><div class="rs-label">Expresión oral</div><div class="rs-value">${attempt.grade_orales ?? '—'}<span style="font-size:0.7rem;color:var(--muted)">/25</span></div></div>
       <div class="rs-item"><div class="rs-label">Total</div><div class="rs-value">${attempt.grade_overall != null ? Math.round(attempt.grade_overall) + '%' : '—'}</div></div>
     </div>
     <a href="results.html?sim=${simId}&attempt=${attemptId}" style="display:block;width:100%;margin-top:18px;padding:13px;background:var(--brand);color:#fff;border:none;border-radius:10px;font-size:0.92rem;font-weight:600;text-align:center;text-decoration:none;">Ver resultados detallados →</a>
