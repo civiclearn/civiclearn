@@ -1256,12 +1256,25 @@ async function handleSubmit() {
 
     if (reviewBtn) reviewBtn.textContent = 'Enviando…';
 
-    await DELE.submit({
-      attemptId,
-      elemKey: 'orales',
-      text: combinedText,
-      json: responseJson,
-    });
+    // Race the submit against a 25s timeout. dele-submit-element is idempotent
+    // (redo-safe) and dele-check-completion runs server-side regardless, so if
+    // the response is lost in transit (Cloudflare edge sometimes cuts response
+    // streams) we advance the UI optimistically rather than leaving the user
+    // staring at a stuck "Enviando…" button forever.
+    const SUBMIT_TIMEOUT_MS = 25000;
+    let submitTimedOut = false;
+    await Promise.race([
+      DELE.submit({
+        attemptId,
+        elemKey: 'orales',
+        text: combinedText,
+        json: responseJson,
+      }),
+      new Promise(resolve => setTimeout(() => { submitTimedOut = true; resolve(); }, SUBMIT_TIMEOUT_MS))
+    ]);
+    if (submitTimedOut) {
+      console.warn('[orales] submit took >25s — advancing UI; server-side will reconcile');
+    }
 
     // Clean up local prep timer key
     try { localStorage.removeItem(PREP_KEY()); } catch (_) {}

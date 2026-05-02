@@ -98,6 +98,25 @@ const ELEM_LABELS = {
   orales:   '🎤 Expresión e interacción orales',
 };
 
+// Turn a list of task IDs into a Spanish heading.
+//   ['orales-1', 'orales-2'] → "Tareas 1 y 2"
+//   ['orales-3']             → "Tarea 3"
+//   ['escritas-1']           → "Tarea 1"
+function blockTitleFor(coversTasks, elemKey) {
+  if (!Array.isArray(coversTasks) || coversTasks.length === 0) return 'Tarea';
+  const nums = coversTasks
+    .map(tid => {
+      const m = String(tid).match(/(\d+)$/);
+      return m ? parseInt(m[1], 10) : null;
+    })
+    .filter(n => n != null);
+  if (nums.length === 0) return 'Tarea';
+  if (nums.length === 1) return `Tarea ${nums[0]}`;
+  if (nums.length === 2) return `Tareas ${nums[0]} y ${nums[1]}`;
+  const last = nums[nums.length - 1];
+  return `Tareas ${nums.slice(0, -1).join(', ')} y ${last}`;
+}
+
 const POLL_INTERVAL = 6000;
 let pollTimer = null;
 let user, simId, attemptId, simNum;
@@ -206,11 +225,12 @@ async function renderResults() {
       html += `<div class="auto-result">
         <strong>${fb.correct_answers || 0}</strong> de <strong>${fb.total_questions || 0}</strong> preguntas correctas (${fb.percentage || 0}%)
       </div>`;
-    } else if (fb.tasks && fb.tasks.length > 0) {
-      // Productive sections (escritas/orales): per-task feedback breakdown.
-      // ai_feedback shape: { tasks: [{ task_id, chosen_option, bandas: { cumplimiento_tarea, uso_lengua },
-      //                       task_points (0-12.5), feedback_summary, strengths, weaknesses, mistakes }],
-      //                     element_score, overall_feedback }
+    } else if ((fb.rubric_blocks && fb.rubric_blocks.length > 0) || (fb.tasks && fb.tasks.length > 0)) {
+      // Productive sections: two shapes are possible.
+      //   escritas → fb.tasks[] each carries bandas + task_points (one block per task)
+      //   orales   → fb.rubric_blocks[] carries the scoring (T1+T2 share a block,
+      //              T3 has its own); fb.tasks[] only carries transcripts.
+      // We unify the two shapes into a single "scoreBlocks" list to render.
       html += `<div class="feedback-section">`;
 
       if (fb.overall_feedback) {
@@ -218,28 +238,72 @@ async function renderResults() {
       }
 
       const BANDA_LABELS = {
-        cumplimiento_tarea: 'Cumplimiento de la tarea',
-        uso_lengua: 'Uso de la lengua',
+        cumplimiento_tarea:    'Cumplimiento de la tarea',
+        uso_lengua:            'Uso de la lengua',
+        alcance_correccion:    'Alcance y corrección',
+        fluidez_pronunciacion: 'Fluidez y pronunciación',
+        interaccion:           'Interacción',
+        uso_lengua_oral:       'Uso de la lengua',
       };
 
-      fb.tasks.forEach((task, idx) => {
-        if (task && task.skipped) return;
+      // Build a transcript lookup for orales (display below each block)
+      const transcriptByTask = {};
+      if (Array.isArray(fb.tasks)) {
+        fb.tasks.forEach(t => {
+          if (t && t.task_id && t.transcript) transcriptByTask[t.task_id] = t.transcript;
+        });
+      }
 
-        const taskNum = idx + 1;
-        const taskPoints = (task.task_points != null) ? task.task_points : 0;
-        const optLabel = (task.chosen_option && task.chosen_option !== 'single')
-          ? ` — Opción ${DELE.escapeHtml(String(task.chosen_option))}` : '';
+      // Decide which shape we have: prefer rubric_blocks, fall back to tasks
+      let scoreBlocks = [];
+      if (Array.isArray(fb.rubric_blocks) && fb.rubric_blocks.length > 0) {
+        // Orales shape — rubric blocks group tasks
+        scoreBlocks = fb.rubric_blocks.map(rb => ({
+          title: blockTitleFor(rb.covers_tasks, key),
+          bandas: rb.bandas,
+          task_points: rb.task_points,
+          max_points: 25 / fb.rubric_blocks.length,  // even split per block
+          feedback_summary: rb.feedback_summary,
+          strengths: rb.strengths,
+          weaknesses: rb.weaknesses,
+          mistakes: rb.mistakes,
+          transcripts: (rb.covers_tasks || []).map(tid => ({ tid, text: transcriptByTask[tid] })).filter(x => x.text),
+        }));
+      } else if (Array.isArray(fb.tasks)) {
+        // Escritas shape — one block per task
+        scoreBlocks = fb.tasks
+          .filter(t => !t.skipped)
+          .map((t, idx) => {
+            const optLabel = (t.chosen_option && t.chosen_option !== 'single')
+              ? ` — Opción ${DELE.escapeHtml(String(t.chosen_option))}` : '';
+            return {
+              title: `Tarea ${idx + 1}${optLabel}`,
+              bandas: t.bandas,
+              task_points: t.task_points,
+              max_points: 12.5,
+              feedback_summary: t.feedback_summary,
+              strengths: t.strengths,
+              weaknesses: t.weaknesses,
+              mistakes: t.mistakes,
+              transcripts: [],
+            };
+          });
+      }
+
+      scoreBlocks.forEach(block => {
+        const taskPoints = (block.task_points != null) ? block.task_points : 0;
+        const maxPts = block.max_points || 12.5;
 
         html += `<div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);">`;
         html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <div style="font-weight:700;font-size:0.92rem;">Tarea ${taskNum}${optLabel}</div>
-          <div style="font-size:0.78rem;color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums;">${taskPoints}/12.5</div>
+          <div style="font-weight:700;font-size:0.92rem;">${DELE.escapeHtml(block.title)}</div>
+          <div style="font-size:0.78rem;color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums;">${taskPoints}/${maxPts}</div>
         </div>`;
 
-        if (task.bandas && typeof task.bandas === 'object') {
+        if (block.bandas && typeof block.bandas === 'object') {
           html += `<div class="criteria-grid" style="margin-bottom:12px;">`;
-          for (const [k, v] of Object.entries(task.bandas)) {
-            const label = BANDA_LABELS[k] || k;
+          for (const [k, v] of Object.entries(block.bandas)) {
+            const label = BANDA_LABELS[k] || k.replace(/_/g, ' ');
             const numV = Number(v) || 0;
             const pct = (numV / 3) * 100;
             html += `<div class="criteria-row">
@@ -251,25 +315,35 @@ async function renderResults() {
           html += `</div>`;
         }
 
-        if (task.feedback_summary) {
-          html += `<div class="fb-summary">${DELE.escapeHtml(task.feedback_summary)}</div>`;
+        if (block.feedback_summary) {
+          html += `<div class="fb-summary">${DELE.escapeHtml(block.feedback_summary)}</div>`;
         }
 
-        if (Array.isArray(task.strengths) && task.strengths.length > 0) {
+        // Transcripts (orales only) — collapsible to keep the card clean
+        if (block.transcripts && block.transcripts.length > 0) {
+          block.transcripts.forEach(tr => {
+            html += `<details style="margin:10px 0;font-size:0.82rem;">
+              <summary style="cursor:pointer;color:var(--muted);font-weight:600;">📝 Transcripción de ${DELE.escapeHtml(tr.tid)}</summary>
+              <div style="margin-top:6px;padding:10px 12px;background:#f8fafc;border-radius:8px;line-height:1.5;color:var(--slate);">${DELE.escapeHtml(tr.text)}</div>
+            </details>`;
+          });
+        }
+
+        if (Array.isArray(block.strengths) && block.strengths.length > 0) {
           html += `<div class="fb-list-title">Puntos fuertes</div><ul class="fb-list">`;
-          task.strengths.forEach(s => { html += `<li>${DELE.escapeHtml(s)}</li>`; });
+          block.strengths.forEach(s => { html += `<li>${DELE.escapeHtml(s)}</li>`; });
           html += `</ul>`;
         }
 
-        if (Array.isArray(task.weaknesses) && task.weaknesses.length > 0) {
+        if (Array.isArray(block.weaknesses) && block.weaknesses.length > 0) {
           html += `<div class="fb-list-title">Áreas de mejora</div><ul class="fb-list">`;
-          task.weaknesses.forEach(w => { html += `<li>${DELE.escapeHtml(w)}</li>`; });
+          block.weaknesses.forEach(w => { html += `<li>${DELE.escapeHtml(w)}</li>`; });
           html += `</ul>`;
         }
 
-        if (Array.isArray(task.mistakes) && task.mistakes.length > 0) {
+        if (Array.isArray(block.mistakes) && block.mistakes.length > 0) {
           html += `<div class="fb-list-title">Errores a corregir</div>`;
-          task.mistakes.forEach(m => {
+          block.mistakes.forEach(m => {
             html += `<div class="mistake-card">
               <span class="mistake-original">${DELE.escapeHtml(m.original)}</span> → <span class="mistake-correction">${DELE.escapeHtml(m.correction)}</span>
               ${m.explanation ? `<div class="mistake-explain">${DELE.escapeHtml(m.explanation)}</div>` : ''}
@@ -277,7 +351,7 @@ async function renderResults() {
           });
         }
 
-        html += `</div>`;  // close task block
+        html += `</div>`;  // close block
       });
 
       html += `</div>`;  // close feedback-section
