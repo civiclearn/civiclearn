@@ -169,7 +169,7 @@
 <script>
 var SIMS = [];
 for (var i = 1; i <= 10; i++) {
-  SIMS.push({ id: 'dele-a2-' + String(i).padStart(2, '0'), title: 'Simulación ' + i });
+  SIMS.push({ id: 'dele-a2-' + String(i).padStart(2, '0'), num: i, title: 'Simulación ' + i });
 }
 
 var ELEM_KEYS = ['lectura', 'auditiva', 'escritas', 'orales'];
@@ -242,7 +242,7 @@ function renderTable(attempts) {
   SIMS.forEach(function(sim) {
     var simAttempts = attempts.filter(function(a) { return a.simulation_id === sim.id; });
     var latest = simAttempts[simAttempts.length - 1];
-    var num = parseInt(sim.id.replace('sim', ''), 10);
+    var num = sim.num;
 
     var status, statusCls;
     if (!latest) { status = 'No iniciada'; statusCls = 'badge-idle'; }
