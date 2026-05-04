@@ -1,12 +1,20 @@
 /**
- * CivicReading v5 – Fully international, safe, final
+ * CivicReading v6 – Quality-ranked voice selection
  * --------------------------------------------------
- * - Reads voice language from country config (voiceLang)
- * - Speaks ON/OFF messages using i18n keys (reading_on / reading_off)
- * - Falls back to English if i18n not ready
- * - Auto-refreshes on ON for immediate availability
- * - No French hardcoded anywhere
- * - 100% safe if toggle not present on page
+ * Same as v5, but picks the HIGHEST-QUALITY voice available
+ * for the configured language instead of the first match.
+ *
+ * Cross-platform name heuristics (no per-language hardcoding):
+ *   "neural" | "natural" | "premium" | "wavenet" | "studio"  → +100
+ *   "online"  (Microsoft Edge online voices, Azure Neural)   → +80
+ *   "siri"    (Apple Siri voices on iOS)                     → +70
+ *   "enhanced" (Apple Enhanced, downloaded)                  → +50
+ *   "google"  (Google network voices)                        → +40
+ *   localService === false (any network-backed voice)        → +10
+ *   "compact" | "eloquence" (low-quality fallbacks)          → penalty
+ *
+ * Effect: when a good voice exists on the user's device, we use it.
+ * When only basic voices exist, we fall back to the same default as before.
  */
 
 (function () {
@@ -42,35 +50,65 @@
   }
 
   // ----------------------------------------------------
-  // SAFE speak() – international
+  // Voice quality scoring (cross-platform)
   // ----------------------------------------------------
-function speak(text) {
-  try {
-    const cfg = getConfig();
-    const lang = cfg.voiceLang || "en-US";
+  function scoreVoice(voice) {
+    const name = (voice.name || "").toLowerCase();
+    let score = 0;
 
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.lang = lang;
+    // High-quality neural/network tiers
+    if (/neural|natural|premium|wavenet|studio/.test(name)) score += 100;
+    if (/\bonline\b/.test(name))   score += 80;   // Microsoft Online (Edge)
+    if (/\bsiri\b/.test(name))     score += 70;   // Apple Siri (iOS)
+    if (/\benhanced\b/.test(name)) score += 50;   // Apple Enhanced
+    if (/\bgoogle\b/.test(name))   score += 40;   // Google network voices
 
+    // Network-backed voices tend to outrank local
+    if (voice.localService === false) score += 10;
+
+    // Penalties for known low-quality variants
+    if (/\bcompact\b/.test(name))   score -= 10;
+    if (/\beloquence\b/.test(name)) score -= 20;
+
+    return score;
+  }
+
+  function pickBestVoice(lang) {
     const voices = window.speechSynthesis.getVoices();
+    if (!voices.length) return null;
 
-    // Try exact match first (ru-RU)
-    let voice = voices.find(v => v.lang === lang);
+    const prefix = lang.split("-")[0];
+    const exact    = voices.filter(v => v.lang === lang);
+    const prefixed = voices.filter(v => v.lang.startsWith(prefix) && v.lang !== lang);
 
-    // Fallback: match by language prefix (ru)
-    if (!voice) {
-      const prefix = lang.split("-")[0];
-      voice = voices.find(v => v.lang.startsWith(prefix));
-    }
+    // Prefer exact-language matches; only fall through to prefix matches if none.
+    const candidates = exact.length ? exact : prefixed;
+    if (!candidates.length) return null;
 
-    if (voice) {
-      msg.voice = voice;
-    }
+    candidates.sort((a, b) => scoreVoice(b) - scoreVoice(a));
+    return candidates[0];
+  }
 
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(msg);
-  } catch (_) {}
-}
+  // ----------------------------------------------------
+  // SAFE speak() – uses best available voice for the language
+  // ----------------------------------------------------
+  function speak(text) {
+    try {
+      const cfg = getConfig();
+      const lang = cfg.voiceLang || "en-US";
+
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = lang;
+
+      const voice = pickBestVoice(lang);
+      if (voice) {
+        msg.voice = voice;
+      }
+
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(msg);
+    } catch (_) {}
+  }
 
   // ----------------------------------------------------
   // Toggle reading assist
@@ -101,7 +139,7 @@ function speak(text) {
     } else {
       // Multilingual OFF message
       speak(i18n ? i18n.t("reading_off") : "Reading assist disabled.");
-      // NO refresh on OFF — safe, brakes nothing
+      // NO refresh on OFF — safe, breaks nothing
     }
   }
 
