@@ -93,6 +93,54 @@ main {
 .price-line-meta { font-size: .72rem; color: #a8a29e; margin-top: .2rem; }
 .price-line-amount { font-size: 1.15rem; font-weight: 700; color: #0f172a; letter-spacing: -.01em; white-space: nowrap; }
 
+/* ── PROMO CODE ── */
+.promo-toggle {
+  display: inline-flex; align-items: center; gap: .3rem;
+  background: none; border: none; cursor: pointer;
+  font-family: "Lexend", sans-serif; font-size: .78rem; font-weight: 500;
+  color: #78716c; transition: color .15s; margin-bottom: 1.1rem;
+}
+.promo-toggle:hover { color: #c8102e; }
+.promo-row {
+  display: none; align-items: center; gap: .5rem; margin-bottom: 1.1rem;
+}
+.promo-row.open { display: flex; }
+.promo-row input {
+  flex: 1; padding: .6rem .75rem; border-radius: .7rem; border: 1.5px solid #e8e0d4;
+  font-size: .84rem; font-family: "Lexend", sans-serif; color: #0f172a;
+  outline: none; transition: border-color .15s; text-transform: uppercase; letter-spacing: .04em;
+}
+.promo-row input:focus { border-color: #c8102e; box-shadow: 0 0 0 3px rgba(200,16,46,.1); }
+.promo-row input::placeholder { text-transform: none; letter-spacing: 0; }
+.promo-apply-btn {
+  padding: .6rem .9rem; border-radius: .7rem; border: 1.5px solid #c8102e;
+  background: #fff; color: #c8102e; font-family: "Lexend", sans-serif;
+  font-size: .8rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all .15s;
+}
+.promo-apply-btn:hover { background: #c8102e; color: #fff; }
+.promo-badge {
+  display: none; align-items: center; justify-content: space-between;
+  font-size: .78rem; margin-bottom: 1.1rem; padding: .5rem .75rem;
+  border-radius: .6rem; background: #f0fdf4; color: #15803d;
+}
+.promo-badge.visible { display: flex; }
+.promo-remove {
+  background: none; border: none; cursor: pointer; font-size: .82rem;
+  color: #15803d; font-weight: 600; padding: 0 .2rem;
+}
+.promo-remove:hover { color: #be123c; }
+.promo-error {
+  display: none; font-size: .78rem; margin-bottom: 1.1rem; padding: .5rem .75rem;
+  border-radius: .6rem; background: #fff1f2; color: #be123c;
+}
+.discount-line {
+  display: none; align-items: center; justify-content: space-between;
+  padding-bottom: .8rem; margin-top: -.8rem;
+}
+.discount-line.visible { display: flex; }
+.discount-line-label { font-size: .78rem; font-weight: 500; color: #15803d; }
+.discount-line-amount { font-size: .95rem; font-weight: 700; color: #15803d; }
+
 /* ── STRIPE ELEMENTS ── */
 #link-auth-element { margin-bottom: 1.1rem; }
 #payment-element { margin-bottom: 1.4rem; }
@@ -220,6 +268,25 @@ main {
     <div style="flex-shrink:0;text-align:right"><span class="price-line-amount" id="priceAmount">499 kr</span></div>
   </div>
 
+  <!-- PROMO CODE -->
+  <button type="button" class="promo-toggle" id="promoToggle">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+    Har du en rabatkode?
+  </button>
+  <div class="promo-row" id="promoRow">
+    <input type="text" id="promoInput" placeholder="Indtast rabatkode" autocomplete="off">
+    <button type="button" class="promo-apply-btn" id="promoApplyBtn">Anvend</button>
+  </div>
+  <div class="promo-badge" id="promoBadge">
+    <span>✓ Rabatkode anvendt</span>
+    <button type="button" class="promo-remove" id="promoRemoveBtn">Fjern</button>
+  </div>
+  <div class="promo-error" id="promoError"></div>
+  <div class="discount-line" id="discountLine">
+    <span class="discount-line-label">Rabat</span>
+    <span class="discount-line-amount">−300 kr</span>
+  </div>
+
   <!-- ══ CHECKOUT FORM — all visible on load ══ -->
   <div id="viewCheckout">
     <div id="link-auth-element"></div>
@@ -335,6 +402,12 @@ main {
   var paymentElement = null;
   var isSubmitting = false;
 
+  /* ── Promo code (hardcoded: MAJ2026 = 300 DKK off solo, valid through June 3 2026) ── */
+  var PROMO_CODE     = 'MAJ2026';
+  var PROMO_ID       = 'promo_1TThykLKpD57DT3qEmKMqvgA';
+  var PROMO_OFF      = 30000; // øre (= 300 DKK)
+  var promoActive    = false;
+
   /* ── Views ── */
   var viewCheckout = document.getElementById('viewCheckout');
   var viewPassword = document.getElementById('viewPassword');
@@ -354,6 +427,63 @@ main {
   function err(text)  { msg.textContent = text; msg.className = 'checkout-message error'; msg.style.display = 'block'; }
   function info(text) { msg.textContent = text; msg.className = 'checkout-message info';  msg.style.display = 'block'; }
 
+  /* ── Promo handlers ── */
+  var promoToggle    = document.getElementById('promoToggle');
+  var promoRow       = document.getElementById('promoRow');
+  var promoInput     = document.getElementById('promoInput');
+  var promoBadge     = document.getElementById('promoBadge');
+  var promoError     = document.getElementById('promoError');
+  var discountLine   = document.getElementById('discountLine');
+
+  promoToggle.addEventListener('click', function() {
+    var open = promoRow.classList.toggle('open');
+    if (open) promoInput.focus();
+  });
+
+  document.getElementById('promoApplyBtn').addEventListener('click', applyPromo);
+  promoInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') applyPromo(); });
+
+  function applyPromo() {
+    var code = promoInput.value.trim().toUpperCase();
+    promoError.style.display = 'none';
+    if (code === PROMO_CODE && selectedPlan === 'solo') {
+      promoActive = true;
+      promoRow.classList.remove('open');
+      promoToggle.style.display = 'none';
+      promoBadge.classList.add('visible');
+      updatePriceDisplay();
+    } else if (code === PROMO_CODE && selectedPlan !== 'solo') {
+      promoError.textContent = 'Denne kode gælder kun for Medborgerskabsprøven (uden Dansk 3).';
+      promoError.style.display = 'block';
+    } else {
+      promoError.textContent = 'Ugyldig rabatkode.';
+      promoError.style.display = 'block';
+    }
+  }
+
+  document.getElementById('promoRemoveBtn').addEventListener('click', function() {
+    promoActive = false;
+    promoInput.value = '';
+    promoBadge.classList.remove('visible');
+    promoToggle.style.display = 'inline-flex';
+    updatePriceDisplay();
+  });
+
+  function getEffectiveAmount() {
+    var base = PLANS[selectedPlan].amount;
+    return (promoActive && selectedPlan === 'solo') ? base - PROMO_OFF : base;
+  }
+
+  function updatePriceDisplay() {
+    var plan = PLANS[selectedPlan];
+    var effective = getEffectiveAmount();
+    var hasDiscount = effective < plan.amount;
+    discountLine.classList.toggle('visible', hasDiscount);
+    document.getElementById('priceAmount').textContent = Math.round(effective / 100) + ' kr';
+    document.getElementById('payBtn').textContent = 'Betal ' + Math.round(effective / 100) + ' kr';
+    if (stripeElements) stripeElements.update({ amount: effective });
+  }
+
   /* ── Plan selection ── */
   var cardSolo   = document.getElementById('planSolo');
   var cardBundle = document.getElementById('planBundle');
@@ -371,7 +501,17 @@ main {
     document.getElementById('priceAmount').textContent = PLANS[plan].price;
     document.getElementById('payBtn').textContent = PLANS[plan].payLabel;
     renderFeatures(plan === 'bundle' ? bundleFeatures : soloFeatures);
+    // Hide promo toggle for bundle (not applicable)
+    if (plan === 'bundle') {
+      promoToggle.style.display = 'none';
+      promoRow.classList.remove('open');
+      if (promoActive) { promoBadge.classList.remove('visible'); discountLine.classList.remove('visible'); }
+    } else {
+      if (!promoActive) promoToggle.style.display = 'inline-flex';
+      if (promoActive) { promoBadge.classList.add('visible'); }
+    }
     mountStripeElements();
+    updatePriceDisplay();
   }
 
   cardSolo.addEventListener('click', function() { selectPlan('solo'); });
@@ -379,10 +519,10 @@ main {
 
   /* ── Stripe — deferred intent ── */
   function mountStripeElements() {
-    var plan = PLANS[selectedPlan];
+    var effectiveAmount = getEffectiveAmount();
     stripeElements = stripe.elements({
       mode: 'payment',
-      amount: plan.amount,
+      amount: effectiveAmount,
       currency: 'dkk',
       appearance: {
         theme: 'stripe',
@@ -460,7 +600,11 @@ main {
       }
       var res = await fetch(FUNCTIONS_URL + '/' + PLANS[selectedPlan].createFn, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentEmail, plan: selectedPlan })
+        body: JSON.stringify({
+          email: currentEmail,
+          plan: selectedPlan,
+          promotion_code: (promoActive && selectedPlan === 'solo') ? PROMO_ID : undefined
+        })
       });
       var data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'En fejl opstod.');
