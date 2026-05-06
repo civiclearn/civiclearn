@@ -37,7 +37,8 @@ window.CIVICEDGE_CONFIG = {
 
   /* ─────────────────────────────────
      SIMULATION — Sweden Citizenship
-     Modelled on DK-PR / Canadian rules
+     1015-question bank, 13 chapters
+     Quotas proportional to bank size
      ───────────────────────────────── */
   simulation: {
     questionCount: 25,
@@ -45,14 +46,21 @@ window.CIVICEDGE_CONFIG = {
     passScore: 20,   // 20 / 25 = 80%
 
     topicQuotas: {
-      "History & Geography": 4,
-      "Culture, Traditions & Religion": 4,
-      "Democracy & Government": 4,
-      "Laws, Rights & Equality": 4,
-      "Welfare, Integration & Citizenship": 4,
-      "Economy, Work & Environment": 3,
-      "Media & Sweden in the World": 2
+      "Modern History": 5,                                // bank: 200
+      "Sweden the Country": 3,                            // bank: 110
+      "Human Rights": 2,                                  // bank: 95
+      "Law and Justice": 2,                               // bank: 75
+      "A Secular State and a Multireligious Country": 2,  // bank: 70
+      "How Sweden is Governed": 2,                        // bank: 65
+      "Sweden and the World": 2,                          // bank: 65
+      "Traditions and Holidays": 2,                       // bank: 65
+      "Labour Market and Personal Finance": 1,            // bank: 60
+      "The Welfare Society": 1,                           // bank: 60
+      "Sweden's Democratic System": 1,                    // bank: 50
+      "Elections and Political Parties": 1,               // bank: 50
+      "The Role of Media": 1                              // bank: 50
     }
+    // Total: 25 — every chapter represented at least once
   },
 
   /* ─────────────────────────────────
@@ -62,8 +70,13 @@ window.CIVICEDGE_CONFIG = {
     questionCount: 5
   },
 
+  /* ─────────────────────────────────
+     TOPICS — 13 chapters, no microtopics
+     Microtopics exist in the JSON but are
+     suppressed in the UI by topics-only mode
+     ───────────────────────────────── */
   topics: {
-    mode: "microtopics"
+    mode: "topics-only"
   }
 };
 

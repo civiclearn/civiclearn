@@ -1,0 +1,81 @@
+{
+  "exam_id": "dele-a2-06",
+  "section": "escritas",
+  "language": "es",
+  "level": "A2",
+  "duration_minutes": 45,
+  "max_score": 25,
+  "rubrics": {
+    "default": {
+      "scale_id": "escritas_a2",
+      "max_points_per_task": 12.5,
+      "scoring_formula": "task_points = round((sum_of_bandas / 6) * 12.5, 1) ; element_score = sum(task_points) ; element_score is 0–25",
+      "categorias": [
+        {
+          "id": "cumplimiento_tarea",
+          "name": "Cumplimiento de la tarea",
+          "weight": 0.5,
+          "bandas": {
+            "0": "El texto no responde a la tarea o se aparta totalmente del tema. No aborda los puntos pedidos o usa un género/registro completamente inadecuado.",
+            "1": "El texto cumple parcialmente con la tarea. Faltan puntos importantes, el formato es incorrecto, o el registro/género no se ajusta a lo pedido.",
+            "2": "El texto cumple con la tarea principal con pequeñas omisiones. Aborda la mayoría de los puntos pedidos con un formato y registro adecuados. Umbral A2 — apto.",
+            "3": "El texto cumple completamente con todos los puntos de la tarea, con buen formato, registro adecuado y extensión apropiada."
+          }
+        },
+        {
+          "id": "uso_lengua",
+          "name": "Uso de la lengua",
+          "weight": 0.5,
+          "bandas": {
+            "0": "El nivel de lengua es muy bajo. El texto es difícil o imposible de entender por errores graves de gramática, ortografía o vocabulario.",
+            "1": "Errores frecuentes de gramática y vocabulario que dificultan la comprensión. El control del A2 es insuficiente.",
+            "2": "El nivel de lengua corresponde al A2. Los errores no impiden la comprensión. Vocabulario básico pero suficiente. Umbral A2 — apto.",
+            "3": "Buen control de la lengua A2. Vocabulario adecuado y variado para el nivel, con pocos errores y estructuras correctamente empleadas."
+          }
+        }
+      ]
+    }
+  },
+  "tasks": [
+    {
+      "task_id": "escritas-1",
+      "title": "Tarea 1",
+      "type": "productive_text",
+      "rubric_id": "default",
+      "instructions": "Lee este mensaje de tu amiga Alba y respóndele.",
+      "constraints": { "min_words": 60, "max_words": 70 },
+      "eval_notes": "El candidato debe responder a Alba sobre su decisión entre clases de pintura y un coro. Cualquier postura razonable es válida (recomendar la pintura, recomendar el coro, proponer empezar por una y dejar la otra para más adelante, sugerir una tercera opción). No penalices la elección concreta. Verifica que el texto cubra los cuatro puntos pedidos: (1) saludo + reacción a la noticia, (2) opinión sobre las dos opciones, (3) sugerencia concreta con un motivo, (4) pregunta práctica + despedida. Evalúa la calidad de la lengua según las bandas de la rúbrica.",
+      "prompts": [
+        {
+          "option_id": "single",
+          "stimulus": "¡Hola!\n\n¿Qué tal? Te escribo para pedirte un consejo. Llevo un par de meses pensando en empezar una afición nueva los fines de semana, porque entre semana solo trabajo y me aburro. Estoy entre dos cosas: apuntarme a clases de pintura cerca de mi casa o entrar en un coro con un amigo que canta.\n\nLas dos opciones me llaman, pero no me decido. ¿Tú qué harías? Tu opinión me importa mucho.\n\nUn abrazo,\nAlba",
+          "instruction": "Escríbele un mensaje a Alba. En tu mensaje:\n– Salúdala y reacciona a su decisión.\n– Dale tu opinión sobre las dos opciones.\n– Sugiérele una opción concreta y explica por qué te parece mejor.\n– Pregúntale algo práctico y despídete.",
+          "model_answer": "¡Hola, Alba!\n\n¡Qué buena idea apuntarte a algo nuevo los fines de semana! Las dos opciones me parecen geniales, pero yo te diría que pruebes primero las clases de pintura. Es algo más tranquilo y creativo, y te va a ayudar a desconectar del trabajo. El coro siempre lo puedes empezar el año que viene.\n\n¿Cuándo te gustaría empezar las clases? Cuéntame cuando lo decidas.\n\n¡Un abrazo!"
+        }
+      ]
+    },
+    {
+      "task_id": "escritas-2",
+      "title": "Tarea 2",
+      "type": "productive_text",
+      "rubric_id": "default",
+      "instructions": "Elige UNA de las dos opciones y escribe el texto correspondiente.",
+      "constraints": { "min_words": 70, "max_words": 80 },
+      "eval_notes": "El candidato elige UNA de las dos opciones. Evalúa solo la opción elegida (consulta `chosen_option` en la respuesta). Verifica que el texto cubra los cuatro puntos pedidos en la opción elegida. No penalices el contenido específico (qué recomendaciones pide en el foro, qué problemas describe en la queja); evalúa la calidad de la lengua según las bandas de la rúbrica. La Opción B requiere registro formal: penaliza saludos/despedidas claramente informales (p. ej. \"¡Hola!\" o \"Un beso\") en `cumplimiento_tarea`.",
+      "prompts": [
+        {
+          "option_id": "A",
+          "label": "Opción A: Mensaje en el foro de tu barrio para pedir recomendaciones",
+          "instruction": "Acabas de mudarte a un barrio nuevo y no conoces bien la zona. Escribe un mensaje en el foro de tu barrio para pedir recomendaciones a tus nuevos vecinos. En tu mensaje:\n– Saluda y preséntate brevemente (cómo te llamas, de dónde vienes, hace cuánto te mudaste).\n– Explica qué tipo de información te interesa.\n– Pide dos o tres recomendaciones concretas (sitios para comer, supermercado, panadería, parque, etc.).\n– Agradece y despídete.",
+          "model_answer": "¡Hola, vecinos!\n\nMe llamo Carlos y acabo de mudarme al barrio desde Sevilla, hace dos semanas. Todavía no conozco bien la zona y me gustaría empezar a vivir aquí lo mejor posible.\n\n¿Me podríais recomendar un supermercado bueno y barato cerca de la calle Mayor? También busco un bar de tapas con buen ambiente para los fines de semana, y una panadería tradicional que abra los domingos por la mañana.\n\nMuchas gracias por vuestras respuestas.\n\n¡Un saludo!\nCarlos"
+        },
+        {
+          "option_id": "B",
+          "label": "Opción B: Correo formal a un hotel para presentar una queja",
+          "instruction": "Te alojaste en un hotel durante un viaje y la experiencia fue mala (problemas con la habitación, el ruido, el desayuno, etc.). Escribe un correo formal al hotel para presentar una queja y pedir una solución. En tu correo:\n– Salúdales formalmente y di tu nombre y las fechas de tu estancia.\n– Explica brevemente dos o tres problemas que tuviste.\n– Pide una solución o compensación concreta.\n– Despídete formalmente.",
+          "model_answer": "Estimados señores:\n\nMe llamo Carmen Vidal y me alojé en su hotel del 15 al 18 de mayo. Quería presentarles una queja por varios problemas durante mi estancia: la habitación estaba sucia al llegar, el aire acondicionado no funcionaba y el desayuno terminó media hora antes de lo anunciado dos días seguidos.\n\nLes pediría una compensación, por ejemplo un descuento para una próxima estancia.\n\nQuedo a la espera de su respuesta.\n\nAtentamente,\nCarmen Vidal"
+        }
+      ]
+    }
+  ]
+}
