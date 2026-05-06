@@ -88,33 +88,39 @@
     </header>
 
     <div class="help-container">
+      <!-- Hidden i18n strings used by JS alerts/confirms (translated by CivicLearnI18n.apply) -->
+      <span hidden id="i18nFillAll" data-i18n="se_help_alert_fill_all">Please fill in all fields.</span>
+      <span hidden id="i18nSendFailed" data-i18n="se_help_alert_send_failed">Could not send. Please try again.</span>
+      <span hidden id="i18nResetConfirm" data-i18n="reset_confirm_message">Do you really want to erase all your training data?</span>
+      <span hidden id="i18nResetDone" data-i18n="reset_success_message">Your data has been successfully reset.</span>
+
       <!-- FAQs -->
       <div class="help-section">
-        <h2>Frequently Asked Questions</h2>
+        <h2 data-i18n="se_help_faq_heading">Frequently Asked Questions</h2>
 
         <div class="faq-item">
-  <div class="faq-q">What does this training cover? <span class="faq-arrow">›</span></div>
-  <div class="faq-a">This platform prepares you for the upcoming Swedish citizenship civics test (medborgarskapsprovet). Every question on the platform is drawn from <em>Sverige i fokus</em>, the official study guide for the test, covering Swedish democracy, laws and rights, history, geography, working life, the welfare society, traditions, and Sweden's role in the world.</div>
+  <div class="faq-q"><span data-i18n="se_help_faq_q1">What does this training cover?</span> <span class="faq-arrow">›</span></div>
+  <div class="faq-a" data-i18n="se_help_faq_a1">This platform prepares you for the upcoming Swedish citizenship civics test (medborgarskapsprovet). Every question on the platform is drawn from Sverige i fokus, the official study guide for the test, covering Swedish democracy, laws and rights, history, geography, working life, the welfare society, traditions, and Sweden's role in the world.</div>
 </div>
 
 <div class="faq-item">
-  <div class="faq-q">Is this the official test? <span class="faq-arrow">›</span></div>
-  <div class="faq-a">No — the official test is administered by Swedish authorities and our platform is preparation material. However, every question here is based directly on <em>Sverige i fokus</em>, the official study guide. When the final test format is published, we will adjust the simulation to match it exactly.</div>
+  <div class="faq-q"><span data-i18n="se_help_faq_q2">Is this the official test?</span> <span class="faq-arrow">›</span></div>
+  <div class="faq-a" data-i18n="se_help_faq_a2">No — the official test is administered by Swedish authorities and our platform is preparation material. However, every question here is based directly on Sverige i fokus, the official study guide. When the final test format is published, we will adjust the simulation to match it exactly.</div>
 </div>
 
         <div class="faq-item">
-          <div class="faq-q">How does the wave system work in topic tests? <span class="faq-arrow">›</span></div>
-          <div class="faq-a">When you practise by topic, questions you answer incorrectly come back in the next wave. This continues until you answer every question correctly. This ensures genuine mastery, not just memorisation.</div>
+          <div class="faq-q"><span data-i18n="se_help_faq_q3">How does the wave system work in topic tests?</span> <span class="faq-arrow">›</span></div>
+          <div class="faq-a" data-i18n="se_help_faq_a3">When you practise by topic, questions you answer incorrectly come back in the next wave. This continues until you answer every question correctly. This ensures genuine mastery, not just memorisation.</div>
         </div>
 
         <div class="faq-item">
-          <div class="faq-q">What is the simulation mode? <span class="faq-arrow">›</span></div>
-          <div class="faq-a">The simulation presents 25 questions in 45 minutes with an 80% pass threshold (20/25), mirroring the expected format of the real test. Use it as a rehearsal after practising by topic.</div>
+          <div class="faq-q"><span data-i18n="se_help_faq_q4">What is the simulation mode?</span> <span class="faq-arrow">›</span></div>
+          <div class="faq-a" data-i18n="se_help_faq_a4">The simulation presents 25 questions in 45 minutes with an 80% pass threshold (20/25), mirroring the expected format of the real test. Use it as a rehearsal after practising by topic.</div>
         </div>
 
         <div class="faq-item">
-          <div class="faq-q">Can I use this on my phone? <span class="faq-arrow">›</span></div>
-          <div class="faq-a">Yes, the platform is fully responsive and works on phones, tablets, and desktops. You can add it to your home screen for app-like access.</div>
+          <div class="faq-q"><span data-i18n="se_help_faq_q5">Can I use this on my phone?</span> <span class="faq-arrow">›</span></div>
+          <div class="faq-a" data-i18n="se_help_faq_a5">Yes, the platform is fully responsive and works on phones, tablets, and desktops. You can add it to your home screen for app-like access.</div>
         </div>
       </div>
 
@@ -174,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const name = document.getElementById("contactName").value.trim();
     const email = document.getElementById("contactEmail").value.trim();
     const message = document.getElementById("contactMessage").value.trim();
-    if (!name || !email || !message) return alert("Please fill in all fields.");
+    if (!name || !email || !message) return alert(document.getElementById("i18nFillAll").textContent);
     try {
       await fetch("https://civiclearn.app.n8n.cloud/webhook/contact", {
         method: "POST",
@@ -183,14 +189,14 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       document.getElementById("contactForm").innerHTML = `<div class="contact-success"><h3 data-i18n="contact_success_title">Message sent!</h3><p data-i18n="contact_success_text">Thank you. We will reply shortly.</p></div>`;
       CivicLearnI18n.apply();
-    } catch { alert("Could not send. Please try again."); }
+    } catch { alert(document.getElementById("i18nSendFailed").textContent); }
   });
 
   // Reset
   document.getElementById("resetBtn")?.addEventListener("click", () => {
-    if (!confirm("Do you really want to erase all your training data?")) return;
+    if (!confirm(document.getElementById("i18nResetConfirm").textContent)) return;
     ["civicedge_progress", "civicedge_stats", "civicedge_saved", "civiclearn_answered_mcqs", "cl_gauge_cache", "civiclearn:se:dashseq:index"].forEach(k => localStorage.removeItem(k));
-    alert("Your data has been reset.");
+    alert(document.getElementById("i18nResetDone").textContent);
     location.reload();
   });
 });
