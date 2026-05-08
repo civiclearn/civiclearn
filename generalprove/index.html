@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <title>Generalprøve: Indfødsretsprøven – Eksamen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --paper: #fdfcf7;
+      --paper-border: #d4d0c8;
+      --text: #1a1a1a;
+      --text-muted: #555;
+      --orange: #e8943c;
+      --orange-dark: #d4802e;
+      --purple: #7c3aed;
+      --purple-dark: #6d28d9;
+      --green: #059669;
+      --red: #dc2626;
+      --bg: #f0ece4;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ============ WAITING ROOM ============ */
+    .waiting-room {
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 60px 24px;
+      text-align: center;
+      font-family: 'Lexend', sans-serif;
+    }
+
+    .wr-logo {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    .wr-title {
+      font-family: 'Lexend', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--purple);
+      margin-bottom: 8px;
+    }
+
+    .wr-sub {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    .wr-countdown {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+      margin-bottom: 32px;
+    }
+
+    .wr-countdown-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .wr-countdown-time {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--purple);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .wr-countdown-date {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .wr-email-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+      text-align: left;
+    }
+
+    .wr-email-box h3 {
+      font-family: 'Lexend', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .wr-email-box p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .wr-email-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .wr-email-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1.5px solid #e2e5ea;
+      border-radius: 10px;
+      font-family: 'Lexend', sans-serif;
+      font-size: 0.9rem;
+      background: #faf6f1;
+    }
+    .wr-email-row input:focus { outline: none; border-color: var(--purple); }
+
+    .wr-email-row button {
+      padding: 10px 20px;
+      background: var(--purple);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Lexend', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .wr-email-row button:hover { background: var(--purple-dark); }
+
+    .wr-status {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      min-height: 20px;
+    }
+    .wr-status.ok { color: var(--green); }
+    .wr-status.err { color: var(--red); }
+
+    .wr-ready {
+      margin-top: 20px;
+      padding: 16px;
+      background: #ecfdf5;
+      border-radius: 12px;
+      color: var(--green);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    /* ============ EXAM PAGE ============ */
+    .exam-page { display: none; }
+    .exam-page.active { display: block; }
+
+    /* Timer */
+    .exam-timer {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 100;
+      background: #fff;
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-family: 'Lexend', sans-serif;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      min-width: 100px;
+    }
+
+    .exam-timer-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .exam-timer-time {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--purple);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .exam-timer.urgent { border-color: var(--red); }
+    .exam-timer.urgent .exam-timer-time { color: var(--red); }
+
+    /* Paper container */
+    .paper {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--paper);
+      border: 1px solid var(--paper-border);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+      min-height: 100vh;
+    }
+
+    .paper-inner {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .paper-bar {
+      width: 36px;
+      background: linear-gradient(180deg, var(--orange) 0%, var(--orange-dark) 100%);
+      flex-shrink: 0;
+    }
+
+    .paper-content {
+      flex: 1;
+      padding: 32px 32px 60px 24px;
+    }
+
+    @media (max-width: 600px) {
+      .paper-content { padding: 20px 16px 60px 14px; }
+      .paper-bar { width: 24px; }
+      .exam-timer { top: 8px; right: 8px; padding: 8px 12px; }
+      .exam-timer-time { font-size: 1.2rem; }
+    }
+
+    /* Cover section */
+    .paper-cover {
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e0dcd5;
+    }
+
+    .paper-branding {
+      text-align: right;
+      margin-bottom: 16px;
+    }
+    .paper-branding-text {
+      font-size: 0.6rem;
+      color: var(--purple);
+      font-weight: 600;
+      font-family: 'Lexend', sans-serif;
+      line-height: 1.3;
+    }
+
+    .paper-main-title {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .paper-meta {
+      font-size: 0.88rem;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    .paper-meta em { font-style: italic; }
+
+    .paper-info-table {
+      margin-top: 16px;
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 420px;
+    }
+    .paper-info-table td {
+      border: 1px solid #ccc;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      width: 50%;
+      vertical-align: top;
+    }
+    .paper-info-table .label { color: var(--text-muted); }
+    .paper-info-table .value { font-weight: 600; }
+
+    /* Instructions */
+    .paper-instructions {
+      font-size: 0.82rem;
+      color: #444;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e0dcd5;
+    }
+
+    .paper-instructions p { margin-bottom: 8px; }
+
+    /* Questions */
+    .paper-section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin: 28px 0 16px;
+      padding-top: 12px;
+      border-top: 1px solid #e0dcd5;
+      font-family: 'Lexend', sans-serif;
+    }
+
+    .question {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #eee;
+    }
+    .question:last-child { border-bottom: none; }
+
+    .q-num-text {
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .q-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 5px 8px;
+      margin: 2px 0;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.1s;
+      font-size: 0.86rem;
+      line-height: 1.4;
+    }
+    .q-option:hover { background: rgba(124,58,237,0.04); }
+
+    .q-checkbox {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid #888;
+      border-radius: 2px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: transparent;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .q-option.selected .q-checkbox {
+      color: var(--purple);
+      border-color: var(--purple);
+    }
+
+    .q-option-label { flex: 1; }
+
+    /* Submit area */
+    .paper-submit {
+      margin-top: 36px;
+      padding-top: 20px;
+      border-top: 2px solid #ccc;
+      text-align: center;
+    }
+
+    .paper-submit-info {
+      font-family: 'Lexend', sans-serif;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .paper-submit-btn {
+      display: inline-block;
+      padding: 14px 40px;
+      background: var(--purple);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Lexend', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      box-shadow: 0 4px 12px rgba(124,58,237,0.2);
+    }
+    .paper-submit-btn:hover { background: var(--purple-dark); }
+    .paper-submit-btn:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* ============ POST-EXAM ============ */
+    .post-exam {
+      display: none;
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 80px 24px;
+      text-align: center;
+      font-family: 'Lexend', sans-serif;
+    }
+    .post-exam.active { display: block; }
+
+    .post-exam-check {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: #ecfdf5;
+      color: var(--green);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    .post-exam h1 {
+      font-family: 'Lexend', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--purple);
+      margin-bottom: 8px;
+    }
+
+    .post-exam p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .post-exam-stats {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin: 24px 0;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+    }
+
+    .post-exam-stat {
+      text-align: center;
+    }
+    .post-exam-stat .num {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--purple);
+    }
+    .post-exam-stat .label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ============ CLOSED ============ */
+    .exam-closed {
+      display: none;
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 80px 24px;
+      text-align: center;
+      font-family: 'Lexend', sans-serif;
+    }
+    .exam-closed.active { display: block; }
+    .exam-closed h1 {
+      font-family: 'Lexend', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .exam-closed p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+    .exam-closed a {
+      color: var(--purple);
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============ STATE: WAITING ROOM ============ -->
+<div class="waiting-room" id="waitingRoom">
+  <div class="wr-logo">Indfodsretsprove.dk · Generalprøve 2026</div>
+
+  <h1 class="wr-title">Generalprøve<br>Indfødsretsprøven</h1>
+  <p class="wr-sub">
+    45 spørgsmål · 45 minutter · Ingen hjælpemidler<br>
+    Prøven åbner præcis kl. 13:00 dansk tid.
+  </p>
+
+  <div class="wr-countdown">
+    <div class="wr-countdown-label">Prøven starter om</div>
+    <div class="wr-countdown-time" id="wrCountdown">--:--:--</div>
+    <div class="wr-countdown-date">Lørdag den 9. maj 2026 kl. 13:00</div>
+  </div>
+
+  <div class="wr-email-box">
+    <h3>Dine oplysninger</h3>
+    <p>Navn og e-mail. Resultatet sendes til denne e-mail i aften.</p>
+    <input type="text" id="wrName" placeholder="Dit navn" style="width:100%;padding:10px 14px;border:1.5px solid #e2e5ea;border-radius:10px;font-family:'Lexend',sans-serif;font-size:0.9rem;background:#faf6f1;margin-bottom:8px;">
+    <div class="wr-email-row">
+      <input type="email" id="wrEmail" placeholder="din@email.dk">
+      <button id="wrReadyBtn" onclick="markReady()">Bekræft</button>
+    </div>
+    <div class="wr-status" id="wrStatus"></div>
+  </div>
+
+  <div class="wr-ready" id="wrReady" style="display:none;">
+    ✓ Du er klar. Prøven starter automatisk, når nedtællingen rammer 00:00:00.
+  </div>
+</div>
+
+<!-- ============ STATE: EXAM ============ -->
+<div class="exam-page" id="examPage">
+
+  <!-- Timer -->
+  <div class="exam-timer" id="examTimer">
+    <div class="exam-timer-label">Tid tilbage</div>
+    <div class="exam-timer-time" id="examTimerTime">45:00</div>
+  </div>
+
+  <!-- Paper -->
+  <div class="paper">
+    <div class="paper-inner">
+      <div class="paper-bar"></div>
+      <div class="paper-content">
+
+        <!-- Cover -->
+        <div class="paper-cover">
+          <div class="paper-branding">
+            <div class="paper-branding-text">Indfodsretsprove.dk<br>Generalprøve 2026</div>
+          </div>
+
+          <h1 class="paper-main-title">Generalprøve<br>Indfødsretsprøven</h1>
+          <div class="paper-meta">Hjælpemidler: <em>Ingen</em></div>
+          <div class="paper-meta">Tid: <em>45 minutter</em></div>
+          <div class="paper-meta" style="margin-top:8px;color:#666;font-size:0.82rem;">Lørdag den 9. maj 2026, kl. 13:00–13:45</div>
+
+          <table class="paper-info-table">
+            <tr>
+              <td class="label">Navn</td>
+              <td class="value" id="examUserName">–</td>
+            </tr>
+            <tr>
+              <td class="label">E-mail</td>
+              <td class="value" id="examUserEmail">–</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Instructions -->
+        <div class="paper-instructions">
+          <p>
+            Generalprøven er en øvelsesprøve der følger det officielle format for indfødsretsprøven.
+            Prøven består af 45 spørgsmål, der skal besvares inden for 45 minutter.
+          </p>
+          <p>
+            De 45 spørgsmål er multiple choice-spørgsmål med to eller tre svarmuligheder.
+            35 spørgsmål vedrører det officielle læremateriale,
+            5 spørgsmål vedrører aktuelle emner, og
+            5 spørgsmål vedrører værdier i det danske samfund.
+          </p>
+          <p>
+            Spørgsmålene besvares ved at klikke på det rigtige svar.
+            Du kan ændre dit svar ved at klikke på et andet svarmulighed.
+          </p>
+        </div>
+
+        <!-- Questions get injected here -->
+        <div id="questionsContainer"></div>
+
+        <!-- Submit -->
+        <div class="paper-submit">
+          <p class="paper-submit-info">
+            <span id="answeredCount">0</span> af 45 spørgsmål besvaret
+          </p>
+          <button class="paper-submit-btn" id="submitBtn" onclick="submitExam()">
+            Aflever prøven
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STATE: POST-EXAM ============ -->
+<div class="post-exam" id="postExam">
+  <div class="post-exam-check">✓</div>
+  <h1>Din besvarelse er registreret</h1>
+  <p>Tak for din deltagelse i Generalprøven.</p>
+  <p>Dine resultater sendes til <strong id="postEmail"></strong> i aften kl. 20:00.</p>
+
+  <div class="post-exam-stats">
+    <div class="post-exam-stat">
+      <div class="num" id="postAnswered">0</div>
+      <div class="label">Besvaret</div>
+    </div>
+    <div class="post-exam-stat">
+      <div class="num" id="postUnanswered">0</div>
+      <div class="label">Ubesvaret</div>
+    </div>
+    <div class="post-exam-stat">
+      <div class="num" id="postTime">0:00</div>
+      <div class="label">Tid brugt</div>
+    </div>
+  </div>
+
+  <p style="margin-top:24px;">
+    <a href="https://indfodsretsprove.dk/generalprove/" style="color:#7c3aed;text-decoration:none;font-weight:600;">← Tilbage til Generalprøven</a>
+  </p>
+</div>
+
+<!-- ============ STATE: CLOSED ============ -->
+<div class="exam-closed" id="examClosed">
+  <h1>Generalprøven er afsluttet</h1>
+  <p>Generalprøven blev afholdt lørdag den 9. maj 2026 kl. 13:00–13:45.</p>
+  <p style="margin-top:16px;">Resultater er sendt til alle deltagere.</p>
+  <p style="margin-top:24px;">
+    <a href="https://indfodsretsprove.dk/generalprove/">← Tilbage til Generalprøven</a>
+  </p>
+</div>
+
+
+<script>
+/* ================================================================
+   GENERALPRØVE EXAM — CONFIG & QUESTIONS
+   ================================================================ */
+
+var EXAM_START = new Date('2026-05-09T13:00:00+02:00');
+var EXAM_END   = new Date('2026-05-09T13:45:00+02:00');
+var EXAM_DURATION_MS = 45 * 60 * 1000;
+var API_BASE = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+
+// ─── TESTING MODE ───
+// Set to true + adjust dates to test locally. Set to false for production.
+var TEST_MODE = false;
+if (TEST_MODE) {
+  var now = new Date();
+  EXAM_START = new Date(now.getTime() + 10 * 1000);   // starts in 10 seconds
+  EXAM_END   = new Date(now.getTime() + 10 * 1000 + EXAM_DURATION_MS);
+}
+
+/* ─── QUESTIONS ───
+   Replace this array with the actual 45-question set.
+   Each question: { id, text, options (array of strings), section }
+   section: "laere" (1-35), "aktuel" (36-40), "vaerdi" (41-45)
+   DO NOT include correct answers here — those live in the edge function.
+*/
+var QUESTIONS = [
+  { id:1, text:"I 1970erne opstod en række græsrodsbevægelser med forskellige mål. En af de markante mærkesager var", options:["flere kolonihaver i storbyerne", "indførelse af et fælleseuropæisk militær", "modstand mod atomkraft"], section:"laere" },
+  { id:2, text:"Hvad indebar stavnsbåndet i 1700-tallet?", options:["At kongen havde eneret på at handle med udlandet", "At bønderne havde begrænset ret til at flytte", "At kristendommen var den eneste tilladte religion"], section:"laere" },
+  { id:3, text:"Hvad valgte Danmark at gøre under 1. Verdenskrig efter pres fra Tyskland?", options:["At internere jøder i fangelejre", "At overgive Jylland til Tyskland", "At lægge miner ud i danske farvande"], section:"laere" },
+  { id:4, text:"Hvad var et mål med reformerne af førtidspension og kontanthjælp?", options:["At færre skulle modtage disse ydelser", "At ydelserne skulle forhøjes", "At ordningerne skulle afskaffes", "At flere unge skulle på førtidspension"], section:"laere" },
+  { id:5, text:"Hvornår blev Det Radikale Venstre dannet?", options:["1915", "1871", "1905", "1901"], section:"laere" },
+  { id:6, text:"Hvornår underskrev Frederik 7. Danmarks første frie forfatning?", options:["6. juni 1849", "15. juni 1864", "1. januar 1848", "5. juni 1849"], section:"laere" },
+  { id:7, text:"Hvad kaldes Nordslesvig efter 1920?", options:["Sydslesvig", "Mellemslesvig", "Sønderjylland", "Angel"], section:"laere" },
+  { id:8, text:"Hvornår fandt Påskekrisen sted?", options:["1901", "1918", "1920", "1929"], section:"laere" },
+  { id:9, text:"Hvad blev gennemført som led i Kanslergadeforliget ud over økonomiske tiltag?", options:["En socialreform", "En uddannelsesreform", "En forfatningsændring", "En militærreform"], section:"laere" },
+  { id:10, text:"Kan politikerne bestemme, hvordan domstolene skal afgøre en konkret retssag?", options:["Nej", "Ja"], section:"laere" },
+  { id:11, text:"Hvem blandt følgende kan fremsætte lovforslag i Folketinget?", options:["Kommunerne", "Regeringen", "EU"], section:"laere" },
+  { id:12, text:"Kan den samme person være statsminister i mere end to valgperioder?", options:["Ja", "Nej"], section:"laere" },
+  { id:13, text:"Hvilket niveau af demokrati beskæftiger Grundloven sig især med?", options:["Det direkte demokrati gennem folkeafstemninger", "Det lokale demokrati i kommunerne", "Det regionale demokrati i regionerne", "Det nationale demokrati i Folketinget"], section:"laere" },
+  { id:14, text:"Hvad er finansloven?", options:["En skatteaftale mellem partier", "Statens samlede budget for det kommende år", "En flerårig økonomisk plan", "Kommunernes budgetlov"], section:"laere" },
+  { id:15, text:"Hvad kaldes den rapport, et udvalg udarbejder efter behandling af et lovforslag?", options:["En redegørelse", "En dom", "En betænkning", "En bekendtgørelse"], section:"laere" },
+  { id:16, text:"Hvad er en central konsekvens af, at ingen partier har haft flertal alene?", options:["En tradition for kompromiser og samarbejde", "At oppositionen ingen rolle spiller", "At regeringen kan regere uden Folketinget", "At lovgivning sjældent vedtages"], section:"laere" },
+  { id:17, text:"Hvad betyder udtrykket ”det samarbejdende folkestyre”?", options:["At borgerne stemmer om alle love", "At regeringen bestemmer uden debat", "At alle partier altid er enige", "At love ofte vedtages med brede flertal efter kompromiser"], section:"laere" },
+  { id:18, text:"Hvilken by er Danmarks største?", options:["Odense", "Århus", "København"], section:"laere" },
+  { id:19, text:"Hvad var middel-levetiden for kvinder i 2019-2020?", options:["83-84 år", "88-89 år", "78-79 år"], section:"laere" },
+  { id:20, text:"Hvorfor beskytter lovgivningen minoriteter særligt?", options:["For at beskytte dem mod overgreb fra staten og andre borgere.", "For at give dem politisk magt.", "For at begrænse ytringsfrihed generelt.", "For at forhindre kritik."], section:"laere" },
+  { id:21, text:"Hvornår blev verdens første havvindmøllepark opstillet i Danmark?", options:["I 1991.", "I 1985.", "I 2000.", "I 1975."], section:"laere" },
+  { id:22, text:"Hvad er et synligt symbol på det nordiske fællesskab?", options:["At landene deler samme nationaldag.", "At landene har samme nationalsang.", "At landene har samme valuta.", "At alle nordiske lande har et kors i deres flag."], section:"laere" },
+  { id:23, text:"Hvornår fik Grønland hjemmestyre efter en folkeafstemning?", options:["I 2009.", "I 1985.", "I 1979.", "I 1978."], section:"laere" },
+  { id:24, text:"Hvornår forlod Grønland EF/EU efter en folkeafstemning?", options:["I 1992.", "I 1985.", "I 1979.", "I 2009."], section:"laere" },
+  { id:25, text:"Hvornår havde den første film om Olsen-banden premiere?", options:["1971", "1968", "1970"], section:"laere" },
+  { id:26, text:"Hvilket skriftsystem blev brugt i Danmarks ældste litteratur?", options:["Tyske gotiske bogstaver.", "Latinske bogstaver.", "Græske bogstaver.", "Runer skrevet på oldnordisk."], section:"laere" },
+  { id:27, text:"Hvilken dansk forfatter er internationalt kendt for sine eventyr?", options:["H.C. Andersen.", "Emma Gad.", "Herman Bang.", "Klaus Rifbjerg."], section:"laere" },
+  { id:28, text:"Hvilken Holberg-komedie er blandt de mest opførte på danske scener?", options:["Erasmus Montanus.", "Jeppe på Bjerget.", "Aladdin.", "Sylfiden."], section:"laere" },
+  { id:29, text:"Hvordan har arbejdsløsheden i Danmark overordnet udviklet sig de sidste ti år?", options:["Den er faldet", "Den er vokset"], section:"laere" },
+  { id:30, text:"Hvad måler bruttonationalproduktet (BNP)?", options:["Statens budgetbalance", "Den samlede værdi af et lands produktion på et år", "Den samlede opsparing i landet", "Privatforbrugets størrelse"], section:"laere" },
+  { id:31, text:"Hvilken international organisation arbejder for fri handel sammen med EU?", options:["UNICEF", "WTO", "WHO", "NATO"], section:"laere" },
+  { id:32, text:"Hvad er en central langsigtet udfordring for velfærdsstaten?", options:["At arbejdsløsheden er for lav", "At der er for mange børn", "At uddannelsesniveauet er for højt", "At færre skal forsørge flere"], section:"laere" },
+  { id:33, text:"Har Danmark forbehold for EU’s forsvars- og sikkerhedspolitik?", options:["Nej", "Ja"], section:"laere" },
+  { id:34, text:"Hvad betyder internationale organisationers beslutninger for Danmark?", options:["De er kun vejledende", "De gælder kun uden for Danmark", "De er med til at fastlægge rammerne for det danske samfund", "De har ingen praktisk betydning"], section:"laere" },
+  { id:35, text:"Hvilket dansk inspektionsskib patruljerer ved Grønlands kyst?", options:["Inspektionsskibet Vædderen", "Inspektionsskibet Knud Rasmussen", "Fregatten Iver Huitfeldt", "Patruljeskibet Diana"], section:"laere" },
+  { id:36, text:"Hvad annoncerede statsminister Mette Frederiksen den 26. februar 2026?", options:["Danmarks officielle ansøgning om optagelse i eurozonen.", "Et nyvalg til Folketinget den 24. marts 2026 – et folketingsvalg udløst af bl.a. Grønlandskrisen.", "Sin afgang som statsminister og formand for Socialdemokratiet."], section:"aktuel" },
+  { id:37, text:"Hvilken diplomatisk spænding blussede op igen den 4. januar 2026 mellem Danmark, Grønland og USA?", options:["Fornyet amerikansk retorik om at købe Grønland.", "USA’s lukning af sit konsulat i Nuuk.", "En uenighed om fiskerirettigheder i Nordatlanten."], section:"aktuel" },
+  { id:38, text:"Hvilken historisk ændring skete der for PostNord i Danmark fra den 1. januar 2026?", options:["Alle postbude blev erstattet af selvkørende leveringsrobotter.", "PostNord stoppede fuldstændig med at omdele landsdækkende breve.", "PostNord blev solgt til en privat amerikansk investorgruppe."], section:"aktuel" },
+  { id:39, text:"Hvad skete der med Novo Nordisks aktie i slutningen af februar 2026?", options:["Et skuffende klinisk forsøg med en ny fedmemedicin fik OMX Copenhagen 25-indekset til at falde op til 3,6 %, og den danske krone blev svækket.", "Selskabet blev opkøbt af den amerikanske konkurrent Eli Lilly.", "Aktien nåede sin højeste kurs nogensinde efter godkendelse af et nyt lægemiddel."], section:"aktuel" },
+  { id:40, text:"Hvad meddelte den danske udlændinge- og integrationsministerium i begyndelsen af marts 2026?", options:["At kravene til indfødsretsprøven blev lempet markant.", "At behandlingen af næsten alle ansøgninger om statsborgerskab via naturalisation blev suspenderet indtil efter valget.", "At alle ventende ansøgninger om statsborgerskab automatisk blev godkendt."], section:"aktuel" },
+  { id:41, text:"Kan man ifølge dansk lov kræve, at en anden borger aldrig må udtale sig kritisk om ens religion?", options:["Nej", "Ja"], section:"vaerdi" },
+  { id:42, text:"Har religiøse trossamfund ret til at fastsætte regler, der gælder i stedet for dansk lov?", options:["Nej", "Ja"], section:"vaerdi" },
+  { id:43, text:"Hvilken myndighed kan opløse (forbyde) en forening, der søger at opnå sine mål med vold?", options:["Politiet", "Domstolene"], section:"vaerdi" },
+  { id:44, text:"Kan kvinder være biskopper i den danske folkekirke?", options:["Ja", "Nej"], section:"vaerdi" },
+  { id:45, text:"Kan religiøse normer begrunde begrænsninger i borgernes ytringsfrihed?", options:["Nej", "Ja"], section:"vaerdi" }
+];
+
+
+/* ================================================================
+   STATE
+   ================================================================ */
+
+var userEmail = '';
+var userName = '';
+var ready = false;             // user has entered name+email and clicked Bekræft
+var examStartedAt = null;
+var answers = {};              // { questionId: selectedOptionIndex }
+var submitted = false;
+var timerInterval = null;
+var clientAttemptId = null;    // generated once per attempt, kept in localStorage
+
+
+/* ================================================================
+   IDEMPOTENCY ID
+   ================================================================ */
+
+function getOrCreateAttemptId() {
+  var id = localStorage.getItem('gp_attempt_id');
+  if (!id) {
+    // Use crypto.randomUUID where available; fall back to a v4-ish polyfill
+    if (window.crypto && crypto.randomUUID) {
+      id = crypto.randomUUID();
+    } else {
+      id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0;
+        var v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    }
+    localStorage.setItem('gp_attempt_id', id);
+  }
+  return id;
+}
+
+
+/* ================================================================
+   ROUTING: WHICH STATE TO SHOW
+   ================================================================ */
+
+function route() {
+  var now = new Date();
+
+  // Past exam end + 1 hour grace for late submissions
+  if (now > new Date(EXAM_END.getTime() + 3600000) && !submitted) {
+    showState('closed');
+    return;
+  }
+
+  // During exam window or just submitted
+  if (submitted) {
+    showState('post');
+    return;
+  }
+
+  // Pre-exam or during exam
+  showState('waiting');
+  startWaitingCountdown();
+}
+
+function showState(state) {
+  document.getElementById('waitingRoom').style.display = state === 'waiting' ? 'block' : 'none';
+  document.getElementById('examPage').className = state === 'exam' ? 'exam-page active' : 'exam-page';
+  document.getElementById('postExam').className = state === 'post' ? 'post-exam active' : 'post-exam';
+  document.getElementById('examClosed').className = state === 'closed' ? 'exam-closed active' : 'exam-closed';
+}
+
+
+/* ================================================================
+   WAITING ROOM
+   ================================================================ */
+
+function startWaitingCountdown() {
+  function tick() {
+    var now = new Date();
+    var diff = EXAM_START - now;
+
+    if (diff <= 0) {
+      document.getElementById('wrCountdown').textContent = '00:00:00';
+      if (ready) startExam();
+      return;
+    }
+
+    var days = Math.floor(diff / 86400000);
+    var h = Math.floor((diff % 86400000) / 3600000);
+    var m = Math.floor((diff % 3600000) / 60000);
+    var s = Math.floor((diff % 60000) / 1000);
+
+    if (days > 0) {
+      document.getElementById('wrCountdown').textContent =
+        days + 'd ' + h + 't ' + m + 'm ' + s + 's';
+    } else {
+      document.getElementById('wrCountdown').textContent =
+        String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    }
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+function markReady() {
+  var name = document.getElementById('wrName').value.trim();
+  var email = document.getElementById('wrEmail').value.trim().toLowerCase();
+  var status = document.getElementById('wrStatus');
+  var btn = document.getElementById('wrReadyBtn');
+
+  if (!name) {
+    status.className = 'wr-status err';
+    status.textContent = 'Indtast venligst dit navn.';
+    return;
+  }
+
+  // Basic email shape check (looks-like-an-email; no server lookup)
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    status.className = 'wr-status err';
+    status.textContent = 'Angiv en gyldig e-mailadresse.';
+    return;
+  }
+
+  userName = name;
+  userEmail = email;
+  ready = true;
+
+  status.className = 'wr-status ok';
+  status.textContent = '';
+  document.getElementById('wrReady').style.display = 'block';
+  document.getElementById('wrName').disabled = true;
+  document.getElementById('wrEmail').disabled = true;
+  btn.style.display = 'none';
+
+  // If exam already started, go straight in
+  var now = new Date();
+  if (now >= EXAM_START && now < EXAM_END) {
+    startExam();
+  }
+}
+
+
+/* ================================================================
+   EXAM
+   ================================================================ */
+
+function startExam() {
+  if (examStartedAt) return; // prevent re-entry from countdown interval
+  examStartedAt = new Date();
+  showState('exam');
+
+  document.getElementById('examUserName').textContent = userName;
+  document.getElementById('examUserEmail').textContent = userEmail;
+
+  // Fire-and-forget start-write. If it fails the submit upsert will create the row.
+  try {
+    fetch(API_BASE + '/generalprove-start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        client_attempt_id: clientAttemptId,
+        email: userEmail,
+        name: userName,
+        started_at: examStartedAt.toISOString()
+      })
+    }).catch(function(){ /* ignore — submit will recover */ });
+  } catch (_) { /* ignore */ }
+
+  renderQuestions();
+  startTimer();
+  window.scrollTo(0, 0);
+}
+
+function renderQuestions() {
+  var container = document.getElementById('questionsContainer');
+  var html = '';
+  var currentSection = '';
+
+  QUESTIONS.forEach(function(q) {
+    // Section labels
+    if (q.section !== currentSection) {
+      currentSection = q.section;
+      if (currentSection === 'laere') {
+        html += '<div class="paper-section-label">Spørgsmål 1–35: Spørgsmål med baggrund i Læremateriale til Indfødsretsprøven</div>';
+      } else if (currentSection === 'aktuel') {
+        html += '<div class="paper-section-label">Spørgsmål 36–40: Aktuelle spørgsmål</div>';
+      } else if (currentSection === 'vaerdi') {
+        html += '<div class="paper-section-label">Spørgsmål 41–45: Spørgsmål om danske værdier</div>';
+      }
+    }
+
+    html += '<div class="question" data-qid="' + q.id + '">';
+    html += '<div class="q-num-text">' + q.id + '. ' + q.text + '</div>';
+
+    q.options.forEach(function(opt, idx) {
+      var letter = String.fromCharCode(65 + idx); // A, B, C
+      html += '<div class="q-option" data-qid="' + q.id + '" data-idx="' + idx + '" onclick="selectOption(' + q.id + ',' + idx + ')">';
+      html += '<div class="q-checkbox">✕</div>';
+      html += '<div class="q-option-label">' + letter + ': ' + opt + '</div>';
+      html += '</div>';
+    });
+
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
+}
+
+function selectOption(qid, idx) {
+  if (submitted) return;
+
+  // Deselect all options for this question
+  var opts = document.querySelectorAll('.q-option[data-qid="' + qid + '"]');
+  opts.forEach(function(o) { o.classList.remove('selected'); });
+
+  // Select the clicked one
+  var target = document.querySelector('.q-option[data-qid="' + qid + '"][data-idx="' + idx + '"]');
+  target.classList.add('selected');
+
+  answers[qid] = idx;
+  updateAnsweredCount();
+}
+
+function updateAnsweredCount() {
+  document.getElementById('answeredCount').textContent = Object.keys(answers).length;
+}
+
+function startTimer() {
+  function tick() {
+    var now = new Date();
+    var remaining = EXAM_END - now;
+
+    if (remaining <= 0) {
+      document.getElementById('examTimerTime').textContent = '0:00';
+      clearInterval(timerInterval);
+      if (!submitted) submitExam(true); // auto-submit
+      return;
+    }
+
+    var m = Math.floor(remaining / 60000);
+    var s = Math.floor((remaining % 60000) / 1000);
+    document.getElementById('examTimerTime').textContent = m + ':' + String(s).padStart(2, '0');
+
+    // Urgency styling when < 5 minutes
+    if (remaining < 300000) {
+      document.getElementById('examTimer').classList.add('urgent');
+    }
+  }
+  tick();
+  timerInterval = setInterval(tick, 1000);
+}
+
+
+/* ================================================================
+   SUBMIT — RESILIENT, JITTERED, BEACON-BACKED
+   ================================================================
+   Flow:
+     1. Persist payload to localStorage immediately.
+     2. Show success screen to user (UI commits instantly).
+     3. Schedule the actual fetch with random jitter.
+        - Manual submit: 0–60s jitter (smooths any clustering, mostly cosmetic)
+        - Auto-submit:   0–15min jitter (spreads the 13:45 cohort across 13:45–14:00)
+     4. On fetch success: clear the localStorage entry.
+     5. On fetch failure (or tab close): localStorage entry persists.
+        - beforeunload/pagehide fires sendBeacon as a last-ditch attempt.
+        - Recovery hook on next page load retries.
+     6. The edge function upserts on client_attempt_id, so duplicate
+        deliveries are safe — they overwrite the same row identically.
+*/
+
+var PENDING_KEY = 'gp_pending_submission';
+
+function persistPending(payload) {
+  try {
+    localStorage.setItem(PENDING_KEY, JSON.stringify(payload));
+  } catch (_) { /* localStorage may be full or disabled; we still try the fetch */ }
+}
+
+function clearPending() {
+  try { localStorage.removeItem(PENDING_KEY); } catch (_) {}
+}
+
+async function submitExam(auto) {
+  if (submitted) return;
+
+  if (!auto) {
+    var unanswered = QUESTIONS.length - Object.keys(answers).length;
+    if (unanswered > 0) {
+      var ok = confirm('Du har ' + unanswered + ' ubesvarede spørgsmål. Vil du aflevere alligevel?');
+      if (!ok) return;
+    }
+  }
+
+  submitted = true;
+  var btn = document.getElementById('submitBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Afleveret';
+  }
+  if (timerInterval) clearInterval(timerInterval);
+
+  var timeSpentMs = examStartedAt ? (new Date() - examStartedAt) : 0;
+  var timeSpentMin = Math.floor(timeSpentMs / 60000);
+  var timeSpentSec = Math.floor((timeSpentMs % 60000) / 1000);
+
+  var payload = {
+    client_attempt_id: clientAttemptId,
+    email: userEmail,
+    name: userName,
+    answers: answers,
+    time_spent_seconds: Math.floor(timeSpentMs / 1000),
+    started_at: examStartedAt ? examStartedAt.toISOString() : null
+  };
+
+  // 1. Persist FIRST — survives anything from here on.
+  persistPending(payload);
+
+  // 2. UI commits immediately.
+  document.getElementById('postEmail').textContent = userEmail;
+  document.getElementById('postAnswered').textContent = Object.keys(answers).length;
+  document.getElementById('postUnanswered').textContent = QUESTIONS.length - Object.keys(answers).length;
+  document.getElementById('postTime').textContent = timeSpentMin + ':' + String(timeSpentSec).padStart(2, '0');
+  showState('post');
+  window.scrollTo(0, 0);
+
+  // 3. Wire unload handlers BEFORE scheduling, so a tab close mid-jitter still delivers.
+  installUnloadBeacon();
+
+  // 4. Schedule jittered delivery.
+  var maxDelayMs = auto ? (15 * 60 * 1000) : (60 * 1000);
+  var delayMs = Math.floor(Math.random() * maxDelayMs);
+  setTimeout(function() { deliverPending(); }, delayMs);
+}
+
+async function deliverPending() {
+  var raw;
+  try { raw = localStorage.getItem(PENDING_KEY); } catch (_) { return; }
+  if (!raw) return; // already delivered
+
+  try {
+    var res = await fetch(API_BASE + '/generalprove-submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: raw
+    });
+    if (res && res.ok) {
+      clearPending();
+      // Also wipe the attempt id now that this attempt is fully delivered;
+      // a future visit (e.g. somebody else on the same machine) starts fresh.
+      try { localStorage.removeItem('gp_attempt_id'); } catch (_) {}
+    }
+    // If non-OK, leave it in localStorage — recovery hook will retry.
+  } catch (_) {
+    // Network blip — leave in localStorage for retry.
+  }
+}
+
+function installUnloadBeacon() {
+  function flushBeacon() {
+    var raw;
+    try { raw = localStorage.getItem(PENDING_KEY); } catch (_) { return; }
+    if (!raw) return;
+    try {
+      // sendBeacon is fire-and-forget and survives tab close.
+      // We deliberately do NOT clear localStorage here — beacon has no response,
+      // so the recovery hook will retry next page load if it didn't actually land.
+      // The edge function upserts on client_attempt_id, so a duplicate is harmless.
+      navigator.sendBeacon(
+        API_BASE + '/generalprove-submit',
+        new Blob([raw], { type: 'application/json' })
+      );
+    } catch (_) {}
+  }
+  window.addEventListener('beforeunload', flushBeacon);
+  window.addEventListener('pagehide', flushBeacon);    // iOS Safari, BFCache
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'hidden') flushBeacon();
+  });
+}
+
+
+/* ================================================================
+   RECOVERY HOOK
+   ================================================================
+   On every page load, check if a pending submission is sitting in
+   localStorage from a previous session that was interrupted before
+   delivery. If so, try to deliver it now.
+*/
+
+function recoverPendingSubmission() {
+  try {
+    if (localStorage.getItem(PENDING_KEY)) {
+      // Don't await — fire and let it complete in the background.
+      deliverPending();
+    }
+  } catch (_) {}
+}
+
+
+/* ================================================================
+   INIT
+   ================================================================ */
+
+clientAttemptId = getOrCreateAttemptId();
+recoverPendingSubmission();
+route();
+</script>
+
+</body>
+</html>
