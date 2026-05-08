@@ -1329,10 +1329,10 @@ body {
       </div>
 
       <div id="gp-new-form" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:1rem;">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:10px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:10px;">
           <div>
             <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:3px;">Slug (unique label)</label>
-            <input id="gp-f-slug" type="text" placeholder="e.g. dry-run-may-8-1600"
+            <input id="gp-f-slug" type="text" placeholder="e.g. nov-15-2026"
               style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.85rem;background:var(--bg);color:var(--text);">
           </div>
           <div>
@@ -1340,26 +1340,14 @@ body {
             <input id="gp-f-start" type="datetime-local"
               style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.85rem;background:var(--bg);color:var(--text);">
           </div>
-          <div>
-            <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:3px;">Exam end (auto +45 min)</label>
-            <input id="gp-f-end" type="datetime-local"
-              style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.85rem;background:var(--bg);color:var(--text);">
-          </div>
-          <div>
-            <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:3px;">Results send (auto +6h45 from start)</label>
-            <input id="gp-f-results" type="datetime-local"
-              style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.85rem;background:var(--bg);color:var(--text);">
-          </div>
-          <div>
-            <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:3px;">Pacing (ms between emails)</label>
-            <input id="gp-f-pacing" type="number" value="150" min="0" max="5000"
-              style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.85rem;background:var(--bg);color:var(--text);">
-          </div>
         </div>
         <div style="margin-bottom:10px;">
           <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:3px;">Notes (optional)</label>
           <input id="gp-f-notes" type="text" placeholder="any context"
             style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.85rem;background:var(--bg);color:var(--text);">
+        </div>
+        <div style="font-size:.72rem;color:var(--muted);margin-bottom:10px;">
+          Exam runs 45 minutes from start. Results compute and display client-side, no emails sent.
         </div>
         <div style="display:flex;gap:8px;">
           <button class="usr-btn usr-btn-primary" onclick="gpCreateEvent()">Create event</button>
@@ -2812,13 +2800,8 @@ function gpStatusOf(ev) {
   const now = Date.now();
   const start = new Date(ev.exam_start_at).getTime();
   const end = new Date(ev.exam_end_at).getTime();
-  const send = new Date(ev.results_send_at).getTime();
-  if (ev.results_sent_at) return { label: 'Completed', color: '#9ca3af' };
-  if (now >= send) return { label: 'Sending results', color: '#7c3aed' };
-  if (now >= end) return { label: 'Awaiting results', color: '#d97706' };
-  if (now >= start) return { label: 'LIVE', color: '#dc2626' };
-  if (ev.warmup_done_at) return { label: 'Warmed up', color: '#059669' };
-  if (now >= start - 10 * 60 * 1000) return { label: 'Warming up', color: '#d97706' };
+  if (now >= start && now < end) return { label: 'LIVE', color: '#dc2626' };
+  if (now >= end) return { label: 'Closed', color: '#9ca3af' };
   return { label: 'Scheduled', color: '#6b7280' };
 }
 
@@ -2845,23 +2828,17 @@ async function gpLoadEvents() {
             </div>
             ${ev.notes ? `<div style="font-size:.75rem;color:var(--muted);margin-top:3px;">${ev.notes}</div>` : ''}
           </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button class="usr-btn" onclick="gpTriggerWarmup('${ev.id}', '${ev.slug}')" style="font-size:.75rem;padding:4px 10px;background:var(--surface2);color:var(--text);">⚡ Warmup</button>
-            <button class="usr-btn" onclick="gpTriggerResults('${ev.id}', '${ev.slug}')" style="font-size:.75rem;padding:4px 10px;background:var(--surface2);color:var(--text);">📧 Send results</button>
+          <div>
             <button class="usr-btn" onclick="gpDeleteEvent('${ev.id}', '${ev.slug}')" style="font-size:.75rem;padding:4px 10px;background:var(--surface2);color:#dc2626;">Delete</button>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;font-size:.78rem;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;font-size:.78rem;">
           <div><div style="color:var(--muted);">Exam start</div><div style="color:var(--text);">${gpFmtCph(ev.exam_start_at)}</div></div>
           <div><div style="color:var(--muted);">Exam end</div><div style="color:var(--text);">${gpFmtCph(ev.exam_end_at)}</div></div>
-          <div><div style="color:var(--muted);">Results send</div><div style="color:var(--text);">${gpFmtCph(ev.results_send_at)}</div></div>
-          <div><div style="color:var(--muted);">Warmup done</div><div style="color:${ev.warmup_done_at ? '#059669' : 'var(--muted)'};">${ev.warmup_done_at ? gpFmtCph(ev.warmup_done_at) : '—'}</div></div>
-          <div><div style="color:var(--muted);">Results sent</div><div style="color:${ev.results_sent_at ? '#059669' : 'var(--muted)'};">${ev.results_sent_at ? `${gpFmtCph(ev.results_sent_at)} (${ev.results_count || 0} emails)` : '—'}</div></div>
         </div>
         <div style="display:flex;gap:14px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:.78rem;">
-          <span><span style="color:var(--muted);">Attempts started:</span> <strong>${ev.counters.attempts}</strong></span>
+          <span><span style="color:var(--muted);">Started:</span> <strong>${ev.counters.attempts}</strong></span>
           <span><span style="color:var(--muted);">Submitted:</span> <strong>${ev.counters.submitted}</strong></span>
-          <span><span style="color:var(--muted);">Emailed:</span> <strong>${ev.counters.emailed}</strong></span>
         </div>
       `;
       list.appendChild(card);
@@ -2874,59 +2851,33 @@ async function gpLoadEvents() {
 function gpShowNewForm() {
   document.getElementById('gp-new-form').style.display = 'block';
   document.getElementById('gp-f-status').textContent = '';
-  // Auto-fill end and results_send when start is changed
-  const startEl = document.getElementById('gp-f-start');
-  startEl.onchange = function() {
-    if (!startEl.value) return;
-    const start = new Date(startEl.value);
-    const end = new Date(start.getTime() + 45 * 60 * 1000);
-    const results = new Date(start.getTime() + 6 * 60 * 60 * 1000 + 45 * 60 * 1000);
-    document.getElementById('gp-f-end').value = gpToDatetimeLocal(end);
-    document.getElementById('gp-f-results').value = gpToDatetimeLocal(results);
-  };
 }
 
 function gpHideNewForm() {
   document.getElementById('gp-new-form').style.display = 'none';
-  ['gp-f-slug','gp-f-start','gp-f-end','gp-f-results','gp-f-notes'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('gp-f-pacing').value = '150';
-}
-
-function gpToDatetimeLocal(d) {
-  const pad = n => String(n).padStart(2, '0');
-  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  ['gp-f-slug','gp-f-start','gp-f-notes'].forEach(id => document.getElementById(id).value = '');
 }
 
 async function gpCreateEvent() {
   const status = document.getElementById('gp-f-status');
   const slug = document.getElementById('gp-f-slug').value.trim();
   const startLocal = document.getElementById('gp-f-start').value;
-  const endLocal = document.getElementById('gp-f-end').value;
-  const resultsLocal = document.getElementById('gp-f-results').value;
-  const pacing = parseInt(document.getElementById('gp-f-pacing').value) || 150;
   const notes = document.getElementById('gp-f-notes').value.trim();
 
-  if (!slug || !startLocal || !endLocal || !resultsLocal) {
-    status.textContent = 'All time fields and slug are required.';
+  if (!slug || !startLocal) {
+    status.textContent = 'Slug and start time are required.';
     status.style.color = '#dc2626';
     return;
   }
 
-  // datetime-local values are interpreted as the user's *local browser time*. Since admins
-  // operate in their own TZ but events are in Copenhagen, we explicitly attach Copenhagen
-  // offset. We compute it dynamically from the date itself (handles CET/CEST correctly).
+  // Convert local datetime-local input to Copenhagen-anchored ISO. Handles CET/CEST.
   function toCphIso(localStr) {
-    // localStr is "YYYY-MM-DDTHH:MM". Treat it as Copenhagen wall time.
-    // We construct a Date by formatting an ISO with the right TZ offset for that date.
     const [datePart, timePart] = localStr.split('T');
     const [y, m, d] = datePart.split('-').map(Number);
-    // Determine if this date is in DST for Europe/Copenhagen by checking what offset
-    // a 13:00 wall-clock time in Copenhagen would have. Using Intl is most reliable.
     const probe = new Date(Date.UTC(y, m-1, d, 12, 0, 0));
     const fmt = new Intl.DateTimeFormat('en', { timeZone: 'Europe/Copenhagen', timeZoneName: 'shortOffset' });
     const parts = fmt.formatToParts(probe);
     const offsetStr = parts.find(p => p.type === 'timeZoneName')?.value || 'GMT+1';
-    // offsetStr like "GMT+2" or "GMT+1"
     const m2 = offsetStr.match(/GMT([+-]\d+)/);
     const hours = m2 ? parseInt(m2[1]) : 1;
     const sign = hours >= 0 ? '+' : '-';
@@ -2934,16 +2885,23 @@ async function gpCreateEvent() {
     return `${datePart}T${timePart}:00${sign}${hh}:00`;
   }
 
+  // Auto-derive end (start+45min) and a placeholder results_send_at.
+  // results_send_at is required by schema CHECK constraint but no longer used by
+  // any flow (results compute client-side). Set it to exam_end_at to satisfy the
+  // constraint with the smallest valid value.
+  const startIso = toCphIso(startLocal);
+  const startMs = new Date(startIso).getTime();
+  const endIso = new Date(startMs + 45 * 60 * 1000).toISOString();
+
   status.textContent = 'Creating…';
   status.style.color = 'var(--muted)';
   try {
     await gpCallApi({
       action: 'create_event',
       slug,
-      exam_start_at: toCphIso(startLocal),
-      exam_end_at: toCphIso(endLocal),
-      results_send_at: toCphIso(resultsLocal),
-      pacing_ms: pacing,
+      exam_start_at: startIso,
+      exam_end_at: endIso,
+      results_send_at: endIso,
       notes: notes || null,
     });
     gpHideNewForm();
@@ -2958,28 +2916,6 @@ async function gpDeleteEvent(id, slug) {
   if (!confirm(`Delete event "${slug}"? This is permanent.`)) return;
   try {
     await gpCallApi({ action: 'delete_event', id });
-    gpLoadEvents();
-  } catch (e) {
-    alert('Error: ' + e.message);
-  }
-}
-
-async function gpTriggerWarmup(id, slug) {
-  if (!confirm(`Manually fire warmup for "${slug}" now?`)) return;
-  try {
-    const r = await gpCallApi({ action: 'trigger_warmup', event_id: id });
-    alert(r.ok ? 'Warmup fired (start: ' + r.start_status + ', submit: ' + r.submit_status + ')' : 'Warmup failed: ' + JSON.stringify(r));
-    gpLoadEvents();
-  } catch (e) {
-    alert('Error: ' + e.message);
-  }
-}
-
-async function gpTriggerResults(id, slug) {
-  if (!confirm(`Manually send results for "${slug}" now? This calls send-results immediately.`)) return;
-  try {
-    const r = await gpCallApi({ action: 'trigger_results', event_id: id });
-    alert(r.ok ? 'Sent: ' + (r.detail?.sent ?? '?') + ' emails' : 'Failed: ' + JSON.stringify(r.detail));
     gpLoadEvents();
   } catch (e) {
     alert('Error: ' + e.message);
