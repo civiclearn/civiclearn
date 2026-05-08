@@ -8,785 +8,222 @@
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
     :root {
-      --paper: #fdfcf7;
-      --paper-border: #d4d0c8;
-      --text: #1a1a1a;
-      --text-muted: #555;
-      --orange: #e8943c;
-      --orange-dark: #d4802e;
-      --purple: #7c3aed;
-      --purple-dark: #6d28d9;
-      --green: #059669;
-      --red: #dc2626;
-      --bg: #f0ece4;
+      --paper: #fdfcf7; --paper-border: #d4d0c8; --text: #1a1a1a; --text-muted: #555;
+      --orange: #e8943c; --orange-dark: #d4802e; --purple: #7c3aed; --purple-dark: #6d28d9;
+      --green: #059669; --red: #dc2626; --bg: #f0ece4;
     }
-
     html { scroll-behavior: smooth; }
+    body { font-family: Georgia,'Times New Roman',serif; background: var(--bg); color: var(--text); line-height: 1.55; -webkit-font-smoothing: antialiased; min-height: 100vh; }
 
-    body {
-      font-family: Georgia, 'Times New Roman', serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.55;
-      -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
-    }
-
-    /* ============ WAITING ROOM ============ */
-    .waiting-room {
-      max-width: 540px;
-      margin: 0 auto;
-      padding: 60px 24px;
-      text-align: center;
-      font-family: 'Lexend', sans-serif;
-    }
-
-    .wr-logo {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 40px;
-    }
-
-    .wr-title {
-      font-family: 'Lexend', sans-serif;
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--purple);
-      margin-bottom: 8px;
-    }
-
-    .wr-sub {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      margin-bottom: 32px;
-      line-height: 1.5;
-    }
-
-    .wr-countdown {
-      background: #fff;
-      border-radius: 16px;
-      padding: 28px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-      margin-bottom: 32px;
-    }
-
-    .wr-countdown-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-
-    .wr-countdown-time {
-      font-size: 2.4rem;
-      font-weight: 700;
-      color: var(--purple);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .wr-countdown-date {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 6px;
-    }
-
-    .wr-email-box {
-      background: #fff;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-      text-align: left;
-    }
-
-    .wr-email-box h3 {
-      font-family: 'Lexend', sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .wr-email-box p {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-    }
-
-    .wr-email-row {
-      display: flex;
-      gap: 8px;
-    }
-
-    .wr-email-row input {
-      flex: 1;
-      padding: 10px 14px;
-      border: 1.5px solid #e2e5ea;
-      border-radius: 10px;
-      font-family: 'Lexend', sans-serif;
-      font-size: 0.9rem;
-      background: #faf6f1;
-    }
+    /* ── WAITING ROOM ── */
+    .waiting-room { max-width: 540px; margin: 0 auto; padding: 60px 24px; text-align: center; font-family: 'Lexend',sans-serif; }
+    .wr-logo { font-size: .85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 40px; }
+    .wr-title { font-family: 'Lexend',sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--purple); margin-bottom: 8px; }
+    .wr-sub { font-size: .95rem; color: var(--text-muted); margin-bottom: 32px; line-height: 1.5; }
+    .wr-countdown { background: #fff; border-radius: 16px; padding: 28px; box-shadow: 0 2px 16px rgba(0,0,0,.06); margin-bottom: 32px; }
+    .wr-countdown-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: 8px; }
+    .wr-countdown-time { font-size: 2.4rem; font-weight: 700; color: var(--purple); font-variant-numeric: tabular-nums; }
+    .wr-countdown-date { font-size: .85rem; color: var(--text-muted); margin-top: 6px; }
+    .wr-email-box { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 2px 16px rgba(0,0,0,.06); text-align: left; }
+    .wr-email-box h3 { font-family: 'Lexend',sans-serif; font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+    .wr-email-box p { font-size: .82rem; color: var(--text-muted); margin-bottom: 12px; }
+    .wr-email-row { display: flex; gap: 8px; }
+    .wr-email-row input { flex: 1; padding: 10px 14px; border: 1.5px solid #e2e5ea; border-radius: 10px; font-family: 'Lexend',sans-serif; font-size: .9rem; background: #faf6f1; }
     .wr-email-row input:focus { outline: none; border-color: var(--purple); }
-
-    .wr-email-row button {
-      padding: 10px 20px;
-      background: var(--purple);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-family: 'Lexend', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-    }
+    .wr-email-row button { padding: 10px 20px; background: var(--purple); color: #fff; border: none; border-radius: 10px; font-family: 'Lexend',sans-serif; font-size: .85rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
     .wr-email-row button:hover { background: var(--purple-dark); }
+    .wr-status { margin-top: 10px; font-size: .8rem; min-height: 20px; }
+    .wr-status.ok { color: var(--green); } .wr-status.err { color: var(--red); }
+    .wr-ready { margin-top: 20px; padding: 16px; background: #ecfdf5; border-radius: 12px; color: var(--green); font-weight: 600; font-size: .9rem; }
 
-    .wr-status {
-      margin-top: 10px;
-      font-size: 0.8rem;
-      min-height: 20px;
-    }
-    .wr-status.ok { color: var(--green); }
-    .wr-status.err { color: var(--red); }
-
-    .wr-ready {
-      margin-top: 20px;
-      padding: 16px;
-      background: #ecfdf5;
-      border-radius: 12px;
-      color: var(--green);
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-
-    /* ============ EXAM PAGE ============ */
+    /* ── EXAM ── */
     .exam-page { display: none; }
     .exam-page.active { display: block; }
-
-    /* Timer */
-    .exam-timer {
-      position: fixed;
-      top: 16px;
-      right: 16px;
-      z-index: 100;
-      background: #fff;
-      border: 2px solid var(--purple);
-      border-radius: 12px;
-      padding: 10px 16px;
-      font-family: 'Lexend', sans-serif;
-      text-align: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-      min-width: 100px;
-    }
-
-    .exam-timer-label {
-      font-size: 0.6rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-    }
-
-    .exam-timer-time {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--purple);
-      font-variant-numeric: tabular-nums;
-    }
-
+    .exam-timer { position: fixed; top: 16px; right: 16px; z-index: 100; background: #fff; border: 2px solid var(--purple); border-radius: 12px; padding: 10px 16px; font-family: 'Lexend',sans-serif; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,.12); min-width: 100px; }
+    .exam-timer-label { font-size: .6rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); }
+    .exam-timer-time { font-size: 1.5rem; font-weight: 700; color: var(--purple); font-variant-numeric: tabular-nums; }
     .exam-timer.urgent { border-color: var(--red); }
     .exam-timer.urgent .exam-timer-time { color: var(--red); }
-
-    /* Paper container */
-    .paper {
-      max-width: 720px;
-      margin: 0 auto;
-      background: var(--paper);
-      border: 1px solid var(--paper-border);
-      box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-      min-height: 100vh;
-    }
-
-    .paper-inner {
-      display: flex;
-      min-height: 100vh;
-    }
-
-    .paper-bar {
-      width: 36px;
-      background: linear-gradient(180deg, var(--orange) 0%, var(--orange-dark) 100%);
-      flex-shrink: 0;
-    }
-
-    .paper-content {
-      flex: 1;
-      padding: 32px 32px 60px 24px;
-    }
-
-    @media (max-width: 600px) {
-      .paper-content { padding: 20px 16px 60px 14px; }
-      .paper-bar { width: 24px; }
-      .exam-timer { top: 8px; right: 8px; padding: 8px 12px; }
-      .exam-timer-time { font-size: 1.2rem; }
-    }
-
-    /* Cover section */
-    .paper-cover {
-      margin-bottom: 28px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid #e0dcd5;
-    }
-
-    .paper-branding {
-      text-align: right;
-      margin-bottom: 16px;
-    }
-    .paper-branding-text {
-      font-size: 0.6rem;
-      color: var(--purple);
-      font-weight: 600;
-      font-family: 'Lexend', sans-serif;
-      line-height: 1.3;
-    }
-
-    .paper-main-title {
-      font-size: clamp(1.6rem, 4vw, 2.2rem);
-      font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 16px;
-    }
-
-    .paper-meta {
-      font-size: 0.88rem;
-      color: #333;
-      margin-bottom: 4px;
-    }
+    .paper { max-width: 720px; margin: 0 auto; background: var(--paper); border: 1px solid var(--paper-border); box-shadow: 0 2px 20px rgba(0,0,0,.1); min-height: 100vh; }
+    .paper-inner { display: flex; min-height: 100vh; }
+    .paper-bar { width: 36px; background: linear-gradient(180deg,var(--orange) 0%,var(--orange-dark) 100%); flex-shrink: 0; }
+    .paper-content { flex: 1; padding: 32px 32px 60px 24px; }
+    @media(max-width:600px) { .paper-content { padding: 20px 16px 60px 14px; } .paper-bar { width: 24px; } .exam-timer { top: 8px; right: 8px; padding: 8px 12px; } .exam-timer-time { font-size: 1.2rem; } }
+    .paper-cover { margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid #e0dcd5; }
+    .paper-branding { text-align: right; margin-bottom: 16px; }
+    .paper-branding-text { font-size: .6rem; color: var(--purple); font-weight: 600; font-family: 'Lexend',sans-serif; line-height: 1.3; }
+    .paper-main-title { font-size: clamp(1.6rem,4vw,2.2rem); font-weight: 700; line-height: 1.2; margin-bottom: 16px; }
+    .paper-meta { font-size: .88rem; color: #333; margin-bottom: 4px; }
     .paper-meta em { font-style: italic; }
-
-    .paper-info-table {
-      margin-top: 16px;
-      border-collapse: collapse;
-      width: 100%;
-      max-width: 420px;
-    }
-    .paper-info-table td {
-      border: 1px solid #ccc;
-      padding: 10px 14px;
-      font-size: 0.82rem;
-      width: 50%;
-      vertical-align: top;
-    }
-    .paper-info-table .label { color: var(--text-muted); }
-    .paper-info-table .value { font-weight: 600; }
-
-    /* Instructions */
-    .paper-instructions {
-      font-size: 0.82rem;
-      color: #444;
-      line-height: 1.6;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #e0dcd5;
-    }
-
+    .paper-info-table { margin-top: 16px; border-collapse: collapse; width: 100%; max-width: 420px; }
+    .paper-info-table td { border: 1px solid #ccc; padding: 10px 14px; font-size: .82rem; width: 50%; vertical-align: top; }
+    .paper-info-table .label { color: var(--text-muted); } .paper-info-table .value { font-weight: 600; }
+    .paper-instructions { font-size: .82rem; color: #444; line-height: 1.6; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #e0dcd5; }
     .paper-instructions p { margin-bottom: 8px; }
-
-    /* Questions */
-    .paper-section-label {
-      font-size: 0.72rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-muted);
-      margin: 28px 0 16px;
-      padding-top: 12px;
-      border-top: 1px solid #e0dcd5;
-      font-family: 'Lexend', sans-serif;
-    }
-
-    .question {
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #eee;
-    }
+    .paper-section-label { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin: 28px 0 16px; padding-top: 12px; border-top: 1px solid #e0dcd5; font-family: 'Lexend',sans-serif; }
+    .question { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #eee; }
     .question:last-child { border-bottom: none; }
-
-    .q-num-text {
-      font-size: 0.88rem;
-      font-weight: 600;
-      margin-bottom: 8px;
-      line-height: 1.4;
-    }
-
-    .q-option {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      padding: 5px 8px;
-      margin: 2px 0;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background 0.1s;
-      font-size: 0.86rem;
-      line-height: 1.4;
-    }
-    .q-option:hover { background: rgba(124,58,237,0.04); }
-
-    .q-checkbox {
-      width: 16px;
-      height: 16px;
-      border: 1.5px solid #888;
-      border-radius: 2px;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 2px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: transparent;
-      transition: all 0.15s;
-      user-select: none;
-    }
-
-    .q-option.selected .q-checkbox {
-      color: var(--purple);
-      border-color: var(--purple);
-    }
-
+    .q-num-text { font-size: .88rem; font-weight: 600; margin-bottom: 8px; line-height: 1.4; }
+    .q-option { display: flex; align-items: flex-start; gap: 8px; padding: 5px 8px; margin: 2px 0; cursor: pointer; border-radius: 4px; transition: background .1s; font-size: .86rem; line-height: 1.4; }
+    .q-option:hover { background: rgba(124,58,237,.04); }
+    .q-checkbox { width: 16px; height: 16px; border: 1.5px solid #888; border-radius: 2px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 2px; font-size: .75rem; font-weight: 700; color: transparent; transition: all .15s; user-select: none; }
+    .q-option.selected .q-checkbox { color: var(--purple); border-color: var(--purple); }
     .q-option-label { flex: 1; }
-
-    /* Submit area */
-    .paper-submit {
-      margin-top: 36px;
-      padding-top: 20px;
-      border-top: 2px solid #ccc;
-      text-align: center;
-    }
-
-    .paper-submit-info {
-      font-family: 'Lexend', sans-serif;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-    }
-
-    .paper-submit-btn {
-      display: inline-block;
-      padding: 14px 40px;
-      background: var(--purple);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-family: 'Lexend', sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-      box-shadow: 0 4px 12px rgba(124,58,237,0.2);
-    }
+    .paper-submit { margin-top: 36px; padding-top: 20px; border-top: 2px solid #ccc; text-align: center; }
+    .paper-submit-info { font-family: 'Lexend',sans-serif; font-size: .82rem; color: var(--text-muted); margin-bottom: 12px; }
+    .paper-submit-btn { display: inline-block; padding: 14px 40px; background: var(--purple); color: #fff; border: none; border-radius: 12px; font-family: 'Lexend',sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background .2s; box-shadow: 0 4px 12px rgba(124,58,237,.2); }
     .paper-submit-btn:hover { background: var(--purple-dark); }
-    .paper-submit-btn:disabled {
-      background: #aaa;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
+    .paper-submit-btn:disabled { background: #aaa; cursor: not-allowed; box-shadow: none; }
 
-    /* ============ POST-EXAM ============ */
-    .post-exam {
-      display: none;
-      max-width: 540px;
-      margin: 0 auto;
-      padding: 80px 24px;
-      text-align: center;
-      font-family: 'Lexend', sans-serif;
-    }
+    /* ── POST-EXAM (RESULTS) ── */
+    .post-exam { display: none; max-width: 640px; margin: 0 auto; padding: 80px 24px; text-align: center; font-family: 'Lexend',sans-serif; }
     .post-exam.active { display: block; }
-
-    .post-exam-check {
-      width: 64px; height: 64px;
-      border-radius: 50%;
-      background: #ecfdf5;
-      color: var(--green);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      margin-bottom: 20px;
-    }
-
-    .post-exam h1 {
-      font-family: 'Lexend', sans-serif;
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: var(--purple);
-      margin-bottom: 8px;
-    }
-
-    .post-exam p {
-      color: var(--text-muted);
-      font-size: 0.92rem;
-      line-height: 1.5;
-      margin-bottom: 8px;
-    }
-
-    .post-exam-stats {
-      background: #fff;
-      border-radius: 14px;
-      padding: 20px 24px;
-      margin: 24px 0;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-      display: flex;
-      justify-content: center;
-      gap: 32px;
-    }
-
-    .post-exam-stat {
-      text-align: center;
-    }
-    .post-exam-stat .num {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--purple);
-    }
-    .post-exam-stat .label {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    /* ============ RICH RESULTS PANEL ============ */
-    .post-exam {
-      max-width: 640px;
-    }
-    .results-header {
-      text-align: center;
-      margin-bottom: 8px;
-    }
-    .results-brand {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--purple);
-      letter-spacing: 0.04em;
-      margin-bottom: 16px;
-    }
-    .results-hello {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-top: 4px;
-    }
-    .score-display {
-      text-align: center;
-      margin: 28px 0 20px;
-    }
-    .score-num {
-      font-family: 'Lexend', sans-serif;
-      font-size: 4rem;
-      font-weight: 700;
-      color: var(--purple);
-      line-height: 1;
-    }
-    .score-of {
-      font-size: 1.6rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-    .score-time {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      margin-top: 6px;
-    }
-    .result-banner {
-      border-radius: 14px;
-      padding: 22px;
-      text-align: center;
-      margin: 16px 0 28px;
-    }
-    .result-banner.passed {
-      background: #ecfdf5;
-      border: 1px solid #a7f3d0;
-    }
-    .result-banner.failed {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-    }
-    .result-banner-icon {
-      font-size: 1.6rem;
-      display: block;
-      margin-bottom: 4px;
-    }
+    .results-brand { font-size: .78rem; font-weight: 600; color: var(--purple); letter-spacing: .04em; margin-bottom: 16px; }
+    .results-hello { color: var(--text-muted); font-size: .9rem; margin-top: 4px; }
+    .score-display { text-align: center; margin: 28px 0 20px; }
+    .score-num { font-family: 'Lexend',sans-serif; font-size: 4rem; font-weight: 700; color: var(--purple); line-height: 1; }
+    .score-of { font-size: 1.6rem; color: var(--text-muted); font-weight: 500; }
+    .score-time { font-size: .82rem; color: var(--text-muted); margin-top: 6px; }
+    .result-banner { border-radius: 14px; padding: 22px; text-align: center; margin: 16px 0 28px; }
+    .result-banner.passed { background: #ecfdf5; border: 1px solid #a7f3d0; }
+    .result-banner.failed { background: #fef2f2; border: 1px solid #fecaca; }
+    .result-banner-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
     .result-banner.passed .result-banner-icon { color: #059669; }
     .result-banner.failed .result-banner-icon { color: #dc2626; }
-    .result-banner-title {
-      font-family: 'Lexend', sans-serif;
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
+    .result-banner-title { font-family: 'Lexend',sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 4px; }
     .result-banner.passed .result-banner-title { color: #059669; }
     .result-banner.failed .result-banner-title { color: #dc2626; }
-    .result-banner-sub {
-      font-size: 0.88rem;
-    }
+    .result-banner-sub { font-size: .88rem; }
     .result-banner.passed .result-banner-sub { color: #065f46; }
     .result-banner.failed .result-banner-sub { color: #991b1b; }
-
-    .results-section-title {
-      font-family: 'Lexend', sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #1a1a2e;
-      margin: 28px 0 14px;
-      text-align: left;
-    }
+    .results-section-title { font-family: 'Lexend',sans-serif; font-size: 1rem; font-weight: 600; color: #1a1a2e; margin: 28px 0 14px; text-align: left; }
     .sec-bar { margin-bottom: 14px; }
-    .sec-bar-label {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: #1a1a2e;
-      margin-bottom: 5px;
-    }
-    .sec-bar-note {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-    .sec-bar-note.ok { color: #059669; }
-    .sec-bar-note.bad { color: #dc2626; }
-    .sec-bar-track {
-      background: #e5e7eb;
-      border-radius: 6px;
-      height: 10px;
-      overflow: hidden;
-    }
-    .sec-bar-fill {
-      height: 100%;
-      border-radius: 6px;
-      transition: width 0.4s ease;
-    }
-
-    .wrong-block {
-      margin-top: 10px;
-      padding: 14px 16px;
-      background: #fff;
-      border-radius: 12px;
-      border: 1px solid #f0eef2;
-      text-align: left;
-    }
-    .wrong-topic {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--purple);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 8px;
-    }
-    .wrong-q {
-      font-size: 0.85rem;
-      color: #444;
-      padding: 8px 0;
-      border-bottom: 1px solid #f3f4f6;
-      line-height: 1.45;
-    }
+    .sec-bar-label { display: flex; justify-content: space-between; align-items: baseline; font-size: .85rem; font-weight: 500; color: #1a1a2e; margin-bottom: 5px; }
+    .sec-bar-note { font-size: .75rem; color: var(--text-muted); }
+    .sec-bar-note.ok { color: #059669; } .sec-bar-note.bad { color: #dc2626; }
+    .sec-bar-track { background: #e5e7eb; border-radius: 6px; height: 10px; overflow: hidden; }
+    .sec-bar-fill { height: 100%; border-radius: 6px; transition: width .4s ease; }
+    .wrong-block { margin-top: 10px; padding: 14px 16px; background: #fff; border-radius: 12px; border: 1px solid #f0eef2; text-align: left; }
+    .wrong-topic { font-size: .72rem; font-weight: 700; color: var(--purple); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+    .wrong-q { font-size: .85rem; color: #444; padding: 8px 0; border-bottom: 1px solid #f3f4f6; line-height: 1.45; }
     .wrong-q:last-child { border-bottom: 0; }
-    .wrong-q-num {
-      font-weight: 600;
-      color: #1a1a2e;
-    }
-    .wrong-q-correct {
-      color: #059669;
-      font-weight: 500;
-      margin-top: 3px;
-      display: block;
-    }
+    .wrong-q-num { font-weight: 600; color: #1a1a2e; }
+    .wrong-q-correct { color: #059669; font-weight: 500; margin-top: 3px; display: block; }
+    /* cohort % pill next to wrong answer */
+    .wrong-q-cohort { display: inline-block; margin-left: 6px; font-size: .72rem; color: #6b7280; background: #f3f4f6; border-radius: 20px; padding: 1px 8px; font-weight: 500; vertical-align: middle; }
+    .wrong-q-cohort.easy { color: #dc2626; background: #fef2f2; } /* user missed an easy one */
+    .wrong-q-cohort.hard { color: #059669; background: #ecfdf5; } /* question was genuinely hard */
 
-    .reco-block {
-      background: #faf8ff;
-      border: 1px solid #ede9fe;
-      border-radius: 14px;
-      padding: 22px;
-      margin-top: 24px;
-      text-align: left;
-    }
-    .reco-title {
-      font-family: 'Lexend', sans-serif;
-      font-size: 1rem;
-      color: var(--purple);
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    .reco-block p {
-      font-size: 0.9rem;
-      color: #444;
-      line-height: 1.55;
-      margin-bottom: 8px;
-    }
-    .reco-cta {
-      display: inline-block;
-      margin-top: 10px;
-      background: #7c3aed;
-      color: #fff;
-      padding: 12px 26px;
-      border-radius: 10px;
-      text-decoration: none;
-      font-size: 0.92rem;
-      font-weight: 600;
-      font-family: 'Lexend', sans-serif;
-    }
+    .reco-block { background: #faf8ff; border: 1px solid #ede9fe; border-radius: 14px; padding: 22px; margin-top: 24px; text-align: left; }
+    .reco-title { font-family: 'Lexend',sans-serif; font-size: 1rem; color: var(--purple); font-weight: 600; margin-bottom: 8px; }
+    .reco-block p { font-size: .9rem; color: #444; line-height: 1.55; margin-bottom: 8px; }
+    .reco-cta { display: inline-block; margin-top: 10px; background: #7c3aed; color: #fff; padding: 12px 26px; border-radius: 10px; text-decoration: none; font-size: .92rem; font-weight: 600; font-family: 'Lexend',sans-serif; }
     .reco-cta:hover { background: #6d28d9; }
 
-    /* ============ CLOSED ============ */
-    .exam-closed {
-      display: none;
-      max-width: 540px;
-      margin: 0 auto;
-      padding: 80px 24px;
-      text-align: center;
-      font-family: 'Lexend', sans-serif;
-    }
+    /* ── COHORT PANEL ── */
+    .cohort-panel { margin-top: 36px; }
+    .cohort-divider { border: none; border-top: 2px solid #e5e0f8; margin-bottom: 28px; }
+    .cohort-loading { text-align: center; padding: 24px; color: var(--text-muted); font-size: .85rem; }
+    .cohort-loading-spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #e5e0f8; border-top-color: var(--purple); border-radius: 50%; animation: spin .8s linear infinite; margin-right: 8px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .cohort-stats-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .cohort-stat-card { flex: 1; min-width: 120px; background: #fff; border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #f0eef2; }
+    .cohort-stat-card .big { font-size: 1.8rem; font-weight: 700; color: var(--purple); line-height: 1.1; }
+    .cohort-stat-card .lbl { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; margin-top: 4px; }
+    .cohort-stat-card.green .big { color: var(--green); }
+    .cohort-histogram { background: #fff; border-radius: 12px; padding: 18px 20px; border: 1px solid #f0eef2; margin-bottom: 16px; text-align: left; }
+    .cohort-histogram-title { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); margin-bottom: 14px; }
+    .hist-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .hist-label { width: 52px; font-size: .75rem; color: #555; text-align: right; flex-shrink: 0; }
+    .hist-bar-track { flex: 1; background: #f3f4f6; border-radius: 4px; height: 18px; overflow: hidden; position: relative; }
+    .hist-bar-fill { height: 100%; border-radius: 4px; transition: width .5s ease; }
+    .hist-bar-count { position: absolute; right: 6px; top: 0; line-height: 18px; font-size: .7rem; color: #555; font-weight: 600; }
+    .hist-row.user-bucket .hist-label { font-weight: 700; color: var(--purple); }
+    .hist-row.user-bucket .hist-bar-track { box-shadow: 0 0 0 2px var(--purple); }
+    .cohort-note { font-size: .76rem; color: var(--text-muted); text-align: center; margin-top: 6px; line-height: 1.5; }
+    .cohort-refresh-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; padding: 8px 18px; background: transparent; border: 1.5px solid #e0dbf5; border-radius: 20px; color: var(--purple); font-family: 'Lexend',sans-serif; font-size: .8rem; font-weight: 600; cursor: pointer; transition: all .15s; }
+    .cohort-refresh-btn:hover { background: #f5f3ff; }
+    .cohort-refresh-btn svg { width: 14px; height: 14px; }
+
+    /* ── CLOSED ── */
+    .exam-closed { display: none; max-width: 540px; margin: 0 auto; padding: 80px 24px; text-align: center; font-family: 'Lexend',sans-serif; }
     .exam-closed.active { display: block; }
-    .exam-closed h1 {
-      font-family: 'Lexend', sans-serif;
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-    .exam-closed p {
-      color: var(--text-muted);
-      font-size: 0.92rem;
-    }
-    .exam-closed a {
-      color: var(--purple);
-      text-decoration: none;
-      font-weight: 600;
-    }
+    .exam-closed h1 { font-family: 'Lexend',sans-serif; font-size: 1.6rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
+    .exam-closed p { color: var(--text-muted); font-size: .92rem; }
+    .exam-closed a { color: var(--purple); text-decoration: none; font-weight: 600; }
   </style>
 </head>
 <body>
 
-<!-- ============ STATE: WAITING ROOM ============ -->
+<!-- ══ WAITING ROOM ══ -->
 <div class="waiting-room" id="waitingRoom">
   <div class="wr-logo">Indfodsretsprove.dk · Generalprøve 2026</div>
-
   <h1 class="wr-title">Generalprøve<br>Indfødsretsprøven</h1>
-  <p class="wr-sub">
-    45 spørgsmål · 45 minutter · Ingen hjælpemidler<br>
-    Prøven åbner præcis kl. 13:00 dansk tid.
-  </p>
-
+  <p class="wr-sub">45 spørgsmål · 45 minutter · Ingen hjælpemidler<br>Prøven åbner præcis kl. 13:00 dansk tid.</p>
   <div class="wr-countdown">
     <div class="wr-countdown-label">Prøven starter om</div>
     <div class="wr-countdown-time" id="wrCountdown">--:--:--</div>
     <div class="wr-countdown-date">Lørdag den 9. maj 2026 kl. 13:00</div>
   </div>
-
   <div class="wr-email-box">
     <h3>Dine oplysninger</h3>
     <p>Navn og e-mail. Du får dine resultater vist med det samme efter aflevering.</p>
-    <input type="text" id="wrName" placeholder="Dit navn" style="width:100%;padding:10px 14px;border:1.5px solid #e2e5ea;border-radius:10px;font-family:'Lexend',sans-serif;font-size:0.9rem;background:#faf6f1;margin-bottom:8px;">
+    <input type="text" id="wrName" placeholder="Dit navn" style="width:100%;padding:10px 14px;border:1.5px solid #e2e5ea;border-radius:10px;font-family:'Lexend',sans-serif;font-size:.9rem;background:#faf6f1;margin-bottom:8px;">
     <div class="wr-email-row">
       <input type="email" id="wrEmail" placeholder="din@email.dk">
       <button id="wrReadyBtn" onclick="markReady()">Bekræft</button>
     </div>
     <div class="wr-status" id="wrStatus"></div>
   </div>
-
   <div class="wr-ready" id="wrReady" style="display:none;">
     ✓ Du er klar. Prøven starter automatisk, når nedtællingen rammer 00:00:00.
   </div>
 </div>
 
-<!-- ============ STATE: EXAM ============ -->
+<!-- ══ EXAM ══ -->
 <div class="exam-page" id="examPage">
-
-  <!-- Timer -->
   <div class="exam-timer" id="examTimer">
     <div class="exam-timer-label">Tid tilbage</div>
     <div class="exam-timer-time" id="examTimerTime">45:00</div>
   </div>
-
-  <!-- Paper -->
   <div class="paper">
     <div class="paper-inner">
       <div class="paper-bar"></div>
       <div class="paper-content">
-
-        <!-- Cover -->
         <div class="paper-cover">
           <div class="paper-branding">
             <div class="paper-branding-text">Indfodsretsprove.dk<br>Generalprøve 2026</div>
           </div>
-
           <h1 class="paper-main-title">Generalprøve<br>Indfødsretsprøven</h1>
           <div class="paper-meta">Hjælpemidler: <em>Ingen</em></div>
           <div class="paper-meta">Tid: <em>45 minutter</em></div>
-          <div class="paper-meta" style="margin-top:8px;color:#666;font-size:0.82rem;">Lørdag den 9. maj 2026, kl. 13:00–13:45</div>
-
+          <div class="paper-meta" style="margin-top:8px;color:#666;font-size:.82rem;">Lørdag den 9. maj 2026, kl. 13:00–13:45</div>
           <table class="paper-info-table">
-            <tr>
-              <td class="label">Navn</td>
-              <td class="value" id="examUserName">–</td>
-            </tr>
-            <tr>
-              <td class="label">E-mail</td>
-              <td class="value" id="examUserEmail">–</td>
-            </tr>
+            <tr><td class="label">Navn</td><td class="value" id="examUserName">–</td></tr>
+            <tr><td class="label">E-mail</td><td class="value" id="examUserEmail">–</td></tr>
           </table>
         </div>
-
-        <!-- Instructions -->
         <div class="paper-instructions">
-          <p>
-            Generalprøven er en øvelsesprøve der følger det officielle format for indfødsretsprøven.
-            Prøven består af 45 spørgsmål, der skal besvares inden for 45 minutter.
-          </p>
-          <p>
-            De 45 spørgsmål er multiple choice-spørgsmål med to eller tre svarmuligheder.
-            35 spørgsmål vedrører det officielle læremateriale,
-            5 spørgsmål vedrører aktuelle emner, og
-            5 spørgsmål vedrører værdier i det danske samfund.
-          </p>
-          <p>
-            Spørgsmålene besvares ved at klikke på det rigtige svar.
-            Du kan ændre dit svar ved at klikke på et andet svarmulighed.
-          </p>
+          <p>Generalprøven er en øvelsesprøve der følger det officielle format for indfødsretsprøven. Prøven består af 45 spørgsmål, der skal besvares inden for 45 minutter.</p>
+          <p>De 45 spørgsmål er multiple choice-spørgsmål med to eller tre svarmuligheder. 35 spørgsmål vedrører det officielle læremateriale, 5 spørgsmål vedrører aktuelle emner, og 5 spørgsmål vedrører værdier i det danske samfund.</p>
+          <p>Spørgsmålene besvares ved at klikke på det rigtige svar. Du kan ændre dit svar ved at klikke på et andet svarmulighed.</p>
         </div>
-
-        <!-- Questions get injected here -->
         <div id="questionsContainer"></div>
-
-        <!-- Submit -->
         <div class="paper-submit">
-          <p class="paper-submit-info">
-            <span id="answeredCount">0</span> af 45 spørgsmål besvaret
-          </p>
-          <button class="paper-submit-btn" id="submitBtn" onclick="submitExam()">
-            Aflever prøven
-          </button>
+          <p class="paper-submit-info"><span id="answeredCount">0</span> af 45 spørgsmål besvaret</p>
+          <button class="paper-submit-btn" id="submitBtn" onclick="submitExam()">Aflever prøven</button>
         </div>
-
       </div>
     </div>
   </div>
 </div>
 
-<!-- ============ STATE: POST-EXAM (rich inline results) ============ -->
+<!-- ══ POST-EXAM (results) ══ -->
 <div class="post-exam" id="postExam">
-
-  <div class="results-header">
-    <div class="results-brand">Indfodsretsprøve · Generalprøve 2026</div>
-    <h1 id="resultsTitle">Dine resultater</h1>
-    <p id="resultsHello" class="results-hello"></p>
-  </div>
+  <div class="results-brand">Indfodsretsprøve · Generalprøve 2026</div>
+  <h1 id="resultsTitle">Dine resultater</h1>
+  <p id="resultsHello" class="results-hello"></p>
 
   <div class="score-display">
     <span class="score-num" id="resScore">—</span><span class="score-of">/45</span>
@@ -797,360 +234,124 @@
 
   <h3 class="results-section-title">Score pr. sektion</h3>
   <div id="resSections"></div>
-
   <div id="resWrong"></div>
   <div id="resReco"></div>
 
-  <p style="margin-top:32px;text-align:center;font-size:0.78rem;color:var(--text-muted);">
+  <!-- ── COHORT PANEL (populated asynchronously) ── -->
+  <div class="cohort-panel" id="cohortPanel" style="display:none;">
+    <hr class="cohort-divider">
+    <h3 class="results-section-title" style="text-align:center;">Alle deltagere</h3>
+
+    <!-- Loading state -->
+    <div class="cohort-loading" id="cohortLoading">
+      <span class="cohort-loading-spinner"></span>Henter statistik…
+    </div>
+
+    <!-- Content (hidden until data arrives) -->
+    <div id="cohortContent" style="display:none;">
+      <div class="cohort-stats-row" id="cohortStatsRow"></div>
+      <div class="cohort-histogram" id="cohortHistogram"></div>
+      <div class="cohort-note" id="cohortNote"></div>
+      <div style="text-align:center;">
+        <button class="cohort-refresh-btn" onclick="refreshCohort()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3"/>
+          </svg>
+          Opdatér statistik
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- /cohort panel -->
+
+  <p style="margin-top:40px;text-align:center;font-size:.78rem;color:var(--text-muted);">
     Generalprøven er arrangeret af <a href="https://indfodsretsprove.dk" style="color:#7c3aed;">Indfodsretsprove.dk</a> (CivicLearn).<br>
     Den næste rigtige indfødsretsprøve afholdes den 3. juni 2026.
   </p>
-
   <p style="margin-top:24px;text-align:center;">
     <a href="https://indfodsretsprove.dk/generalprove/" style="color:#7c3aed;text-decoration:none;font-weight:600;">← Tilbage til Generalprøven</a>
   </p>
 </div>
 
-<!-- ============ STATE: CLOSED ============ -->
+<!-- ══ CLOSED ══ -->
 <div class="exam-closed" id="examClosed">
   <h1>Generalprøven er afsluttet</h1>
   <p>Generalprøven blev afholdt lørdag den 9. maj 2026 kl. 13:00–13:45.</p>
-  <p style="margin-top:16px;">Resultater er sendt til alle deltagere.</p>
-  <p style="margin-top:24px;">
-    <a href="https://indfodsretsprove.dk/generalprove/">← Tilbage til Generalprøven</a>
-  </p>
+  <p style="margin-top:16px;">Resultaterne vises direkte på denne side.</p>
+  <p style="margin-top:24px;"><a href="https://indfodsretsprove.dk/generalprove/">← Tilbage til Generalprøven</a></p>
 </div>
 
 
 <script>
-/* ================================================================
-   GENERALPRØVE EXAM — CONFIG & QUESTIONS
-   ================================================================ */
-
+/* ════════════════════════════════════════════════════════════════
+   CONFIG
+   ════════════════════════════════════════════════════════════════ */
 var EXAM_START = new Date('2026-05-09T13:00:00+02:00');
 var EXAM_END   = new Date('2026-05-09T13:45:00+02:00');
 var EXAM_DURATION_MS = 45 * 60 * 1000;
 var API_BASE = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
 
-// ─── TESTING MODE ───
-// Set to true + adjust dates to test locally. Set to false for production.
 var TEST_MODE = false;
 if (TEST_MODE) {
   var now = new Date();
-  EXAM_START = new Date(now.getTime() + 10 * 1000);   // starts in 10 seconds
+  EXAM_START = new Date(now.getTime() + 10 * 1000);
   EXAM_END   = new Date(now.getTime() + 10 * 1000 + EXAM_DURATION_MS);
 }
 
-/* ─── QUESTIONS ───
-   Replace this array with the actual 45-question set.
-   Each question: { id, text, options (array of strings), section }
-   section: "laere" (1-35), "aktuel" (36-40), "vaerdi" (41-45)
-   DO NOT include correct answers here — those live in the edge function.
-*/
+/* ════════════════════════════════════════════════════════════════
+   QUESTIONS
+   ════════════════════════════════════════════════════════════════ */
 var QUESTIONS = [
-  { id:1, text:"I 1970erne opstod en række græsrodsbevægelser med forskellige mål. En af de markante mærkesager var", options:["flere kolonihaver i storbyerne", "indførelse af et fælleseuropæisk militær", "modstand mod atomkraft"], section:"laere" },
-  { id:2, text:"Hvad indebar stavnsbåndet i 1700-tallet?", options:["At kongen havde eneret på at handle med udlandet", "At bønderne havde begrænset ret til at flytte", "At kristendommen var den eneste tilladte religion"], section:"laere" },
-  { id:3, text:"Hvad valgte Danmark at gøre under 1. Verdenskrig efter pres fra Tyskland?", options:["At internere jøder i fangelejre", "At overgive Jylland til Tyskland", "At lægge miner ud i danske farvande"], section:"laere" },
-  { id:4, text:"Hvad var et mål med reformerne af førtidspension og kontanthjælp?", options:["At færre skulle modtage disse ydelser", "At ydelserne skulle forhøjes", "At ordningerne skulle afskaffes"], section:"laere" },
-  { id:5, text:"Hvornår blev Det Radikale Venstre dannet?", options:["1915", "1905", "1901"], section:"laere" },
-  { id:6, text:"Hvornår underskrev Frederik 7. Danmarks første frie forfatning?", options:["6. juni 1849", "1. januar 1848", "5. juni 1849"], section:"laere" },
-  { id:7, text:"Hvad kaldes Nordslesvig efter 1920?", options:["Sydslesvig", "Mellemslesvig", "Sønderjylland"], section:"laere" },
-  { id:8, text:"Hvornår fandt Påskekrisen sted?", options:["1901", "1918", "1920"], section:"laere" },
-  { id:9, text:"Hvad blev gennemført som led i Kanslergadeforliget ud over økonomiske tiltag?", options:["En socialreform", "En uddannelsesreform", "En forfatningsændring"], section:"laere" },
-  { id:10, text:"Kan politikerne bestemme, hvordan domstolene skal afgøre en konkret retssag?", options:["Nej", "Ja"], section:"laere" },
-  { id:11, text:"Hvem blandt følgende kan fremsætte lovforslag i Folketinget?", options:["Kommunerne", "Regeringen", "EU"], section:"laere" },
-  { id:12, text:"Kan den samme person være statsminister i mere end to valgperioder?", options:["Ja", "Nej"], section:"laere" },
-  { id:13, text:"Hvilket niveau af demokrati beskæftiger Grundloven sig især med?", options:["Det direkte demokrati gennem folkeafstemninger", "Det lokale demokrati i kommunerne", "Det nationale demokrati i Folketinget"], section:"laere" },
-  { id:14, text:"Hvad er finansloven?", options:["En skatteaftale mellem partier", "Statens samlede budget for det kommende år", "En flerårig økonomisk plan"], section:"laere" },
-  { id:15, text:"Hvad kaldes den rapport, et udvalg udarbejder efter behandling af et lovforslag?", options:["En redegørelse", "En betænkning", "En bekendtgørelse"], section:"laere" },
-  { id:16, text:"Hvad er en central konsekvens af, at ingen partier har haft flertal alene?", options:["En tradition for kompromiser og samarbejde", "At oppositionen ingen rolle spiller", "At lovgivning sjældent vedtages"], section:"laere" },
-  { id:17, text:"Hvad betyder udtrykket ”det samarbejdende folkestyre”?", options:["At regeringen bestemmer uden debat", "At alle partier altid er enige", "At love ofte vedtages med brede flertal efter kompromiser"], section:"laere" },
-  { id:18, text:"Hvilken by er Danmarks største?", options:["Odense", "Århus", "København"], section:"laere" },
-  { id:19, text:"Hvad var middel-levetiden for kvinder i 2019-2020?", options:["83-84 år", "88-89 år", "78-79 år"], section:"laere" },
-  { id:20, text:"Hvorfor beskytter lovgivningen minoriteter særligt?", options:["For at beskytte dem mod overgreb fra staten og andre borgere.", "For at give dem politisk magt.", "For at begrænse ytringsfrihed generelt."], section:"laere" },
-  { id:21, text:"Hvornår blev verdens første havvindmøllepark opstillet i Danmark?", options:["I 1991.", "I 1985.", "I 2000."], section:"laere" },
-  { id:22, text:"Hvad er et synligt symbol på det nordiske fællesskab?", options:["At landene deler samme nationaldag.", "At landene har samme nationalsang.", "At alle nordiske lande har et kors i deres flag."], section:"laere" },
-  { id:23, text:"Hvornår fik Grønland hjemmestyre efter en folkeafstemning?", options:["I 2009.", "I 1985.", "I 1979."], section:"laere" },
-  { id:24, text:"Hvornår forlod Grønland EF/EU efter en folkeafstemning?", options:["I 1985.", "I 1979.", "I 2009."], section:"laere" },
-  { id:25, text:"Hvornår havde den første film om Olsen-banden premiere?", options:["1971", "1968", "1970"], section:"laere" },
-  { id:26, text:"Hvilket skriftsystem blev brugt i Danmarks ældste litteratur?", options:["Tyske gotiske bogstaver.", "Latinske bogstaver.", "Runer skrevet på oldnordisk."], section:"laere" },
-  { id:27, text:"Hvilken dansk forfatter er internationalt kendt for sine eventyr?", options:["H.C. Andersen.", "Herman Bang.", "Klaus Rifbjerg."], section:"laere" },
-  { id:28, text:"Hvilken Holberg-komedie er blandt de mest opførte på danske scener?", options:["Erasmus Montanus.", "Den lille havfrue.", "Aladdin."], section:"laere" },
-  { id:29, text:"Hvordan har arbejdsløsheden i Danmark overordnet udviklet sig de sidste ti år?", options:["Den er faldet", "Den er vokset"], section:"laere" },
-  { id:30, text:"Hvad måler bruttonationalproduktet (BNP)?", options:["Statens budgetbalance", "Den samlede værdi af et lands produktion på et år", "Den samlede opsparing i landet"], section:"laere" },
-  { id:31, text:"Hvilken international organisation arbejder for fri handel sammen med EU?", options:["WTO", "WHO", "NATO"], section:"laere" },
-  { id:32, text:"Hvad er en central langsigtet udfordring for velfærdsstaten?", options:["At der er for mange børn", "At uddannelsesniveauet er for højt", "At færre skal forsørge flere"], section:"laere" },
-  { id:33, text:"Har Danmark forbehold for EU’s forsvars- og sikkerhedspolitik?", options:["Nej", "Ja"], section:"laere" },
-  { id:34, text:"Hvad betyder internationale organisationers beslutninger for Danmark?", options:["De er kun vejledende", "De gælder kun uden for Danmark", "De er med til at fastlægge rammerne for det danske samfund"], section:"laere" },
-  { id:35, text:"Hvilket dansk inspektionsskib patruljerer ved Grønlands kyst?", options:["Inspektionsskibet Vædderen", "Inspektionsskibet Knud Rasmussen", "Fregatten Iver Huitfeldt"], section:"laere" },
-  { id:36, text:"Hvad annoncerede statsminister Mette Frederiksen den 26. februar 2026?", options:["Danmarks officielle ansøgning om optagelse i eurozonen.", "Et nyvalg til Folketinget den 24. marts 2026 – et folketingsvalg udløst af bl.a. Grønlandskrisen.", "Sin afgang som statsminister og formand for Socialdemokratiet."], section:"aktuel" },
-  { id:37, text:"Hvilken diplomatisk spænding blussede op igen den 4. januar 2026 mellem Danmark, Grønland og USA?", options:["Fornyet amerikansk retorik om at købe Grønland.", "USA’s lukning af sit konsulat i Nuuk.", "En uenighed om fiskerirettigheder i Nordatlanten."], section:"aktuel" },
-  { id:38, text:"Hvilken historisk ændring skete der for PostNord i Danmark fra den 1. januar 2026?", options:["Alle postbude blev erstattet af selvkørende leveringsrobotter.", "PostNord stoppede fuldstændig med at omdele landsdækkende breve.", "PostNord blev solgt til en privat amerikansk investorgruppe."], section:"aktuel" },
-  { id:39, text:"Hvad skete der med Novo Nordisks aktie i slutningen af februar 2026?", options:["Et skuffende klinisk forsøg med en ny fedmemedicin fik OMX Copenhagen 25-indekset til at falde op til 3,6 %, og den danske krone blev svækket.", "Selskabet blev opkøbt af den amerikanske konkurrent Eli Lilly.", "Aktien nåede sin højeste kurs nogensinde efter godkendelse af et nyt lægemiddel."], section:"aktuel" },
-  { id:40, text:"Hvad meddelte den danske udlændinge- og integrationsministerium i begyndelsen af marts 2026?", options:["At kravene til indfødsretsprøven blev lempet markant.", "At behandlingen af næsten alle ansøgninger om statsborgerskab via naturalisation blev suspenderet indtil efter valget.", "At alle ventende ansøgninger om statsborgerskab automatisk blev godkendt."], section:"aktuel" },
-  { id:41, text:"Kan man ifølge dansk lov kræve, at en anden borger aldrig må udtale sig kritisk om ens religion?", options:["Nej", "Ja"], section:"vaerdi" },
-  { id:42, text:"Har religiøse trossamfund ret til at fastsætte regler, der gælder i stedet for dansk lov?", options:["Nej", "Ja"], section:"vaerdi" },
-  { id:43, text:"Hvilken myndighed kan opløse (forbyde) en forening, der søger at opnå sine mål med vold?", options:["Politiet", "Domstolene"], section:"vaerdi" },
-  { id:44, text:"Kan kvinder være biskopper i den danske folkekirke?", options:["Ja", "Nej"], section:"vaerdi" },
-  { id:45, text:"Kan religiøse normer begrunde begrænsninger i borgernes ytringsfrihed?", options:["Nej", "Ja"], section:"vaerdi" }
+  { id:1,  text:"I 1970erne opstod en række græsrodsbevægelser med forskellige mål. En af de markante mærkesager var", options:["flere kolonihaver i storbyerne","indførelse af et fælleseuropæisk militær","modstand mod atomkraft"], section:"laere" },
+  { id:2,  text:"Hvad indebar stavnsbåndet i 1700-tallet?", options:["At kongen havde eneret på at handle med udlandet","At bønderne havde begrænset ret til at flytte","At kristendommen var den eneste tilladte religion"], section:"laere" },
+  { id:3,  text:"Hvad valgte Danmark at gøre under 1. Verdenskrig efter pres fra Tyskland?", options:["At internere jøder i fangelejre","At overgive Jylland til Tyskland","At lægge miner ud i danske farvande"], section:"laere" },
+  { id:4,  text:"Hvad var et mål med reformerne af førtidspension og kontanthjælp?", options:["At færre skulle modtage disse ydelser","At ydelserne skulle forhøjes","At ordningerne skulle afskaffes"], section:"laere" },
+  { id:5,  text:"Hvornår blev Det Radikale Venstre dannet?", options:["1915","1905","1901"], section:"laere" },
+  { id:6,  text:"Hvornår underskrev Frederik 7. Danmarks første frie forfatning?", options:["6. juni 1849","1. januar 1848","5. juni 1849"], section:"laere" },
+  { id:7,  text:"Hvad kaldes Nordslesvig efter 1920?", options:["Sydslesvig","Mellemslesvig","Sønderjylland"], section:"laere" },
+  { id:8,  text:"Hvornår fandt Påskekrisen sted?", options:["1901","1918","1920"], section:"laere" },
+  { id:9,  text:"Hvad blev gennemført som led i Kanslergadeforliget ud over økonomiske tiltag?", options:["En socialreform","En uddannelsesreform","En forfatningsændring"], section:"laere" },
+  { id:10, text:"Kan politikerne bestemme, hvordan domstolene skal afgøre en konkret retssag?", options:["Nej","Ja"], section:"laere" },
+  { id:11, text:"Hvem blandt følgende kan fremsætte lovforslag i Folketinget?", options:["Kommunerne","Regeringen","EU"], section:"laere" },
+  { id:12, text:"Kan den samme person være statsminister i mere end to valgperioder?", options:["Ja","Nej"], section:"laere" },
+  { id:13, text:"Hvilket niveau af demokrati beskæftiger Grundloven sig især med?", options:["Det direkte demokrati gennem folkeafstemninger","Det lokale demokrati i kommunerne","Det nationale demokrati i Folketinget"], section:"laere" },
+  { id:14, text:"Hvad er finansloven?", options:["En skatteaftale mellem partier","Statens samlede budget for det kommende år","En flerårig økonomisk plan"], section:"laere" },
+  { id:15, text:"Hvad kaldes den rapport, et udvalg udarbejder efter behandling af et lovforslag?", options:["En redegørelse","En betænkning","En bekendtgørelse"], section:"laere" },
+  { id:16, text:"Hvad er en central konsekvens af, at ingen partier har haft flertal alene?", options:["En tradition for kompromiser og samarbejde","At oppositionen ingen rolle spiller","At lovgivning sjældent vedtages"], section:"laere" },
+  { id:17, text:"Hvad betyder udtrykket \u201cdet samarbejdende folkestyre\u201d?", options:["At regeringen bestemmer uden debat","At alle partier altid er enige","At love ofte vedtages med brede flertal efter kompromiser"], section:"laere" },
+  { id:18, text:"Hvilken by er Danmarks største?", options:["Odense","Århus","København"], section:"laere" },
+  { id:19, text:"Hvad var middel-levetiden for kvinder i 2019-2020?", options:["83-84 år","88-89 år","78-79 år"], section:"laere" },
+  { id:20, text:"Hvorfor beskytter lovgivningen minoriteter særligt?", options:["For at beskytte dem mod overgreb fra staten og andre borgere.","For at give dem politisk magt.","For at begrænse ytringsfrihed generelt."], section:"laere" },
+  { id:21, text:"Hvornår blev verdens første havvindmøllepark opstillet i Danmark?", options:["I 1991.","I 1985.","I 2000."], section:"laere" },
+  { id:22, text:"Hvad er et synligt symbol på det nordiske fællesskab?", options:["At landene deler samme nationaldag.","At landene har samme nationalsang.","At alle nordiske lande har et kors i deres flag."], section:"laere" },
+  { id:23, text:"Hvornår fik Grønland hjemmestyre efter en folkeafstemning?", options:["I 2009.","I 1985.","I 1979."], section:"laere" },
+  { id:24, text:"Hvornår forlod Grønland EF/EU efter en folkeafstemning?", options:["I 1985.","I 1979.","I 2009."], section:"laere" },
+  { id:25, text:"Hvornår havde den første film om Olsen-banden premiere?", options:["1971","1968","1970"], section:"laere" },
+  { id:26, text:"Hvilket skriftsystem blev brugt i Danmarks ældste litteratur?", options:["Tyske gotiske bogstaver.","Latinske bogstaver.","Runer skrevet på oldnordisk."], section:"laere" },
+  { id:27, text:"Hvilken dansk forfatter er internationalt kendt for sine eventyr?", options:["H.C. Andersen.","Herman Bang.","Klaus Rifbjerg."], section:"laere" },
+  { id:28, text:"Hvilken Holberg-komedie er blandt de mest opførte på danske scener?", options:["Erasmus Montanus.","Den lille havfrue.","Aladdin."], section:"laere" },
+  { id:29, text:"Hvordan har arbejdsløsheden i Danmark overordnet udviklet sig de sidste ti år?", options:["Den er faldet","Den er vokset"], section:"laere" },
+  { id:30, text:"Hvad måler bruttonationalproduktet (BNP)?", options:["Statens budgetbalance","Den samlede værdi af et lands produktion på et år","Den samlede opsparing i landet"], section:"laere" },
+  { id:31, text:"Hvilken international organisation arbejder for fri handel sammen med EU?", options:["WTO","WHO","NATO"], section:"laere" },
+  { id:32, text:"Hvad er en central langsigtet udfordring for velfærdsstaten?", options:["At der er for mange børn","At uddannelsesniveauet er for højt","At færre skal forsørge flere"], section:"laere" },
+  { id:33, text:"Har Danmark forbehold for EU's forsvars- og sikkerhedspolitik?", options:["Nej","Ja"], section:"laere" },
+  { id:34, text:"Hvad betyder internationale organisationers beslutninger for Danmark?", options:["De er kun vejledende","De gælder kun uden for Danmark","De er med til at fastlægge rammerne for det danske samfund"], section:"laere" },
+  { id:35, text:"Hvilket dansk inspektionsskib patruljerer ved Grønlands kyst?", options:["Inspektionsskibet Vædderen","Inspektionsskibet Knud Rasmussen","Fregatten Iver Huitfeldt"], section:"laere" },
+  { id:36, text:"Hvad annoncerede statsminister Mette Frederiksen den 26. februar 2026?", options:["Danmarks officielle ansøgning om optagelse i eurozonen.","Et nyvalg til Folketinget den 24. marts 2026 – et folketingsvalg udløst af bl.a. Grønlandskrisen.","Sin afgang som statsminister og formand for Socialdemokratiet."], section:"aktuel" },
+  { id:37, text:"Hvilken diplomatisk spænding blussede op igen den 4. januar 2026 mellem Danmark, Grønland og USA?", options:["Fornyet amerikansk retorik om at købe Grønland.","USA's lukning af sit konsulat i Nuuk.","En uenighed om fiskerirettigheder i Nordatlanten."], section:"aktuel" },
+  { id:38, text:"Hvilken historisk ændring skete der for PostNord i Danmark fra den 1. januar 2026?", options:["Alle postbude blev erstattet af selvkørende leveringsrobotter.","PostNord stoppede fuldstændig med at omdele landsdækkende breve.","PostNord blev solgt til en privat amerikansk investorgruppe."], section:"aktuel" },
+  { id:39, text:"Hvad skete der med Novo Nordisks aktie i slutningen af februar 2026?", options:["Et skuffende klinisk forsøg med en ny fedmemedicin fik OMX Copenhagen 25-indekset til at falde op til 3,6 %, og den danske krone blev svækket.","Selskabet blev opkøbt af den amerikanske konkurrent Eli Lilly.","Aktien nåede sin højeste kurs nogensinde efter godkendelse af et nyt lægemiddel."], section:"aktuel" },
+  { id:40, text:"Hvad meddelte den danske udlændinge- og integrationsministerium i begyndelsen af marts 2026?", options:["At kravene til indfødsretsprøven blev lempet markant.","At behandlingen af næsten alle ansøgninger om statsborgerskab via naturalisation blev suspenderet indtil efter valget.","At alle ventende ansøgninger om statsborgerskab automatisk blev godkendt."], section:"aktuel" },
+  { id:41, text:"Kan man ifølge dansk lov kræve, at en anden borger aldrig må udtale sig kritisk om ens religion?", options:["Nej","Ja"], section:"vaerdi" },
+  { id:42, text:"Har religiøse trossamfund ret til at fastsætte regler, der gælder i stedet for dansk lov?", options:["Nej","Ja"], section:"vaerdi" },
+  { id:43, text:"Hvilken myndighed kan opløse (forbyde) en forening, der søger at opnå sine mål med vold?", options:["Politiet","Domstolene"], section:"vaerdi" },
+  { id:44, text:"Kan kvinder være biskopper i den danske folkekirke?", options:["Ja","Nej"], section:"vaerdi" },
+  { id:45, text:"Kan religiøse normer begrunde begrænsninger i borgernes ytringsfrihed?", options:["Nej","Ja"], section:"vaerdi" }
 ];
 
-
-/* ================================================================
-   STATE
-   ================================================================ */
-
-var userEmail = '';
-var userName = '';
-var ready = false;             // user has entered name+email and clicked Bekræft
-var examStartedAt = null;
-var answers = {};              // { questionId: selectedOptionIndex }
-var submitted = false;
-var timerInterval = null;
-var clientAttemptId = null;    // generated once per attempt, kept in localStorage
-
-
-/* ================================================================
-   IDEMPOTENCY ID
-   ================================================================ */
-
-function getOrCreateAttemptId() {
-  var id = localStorage.getItem('gp_attempt_id');
-  if (!id) {
-    // Use crypto.randomUUID where available; fall back to a v4-ish polyfill
-    if (window.crypto && crypto.randomUUID) {
-      id = crypto.randomUUID();
-    } else {
-      id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16 | 0;
-        var v = c === 'x' ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-      });
-    }
-    localStorage.setItem('gp_attempt_id', id);
-  }
-  return id;
-}
-
-
-/* ================================================================
-   ROUTING: WHICH STATE TO SHOW
-   ================================================================ */
-
-function route() {
-  var now = new Date();
-
-  // Past exam end + 1 hour grace for late submissions
-  if (now > new Date(EXAM_END.getTime() + 3600000) && !submitted) {
-    showState('closed');
-    return;
-  }
-
-  // During exam window or just submitted
-  if (submitted) {
-    showState('post');
-    return;
-  }
-
-  // Pre-exam or during exam
-  showState('waiting');
-  startWaitingCountdown();
-}
-
-function showState(state) {
-  document.getElementById('waitingRoom').style.display = state === 'waiting' ? 'block' : 'none';
-  document.getElementById('examPage').className = state === 'exam' ? 'exam-page active' : 'exam-page';
-  document.getElementById('postExam').className = state === 'post' ? 'post-exam active' : 'post-exam';
-  document.getElementById('examClosed').className = state === 'closed' ? 'exam-closed active' : 'exam-closed';
-}
-
-
-/* ================================================================
-   WAITING ROOM
-   ================================================================ */
-
-function startWaitingCountdown() {
-  function tick() {
-    var now = new Date();
-    var diff = EXAM_START - now;
-
-    if (diff <= 0) {
-      document.getElementById('wrCountdown').textContent = '00:00:00';
-      if (ready) startExam();
-      return;
-    }
-
-    var days = Math.floor(diff / 86400000);
-    var h = Math.floor((diff % 86400000) / 3600000);
-    var m = Math.floor((diff % 3600000) / 60000);
-    var s = Math.floor((diff % 60000) / 1000);
-
-    if (days > 0) {
-      document.getElementById('wrCountdown').textContent =
-        days + 'd ' + h + 't ' + m + 'm ' + s + 's';
-    } else {
-      document.getElementById('wrCountdown').textContent =
-        String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-    }
-  }
-  tick();
-  setInterval(tick, 1000);
-}
-
-function markReady() {
-  var name = document.getElementById('wrName').value.trim();
-  var email = document.getElementById('wrEmail').value.trim().toLowerCase();
-  var status = document.getElementById('wrStatus');
-  var btn = document.getElementById('wrReadyBtn');
-
-  if (!name) {
-    status.className = 'wr-status err';
-    status.textContent = 'Indtast venligst dit navn.';
-    return;
-  }
-
-  // Basic email shape check (looks-like-an-email; no server lookup)
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    status.className = 'wr-status err';
-    status.textContent = 'Angiv en gyldig e-mailadresse.';
-    return;
-  }
-
-  userName = name;
-  userEmail = email;
-  ready = true;
-
-  status.className = 'wr-status ok';
-  status.textContent = '';
-  document.getElementById('wrReady').style.display = 'block';
-  document.getElementById('wrName').disabled = true;
-  document.getElementById('wrEmail').disabled = true;
-  btn.style.display = 'none';
-
-  // If exam already started, go straight in
-  var now = new Date();
-  if (now >= EXAM_START && now < EXAM_END) {
-    startExam();
-  }
-}
-
-
-/* ================================================================
-   EXAM
-   ================================================================ */
-
-function startExam() {
-  if (examStartedAt) return; // prevent re-entry from countdown interval
-  examStartedAt = new Date();
-  showState('exam');
-
-  document.getElementById('examUserName').textContent = userName;
-  document.getElementById('examUserEmail').textContent = userEmail;
-
-  // Fire-and-forget start-write. If it fails the submit upsert will create the row.
-  try {
-    fetch(API_BASE + '/generalprove-start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      keepalive: true,
-      body: JSON.stringify({
-        client_attempt_id: clientAttemptId,
-        email: userEmail,
-        name: userName,
-        started_at: examStartedAt.toISOString()
-      })
-    }).catch(function(){ /* ignore — submit will recover */ });
-  } catch (_) { /* ignore */ }
-
-  renderQuestions();
-  startTimer();
-  window.scrollTo(0, 0);
-}
-
-function renderQuestions() {
-  var container = document.getElementById('questionsContainer');
-  var html = '';
-  var currentSection = '';
-
-  QUESTIONS.forEach(function(q) {
-    // Section labels
-    if (q.section !== currentSection) {
-      currentSection = q.section;
-      if (currentSection === 'laere') {
-        html += '<div class="paper-section-label">Spørgsmål 1–35: Spørgsmål med baggrund i Læremateriale til Indfødsretsprøven</div>';
-      } else if (currentSection === 'aktuel') {
-        html += '<div class="paper-section-label">Spørgsmål 36–40: Aktuelle spørgsmål</div>';
-      } else if (currentSection === 'vaerdi') {
-        html += '<div class="paper-section-label">Spørgsmål 41–45: Spørgsmål om danske værdier</div>';
-      }
-    }
-
-    html += '<div class="question" data-qid="' + q.id + '">';
-    html += '<div class="q-num-text">' + q.id + '. ' + q.text + '</div>';
-
-    q.options.forEach(function(opt, idx) {
-      var letter = String.fromCharCode(65 + idx); // A, B, C
-      html += '<div class="q-option" data-qid="' + q.id + '" data-idx="' + idx + '" onclick="selectOption(' + q.id + ',' + idx + ')">';
-      html += '<div class="q-checkbox">✕</div>';
-      html += '<div class="q-option-label">' + letter + ': ' + opt + '</div>';
-      html += '</div>';
-    });
-
-    html += '</div>';
-  });
-
-  container.innerHTML = html;
-}
-
-function selectOption(qid, idx) {
-  if (submitted) return;
-
-  // Deselect all options for this question
-  var opts = document.querySelectorAll('.q-option[data-qid="' + qid + '"]');
-  opts.forEach(function(o) { o.classList.remove('selected'); });
-
-  // Select the clicked one
-  var target = document.querySelector('.q-option[data-qid="' + qid + '"][data-idx="' + idx + '"]');
-  target.classList.add('selected');
-
-  answers[qid] = idx;
-  updateAnsweredCount();
-}
-
-function updateAnsweredCount() {
-  document.getElementById('answeredCount').textContent = Object.keys(answers).length;
-}
-
-function startTimer() {
-  function tick() {
-    var now = new Date();
-    var remaining = EXAM_END - now;
-
-    if (remaining <= 0) {
-      document.getElementById('examTimerTime').textContent = '0:00';
-      clearInterval(timerInterval);
-      if (!submitted) submitExam(true); // auto-submit
-      return;
-    }
-
-    var m = Math.floor(remaining / 60000);
-    var s = Math.floor((remaining % 60000) / 1000);
-    document.getElementById('examTimerTime').textContent = m + ':' + String(s).padStart(2, '0');
-
-    // Urgency styling when < 5 minutes
-    if (remaining < 300000) {
-      document.getElementById('examTimer').classList.add('urgent');
-    }
-  }
-  tick();
-  timerInterval = setInterval(tick, 1000);
-}
-
-
-/* ================================================================
-   ANSWER KEY + SCORING (client-side)
-   ================================================================ */
-
+/* ════════════════════════════════════════════════════════════════
+   ANSWER KEY + Q_META (client-side scoring & display)
+   ════════════════════════════════════════════════════════════════ */
 var ANSWER_KEY = {
   1:2, 2:1, 3:2, 4:0, 5:1, 6:2, 7:2, 8:2, 9:0, 10:0,
   11:1, 12:0, 13:2, 14:1, 15:1, 16:0, 17:2, 18:2, 19:0, 20:0,
@@ -1158,13 +359,11 @@ var ANSWER_KEY = {
   31:0, 32:2, 33:0, 34:2, 35:0, 36:1, 37:0, 38:1, 39:0, 40:1,
   41:0, 42:0, 43:1, 44:0, 45:0
 };
-
 var SECTIONS = {
   laere:  [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35],
   aktuel: [36,37,38,39,40],
   vaerdi: [41,42,43,44,45]
 };
-
 var Q_META = {
   1: {topic:"Historie", correct:"C: modstand mod atomkraft"},
   2: {topic:"Historie", correct:"B: bønderne havde begrænset ret til at flytte"},
@@ -1213,230 +412,416 @@ var Q_META = {
   45: {topic:"Danske værdier", correct:"A: Nej"}
 };
 
-function computeResults(userAnswers) {
-  var perQuestion = {};
-  var sectionScores = {};
-  var totalCorrect = 0;
-  Object.keys(SECTIONS).forEach(function(sec) {
-    var ids = SECTIONS[sec];
-    var correctInSec = 0;
-    ids.forEach(function(qid) {
-      var ua = userAnswers[qid];
-      var ok = (ua !== undefined && ua === ANSWER_KEY[qid]);
-      perQuestion[qid] = ok;
-      if (ok) { correctInSec++; totalCorrect++; }
-    });
-    sectionScores[sec] = { correct: correctInSec, total: ids.length };
-  });
-  var passed = totalCorrect >= 36 && sectionScores.vaerdi.correct >= 4;
-  return { totalCorrect: totalCorrect, sectionScores: sectionScores, perQuestion: perQuestion, passed: passed };
+/* ════════════════════════════════════════════════════════════════
+   STATE
+   ════════════════════════════════════════════════════════════════ */
+var userEmail = '', userName = '', ready = false;
+var examStartedAt = null;
+var answers = {};
+var submitted = false;
+var timerInterval = null;
+var clientAttemptId = null;
+var lastPersonalResults = null; // stored for cohort enrichment
+
+/* ════════════════════════════════════════════════════════════════
+   IDEMPOTENCY ID
+   ════════════════════════════════════════════════════════════════ */
+function getOrCreateAttemptId() {
+  var id = localStorage.getItem('gp_attempt_id');
+  if (!id) {
+    if (window.crypto && crypto.randomUUID) { id = crypto.randomUUID(); }
+    else { id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0;return(c==='x'?r:(r&0x3)|0x8).toString(16);}); }
+    localStorage.setItem('gp_attempt_id', id);
+  }
+  return id;
 }
 
+/* ════════════════════════════════════════════════════════════════
+   ROUTING
+   ════════════════════════════════════════════════════════════════ */
+function route() {
+  var now = new Date();
+  if (now > new Date(EXAM_END.getTime() + 3600000) && !submitted) { showState('closed'); return; }
+  if (submitted) { showState('post'); return; }
+  showState('waiting');
+  startWaitingCountdown();
+}
+function showState(state) {
+  document.getElementById('waitingRoom').style.display = state === 'waiting' ? 'block' : 'none';
+  document.getElementById('examPage').className = state === 'exam' ? 'exam-page active' : 'exam-page';
+  document.getElementById('postExam').className = state === 'post' ? 'post-exam active' : 'post-exam';
+  document.getElementById('examClosed').className = state === 'closed' ? 'exam-closed active' : 'exam-closed';
+}
+
+/* ════════════════════════════════════════════════════════════════
+   WAITING ROOM
+   ════════════════════════════════════════════════════════════════ */
+function startWaitingCountdown() {
+  function tick() {
+    var now = new Date(), diff = EXAM_START - now;
+    if (diff <= 0) {
+      document.getElementById('wrCountdown').textContent = '00:00:00';
+      if (ready) startExam();
+      return;
+    }
+    var days=Math.floor(diff/86400000), h=Math.floor((diff%86400000)/3600000),
+        m=Math.floor((diff%3600000)/60000), s=Math.floor((diff%60000)/1000);
+    document.getElementById('wrCountdown').textContent = days > 0
+      ? days+'d '+h+'t '+m+'m '+s+'s'
+      : String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+  tick(); setInterval(tick,1000);
+}
+function markReady() {
+  var name = document.getElementById('wrName').value.trim();
+  var email = document.getElementById('wrEmail').value.trim().toLowerCase();
+  var status = document.getElementById('wrStatus');
+  if (!name) { status.className='wr-status err'; status.textContent='Indtast venligst dit navn.'; return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { status.className='wr-status err'; status.textContent='Angiv en gyldig e-mailadresse.'; return; }
+  userName = name; userEmail = email; ready = true;
+  status.className='wr-status ok'; status.textContent='';
+  document.getElementById('wrReady').style.display = 'block';
+  document.getElementById('wrName').disabled = true;
+  document.getElementById('wrEmail').disabled = true;
+  document.getElementById('wrReadyBtn').style.display = 'none';
+  var now = new Date();
+  if (now >= EXAM_START && now < EXAM_END) startExam();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   EXAM
+   ════════════════════════════════════════════════════════════════ */
+function startExam() {
+  if (examStartedAt) return;
+  examStartedAt = new Date();
+  showState('exam');
+  document.getElementById('examUserName').textContent = userName;
+  document.getElementById('examUserEmail').textContent = userEmail;
+  try {
+    fetch(API_BASE+'/generalprove-start',{method:'POST',headers:{'Content-Type':'application/json'},keepalive:true,
+      body:JSON.stringify({client_attempt_id:clientAttemptId,email:userEmail,name:userName,started_at:examStartedAt.toISOString()})
+    }).catch(function(){});
+  } catch(_){}
+  renderQuestions(); startTimer(); window.scrollTo(0,0);
+}
+function renderQuestions() {
+  var container = document.getElementById('questionsContainer'), html='', currentSection='';
+  QUESTIONS.forEach(function(q) {
+    if (q.section !== currentSection) {
+      currentSection = q.section;
+      var labels = {laere:'Spørgsmål 1–35: Spørgsmål med baggrund i Læremateriale til Indfødsretsprøven',aktuel:'Spørgsmål 36–40: Aktuelle spørgsmål',vaerdi:'Spørgsmål 41–45: Spørgsmål om danske værdier'};
+      html += '<div class="paper-section-label">'+labels[currentSection]+'</div>';
+    }
+    html += '<div class="question" data-qid="'+q.id+'">';
+    html += '<div class="q-num-text">'+q.id+'. '+q.text+'</div>';
+    q.options.forEach(function(opt,idx) {
+      html += '<div class="q-option" data-qid="'+q.id+'" data-idx="'+idx+'" onclick="selectOption('+q.id+','+idx+')">';
+      html += '<div class="q-checkbox">✕</div><div class="q-option-label">'+String.fromCharCode(65+idx)+': '+opt+'</div></div>';
+    });
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+function selectOption(qid,idx) {
+  if (submitted) return;
+  document.querySelectorAll('.q-option[data-qid="'+qid+'"]').forEach(function(o){o.classList.remove('selected');});
+  document.querySelector('.q-option[data-qid="'+qid+'"][data-idx="'+idx+'"]').classList.add('selected');
+  answers[qid] = idx;
+  updateAnsweredCount();
+}
+function updateAnsweredCount() {
+  document.getElementById('answeredCount').textContent = Object.keys(answers).length;
+}
+function startTimer() {
+  function tick() {
+    var now=new Date(), remaining=EXAM_END-now;
+    if (remaining <= 0) {
+      document.getElementById('examTimerTime').textContent='0:00';
+      clearInterval(timerInterval);
+      if (!submitted) submitExam(true);
+      return;
+    }
+    var m=Math.floor(remaining/60000), s=Math.floor((remaining%60000)/1000);
+    document.getElementById('examTimerTime').textContent = m+':'+String(s).padStart(2,'0');
+    if (remaining < 300000) document.getElementById('examTimer').classList.add('urgent');
+  }
+  tick(); timerInterval = setInterval(tick,1000);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SCORING
+   ════════════════════════════════════════════════════════════════ */
+function computeResults(userAnswers) {
+  var perQuestion={}, sectionScores={}, totalCorrect=0;
+  Object.keys(SECTIONS).forEach(function(sec) {
+    var ids=SECTIONS[sec], correctInSec=0;
+    ids.forEach(function(qid) {
+      var ok=(userAnswers[qid]!==undefined && userAnswers[qid]===ANSWER_KEY[qid]);
+      perQuestion[qid]=ok;
+      if (ok){correctInSec++;totalCorrect++;}
+    });
+    sectionScores[sec]={correct:correctInSec,total:ids.length};
+  });
+  return {totalCorrect:totalCorrect,sectionScores:sectionScores,perQuestion:perQuestion,
+          passed:totalCorrect>=36&&sectionScores.vaerdi.correct>=4};
+}
+
+/* ════════════════════════════════════════════════════════════════
+   RENDER PERSONAL RESULTS
+   ════════════════════════════════════════════════════════════════ */
 function renderResults(results, name, timeSpentSec) {
-  var timeMin = Math.floor(timeSpentSec / 60);
-  var timeSec = timeSpentSec % 60;
-
+  var timeMin=Math.floor(timeSpentSec/60), timeSec=timeSpentSec%60;
   document.getElementById('resScore').textContent = results.totalCorrect;
-  document.getElementById('resTime').textContent =
-    'Tid brugt: ' + timeMin + ':' + String(timeSec).padStart(2, '0') + ' minutter';
-  document.getElementById('resultsHello').textContent =
-    'Hej ' + (name || 'deltager') + ' — her er din analyse.';
+  document.getElementById('resTime').textContent = 'Tid brugt: '+timeMin+':'+String(timeSec).padStart(2,'0')+' minutter';
+  document.getElementById('resultsHello').textContent = 'Hej '+(name||'deltager')+' — her er din analyse.';
 
-  var banner = document.getElementById('resBanner');
+  var banner=document.getElementById('resBanner');
   if (results.passed) {
-    banner.className = 'result-banner passed';
-    banner.innerHTML =
-      '<span class="result-banner-icon">✓</span>' +
-      '<div class="result-banner-title">Bestået</div>' +
-      '<div class="result-banner-sub">Du ville have bestået den rigtige prøve!</div>';
+    banner.className='result-banner passed';
+    banner.innerHTML='<span class="result-banner-icon">✓</span><div class="result-banner-title">Bestået</div><div class="result-banner-sub">Du ville have bestået den rigtige prøve!</div>';
   } else {
-    banner.className = 'result-banner failed';
-    banner.innerHTML =
-      '<span class="result-banner-icon">✗</span>' +
-      '<div class="result-banner-title">Ikke bestået</div>' +
-      '<div class="result-banner-sub">Du ville ikke have bestået den rigtige prøve. Se nedenfor hvad du skal fokusere på.</div>';
+    banner.className='result-banner failed';
+    banner.innerHTML='<span class="result-banner-icon">✗</span><div class="result-banner-title">Ikke bestået</div><div class="result-banner-sub">Du ville ikke have bestået den rigtige prøve. Se nedenfor hvad du skal fokusere på.</div>';
   }
 
-  var sectionLabels = {
-    laere:  'Læremateriale (1–35)',
-    aktuel: 'Aktuelle spørgsmål (36–40)',
-    vaerdi: 'Danske værdier (41–45)'
-  };
-  var secsEl = document.getElementById('resSections');
-  secsEl.innerHTML = '';
+  var sectionLabels={laere:'Læremateriale (1–35)',aktuel:'Aktuelle spørgsmål (36–40)',vaerdi:'Danske værdier (41–45)'};
+  var secsEl=document.getElementById('resSections');
+  secsEl.innerHTML='';
   Object.keys(results.sectionScores).forEach(function(sec) {
-    var s = results.sectionScores[sec];
-    var pct = Math.round((s.correct / s.total) * 100);
-    var color = pct >= 80 ? '#059669' : pct >= 60 ? '#d97706' : '#dc2626';
-    var noteHtml = '';
-    if (sec === 'vaerdi') {
-      var ok = s.correct >= 4;
-      noteHtml = '<span class="sec-bar-note ' + (ok ? 'ok' : 'bad') + '">' +
-        (ok ? '✓ (krav: mindst 4/5)' : '✗ (krav: mindst 4/5)') + '</span>';
+    var s=results.sectionScores[sec], pct=Math.round((s.correct/s.total)*100);
+    var color=pct>=80?'#059669':pct>=60?'#d97706':'#dc2626';
+    var noteHtml='';
+    if (sec==='vaerdi') {
+      var ok=s.correct>=4;
+      noteHtml='<span class="sec-bar-note '+(ok?'ok':'bad')+'">'+(ok?'✓ (krav: mindst 4/5)':'✗ (krav: mindst 4/5)')+'</span>';
     }
     secsEl.insertAdjacentHTML('beforeend',
-      '<div class="sec-bar">' +
-        '<div class="sec-bar-label"><span>' + sectionLabels[sec] + ': ' + s.correct + '/' + s.total + '</span>' + noteHtml + '</div>' +
-        '<div class="sec-bar-track"><div class="sec-bar-fill" style="background:' + color + ';width:' + pct + '%"></div></div>' +
-      '</div>'
-    );
+      '<div class="sec-bar"><div class="sec-bar-label"><span>'+sectionLabels[sec]+': '+s.correct+'/'+s.total+'</span>'+noteHtml+'</div>'+
+      '<div class="sec-bar-track"><div class="sec-bar-fill" style="background:'+color+';width:'+pct+'%"></div></div></div>');
   });
 
-  var wrongByTopic = {};
+  var wrongByTopic={};
   Object.keys(results.perQuestion).forEach(function(qid) {
     if (results.perQuestion[qid]) return;
-    var meta = Q_META[qid];
-    if (!meta) return;
-    if (!wrongByTopic[meta.topic]) wrongByTopic[meta.topic] = [];
-    var qData = QUESTIONS.find(function(q){ return q.id === parseInt(qid); });
-    wrongByTopic[meta.topic].push({
-      id: qid,
-      text: qData ? qData.text : '',
-      correct: meta.correct
-    });
+    var meta=Q_META[qid]; if (!meta) return;
+    if (!wrongByTopic[meta.topic]) wrongByTopic[meta.topic]=[];
+    var qData=QUESTIONS.find(function(q){return q.id===parseInt(qid);});
+    wrongByTopic[meta.topic].push({id:qid,text:qData?qData.text:'',correct:meta.correct});
   });
 
-  var wrongEl = document.getElementById('resWrong');
-  wrongEl.innerHTML = '';
-  var topicKeys = Object.keys(wrongByTopic);
-  if (topicKeys.length > 0) {
-    wrongEl.insertAdjacentHTML('beforeend',
-      '<h3 class="results-section-title">Spørgsmål du svarede forkert på</h3>'
-    );
+  var wrongEl=document.getElementById('resWrong');
+  wrongEl.innerHTML='';
+  var topicKeys=Object.keys(wrongByTopic);
+  if (topicKeys.length>0) {
+    wrongEl.insertAdjacentHTML('beforeend','<h3 class="results-section-title">Spørgsmål du svarede forkert på</h3>');
     topicKeys.forEach(function(topic) {
-      var qs = wrongByTopic[topic];
-      var html = '<div class="wrong-block"><div class="wrong-topic">' + topic + '</div>';
+      var qs=wrongByTopic[topic];
+      var html='<div class="wrong-block"><div class="wrong-topic">'+topic+'</div>';
       qs.forEach(function(q) {
-        html += '<div class="wrong-q"><span class="wrong-q-num">Sp. ' + q.id + ':</span> ' +
-                q.text + '<span class="wrong-q-correct">Rigtigt svar: ' + q.correct + '</span></div>';
+        // data-qid added so cohort enrichment can find and update each row
+        html+='<div class="wrong-q" data-qid="'+q.id+'"><span class="wrong-q-num">Sp. '+q.id+':</span> '+q.text+
+              '<span class="wrong-q-correct">Rigtigt svar: '+q.correct+'</span></div>';
       });
-      html += '</div>';
-      wrongEl.insertAdjacentHTML('beforeend', html);
+      html+='</div>';
+      wrongEl.insertAdjacentHTML('beforeend',html);
     });
   }
 
-  var recoEl = document.getElementById('resReco');
-  recoEl.innerHTML = '';
-  if (!results.passed && topicKeys.length > 0) {
-    var weak = topicKeys
-      .map(function(t){ return { topic: t, n: wrongByTopic[t].length }; })
-      .sort(function(a, b){ return b.n - a.n; })
-      .slice(0, 3)
-      .map(function(x){ return x.topic; });
-    recoEl.innerHTML =
-      '<div class="reco-block">' +
-        '<div class="reco-title">Vores anbefaling</div>' +
-        '<p>Fokusér de næste uger på: <strong>' + weak.join(', ') + '</strong>. ' +
-        'Disse emner kostede dig flest point.</p>' +
-        '<p>Med målrettet træning i disse emner kan du bestå den rigtige prøve den 3. juni.</p>' +
-        '<a href="https://civiclearn.com/denmark/checkout" class="reco-cta">Start træning →</a>' +
-      '</div>';
+  var recoEl=document.getElementById('resReco');
+  recoEl.innerHTML='';
+  if (!results.passed && topicKeys.length>0) {
+    var weak=topicKeys.map(function(t){return{topic:t,n:wrongByTopic[t].length};})
+      .sort(function(a,b){return b.n-a.n;}).slice(0,3).map(function(x){return x.topic;});
+    recoEl.innerHTML='<div class="reco-block"><div class="reco-title">Vores anbefaling</div>'+
+      '<p>Fokusér de næste uger på: <strong>'+weak.join(', ')+'</strong>. Disse emner kostede dig flest point.</p>'+
+      '<p>Med målrettet træning i disse emner kan du bestå den rigtige prøve den 3. juni.</p>'+
+      '<a href="https://civiclearn.com/denmark/checkout" class="reco-cta">Start træning →</a></div>';
   }
 }
 
-function fireSubmit(payload) {
-  try {
-    fetch(API_BASE + '/generalprove-submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      keepalive: true,
-      body: JSON.stringify(payload)
-    }).catch(function(){ /* user already saw results */ });
-  } catch (_) {}
+/* ════════════════════════════════════════════════════════════════
+   COHORT PANEL
+   ════════════════════════════════════════════════════════════════ */
+function bucketForScore(score) {
+  if (score <= 9)  return '0_9';
+  if (score <= 19) return '10_19';
+  if (score <= 29) return '20_29';
+  if (score <= 35) return '30_35';
+  return '36_45';
 }
 
+function renderCohort(cohort) {
+  if (!cohort || cohort.total === 0) return;
 
-/* ================================================================
-   SUBMIT — COMPUTE LOCALLY, RENDER IMMEDIATELY, FIRE BEST-EFFORT
-   ================================================================
-   1. Compute results client-side from the answer key shipped above.
-   2. Render the rich results UI immediately. User has their score.
-   3. Fire one POST to /generalprove-submit for analytics. If it
-      fails, fine — the user already saw their results.
-   No localStorage queue, no jitter, no beacon, no recovery hook.
-   keepalive:true is enough for tab-close survival.
+  document.getElementById('cohortPanel').style.display = 'block';
+  document.getElementById('cohortLoading').style.display = 'none';
+  document.getElementById('cohortContent').style.display = 'block';
+
+  // ── Stat cards ──
+  var row = document.getElementById('cohortStatsRow');
+  row.innerHTML =
+    '<div class="cohort-stat-card"><div class="big">'+cohort.total+'</div><div class="lbl">Deltog</div></div>'+
+    '<div class="cohort-stat-card green"><div class="big">'+cohort.pass_rate+'%</div><div class="lbl">Bestod</div></div>'+
+    '<div class="cohort-stat-card"><div class="big">'+cohort.avg_score+'</div><div class="lbl">Gns. score</div></div>';
+
+  // ── Score histogram ──
+  var buckets = [
+    { key:'0_9',   label:'0–9',   color:'#ef4444' },
+    { key:'10_19', label:'10–19', color:'#f97316' },
+    { key:'20_29', label:'20–29', color:'#eab308' },
+    { key:'30_35', label:'30–35', color:'#a3a3a3' },
+    { key:'36_45', label:'36–45 ✓', color:'#10b981' }
+  ];
+  var myBucket = lastPersonalResults ? bucketForScore(lastPersonalResults.totalCorrect) : null;
+  var maxCount = Math.max.apply(null, buckets.map(function(b){ return cohort.buckets[b.key]||0; }));
+
+  var histHtml = '<div class="cohort-histogram-title">Scorefordeling</div>';
+  buckets.forEach(function(b) {
+    var count = cohort.buckets[b.key] || 0;
+    var barPct = maxCount > 0 ? Math.round((count/maxCount)*100) : 0;
+    var isMe = (b.key === myBucket);
+    histHtml += '<div class="hist-row'+(isMe?' user-bucket':'')+'">'+
+      '<div class="hist-label">'+b.label+'</div>'+
+      '<div class="hist-bar-track">'+
+        '<div class="hist-bar-fill" style="background:'+b.color+';width:'+barPct+'%"></div>'+
+        '<span class="hist-bar-count">'+count+'</span>'+
+      '</div></div>';
+  });
+  document.getElementById('cohortHistogram').innerHTML = histHtml;
+
+  // ── Per-question enrichment: inject % badges into wrong-q rows ──
+  if (cohort.per_question && cohort.per_question.length > 0) {
+    var pqMap = {};
+    cohort.per_question.forEach(function(item){ pqMap[item.q] = item.pct; });
+    document.querySelectorAll('.wrong-q[data-qid]').forEach(function(el) {
+      var qid = parseInt(el.getAttribute('data-qid'));
+      var pct = pqMap[qid];
+      if (pct === undefined) return;
+      // Remove any existing badge first (in case of refresh)
+      var old = el.querySelector('.wrong-q-cohort');
+      if (old) old.remove();
+      var badge = document.createElement('span');
+      badge.className = 'wrong-q-cohort ' + (pct >= 70 ? 'easy' : 'hard');
+      badge.textContent = pct + '% svarede rigtigt';
+      // Insert after the question number/text, before wrong-q-correct
+      var correctEl = el.querySelector('.wrong-q-correct');
+      el.insertBefore(badge, correctEl);
+    });
+  }
+
+  // ── Note ──
+  var note = document.getElementById('cohortNote');
+  note.textContent = cohort.total === 1
+    ? 'Du er den første til at aflevere. Opdatér om lidt for at se de øvrige deltageres resultater.'
+    : 'Baseret på '+cohort.total+' besvarelse'+(cohort.total===1?'':'r')+'. Opdateres løbende.';
+}
+
+function showCohortLoading() {
+  document.getElementById('cohortPanel').style.display = 'block';
+  document.getElementById('cohortLoading').style.display = 'block';
+  document.getElementById('cohortContent').style.display = 'none';
+}
+
+async function refreshCohort() {
+  var btn = document.querySelector('.cohort-refresh-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Henter…'; }
+  try {
+    var res = await fetch(API_BASE+'/generalprove-cohort-stats');
+    if (res.ok) {
+      var cohort = await res.json();
+      renderCohort(cohort);
+    }
+  } catch(e) {}
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3"/></svg>Opdatér statistik';
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SUBMIT
+   ════════════════════════════════════════════════════════════════
+   1. Compute + render immediately from client-side answer key.
+   2. POST to server for analytics. When server responds, inject
+      cohort stats into the already-visible results page.
+      If server fails, user already has their personal results —
+      the cohort panel simply never appears.
 */
-
 async function submitExam(auto) {
   if (submitted) return;
-
   if (!auto) {
     var unanswered = QUESTIONS.length - Object.keys(answers).length;
     if (unanswered > 0) {
-      var ok = confirm('Du har ' + unanswered + ' ubesvarede spørgsmål. Vil du aflevere alligevel?');
-      if (!ok) return;
+      if (!confirm('Du har '+unanswered+' ubesvarede spørgsmål. Vil du aflevere alligevel?')) return;
     }
   }
 
   submitted = true;
   var btn = document.getElementById('submitBtn');
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = 'Afleveret';
-  }
+  if (btn) { btn.disabled=true; btn.textContent='Afleveret'; }
   if (timerInterval) clearInterval(timerInterval);
 
-  var timeSpentMs = examStartedAt ? (new Date() - examStartedAt) : 0;
-  var timeSpentSeconds = Math.floor(timeSpentMs / 1000);
+  var timeSpentMs = examStartedAt ? (new Date()-examStartedAt) : 0;
+  var timeSpentSeconds = Math.floor(timeSpentMs/1000);
 
-  // 1. Compute results
+  // Step 1: compute + render immediately
   var results = computeResults(answers);
-
-  // 2. Render and show
+  lastPersonalResults = results;
   renderResults(results, userName, timeSpentSeconds);
   showState('post');
-  window.scrollTo(0, 0);
+  window.scrollTo(0,0);
 
-  // 3. Fire-and-forget analytics POST. User already has their results.
-  fireSubmit({
-    client_attempt_id: clientAttemptId,
-    email: userEmail,
-    name: userName,
-    answers: answers,
-    time_spent_seconds: timeSpentSeconds,
-    started_at: examStartedAt ? examStartedAt.toISOString() : null
-  });
-}
+  // Step 2: show cohort loading state
+  showCohortLoading();
 
-
-/* ================================================================
-   BOOTSTRAP — fetch event config from server, fall back to hardcoded
-   ================================================================
-   The hardcoded EXAM_START/EXAM_END at the top of the file act as a
-   safety net. If generalprove-config returns an event, those values
-   are overwritten before route() runs. If config is unreachable or
-   returns 204 (no scheduled event), we silently keep the hardcoded
-   defaults. TEST_MODE always wins over config.
-*/
-
-async function loadEventConfig() {
-  if (TEST_MODE) return; // TEST_MODE overrides server config
+  // Step 3: POST to server; enrich with cohort when it responds
   try {
-    var ctrl = new AbortController();
-    var to = setTimeout(function(){ ctrl.abort(); }, 4000); // 4s budget
-    var res = await fetch(API_BASE + '/generalprove-config', { signal: ctrl.signal });
-    clearTimeout(to);
-    if (res.status === 200) {
-      var ev = await res.json();
-      if (ev && ev.exam_start_at && ev.exam_end_at) {
-        EXAM_START = new Date(ev.exam_start_at);
-        EXAM_END   = new Date(ev.exam_end_at);
-      }
+    var res = await fetch(API_BASE+'/generalprove-submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        client_attempt_id: clientAttemptId,
+        email: userEmail,
+        name: userName,
+        answers: answers,
+        time_spent_seconds: timeSpentSeconds,
+        started_at: examStartedAt ? examStartedAt.toISOString() : null
+      })
+    });
+    if (res.ok) {
+      var data = await res.json();
+      if (data.cohort) renderCohort(data.cohort);
+      else { document.getElementById('cohortPanel').style.display='none'; }
+    } else {
+      document.getElementById('cohortPanel').style.display='none';
     }
-    // 204 or any other status: keep hardcoded fallback, no error surfaced
-  } catch (_) {
-    // Network error / timeout: keep hardcoded fallback
+  } catch(e) {
+    document.getElementById('cohortPanel').style.display='none';
   }
 }
 
+/* ════════════════════════════════════════════════════════════════
+   BOOTSTRAP
+   ════════════════════════════════════════════════════════════════ */
+async function loadEventConfig() {
+  if (TEST_MODE) return;
+  try {
+    var ctrl=new AbortController(), to=setTimeout(function(){ctrl.abort();},4000);
+    var res=await fetch(API_BASE+'/generalprove-config',{signal:ctrl.signal});
+    clearTimeout(to);
+    if (res.status===200) {
+      var ev=await res.json();
+      if (ev&&ev.exam_start_at&&ev.exam_end_at) { EXAM_START=new Date(ev.exam_start_at); EXAM_END=new Date(ev.exam_end_at); }
+    }
+  } catch(_){}
+}
 async function bootstrap() {
   clientAttemptId = getOrCreateAttemptId();
   await loadEventConfig();
   route();
 }
-
 bootstrap();
 </script>
-
 </body>
 </html>
