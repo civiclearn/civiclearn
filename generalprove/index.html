@@ -1108,12 +1108,43 @@ function recoverPendingSubmission() {
 
 
 /* ================================================================
-   INIT
-   ================================================================ */
+   BOOTSTRAP — fetch event config from server, fall back to hardcoded
+   ================================================================
+   The hardcoded EXAM_START/EXAM_END at the top of the file act as a
+   safety net. If generalprove-config returns an event, those values
+   are overwritten before route() runs. If config is unreachable or
+   returns 204 (no scheduled event), we silently keep the hardcoded
+   defaults. TEST_MODE always wins over config.
+*/
 
-clientAttemptId = getOrCreateAttemptId();
-recoverPendingSubmission();
-route();
+async function loadEventConfig() {
+  if (TEST_MODE) return; // TEST_MODE overrides server config
+  try {
+    var ctrl = new AbortController();
+    var to = setTimeout(function(){ ctrl.abort(); }, 4000); // 4s budget
+    var res = await fetch(API_BASE + '/generalprove-config', { signal: ctrl.signal });
+    clearTimeout(to);
+    if (res.status === 200) {
+      var ev = await res.json();
+      if (ev && ev.exam_start_at && ev.exam_end_at) {
+        EXAM_START = new Date(ev.exam_start_at);
+        EXAM_END   = new Date(ev.exam_end_at);
+      }
+    }
+    // 204 or any other status: keep hardcoded fallback, no error surfaced
+  } catch (_) {
+    // Network error / timeout: keep hardcoded fallback
+  }
+}
+
+async function bootstrap() {
+  clientAttemptId = getOrCreateAttemptId();
+  await loadEventConfig();
+  recoverPendingSubmission();
+  route();
+}
+
+bootstrap();
 </script>
 
 </body>
