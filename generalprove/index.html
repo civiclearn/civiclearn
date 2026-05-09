@@ -146,6 +146,13 @@
     .cohort-refresh-btn:hover { background: #f5f3ff; }
     .cohort-refresh-btn svg { width: 14px; height: 14px; }
 
+    /* ── PROCESSING SCREEN ── */
+    .processing-screen { display: none; max-width: 540px; margin: 0 auto; padding: 120px 24px; text-align: center; font-family: 'Lexend', sans-serif; }
+    .processing-screen.active { display: block; }
+    .processing-spinner { display: inline-block; width: 44px; height: 44px; border: 3px solid #e5e0f8; border-top-color: var(--purple); border-radius: 50%; animation: spin .9s linear infinite; margin-bottom: 28px; }
+    .processing-msg { font-size: 1.05rem; font-weight: 600; color: var(--purple); min-height: 1.6em; transition: opacity .3s; }
+    .processing-submsg { font-size: .82rem; color: var(--text-muted); margin-top: 8px; }
+
     /* ── CLOSED ── */
     .exam-closed { display: none; max-width: 540px; margin: 0 auto; padding: 80px 24px; text-align: center; font-family: 'Lexend',sans-serif; }
     .exam-closed.active { display: block; }
@@ -300,6 +307,13 @@
   <p style="margin-top:24px;text-align:center;">
     <a href="https://indfodsretsprove.dk/generalprove/" style="color:#7c3aed;text-decoration:none;font-weight:600;">← Tilbage til Generalprøven</a>
   </p>
+</div>
+
+<!-- ══ PROCESSING ══ -->
+<div class="processing-screen" id="processingScreen">
+  <div class="processing-spinner"></div>
+  <div class="processing-msg" id="processingMsg">Afleverer…</div>
+  <div class="processing-submsg">Vent venligst</div>
 </div>
 
 <!-- ══ CLOSED ══ -->
@@ -480,6 +494,7 @@ function showState(state) {
   document.getElementById('examPage').className = state === 'exam' ? 'exam-page active' : 'exam-page';
   document.getElementById('postExam').className = state === 'post' ? 'post-exam active' : 'post-exam';
   document.getElementById('examClosed').className = state === 'closed' ? 'exam-closed active' : 'exam-closed';
+  document.getElementById('processingScreen').className = state === 'processing' ? 'processing-screen active' : 'processing-screen';
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -793,12 +808,28 @@ async function submitExam(auto) {
   var timeSpentMs = examStartedAt ? (new Date()-examStartedAt) : 0;
   var timeSpentSeconds = Math.floor(timeSpentMs/1000);
 
-  // Step 1: compute + render immediately
-  var results = computeResults(answers);
-  lastPersonalResults = results;
-  renderResults(results, userName, timeSpentSeconds);
-  showState('post');
+  showState('processing');
   window.scrollTo(0,0);
+
+  var _msgs = ['Afleverer…', 'Analyserer…', 'Forbereder resultater…'];
+  var _msgEl = document.getElementById('processingMsg');
+  var _mi = 0;
+  var _msgInterval = setInterval(function() {
+    _mi++;
+    if (_mi < _msgs.length) {
+      _msgEl.style.opacity = 0;
+      setTimeout(function(){ _msgEl.textContent = _msgs[_mi]; _msgEl.style.opacity = 1; }, 250);
+    }
+  }, 1100);
+
+  setTimeout(function() {
+    clearInterval(_msgInterval);
+    var results = computeResults(answers);
+    lastPersonalResults = results;
+    renderResults(results, userName, timeSpentSeconds);
+    showState('post');
+    window.scrollTo(0,0);
+  }, 3500);
 
   // Step 2: show cohort loading state
   showCohortLoading();
