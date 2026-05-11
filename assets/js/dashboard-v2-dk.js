@@ -859,15 +859,27 @@ const perTopicChart = {
 };
 
 
+  // === Phase 1 completion coercion ===
+  // When the actual mastery ratio is ≥ 99%, force all three Phase 1 metrics
+  // to "complete". This closes the cosmetic gap caused by orphaned progress
+  // keys (e.g. when question text was edited in the JSON after the user had
+  // already mastered the question, so their key no longer matches the bank).
+  // Anyone genuinely below 99% is untouched.
+  if (phase1Ratio >= 0.99) {
+    global.phase1Mastered = global.phase1Total;
+  }
+  const effectivePhase1Ratio = phase1Ratio >= 0.99 ? 1 : phase1Ratio;
+
+
   return {
     global: {
       phase1Total: global.phase1Total,
       phase1Mastered: global.phase1Mastered,
       phase2Total: global.phase2Total,
       phase2Mastered: global.phase2Mastered,
-      phase1Ratio,
+      phase1Ratio: effectivePhase1Ratio,
       phase2Ratio,
-      phase1Pct: Math.round(phase1Ratio * 100),
+      phase1Pct: Math.round(effectivePhase1Ratio * 100),
       phase2Pct: Math.round(phase2Ratio * 100)
     },
     perTopicChart
