@@ -1,323 +1,584 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-ES">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DELE A2 — Simuleringar</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="/dele/assets/js/dele-auth.js"></script>
-  <script src="/dele/assets/js/dele-engine.js?v=2"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Preparación DELE A2 Nacionalidad española | CivicLearn DELE</title>
+
+  <meta name="description"
+        content="Prepárate para el examen DELE A2 con 10 simulaciones completas de las 4 destrezas, evaluación con IA y estadísticas claras. Pago único, acceso de por vida." />
+
+  <!-- Lexend font -->
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap">
+
+  <link rel="stylesheet" href="/ccse/assets/css/main.css">
+
+  <!-- DELE brand color overrides for shared CSS purple-themed classes.
+       Keeps CIPLE class names so shared sizing/padding rules still apply;
+       only repaints colors to DELE red (#AA151B) + yellow accent (#F1BF00).
+       Refactor into proper btn-small-red / btn-dele-* classes when convenient. -->
   <style>
     :root {
-      --brand:#AA151B; --brand-dim:#fce8ea; --yellow:#F1BF00;
-      --navy:#0f172a; --slate:#334155; --muted:#64748b; --border:#e2e8f0;
-      --surface:#ffffff; --bg:#f8f7f4;
-      --pass:#166534; --pass-bg:#dcfce7;
-      --fail:#991b1b; --fail-bg:#fee2e2;
-      --amber:#92400e; --amber-bg:#fef9c3;
+      --dele-brand: #AA151B;
+      --dele-brand-hover: #8e1117;
+      --dele-tint: #fdecec;
+      --dele-accent: #F1BF00;
     }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
-
-    .topbar{background:var(--navy);border-bottom:3px solid var(--brand);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-    .topbar-brand{display:flex;align-items:center;gap:14px}
-    .topbar-flag{width:28px;height:20px;background:var(--brand);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0}
-    .topbar-flag::before{content:'';position:absolute;top:5px;left:0;right:0;height:10px;background:var(--yellow)}
-    .brand-text{display:flex;flex-direction:column;line-height:1.1}
-    .brand-title{font-size:1rem;font-weight:700;color:#fff}
-    .brand-sub{font-size:0.72rem;color:#64748b}
-    .topbar-right{display:flex;align-items:center;gap:12px}
-    .user-pill{background:#1e293b;border-radius:99px;padding:5px 14px;font-size:0.75rem;color:#94a3b8}
-    .signout-link{background:none;border:none;color:#64748b;font-size:0.75rem;cursor:pointer;font-family:inherit}
-    .signout-link:hover{color:#fff}
-
-    #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity 0.35s}
-    #loading-overlay.hidden{opacity:0;pointer-events:none}
-    .loading-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--brand);animation:spin 0.8s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    .dashboard-wrap{max-width:1040px;margin:0 auto;padding:32px 28px 80px}
-    .dashboard-header{margin-bottom:28px}
-    .dashboard-header h1{font-size:1.5rem;font-weight:700;margin-bottom:4px}
-    .dashboard-header p{font-size:0.88rem;color:var(--muted)}
-
-    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
-    .stat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:18px 20px}
-    .stat-label{font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:8px}
-    .stat-value{font-size:1.6rem;font-weight:700;line-height:1}
-    .stat-sub{font-size:0.78rem;color:var(--muted);margin-top:6px}
-    .stat-progress{height:4px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden}
-    .stat-progress-fill{height:100%;background:var(--brand);border-radius:2px;transition:width 0.6s ease}
-
-    .table-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;overflow:hidden}
-    .table-title{padding:18px 22px 14px;font-size:1.05rem;font-weight:700;border-bottom:1px solid var(--border)}
-    .sim-table{width:100%;border-collapse:collapse;font-size:0.82rem}
-    .sim-table thead{background:#f8fafc}
-    .sim-table th{padding:10px 12px;text-align:center;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);border-bottom:1px solid var(--border)}
-    .sim-table th:first-child{text-align:left;padding-left:22px}
-    .sim-table th:last-child{text-align:right;padding-right:22px}
-    .sim-table td{padding:12px 12px;text-align:center;border-bottom:1px solid #f1f5f9;vertical-align:middle}
-    .sim-table td:first-child{text-align:left;padding-left:22px}
-    .sim-table td:last-child{text-align:right;padding-right:22px}
-    .sim-table tbody tr{transition:background 0.1s}
-    .sim-table tbody tr:hover{background:#fafaf8}
-    .sim-table tbody tr:last-child td{border-bottom:none}
-
-    .sim-id{font-weight:700;color:var(--navy);display:block;font-size:0.84rem}
-    .badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:0.68rem;font-weight:600;white-space:nowrap}
-    .badge-idle{background:#f1f5f9;color:#475569}
-    .badge-progress{background:var(--amber-bg);color:var(--amber)}
-    .badge-complete{background:var(--pass-bg);color:var(--pass)}
-
-    .score-cell{font-weight:600;font-variant-numeric:tabular-nums}
-    .score-cell.na{color:var(--border);font-weight:400}
-    .score-cell.low{color:var(--fail)}
-    .score-cell.mid{color:var(--amber)}
-    .score-cell.high{color:var(--pass)}
-
-    .level-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:0.72rem;font-weight:700;white-space:nowrap}
-    .level-pass{background:var(--pass-bg);color:var(--pass)}
-    .level-fail{background:var(--fail-bg);color:var(--fail)}
-
-    .table-btn{display:inline-block;padding:6px 16px;border-radius:6px;font-size:0.78rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;font-family:inherit;white-space:nowrap;transition:opacity 0.15s}
-    .table-btn:hover{opacity:0.85}
-    .table-btn-start{background:var(--brand);color:#fff}
-    .table-btn-resume{background:var(--navy);color:#fff}
-    .table-btn-results{background:#f1f5f9;color:var(--navy);border:1px solid var(--border)}
-    .table-btn-listo{background:var(--brand-dim);color:var(--brand);border:1px solid var(--brand)}
-    .action-group{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
-
-    @media (max-width:768px) {
-      .dashboard-wrap{padding:20px 16px 60px}
-      .stat-grid{grid-template-columns:1fr}
-      .sim-table .hide-mobile{display:none}
-      .sim-table th:first-child,.sim-table td:first-child{padding-left:14px}
-      .sim-table th:last-child,.sim-table td:last-child{padding-right:14px}
-      .topbar{padding:0 16px}
-    }
+    .btn-small-purple,
+    .btn-primary,
+    .hero-card-btn,
+    .mini-next-btn { background-color: var(--dele-brand) !important; color: #fff !important; }
+    .btn-small-purple:hover,
+    .btn-primary:hover,
+    .hero-card-btn:hover,
+    .mini-next-btn:hover { background-color: var(--dele-brand-hover) !important; }
+    .btn-secondary { border-color: var(--dele-brand) !important; color: var(--dele-brand) !important; }
+    .btn-secondary:hover { background-color: var(--dele-tint) !important; }
+    .btn-ghost { color: var(--dele-brand) !important; }
+    .btn-ghost:hover { background-color: var(--dele-tint) !important; }
+    .hero-highlight,
+    .hero-card-price,
+    .section-kicker,
+    .feature-label { color: var(--dele-brand) !important; }
+    .badge,
+    .step-number { background-color: var(--dele-brand) !important; color: #fff !important; }
+    .hero-card-pill { background-color: var(--dele-tint) !important; color: var(--dele-brand-hover) !important; }
   </style>
 </head>
+
 <body>
 
-<div id="loading-overlay">
-  <div class="loading-spinner"></div>
-  <div style="font-size:0.85rem;color:var(--muted)">Cargando…</div>
-</div>
+<header class="site-header">
+  <div class="header-inner">
 
-<div class="topbar">
-  <div class="topbar-brand">
-    <div class="topbar-flag"></div>
-    <div class="brand-text">
-      <span class="brand-title">DELE A2</span>
-      <span class="brand-sub">Provsimulering</span>
+    <div class="header-left">
+      <div class="brand-main">
+        <img src="/assets/images/es.svg" alt="Bandera de España">
+        <div class="brand-title">CivicLearn DELE</div>
+      </div>
+      <div class="brand-powered">
+        powered by <span>CivicLearn</span>
+      </div>
+    </div>
+
+    <nav class="header-nav">
+      <a href="#presentation">Presentación</a>
+      <a href="#funcionalidades">Funcionalidades</a>
+    </nav>
+
+    <div class="header-right">
+      <a href="/dele/login" class="btn-ghost">Ya tengo cuenta</a>
+      <a href="/dele/checkout" class="btn-small-purple">Activar acceso</a>
+    </div>
+
+  </div>
+</header>
+
+
+<main>
+
+<!-- =======================
+       HERO
+======================== -->
+<section class="hero" id="presentation">
+  <div>
+    <div class="hero-kicker">
+      Preparación completa
+      <span class="badge">Examen DELE A2</span>
+    </div>
+
+    <h1 class="hero-title">
+      Todo lo que necesitas para
+      <span class="hero-highlight">aprobar el DELE A2 con confianza</span>.
+    </h1>
+
+    <p class="hero-subtitle">
+      10 simulaciones fieles al examen oficial DELE A2 del Instituto Cervantes
+      en las 4 destrezas — comprensión de lectura, comprensión auditiva,
+      expresión e interacción escritas, y expresión e interacción orales.
+      Un solo pago, acceso de por vida a una plataforma diseñada para
+      candidatos a la nacionalidad española.
+    </p>
+
+    <div class="hero-bullets">
+      <ul>
+        <li>10 simulaciones completas en las 4 destrezas del DELE A2</li>
+        <li>Ejercicios alineados con los criterios oficiales del Instituto Cervantes</li>
+        <li>Simulaciones repetibles sin límite — practica hasta sentirte seguro</li>
+        <li>Seguimiento del progreso por destreza y tipo de ejercicio</li>
+      </ul>
+    </div>
+
+    <div class="hero-ctas">
+      <a href="/dele/checkout" class="btn-primary">
+        Activar acceso ahora
+      </a>
+      <a href="/dele/login" class="btn-secondary">
+        Ya tengo cuenta
+      </a>
+    </div>
+
+    <p class="hero-note">
+      <strong>Pago único, acceso de por vida.</strong> Sin suscripciones ni renovaciones automáticas.
+    </p>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-image-wide">
+      <img src="/dele/assets/img/devices-dele.webp" alt="Plataforma DELE A2">
     </div>
   </div>
-  <div class="topbar-right">
-    <div class="user-pill" id="userEmail"></div>
-    <a href="https://nacionalidadespanola.com/contacto" class="signout-link" style="text-decoration:none" target="_blank" rel="noopener">Contacto</a>
-    <button class="signout-link" onclick="deleAuth.signOut()">Cerrar sesión</button>
-  </div>
-</div>
+</section>
 
-<div class="dashboard-wrap">
-  <div class="dashboard-header">
-    <h1>Vista general</h1>
-    <p>Practica para tu examen DELE A2 con evaluación por IA.</p>
-  </div>
 
-  <div class="stat-grid">
-    <div class="stat-card">
-      <div class="stat-label">Avklarade simuleringar</div>
-      <div class="stat-value" id="doneSims">0/10</div>
-      <div class="stat-progress"><div class="stat-progress-fill" id="progressBar" style="width:0%"></div></div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Senaste resultat</div>
-      <div class="stat-value" id="lastResult">—</div>
-      <div class="stat-sub" id="lastResultSub">Ingen simulación avklarad</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Puntuación total (más reciente)</div>
-      <div class="stat-value" id="lastScore">—</div>
-      <div class="stat-sub" id="lastScoreSub">&nbsp;</div>
-    </div>
+
+<!-- =======================
+   1 — Funcionalidades
+======================== -->
+<section class="section" id="funcionalidades">
+  <div class="section-header">
+    <div class="section-kicker">Funciones clave</div>
+    <h2 class="section-title">Una plataforma pensada para el DELE real</h2>
+    <p class="section-subtitle">
+      Cada pantalla, cada ejercicio y cada gráfico se han diseñado con un único
+      objetivo: ayudarte a llegar al examen DELE A2 bien preparado y con confianza.
+    </p>
   </div>
 
-  <div class="table-card">
-    <div class="table-title">Simuleringar</div>
-    <table class="sim-table">
-      <thead>
-        <tr>
-          <th>Nr</th>
-          <th>Status</th>
-          <th class="hide-mobile">Lectura</th>
-          <th class="hide-mobile">Audición</th>
-          <th class="hide-mobile">Escribe</th>
-          <th class="hide-mobile">Tal</th>
-          <th>Nivel</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="simTableBody"></tbody>
-    </table>
+  <div class="features-grid">
+
+    <article class="feature-card">
+      <div class="feature-label">Simulaciones oficiales</div>
+      <div class="feature-title">Como el día del examen</div>
+      <p class="feature-text">
+        10 simulaciones completas con temporizador y corrección inmediata,
+        cubriendo lectura, audición, escritura y expresión oral. Familiarízate
+        con el formato real y reduce el estrés.
+      </p>
+    </article>
+
+    <article class="feature-card">
+      <div class="feature-label">4 destrezas</div>
+      <div class="feature-title">Lectura, audición, escritura y habla</div>
+      <p class="feature-text">
+        Practica cada destreza del DELE A2 por separado o en simulación
+        completa. Comprensión de lectura, comprensión auditiva, expresión
+        escrita y expresión e interacción orales.
+      </p>
+    </article>
+
+    <article class="feature-card">
+      <div class="feature-label">Simulaciones ilimitadas</div>
+      <div class="feature-title">Repite las veces que quieras</div>
+      <p class="feature-text">
+        Cada una de las 10 simulaciones se puede repetir sin límite.
+        Rehaz los ejercicios hasta sentirte seguro en todas las destrezas.
+      </p>
+    </article>
+
+    <article class="feature-card">
+      <div class="feature-label">Evaluación con IA</div>
+      <div class="feature-title">Como un examinador virtual</div>
+      <p class="feature-text">
+        Las pruebas escritas y orales se evalúan con IA según las dimensiones
+        oficiales del DELE. Recibe puntuación y comentarios detallados al instante.
+      </p>
+    </article>
+
+    <article class="feature-card">
+      <div class="feature-label">Corrección detallada</div>
+      <div class="feature-title">Ve todos tus errores</div>
+      <p class="feature-text">
+        En la lectura y la comprensión auditiva, cada error se identifica
+        con la respuesta correcta para que sepas exactamente dónde mejorar.
+      </p>
+    </article>
+
+    <article class="feature-card">
+      <div class="feature-label">Estadísticas claras</div>
+      <div class="feature-title">Control total de tu progreso</div>
+      <p class="feature-text">
+        Porcentajes de acierto, progreso por destreza e historial completo
+        de tus sesiones de estudio.
+      </p>
+    </article>
+
+    <article class="feature-card">
+      <div class="feature-label">Audio nativo</div>
+      <div class="feature-title">Escucha y aprende</div>
+      <p class="feature-text">
+        Escucha los ejercicios de comprensión auditiva con voces nativas
+        de toda España para acostumbrarte al ritmo del español peninsular.
+      </p>
+    </article>
+
+    <article class="feature-card">
+      <div class="feature-label">Para la nacionalidad</div>
+      <div class="feature-title">Examen oficial requerido</div>
+      <p class="feature-text">
+        El DELE A2 (o superior) es el examen oficial reconocido por el
+        Ministerio de Justicia para la nacionalidad española por residencia
+        (Real Decreto 1004/2015).
+      </p>
+    </article>
+
+    <article class="feature-card">
+      <div class="feature-label">100% móvil</div>
+      <div class="feature-title">Estudia desde donde estés</div>
+      <p class="feature-text">
+        Totalmente optimizado para móvil: simulaciones, estadísticas
+        y correcciones en cualquier dispositivo.
+      </p>
+    </article>
+
   </div>
-</div>
+</section>
+
+
+
+<!-- =======================
+   2 — Mini-test + Precio
+======================== -->
+<section class="try-and-upgrade">
+
+  <div class="section-header">
+    <div class="section-kicker">Prueba gratuita</div>
+    <h2 class="section-title">Prueba rápida + Acceso Premium</h2>
+    <p class="section-subtitle">
+      Responde a 10 preguntas rápidas para evaluar tu nivel de español.
+      Continúa después con el acceso completo al DELE A2.
+    </p>
+  </div>
+
+  <div class="try-grid">
+
+    <!-- MINITEST -->
+    <div class="try-card test-card">
+      <div id="mini-test-container"></div>
+
+      <div id="mini-test-result" style="display:none;">
+        <h4>Resultados de la prueba</h4>
+        <p id="mini-test-text"></p>
+
+        <div class="result-chart-container" style="max-width:260px; margin:1.2rem auto;">
+          <canvas id="mini-test-chart"></canvas>
+        </div>
+
+        <a href="/dele/checkout"
+           class="btn-small-purple"
+           style="margin-top:1rem; display:inline-block;">
+          Obtener acceso completo
+        </a>
+      </div>
+    </div>
+
+    <!-- PRICING -->
+    <div class="try-card price-card">
+      <div class="hero-card-title">Acceso Premium</div>
+      <div class="hero-card-price">69 €</div>
+      <div class="hero-card-sub">Pago único — acceso de por vida</div>
+
+      <div class="hero-card-pill">
+        ✅ Recomendado por candidatos que aprobaron el DELE A2
+      </div>
+
+      <ul class="hero-card-list">
+        <li>10 simulaciones completas en las 4 destrezas (2026)</li>
+        <li>Lectura, audición, escritura y expresión oral</li>
+        <li>Evaluación con IA y comentarios detallados</li>
+        <li>Estadísticas claras y seguimiento completo</li>
+      </ul>
+
+      <div class="hero-card-cta">
+        <a href="/dele/checkout" class="hero-card-btn">
+          Pago seguro con tarjeta
+        </a>
+        <div class="hero-card-foot">
+          Pago 100% seguro vía Stripe. Acceso inmediato tras el pago.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- =======================
+   3 — Cómo funciona
+======================== -->
+<section class="section" id="como-funciona">
+  <div class="section-header">
+    <div class="section-kicker">Cómo funciona</div>
+    <h2 class="section-title">En 3 pasos simples</h2>
+    <p class="section-subtitle">
+      El registro lleva menos de un minuto. Después, solo necesitas practicar
+      regularmente hasta el día del examen DELE A2.
+    </p>
+  </div>
+
+  <div class="steps-grid">
+
+    <article class="step-card">
+      <div class="step-number">1</div>
+      <div class="step-title">Activa tu acceso</div>
+      <p class="step-text">
+        Haz clic en "Activar acceso ahora", completa el pago seguro con Stripe
+        y obtén acceso inmediato a la plataforma completa.
+      </p>
+    </article>
+
+    <article class="step-card">
+      <div class="step-number">2</div>
+      <div class="step-title">Haz las simulaciones a tu ritmo</div>
+      <p class="step-text">
+        Completa las 10 simulaciones DELE A2 una a una, a tu propio ritmo.
+        Repite cualquier simulación las veces que necesites hasta sentirte preparado.
+      </p>
+    </article>
+
+    <article class="step-card">
+      <div class="step-number">3</div>
+      <div class="step-title">Sigue tu progreso</div>
+      <p class="step-text">
+        Consulta tus resultados en el panel, identifica tus puntos débiles
+        y refuerza las áreas necesarias hasta estar preparado.
+      </p>
+    </article>
+
+  </div>
+</section>
+
+
+</main>
+
+
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© 2026 CivicLearn DELE · powered by CivicLearn</div>
+    <div class="footer-links">
+      <a href="/dele/terminos.html">Términos y condiciones</a>
+      <a href="/dele/privacidad.html">Privacidad</a>
+      <a href="https://civiclearn.com/#contact">Contacto</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-var SIMS = [];
-for (var i = 1; i <= 10; i++) {
-  SIMS.push({ id: 'sim' + String(i).padStart(2, '0'), title: 'Simulación ' + i });
+
+const MINI_QUESTIONS = [
+  {
+    q: "Completa: «Ayer ___ al médico.»",
+    a: [
+      "fui",
+      "fue",
+      "iba"
+    ]
+  },
+  {
+    q: "¿Cuál es el plural de «pan»?",
+    a: [
+      "panes",
+      "panos",
+      "pans"
+    ]
+  },
+  {
+    q: "«El café ___ frío.» ¿Qué verbo es correcto?",
+    a: [
+      "está",
+      "es",
+      "tiene"
+    ]
+  },
+  {
+    q: "En España, una «caña» es...",
+    a: [
+      "una cerveza de barril pequeña.",
+      "un café con leche.",
+      "un bocadillo de jamón."
+    ]
+  },
+  {
+    q: "Completa: «Yo vivo ___ Madrid.»",
+    a: [
+      "en",
+      "a",
+      "de"
+    ]
+  },
+  {
+    q: "¿Cuál de estas frases es correcta?",
+    a: [
+      "Necesito ayuda.",
+      "Necesito de ayuda.",
+      "Necesito la ayuda."
+    ]
+  },
+  {
+    q: "¿Qué significa «echar de menos»?",
+    a: [
+      "Sentir la ausencia de alguien o algo.",
+      "Tener mucha hambre.",
+      "Estar muy enfadado."
+    ]
+  },
+  {
+    q: "«¿Puedes pasar___ la sal, por favor?» (a mí)",
+    a: [
+      "me",
+      "mí",
+      "yo"
+    ]
+  },
+  {
+    q: "Completa: «Mañana ___ ir al dentista.»",
+    a: [
+      "tengo que",
+      "tengo de",
+      "debo de"
+    ]
+  },
+  {
+    q: "«Ella es ___ alta ___ su hermana.» (comparativo de igualdad)",
+    a: [
+      "tan … como",
+      "tan … que",
+      "tanta … como"
+    ]
+  }
+];
+
+
+/* ---- Utility: shuffle ---- */
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
-var ELEM_KEYS = ['lectura', 'auditiva', 'escritas', 'orales'];
-
-var _userId = null;
-var _pollTimer = null;
-
-document.addEventListener('DOMContentLoaded', async function() {
-  var ctx = await DELE.init();
-  _userId = ctx.user.id;
-  document.getElementById('userEmail').textContent = ctx.user.email;
-
-  // Show page immediately — don't wait for hydrate (cold starts can take 20s)
-  DELE.hideLoading();
-  await refreshDashboard();
+/* ---- Build model ---- */
+const miniModel = MINI_QUESTIONS.map((item, i) => {
+  const correct = item.a[0];
+  const shuffled = shuffle(item.a);
+  return {
+    index: i,
+    text: item.q,
+    choices: shuffled.map(opt => ({
+      text: opt,
+      isCorrect: opt === correct
+    })),
+    answered: false,
+    pickedIndex: -1
+  };
 });
 
-async function refreshDashboard() {
-  var data = await DELE.hydrateData(_userId, 'any', true);
-  var attempts = (data && data.attempts) || [];
+let qi = 0;
+let score = 0;
+const total = miniModel.length;
 
-  renderStats(attempts);
-  renderTable(attempts);
+const miniContainer   = document.getElementById("mini-test-container");
+const miniResultPanel = document.getElementById("mini-test-result");
+const miniResultText  = document.getElementById("mini-test-text");
 
-  // Check if any elements are still being evaluated
-  var hasPending = attempts.some(function(a) {
-    return a.status !== 'complete' && (a.elements || []).some(function(e) {
-      return e.submission_status === 'submitted' && e.eval_status !== 'complete' && e.eval_status !== 'skipped';
-    });
+/* ---- Render question ---- */
+function renderMiniQuestion() {
+  const q = miniModel[qi];
+
+  miniContainer.style.display = "block";
+  miniResultPanel.style.display = "none";
+
+  miniContainer.innerHTML = `
+    <div class="mini-q-title">${q.text}</div>
+    <div class="choices" id="miniChoices"></div>
+    <div class="mini-next-area"></div>
+  `;
+
+  const choicesEl = document.getElementById("miniChoices");
+  q.choices.forEach((c, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "choice";
+    btn.textContent = c.text;
+    btn.addEventListener("click", () => miniPick(idx));
+    choicesEl.appendChild(btn);
   });
-
-  if (hasPending && !_pollTimer) {
-    _pollTimer = setInterval(refreshDashboard, 12000);
-  } else if (!hasPending && _pollTimer) {
-    clearInterval(_pollTimer);
-    _pollTimer = null;
-  }
 }
 
-function renderStats(attempts) {
-  var completed = attempts.filter(function(a) { return a.status === 'complete'; });
-  // Count unique completed simulations (not total attempts, since redos create multiple)
-  var uniqueSims = {};
-  completed.forEach(function(a) { uniqueSims[a.simulation_id] = true; });
-  var count = Object.keys(uniqueSims).length;
-  document.getElementById('doneSims').textContent = count + '/10';
-  document.getElementById('progressBar').style.width = (count / 10 * 100) + '%';
+/* ---- Handle answer ---- */
+function miniPick(idx) {
+  const q = miniModel[qi];
+  if (q.answered) return;
 
-  if (count > 0) {
-    var latest = completed.sort(function(a, b) {
-      return new Date(b.completed_at || b.updated_at) - new Date(a.completed_at || a.updated_at);
-    })[0];
-    var level = latest.result_level || '—';
-    document.getElementById('lastResult').textContent = level;
-    document.getElementById('lastResultSub').textContent =
-      'Lectura ' + (latest.grade_reading != null ? Math.round(latest.grade_reading) + '%' : '—') +
-      ' · Audición ' + (latest.grade_listening != null ? Math.round(latest.grade_listening) + '%' : '—');
-    document.getElementById('lastScore').textContent =
-      (latest.grade_overall != null ? Math.round(latest.grade_overall) + '%' : '—');
-    document.getElementById('lastScoreSub').textContent =
-      'Escribe ' + (latest.grade_writing != null ? latest.grade_writing + '/25' : '—') +
-      ' · Tal ' + (latest.grade_speaking != null ? latest.grade_speaking + '/25' : '—');
-  }
+  q.answered = true;
+  q.pickedIndex = idx;
+
+  if (q.choices[idx].isCorrect) score++;
+
+  applyMiniReveal();
+
+  const area = miniContainer.querySelector(".mini-next-area");
+  area.innerHTML = `
+    <button class="mini-next-btn" onclick="miniNext()">Siguiente →</button>
+  `;
 }
 
-function renderTable(attempts) {
-  var tbody = document.getElementById('simTableBody');
-  var html = '';
+/* ---- Reveal ---- */
+function applyMiniReveal() {
+  const q = miniModel[qi];
+  const buttons = miniContainer.querySelectorAll(".choice");
 
-  SIMS.forEach(function(sim) {
-    var simAttempts = attempts.filter(function(a) { return a.simulation_id === sim.id; });
-    var latest = simAttempts[simAttempts.length - 1];
-    var num = parseInt(sim.id.replace('sim', ''), 10);
+  buttons.forEach((b, i) => {
+    b.classList.add("disabled");
 
-    var status, statusCls;
-    if (!latest) { status = 'No iniciada'; statusCls = 'badge-idle'; }
-    else if (latest.status === 'complete') { status = 'Avklarad'; statusCls = 'badge-complete'; }
-    else { status = 'En curso'; statusCls = 'badge-progress'; }
-
-    var elems = (latest && latest.elements) || [];
-    var elemMap = {};
-    elems.forEach(function(e) { elemMap[e.element_key] = e; });
-
-    var scoreCells = ELEM_KEYS.map(function(key) {
-      var el = elemMap[key];
-      if (!el || el.submission_status === 'not_started') return '<td class="score-cell na hide-mobile">—</td>';
-      if (el.submission_status === 'skipped') return '<td class="score-cell low hide-mobile">0</td>';
-      if (el.eval_status !== 'complete') return '<td class="score-cell hide-mobile" style="color:var(--muted)">⏳</td>';
-      var score = Number(el.ai_score_internal) || 0;
-      var display = (key === 'lectura' || key === 'auditiva') ? Math.round(score) + '%' : score + '/25';
-      var pct = (key === 'lectura' || key === 'auditiva') ? score : (score / 25) * 100;
-      var cls = pct >= 60 ? 'high' : pct >= 40 ? 'mid' : 'low';
-      return '<td class="score-cell ' + cls + ' hide-mobile">' + display + '</td>';
-    }).join('');
-
-    var levelHtml;
-    if (latest && latest.status === 'complete') {
-      var level = latest.result_level || '—';
-      var isPass = level !== 'No apto' && level !== '—';
-      levelHtml = '<span class="level-badge ' + (isPass ? 'level-pass' : 'level-fail') + '">' + DELE.escapeHtml(level) + '</span>';
-    } else {
-      levelHtml = '<span style="color:var(--border)">—</span>';
-    }
-
-    var actionHtml;
-    if (!latest) {
-      actionHtml = '<button class="table-btn table-btn-start" onclick="startSim(\'' + sim.id + '\',this)">Comenzar</button>';
-    } else if (latest.status === 'complete') {
-      actionHtml = '<div class="action-group">' +
-        '<a class="table-btn table-btn-results" href="/dele/dashboard/results.html?sim=' + sim.id + '&attempt=' + latest.id + '">Resultados</a>' +
-        '<button class="table-btn table-btn-listo" onclick="startSim(\'' + sim.id + '\',this)">Repetir</button>' +
-        '</div>';
-    } else {
-      actionHtml = '<a class="table-btn table-btn-resume" href="/dele/dashboard/exam.html?sim=' + sim.id + '&attempt=' + latest.id + '">Continuar</a>';
-    }
-
-    html += '<tr>' +
-      '<td><span class="sim-id">' + num + '</span></td>' +
-      '<td><span class="badge ' + statusCls + '">' + status + '</span></td>' +
-      scoreCells +
-      '<td>' + levelHtml + '</td>' +
-      '<td>' + actionHtml + '</td>' +
-      '</tr>';
+    if (q.choices[i].isCorrect) b.classList.add("correct");
+    if (q.pickedIndex === i && !q.choices[i].isCorrect) b.classList.add("wrong");
   });
-  tbody.innerHTML = html;
 }
 
-async function startSim(simId, btn) {
-  btn.disabled = true;
-  btn.textContent = 'Creando…';
-  try {
-    var result = await DELE.apiFetch('dele-submit-test', {
-      simulation_id: simId,
-      user_id: deleAuth.userId,
-    });
-    if (result.success) {
-      window.location.href = '/dele/dashboard/exam.html?sim=' + simId + '&attempt=' + result.attempt.id;
-    } else {
-      throw new Error(result.error || 'Falló');
-    }
-  } catch (err) {
-    console.error('Start sim error:', err);
-    btn.disabled = false;
-    btn.textContent = 'Comenzar';
-    DELE.toast('Kunde no skapa simulación. Inténtalo de nuevo.');
-  }
+/* ---- Next ---- */
+function miniNext() {
+  qi++;
+  if (qi < total) renderMiniQuestion();
+  else finishMiniTest();
 }
+
+/* ---- Finish ---- */
+function finishMiniTest() {
+  miniContainer.style.display = "none";
+  miniResultPanel.style.display = "block";
+
+  const wrong = total - score;
+
+miniResultText.textContent =
+  `Has respondido correctamente a ${score} de ${total} preguntas. ` +
+  `Correctas: ${score}. Incorrectas: ${wrong}.`;
+
+renderMiniChart(score, wrong);
+}
+
+/* ---- Result chart ---- */
+function renderMiniChart(correct, wrong) {
+  new Chart(document.getElementById("mini-test-chart"), {
+    type: "pie",
+    data: {
+      labels: ["Correctas", "Incorrectas"],
+      datasets: [{ data: [correct, wrong] }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: "bottom" } }
+    }
+  });
+}
+
+/* ---- Start ---- */
+renderMiniQuestion();
 </script>
-<script src="/assets/js/maintenance-bar.js"></script>
+
 </body>
 </html>
