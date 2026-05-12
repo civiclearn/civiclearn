@@ -46,7 +46,7 @@ window.DELE = (function () {
       _hydrateCacheKey = cacheKey;
       return data;
     } catch (err) {
-      console.warn('[SP] hydrate failed:', err.message);
+      console.warn('[DELE] hydrate failed:', err.message);
       return null;
     }
   }
@@ -207,7 +207,7 @@ window.DELE = (function () {
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ attempt_id: attemptId, element_key: elemKey, action: 'skip' }),
         });
-      } catch (err) { console.warn('[SP] skip failed (non-fatal):', err.message); }
+      } catch (err) { console.warn('[DELE] skip failed (non-fatal):', err.message); }
     },
 
     goBack(simId, attemptId) {
