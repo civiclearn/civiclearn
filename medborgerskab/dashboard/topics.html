@@ -52,6 +52,13 @@
       <a href="#" data-i18n="nav_logout" id="logoutLink">Log out</a>
     </nav>
     <div class="spacer"></div>
+    <div class="global-controls">
+      <div class="lang-switch">
+        <button data-lang="da">DA</button>
+        <button data-lang="en">EN</button>
+      </div>
+      <button id="readingToggle" class="reading-btn" data-i18n="reading_tooltip" data-i18n-attr="title" aria-label="Reading assist">🔇</button>
+    </div>
   </aside>
   <div class="overlay" id="menuOverlay"></div>
   <main>
@@ -203,6 +210,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const overlay = document.getElementById("menuOverlay");
   if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
   if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+
+  const current = window.CIVICEDGE_LANG;
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    if (btn.dataset.lang === current) btn.classList.add("active");
+    btn.addEventListener("click", () => {
+      if (btn.dataset.lang === current) return;
+      localStorage.setItem("civicedge_lang", btn.dataset.lang);
+      location.reload();
+    });
+  });
 });
 </script>
 <script src="/medborgerskab/assets/js/gauge-bar.js"></script>
