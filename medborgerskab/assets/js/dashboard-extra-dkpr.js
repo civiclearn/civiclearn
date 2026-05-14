@@ -123,9 +123,9 @@
     else if (close) state = "orange";
 
     let badgeText;
-    if (passed) badgeText = "Bestået";
-    else if (close) badgeText = "Næsten";
-    else badgeText = "Skal øve mere";
+    if (passed) badgeText = t("gauge_badge_pass", "Bestået");
+    else if (close) badgeText = t("gauge_badge_close", "Næsten");
+    else badgeText = t("gauge_badge_fail", "Skal øve mere");
 
     const cache = { estimated, total: totalQ, passScore, state, badgeText };
 
@@ -243,7 +243,7 @@
           tooltip: {
             callbacks: {
               label: function (ctx) {
-                return ctx.parsed.y + "% mastered";
+                return t("chart_tooltip_pct_mastered", "{n}% mestret").replace("{n}", ctx.parsed.y);
               }
             }
           }

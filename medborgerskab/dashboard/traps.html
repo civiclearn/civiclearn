@@ -53,7 +53,7 @@
   </style>
   <script>document.documentElement.classList.add("i18n-hidden");</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <!-- <script src="/medborgerskab/assets/js/dkpr-auth.js"></script> -->
+  <script src="/medborgerskab/assets/js/dkpr-auth.js"></script>
 </head>
 <body>
 <button class="menu-toggle" aria-label="Menu">&#9776;</button>
@@ -110,10 +110,10 @@
     <!-- TABS: Personal traps vs 100 hardest -->
     <div class="traps-tabs" id="trapsTabs">
       <button class="traps-tab active" data-tab="mine">
-        Mine f&aelig;lder<span class="traps-tab-count" id="mineCount">&ndash;</span>
+        <span data-i18n="traps_tab_mine">Mine f&aelig;lder</span><span class="traps-tab-count" id="mineCount">&ndash;</span>
       </button>
       <button class="traps-tab" data-tab="common">
-        100 sv&aelig;reste<span class="traps-tab-count" id="commonCount">&ndash;</span>
+        <span data-i18n="traps_tab_common">100 sv&aelig;reste</span><span class="traps-tab-count" id="commonCount">&ndash;</span>
       </button>
     </div>
 
@@ -189,10 +189,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (bank.length === 0) {
         const emptyTitle = tab === "mine"
           ? (CivicLearnI18n.t("traps_none_title") || "Ingen f\u00e6lder endnu")
-          : "Ingen hyppigt forkerte sp\u00f8rgsm\u00e5l endnu";
+          : (CivicLearnI18n.t("traps_common_none_title") || "Ingen hyppigt forkerte sp\u00f8rgsm\u00e5l endnu");
         const emptyBody = tab === "mine"
           ? (CivicLearnI18n.t("traps_none_body") || "Du har ikke nok fejl endnu. Bliv ved med at \u00f8ve!")
-          : "Denne funktion aktiveres n\u00e5r vi har nok brugerdata. Bliv ved med at \u00f8ve!";
+          : (CivicLearnI18n.t("traps_common_none_body") || "Denne funktion aktiveres n\u00e5r vi har nok brugerdata. Bliv ved med at \u00f8ve!");
 
         quizArea.innerHTML = `
           <div class="ce-card">
