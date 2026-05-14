@@ -364,35 +364,19 @@ if (!saved) {
         const v = sheetInput.value;
         if (!v) return;
         localStorage.setItem("civicedge_testDate", v);
-        syncExamDate(v);
+        // Push to user_sync via the standard sync infrastructure. This uses
+        // the correct site code (via CIVIC_SITE_CODE) and the same key name
+        // on server and localStorage, so the date round-trips correctly on
+        // cross-device pull. The previous syncExamDate() bypass hardcoded
+        // site='lu' and used a different server key ('exam_date'), which
+        // (a) silently failed on every non-Luxembourg product because it
+        // looked for window.luxAuth, and (b) on Luxembourg pushed to the
+        // wrong key so cross-device pull didn't restore the date either.
+        if (window.CivicSync) CivicSync.push("civicedge_testDate");
         closeSheet();
         renderCountdown();
       });
     }
-
-    // Sync exam date to user_sync table
-    async function syncExamDate(dateStr) {
-      try {
-        if (window.luxAuth && window.luxAuth.ready) await window.luxAuth.ready;
-        var sb = window.luxAuth && window.luxAuth.supabase;
-        if (!sb) return;
-        var sess = await sb.auth.getSession();
-        if (!sess.data.session) return;
-        var email = sess.data.session.user.email;
-        if (!email) return;
-        await sb.from('user_sync').upsert({
-          email: email.toLowerCase(),
-          site: 'lu',
-          key: 'exam_date',
-          data: dateStr,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'email,site,key' });
-      } catch(e) { /* silent */ }
-    }
-
-    // Sync existing date on page load
-    var existingDate = localStorage.getItem("civicedge_testDate");
-    if (existingDate) syncExamDate(existingDate);
 
 // ------------------------------------------
 // Official exam dates hint (read-only)

@@ -13,8 +13,13 @@ window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
    `civiclearn_answered_mcqs` (persistent list of seen question IDs, used to
    filter out repeats) but sync.js's default SYNC_KEYS list doesn't include it.
    Adding it here ensures sync.js's pull and no-arg pushAll cover it. The engine
-   also pushes it explicitly at session end (engine-dkpr.js line 1553). */
-window.CIVIC_SYNC_EXTRA_KEYS = ["civiclearn_answered_mcqs"];
+   also pushes it explicitly at session end (engine-dkpr.js line 1553).
+   
+   `civicedge_testDate` is the user's chosen exam date, written by
+   dashboard-v2-lu.js when the user saves a date in the countdown sheet. It's
+   pushed there via CivicSync.push("civicedge_testDate"); listing it here makes
+   sure it's included in cross-device pull operations. */
+window.CIVIC_SYNC_EXTRA_KEYS = ["civiclearn_answered_mcqs", "civicedge_testDate"];
 
 window.CIVICEDGE_CONFIG = {
   country: "dkpr",
