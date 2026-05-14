@@ -165,7 +165,31 @@ function updateCount(n) {
 function render() {
   clear();
 
-  const ids = CivicEdgeEngine.getSavedQuestionIds();
+  const allIds = CivicEdgeEngine.getSavedQuestionIds();
+
+  // bank is already loaded by dashboard pages
+  const bank = CivicEdgeEngine.getBank?.() || [];
+  const map = new Map(bank.map((q) => [q.id, q]));
+
+  // Lookup helper — same fallback chain used by the render loop. Used both
+  // for filtering ids (so we don't count stale entries) and for fetching
+  // the question object during render.
+  function lookupQuestion(id) {
+    return (
+      map.get(id) ||
+      map.get(String(id)) ||
+      [...map.values()].find((x) => String(x.id) === String(id))
+    );
+  }
+
+  // Filter out saved IDs that don't exist in the current bank. This happens
+  // when civicedge_saved (a per-origin shared localStorage key) carries IDs
+  // from an older bank version or from a sibling product on the same origin
+  // (e.g. /denmark-pr/ uses q_000001-style IDs that don't exist in
+  // /medborgerskab/'s DK-PR-NNNN bank). Without filtering, the count above
+  // the list disagrees with the number of rendered cards.
+  const ids = allIds.filter((id) => !!lookupQuestion(id));
+
   const maxPage = Math.max(0, Math.ceil(ids.length / MY_LIST_RENDER_LIMIT) - 1);
 
 if (myListPage < 0) {
@@ -175,20 +199,13 @@ if (myListPage < 0) {
 }
 
 
-  // bank is already loaded by dashboard pages
-  const bank = CivicEdgeEngine.getBank?.() || [];
-  const map = new Map(bank.map((q) => [q.id, q]));
-
   let rendered = 0;
 
   const start = myListPage * MY_LIST_RENDER_LIMIT;
 const end = start + MY_LIST_RENDER_LIMIT;
 
 ids.slice(start, end).forEach((id) => {
-  const q =
-  map.get(id) ||
-  map.get(String(id)) ||
-  [...map.values()].find(x => String(x.id) === String(id));
+  const q = lookupQuestion(id);
   if (q) {
     listEl.appendChild(renderItem(q));
     rendered++;
