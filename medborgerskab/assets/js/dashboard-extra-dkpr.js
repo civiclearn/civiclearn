@@ -432,17 +432,34 @@
     }
 
     // Patch streak — dashboard-v2-lu.js leaves {n} uninterpolated
+    patchStreak();
+  }
+
+  // ════════════════════════════════════════════════════════
+  // 5b. STREAK PATCH (extracted for MutationObserver reuse)
+  // ════════════════════════════════════════════════════════
+
+  // Supports both i18n conventions:
+  //   "{n} day" / "{n} days"  → DA-style template with placeholder
+  //   "day" / "days"          → bare-noun (EN-style, /lux/ etc.)
+  // Re-entrant safe: skips write if textContent already matches the target.
+
+  function patchStreak() {
     const tmStreak = document.getElementById("tmStreak");
-    if (tmStreak) {
-      try {
-        const raw = localStorage.getItem("civicedge_stats");
-        const stats = raw ? JSON.parse(raw) : {};
-        const streak = Number(stats.streakDays || 0);
-        const key = streak === 1 ? "dashboard_streak_day_singular" : "dashboard_streak_day_plural";
-        const tmpl = t(key, streak === 1 ? "{n} dag" : "{n} dage");
-        tmStreak.textContent = tmpl.replace("{n}", streak);
-      } catch {}
-    }
+    if (!tmStreak) return;
+    try {
+      const raw = localStorage.getItem("civicedge_stats");
+      const stats = raw ? JSON.parse(raw) : {};
+      const streak = Number(stats.streakDays || 0);
+      const key = streak === 1 ? "dashboard_streak_day_singular" : "dashboard_streak_day_plural";
+      const tmpl = t(key, streak === 1 ? "{n} dag" : "{n} dage");
+      const finalText = tmpl.includes("{n}")
+        ? tmpl.replace("{n}", streak)
+        : streak + " " + tmpl;
+      if (tmStreak.textContent !== finalText) {
+        tmStreak.textContent = finalText;
+      }
+    } catch {}
   }
 
   // ════════════════════════════════════════════════════════
@@ -456,6 +473,16 @@
       renderChart();
       checkCelebration();
       patchStudyTime();
+
+      // Eliminate streak flash: patch immediately, then guard against any
+      // later overwrite from dashboard-v2-lu.js via a MutationObserver.
+      patchStreak();
+      const tmStreak = document.getElementById("tmStreak");
+      if (tmStreak && typeof MutationObserver !== "undefined") {
+        const obs = new MutationObserver(patchStreak);
+        obs.observe(tmStreak, { childList: true, characterData: true, subtree: true });
+      }
+
       // Override stat cards after dashboard-v2-lu.js has set its values
       setTimeout(patchStatCards, 200);
 
