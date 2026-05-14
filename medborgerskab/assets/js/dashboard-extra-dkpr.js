@@ -474,15 +474,6 @@
       checkCelebration();
       patchStudyTime();
 
-      // Eliminate streak flash: patch immediately, then guard against any
-      // later overwrite from dashboard-v2-lu.js via a MutationObserver.
-      patchStreak();
-      const tmStreak = document.getElementById("tmStreak");
-      if (tmStreak && typeof MutationObserver !== "undefined") {
-        const obs = new MutationObserver(patchStreak);
-        obs.observe(tmStreak, { childList: true, characterData: true, subtree: true });
-      }
-
       // Override stat cards after dashboard-v2-lu.js has set its values
       setTimeout(patchStatCards, 200);
 
@@ -491,6 +482,33 @@
       setTimeout(tryInit, 500);
     }
   }
+
+  // ════════════════════════════════════════════════════════
+  // STREAK WATCHER — must run eagerly, BEFORE dashboard-v2-lu.js
+  // ════════════════════════════════════════════════════════
+  //
+  // The 800ms tryInit setTimeout is too late: dashboard-v2-lu.js writes
+  // the raw "{n} dage" / "days" template to #tmStreak well before that,
+  // causing a visible flash. We install the MutationObserver as soon
+  // as the script runs (or as soon as DOM is ready, if earlier).
+
+  function installStreakWatcher() {
+    const tmStreak = document.getElementById("tmStreak");
+    if (!tmStreak) {
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", installStreakWatcher, { once: true });
+      }
+      return;
+    }
+    if (typeof MutationObserver !== "undefined") {
+      const obs = new MutationObserver(patchStreak);
+      obs.observe(tmStreak, { childList: true, characterData: true, subtree: true });
+    }
+    // Also patch right now in case the streak is already correct in localStorage
+    patchStreak();
+  }
+
+  installStreakWatcher();
 
   if (document.readyState === "complete") {
     setTimeout(tryInit, 800);
