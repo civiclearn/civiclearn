@@ -1,25 +1,59 @@
-/* CivicLearn — Reading Assist (MP3-based)
-   ─────────────────────────────────────────
-   Replaces the previous SpeechSynthesis-based CivicReading. Looks up a
-   pre-generated MP3 for each text by SHA-1 hash (first 16 hex chars) and
-   plays it. Same .speak(text) signature, so engine-dkpr.js needs no edits.
+/* CivicLearn — Reading Assist (MP3-based, /medborgerskab/)
+   ─────────────────────────────────────────────────────────
+   Drop-in replacement for the previous /assets/js/reading.js, but plays
+   pre-generated MP3 files instead of using the browser's SpeechSynthesis.
 
-   The hash derivation here MUST match generate-audio-dkpr.py exactly:
-     sha1(normalize(text)).slice(0, 16)
-   where normalize = trim + collapse internal whitespace.
+   Public API and storage are unchanged from reading.js, so this module is
+   wire-compatible with the rest of the system:
 
-   MP3 path: /medborgerskab/audio/da/{hash}.mp3
+     window.CivicReading.isEnabled()  - reads from civicedge_settings.reading
+     window.CivicReading.speak(text)  - no-op if disabled; otherwise plays MP3
+     window.CivicReading.stop()       - stops any currently playing clip
+
+   The #readingToggle sidebar button is bound here exactly as it was in
+   reading.js: clicking it flips civicedge_settings.reading, updates the
+   icon (🔊/🔇), and reloads the page when turning ON so engine-dkpr.js
+   re-renders questions with the inline speaker buttons visible.
+
+   MP3 lookup: each pre-generated file is named for the SHA-1 hash (first
+   16 hex chars) of the normalized text. The Python generator script
+   (generate-audio-dkpr.py) and this module use the same hashing and
+   normalization, so identical text produces identical filenames.
+   Files live at /medborgerskab/audio/da/{hash}.mp3.
 */
 (function () {
   "use strict";
 
+  const LS_KEY = "civicedge_settings";
   const AUDIO_BASE = "/medborgerskab/audio/da";
 
-  let currentAudio = null;
+  // ----------------------------------------------------
+  // Load/save settings (same key + shape as old reading.js)
+  // ----------------------------------------------------
+  function loadSettings() {
+    try {
+      return JSON.parse(localStorage.getItem(LS_KEY)) || {};
+    } catch (_) {
+      return {};
+    }
+  }
 
+  function saveSettings(obj) {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(obj));
+    } catch (_) {}
+  }
+
+  let settings = loadSettings();
+  // Match old reading.js default exactly: OFF until user explicitly enables.
+  let enabled = settings.reading === true;
+
+  // ----------------------------------------------------
+  // Text → filename
+  // ----------------------------------------------------
   function normalize(s) {
-    // Match Python's " ".join(s.split()) — trim ends, collapse runs of any
-    // whitespace (spaces, tabs, newlines) to single spaces.
+    // Mirror generate-audio-dkpr.py's normalization:
+    //   " ".join(s.split())  →  trim + collapse all whitespace to single spaces
     return String(s || "").split(/\s+/).filter(Boolean).join(" ");
   }
 
@@ -31,22 +65,26 @@
       .slice(0, 16);
   }
 
+  // ----------------------------------------------------
+  // Playback (single-clip-at-a-time)
+  // ----------------------------------------------------
+  let currentAudio = null;
+
   function stopCurrent() {
     if (currentAudio) {
       try {
         currentAudio.pause();
         currentAudio.currentTime = 0;
-      } catch (e) { /* ignore */ }
+      } catch (_) {}
       currentAudio = null;
     }
   }
 
-  async function speak(text) {
+  async function speakInternal(text) {
     const t = normalize(text);
     if (!t) return;
 
-    // Tapping the speak button while audio is already playing should stop it,
-    // not stack a second clip on top.
+    // Tapping speak while audio plays should replace, not stack.
     stopCurrent();
 
     let hash;
@@ -72,17 +110,63 @@
     try {
       await audio.play();
     } catch (e) {
-      // Common on mobile if speak() is called without a user gesture, but
-      // every speak() in this app IS bound to a click handler, so this
-      // should only fire on genuine errors. Don't spam console.
-      console.warn("[CivicReading] play failed:", e.name);
+      console.warn("[CivicReading] play failed:", e.name || e);
       if (currentAudio === audio) currentAudio = null;
     }
   }
 
-  function stop() {
-    stopCurrent();
+  // ----------------------------------------------------
+  // Toggle (mirrors reading.js behavior)
+  // ----------------------------------------------------
+  function toggle() {
+    enabled = !enabled;
+    settings.reading = enabled;
+    saveSettings(settings);
+
+    const btn = document.getElementById("readingToggle");
+    if (btn) btn.textContent = enabled ? "🔊" : "🔇";
+
+    if (enabled) {
+      // Reload so engine-dkpr.js re-renders with inline speaker buttons
+      // visible next to questions and options. Matches old reading.js.
+      setTimeout(() => window.location.reload(), 150);
+    }
+    // No reload on OFF — inline speaker buttons can stay visible until
+    // next render; they just become no-ops because speak() bails when
+    // !enabled. Identical to the old behavior.
   }
 
-  window.CivicReading = { speak, stop };
+  // ----------------------------------------------------
+  // Initialization — bind the sidebar toggle button
+  // ----------------------------------------------------
+  function init() {
+    const btn = document.getElementById("readingToggle");
+    if (!btn) return; // pages without the toggle (e.g. login, help) — skip
+
+    btn.textContent = enabled ? "🔊" : "🔇";
+    btn.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      toggle();
+    });
+  }
+
+  // Run init now if DOM is ready, otherwise wait for DOMContentLoaded.
+  // (This script tag may load before or after parsing — handle both.)
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+
+  // ----------------------------------------------------
+  // Public API — identical signature to the old reading.js
+  // ----------------------------------------------------
+  window.CivicReading = {
+    isEnabled: () => enabled,
+    speak(text) {
+      if (!enabled) return;
+      speakInternal(text);
+    },
+    stop: stopCurrent,
+  };
 })();
