@@ -757,6 +757,71 @@ if (micro) {
   });
 
   wrap.appendChild(saveBtn);
+
+  // === PEEK button — hold to view this question in the other language ===
+  // Useful when training in DA but stuck on a single term, or vice versa.
+  // Press & hold → swap to alt language; release → restore trained language.
+  {
+    const currentLang = getLang();
+    const altLang = currentLang === "da" ? "en" : "da";
+    const rawQ = q._raw || {};
+    const qObj = rawQ.q || rawQ.text;
+    const altQText = (qObj && typeof qObj === "object") ? qObj[altLang] : null;
+    const altOpts = (rawQ.options && typeof rawQ.options === "object" && !Array.isArray(rawQ.options))
+      ? rawQ.options[altLang] : null;
+
+    if (altQText && Array.isArray(altOpts) && altOpts.length) {
+      const peekBtn = createEl("button", "ce-peek-btn", "🌐");
+      peekBtn.type = "button";
+      const peekLabel = altLang === "en" ? "Hold for English" : "Hold for dansk";
+      peekBtn.setAttribute("aria-label", peekLabel);
+      peekBtn.title = peekLabel;
+
+      function peekOn(e) {
+        e.preventDefault();
+        try { peekBtn.setPointerCapture(e.pointerId); } catch (err) {}
+        card.classList.add("peeking");
+        const qEl = card.querySelector(".ce-question");
+        if (qEl && qEl.dataset.origText === undefined) {
+          qEl.dataset.origText = qEl.textContent;
+          qEl.textContent = altQText;
+        }
+        card.querySelectorAll(".ce-option").forEach(function (btn) {
+          const idx = parseInt(btn.dataset.index, 10);
+          const labelEl = btn.querySelector(".ce-option-label");
+          if (labelEl && Number.isFinite(idx) && altOpts[idx] != null && labelEl.dataset.origText === undefined) {
+            labelEl.dataset.origText = labelEl.textContent;
+            labelEl.textContent = String(altOpts[idx]);
+          }
+        });
+      }
+
+      function peekOff() {
+        card.classList.remove("peeking");
+        const qEl = card.querySelector(".ce-question");
+        if (qEl && qEl.dataset.origText !== undefined) {
+          qEl.textContent = qEl.dataset.origText;
+          delete qEl.dataset.origText;
+        }
+        card.querySelectorAll(".ce-option .ce-option-label").forEach(function (labelEl) {
+          if (labelEl.dataset.origText !== undefined) {
+            labelEl.textContent = labelEl.dataset.origText;
+            delete labelEl.dataset.origText;
+          }
+        });
+      }
+
+      peekBtn.addEventListener("pointerdown", peekOn);
+      peekBtn.addEventListener("pointerup", peekOff);
+      peekBtn.addEventListener("pointercancel", peekOff);
+      peekBtn.addEventListener("blur", peekOff);
+      peekBtn.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+      peekBtn.addEventListener("click", function (e) { e.stopPropagation(); });
+
+      wrap.appendChild(peekBtn);
+    }
+  }
+
   header.appendChild(wrap);
 }
 
