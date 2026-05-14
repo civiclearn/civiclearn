@@ -1550,7 +1550,7 @@ const key = `${topicLT}:${question.id}`;
 
     // Sync to cloud
     if (window.CivicSync) {
-      CivicSync.push(["civicedge_stats", "civicedge_progress"]);
+      CivicSync.push(["civicedge_stats", "civicedge_progress", "civiclearn_answered_mcqs"]);
     }
   }
 

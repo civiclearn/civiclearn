@@ -442,11 +442,17 @@ const I18N = {
 
     // 2) No session — check if we just came from a successful login.
     //    That pattern means dashboard kicked us back here, i.e. bounce loop.
+    //    The ?return= query param is the discriminator: auth guards always
+    //    redirect with ?return=<path>, while intentional signout from the
+    //    sidebar navigates to /login.html with no params. Without this guard
+    //    the detector would also fire when a user deliberately logs out
+    //    within 120s of logging in, sending them to reset-cache by mistake.
     const lastLoginTime = localStorage.getItem('cl_last_login_time');
     const now = Date.now();
     const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+    const hasReturnParam = new URLSearchParams(location.search).has('return');
 
-    if (lastLoginTime && (now - parseInt(lastLoginTime)) < 120000) {
+    if (lastLoginTime && (now - parseInt(lastLoginTime)) < 120000 && hasReturnParam) {
       // Clear the key immediately so the detector cannot fire a second time
       // for the same login event. Defensive against reset-cache.html not
       // clearing localStorage — would otherwise risk a login↔reset-cache loop.

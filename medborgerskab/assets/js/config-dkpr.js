@@ -9,6 +9,13 @@ window.CIVIC_SITE_CODE = "dkpr";
 window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
 window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs";
 
+/* Site-specific keys to include in sync. The engine writes
+   `civiclearn_answered_mcqs` (persistent list of seen question IDs, used to
+   filter out repeats) but sync.js's default SYNC_KEYS list doesn't include it.
+   Adding it here ensures sync.js's pull and no-arg pushAll cover it. The engine
+   also pushes it explicitly at session end (engine-dkpr.js line 1553). */
+window.CIVIC_SYNC_EXTRA_KEYS = ["civiclearn_answered_mcqs"];
+
 window.CIVICEDGE_CONFIG = {
   country: "dkpr",
 
