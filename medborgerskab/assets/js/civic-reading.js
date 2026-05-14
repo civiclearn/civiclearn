@@ -25,7 +25,17 @@
   "use strict";
 
   const LS_KEY = "civicedge_settings";
-  const AUDIO_BASE = "/medborgerskab/audio/da";
+
+  /* Resolve audio folder for the current UI language. The page sets
+     window.CIVICEDGE_LANG via lang-bootstrap-dkpr.js + i18n.js before this
+     script runs. We accept either "da" or "da-DK" style values and map to
+     the short folder name. Falls back to "da" if nothing's set, since this
+     module is /medborgerskab/-specific. */
+  function getAudioBase() {
+    const raw = (window.CIVICEDGE_LANG || "da").toString().toLowerCase();
+    const short = raw.split("-")[0];  // "da-DK" → "da", "en-US" → "en"
+    return `/medborgerskab/audio/${short}`;
+  }
 
   // ----------------------------------------------------
   // Load/save settings (same key + shape as old reading.js)
@@ -95,7 +105,7 @@
       return;
     }
 
-    const url = `${AUDIO_BASE}/${hash}.mp3`;
+    const url = `${getAudioBase()}/${hash}.mp3`;
     const audio = new Audio(url);
     currentAudio = audio;
 
