@@ -383,7 +383,7 @@ let stateScopeQuestions = null;
     const VALUES_LABEL = "Danske værdier";
     const CURRENT_LABEL = "Aktuelle begivenheder";
 
-    const valuesPool = fullBank.filter(q =>
+    const valuesPool = fullBankRaw.filter(q =>
       normalizeLabel(q.topicLabel) === normalizeLabel(VALUES_LABEL)
     );
 
