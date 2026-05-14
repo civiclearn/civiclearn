@@ -136,14 +136,12 @@
     const btn = document.getElementById("readingToggle");
     if (btn) btn.textContent = enabled ? "🔊" : "🔇";
 
-    if (enabled) {
-      // Reload so engine-dkpr.js re-renders with inline speaker buttons
-      // visible next to questions and options. Matches old reading.js.
-      setTimeout(() => window.location.reload(), 150);
-    }
-    // No reload on OFF — inline speaker buttons can stay visible until
-    // next render; they just become no-ops because speak() bails when
-    // !enabled. Identical to the old behavior.
+    // Reload regardless of direction so engine-dkpr.js re-renders questions
+    // and either adds (enable) or removes (disable) the inline 🔊 buttons.
+    // Without the reload on disable, leftover speaker icons stay on screen
+    // until the next question loads, which is visually inconsistent — even
+    // though they'd be no-ops because speak() bails when !enabled.
+    setTimeout(() => window.location.reload(), 150);
   }
 
   // ----------------------------------------------------
