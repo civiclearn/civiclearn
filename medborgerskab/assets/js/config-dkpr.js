@@ -2,6 +2,13 @@
 
 window.CIVIC_SITE_CODE = "dkpr";
 
+/* Supabase project config — exposed on window so /assets/js/sync.js and
+   /assets/js/reset.js can run. sync.js gates auto-sync on `window.SUPABASE_URL`
+   being truthy; without these lines it exits silently and nothing syncs.
+   Both keys are the same anon JWT used by dkpr-auth.js and the login page. */
+window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs";
+
 window.CIVICEDGE_CONFIG = {
   country: "dkpr",
 

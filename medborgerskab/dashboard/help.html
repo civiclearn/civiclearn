@@ -129,7 +129,7 @@
 
       <!-- Reset -->
       <div class="help-reset">
-        <button class="reset-btn" id="resetBtn" data-i18n="reset_button_label">Repor treino</button>
+        <button class="reset-btn" id="resetAllFull" data-i18n="reset_button_label">Repor treino</button>
       </div>
     </div>
   </main>
@@ -170,17 +170,18 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch { alert("Kunne ikke sendes. Prøv igen."); }
   });
 
-  // Reset
-  document.getElementById("resetBtn")?.addEventListener("click", () => {
-    if (!confirm("Er du sikker på, at du vil slette alle dine træningsdata?")) return;
-    ["civicedge_progress", "civicedge_stats", "civicedge_saved", "civiclearn_answered_mcqs", "cl_gauge_cache", "civiclearn:dkpr:dashseq:index"].forEach(k => localStorage.removeItem(k));
-    alert("Dine data er blevet nulstillet.");
-    location.reload();
-  });
+  // Reset is now handled by /assets/js/reset.js (loaded below), which:
+  //  1) Calls the sync edge function with action:'reset' to DELETE the user's
+  //     user_sync rows server-side (scoped to CIVIC_SITE_CODE = 'dkpr').
+  //  2) Clears the full set of synced localStorage keys + the civicsync_loaded
+  //     reload guard.
+  //  3) Redirects to /medborgerskab/dashboard/.
+  // The button id must be 'resetAllFull' (set above) for reset.js to bind.
 });
 </script>
 <script src="/medborgerskab/assets/js/gauge-bar.js"></script>
 <script src="/medborgerskab/assets/js/study-timer.js"></script>
+<script src="/assets/js/reset.js"></script>
 <script src="/assets/js/maintenance-bar.js"></script>
 <script src="/assets/js/signout.js"></script>
 </body>

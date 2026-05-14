@@ -84,8 +84,9 @@
     <ul class="steps" id="steps" style="display:none">
       <li class="step" id="s1"><span class="step-icon">1</span> Fjerner gamle filer</li>
       <li class="step" id="s2"><span class="step-icon">2</span> Rydder cache</li>
-      <li class="step" id="s3"><span class="step-icon">3</span> Rydder session</li>
-      <li class="step" id="s4"><span class="step-icon">✓</span> Klar</li>
+      <li class="step" id="s3"><span class="step-icon">3</span> Nulstiller browser</li>
+      <li class="step" id="s4"><span class="step-icon">4</span> Rydder database</li>
+      <li class="step" id="s5"><span class="step-icon">✓</span> Klar</li>
     </ul>
 
     <div class="status" id="status"></div>
@@ -127,15 +128,15 @@
 
     // Step 1 — Unregister service workers
     setStep('s1', 'active');
-    setBar(10);
+    setBar(5);
     try {
       if ('serviceWorker' in navigator) {
         const regs = await navigator.serviceWorker.getRegistrations();
         await Promise.all(regs.map(r => r.unregister()));
       }
       setStep('s1', 'done');
-    } catch (e) { errors.push(e.message); }
-    setBar(30);
+    } catch (e) { errors.push('SW: ' + e.message); }
+    setBar(20);
     await delay(300);
 
     // Step 2 — Clear Cache API
@@ -146,43 +147,91 @@
         await Promise.all(keys.map(k => caches.delete(k)));
       }
       setStep('s2', 'done');
-    } catch (e) { errors.push(e.message); }
-    setBar(65);
+    } catch (e) { errors.push('Cache: ' + e.message); }
+    setBar(40);
     await delay(300);
 
-    // Step 3 — Clear localStorage (auth keys only) & sessionStorage & cookies
+    // Step 3 — NUCLEAR: Clear ALL localStorage, sessionStorage, cookies
     setStep('s3', 'active');
     try {
-      // Only clear auth-related keys, preserve progress data
-      const authPrefixes = ['sb-', 'supabase', 'cl_auth', 'cl_email', 'cl_login_at', 'cl_bundle', 'cl_redirect_ts'];
-      const toRemove = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && authPrefixes.some(p => k.startsWith(p) || k === p)) {
-          toRemove.push(k);
-        }
-      }
-      toRemove.forEach(k => localStorage.removeItem(k));
+      // Clear ALL localStorage (no selective clearing)
+      localStorage.clear();
+      
+      // Clear sessionStorage
       sessionStorage.clear();
-      document.cookie.split(';').forEach(c => {
-        document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
-      });
+      
+      // Clear ALL cookies for this domain
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf('=');
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+        // Clear with all possible path/domain combinations
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=' + location.hostname;
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.' + location.hostname;
+      }
+      
       setStep('s3', 'done');
-    } catch (e) { errors.push(e.message); }
-    setBar(90);
+    } catch (e) { errors.push('Storage: ' + e.message); }
+    setBar(60);
     await delay(300);
 
-    setStep('s4', 'done');
+    // Step 4 — Clear IndexedDB (Supabase auth lives here!)
+    setStep('s4', 'active');
+    try {
+      if ('indexedDB' in window) {
+        // Get all databases
+        if (indexedDB.databases) {
+          const dbs = await indexedDB.databases();
+          for (const db of dbs) {
+            if (db.name) {
+              await new Promise((resolve, reject) => {
+                const req = indexedDB.deleteDatabase(db.name);
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+                req.onblocked = () => {
+                  // Force close any open connections
+                  setTimeout(() => resolve(), 1000);
+                };
+              });
+            }
+          }
+        } else {
+          // Fallback: try to delete known Supabase database names
+          const knownDBs = ['supabase-auth', 'keyval-store'];
+          for (const dbName of knownDBs) {
+            await new Promise((resolve) => {
+              const req = indexedDB.deleteDatabase(dbName);
+              req.onsuccess = () => resolve();
+              req.onerror = () => resolve(); // Ignore errors for non-existent DBs
+              req.onblocked = () => setTimeout(() => resolve(), 1000);
+            });
+          }
+        }
+      }
+      setStep('s4', 'done');
+    } catch (e) { errors.push('IndexedDB: ' + e.message); }
+    setBar(85);
+    await delay(300);
+
+    // Step 5 — Done
+    setStep('s5', 'done');
     setBar(100);
 
     // Update UI
     document.getElementById('cardIcon').textContent = '✅';
-    document.getElementById('cardTitle').textContent = 'Alt er opdateret';
+    document.getElementById('cardTitle').textContent = 'Alt er nulstillet';
     document.getElementById('cardSubtitle').textContent = 'Din browser er klar. Du sendes nu til login-siden.';
     this.style.display = 'none';
 
     statusEl.className = 'status success';
-    statusEl.innerHTML = '<strong>Fuldført.</strong> Gammel data er ryddet.';
+    statusEl.innerHTML = '<strong>Fuldført.</strong> Al gammel data er fjernet.';
+
+    // Log errors to console if any (but don't show to user - they don't care)
+    if (errors.length > 0) {
+      console.log('Reset cache completed with some errors (non-critical):', errors);
+    }
 
     // Countdown redirect
     redirectMsg.classList.add('visible');
