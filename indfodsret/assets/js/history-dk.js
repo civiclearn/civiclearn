@@ -78,10 +78,10 @@ function getTopicDisplayFromRaw(raw) {
     const countLabel =
       count === 1
         ? t("history_one_session", "1 session")
-        : t("history_sessions_count", "{n} sessions").replace("{n}", String(count));
+        : t("history_sessions_count", "{n} sessioner").replace("{n}", String(count));
 
     if (!dateKey || dateKey === "0000-00-00") {
-      return t("history_unknown_date_header", "Unknown date • {count}").replace(
+      return t("history_unknown_date_header", "Ukendt dato • {count}").replace(
         "{count}",
         countLabel
       );
@@ -106,15 +106,15 @@ function getTopicDisplayFromRaw(raw) {
   function modeLabel(mode) {
     switch (mode) {
       case "simulation":
-        return t("mode_simulation", "Official simulation");
+        return t("mode_simulation", "Officiel simulation");
       case "quick":
-        return t("mode_quick", "Quick test");
+        return t("mode_quick", "Hurtig test");
       case "sequential":
-        return t("mode_sequential", "Sequential practice");
+        return t("mode_sequential", "Sekventiel øvelse");
       case "topics":
-        return t("mode_topics", "By topics");
+        return t("mode_topics", "Test efter emne");
       case "traps":
-        return t("mode_traps", "Frequent traps");
+        return t("mode_traps", "Typiske fælder");
       default:
         return t("mode_session", "Session");
     }
@@ -151,7 +151,7 @@ function getTopicDisplayFromRaw(raw) {
     if (!sessions.length) {
       listEl.innerHTML =
         `<p class="muted" data-i18n="history_no_sessions">` +
-        t("history_no_sessions", "No practice history yet.") +
+        t("history_no_sessions", "Ingen sessioner endnu.") +
         `</p>`;
       return;
     }
@@ -200,7 +200,7 @@ function getTopicDisplayFromRaw(raw) {
       countSpan.textContent =
         count === 1
           ? t("history_day_one_session", "1 session")
-          : t("history_day_sessions", "{n} sessions").replace(
+          : t("history_day_sessions", "{n} sessioner").replace(
               "{n}",
               String(count)
             );
@@ -227,10 +227,7 @@ function getTopicDisplayFromRaw(raw) {
         const meta = document.createElement("div");
         meta.className = "history-item-meta";
 
-        const metaStr = t(
-          "history_item_meta",
-          "{percent}% — {total} questions — {minutes} min"
-        )
+        const metaStr = t("history_item_meta", "{percent}% — {total} spørgsmål — {minutes} min")
           .replace("{percent}", session.percent ?? "—")
           .replace("{total}", session.total ?? "?")
           .replace("{minutes}", dur ?? "—");
@@ -244,7 +241,7 @@ function getTopicDisplayFromRaw(raw) {
         )}`;
         pill.textContent = session.total
           ? `${session.percent ?? 0}%`
-          : t("history_no_score", "No score");
+          : t("history_no_score", "Ingen score");
 
         item.appendChild(h);
         item.appendChild(meta);
@@ -322,36 +319,33 @@ function getTopicDisplayFromRaw(raw) {
       });
       longDate = longDate.charAt(0).toUpperCase() + longDate.slice(1);
     } else {
-      longDate = t("history_unknown_date", "Unknown date");
+      longDate = t("history_unknown_date", "Ukendt dato");
     }
 
     const dur = getDurationMin(session);
     const durationLabel =
       dur != null
         ? `${dur} ${t("history_minutes", "min")}`
-        : t("history_no_time", "Not available");
+        : t("history_no_time", "Ingen tid");
 
     let html = `
       <div class="history-details-header">
         <div class="hd-title"><strong>${longDate}</strong></div>
-        <button class="close-btn" id="closeHistoryDetails" aria-label="${t(
-          "history_close",
-          "Close"
-        )}">×</button>
+        <button class="close-btn" id="closeHistoryDetails" aria-label="${t("history_close", "Luk")}">×</button>
       </div>
 
       <div class="history-review-summary">
         <div><strong>${t("history_score", "Score")}:</strong>
           ${session.percent ?? "—"}% (${session.correct ?? "?"}/${session.total ?? "?"})
         </div>
-        <div><strong>${t("history_duration", "Duration")}:</strong> ${durationLabel}</div>
-        <div><strong>${t("history_mode", "Mode")}:</strong> ${modeLabel(
+        <div><strong>${t("history_duration", "Varighed")}:</strong> ${durationLabel}</div>
+        <div><strong>${t("history_mode", "Tilstand")}:</strong> ${modeLabel(
           session.mode
         )}</div>
       </div>
 
       <h3 style="margin-top:8px;margin-bottom:10px;">
-        ${t("history_questions_header", "Questions in this session")}
+        ${t("history_questions_header", "Sessionens spørgsmål")}
       </h3>
     `;
 
@@ -398,7 +392,7 @@ function getTopicDisplayFromRaw(raw) {
           const cls = attempt.correct ? "correct" : "incorrect";
           html += `
             <span class="wave-pill ${cls}">
-              ${t("history_wave_prefix", "Wave")} ${attempt.wave}
+              ${t("history_wave_prefix", "Bølge")} ${attempt.wave}
             </span>
           `;
         });
@@ -408,7 +402,7 @@ function getTopicDisplayFromRaw(raw) {
 
             <div class="final-answer-row">
               <span class="final-answer-pill">
-                ${t("history_answer_label", "Answer")}
+                ${t("history_answer_label", "Svar")}
               </span>
               ${canonicalQ.correctAnswerText || "—"}
             </div>
@@ -443,9 +437,9 @@ function getTopicDisplayFromRaw(raw) {
             </div>
 
             <div class="question-a">
-              <strong>${t("history_your_answer", "Your answer")}:</strong>
+              <strong>${t("history_your_answer", "Dit svar")}:</strong>
               ${userText}<br>
-              <strong>${t("history_correct_answer", "Correct answer")}:</strong>
+              <strong>${t("history_correct_answer", "Korrekt svar")}:</strong>
               ${correctText}
             </div>
 
@@ -478,19 +472,20 @@ function getTopicDisplayFromRaw(raw) {
   // --------- Init ---------
 
   function initHistory() {
-    const i18n = getI18n();
-    if (i18n && typeof i18n.onReady === "function") {
-      i18n.onReady(() => {
+    // We no longer depend on CivicLearnI18n. Just kick off rendering as soon
+    // as the DOM is ready — and if it's already past DOMContentLoaded (the
+    // common case, since this script is loaded dynamically from history.html),
+    // run immediately.
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => {
         renderHistory().catch((e) =>
-          console.error("History: render failed after i18n ready", e)
+          console.error("History: render failed", e)
         );
       });
     } else {
-      document.addEventListener("DOMContentLoaded", () => {
-        renderHistory().catch((e) =>
-          console.error("History: render failed (fallback)", e)
-        );
-      });
+      renderHistory().catch((e) =>
+        console.error("History: render failed", e)
+      );
     }
   }
 

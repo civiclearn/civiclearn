@@ -24,10 +24,7 @@ function emptyState() {
   const div = document.createElement("div");
   div.className = "muted";
   div.style.padding = "1rem";
-  div.textContent = CivicLearnI18n.t(
-    "my_list_empty",
-    "Your list is empty"
-  );
+  div.textContent = "Din liste er tom";
   listEl.appendChild(div);
 }
 
@@ -62,7 +59,7 @@ actions.className = "mylist-actions";
 
 const removeBtn = document.createElement("button");
 removeBtn.className = "mylist-remove";
-removeBtn.textContent = CivicLearnI18n.t("my_list_remove", "Remove");
+removeBtn.textContent = "Fjern";
 removeBtn.onclick = () => {
   CivicEdgeEngine.toggleSavedQuestion(q.id);
   // FIX: push the updated saved list to Supabase so removals persist across devices/logins
@@ -153,8 +150,8 @@ function updateCount(n) {
   }
 
   const label = n === 1
-    ? CivicLearnI18n.t("my_list_count_one", "1 question")
-    : CivicLearnI18n.t("my_list_count_many", "{n} questions").replace("{n}", n);
+    ? "1 spørgsmål"
+    : `${n} spørgsmål`;
 
   el.textContent = label;
 }
@@ -212,20 +209,14 @@ ids.slice(start, end).forEach((id) => {
 
   const status = document.createElement("div");
   status.className = "mylist-status";
-  status.textContent = CivicLearnI18n.t(
-    "my_list_showing_range",
-    "Showing {from}–{to} of {total} saved questions"
-  )
-    .replace("{from}", startNum)
-    .replace("{to}", endNum)
-    .replace("{total}", ids.length);
+  status.textContent = `Viser ${startNum}–${endNum} af ${ids.length} gemte spørgsmål`;
 
   const controls = document.createElement("div");
   controls.className = "mylist-controls";
 
   const prevBtn = document.createElement("button");
   prevBtn.className = "mylist-page-btn";
-  prevBtn.textContent = CivicLearnI18n.t("my_list_prev", "Previous");
+  prevBtn.textContent = "Forrige";
   prevBtn.disabled = myListPage === 0;
   prevBtn.onclick = () => {
   if (myListPage > 0) {
@@ -238,7 +229,7 @@ ids.slice(start, end).forEach((id) => {
 
   const nextBtn = document.createElement("button");
   nextBtn.className = "mylist-page-btn";
-  nextBtn.textContent = CivicLearnI18n.t("my_list_next", "Next");
+  nextBtn.textContent = "Næste";
   nextBtn.disabled = end >= ids.length;
   nextBtn.onclick = () => {
     myListPage++;
