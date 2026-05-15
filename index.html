@@ -799,6 +799,20 @@
 
   const svg = d3.select('#worldmap');
 
+  // Mobile: tighten viewBox to crop the empty whitespace on the left
+  // (Europe content starts ~x=240; full viewBox 0 0 1000 560 looks shifted on narrow screens)
+  function adjustMapViewBox() {
+    const svgEl = document.getElementById('worldmap');
+    if (!svgEl) return;
+    if (window.matchMedia('(max-width: 768px)').matches) {
+      svgEl.setAttribute('viewBox', '220 40 780 520');
+    } else {
+      svgEl.setAttribute('viewBox', '0 0 1000 560');
+    }
+  }
+  adjustMapViewBox();
+  window.addEventListener('resize', adjustMapViewBox);
+
   // Three panels: Europe is the main canvas; Americas and Oceania are enclosed insets
   const PANELS = [
     {
