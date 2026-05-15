@@ -47,21 +47,17 @@ Engine.toggleSavedQuestion = toggleSavedQuestion;
 Engine.getSavedQuestionIds = getSavedQuestionIds;
 
 
-const PHASE_EXAM_ONLY = "exam_only";
-const PHASE_FULL_PREP = "full_prep";
-
-function getActivePhase() {
-  return localStorage.getItem("dk_active_phase") || PHASE_EXAM_ONLY;
-}
-
-function setActivePhase(phase) {
-  if (phase !== PHASE_EXAM_ONLY && phase !== PHASE_FULL_PREP) return;
-  localStorage.setItem("dk_active_phase", phase);
-}
-
-function isPhaseUnlocked() {
-  return readJsonLS("dk_phase2_unlocked", false) === true;
-}
+  // ─────────────────────────────────────────────────────────────
+  // PHASE SYSTEM REMOVED (May 2026)
+  // The old PHASE_EXAM_ONLY / PHASE_FULL_PREP gate was replaced by
+  // an explicit /indfodsret/official.html landing page that lets
+  // users self-select past-exam practice. The dashboard recommends
+  // starting there, but no questions are ever hidden.
+  //
+  // Legacy localStorage keys (dk_active_phase, dk_phase2_unlocked,
+  // dk_phase1_progress, dk_exam_index) are no longer read or written.
+  // They'll persist in existing users' browsers harmlessly.
+  // ─────────────────────────────────────────────────────────────
 
   function getConfig() {
     return window.CIVICEDGE_CONFIG || {};
@@ -121,49 +117,16 @@ function isPhaseUnlocked() {
   }
 
 // ==============================
-// DK PHASE BANK FILTER
+// DK BANK FILTER — exclude Advanced/Bonus from practice modes.
+// Advanced questions are reached only via /indfodsret/advanced.html,
+// which loads the bank and filters to depth === "deep" itself.
 // ==============================
 
-function filterBankByPhase(fullBank) {
-  // Always exclude deep (Advanced/Bonus) from practice modes
-  const nonDeep = fullBank.filter(q => {
+function excludeDeep(fullBank) {
+  return fullBank.filter(q => {
     const depth = q._raw?.depth || q.depth;
     return depth !== "deep";
   });
-
-  // If Phase 2 is unlocked, auto-switch and serve all non-deep questions
-  if (isPhaseUnlocked()) {
-    setActivePhase(PHASE_FULL_PREP);
-    return nonDeep;
-  }
-
-  // Phase 1: Foundation only (exam + values + current events)
-  return nonDeep.filter(q => {
-    const src = q._raw?.source || q.source;
-    return (
-      src === "exam" ||
-      src === "values" ||
-      src === "begivenheder"
-    );
-  });
-}
-
-
-
-// ==============================
-// DK PHASE 1 — ELIGIBILITY RULES
-// ==============================
-
-const DK_CURRENT_LABEL = "Aktuelle begivenheder";
-
-function isPhase1Eligible(question) {
-  const src = question._raw?.source || question.source;
-  if (src !== "exam") return false;
-
-  const topic = normalizeLabel(question.topicLabel || "");
-  if (topic === normalizeLabel(DK_CURRENT_LABEL)) return false;
-
-  return true;
 }
 
 // ==============================
@@ -312,7 +275,9 @@ return {
   // keep raw for filtering if needed later
   _raw: q,
 
-  // ---- DK PHASE SUPPORT ----
+  // Keep source + depth on the normalized question — used by:
+  // - official.html / "official" mode to filter source === "exam"
+  // - excludeDeep() to keep depth === "deep" out of practice modes
   source: q.source || null,
   depth: q.depth || null
 };
@@ -351,19 +316,13 @@ Engine.start = async function start(mode, options = {}) {
 
   // ---- LOAD + FILTER BANK ----
   const fullBankRaw = await loadBankIfNeeded(options);
-  const fullBank = filterBankByPhase(fullBankRaw);
+  const fullBank = excludeDeep(fullBankRaw);
 
   Engine._activeBank = fullBank;
 __normalizedBank = fullBankRaw;
 
   // Load tricky questions set (non-blocking, no auth)
   await loadTrickySet();
-
-  // ---- PHASE 1 FREEZE ----
-  if (!readJsonLS("dk_exam_index", null)) {
-    const examIndex = fullBankRaw.filter(q => isPhase1Eligible(q));
-    writeJsonLS("dk_exam_index", examIndex);
-  }
 
   let questions = [];
   let filtered = null;
@@ -381,6 +340,21 @@ let stateScopeQuestions = null;
       options.limit ||
       5;
     questions = sample(fullBank, n);
+  }
+
+  // =====================================================
+  // OFFICIAL — past exam questions only
+  // Mirrors /indfodsret/official.html's pool definition:
+  // source === "exam" (the engine's canonical "real past test" flag).
+  // =====================================================
+  else if (mode === "official") {
+    const n = options.limit || 25;
+    const officialBank = fullBank.filter(q => {
+      const src = q._raw?.source || q.source;
+      return src === "exam";
+    });
+    questions = sample(officialBank, Math.min(n, officialBank.length));
+    console.log(`[OFFICIAL] pool=${officialBank.length}, picked=${questions.length}`);
   }
 
   // =====================================================
@@ -1100,6 +1074,9 @@ function updateProgressBar() {
   } else if (state.mode === "quick") {
     barId = "quickProgress";
 
+  } else if (state.mode === "official") {
+    barId = "officialProgress";
+
   } else if (state.mode === "traps") {
     barId = "trapsProgress";
 
@@ -1577,49 +1554,6 @@ if (state.fromTopicsUI === true) {
 
 // ------------- Progress & Stats -------------
 
-// ==============================
-// DK PHASE 1 — COMPLETION CHECK
-// ==============================
-function evaluatePhase1Completion() {
-  const progress = readJsonLS("civicedge_progress", {});
-  const bank = readJsonLS("dk_exam_index", []);
-
-  if (!Array.isArray(bank) || bank.length === 0) return;
-
-  let total = 0;
-  let mastered = 0;
-
-  bank.forEach(q => {
-    if (!isPhase1Eligible(q)) return;
-
-    total += 1;
-
-    const key =
-      `${q.topicLabel || q.topicKey || "topic"}:${q.text}`;
-
-    const entry = progress[key];
-    if (entry && entry.correct === 1) {
-      mastered += 1;
-    }
-  });
-
-  if (!total) return;
-
-  const percent = Math.round((mastered / total) * 100);
-
-  writeJsonLS("dk_phase1_progress", {
-    mastered,
-    total,
-    percent,
-    updatedAt: Date.now()
-  });
-
-  // One-way unlock
-  if (percent >= 70) {
-    writeJsonLS("dk_phase2_unlocked", true);
-  }
-}
-
 function updateProgress(question, correct) {
 
   // --- Canonical key: LABEL + FULL TEXT ---
@@ -1669,13 +1603,6 @@ function updateProgress(question, correct) {
 
     progress[key] = entry;
   writeJsonLS("civicedge_progress", progress);
-
-  // ==============================
-  // DK PHASE 1 — PROGRESS UPDATE
-  // ==============================
-  if (correct && isPhase1Eligible(question)) {
-    evaluatePhase1Completion();
-  }
 }
 
 

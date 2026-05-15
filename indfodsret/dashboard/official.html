@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title_official">Officielle prøvespørgsmål</title>
+  <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <link rel="stylesheet" href="/indfodsret/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/indfodsret/assets/css/test-v2.css">
+
+  <script>document.documentElement.classList.add("i18n-hidden");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/indfodsret/assets/js/denmark-auth.js?v=3"></script>
+
+  <style>
+    .official-landing { max-width: 540px; padding: 1.5rem 0; }
+    .official-hero {
+      display: flex; align-items: center; gap: 2rem;
+      background: var(--card-bg, #fff); border-radius: 14px;
+      padding: 1.5rem 2rem; box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      margin-bottom: 1.25rem;
+    }
+    .official-ring-wrap { position: relative; flex-shrink: 0; }
+    .official-ring-label {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      text-align: center; line-height: 1.2;
+    }
+    .official-ring-pct { font-size: 1.6rem; font-weight: 700; color: var(--text, #1a1a1a); }
+    .official-ring-sub { font-size: .72rem; color: var(--text-muted, #888); text-transform: uppercase; letter-spacing: .03em; }
+    .official-stats { flex: 1; }
+    .official-stats h2 { margin: 0 0 .5rem; font-size: 1.15rem; font-weight: 700; }
+    .official-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem .75rem; }
+    .official-stat-val { font-size: 1.35rem; font-weight: 700; }
+    .official-stat-lbl { font-size: .75rem; color: var(--text-muted, #888); }
+    .official-stat-val.mastered { color: #16a34a; }
+    .official-stat-val.seen { color: #2563eb; }
+    .official-stat-val.remaining { color: #d97706; }
+    .official-stat-val.total { color: var(--text, #1a1a1a); }
+    .official-bar-track {
+      height: 10px; border-radius: 5px; background: var(--bg-muted, #f0f0f0);
+      overflow: hidden; display: flex; margin-bottom: 1.25rem;
+    }
+    .official-bar-mastered { background: #16a34a; transition: width .4s; }
+    .official-bar-seen { background: #93c5fd; transition: width .4s; }
+    .official-start-btn {
+      display: block; width: 100%; padding: .9rem; border: none; border-radius: 10px;
+      background: #C8102E; color: #fff; font-size: 1.05rem; font-weight: 600;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .official-start-btn:hover { opacity: .9; }
+    .official-note {
+      margin-top: 1rem; font-size: .8rem; color: var(--text-muted, #888);
+      line-height: 1.5;
+    }
+    @media (max-width: 480px) {
+      .official-hero { flex-direction: column; gap: 1rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Danmark">
+        <rect width="640" height="400" fill="#C8102E"/>
+        <rect x="176" y="0" width="64" height="400" fill="#FFFFFF"/>
+        <rect x="0" y="168" width="640" height="64" fill="#FFFFFF"/>
+      </svg>
+    </div>
+    <!-- Sidebar gauge -->
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Est. score</span>
+        <span class="sidebar-gauge-score" id="clGaugeScore">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugePass"></div>
+      </div>
+      <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
+    </div>
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav_dashboard">Dashboard</a>
+      <a href="simulation.html" data-i18n="nav_simulation">Prøvesimulation</a>
+      <a href="quick.html" data-i18n="nav_quick">Hurtig test</a>
+      <a href="official.html" class="active">Officielle prøvespørgsmål</a>
+      <a href="topics.html" data-i18n="nav_topics">Test efter emne</a>
+      <a href="traps.html" data-i18n="nav_traps">Typiske fælder</a>
+      <a href="flashcards.html" data-i18n="nav_flashcards">Flashcards</a>
+      <a href="manual.html">Læremateriale</a>
+      <a href="audio.html">Lyd</a>
+      <a href="advanced.html" id="advancedNavLink" style="display:none">Avancerede spørgsmål</a>
+      <div class="nav-sep"></div>
+      <a href="history.html" data-i18n="nav_history">Historik</a>
+      <a href="my-list.html" data-i18n="nav_my_list">Min liste</a>
+      <a href="help.html" data-i18n="nav_help">Hjælp & Kontakt</a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink">Log ud</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="global-controls">
+      <button id="readingToggle" class="reading-btn" aria-label="Reading assist">🔇</button>
+    </div>
+  </aside>
+
+  <div class="overlay" id="menuOverlay"></div>
+
+  <main>
+    <header class="ce-header">
+      <h1 data-i18n="title_official">Officielle prøvespørgsmål</h1>
+    </header>
+
+    <!-- Landing panel -->
+    <div class="official-landing" id="officialLanding">
+      <div class="official-hero">
+        <div class="official-ring-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120" id="officialRing">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#e5e7eb" stroke-width="10"/>
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#16a34a" stroke-width="10"
+                    stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327"
+                    transform="rotate(-90 60 60)" id="officialRingFill"/>
+          </svg>
+          <div class="official-ring-label">
+            <div class="official-ring-pct" id="officialPct">–</div>
+            <div class="official-ring-sub" data-i18n="official_mastered_label">mestret</div>
+          </div>
+        </div>
+        <div class="official-stats">
+          <h2 data-i18n="official_pool_title">Din fremgang</h2>
+          <div class="official-stats-grid">
+            <div class="official-stat">
+              <div class="official-stat-val mastered" id="officialMastered">–</div>
+              <div class="official-stat-lbl" data-i18n="official_stat_mastered">Mestret</div>
+            </div>
+            <div class="official-stat">
+              <div class="official-stat-val seen" id="officialSeen">–</div>
+              <div class="official-stat-lbl" data-i18n="official_stat_seen">Set (ikke mestret)</div>
+            </div>
+            <div class="official-stat">
+              <div class="official-stat-val remaining" id="officialRemaining">–</div>
+              <div class="official-stat-lbl" data-i18n="official_stat_remaining">Ikke set endnu</div>
+            </div>
+            <div class="official-stat">
+              <div class="official-stat-val total" id="officialTotal">–</div>
+              <div class="official-stat-lbl" data-i18n="official_stat_total">Samlet pool</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="official-bar-track">
+        <div class="official-bar-mastered" id="officialBarMastered" style="width:0"></div>
+        <div class="official-bar-seen" id="officialBarSeen" style="width:0"></div>
+      </div>
+
+      <button class="official-start-btn" id="officialStartBtn" data-i18n="official_start_btn">
+        Start — 25 spørgsmål
+      </button>
+
+      <p class="official-note" data-i18n="official_note">
+        Alle spørgsmål stammer fra tidligere officielle indfødsretsprøver. Spørgsmål du allerede har mestret prioriteres lavest.
+      </p>
+    </div>
+
+    <!-- Quiz area — hidden until start -->
+    <div class="ce-progress-global" style="display:none" id="officialProgressWrap">
+      <div class="ce-progress-global-bar" id="officialProgress"></div>
+    </div>
+
+    <div class="quiz-container" id="quizArea" style="display:none">
+      <div id="quiz"></div>
+    </div>
+  </main>
+</div>
+
+<script src="/indfodsret/assets/js/lang-bootstrap-dk.js"></script>
+<script src="/indfodsret/assets/js/config-dk.js"></script>
+<script src="/indfodsret/assets/js/i18n.js"></script>
+<script>CivicLearnI18n.init();</script>
+<script src="/indfodsret/assets/js/civic-reading.js"></script>
+<script src="/indfodsret/assets/js/engine-dk.js"></script>
+<script src="/indfodsret/assets/js/sync.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+
+  // Load bank and compute stats
+  await CivicEdgeEngine.ensureBankLoaded();
+  const bank = CivicEdgeEngine.getBank();
+
+  // Past official-exam questions = engine's canonical "exam" source
+  // (matches isPhase1Eligible / filterBankByPhase from before the cleanup).
+  const officialQs = bank.filter(q => {
+    const src = q._raw?.source || q.source;
+    return src === "exam";
+  });
+  const totalCount = officialQs.length;
+  console.log(`[OFFICIAL] pool size: ${totalCount}`);
+
+  // Read shared progress object (same one every quiz mode writes to)
+  let progress = {};
+  try { progress = JSON.parse(localStorage.getItem("civicedge_progress") || "{}"); } catch(e) {}
+
+  let masteredCount = 0, seenNotMastered = 0, unseenCount = 0;
+
+  officialQs.forEach(q => {
+    // Match the engine's canonical key: topicLabel + ":" + question text.
+    // See updateProgress() in engine-dk.js — both must agree exactly.
+    const key = `${q.topicLabel || q.topicKey || "topic"}:${q.text}`;
+    const entry = progress[key];
+    if (entry && entry.correct === 1) {
+      masteredCount++;
+    } else if (entry) {
+      seenNotMastered++;
+    } else {
+      unseenCount++;
+    }
+  });
+
+  const pct = totalCount > 0 ? Math.round((masteredCount / totalCount) * 100) : 0;
+
+  // Update numbers
+  document.getElementById("officialPct").textContent = pct + "%";
+  document.getElementById("officialMastered").textContent = masteredCount;
+  document.getElementById("officialSeen").textContent = seenNotMastered;
+  document.getElementById("officialRemaining").textContent = unseenCount;
+  document.getElementById("officialTotal").textContent = totalCount;
+
+  // Ring animation
+  const circumference = 2 * Math.PI * 52;
+  document.getElementById("officialRingFill").style.strokeDashoffset =
+    circumference - (circumference * pct / 100);
+
+  // Stacked bar
+  const mPct = totalCount > 0 ? (masteredCount / totalCount * 100) : 0;
+  const sPct = totalCount > 0 ? (seenNotMastered / totalCount * 100) : 0;
+  document.getElementById("officialBarMastered").style.width = mPct + "%";
+  document.getElementById("officialBarSeen").style.width = sPct + "%";
+
+  // Start quiz
+  document.getElementById("officialStartBtn").addEventListener("click", () => {
+    document.getElementById("officialLanding").style.display = "none";
+    document.getElementById("officialProgressWrap").style.display = "";
+    document.getElementById("quizArea").style.display = "";
+    CivicEdgeEngine.start("official");
+  });
+
+  // Restart reloads page to refresh stats
+  document.addEventListener("click", e => {
+    if (["changeTheme","returnBtn","restartBtn","ce-return"].includes(e.target?.id)) {
+      e.preventDefault();
+      location.reload();
+    }
+  });
+});
+</script>
+<script src="/indfodsret/assets/js/gauge-bar.js"></script>
+<script src="/indfodsret/assets/js/study-timer.js"></script>
+<script src="/indfodsret/assets/js/maintenance-bar.js"></script>
+<script src="/indfodsret/assets/js/signout.js"></script>
+</body>
+</html>
