@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title data-i18n="title_help">Help & Contact</title>
+  <title>Help & Contact</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="/indfodsret/assets/css/civic-v2.css">
   <style>
@@ -29,9 +29,8 @@
     .reset-btn { padding: 8px 20px; border-radius: var(--radius-sm); font-family: var(--font); font-size: 13px; font-weight: 600; background: var(--wrong-bg); color: #991b1b; border: 1px solid #fecaca; cursor: pointer; transition: all 0.15s; }
     .reset-btn:hover { background: #fecaca; }
   </style>
-  <script>document.documentElement.classList.add("i18n-hidden");</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <!-- <script src="/indfodsret/assets/js/denmark-auth.js"></script> -->
+  <script src="/indfodsret/assets/js/denmark-auth.js"></script>
 </head>
 <body>
 <button class="menu-toggle" aria-label="Menu">☰</button>
@@ -48,7 +47,7 @@
     <!-- Sidebar gauge -->
     <div class="sidebar-gauge">
       <div class="sidebar-gauge-header">
-        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Est. score</span>
+        <span class="sidebar-gauge-label">Est. score</span>
         <span class="sidebar-gauge-score" id="clGaugeScore">–</span>
       </div>
       <div class="sidebar-gauge-track">
@@ -58,21 +57,21 @@
       <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
     </div>
         <nav class="nav">
-      <a href="index.html" data-i18n="nav_dashboard">Dashboard</a>
-      <a href="simulation.html" data-i18n="nav_simulation">Prøvesimulation</a>
-      <a href="quick.html" data-i18n="nav_quick">Hurtig test</a>
+      <a href="index.html">Dashboard</a>
+      <a href="simulation.html">Prøvesimulation</a>
+      <a href="quick.html">Hurtig test</a>
 	  <a href="official.html">Officielle prøvespørgsmål</a>
-      <a href="topics.html" data-i18n="nav_topics">Test efter emne</a>
-      <a href="traps.html" data-i18n="nav_traps">Typiske fælder</a>
-      <a href="flashcards.html" data-i18n="nav_flashcards">Flashcards</a>
+      <a href="topics.html">Test efter emne</a>
+      <a href="traps.html">Typiske fælder</a>
+      <a href="flashcards.html">Flashcards</a>
       <a href="manual.html">Læremateriale</a>
       <a href="audio.html">Lyd</a>
       <a href="advanced.html" id="advancedNavLink" style="display:none">Avancerede spørgsmål</a>
       <div class="nav-sep"></div>
-      <a href="history.html" data-i18n="nav_history">Historik</a>
-      <a href="my-list.html" data-i18n="nav_my_list">Min liste</a>
-      <a href="help.html" class="active" data-i18n="nav_help">Hjælp & Kontakt</a>
-      <a href="#" data-i18n="nav_logout" id="logoutLink">Log ud</a>
+      <a href="history.html">Historik</a>
+      <a href="my-list.html">Min liste</a>
+      <a href="help.html" class="active">Hjælp & Kontakt</a>
+      <a href="#" id="logoutLink">Log ud</a>
     </nav>
     <div class="spacer"></div>
   </aside>
@@ -81,7 +80,7 @@
 
   <main>
     <header class="ce-header">
-      <h1 data-i18n="title_help">Help & Contact</h1>
+      <h1>Help & Contact</h1>
     </header>
 
     <div class="help-container">
@@ -133,31 +132,26 @@
 
       <!-- Contact -->
       <div class="help-section">
-        <h2 data-i18n="contact_title">Enviar uma mensagem</h2>
+        <h2>Enviar uma mensagem</h2>
         <div class="contact-form" id="contactForm">
-          <label data-i18n="contact_name_label">O seu nome</label>
+          <label>O seu nome</label>
           <input type="text" id="contactName">
-          <label data-i18n="contact_email_label">O seu email</label>
+          <label>O seu email</label>
           <input type="email" id="contactEmail">
-          <label data-i18n="contact_message_label">A sua mensagem</label>
+          <label>A sua mensagem</label>
           <textarea id="contactMessage"></textarea>
-          <button class="btn" id="contactSubmit" data-i18n="contact_submit_btn">Enviar</button>
+          <button class="btn" id="contactSubmit">Enviar</button>
         </div>
       </div>
 
       <!-- Reset -->
       <div class="help-reset">
-        <button class="reset-btn" id="resetBtn" data-i18n="reset_button_label">Repor treino</button>
+        <button class="reset-btn" id="resetBtn">Repor treino</button>
       </div>
     </div>
   </main>
 </div>
-
-<script src="/indfodsret/assets/js/lang-bootstrap-dk.js"></script>
 <script src="/indfodsret/assets/js/config-dk.js"></script>
-<script src="/indfodsret/assets/js/i18n.js"></script>
-<script>CivicLearnI18n.init();</script>
-
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   // Mobile menu
@@ -183,8 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, message, product: "denmark", language: "da" })
       });
-      document.getElementById("contactForm").innerHTML = `<div class="contact-success"><h3 data-i18n="contact_success_title">Mensagem enviada!</h3><p data-i18n="contact_success_text">Obrigado. Responderemos em breve.</p></div>`;
-      CivicLearnI18n.apply();
+      document.getElementById("contactForm").innerHTML = `<div class="contact-success"><h3>Besked sendt!</h3><p>Tak for din besked. Vi vender hurtigt tilbage.</p></div>`;
     } catch { alert("Kunne ikke sendes. Prøv igen."); }
   });
 
