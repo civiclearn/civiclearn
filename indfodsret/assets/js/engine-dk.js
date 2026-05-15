@@ -343,18 +343,53 @@ let stateScopeQuestions = null;
   }
 
   // =====================================================
-  // OFFICIAL — past exam questions only
-  // Mirrors /indfodsret/official.html's pool definition:
-  // source === "exam" (the engine's canonical "real past test" flag).
+  // OFFICIAL — past exam questions only.
+  // Pool: source === "exam" (the engine's canonical "real past test" flag).
+  // Sampling priority: unseen first, then seen-but-not-mastered, then
+  // mastered (refresher). This is what the landing-page footer note
+  // promises: "Spørgsmål du allerede har mestret prioriteres lavest."
+  // Naturally handles the tail: if fewer than N unseen, the deficit is
+  // filled from the next priority tier, so the user always gets N
+  // questions (or the full pool if N exceeds it).
   // =====================================================
   else if (mode === "official") {
     const n = options.limit || 25;
+
     const officialBank = fullBank.filter(q => {
       const src = q._raw?.source || q.source;
       return src === "exam";
     });
-    questions = sample(officialBank, Math.min(n, officialBank.length));
-    console.log(`[OFFICIAL] pool=${officialBank.length}, picked=${questions.length}`);
+
+    const progress = readJsonLS("civicedge_progress", {});
+    const unseen = [];
+    const seenNotMastered = [];
+    const mastered = [];
+
+    officialBank.forEach(q => {
+      const key = `${q.topicLabel || q.topicKey || "topic"}:${q.text}`;
+      const entry = progress[key];
+      if (!entry) unseen.push(q);
+      else if (entry.correct === 1) mastered.push(q);
+      else seenNotMastered.push(q);
+    });
+
+    // Fill tiers in order. shuffle each tier so order within a tier is random.
+    const pickFrom = (pool, need) => sample(pool, Math.min(need, pool.length));
+    const pickUnseen = pickFrom(unseen, n);
+    const pickStruggle = pickFrom(seenNotMastered, n - pickUnseen.length);
+    const pickMastered = pickFrom(mastered, n - pickUnseen.length - pickStruggle.length);
+
+    questions = [...pickUnseen, ...pickStruggle, ...pickMastered];
+    // Final shuffle so the user doesn't see "all unseen first, then review"
+    // — the tiers should feel interleaved, not segregated.
+    shuffle(questions);
+
+    console.log(
+      `[OFFICIAL] pool=${officialBank.length} ` +
+      `(unseen=${unseen.length}, struggle=${seenNotMastered.length}, mastered=${mastered.length}) ` +
+      `picked=${questions.length} ` +
+      `(unseen=${pickUnseen.length}, struggle=${pickStruggle.length}, mastered=${pickMastered.length})`
+    );
   }
 
   // =====================================================
