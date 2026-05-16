@@ -58,6 +58,26 @@
         træning. Spørgsmål du svarer rigtigt på, tæller som mestret
         i alle andre testformater.</p>
       `
+    },
+
+    official: {
+      icon: "📜",
+      title: "Sådan fungerer Officielle prøvespørgsmål",
+      body: `
+        <p>Alle spørgsmål her stammer fra tidligere officielle
+        indfødsretsprøver. <em>Cirka halvdelen af spørgsmålene i hver
+        prøve kommer fra et lille sæt tilbagevendende emner</em> — du
+        får langt mest ud af at mestre dem her først.</p>
+        <p>Vi har udeladt spørgsmål om aktuelle begivenheder (de
+        skifter for ofte) og spørgsmål, der ikke længere indgår i den
+        officielle læreplan.</p>
+        <p>Du øver 25 spørgsmål ad gangen. Spørgsmål du ikke har set
+        endnu prioriteres først, derefter dem du har svaret forkert
+        på. Spørgsmål du har mestret kommer kun igen, når alt andet
+        er gennemgået.</p>
+        <p>Vi anbefaler at starte din træning her. Spørgsmål du svarer
+        rigtigt på, tæller som mestret i alle andre testformater.</p>
+      `
     }
 
     // Future: add more entries here for other pages. Examples:
