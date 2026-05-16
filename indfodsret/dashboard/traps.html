@@ -7,6 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="/indfodsret/assets/css/civic-v2.css">
   <link rel="stylesheet" href="/indfodsret/assets/css/test-v2.css">
+  <link rel="stylesheet" href="/indfodsret/assets/css/help-card.css">
   <style>
     .traps-tabs {
       display: flex;
@@ -104,6 +105,8 @@
     <header class="ce-header"><h1>Frequent Traps</h1></header>
 
     <div class="quiz-container">
+    <div data-help-card="traps"></div>
+
     <!-- TABS: Personal traps vs 100 hardest -->
     <div class="traps-tabs" id="trapsTabs">
       <button class="traps-tab active" data-tab="mine">
@@ -124,8 +127,7 @@
 <script src="/indfodsret/assets/js/sync.js"></script>
 <script src="/indfodsret/assets/js/civic-reading.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const bankPath = window.CIVICEDGE_CONFIG?.bank?.path;
     if (!bankPath) return;
     let fullBank = [];
@@ -137,12 +139,36 @@ document.addEventListener("DOMContentLoaded", () => {
     let progress = {};
     try { progress = JSON.parse(localStorage.getItem("civicedge_progress") || "{}"); } catch {}
 
-    const trickyKeys = Object.keys(progress).filter(id => (progress[id].wrongs || 0) >= 3 && (progress[id].rights || 0) < 2);
+    // Eligibility: a question is a personal trap if you've gotten it wrong
+    // at least twice AND haven't recovered (fewer than 2 corrects).
+    const trickyKeys = Object.keys(progress).filter(id =>
+      (progress[id].wrongs || 0) >= 2 && (progress[id].rights || 0) < 2
+    );
     const normalizedSet = new Set(trickyKeys);
-    const personalTraps = fullBank.filter(q => {
-      const qKey = `${q.microtopic?.en || q.topic?.en || ""}:${q.id}`;
-      return normalizedSet.has(qKey);
-    });
+
+    // Reconstruct the canonical key from raw bank entries. Must mirror
+    // updateProgress() in engine-dk.js exactly — both formats supported:
+    //   indfodsret (flat):           `${q.topic}:${q.q}`
+    //   medborgerskab (multilingual): `${q.microtopic.en || q.topic.en}:${q.id}`
+    function progressKey(q) {
+      if (q.microtopic !== undefined) {
+        // medborgerskab format
+        const microKey = (typeof q.microtopic === "object")
+          ? (q.microtopic.en || "")
+          : String(q.microtopic);
+        return `${microKey}:${q.id}`;
+      }
+      // indfodsret format — mirror engine-dk.js updateProgress key
+      const topicKey = (typeof q.topic === "object")
+        ? (q.topic.en || "topic")
+        : String(q.topic || "topic");
+      const text = (typeof q.q === "object")
+        ? (q.q.da || q.q.en || "")
+        : String(q.q || "");
+      return `${topicKey}:${text}`;
+    }
+
+    const personalTraps = fullBank.filter(q => normalizedSet.has(progressKey(q)));
 
     /* ============================================
        TAB B: 100 HARDEST (from tricky-dk.json)
@@ -208,7 +234,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     startTab("mine");
-  });
 });
 </script>
 <script>
@@ -223,4 +248,5 @@ document.addEventListener("DOMContentLoaded", () => {
 <script src="/indfodsret/assets/js/study-timer.js"></script>
 <script src="/indfodsret/assets/js/maintenance-bar.js"></script>
 <script src="/indfodsret/assets/js/signout.js"></script>
+<script src="/indfodsret/assets/js/help-card.js"></script>
 </body></html>

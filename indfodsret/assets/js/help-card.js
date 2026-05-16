@@ -68,15 +68,41 @@
         indfødsretsprøver. <em>Cirka halvdelen af spørgsmålene i hver
         prøve kommer fra et lille sæt tilbagevendende emner</em> — du
         får langt mest ud af at mestre dem her først.</p>
-        <p>Vi har udeladt spørgsmål om aktuelle begivenheder (de
-        skifter for ofte) og spørgsmål, der ikke længere indgår i den
-        officielle læreplan.</p>
+        <p>Vi har udeladt spørgsmål om aktuelle begivenheder og
+        spørgsmål, der ikke længere indgår i den officielle læreplan.</p>
         <p>Du øver 25 spørgsmål ad gangen. Spørgsmål du ikke har set
         endnu prioriteres først, derefter dem du har svaret forkert
         på. Spørgsmål du har mestret kommer kun igen, når alt andet
         er gennemgået.</p>
         <p>Vi anbefaler at starte din træning her. Spørgsmål du svarer
         rigtigt på, tæller som mestret i alle andre testformater.</p>
+      `
+    },
+
+    quick: {
+      icon: "⚡",
+      title: "Sådan fungerer Hurtig test",
+      body: `
+        <p>Hurtig test er et tilfældigt udvalg af spørgsmål fra hele
+        banken — ingen tidsbegrænsning, ingen særlig sammensætning.
+        En god måde at få lidt øvelse ind på farten.</p>
+        <p>Spørgsmål du svarer rigtigt på, tæller som mestret i alle
+        andre testformater.</p>
+      `
+    },
+
+    traps: {
+      icon: "🎯",
+      title: "Sådan fungerer Typiske fælder",
+      body: `
+        <p><em>Mine fælder</em> samler de spørgsmål, du gentagne gange
+        har svaret forkert på — dine personlige svage punkter. Listen
+        vokser efterhånden, som du øver.</p>
+        <p><em>100 sværeste</em> er en kurateret liste over de spørgsmål,
+        andre brugere oftest fejler. De er gode at have set mindst én
+        gang før prøvedagen.</p>
+        <p>Skift mellem fanerne for at øve hver liste. Spørgsmål du
+        svarer rigtigt på, tæller som mestret i alle andre testformater.</p>
       `
     }
 
