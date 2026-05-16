@@ -1,0 +1,139 @@
+/* CivicLearn — Help Card
+   ─────────────────────────────────────────────────────────────
+   A persistent, collapsible explainer card that lives inline in the
+   page layout. First visit: expanded by default. After the user
+   collapses it: they see a one-line strip on every subsequent visit,
+   which can be re-expanded anytime by clicking. State is per-page
+   and stored in localStorage.
+
+   Usage on any page:
+     1. Drop a placeholder somewhere in the page:
+          <div data-help-card="topics"></div>
+     2. Define the content for that key in this file's CONTENT map.
+     3. Load this script after the DOM is parsed.
+
+   Adding a new help card to another page = one HTML line + one
+   entry in CONTENT below. No other changes.
+*/
+(function () {
+  "use strict";
+
+  // ── Per-page help content ──
+  // Keep it tight: a title and 2–4 short paragraphs (or list items).
+  // Talk about what the user DOES, what's surprising, and the rules of
+  // the format. Skip anything they'd intuit on their own.
+  const CONTENT = {
+    topics: {
+      icon: "💡",
+      title: "Sådan fungerer Test efter emne",
+      body: `
+        <p>Vælg ét eller flere emner og start en øvelse på 10 spørgsmål
+        ad gangen.</p>
+        <p>Forkerte svar kommer tilbage i næste bølge — du fortsætter,
+        indtil du har svaret rigtigt på alle 10. Sådan bygger du
+        gradvist mestring op.</p>
+        <p>Procenttallet på hvert emne afspejler din samlede fremgang
+        — også fra <em>Officielle prøvespørgsmål</em>, <em>Hurtig test</em>
+        og <em>Prøvesimulation</em>. Det er alt sammen samme materiale.</p>
+        <p>Når et emne når 100 %, kan du øve det som genopfriskning uden
+        at miste din fremgang.</p>
+      `
+    }
+
+    // Future: add more entries here for other pages. Examples:
+    //   official:    { icon: "📜", title: "...", body: "..." }
+    //   simulation:  { icon: "⏱️", title: "...", body: "..." }
+    //   quick:       { icon: "⚡", title: "...", body: "..." }
+    //   traps:       { icon: "🎯", title: "...", body: "..." }
+  };
+
+  // ── Persistence ──
+  function storageKey(helpKey) {
+    return `indfodsret:help:${helpKey}:collapsed`;
+  }
+
+  function isCollapsed(helpKey) {
+    try {
+      return localStorage.getItem(storageKey(helpKey)) === "true";
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function setCollapsed(helpKey, collapsed) {
+    try {
+      localStorage.setItem(storageKey(helpKey), collapsed ? "true" : "false");
+    } catch (_) {}
+  }
+
+  // ── Rendering ──
+  function buildCard(helpKey, content) {
+    const card = document.createElement("div");
+    card.className = "help-card";
+    card.setAttribute("data-help-key", helpKey);
+
+    // Header (always visible — the collapsed strip IS this header)
+    const header = document.createElement("button");
+    header.type = "button";
+    header.className = "help-card-header";
+    header.setAttribute("aria-expanded", "true");
+    header.innerHTML = `
+      <span class="help-card-icon">${content.icon || "💡"}</span>
+      <span class="help-card-title">${content.title}</span>
+      <span class="help-card-chevron" aria-hidden="true">⌃</span>
+    `;
+
+    // Body (the expandable part)
+    const body = document.createElement("div");
+    body.className = "help-card-body";
+    body.innerHTML = content.body;
+
+    card.appendChild(header);
+    card.appendChild(body);
+
+    // Apply initial state from localStorage
+    if (isCollapsed(helpKey)) {
+      card.classList.add("collapsed");
+      header.setAttribute("aria-expanded", "false");
+    } else {
+      // First visit / explicitly open: subtle one-shot pulse on the
+      // chevron after a brief delay, so users notice they can collapse.
+      // Animation runs once via CSS keyframes; no JS state to clear.
+      setTimeout(() => card.classList.add("hint-pulse"), 900);
+    }
+
+    // Toggle handler
+    header.addEventListener("click", () => {
+      const wasCollapsed = card.classList.contains("collapsed");
+      card.classList.toggle("collapsed");
+      header.setAttribute("aria-expanded", String(wasCollapsed));
+      setCollapsed(helpKey, !wasCollapsed);
+
+      // Once they've interacted, kill the pulse permanently for this session
+      card.classList.remove("hint-pulse");
+    });
+
+    return card;
+  }
+
+  // ── Initialization ──
+  function init() {
+    const placeholders = document.querySelectorAll("[data-help-card]");
+    placeholders.forEach((placeholder) => {
+      const helpKey = placeholder.getAttribute("data-help-card");
+      const content = CONTENT[helpKey];
+      if (!content) {
+        console.warn(`[HelpCard] No content defined for key: ${helpKey}`);
+        return;
+      }
+      const card = buildCard(helpKey, content);
+      placeholder.replaceWith(card);
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
