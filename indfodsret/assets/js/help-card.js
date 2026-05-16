@@ -104,6 +104,23 @@
         <p>Skift mellem fanerne for at øve hver liste. Spørgsmål du
         svarer rigtigt på, tæller som mestret i alle andre testformater.</p>
       `
+    },
+
+    flashcards: {
+      icon: "🃏",
+      title: "Sådan fungerer Flashcards",
+      body: `
+        <p>Flashcards er fri øvelse uden pres. Vælg ét eller flere
+        emner og klik Start. Klik <em>Vend</em> for at se det rigtige
+        svar. Klik <em>Forstået</em> for at fjerne kortet fra dyngen,
+        eller <em>Gense</em> for at lægge det bagerst og se det igen
+        senere.</p>
+        <p>Slå <em>Fokuser på svage emner</em> til, hvis du kun vil
+        øve emner, du endnu ikke har mestret 100 %.</p>
+        <p>Bemærk: Flashcards påvirker ikke din fremgang i de andre
+        testformater. Brug det til at opfriske eller bygge selvtillid
+        uden risiko.</p>
+      `
     }
 
     // Future: add more entries here for other pages. Examples:
