@@ -140,6 +140,100 @@ function createEl(tag, cls, text) {
   return el;
 }
 
+// ─────────────────────────────────────────────────────────────
+// TOPIC-MASTERED EMPTY STATE
+// ─────────────────────────────────────────────────────────────
+// Shown when the user opens a topic (or topic selection) where every
+// question is already marked correct in civicedge_progress.
+//
+// Two paths:
+//   1. "Øv 10 tilfældige spørgsmål" — non-destructive refresher. Picks
+//      10 random from the topic's mastered pool, runs a normal quiz
+//      session, BUT marks state.refresherMode = true so updateProgress
+//      will skip writing to civicedge_progress. Topic stays at 100%.
+//
+//   2. "Nulstil emnet og start forfra" — destructive reset. After an
+//      explicit confirmation, wipes the topic's entries from
+//      civicedge_progress, then re-invokes the topics flow which will
+//      now find unmastered === filtered.length and proceed normally.
+//
+// `filtered` is the full set of questions in the selected topic(s).
+// `selectedKeys` is the array of topic keys (used to re-invoke start
+// after a destructive reset).
+function renderTopicMasteredScreen(quizEl, filtered, selectedKeys) {
+  const total = filtered.length;
+  const isMulti = (selectedKeys || []).length > 1;
+  const heading = isMulti
+    ? "Du har mestret de valgte emner!"
+    : "Du har mestret dette emne!";
+  const subhead = isMulti
+    ? `${total} af ${total} spørgsmål er besvaret korrekt på tværs af de valgte emner.`
+    : `${total} af ${total} spørgsmål er besvaret korrekt.`;
+
+  quizEl.innerHTML = `
+    <div class="ce-card" style="text-align:center;padding:32px 24px;">
+      <div style="font-size:32px;margin-bottom:8px;">🎉</div>
+      <h2 style="margin:0 0 8px;font-size:20px;">${heading}</h2>
+      <p style="color:var(--text-muted);font-size:14px;margin:0 0 24px;">${subhead}</p>
+
+      <button id="topicRefreshBtn" class="btn" style="display:block;width:100%;max-width:360px;margin:0 auto 8px;padding:14px;font-size:15px;font-weight:600;">
+        Øv 10 tilfældige spørgsmål
+      </button>
+      <p style="color:var(--text-muted);font-size:12px;margin:0 0 28px;">
+        Din fremgang ændres ikke i denne tilstand.
+      </p>
+
+      <button id="topicResetBtn" style="background:none;border:none;color:var(--text-muted);font-size:13px;text-decoration:underline;cursor:pointer;font-family:var(--font);padding:4px 8px;">
+        Nulstil emnet og start forfra
+      </button>
+    </div>
+  `;
+
+  // Path 1: Non-destructive refresher.
+  document.getElementById("topicRefreshBtn").addEventListener("click", () => {
+    const refresherPool = sample(filtered, Math.min(10, filtered.length));
+    // Re-enter start() via the explicit-questions path, plus a refresherMode
+    // flag we'll honor inside updateProgress to skip writes.
+    Engine.start("topics", {
+      questions: refresherPool.map(q => q._raw || q),
+      fromTopicsUI: true,
+      refresherMode: true
+    });
+  });
+
+  // Path 2: Destructive reset (confirmation-gated).
+  document.getElementById("topicResetBtn").addEventListener("click", () => {
+    const label = isMulti
+      ? `${total} spørgsmål i de valgte emner`
+      : `${total} spørgsmål i dette emne`;
+    const ok = window.confirm(
+      `Er du sikker?\n\nDin fremgang på ${label} nulstilles. ` +
+      `Du starter forfra på 0%.`
+    );
+    if (!ok) return;
+
+    // Wipe progress entries for every question in `filtered`.
+    const progress = readJsonLS("civicedge_progress", {});
+    filtered.forEach(q => {
+      const key = `${q.topicLabel || q.topicKey || "topic"}:${q.text}`;
+      delete progress[key];
+    });
+    writeJsonLS("civicedge_progress", progress);
+
+    // Push to Supabase immediately so the wipe persists across devices.
+    if (window.CivicSync && typeof window.CivicSync.pushNow === "function") {
+      window.CivicSync.pushNow("civicedge_progress");
+    }
+
+    // Re-enter the normal topics flow. With progress cleared, unmastered
+    // will now equal filtered, so a fresh wave session starts.
+    Engine.start("topics", {
+      topics: selectedKeys,
+      fromTopicsUI: true
+    });
+  });
+}
+
   function shuffle(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -508,6 +602,7 @@ if (Array.isArray(options.questions) && options.questions.length > 0) {
     mode: "topics",
     cfg,
 	fromTopicsUI: options.fromTopicsUI === true,
+	refresherMode: options.refresherMode === true,
 
     // current wave
     questions: picked,
@@ -603,6 +698,18 @@ if (options.subtopic && options.subtopic !== "Alle spørgsmål") {
             Tilbage til emner
           </button>
         </div>`;
+      return;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // FULLY-MASTERED EMPTY STATE
+    // If every question in the selected topic(s) is mastered, show
+    // the celebratory screen with two paths: non-destructive refresher
+    // (10 random questions, no progress writes) OR full destructive
+    // reset (wipe these questions' progress entries, start fresh).
+    // ─────────────────────────────────────────────────────────────
+    if (unmastered.length === 0 && options.practice !== true) {
+      renderTopicMasteredScreen(quizEl, filtered, selectedKeys);
       return;
     }
 
@@ -1066,7 +1173,10 @@ if (card) {
   }
 
   // ---- TOPICS AUTOPILOT (only applies in topics mode) ----
-  if (state.mode === "topics" && state.questions.length > 0) {
+  // Refresher mode escape: a refresher session is a single-pass review, not
+  // a forced-mastery loop. Skip the wave-retry so the user can exit even
+  // after getting some wrong.
+  if (state.mode === "topics" && state.questions.length > 0 && !state.refresherMode) {
     const source = state.allQuestions || [];
     const wrong = source.filter(q => q._userCorrect === false);
 
@@ -1590,6 +1700,11 @@ if (state.fromTopicsUI === true) {
 // ------------- Progress & Stats -------------
 
 function updateProgress(question, correct) {
+
+  // Refresher mode (topic-mastered "10 random" path): we deliberately do
+  // NOT write to civicedge_progress so the topic stays at 100% and the
+  // user's mastery record isn't put at risk by polishing practice.
+  if (state && state.refresherMode === true) return;
 
   // --- Canonical key: LABEL + FULL TEXT ---
   const key =

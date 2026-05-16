@@ -44,7 +44,27 @@
   }
 
   function correctAnswer(q) {
-    if (!q || !q.options || typeof q.correctIndex !== "number") return "";
+    if (!q || !q.options) return "";
+
+    // Format A — indfodsret (flat): options = [{ t: "...", correct: true|false }, ...]
+    // Detect by checking the first option for the shape: object with `t` field.
+    if (
+      Array.isArray(q.options) &&
+      q.options[0] &&
+      typeof q.options[0] === "object" &&
+      "t" in q.options[0]
+    ) {
+      const correctOpt = q.options.find(opt => opt && opt.correct === true);
+      if (!correctOpt) return "";
+      const text = correctOpt.t;
+      return (typeof text === "object")
+        ? (text[lang()] || text.en || "")
+        : String(text);
+    }
+
+    // Format B — medborgerskab (multilingual): options = ["..."]  or  { da: [], en: [] },
+    // with a separate q.correctIndex number.
+    if (typeof q.correctIndex !== "number") return "";
     const opts = (typeof q.options === "object" && !Array.isArray(q.options))
       ? (q.options[lang()] || q.options.en || [])
       : q.options;
@@ -81,6 +101,26 @@
   }
 
   // ── Weak topics ──
+  // The progress key has to match what the engine writes in updateProgress().
+  // Two formats:
+  //   indfodsret (flat):       `${q.topic}:${q.q}`             (matches engine-dk.js)
+  //   medborgerskab (i18n):    `${q.microtopic.en}:${q.id}`    (legacy path)
+  function progressKey(q) {
+    // Detect by looking for microtopic — only the multilingual bank has it.
+    if (q.microtopic !== undefined) {
+      const microKey = (typeof q.microtopic === "object")
+        ? (q.microtopic.en || "")
+        : String(q.microtopic || "");
+      return `${microKey}:${q.id}`;
+    }
+    // Flat format — mirror engine-dk.js's updateProgress key exactly.
+    const topicKey = (typeof q.topic === "object")
+      ? (q.topic.en || "")
+      : String(q.topic || "topic");
+    const text = questionText(q);
+    return `${topicKey}:${text}`;
+  }
+
   function computeWeakTopics() {
     const progress = readProgress();
     const totals = {};
@@ -91,11 +131,7 @@
       if (!topicKey) return;
       totals[topicKey] = (totals[topicKey] || 0) + 1;
 
-      // Progress key uses microtopic:id
-      const microKey = q.microtopic && typeof q.microtopic === "object"
-        ? q.microtopic.en : (q.microtopic || "");
-      const pKey = `${microKey}:${q.id}`;
-      const entry = progress[pKey];
+      const entry = progress[progressKey(q)];
       if (entry && entry.correct === 1) {
         mastered[topicKey] = (mastered[topicKey] || 0) + 1;
       }
