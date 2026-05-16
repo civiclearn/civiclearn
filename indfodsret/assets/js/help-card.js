@@ -38,6 +38,26 @@
         <p>Når et emne når 100 %, kan du øve det som genopfriskning uden
         at miste din fremgang.</p>
       `
+    },
+
+    simulation: {
+      icon: "⏱️",
+      title: "Sådan fungerer Prøvesimulation",
+      body: `
+        <p>Prøvesimulationen følger den officielle indfødsretsprøve
+        nøjagtigt: <em>45 spørgsmål på 45 minutter</em>, og du skal
+        have mindst <em>36 rigtige (80 %)</em> for at bestå.</p>
+        <p>Sammensætningen afspejler den rigtige prøve: 35 spørgsmål
+        fra læremidlerne, 5 om danske værdier, og 5 om aktuelle
+        begivenheder.</p>
+        <p>Pas på "danske værdier"-spørgsmålene: du skal have mindst
+        <em>4 ud af 5 rigtige</em> her — ellers består du ikke, uanset
+        hvor godt du klarer resten af prøven.</p>
+        <p>Vi anbefaler at gemme simulationen til når du har øvet i
+        nogle dage. Brug den som en parathedstest, ikke som første
+        træning. Spørgsmål du svarer rigtigt på, tæller som mestret
+        i alle andre testformater.</p>
+      `
     }
 
     // Future: add more entries here for other pages. Examples:
