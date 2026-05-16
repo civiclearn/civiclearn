@@ -148,6 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const chip = document.createElement("button");
       chip.className = "topic-card";
+      chip.dataset.key = key;
       if (isMastered) chip.classList.add("mastered");
 
       chip.innerHTML = `
@@ -174,6 +175,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
       container.appendChild(chip);
     });
+
+    // Deep-link from dashboard recommendation: ?topic=X auto-selects the chip
+    // and scrolls the Start button into view. The user can then either click
+    // Start as-is or pick additional topics.
+    const presetTopic = new URLSearchParams(window.location.search).get("topic");
+    if (presetTopic) {
+      const preselectChip = container.querySelector(`[data-key="${CSS.escape(presetTopic)}"]`);
+      if (preselectChip) {
+        preselectChip.click();  // fires the existing toggle handler
+        setTimeout(() => {
+          startBtn.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 250);
+      }
+    }
 
     startBtn.addEventListener("click", () => {
       const topicKeys = Array.from(selected);

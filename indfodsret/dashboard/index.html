@@ -75,6 +75,14 @@
     .bonus-row-stat{font-size:12px;color:var(--text-muted);margin-bottom:10px;}
     .bonus-row-stat strong{color:var(--text);font-weight:700;}
 
+    /* Personalized recommendation card (replaces static tip cards) */
+    .db-recommend-card{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:16px 22px;margin-bottom:16px;box-shadow:var(--shadow);}
+    .db-recommend-icon{font-size:1.5rem;flex-shrink:0;}
+    .db-recommend-text{flex:1;min-width:200px;color:var(--text-mid);font-size:.92rem;line-height:1.45;}
+    .db-recommend-text strong{color:var(--text);font-weight:600;}
+    .db-recommend-btn{background:var(--accent);color:#fff;text-decoration:none;padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;white-space:nowrap;transition:background .15s;}
+    .db-recommend-btn:hover{background:#0b6265;}
+
     /* Date picker radio cards */
     .exam-date-cards{display:flex;flex-direction:column;gap:8px;padding:16px 0;}
     .exam-date-card{display:flex;align-items:center;gap:10px;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;}
@@ -88,6 +96,8 @@
       .bundle-banner-btn,.pd3-goto-btn{width:100%;text-align:center;}
       .pd3-code-block{width:100%;}
       .pd3-code-shown{justify-content:center;}
+      .db-recommend-card{flex-direction:column;text-align:center;}
+      .db-recommend-btn{width:100%;text-align:center;}
     }
   </style>
 </head>
@@ -309,20 +319,11 @@
         <a href="advanced.html" class="btn">Åbn avancerede spørgsmål →</a>
       </div>
 
-      <!-- ⑤ Tips -->
-      <div class="db-tips-row anim d4" id="tipsRow">
-        <div class="db-tip-card">
-          <div class="db-tip-title">Start med emner</div>
-          <div class="db-tip-text">Emnebaserede tests bruger progressiv mestring. Fejl kommer tilbage, indtil du svarer rigtigt.</div>
-        </div>
-        <div class="db-tip-card">
-          <div class="db-tip-title">Markér svære spørgsmål</div>
-          <div class="db-tip-text">Brug ☆ stjerne på ethvert spørgsmål for at bygge en personlig gennemgangsliste.</div>
-        </div>
-        <div class="db-tip-card">
-          <div class="db-tip-title">Simulationer er generalprøver</div>
-          <div class="db-tip-text">Efter et par dages emneøvelse, test dig selv under rigtige tidsforhold.</div>
-        </div>
+      <!-- ⑤ Personalized recommendation (replaces static tips) -->
+      <div class="db-recommend-card anim d4" id="recommendCard" style="display:none">
+        <div class="db-recommend-icon" id="recommendIcon">💡</div>
+        <div class="db-recommend-text" id="recommendText"></div>
+        <a class="db-recommend-btn" id="recommendBtn" href="#"></a>
       </div>
 
       <div class="db-footer">
@@ -499,9 +500,11 @@ document.addEventListener("DOMContentLoaded", () => {
   var CODE = "PD3DIS26";
 
   var PD3_DISMISSED = "pd3_banner_dismissed";
+  var PD3_SEEN      = "pd3_banner_seen";
 
   async function initBanner() {
     if (localStorage.getItem(PD3_DISMISSED)) return;
+    if (localStorage.getItem(PD3_SEEN))      return;
     if (localStorage.getItem("cl_bundle") === "dk") return;
     try {
       if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
@@ -516,6 +519,10 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       banner.classList.add("show");
+      // Mark as seen on first display — banner won't auto-show on future visits,
+      // even if user didn't explicitly dismiss. The × button still works for
+      // immediate kill; this flag handles the "ignored" case so we don't nag.
+      localStorage.setItem(PD3_SEEN, "1");
     } catch(e) {}
   }
 
@@ -540,6 +547,115 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   initBanner();
+})();
+</script>
+
+<!-- Personalized recommendation card -->
+<script>
+(function () {
+  // Picks ONE recommendation based on user state. Three branches:
+  //   A. Brand-new user (no answered questions)  → start with Officielle
+  //   B. All topics mastered                     → take a Prøvesimulation
+  //   C. Default — show weakest topic, deep-link to topics.html?topic=X
+  //
+  // Runs after the engine + bank are loaded. Reuses civicedge_progress
+  // (the same global mastery map all modes write to).
+
+  function normalizeLabel(str) {
+    return (str || "").normalize("NFD").replace(/\p{Diacritic}/gu, "")
+      .toLowerCase().trim().replace(/\s+/g, " ");
+  }
+
+  function getProgressKey(q) {
+    return `${q.topic || "topic"}:${q.q || ""}`;
+  }
+
+  async function buildRecommendation() {
+    const cardEl = document.getElementById("recommendCard");
+    const iconEl = document.getElementById("recommendIcon");
+    const textEl = document.getElementById("recommendText");
+    const btnEl  = document.getElementById("recommendBtn");
+    if (!cardEl || !textEl || !btnEl || !iconEl) return;
+
+    // Wait for engine/bank
+    if (!window.CivicEdgeEngine || !window.CivicEdgeEngine.ensureBankLoaded) return;
+    try { await window.CivicEdgeEngine.ensureBankLoaded(); } catch { return; }
+    const bank = window.CivicEdgeEngine.getBank ? window.CivicEdgeEngine.getBank() : [];
+    if (!bank.length) return;
+
+    let progress = {};
+    try { progress = JSON.parse(localStorage.getItem("civicedge_progress") || "{}"); } catch {}
+
+    const totalEntries = Object.keys(progress).length;
+
+    // ── Branch A: brand-new user ─────────────────────────
+    if (totalEntries === 0) {
+      iconEl.textContent = "👋";
+      textEl.innerHTML = "Velkommen! Vi anbefaler at starte med <strong>Officielle prøvespørgsmål</strong> — det er det vigtigste materiale.";
+      btnEl.textContent = "Start →";
+      btnEl.href = "official.html";
+      cardEl.style.display = "";
+      return;
+    }
+
+    // Compute per-topic stats (same logic as topics.html)
+    const cfg = window.CIVICEDGE_CONFIG || {};
+    const topicLabels = (cfg.topics && cfg.topics.topicLabels) || {};
+    const topicStats = {};
+    Object.keys(topicLabels).forEach(key => {
+      topicStats[key] = { label: topicLabels[key] || key, total: 0, mastered: 0 };
+    });
+
+    const eligible = bank.filter(q => q.depth !== "deep");
+    eligible.forEach(q => {
+      const normQ = normalizeLabel(q.topic || "");
+      const matchedKey = Object.keys(topicLabels).find(k => normalizeLabel(topicLabels[k]) === normQ);
+      if (!matchedKey || !topicStats[matchedKey]) return;
+      topicStats[matchedKey].total++;
+      const entry = progress[getProgressKey(q)];
+      if (entry && (entry.correct === 1 || entry.rights > 0)) {
+        topicStats[matchedKey].mastered++;
+      }
+    });
+
+    // Find weakest non-fully-mastered topic
+    let weakestKey = null;
+    let weakestPct = 101;
+    Object.keys(topicStats).forEach(key => {
+      const s = topicStats[key];
+      if (s.total === 0) return;
+      const pct = (s.mastered / s.total) * 100;
+      if (pct >= 100) return;             // skip fully mastered
+      if (pct < weakestPct) {
+        weakestPct = pct;
+        weakestKey = key;
+      }
+    });
+
+    // ── Branch B: all topics fully mastered ─────────────
+    if (weakestKey === null) {
+      iconEl.textContent = "🏆";
+      textEl.innerHTML = "Du har mestret alle emner. Test dig selv med en <strong>prøvesimulation</strong>.";
+      btnEl.textContent = "Start simulation →";
+      btnEl.href = "simulation.html";
+      cardEl.style.display = "";
+      return;
+    }
+
+    // ── Branch C: weakest topic ─────────────────────────
+    const weakest = topicStats[weakestKey];
+    iconEl.textContent = "🎯";
+    textEl.innerHTML = `Din svageste emne er <strong>${weakest.label}</strong> (${Math.round(weakestPct)} %). Brug 10 minutter på det nu.`;
+    btnEl.textContent = `Øv ${weakest.label} →`;
+    btnEl.href = `topics.html?topic=${encodeURIComponent(weakestKey)}`;
+    cardEl.style.display = "";
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", buildRecommendation);
+  } else {
+    buildRecommendation();
+  }
 })();
 </script>
 
