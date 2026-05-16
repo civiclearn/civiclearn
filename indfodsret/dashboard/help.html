@@ -28,6 +28,20 @@
     .help-reset { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); }
     .reset-btn { padding: 8px 20px; border-radius: var(--radius-sm); font-family: var(--font); font-size: 13px; font-weight: 600; background: var(--wrong-bg); color: #991b1b; border: 1px solid #fecaca; cursor: pointer; transition: all 0.15s; }
     .reset-btn:hover { background: #fecaca; }
+
+    /* Troubleshooting — top priority section, designed to deflect support tickets */
+    .help-troubleshooting { background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius); padding: 22px 26px; margin-bottom: 28px; }
+    .help-troubleshooting h2 { font-size: 17px; font-weight: 700; margin-bottom: 4px; color: #78350f; letter-spacing: -0.02em; }
+    .ts-intro { font-size: 13px; color: var(--text-mid); margin-bottom: 16px; line-height: 1.5; }
+    .ts-steps { list-style: none; counter-reset: step; padding: 0; margin: 0; }
+    .ts-steps > li { position: relative; padding: 12px 0 12px 40px; border-bottom: 1px solid rgba(120, 53, 15, 0.08); font-size: 13.5px; line-height: 1.55; color: var(--text-mid); counter-increment: step; }
+    .ts-steps > li:last-child { border-bottom: none; }
+    .ts-steps > li::before { content: counter(step); position: absolute; left: 0; top: 13px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+    .ts-steps strong { color: var(--text); font-weight: 600; }
+    .ts-steps kbd { display: inline-block; padding: 1px 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; font-family: ui-monospace, monospace; font-size: 11.5px; font-weight: 500; color: var(--text); margin: 0 2px; }
+    .ts-action { margin-top: 10px; }
+    .ts-reset-btn { display: inline-block; padding: 9px 20px; background: var(--accent); color: #fff; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600; transition: opacity 0.15s; }
+    .ts-reset-btn:hover { opacity: 0.9; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="/indfodsret/assets/js/denmark-auth.js"></script>
@@ -84,6 +98,38 @@
     </header>
 
     <div class="help-container">
+      <!-- Troubleshooting (top priority — deflects support tickets) -->
+      <section class="help-troubleshooting" id="troubleshooting">
+        <h2>Træningsprogrammet virker ikke som forventet?</h2>
+        <p class="ts-intro">Prøv disse trin i rækkefølge — de fleste problemer løses i de første par trin.</p>
+
+        <ol class="ts-steps">
+          <li>
+            <strong>Genindlæs siden</strong> med <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>
+            (eller <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> på Mac). Løser de fleste mindre problemer.
+          </li>
+          <li>
+            <strong>Prøv en anden browser eller et inkognito-vindue.</strong> Hvis det virker dér,
+            ligger problemet i din normale browser.
+          </li>
+          <li>
+            <strong>Skift fra WiFi til mobildata</strong> (eller omvendt). Hvis problemet kun opstår
+            på det ene netværk, er det netværksrelateret.
+          </li>
+          <li>
+            <strong>Nulstil app-data og log ind igen.</strong> Den mest grundige løsning. Bemærk: du
+            logges ud, men dine data er gemt sikkert på serveren og kommer tilbage automatisk.
+            <div class="ts-action">
+              <a href="/denmark/reset-cache" class="ts-reset-btn">Start nulstilling →</a>
+            </div>
+          </li>
+          <li>
+            <strong>Kontakt os</strong> hvis intet af ovenstående hjælper. Fortæl gerne hvilke trin
+            du har prøvet — det hjælper os med at finde løsningen hurtigere.
+          </li>
+        </ol>
+      </section>
+
       <!-- FAQs -->
       <div class="help-section">
         <h2>Ofte stillede spørgsmål</h2>
@@ -132,21 +178,21 @@
 
       <!-- Contact -->
       <div class="help-section">
-        <h2>Enviar uma mensagem</h2>
+        <h2>Send os en besked</h2>
         <div class="contact-form" id="contactForm">
-          <label>O seu nome</label>
+          <label>Dit navn</label>
           <input type="text" id="contactName">
-          <label>O seu email</label>
+          <label>Din e-mail</label>
           <input type="email" id="contactEmail">
-          <label>A sua mensagem</label>
+          <label>Din besked</label>
           <textarea id="contactMessage"></textarea>
-          <button class="btn" id="contactSubmit">Enviar</button>
+          <button class="btn" id="contactSubmit">Send</button>
         </div>
       </div>
 
       <!-- Reset -->
       <div class="help-reset">
-        <button class="reset-btn" id="resetBtn">Repor treino</button>
+        <button class="reset-btn" id="resetBtn">Nulstil træning</button>
       </div>
     </div>
   </main>
