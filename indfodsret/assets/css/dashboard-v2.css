@@ -68,17 +68,21 @@
 
 .date-sheet {
   position: fixed;
-  bottom: -300px;
-  left: 50%; transform: translateX(-50%);
+  bottom: 0;
+  left: 50%;
+  /* Hidden by default — translated down by its OWN height (100%), so works
+     regardless of how tall the sheet content is. Combine with the horizontal
+     centering translate to keep both in one transform. */
+  transform: translateX(-50%) translateY(100%);
   width: 340px;
   background: var(--surface);
   border-radius: var(--radius) var(--radius) 0 0;
   padding: 24px;
   z-index: 81;
   box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
-  transition: bottom 0.3s ease;
+  transition: transform 0.3s ease;
 }
-.date-sheet.active { bottom: 0; }
+.date-sheet.active { transform: translateX(-50%) translateY(0); }
 
 .date-sheet h3 {
   font-size: 15px; font-weight: 700;
