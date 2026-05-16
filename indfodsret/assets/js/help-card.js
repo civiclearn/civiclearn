@@ -121,6 +121,20 @@
         testformater. Brug det til at opfriske eller bygge selvtillid
         uden risiko.</p>
       `
+    },
+
+    "my-list": {
+      icon: "📌",
+      title: "Sådan fungerer Min liste",
+      startCollapsed: true,
+      body: `
+        <p>Når du støder på et spørgsmål, du vil gemme — fx et svært
+        spørgsmål, du vil gennemgå senere — klik på stjernen ⭐ øverst
+        på spørgsmålet for at lægge det her.</p>
+        <p>Spørgsmålene bliver på listen, indtil du fjerner dem. Du
+        kan svare på dem direkte her på siden, og listen synkroniseres
+        på tværs af dine enheder.</p>
+      `
     }
 
     // Future: add more entries here for other pages. Examples:
@@ -135,12 +149,21 @@
     return `indfodsret:help:${helpKey}:collapsed`;
   }
 
-  function isCollapsed(helpKey) {
+  // Resolve the initial collapsed/open state for a card.
+  // Priority:
+  //   1. User's explicit stored preference ("true" or "false") wins.
+  //   2. Otherwise, fall back to the content's `startCollapsed` flag.
+  //   3. Default to open (expanded).
+  // This lets utility pages (my-list, history) start collapsed by default
+  // while behavioural pages (topics, simulation, …) start expanded for
+  // first-visit education.
+  function getInitialState(helpKey, content) {
     try {
-      return localStorage.getItem(storageKey(helpKey)) === "true";
-    } catch (_) {
-      return false;
-    }
+      const stored = localStorage.getItem(storageKey(helpKey));
+      if (stored === "true") return true;
+      if (stored === "false") return false;
+    } catch (_) {}
+    return content.startCollapsed === true;
   }
 
   function setCollapsed(helpKey, collapsed) {
@@ -174,14 +197,16 @@
     card.appendChild(header);
     card.appendChild(body);
 
-    // Apply initial state from localStorage
-    if (isCollapsed(helpKey)) {
+    // Apply initial state — user preference wins, otherwise content default
+    if (getInitialState(helpKey, content)) {
       card.classList.add("collapsed");
       header.setAttribute("aria-expanded", "false");
     } else {
       // First visit / explicitly open: subtle one-shot pulse on the
       // chevron after a brief delay, so users notice they can collapse.
       // Animation runs once via CSS keyframes; no JS state to clear.
+      // Cards that start collapsed don't get the pulse — no need to
+      // draw attention when there's nothing to read yet.
       setTimeout(() => card.classList.add("hint-pulse"), 900);
     }
 
