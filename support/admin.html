@@ -1227,6 +1227,40 @@ body {
             <option value="/ykifinnish/dashboard">YKI Finnish</option>
             <option value="/ykisvenska/dashboard">YKI Svenska</option>
             <option value="/svenskaprov/dashboard">SvenskaProv</option>
+            <option value="/slovensko/dashboard">Slovakia</option>
+            <option value="/lt/dashboard">Lithuania</option>
+            <option value="/australia/dashboard">Australia</option>
+            <option value="/uk/dashboard">UK</option>
+            <option value="/canadafr/dashboard">Canada (French)</option>
+            <option value="/austria/dashboard">Austria</option>
+            <option value="/romania/dashboard">Romania</option>
+            <option value="/ccse/dashboard">Spain (CCSE)</option>
+            <option value="/portugal/dashboard">Portugal</option>
+          </select>
+        </div>
+        <div class="usr-form-field">
+          <label class="usr-form-label">Purchase country <span style="color:var(--muted);font-weight:400;text-transform:none">(auto-fills from product)</span></label>
+          <select class="usr-form-select" id="usr-new-country">
+            <option value="">— auto from product —</option>
+            <option value="da-dk">da-dk (Denmark)</option>
+            <option value="fr-lu">fr-lu (Luxembourg · French)</option>
+            <option value="lb-lu">lb-lu (Luxembourg · Lëtzebuergesch)</option>
+            <option value="pt-pt">pt-pt (Portugal)</option>
+            <option value="pt-br">pt-br (Brazil)</option>
+            <option value="fr-fr">fr-fr (France)</option>
+            <option value="fr-ch">fr-ch (Switzerland)</option>
+            <option value="fr-ca">fr-ca (Canada · French)</option>
+            <option value="fi-fi">fi-fi (Finland)</option>
+            <option value="sv-fi">sv-fi (Finland · Swedish)</option>
+            <option value="sv-se">sv-se (Sweden)</option>
+            <option value="is-is">is-is (Iceland)</option>
+            <option value="sk-sk">sk-sk (Slovakia)</option>
+            <option value="de-at">de-at (Austria)</option>
+            <option value="es-es">es-es (Spain)</option>
+            <option value="ro-ro">ro-ro (Romania)</option>
+            <option value="lt-lt">lt-lt (Lithuania)</option>
+            <option value="en-au">en-au (Australia)</option>
+            <option value="en-gb">en-gb (UK)</option>
           </select>
         </div>
         <div class="usr-form-field">
@@ -2661,6 +2695,7 @@ async function usrLookup() {
     document.getElementById('usr-result-grid').innerHTML = [
       { label: 'Email',       value: u.email },
       { label: 'Access Path', value: u.access_path || '—' },
+      { label: 'Country',     value: u.purchase_country || '—', cls: u.purchase_country ? 'ok' : 'miss' },
       { label: 'Bundle',      value: u.bundle || '—' },
       { label: 'Auth UID',    value: u.id || '—' },
       { label: 'Created',     value: u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—' },
@@ -2686,10 +2721,35 @@ async function usrLookup() {
   }
 }
 
+// product (first path segment) -> purchase_country. Mirror of the admin-users edge function map.
+const USR_COUNTRY_BY_PRODUCT = {
+  'denmark': 'da-dk', 'denmark-pr': 'da-dk', 'dansk3': 'da-dk',
+  'lux': 'fr-lu', 'sproochentest': 'lb-lu',
+  'ciple': 'pt-pt', 'celpe': 'pt-br', 'portugal': 'pt-pt',
+  'france': 'fr-fr', 'canadafr': 'fr-ca', 'geneva': 'fr-ch',
+  'rikisborgaraprof': 'is-is', 'ykifinnish': 'fi-fi', 'ykisvenska': 'sv-fi', 'svenskaprov': 'sv-se',
+  'slovensko': 'sk-sk', 'lt': 'lt-lt', 'australia': 'en-au',
+  'austria': 'de-at', 'romania': 'ro-ro', 'ccse': 'es-es', 'uk': 'en-gb',
+};
+
+function usrDeriveCountry(access_path) {
+  if (!access_path) return '';
+  const seg = access_path.split('/').filter(Boolean)[0] || '';
+  return USR_COUNTRY_BY_PRODUCT[seg] || '';
+}
+
+// When the product changes, auto-fill the country select (still editable for edge cases like lb-lu Luxembourg).
+document.getElementById('usr-new-site').addEventListener('change', function() {
+  const c = usrDeriveCountry(this.value);
+  if (c) document.getElementById('usr-new-country').value = c;
+});
+
 async function usrCreate() {
   const email  = document.getElementById('usr-new-email').value.trim();
   const pw     = document.getElementById('usr-new-pw').value;
   const access_path = document.getElementById('usr-new-site').value;
+  // Explicit choice wins; fall back to deriving from the product so it's never left empty.
+  const purchase_country = document.getElementById('usr-new-country').value || usrDeriveCountry(access_path) || null;
   const bundle = document.getElementById('usr-new-bundle').value.trim() || null;
   const status = document.getElementById('usr-create-status');
   const btn    = document.getElementById('usr-create-btn');
@@ -2705,7 +2765,7 @@ async function usrCreate() {
     const res = await fetch(USERS_FN, {
       method: 'POST',
       headers: { 'X-Admin-Key': adminPw, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'create', email, password: pw, access_path, bundle }),
+      body: JSON.stringify({ action: 'create', email, password: pw, access_path, purchase_country, bundle }),
     });
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || 'Create failed');
@@ -2715,6 +2775,7 @@ async function usrCreate() {
     document.getElementById('usr-new-pw').value = '';
     document.getElementById('usr-new-bundle').value = '';
     document.getElementById('usr-new-site').value = '';
+    document.getElementById('usr-new-country').value = '';
     showToast('User created ✓', 'success');
   } catch(e) {
     status.textContent = e.message;
