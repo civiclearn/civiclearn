@@ -1114,7 +1114,7 @@ body {
   <!-- REVENUE TAB -->
   <div class="tab-panel" id="tab-revenue">
     <div class="rev-load-bar">
-      <span id="rev-status">Historical data loaded · enter password to fetch live March figures</span>
+      <span id="rev-status">Historical data loaded · click “Load live” for current Stripe figures</span>
       <button onclick="loadRevLive()" id="rev-load-btn" style="background:var(--brand);color:#fff;border:none;border-radius:6px;padding:4px 14px;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:500;cursor:pointer">Load live</button>
     </div>
     <div class="rev-kpi-grid" id="rev-kpi-grid"></div>
@@ -1125,7 +1125,7 @@ body {
     <div class="rev-table-card">
       <div class="rev-card-title">Year-over-year comparison</div>
       <table class="rev-table" id="rev-yoy-table"></table>
-      <div class="rev-note">Historical (up to Feb 2026) from Stripe payouts export — net of fees. Live figures from charges API on demand.</div>
+      <div class="rev-note">Months before this year are from the Stripe payouts export (net of fees). The current year (YTD, KPIs, and this year's bars) is pulled live from the Stripe charges API when you click “Load live”.</div>
     </div>
 
     <!-- WEEKLY PAYOUTS -->
@@ -2265,7 +2265,6 @@ const REV_HISTORY = [
   { month: '2026-01', eur: 19433.01 },
   { month: '2026-02', eur: 16523.80 },
 ];
-const REV_PREV_JAN_FEB = 4877.82 + 10247.71; // Jan+Feb 2025
 const REV_FN = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/stripe_metrics_summary';
 let revLiveData = null;
 let revChart = null;
@@ -2292,8 +2291,8 @@ function renderRevenue() {
   const today = L ? L.today : null;
   const wtd   = L ? L.wtd   : null;
   const mtd   = L ? L.mtd   : null;
-  const ytd2026 = 19433.01 + 16523.80 + (mtd || 0);
-  const ytd2025 = L ? (REV_PREV_JAN_FEB + L.mtd_prev) : null;
+  const ytd2026 = L ? L.ytd      : null;
+  const ytd2025 = L ? L.ytd_prev : null;
 
   document.getElementById('rev-kpi-grid').innerHTML = [
     { label: 'Today',         cur: today,   prev: L ? L.today_prev : null },
@@ -2307,7 +2306,18 @@ function renderRevenue() {
       ${revYoyBadge(k.cur, k.prev)}
     </div>`).join('');
 
-  const chartData = [...REV_HISTORY, { month: '2026-03', eur: mtd || 0, partial: true }];
+  // Chart: months before the current year come from REV_HISTORY; the current
+  // year's months come live from Stripe (avoids stale/missing-month gaps).
+  const curYear = new Date().getFullYear();
+  const pastMonths = REV_HISTORY.filter(d => +d.month.slice(0, 4) < curYear);
+  let curMonths;
+  if (L && L.months && L.months.length) {
+    curMonths = L.months.map(m => ({ month: m.month, eur: m.eur, partial: !!m.partial }));
+  } else {
+    // Not loaded yet — fall back to whatever current-year history we have.
+    curMonths = REV_HISTORY.filter(d => +d.month.slice(0, 4) === curYear);
+  }
+  const chartData = [...pastMonths, ...curMonths].slice(-24);
   const labels = chartData.map(({ month }) => {
     const [y, mo] = month.split('-');
     return new Date(+y, +mo - 1, 1).toLocaleString('default', { month: 'short' }) + " '" + String(+y).slice(2);
@@ -2375,7 +2385,7 @@ async function loadRevLive() {
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || 'Request failed');
     const cur = data.summary[0], prev = data.summary[1];
-    revLiveData = { today: cur.day_eur, wtd: cur.week_eur, mtd: cur.mtd_eur, today_prev: prev.day_eur, wtd_prev: prev.week_eur, mtd_prev: prev.mtd_eur };
+    revLiveData = { today: cur.day_eur, wtd: cur.week_eur, mtd: cur.mtd_eur, ytd: cur.ytd_eur, today_prev: prev.day_eur, wtd_prev: prev.week_eur, mtd_prev: prev.mtd_eur, ytd_prev: prev.ytd_eur, months: data.months || [] };
     document.getElementById('rev-status').textContent = 'Live · as of ' + data.as_of;
     btn.textContent = 'Refresh';
     renderRevenue();
