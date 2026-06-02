@@ -716,6 +716,35 @@ body {
 .rev-load-bar span { flex: 1; }
 .rev-note { font-size: 0.72rem; color: var(--muted); margin-top: 0.6rem; line-height: 1.5; opacity: 0.7; }
 
+/* ── PAYOUTS (within revenue tab) ── */
+.po-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;
+}
+.po-head .rev-card-title { margin-bottom: 0; }
+.po-sync-btn {
+  background: var(--brand); color: #fff; border: none; border-radius: 6px;
+  padding: 5px 14px; font-family: 'DM Sans', sans-serif; font-size: 0.8rem;
+  font-weight: 500; cursor: pointer; white-space: nowrap;
+}
+.po-sync-btn:disabled { opacity: 0.5; cursor: default; }
+.po-legend { display: flex; gap: 1rem; flex-wrap: wrap; margin: 0.2rem 0 1rem; }
+.po-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: var(--muted); }
+.po-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.po-dot.below { background: var(--red); }
+.po-dot.met   { background: var(--blue); }
+.po-dot.over  { background: var(--green); }
+.po-table tbody td .po-badge {
+  display: inline-block; padding: 1px 8px; border-radius: 20px;
+  font-size: 0.68rem; font-weight: 500;
+}
+.po-badge.below { background: var(--red-dim); color: var(--red); }
+.po-badge.met   { background: var(--blue-dim); color: var(--blue); }
+.po-badge.over  { background: var(--green-dim); color: var(--green); }
+.po-delta.pos { color: var(--green); }
+.po-delta.neg { color: var(--red); }
+.po-empty { font-size: 0.82rem; color: var(--muted); padding: 1.5rem 0; text-align: center; }
+
 /* ── KNOWLEDGE BASE TAB ── */
 #tab-kb {
   overflow-y: auto;
@@ -1097,6 +1126,28 @@ body {
       <div class="rev-card-title">Year-over-year comparison</div>
       <table class="rev-table" id="rev-yoy-table"></table>
       <div class="rev-note">Historical (up to Feb 2026) from Stripe payouts export — net of fees. Live figures from charges API on demand.</div>
+    </div>
+
+    <!-- WEEKLY PAYOUTS -->
+    <div class="rev-chart-card">
+      <div class="po-head">
+        <div class="rev-card-title">Weekly payouts vs S$4,000 target — since 1 Jan 2026</div>
+        <button class="po-sync-btn" id="po-sync-btn" onclick="loadPayouts()">Sync from Stripe</button>
+      </div>
+      <div id="po-status" class="rev-note" style="margin-top:0">Not yet synced — click “Sync from Stripe”.</div>
+      <div class="rev-kpi-grid" id="po-kpi-grid" style="margin:1rem 0 0;display:none"></div>
+      <div class="po-legend" id="po-legend" style="display:none">
+        <span class="po-legend-item"><span class="po-dot below"></span> Below target (&lt; S$4,000)</span>
+        <span class="po-legend-item"><span class="po-dot met"></span> Met (S$4,000–5,999)</span>
+        <span class="po-legend-item"><span class="po-dot over"></span> Significantly exceeded (≥ S$6,000)</span>
+      </div>
+      <div class="rev-chart-wrap" id="po-chart-wrap" style="height:240px;display:none"><canvas id="po-chart"></canvas></div>
+      <div id="po-empty" class="po-empty" style="display:none">No payouts found since 1 Jan 2026.</div>
+    </div>
+    <div class="rev-table-card" id="po-table-card" style="display:none">
+      <div class="rev-card-title">Payout detail by week</div>
+      <table class="rev-table po-table" id="po-table"></table>
+      <div class="rev-note">Each row is a Stripe payout that arrived in the given ISO week. Amounts are gross payout value in SGD as sent to your bank.</div>
     </div>
   </div><!-- /tab-revenue -->
 
@@ -2306,6 +2357,7 @@ function renderRevenue() {
     <td>${revFmtFull(L ? L.mtd_prev : null)}</td><td>${revFmtFull(ytd2025)}</td></tr>`;
   html += '</tbody>';
   document.getElementById('rev-yoy-table').innerHTML = html;
+  if (payoutData) renderPayouts();
 }
 
 async function loadRevLive() {
@@ -2333,6 +2385,185 @@ async function loadRevLive() {
   } finally {
     btn.disabled = false;
   }
+}
+
+// ── WEEKLY PAYOUTS ──────────────────────────────────────────────────────────
+const PAYOUTS_FN = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/stripe_payouts';
+const PO_TARGET = 4000;          // S$ minimum per weekly payout
+const PO_SIGNIF = PO_TARGET * 1.5; // ≥ this counts as "significantly exceeded"
+let payoutData = null;           // array of grouped weeks
+let payoutChart = null;
+
+function poFmt(n) {
+  if (n == null) return '—';
+  return 'S$' + Math.round(n).toLocaleString('en');
+}
+// ISO-week key + Monday date for a unix-seconds timestamp
+function isoWeek(ts) {
+  const d = new Date(ts * 1000);
+  const day = (d.getUTCDay() + 6) % 7;            // Mon=0..Sun=6
+  const monday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - day));
+  const thu = new Date(monday); thu.setUTCDate(monday.getUTCDate() + 3);
+  const yearStart = new Date(Date.UTC(thu.getUTCFullYear(), 0, 1));
+  const week = Math.ceil((((thu - yearStart) / 86400000) + 1) / 7);
+  return { key: thu.getUTCFullYear() + '-W' + String(week).padStart(2, '0'), monday };
+}
+function poTier(amt) {
+  if (amt < PO_TARGET) return 'below';
+  if (amt < PO_SIGNIF) return 'met';
+  return 'over';
+}
+const PO_COLORS = {
+  below: 'rgba(248,113,113,0.85)',
+  met:   'rgba(96,165,250,0.85)',
+  over:  'rgba(52,211,153,0.85)',
+};
+
+async function loadPayouts() {
+  if (!adminPw) { document.getElementById('po-status').textContent = 'Enter password first.'; return; }
+  const btn = document.getElementById('po-sync-btn');
+  btn.disabled = true; btn.textContent = 'Syncing…';
+  document.getElementById('po-status').textContent = 'Fetching payouts from Stripe…';
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90000);
+    let res;
+    try {
+      res = await fetch(PAYOUTS_FN, { signal: controller.signal, headers: { 'X-Admin-Key': adminPw, 'Content-Type': 'application/json' } });
+    } finally { clearTimeout(timeout); }
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Request failed');
+
+    // group payouts by ISO week of arrival_date
+    const byWeek = {};
+    (data.payouts || []).forEach(p => {
+      const { key, monday } = isoWeek(p.arrival_date);
+      if (!byWeek[key]) byWeek[key] = { key, monday, amount: 0, currency: p.currency, statuses: [] };
+      byWeek[key].amount += p.amount;
+      byWeek[key].statuses.push(p.status);
+    });
+    payoutData = Object.values(byWeek).sort((a, b) => a.monday - b.monday);
+
+    document.getElementById('po-status').textContent =
+      'Synced · ' + payoutData.length + ' weeks · as of ' + (data.as_of || '');
+    btn.textContent = 'Re-sync';
+    renderPayouts();
+  } catch (e) {
+    document.getElementById('po-status').textContent = 'Error: ' + e.message;
+    btn.textContent = 'Retry';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderPayouts() {
+  const wrap = document.getElementById('po-chart-wrap');
+  const kpis = document.getElementById('po-kpi-grid');
+  const legend = document.getElementById('po-legend');
+  const tableCard = document.getElementById('po-table-card');
+  const empty = document.getElementById('po-empty');
+
+  if (!payoutData) return;
+  if (!payoutData.length) {
+    empty.style.display = 'block';
+    [wrap, kpis, legend, tableCard].forEach(el => el.style.display = 'none');
+    return;
+  }
+  empty.style.display = 'none';
+  wrap.style.display = 'block'; kpis.style.display = 'grid';
+  legend.style.display = 'flex'; tableCard.style.display = 'block';
+
+  const amounts = payoutData.map(w => w.amount);
+  const onTarget = amounts.filter(a => a >= PO_TARGET).length;
+  const avg = amounts.reduce((s, a) => s + a, 0) / amounts.length;
+  const total = amounts.reduce((s, a) => s + a, 0);
+  const latest = payoutData[payoutData.length - 1];
+  const latestDelta = latest.amount - PO_TARGET;
+
+  // KPIs
+  kpis.innerHTML = [
+    { label: 'Latest payout', val: poFmt(latest.amount),
+      sub: (latestDelta >= 0 ? '▲ ' : '▼ ') + poFmt(Math.abs(latestDelta)) + ' vs target',
+      cls: latestDelta >= 0 ? 'up' : 'down' },
+    { label: 'On-target weeks', val: onTarget + ' / ' + payoutData.length,
+      sub: Math.round(onTarget / payoutData.length * 100) + '% hit S$4,000+',
+      cls: onTarget === payoutData.length ? 'up' : 'flat' },
+    { label: 'Average / week', val: poFmt(avg),
+      sub: (avg >= PO_TARGET ? '▲ ' : '▼ ') + poFmt(Math.abs(avg - PO_TARGET)) + ' vs target',
+      cls: avg >= PO_TARGET ? 'up' : 'down' },
+    { label: 'Total paid out', val: poFmt(total),
+      sub: payoutData.length + ' weeks YTD', cls: 'flat' },
+  ].map(k => `
+    <div class="rev-kpi-card">
+      <div class="rev-kpi-label">${k.label}</div>
+      <div class="rev-kpi-value">${k.val}</div>
+      <div class="rev-kpi-yoy ${k.cls}">${k.sub}</div>
+    </div>`).join('');
+
+  // chart
+  const labels = payoutData.map(w => w.monday.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }));
+  const colors = payoutData.map(w => PO_COLORS[poTier(w.amount)]);
+
+  const targetLine = {
+    id: 'poTargetLine',
+    afterDraw(chart) {
+      const { ctx, chartArea: { left, right }, scales: { y } } = chart;
+      [[PO_TARGET, 'rgba(248,113,113,0.7)', 'S$4,000 target'],
+       [PO_SIGNIF, 'rgba(52,211,153,0.45)', 'S$6,000']].forEach(([val, col, txt]) => {
+        const yPos = y.getPixelForValue(val);
+        if (yPos < chart.chartArea.top || yPos > chart.chartArea.bottom) return;
+        ctx.save();
+        ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.setLineDash([5, 4]);
+        ctx.beginPath(); ctx.moveTo(left, yPos); ctx.lineTo(right, yPos); ctx.stroke();
+        ctx.setLineDash([]); ctx.fillStyle = col; ctx.font = '10px DM Sans';
+        ctx.textAlign = 'right'; ctx.fillText(txt, right - 4, yPos - 4);
+        ctx.restore();
+      });
+    }
+  };
+
+  if (payoutChart) payoutChart.destroy();
+  payoutChart = new Chart(document.getElementById('po-chart').getContext('2d'), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: amounts, backgroundColor: colors, borderRadius: 4, borderSkipped: false }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: items => 'Week of ' + items[0].label,
+            label: ctx => {
+              const d = ctx.raw - PO_TARGET;
+              return poFmt(ctx.raw) + '  (' + (d >= 0 ? '+' : '−') + poFmt(Math.abs(d)) + ' vs target)';
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#7c7a90', font: { size: 10 }, maxRotation: 45 } },
+        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' },
+             ticks: { color: '#7c7a90', font: { size: 10 }, callback: v => v >= 1000 ? 'S$' + (v / 1000).toFixed(0) + 'k' : 'S$' + v } }
+      }
+    },
+    plugins: [targetLine]
+  });
+
+  // table (most recent first)
+  let html = '<thead><tr><th>Week of</th><th>Payout</th><th>vs target</th><th>Status</th></tr></thead><tbody>';
+  [...payoutData].reverse().forEach(w => {
+    const tier = poTier(w.amount);
+    const d = w.amount - PO_TARGET;
+    const label = { below: 'Below', met: 'Met', over: 'Exceeded' }[tier];
+    html += `<tr>
+      <td>${w.monday.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+      <td>${poFmt(w.amount)}</td>
+      <td class="po-delta ${d >= 0 ? 'pos' : 'neg'}">${d >= 0 ? '+' : '−'}${poFmt(Math.abs(d))}</td>
+      <td><span class="po-badge ${tier}">${label}</span></td>
+    </tr>`;
+  });
+  html += '</tbody>';
+  document.getElementById('po-table').innerHTML = html;
 }
 
 // ── KNOWLEDGE BASE ────────────────────────────────────────────────────────────
