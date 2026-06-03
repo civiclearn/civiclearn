@@ -31,30 +31,6 @@
     .bundle-banner-btn:hover{background:#9E0B22;}
     @media(max-width:600px){.bundle-banner{flex-direction:column;text-align:center;}.bundle-banner-btn{width:100%;text-align:center;}}
 
-    /* PD3 Addon Banner */
-    .pd3-addon-banner{display:none;background:linear-gradient(135deg,#eef2ff 0%,#e0e7ff 100%);border:1px solid #c7d2fe;border-radius:12px;padding:14px 20px;margin:0 0 20px 0;align-items:center;gap:14px;flex-wrap:wrap;position:relative;}
-    .pd3-addon-banner.show{display:flex;}
-    .pd3-addon-icon{font-size:1.3rem;flex-shrink:0;}
-    .pd3-addon-text{flex:1;min-width:200px;}
-    .pd3-addon-text strong{color:#3730a3;font-size:.92rem;}
-    .pd3-addon-text span{display:block;color:#4338ca;font-size:.82rem;margin-top:2px;}
-    .pd3-addon-dismiss{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:#6366f1;font-size:.8rem;opacity:.5;transition:opacity .15s;font-family:inherit;}
-    .pd3-addon-dismiss:hover{opacity:1;}
-    /* Code reveal block */
-    .pd3-code-block{background:rgba(255,255,255,.65);border:1px solid #c7d2fe;border-radius:8px;padding:10px 14px;min-width:210px;}
-    .pd3-code-label{font-size:.7rem;color:#6366f1;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
-    .pd3-code-reveal{display:flex;align-items:center;gap:8px;}
-    .pd3-code-masked{font-size:1.05rem;color:#a5b4fc;letter-spacing:.15em;font-family:monospace;}
-    .pd3-code-show-btn{background:#4f46e5;color:#fff;border:none;cursor:pointer;padding:5px 12px;border-radius:6px;font-size:.78rem;font-weight:600;font-family:inherit;transition:background .15s;}
-    .pd3-code-show-btn:hover{background:#4338ca;}
-    .pd3-code-shown{display:none;align-items:center;gap:8px;flex-wrap:wrap;}
-    .pd3-code-value{font-family:monospace;font-size:1rem;font-weight:700;color:#3730a3;letter-spacing:.1em;background:#e0e7ff;padding:4px 10px;border-radius:6px;}
-    .pd3-copy-btn{background:none;border:none;cursor:pointer;font-size:.95rem;padding:2px 4px;opacity:.65;transition:opacity .15s;line-height:1;}
-    .pd3-copy-btn:hover{opacity:1;}
-    .pd3-goto-btn{background:#4f46e5;color:#fff;text-decoration:none;padding:6px 14px;border-radius:6px;font-size:.82rem;font-weight:600;white-space:nowrap;transition:background .15s;}
-    .pd3-goto-btn:hover{background:#4338ca;}
-    @media(max-width:600px){.pd3-addon-banner{flex-direction:column;text-align:center;padding-right:20px;}.pd3-code-block{width:100%;}.pd3-code-shown{justify-content:center;}.pd3-goto-btn{width:100%;text-align:center;}.pd3-addon-dismiss{top:6px;right:8px;}}
-
     /* Trustpilot Review Notice */
     .tp-notice{display:none;background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border:1px solid #86efac;border-radius:12px;padding:14px 20px;margin:0 0 20px 0;align-items:center;gap:14px;flex-wrap:wrap;position:relative;}
     .tp-notice.show{display:flex;}
@@ -161,28 +137,6 @@
     <span>Du har også adgang til Prøve i Dansk 3 — samme e-mail og adgangskode.</span>
   </div>
   <a href="https://civiclearn.com/dansk3/dashboard/" class="bundle-banner-btn">Åbn Dansk 3 →</a>
-</div>
-
-<!-- PD3 Addon Banner (shown to non-bundle Denmark users) -->
-<div class="pd3-addon-banner" id="pd3AddonBanner">
-  <button class="pd3-addon-dismiss" id="pd3AddonDismiss" title="Skjul">✕</button>
-  <div class="pd3-addon-icon">📘</div>
-  <div class="pd3-addon-text">
-    <strong>Har du også brug for Prøve i Dansk 3?</strong>
-    <span>10 komplette simulationer · alle 9 delprøver · 7-trins evaluering · Normalpris 899 kr.</span>
-  </div>
-  <div class="pd3-code-block">
-    <div class="pd3-code-label">Din rabatkode</div>
-    <div class="pd3-code-reveal" id="pd3CodeReveal">
-      <span class="pd3-code-masked">••••••••</span>
-      <button class="pd3-code-show-btn" id="pd3ShowCodeBtn">Vis kode</button>
-    </div>
-    <div class="pd3-code-shown" id="pd3CodeShown">
-      <span class="pd3-code-value">PD3DIS26</span>
-      <button class="pd3-copy-btn" id="pd3CopyBtn" title="Kopiér kode">📋</button>
-      <a href="https://dansk3.dk/" target="_blank" class="pd3-goto-btn">Gå til Dansk 3 →</a>
-    </div>
-  </div>
 </div>
 
 <!-- Trustpilot Review Notice (shown once to eligible users) -->
@@ -600,67 +554,6 @@ WonderPush.push(["addTag", "country:dk"]);
   })();
 </script>
 
-<!-- PD3 Addon: discount code reveal for Denmark customers -->
-<script>
-(function() {
-  var banner      = document.getElementById("pd3AddonBanner");
-  var dismissBtn  = document.getElementById("pd3AddonDismiss");
-  var showCodeBtn = document.getElementById("pd3ShowCodeBtn");
-  var codeReveal  = document.getElementById("pd3CodeReveal");
-  var codeShown   = document.getElementById("pd3CodeShown");
-  var copyBtn     = document.getElementById("pd3CopyBtn");
-  var CODE = "PD3DIS26";
-
-  var PD3_SINCE = "pd3_banner_since";
-  var PD3_DISMISSED = "pd3_banner_dismissed";
-  var PD3_72H = 72 * 60 * 60 * 1000;
-
-  async function initBanner() {
-    return; // ⛔ Disabled 2026-05-15 — exam crunch period. Remove this line to re-enable PD3 cross-sell banner.
-    if (localStorage.getItem(PD3_DISMISSED)) return;
-    var since = localStorage.getItem(PD3_SINCE);
-    if (since && Date.now() - parseInt(since, 10) > PD3_72H) return;
-    if (localStorage.getItem("cl_bundle") === "dk") return;
-    try {
-      if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
-      var sb = window.denmarkAuth && window.denmarkAuth.supabase;
-      var userId = window.denmarkAuth && window.denmarkAuth.userId;
-      if (!sb || !userId) return;
-      var sess = await sb.auth.getSession();
-      if (!sess.data.session) return;
-      var result = await sb.from("users").select("bundle").eq("id", userId).maybeSingle();
-      if (result.data && result.data.bundle === "dk") {
-        localStorage.setItem("cl_bundle", "dk");
-        return;
-      }
-      if (!since) localStorage.setItem(PD3_SINCE, String(Date.now()));
-      banner.classList.add("show");
-    } catch(e) {}
-  }
-
-  showCodeBtn.addEventListener("click", function() {
-    codeReveal.style.display = "none";
-    codeShown.style.display = "flex";
-  });
-
-  copyBtn.addEventListener("click", function() {
-    navigator.clipboard.writeText(CODE).then(function() {
-      copyBtn.textContent = "✓";
-      setTimeout(function() { copyBtn.textContent = "📋"; }, 1500);
-    }).catch(function() {
-      copyBtn.textContent = "✓";
-      setTimeout(function() { copyBtn.textContent = "📋"; }, 1500);
-    });
-  });
-
-  dismissBtn.addEventListener("click", function() {
-    banner.classList.remove("show");
-    localStorage.setItem(PD3_DISMISSED, "1");
-  });
-
-  initBanner();
-})();
-</script>
 <!-- Trustpilot Review Invitation -->
 <script>
 (function(){
