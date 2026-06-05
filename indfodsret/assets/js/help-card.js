@@ -1,10 +1,10 @@
 /* CivicLearn — Help Card
    ─────────────────────────────────────────────────────────────
    A persistent, collapsible explainer card that lives inline in the
-   page layout. First visit: expanded by default. After the user
-   collapses it: they see a one-line strip on every subsequent visit,
-   which can be re-expanded anytime by clicking. State is per-page
-   and stored in localStorage.
+   page layout. Collapsed by default: the user sees a one-line title
+   strip, which expands on click. Once expanded or collapsed by the
+   user, that choice is remembered per-page in localStorage. A card
+   can start expanded by setting `startCollapsed: false` in CONTENT.
 
    Usage on any page:
      1. Drop a placeholder somewhere in the page:
@@ -152,18 +152,17 @@
   // Resolve the initial collapsed/open state for a card.
   // Priority:
   //   1. User's explicit stored preference ("true" or "false") wins.
-  //   2. Otherwise, fall back to the content's `startCollapsed` flag.
-  //   3. Default to open (expanded).
-  // This lets utility pages (my-list, history) start collapsed by default
-  // while behavioural pages (topics, simulation, …) start expanded for
-  // first-visit education.
+  //   2. Otherwise: collapsed by default — users see only the title line
+  //      until they tap to expand.
+  //   3. A card can opt OUT (start expanded) with `startCollapsed: false`
+  //      in its CONTENT entry.
   function getInitialState(helpKey, content) {
     try {
       const stored = localStorage.getItem(storageKey(helpKey));
       if (stored === "true") return true;
       if (stored === "false") return false;
     } catch (_) {}
-    return content.startCollapsed === true;
+    return content.startCollapsed !== false;
   }
 
   function setCollapsed(helpKey, collapsed) {
