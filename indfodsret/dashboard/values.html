@@ -3,54 +3,60 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Officielle prøvespørgsmål</title>
+  <title>Danske værdier</title>
   <meta name="apple-mobile-web-app-title" content="CivicLearn">
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <link rel="stylesheet" href="/indfodsret/assets/css/civic-v2.css">
   <link rel="stylesheet" href="/indfodsret/assets/css/test-v2.css">
-  <link rel="stylesheet" href="/indfodsret/assets/css/help-card.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="/indfodsret/assets/js/denmark-auth.js?v=3"></script>
 
   <style>
-    .official-landing { max-width: 540px; padding: 1.5rem 0; }
-    .official-hero {
+    .vals-landing { max-width: 540px; padding: 1.5rem 0; }
+    .vals-note {
+      background: var(--card-bg, #fff); border-left: 3px solid #C8102E;
+      border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      font-size: .9rem; line-height: 1.5; color: var(--text-mid, #444);
+    }
+    .vals-note strong { color: var(--text, #1a1a1a); }
+    .vals-hero {
       display: flex; align-items: center; gap: 2rem;
       background: var(--card-bg, #fff); border-radius: 14px;
       padding: 1.5rem 2rem; box-shadow: 0 1px 4px rgba(0,0,0,.06);
       margin-bottom: 1.25rem;
     }
-    .official-ring-wrap { position: relative; flex-shrink: 0; }
-    .official-ring-label {
+    .vals-ring-wrap { position: relative; flex-shrink: 0; }
+    .vals-ring-label {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
       text-align: center; line-height: 1.2;
     }
-    .official-ring-pct { font-size: 1.6rem; font-weight: 700; color: var(--text, #1a1a1a); }
-    .official-ring-sub { font-size: .72rem; color: var(--text-muted, #888); text-transform: uppercase; letter-spacing: .03em; }
-    .official-stats { flex: 1; }
-    .official-stats h2 { margin: 0 0 .5rem; font-size: 1.15rem; font-weight: 700; }
-    .official-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem .75rem; }
-    .official-stat-val { font-size: 1.35rem; font-weight: 700; }
-    .official-stat-lbl { font-size: .75rem; color: var(--text-muted, #888); }
-    .official-stat-val.mastered { color: #16a34a; }
-    .official-stat-val.seen { color: #2563eb; }
-    .official-stat-val.remaining { color: #d97706; }
-    .official-stat-val.total { color: var(--text, #1a1a1a); }
-    .official-bar-track {
+    .vals-ring-pct { font-size: 1.6rem; font-weight: 700; color: var(--text, #1a1a1a); }
+    .vals-ring-sub { font-size: .72rem; color: var(--text-muted, #888); text-transform: uppercase; letter-spacing: .03em; }
+    .vals-stats { flex: 1; }
+    .vals-stats h2 { margin: 0 0 .5rem; font-size: 1.15rem; font-weight: 700; }
+    .vals-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem .75rem; }
+    .vals-stat-val { font-size: 1.35rem; font-weight: 700; }
+    .vals-stat-lbl { font-size: .75rem; color: var(--text-muted, #888); }
+    .vals-stat-val.mastered { color: #16a34a; }
+    .vals-stat-val.seen { color: #2563eb; }
+    .vals-stat-val.remaining { color: #d97706; }
+    .vals-stat-val.total { color: var(--text, #1a1a1a); }
+    .vals-bar-track {
       height: 10px; border-radius: 5px; background: var(--bg-muted, #f0f0f0);
       overflow: hidden; display: flex; margin-bottom: 1.25rem;
     }
-    .official-bar-mastered { background: #16a34a; transition: width .4s; }
-    .official-bar-seen { background: #93c5fd; transition: width .4s; }
-    .official-start-btn {
+    .vals-bar-mastered { background: #16a34a; transition: width .4s; }
+    .vals-bar-seen { background: #93c5fd; transition: width .4s; }
+    .vals-start-btn {
       display: block; width: 100%; padding: .9rem; border: none; border-radius: 10px;
       background: #C8102E; color: #fff; font-size: 1.05rem; font-weight: 600;
       cursor: pointer; transition: opacity .15s;
     }
-    .official-start-btn:hover { opacity: .9; }
+    .vals-start-btn:hover { opacity: .9; }
     @media (max-width: 480px) {
-      .official-hero { flex-direction: column; gap: 1rem; }
+      .vals-hero { flex-direction: column; gap: 1rem; }
     }
   </style>
 </head>
@@ -85,9 +91,9 @@
       <a href="index.html">Dashboard</a>
       <a href="simulation.html">Prøvesimulation</a>
       <a href="quick.html">Hurtig test</a>
-      <a href="official.html" class="active">Officielle prøvespørgsmål</a>
+      <a href="official.html">Officielle prøvespørgsmål</a>
       <a href="topics.html">Test efter emne</a>
-      <a href="values.html">Danske værdier</a>
+      <a href="values.html" class="active">Danske værdier</a>
       <a href="current.html">Aktuelle begivenheder</a>
       <a href="traps.html">Typiske fælder</a>
       <a href="flashcards.html">Flashcards</a>
@@ -110,62 +116,71 @@
 
   <main>
     <header class="ce-header">
-      <h1>Officielle prøvespørgsmål</h1>
+      <h1>Danske værdier</h1>
     </header>
 
     <!-- Landing panel -->
-    <div class="official-landing" id="officialLanding">
-      <div data-help-card="official"></div>
+    <div class="vals-landing" id="valsLanding">
 
-      <div class="official-hero">
-        <div class="official-ring-wrap">
-          <svg width="120" height="120" viewBox="0 0 120 120" id="officialRing">
+      <div class="vals-note">
+        Spørgsmålene om <strong>danske værdier</strong> bygger ikke på en officiel lærebog
+        — der findes ikke noget pensum for denne del. De handler om grundlæggende
+        principper som ytringsfrihed, ligestilling og forholdet mellem stat og religion.
+        På den rigtige prøve skal du svare rigtigt på <strong>mindst 4 ud af 5</strong>
+        værdispørgsmål for at bestå, så det er værd at øve grundigt.
+      </div>
+
+      <div class="vals-hero">
+        <div class="vals-ring-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120" id="valsRing">
             <circle cx="60" cy="60" r="52" fill="none" stroke="#e5e7eb" stroke-width="10"/>
             <circle cx="60" cy="60" r="52" fill="none" stroke="#16a34a" stroke-width="10"
                     stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327"
-                    transform="rotate(-90 60 60)" id="officialRingFill"/>
+                    transform="rotate(-90 60 60)" id="valsRingFill"/>
           </svg>
-          <div class="official-ring-label">
-            <div class="official-ring-pct" id="officialPct">–</div>
-            <div class="official-ring-sub">mestret</div>
+          <div class="vals-ring-label">
+            <div class="vals-ring-pct" id="valsPct">–</div>
+            <div class="vals-ring-sub">mestret</div>
           </div>
         </div>
-        <div class="official-stats">
+        <div class="vals-stats">
           <h2>Din fremgang</h2>
-          <div class="official-stats-grid">
-            <div class="official-stat">
-              <div class="official-stat-val mastered" id="officialMastered">–</div>
-              <div class="official-stat-lbl">Mestret</div>
+          <div class="vals-stats-grid">
+            <div class="vals-stat">
+              <div class="vals-stat-val mastered" id="valsMastered">–</div>
+              <div class="vals-stat-lbl">Mestret</div>
             </div>
-            <div class="official-stat">
-              <div class="official-stat-val seen" id="officialSeen">–</div>
-              <div class="official-stat-lbl">Set (ikke mestret)</div>
+            <div class="vals-stat">
+              <div class="vals-stat-val seen" id="valsSeen">–</div>
+              <div class="vals-stat-lbl">Set (ikke mestret)</div>
             </div>
-            <div class="official-stat">
-              <div class="official-stat-val remaining" id="officialRemaining">–</div>
-              <div class="official-stat-lbl">Ikke set endnu</div>
+            <div class="vals-stat">
+              <div class="vals-stat-val remaining" id="valsRemaining">–</div>
+              <div class="vals-stat-lbl">Ikke set endnu</div>
             </div>
-            <div class="official-stat">
-              <div class="official-stat-val total" id="officialTotal">–</div>
-              <div class="official-stat-lbl">Samlet pool</div>
+            <div class="vals-stat">
+              <div class="vals-stat-val total" id="valsTotal">–</div>
+              <div class="vals-stat-lbl">Samlet pool</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="official-bar-track">
-        <div class="official-bar-mastered" id="officialBarMastered" style="width:0"></div>
-        <div class="official-bar-seen" id="officialBarSeen" style="width:0"></div>
+      <div class="vals-bar-track">
+        <div class="vals-bar-mastered" id="valsBarMastered" style="width:0"></div>
+        <div class="vals-bar-seen" id="valsBarSeen" style="width:0"></div>
       </div>
 
-      <button class="official-start-btn" id="officialStartBtn">
-        Start — 25 spørgsmål
+      <button class="vals-start-btn" id="valsStartBtn">
+        Start øvelse
       </button>
     </div>
 
-    <!-- Quiz area — hidden until start -->
-    <div class="ce-progress-global" style="display:none" id="officialProgressWrap">
-      <div class="ce-progress-global-bar" id="officialProgress"></div>
+    <!-- Quiz area — hidden until start.
+         NB: topics-mode writes its progress bar to #topicsProgress (see engine-dk.js
+         updateProgressBar), so the bar id below must stay "topicsProgress". -->
+    <div class="ce-progress-global" style="display:none" id="valsProgressWrap">
+      <div class="ce-progress-global-bar" id="topicsProgress"></div>
     </div>
 
     <div class="quiz-container" id="quizArea" style="display:none">
@@ -185,28 +200,38 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
   if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
 
-  // Load bank and compute stats
+  const VALUES_LABEL = "Danske værdier";
+
+  // Same normalisation the engine uses (engine-dk.js normalizeLabel)
+  function normalizeLabel(str) {
+    return (str || "")
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, " ");
+  }
+
   await CivicEdgeEngine.ensureBankLoaded();
   const bank = CivicEdgeEngine.getBank();
 
-  // Past official-exam questions = engine's canonical "exam" source
-  // (matches isPhase1Eligible / filterBankByPhase from before the cleanup).
-  const officialQs = bank.filter(q => {
-    const src = q._raw?.source || q.source;
-    return src === "exam";
+  // Values pool = topic "Danske værdier" (NOT in config topicLabels on purpose,
+  // so it never appears on Test-efter-emne or the dashboard topic chart).
+  const valuesQs = bank.filter(q => {
+    const topic = q._raw?.topic || q.topicLabel || q.topic;
+    return normalizeLabel(topic) === normalizeLabel(VALUES_LABEL);
   });
-  const totalCount = officialQs.length;
-  console.log(`[OFFICIAL] pool size: ${totalCount}`);
+  const totalCount = valuesQs.length;
+  console.log(`[VALUES] pool size: ${totalCount}`);
 
-  // Read shared progress object (same one every quiz mode writes to)
+  // Read shared progress object (same key formula every quiz mode writes to:
+  // `${topicLabel}:${text}` — see updateProgress() in engine-dk.js).
   let progress = {};
   try { progress = JSON.parse(localStorage.getItem("civicedge_progress") || "{}"); } catch(e) {}
 
   let masteredCount = 0, seenNotMastered = 0, unseenCount = 0;
 
-  officialQs.forEach(q => {
-    // Match the engine's canonical key: topicLabel + ":" + question text.
-    // See updateProgress() in engine-dk.js — both must agree exactly.
+  valuesQs.forEach(q => {
     const key = `${q.topicLabel || q.topicKey || "topic"}:${q.text}`;
     const entry = progress[key];
     if (entry && entry.correct === 1) {
@@ -220,30 +245,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const pct = totalCount > 0 ? Math.round((masteredCount / totalCount) * 100) : 0;
 
-  // Update numbers
-  document.getElementById("officialPct").textContent = pct + "%";
-  document.getElementById("officialMastered").textContent = masteredCount;
-  document.getElementById("officialSeen").textContent = seenNotMastered;
-  document.getElementById("officialRemaining").textContent = unseenCount;
-  document.getElementById("officialTotal").textContent = totalCount;
+  document.getElementById("valsPct").textContent = pct + "%";
+  document.getElementById("valsMastered").textContent = masteredCount;
+  document.getElementById("valsSeen").textContent = seenNotMastered;
+  document.getElementById("valsRemaining").textContent = unseenCount;
+  document.getElementById("valsTotal").textContent = totalCount;
 
   // Ring animation
   const circumference = 2 * Math.PI * 52;
-  document.getElementById("officialRingFill").style.strokeDashoffset =
+  document.getElementById("valsRingFill").style.strokeDashoffset =
     circumference - (circumference * pct / 100);
 
   // Stacked bar
   const mPct = totalCount > 0 ? (masteredCount / totalCount * 100) : 0;
   const sPct = totalCount > 0 ? (seenNotMastered / totalCount * 100) : 0;
-  document.getElementById("officialBarMastered").style.width = mPct + "%";
-  document.getElementById("officialBarSeen").style.width = sPct + "%";
+  document.getElementById("valsBarMastered").style.width = mPct + "%";
+  document.getElementById("valsBarSeen").style.width = sPct + "%";
 
-  // Start quiz
-  document.getElementById("officialStartBtn").addEventListener("click", () => {
-    document.getElementById("officialLanding").style.display = "none";
-    document.getElementById("officialProgressWrap").style.display = "";
+  // Start the wave system (topics mode, explicit-questions path) on the full
+  // values pool. The engine filters out already-mastered, samples a batch of
+  // questionCount (10), and re-asks in waves until everything is mastered.
+  document.getElementById("valsStartBtn").addEventListener("click", () => {
+    if (totalCount === 0) return;
+    document.getElementById("valsLanding").style.display = "none";
+    document.getElementById("valsProgressWrap").style.display = "";
     document.getElementById("quizArea").style.display = "";
-    CivicEdgeEngine.start("official");
+    CivicEdgeEngine.start("topics", {
+      questions: valuesQs.map(q => q._raw || q)
+    });
   });
 
   // Restart reloads page to refresh stats
@@ -259,6 +288,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 <script src="/indfodsret/assets/js/study-timer.js"></script>
 <script src="/indfodsret/assets/js/maintenance-bar.js"></script>
 <script src="/indfodsret/assets/js/signout.js"></script>
-<script src="/indfodsret/assets/js/help-card.js"></script>
 </body>
 </html>

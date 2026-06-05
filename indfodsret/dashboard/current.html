@@ -3,15 +3,35 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Test Simulation</title>
+  <title>Aktuelle begivenheder</title>
   <meta name="apple-mobile-web-app-title" content="CivicLearn">
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <link rel="stylesheet" href="/indfodsret/assets/css/civic-v2.css">
   <link rel="stylesheet" href="/indfodsret/assets/css/test-v2.css">
-  <link rel="stylesheet" href="/indfodsret/assets/css/help-card.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="/indfodsret/assets/js/denmark-auth.js"></script>
+  <script src="/indfodsret/assets/js/denmark-auth.js?v=3"></script>
+
+  <style>
+    .ce-empty {
+      max-width: 560px; margin: 1.5rem 0;
+      background: var(--card-bg, #fff); border-radius: 14px;
+      padding: 2rem 2.25rem; box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      text-align: center;
+    }
+    .ce-empty-icon { font-size: 2.6rem; line-height: 1; margin-bottom: 1rem; }
+    .ce-empty h2 { margin: 0 0 .75rem; font-size: 1.2rem; font-weight: 700; color: var(--text, #1a1a1a); }
+    .ce-empty p {
+      margin: 0 0 .9rem; font-size: .95rem; line-height: 1.55;
+      color: var(--text-mid, #444); text-align: left;
+    }
+    .ce-empty p:last-child { margin-bottom: 0; }
+    .ce-empty .ce-empty-meta {
+      margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border, #eee);
+      font-size: .82rem; color: var(--text-muted, #888); text-align: left;
+    }
+    .ce-empty strong { color: var(--text, #1a1a1a); }
+  </style>
 </head>
 
 <body>
@@ -40,14 +60,14 @@
       </div>
       <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
     </div>
-        <nav class="nav">
+    <nav class="nav">
       <a href="index.html">Dashboard</a>
-      <a href="simulation.html" class="active">Prøvesimulation</a>
+      <a href="simulation.html">Prøvesimulation</a>
       <a href="quick.html">Hurtig test</a>
-	  <a href="official.html">Officielle prøvespørgsmål</a>
+      <a href="official.html">Officielle prøvespørgsmål</a>
       <a href="topics.html">Test efter emne</a>
       <a href="values.html">Danske værdier</a>
-      <a href="current.html">Aktuelle begivenheder</a>
+      <a href="current.html" class="active">Aktuelle begivenheder</a>
       <a href="traps.html">Typiske fælder</a>
       <a href="flashcards.html">Flashcards</a>
       <a href="manual.html">Læremateriale</a>
@@ -59,7 +79,7 @@
       <a href="help.html">Hjælp & Kontakt</a>
       <a href="#" id="logoutLink">Log ud</a>
     </nav>
-<div class="spacer"></div>
+    <div class="spacer"></div>
     <div class="global-controls">
       <button id="readingToggle" class="reading-btn" aria-label="Reading assist">🔇</button>
     </div>
@@ -69,48 +89,48 @@
 
   <main>
     <header class="ce-header">
-      <h1>Test Simulation</h1>
-      <div id="ce-timer-ring"></div>
+      <h1>Aktuelle begivenheder</h1>
     </header>
 
-    <div data-help-card="simulation"></div>
-
-    <div class="ce-progress-global">
-      <div class="ce-progress-global-bar" id="simProgress"></div>
-    </div>
-
-    <div class="quiz-container" id="quizArea">
-      <div id="quiz"></div>
+    <div class="ce-empty">
+      <div class="ce-empty-icon">🗓️</div>
+      <h2>Der er endnu ingen spørgsmål her</h2>
+      <p>
+        Cirka 5 af spørgsmålene på indfødsretsprøven handler om
+        <strong>aktuelle begivenheder</strong> — politiske, økonomiske og kulturelle
+        forhold i Danmark og verden. Disse spørgsmål er specielle, fordi de kun
+        dækker begivenheder, der er sket <strong>siden den seneste prøve</strong>.
+      </p>
+      <p>
+        Den seneste prøve blev afholdt <strong>onsdag den 3. juni 2026</strong>.
+        Spørgsmålene til næste prøve handler derfor om begivenheder herefter — og de
+        er endnu ikke offentliggjort. Derfor er denne side tom indtil videre.
+      </p>
+      <p>
+        Vi opdaterer denne side med relevante spørgsmål og baggrundsstof i god tid
+        <strong>inden den næste prøve</strong>. Kig forbi igen, når prøvedatoen
+        nærmer sig.
+      </p>
+      <div class="ce-empty-meta">
+        Tip: I mellemtiden kan du forberede dig på resten af prøven under
+        <strong>Officielle prøvespørgsmål</strong>, <strong>Test efter emne</strong>
+        og <strong>Danske værdier</strong>.
+      </div>
     </div>
   </main>
 </div>
 <script src="/indfodsret/assets/js/config-dk.js"></script>
-<script src="/indfodsret/assets/js/civic-reading.js"></script>
-<script src="/indfodsret/assets/js/engine-dk.js"></script>
-<script src="/indfodsret/assets/js/sync.js"></script>
-
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const toggle = document.querySelector(".menu-toggle");
   const overlay = document.getElementById("menuOverlay");
   if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
   if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
-
-  setTimeout(() => CivicEdgeEngine.start("simulation"), 600);
-
-  document.addEventListener("click", e => {
-    if (["changeTheme","returnBtn","restartBtn","ce-return"].includes(e.target?.id)) {
-      e.preventDefault();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      location.reload();
-    }
-  });
 });
 </script>
 <script src="/indfodsret/assets/js/gauge-bar.js"></script>
 <script src="/indfodsret/assets/js/study-timer.js"></script>
 <script src="/indfodsret/assets/js/maintenance-bar.js"></script>
 <script src="/indfodsret/assets/js/signout.js"></script>
-<script src="/indfodsret/assets/js/help-card.js"></script>
 </body>
 </html>
