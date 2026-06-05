@@ -902,6 +902,16 @@ function renderQuestion() {
 
   const q = state.questions[state.currentIndex];
   const card = createEl("div", "ce-card");
+
+  // Question ID (subtle reference, top-right of the card) so users can cite a
+  // specific question when contacting support. Hidden for synthetic fallback
+  // ids (those contain a ":" — only clean bank ids like "DK-0001" are shown).
+  if (q.id && !String(q.id).includes(":")) {
+    const idEl = createEl("div", "ce-q-id", q.id);
+    idEl.style.cssText = "font-family:ui-monospace,SFMono-Regular,Menlo,monospace;"
+      + "font-size:11px;letter-spacing:.04em;opacity:.45;text-align:right;margin:0 0 2px;";
+    card.appendChild(idEl);
+  }
   
 // ===== QUESTION HEADER (v2 style) =====
 const header = createEl("div", "ce-q-header");
