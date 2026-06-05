@@ -231,10 +231,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const message = document.getElementById("contactMessage").value.trim();
     if (!name || !email || !message) return alert("Udfyld venligst alle felter.");
     try {
+      // Inbound flow: n8n "Contact from CivicLearn" (bMYjet4MFsA5zOO0),
+      // POST /webhook/contact -> Inbox sheet + Telegram + Supabase contact_messages.
+      // The flow maps body.site / body.page / body.user_id (the old product/language
+      // fields were ignored, leaving site & page blank in the inbox).
+      const site = location.pathname.split("/").filter(Boolean)[0] || "indfodsret";
+      const page = (location.pathname.split("/").pop() || "help").replace(/\.html$/, "") || "help";
+      let user_id = "";
+      try { user_id = (window.DENMARK_AUTH && window.DENMARK_AUTH.user && window.DENMARK_AUTH.user.id) || ""; } catch (e) {}
       await fetch("https://civiclearn.app.n8n.cloud/webhook/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message, product: "denmark", language: "da" })
+        body: JSON.stringify({ name, email, message, site, page, user_id })
       });
       document.getElementById("contactForm").innerHTML = `<div class="contact-success"><h3>Besked sendt!</h3><p>Tak for din besked. Vi vender hurtigt tilbage.</p></div>`;
     } catch { alert("Kunne ikke sendes. Prøv igen."); }
