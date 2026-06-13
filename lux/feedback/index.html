@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CivicLearn — Vivre-Ensemble : Résultat</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Trustpilot JS Integration -->
+<script>
+(function(w,d,s,r,n){w.TrustpilotObject=n;w[n]=w[n]||function(){(w[n].q=w[n].q||[]).push(arguments)};
+a=d.createElement(s);a.async=1;a.src=r;a.type='text/java'+s;f=d.getElementsByTagName(s)[0];
+f.parentNode.insertBefore(a,f)})(window,document,'script','https://invitejs.trustpilot.com/tp.min.js','tp');
+tp('register', 'llCAmjJMQXGuWAke');
+</script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    color: #1a1a2e;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.06);
+    max-width: 520px;
+    width: 100%;
+    padding: 40px 36px;
+    text-align: center;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .brand {
+    font-size: .85rem;
+    font-weight: 600;
+    color: #999;
+    letter-spacing: .04em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Luxembourg flag */
+  .lu-flag {
+    display: inline-block;
+    width: 22px; height: 15px;
+    border-radius: 2px;
+    overflow: hidden;
+    vertical-align: middle;
+    border: 1px solid #eee;
+  }
+  .lu-flag i { display: block; height: 5px; }
+  .lu-flag .r { background: #ED2939; }
+  .lu-flag .w { background: #fff; }
+  .lu-flag .b { background: #00A1DE; }
+
+  .lang-switch { display: flex; gap: 4px; }
+  .lang-switch button {
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #888;
+    font-family: inherit;
+    font-size: .72rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .lang-switch button.active { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 16px 0 8px;
+    line-height: 1.3;
+  }
+
+  .subtitle {
+    font-size: .95rem;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 32px;
+  }
+
+  /* --- option buttons (step 1 + helpfulness) --- */
+  .options { display: flex; flex-direction: column; gap: 12px; }
+
+  .opt-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1a1a2e;
+    transition: all .15s;
+    text-align: left;
+  }
+  .opt-btn:hover { border-color: #7c3aed; background: #faf5ff; }
+  .opt-btn .ico { font-size: 1.5rem; flex-shrink: 0; width: 40px; text-align: center; }
+  .opt-btn .lbl { flex: 1; }
+  .opt-btn .lbl small {
+    display: block;
+    font-size: .8rem;
+    font-weight: 400;
+    color: #888;
+    margin-top: 2px;
+  }
+  .opt-btn.passed:hover    { border-color: #16a34a; background: #f0fdf4; }
+  .opt-btn.failed:hover    { border-color: #dc2626; background: #fef2f2; }
+  .opt-btn.not-taken:hover { border-color: #9ca3af; background: #f9fafb; }
+  .opt-btn.not-yet:hover   { border-color: #d97706; background: #fffbeb; }
+
+  /* --- result screens --- */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .result-icon { font-size: 3rem; margin-bottom: 16px; }
+  .screen h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; }
+  .screen p { font-size: .92rem; color: #555; line-height: 1.6; margin-bottom: 20px; }
+
+  .tp-btn {
+    display: inline-block;
+    background: #00b67a;
+    color: #fff;
+    text-decoration: none;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: .95rem;
+    font-weight: 600;
+    transition: background .15s;
+  }
+  .tp-btn:hover { background: #009e69; }
+  .tp-note { font-size: .78rem; color: #999; margin-top: 14px; line-height: 1.4; }
+
+  .training-link {
+    display: inline-block;
+    margin-top: 8px;
+    color: #7c3aed;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: .9rem;
+  }
+  .training-link:hover { text-decoration: underline; }
+
+
+  /* --- free text --- */
+  .ft-box {
+    width: 100%;
+    min-height: 96px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: .92rem;
+    color: #1a1a2e;
+    resize: vertical;
+    margin-bottom: 14px;
+  }
+  .ft-box:focus { outline: none; border-color: #7c3aed; }
+  .ft-actions { display: flex; gap: 10px; justify-content: center; }
+  .ft-send {
+    background: #7c3aed; color: #fff; border: none;
+    padding: 12px 26px; border-radius: 10px;
+    font-family: inherit; font-size: .92rem; font-weight: 600; cursor: pointer;
+  }
+  .ft-send:hover { background: #6d28d9; }
+  .ft-skip {
+    background: #fff; color: #888; border: 1px solid #e5e7eb;
+    padding: 12px 20px; border-radius: 10px;
+    font-family: inherit; font-size: .92rem; font-weight: 500; cursor: pointer;
+  }
+
+  .loading { color: #999; font-size: .9rem; padding: 40px 0; }
+  .error-msg { color: #dc2626; font-size: .9rem; margin-top: 16px; }
+  .footer { margin-top: 32px; font-size: .75rem; color: #bbb; }
+
+  @media (max-width: 480px) {
+    .card { padding: 28px 20px; }
+    h1 { font-size: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="topbar">
+    <div class="brand">
+      CivicLearn
+      <span class="lu-flag"><i class="r"></i><i class="w"></i><i class="b"></i></span>
+    </div>
+    <div class="lang-switch">
+      <button data-lang="fr" onclick="applyLang('fr')">FR</button>
+      <button data-lang="en" onclick="applyLang('en')">EN</button>
+      <button data-lang="de" onclick="applyLang('de')">DE</button>
+    </div>
+  </div>
+
+  <!-- STEP 1 — HOW DID IT GO -->
+  <div id="voteScreen" class="screen">
+    <h1 data-i18n="q1_title"></h1>
+    <p class="subtitle" data-i18n="q1_sub"></p>
+    <div class="options">
+      <button class="opt-btn passed" onclick="vote('passed')">
+        <span class="ico">🎉</span>
+        <span class="lbl"><span data-i18n="opt_passed"></span><small data-i18n="opt_passed_sub"></small></span>
+      </button>
+      <button class="opt-btn failed" onclick="vote('failed')">
+        <span class="ico">😔</span>
+        <span class="lbl"><span data-i18n="opt_failed"></span><small data-i18n="opt_failed_sub"></small></span>
+      </button>
+      <button class="opt-btn not-yet" onclick="vote('not_yet')">
+        <span class="ico">⏳</span>
+        <span class="lbl"><span data-i18n="opt_not_yet"></span><small data-i18n="opt_not_yet_sub"></small></span>
+      </button>
+      <button class="opt-btn not-taken" onclick="vote('not_taken')">
+        <span class="ico">📅</span>
+        <span class="lbl"><span data-i18n="opt_not_taken"></span><small data-i18n="opt_not_taken_sub"></small></span>
+      </button>
+    </div>
+    <div id="errorMsg" class="error-msg" style="display:none"></div>
+  </div>
+
+  <!-- STEP 2 — HELPFULNESS (passers only) -->
+  <div id="helpfulnessScreen" class="screen">
+    <div class="result-icon">🎉</div>
+    <h2 data-i18n="h_title"></h2>
+    <p data-i18n="h_sub"></p>
+    <div class="options">
+      <button class="opt-btn passed" onclick="rate('essential')">
+        <span class="ico">⭐</span>
+        <span class="lbl" data-i18n="h_essential"></span>
+      </button>
+      <button class="opt-btn not-taken" onclick="rate('somewhat')">
+        <span class="ico">👍</span>
+        <span class="lbl" data-i18n="h_somewhat"></span>
+      </button>
+      <button class="opt-btn failed" onclick="rate('not_much')">
+        <span class="ico">🤔</span>
+        <span class="lbl" data-i18n="h_not_much"></span>
+      </button>
+    </div>
+    <div id="errorMsg2" class="error-msg" style="display:none"></div>
+  </div>
+
+  <!-- TRUSTPILOT (essential) -->
+  <div id="tpScreen" class="screen">
+    <div class="result-icon">🎉</div>
+    <h2 data-i18n="tp_title"></h2>
+    <p data-i18n="tp_body"></p>
+    <a id="tpLink" href="https://www.trustpilot.com/evaluate/civiclearn.com" target="_blank" class="tp-btn" data-i18n="tp_btn"></a>
+    <p class="tp-note" id="tpNote"></p>
+  </div>
+
+  <!-- PASSED · SOMEWHAT -->
+  <div id="somewhatScreen" class="screen">
+    <div class="result-icon">😊</div>
+    <h2 data-i18n="some_title"></h2>
+    <p data-i18n="some_body"></p>
+    <textarea class="ft-box" id="ft-somewhat" data-i18n-ph="ft_placeholder"></textarea>
+    <div class="ft-actions">
+      <button class="ft-skip" onclick="showThanks()" data-i18n="ft_skip"></button>
+      <button class="ft-send" onclick="sendFeedback('ft-somewhat')" data-i18n="ft_submit"></button>
+    </div>
+  </div>
+
+  <!-- PASSED · NOT MUCH -->
+  <div id="notMuchScreen" class="screen">
+    <div class="result-icon">🙏</div>
+    <h2 data-i18n="nm_title"></h2>
+    <p data-i18n="nm_body"></p>
+    <textarea class="ft-box" id="ft-notmuch" data-i18n-ph="ft_placeholder"></textarea>
+    <div class="ft-actions">
+      <button class="ft-skip" onclick="showThanks()" data-i18n="ft_skip"></button>
+      <button class="ft-send" onclick="sendFeedback('ft-notmuch')" data-i18n="ft_submit"></button>
+    </div>
+  </div>
+
+  <!-- FAILED -->
+  <div id="failedScreen" class="screen">
+    <div class="result-icon">💪</div>
+    <h2 data-i18n="fail_title"></h2>
+    <p data-i18n="fail_body"></p>
+    <p style="font-weight:500;color:#555;margin-bottom:12px;" data-i18n="fail_q"></p>
+    <textarea class="ft-box" id="ft-failed" data-i18n-ph="ft_placeholder"></textarea>
+    <div class="ft-actions" style="margin-bottom:18px;">
+      <button class="ft-skip" onclick="showThanks(true)" data-i18n="ft_skip"></button>
+      <button class="ft-send" onclick="sendFeedback('ft-failed', true)" data-i18n="ft_submit"></button>
+    </div>
+    <a class="training-link" id="train-failed" data-i18n="back_to_training"></a>
+  </div>
+
+  <!-- NOT TAKEN -->
+  <div id="notTakenScreen" class="screen">
+    <div class="result-icon">📅</div>
+    <h2 data-i18n="nt_title"></h2>
+    <p data-i18n="nt_body"></p>
+    <a class="training-link" id="train-nottaken" data-i18n="back_to_training"></a>
+  </div>
+
+  <!-- NOT YET -->
+  <div id="notYetScreen" class="screen">
+    <div class="result-icon">⏳</div>
+    <h2 data-i18n="ny_title"></h2>
+    <p data-i18n="ny_body"></p>
+    <a class="training-link" id="train-notyet" data-i18n="back_to_training"></a>
+  </div>
+
+  <!-- ALREADY VOTED -->
+  <div id="alreadyScreen" class="screen">
+    <div class="result-icon">✅</div>
+    <h2 data-i18n="already_title"></h2>
+    <p id="alreadyMsg"></p>
+  </div>
+
+  <!-- GENERIC THANKS (after free text) -->
+  <div id="thanksScreen" class="screen">
+    <div class="result-icon">🙌</div>
+    <h2 data-i18n="ft_thanks"></h2>
+    <a class="training-link" id="train-thanks" data-i18n="back_to_training"></a>
+  </div>
+
+  <!-- INVALID -->
+  <div id="invalidScreen" class="screen">
+    <div class="result-icon">⚠️</div>
+    <h2 data-i18n="invalid_title"></h2>
+    <p data-i18n="invalid_body"></p>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loadingScreen" class="screen">
+    <div class="loading" data-i18n="loading"></div>
+  </div>
+
+</div>
+
+<div class="footer">© 2026 CivicLearn by Testrada Pte Ltd</div>
+
+<script>
+  const API  = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/lux-feedback-vote';
+  const DASH = 'https://civiclearn.com/lux/dashboard/';
+
+  const params = new URLSearchParams(location.search);
+  const email  = params.get('email');
+  const token  = params.get('token');
+  const cycle  = params.get('cycle');
+  let lang = (params.get('lang') || 'fr').toLowerCase();
+  if (!['fr', 'en', 'de'].includes(lang)) lang = 'fr';
+
+  // ── i18n ──────────────────────────────────────────────────────────────────
+  const T = {
+    fr: {
+      q1_title: "Comment s'est passé votre test Vivre-Ensemble ?",
+      q1_sub: "Nous aimerions beaucoup savoir comment cela s'est passé — quel que soit le résultat. Cela nous aide à améliorer notre programme.",
+      opt_passed: "Réussi !", opt_passed_sub: "J'ai réussi le test",
+      opt_failed: "Pas réussi", opt_failed_sub: "Je n'ai pas réussi cette fois",
+      opt_not_yet: "Pas encore passé", opt_not_yet_sub: "Je passe le test plus tard",
+      opt_not_taken: "Pas présenté(e)", opt_not_taken_sub: "Je ne me suis finalement pas présenté(e)",
+      h_title: "Félicitations ! Une dernière question :",
+      h_sub: "Dans quelle mesure CivicLearn vous a-t-il aidé à préparer le test ?",
+      h_essential: "Essentiel — un grand soutien",
+      h_somewhat: "Un peu utile",
+      h_not_much: "Pas vraiment",
+      tp_title: "Merci, et félicitations !",
+      tp_body: "Nous sommes ravis d'avoir fait partie de votre préparation. Si vous avez une minute, votre avis aidera de futurs candidats à nous trouver.",
+      tp_btn: "⭐ Partager votre avis sur Trustpilot",
+      tp_note_invite: "Vous recevrez également un e-mail de Trustpilot sous peu.",
+      tp_note_organic: "Cliquez sur le bouton ci-dessus pour rédiger votre avis.",
+      some_title: "Merci beaucoup !",
+      some_body: "Félicitations pour votre réussite ! Qu'est-ce qui aurait rendu votre préparation encore plus utile ? (facultatif)",
+      nm_title: "Félicitations — et merci de votre franchise",
+      nm_body: "Nous aimerions comprendre : y avait-il des sujets ou des questions au test réel que notre programme n'a pas couverts ? (facultatif)",
+      fail_title: "Ce sera pour la prochaine fois",
+      fail_body: "De nombreux candidats ont besoin de plus d'une tentative — c'est tout à fait normal. Votre compte reste actif et vous pouvez continuer à vous entraîner pour la prochaine session.",
+      fail_q: "Si vous le souhaitez : qu'est-ce qui vous a posé problème ? Y avait-il des sujets que nous n'avions pas couverts ? (facultatif)",
+      nt_title: "Merci de nous l'avoir dit",
+      nt_body: "Pas de souci — votre compte reste actif. Vous pouvez continuer à vous préparer pour une prochaine session.",
+      ny_title: "Bonne chance !",
+      ny_body: "Pas de souci — votre compte reste actif. Continuez à vous entraîner, et nous reviendrons vers vous après votre session.",
+      already_title: "Merci — nous avons déjà reçu votre réponse",
+      already_body: "Merci d'avoir partagé votre résultat avec nous.",
+      already_passed: "Vous nous avez déjà dit que vous aviez réussi — félicitations encore !",
+      ft_placeholder: "Votre réponse…",
+      ft_submit: "Envoyer", ft_skip: "Passer",
+      ft_thanks: "Merci pour votre retour !",
+      back_to_training: "Retour à votre entraînement →",
+      invalid_title: "Lien invalide",
+      invalid_body: "Ce lien est invalide ou a expiré. Contactez-nous à admin@civiclearn.com.",
+      loading: "Enregistrement de votre réponse…",
+      err_generic: "Une erreur s'est produite. Veuillez réessayer plus tard."
+    },
+    en: {
+      q1_title: "How did your Vivre-Ensemble test go?",
+      q1_sub: "We'd love to know how it went — whatever the outcome. It helps us improve our programme.",
+      opt_passed: "Passed!", opt_passed_sub: "I passed the test",
+      opt_failed: "Didn't pass", opt_failed_sub: "I didn't pass this time",
+      opt_not_yet: "Not yet taken", opt_not_yet_sub: "I'm taking the test later",
+      opt_not_taken: "Didn't take it", opt_not_taken_sub: "I didn't sit the test in the end",
+      h_title: "Congratulations! One last question:",
+      h_sub: "How much did CivicLearn help you prepare for the test?",
+      h_essential: "Essential — a big help",
+      h_somewhat: "Helped somewhat",
+      h_not_much: "Not really",
+      tp_title: "Thank you, and congratulations!",
+      tp_body: "We're delighted to have been part of your preparation. If you have a minute, your review will help future candidates find us.",
+      tp_btn: "⭐ Share your experience on Trustpilot",
+      tp_note_invite: "You'll also receive an email from Trustpilot shortly.",
+      tp_note_organic: "Click the button above to write your review.",
+      some_title: "Thank you!",
+      some_body: "Congratulations on passing! What would have made your preparation even more useful? (optional)",
+      nm_title: "Congratulations — and thank you for your honesty",
+      nm_body: "We'd like to understand: were there topics or questions in the real test that our programme didn't cover? (optional)",
+      fail_title: "Next time will be the one",
+      fail_body: "Many candidates need more than one attempt — that's completely normal. Your account stays active and you can keep practising for the next session.",
+      fail_q: "If you're up for it: what tripped you up? Were there topics we hadn't covered? (optional)",
+      nt_title: "Thanks for letting us know",
+      nt_body: "No problem — your account stays active. You can keep preparing for an upcoming session.",
+      ny_title: "Good luck!",
+      ny_body: "No problem — your account stays active. Keep practising, and we'll check back with you after your session.",
+      already_title: "Thank you — we've already received your response",
+      already_body: "Thanks for sharing your result with us.",
+      already_passed: "You already told us you passed — congratulations again!",
+      ft_placeholder: "Your answer…",
+      ft_submit: "Send", ft_skip: "Skip",
+      ft_thanks: "Thank you for your feedback!",
+      back_to_training: "Back to your training →",
+      invalid_title: "Invalid link",
+      invalid_body: "This link is invalid or has expired. Contact us at admin@civiclearn.com.",
+      loading: "Recording your response…",
+      err_generic: "Something went wrong. Please try again later."
+    },
+    de: {
+      q1_title: "Wie ist Ihr Vivre-Ensemble-Test gelaufen?",
+      q1_sub: "Wir würden gerne wissen, wie es gelaufen ist — unabhängig vom Ergebnis. Das hilft uns, unser Programm zu verbessern.",
+      opt_passed: "Bestanden!", opt_passed_sub: "Ich habe den Test bestanden",
+      opt_failed: "Nicht bestanden", opt_failed_sub: "Diesmal hat es nicht geklappt",
+      opt_not_yet: "Noch nicht abgelegt", opt_not_yet_sub: "Ich lege den Test später ab",
+      opt_not_taken: "Nicht angetreten", opt_not_taken_sub: "Ich bin letztlich nicht angetreten",
+      h_title: "Glückwunsch! Eine letzte Frage:",
+      h_sub: "Wie sehr hat CivicLearn Ihnen bei der Vorbereitung geholfen?",
+      h_essential: "Wesentlich — eine große Hilfe",
+      h_somewhat: "Etwas hilfreich",
+      h_not_much: "Nicht wirklich",
+      tp_title: "Danke und herzlichen Glückwunsch!",
+      tp_body: "Wir freuen uns, Teil Ihrer Vorbereitung gewesen zu sein. Wenn Sie eine Minute haben, hilft Ihre Bewertung künftigen Kandidaten, uns zu finden.",
+      tp_btn: "⭐ Ihre Erfahrung auf Trustpilot teilen",
+      tp_note_invite: "Sie erhalten in Kürze auch eine E-Mail von Trustpilot.",
+      tp_note_organic: "Klicken Sie oben, um Ihre Bewertung zu schreiben.",
+      some_title: "Vielen Dank!",
+      some_body: "Glückwunsch zum Bestehen! Was hätte Ihre Vorbereitung noch nützlicher gemacht? (optional)",
+      nm_title: "Glückwunsch — und danke für Ihre Ehrlichkeit",
+      nm_body: "Wir möchten es verstehen: Gab es Themen oder Fragen in der echten Prüfung, die unser Programm nicht abgedeckt hat? (optional)",
+      fail_title: "Beim nächsten Mal klappt es",
+      fail_body: "Viele Kandidaten brauchen mehr als einen Versuch — das ist völlig normal. Ihr Konto bleibt aktiv und Sie können für die nächste Sitzung weiterüben.",
+      fail_q: "Wenn Sie möchten: Was ist Ihnen schwergefallen? Gab es Themen, die wir nicht behandelt hatten? (optional)",
+      nt_title: "Danke für die Rückmeldung",
+      nt_body: "Kein Problem — Ihr Konto bleibt aktiv. Sie können sich weiter auf eine kommende Sitzung vorbereiten.",
+      ny_title: "Viel Erfolg!",
+      ny_body: "Kein Problem — Ihr Konto bleibt aktiv. Üben Sie weiter, und wir melden uns nach Ihrer Sitzung wieder.",
+      already_title: "Danke — wir haben Ihre Antwort bereits erhalten",
+      already_body: "Danke, dass Sie Ihr Ergebnis mit uns geteilt haben.",
+      already_passed: "Sie haben uns bereits mitgeteilt, dass Sie bestanden haben — nochmals Glückwunsch!",
+      ft_placeholder: "Ihre Antwort…",
+      ft_submit: "Senden", ft_skip: "Überspringen",
+      ft_thanks: "Danke für Ihr Feedback!",
+      back_to_training: "Zurück zu Ihrem Training →",
+      invalid_title: "Ungültiger Link",
+      invalid_body: "Dieser Link ist ungültig oder abgelaufen. Kontaktieren Sie uns unter admin@civiclearn.com.",
+      loading: "Ihre Antwort wird gespeichert…",
+      err_generic: "Etwas ist schiefgelaufen. Bitte versuchen Sie es später erneut."
+    }
+  };
+
+  function applyLang(l) {
+    lang = l;
+    document.documentElement.lang = l;
+    const dict = T[l];
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+      const k = el.getAttribute('data-i18n');
+      if (dict[k] != null) el.textContent = dict[k];
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(function(el) {
+      const k = el.getAttribute('data-i18n-ph');
+      if (dict[k] != null) el.setAttribute('placeholder', dict[k]);
+    });
+    document.querySelectorAll('.lang-switch button').forEach(function(b) {
+      b.classList.toggle('active', b.getAttribute('data-lang') === l);
+    });
+    [].forEach.call(document.querySelectorAll('.training-link'), function(a) { a.href = DASH; });
+  }
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ── flow ────────────────────────────────────────────────────────────────
+  function disable(sel) {
+    document.querySelectorAll(sel).forEach(function(b) { b.disabled = true; b.style.opacity = '0.5'; });
+  }
+  function enable(sel) {
+    document.querySelectorAll(sel).forEach(function(b) { b.disabled = false; b.style.opacity = '1'; });
+  }
+
+  async function post(payload) {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ email: email, token: token, exam_cycle: cycle, language: lang }, payload))
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'error');
+    return data;
+  }
+
+  async function vote(result) {
+    disable('#voteScreen .opt-btn');
+    document.getElementById('errorMsg').style.display = 'none';
+    try {
+      const data = await post({ action: 'vote', result: result });
+
+      if (data.status === 'already_voted') {
+        if (data.next === 'helpfulness') { show('helpfulnessScreen'); return; }
+        return showAlready(data);
+      }
+      if (data.next === 'helpfulness') { show('helpfulnessScreen'); return; }
+
+      if (result === 'failed')         show('failedScreen');
+      else if (result === 'not_taken') show('notTakenScreen');
+      else if (result === 'not_yet')   show('notYetScreen');
+    } catch (e) {
+      enable('#voteScreen .opt-btn');
+      const err = document.getElementById('errorMsg');
+      err.textContent = T[lang].err_generic;
+      err.style.display = 'block';
+    }
+  }
+
+  async function rate(helpfulness) {
+    disable('#helpfulnessScreen .opt-btn');
+    document.getElementById('errorMsg2').style.display = 'none';
+    try {
+      const data = await post({ action: 'helpfulness', helpfulness: helpfulness });
+
+      if (helpfulness === 'essential') {
+        if (data.review_action === 'invite' && typeof tp === 'function') {
+          tp('createInvitation', {
+            recipientEmail: email,
+            recipientName: data.user_name || 'Customer',
+            referenceId: cycle || 'lux-ve',
+            source: 'InvitationScript'
+          });
+          document.getElementById('tpNote').textContent = T[lang].tp_note_invite;
+        } else {
+          document.getElementById('tpNote').textContent = T[lang].tp_note_organic;
+        }
+        if (data.trustpilot_url) document.getElementById('tpLink').href = data.trustpilot_url;
+        show('tpScreen');
+      } else if (helpfulness === 'somewhat') {
+        show('somewhatScreen');
+      } else {
+        show('notMuchScreen');
+      }
+    } catch (e) {
+      enable('#helpfulnessScreen .opt-btn');
+      const err = document.getElementById('errorMsg2');
+      err.textContent = T[lang].err_generic;
+      err.style.display = 'block';
+    }
+  }
+
+  async function sendFeedback(boxId, isFailed) {
+    const txt = (document.getElementById(boxId).value || '').trim();
+    if (txt) { try { await post({ action: 'feedback', free_text: txt }); } catch (e) { /* keep UX smooth */ } }
+    showThanks(isFailed);
+  }
+
+  function showThanks(isFailed) {
+    // For failed, keep the reassurance screen feel by reusing the generic thanks.
+    show('thanksScreen');
+  }
+
+  function showAlready(data) {
+    const msg = document.getElementById('alreadyMsg');
+    if (data.result === 'passed' && data.review_action === 'organic' && data.trustpilot_url) {
+      msg.innerHTML = T[lang].already_passed +
+        '<br><br><a href="' + data.trustpilot_url + '" target="_blank" class="tp-btn">' + T[lang].tp_btn + '</a>';
+    } else {
+      msg.textContent = T[lang].already_body;
+    }
+    show('alreadyScreen');
+  }
+
+  // ── init ──────────────────────────────────────────────────────────────────
+  applyLang(lang);
+  if (!email || !token || !cycle) {
+    show('invalidScreen');
+  } else {
+    show('voteScreen');
+  }
+</script>
+</body>
+</html>
