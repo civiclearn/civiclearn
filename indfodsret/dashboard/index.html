@@ -1,4 +1,3 @@
-<!-- ================= TEST BUILD ONLY: review-prompt thresholds = 1 active day / 1 session. Swap back to the real index.html (3 / 5) after eyeballing. ================= -->
 <!doctype html>
 <html lang="da">
 <head>
@@ -764,15 +763,15 @@ WonderPush.push(["addTag", "country:dk"]);
 <!-- Organic review prompt trigger (exposure-based, outcome-blind) -->
 <script>
 (function(){
-  console.warn('%c[CivicLearn] REVIEW PROMPT TEST BUILD \u2014 thresholds 1/1. Do NOT leave in production.','color:#c8102e;font-weight:bold');
   var CFG = {
-    minActiveDays: 1,            // *** TEST BUILD *** real value is 3
-    minSessions: 1,              // *** TEST BUILD *** real value is 5
+    minActiveDays: 3,            // exposure threshold (Denis: >=3 active days AND >=5 sessions)
+    minSessions: 5,
     reviewUrl: 'https://www.trustpilot.com/evaluate/civiclearn.com',
     statsKey: 'civicedge_stats', // synced study-session log {history:[{startedAt,...}]}
     doneKey: 'cl_review_prompt_done',
     snoozeKey: 'cl_review_prompt_snooze_until',
-    snoozeDays: 90
+    snoozeDays: 90,            // explicit "Maybe later" -> long snooze
+    showSnoozeDays: 7          // shown but ignored -> short auto-snooze (chart returns next visit)
   };
 
   function exposure(){
@@ -805,6 +804,9 @@ WonderPush.push(["addTag", "country:dk"]);
     var row = document.getElementById('insightRow');
     if(row) row.style.display = 'none';                  // replace the chart row, like the old prompt did
     card.classList.add('show');
+    // Auto-snooze on display: an ignored prompt won't take over the chart again until
+    // showSnoozeDays pass. Explicit choices below override this (done=forever, later=90d).
+    localStorage.setItem(CFG.snoozeKey, String(Date.now() + CFG.showSnoozeDays*86400000));
     var btn = document.getElementById('reviewCardBtn');
     var later = document.getElementById('reviewCardLater');
     if(btn) btn.addEventListener('click', function(){
