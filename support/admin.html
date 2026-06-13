@@ -1058,6 +1058,7 @@ body {
       <button class="tab-btn" id="tab-btn-users" onclick="switchTab('users')">Users</button>
       <button class="tab-btn" id="tab-btn-exam" onclick="switchTab('exam')">Exam</button>
       <button class="tab-btn" id="tab-btn-gp" onclick="switchTab('gp')">Generalprøve</button>
+      <button class="tab-btn" id="tab-btn-luxfb" onclick="switchTab('luxfb')">Lux Feedback</button>
     </div>
     <button class="tpl-btn" id="tpl-btn-topbar" style="font-size:0.76rem;padding:4px 12px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif" onclick="openTemplateManager()">📋 Templates</button>
     <div class="mob-topbar-actions">
@@ -1447,6 +1448,71 @@ body {
     </div>
 
   </div><!-- /tab-gp -->
+
+  <div class="tab-panel" id="tab-luxfb" style="overflow-y:auto;padding:1.5rem;background:var(--bg);">
+
+    <div class="usr-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:1rem;">
+        <div class="usr-section-title" style="margin:0;">Vivre-Ensemble Luxembourg — Exam Feedback</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="luxfb-cycle" onchange="luxfbLoad(this.value)"
+            style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.82rem;background:var(--surface);color:var(--text);">
+            <option value="">All sessions</option>
+          </select>
+          <button class="usr-btn" onclick="luxfbLoad(document.getElementById('luxfb-cycle').value)"
+            style="background:var(--surface);color:var(--text);">Refresh</button>
+        </div>
+      </div>
+
+      <!-- Outcome stats -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:.8rem;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:var(--brand);" id="luxfb-s-sent">—</div>
+          <div style="font-size:.72rem;color:var(--muted);">Emails sent</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:var(--text);" id="luxfb-s-responded">—</div>
+          <div style="font-size:.72rem;color:var(--muted);">Responded</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:#9ca3af;" id="luxfb-s-noresp">—</div>
+          <div style="font-size:.72rem;color:var(--muted);">No response</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:#16a34a;" id="luxfb-s-passed">—</div>
+          <div style="font-size:.72rem;color:var(--muted);">Passed</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:#dc2626;" id="luxfb-s-failed">—</div>
+          <div style="font-size:.72rem;color:var(--muted);">Failed</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:#9ca3af;" id="luxfb-s-nottaken">—</div>
+          <div style="font-size:.72rem;color:var(--muted);">Didn't take</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:#9ca3af;" id="luxfb-s-notyet">—</div>
+          <div style="font-size:.72rem;color:var(--muted);">Not yet</div></div>
+      </div>
+
+      <!-- Helpfulness gate + Trustpilot -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:#16a34a;" id="luxfb-s-ess">—</div>
+          <div style="font-size:.72rem;color:var(--muted);">Passed · essential</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:#d97706;" id="luxfb-s-some">—</div>
+          <div style="font-size:.72rem;color:var(--muted);">Passed · somewhat</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:#dc2626;" id="luxfb-s-not">—</div>
+          <div style="font-size:.72rem;color:var(--muted);">Passed · not helped</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:700;color:var(--brand);" id="luxfb-s-tp">—</div>
+          <div style="font-size:.72rem;color:var(--muted);">Trustpilot invited</div></div>
+      </div>
+    </div>
+
+    <div class="usr-section" style="margin-top:1.5rem;">
+      <div class="usr-section-title">Written feedback &amp; coverage gaps</div>
+      <div id="luxfb-status" style="font-size:.82rem;color:var(--muted);margin-bottom:.6rem;"></div>
+      <div id="luxfb-feedback"></div>
+    </div>
+
+  </div><!-- /tab-luxfb -->
 
 </div><!-- /app -->
 
@@ -2236,6 +2302,7 @@ function switchTab(name) {
   if (name === 'content' && !ctLoaded) ctLoad();
   if (name === 'exam') examLoadStats();
   if (name === 'gp') gpLoadEvents();
+  if (name === 'luxfb' && !luxfbLoaded) luxfbLoad();
   // 'users' tab needs no lazy load
 }
 
@@ -3261,6 +3328,70 @@ async function gpDeleteEvent(id, slug) {
     alert('Error: ' + e.message);
   }
 }
+
+// ── LUX FEEDBACK TAB ──────────────────────────────────────────────────────────
+const LUXFB_FN = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/lux-feedback-admin';
+let luxfbLoaded = false;
+
+async function luxfbLoad(cycle) {
+  const statusEl = document.getElementById('luxfb-status');
+  statusEl.textContent = 'Loading…';
+  try {
+    const res = await fetch(LUXFB_FN, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminPw },
+      body: JSON.stringify({ cycle: cycle || '' })
+    });
+    const d = await res.json();
+    if (!res.ok) { statusEl.textContent = 'Error: ' + (d.error || 'unknown'); return; }
+    luxfbLoaded = true;
+
+    const s = d.stats || {};
+    const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = (v ?? 0); };
+    set('luxfb-s-sent', s.emails_sent); set('luxfb-s-responded', s.responded);
+    set('luxfb-s-noresp', s.no_response); set('luxfb-s-passed', s.passed);
+    set('luxfb-s-failed', s.failed); set('luxfb-s-nottaken', s.not_taken);
+    set('luxfb-s-notyet', s.not_yet);
+    set('luxfb-s-ess', s.help_essential); set('luxfb-s-some', s.help_somewhat);
+    set('luxfb-s-not', s.help_not_much); set('luxfb-s-tp', s.tp_invited);
+
+    // Populate the session filter (only when viewing "all")
+    const sel = document.getElementById('luxfb-cycle');
+    if (sel && !cycle) {
+      sel.innerHTML = '<option value="">All sessions</option>' +
+        (d.cycles || []).map(c =>
+          `<option value="${c.cycle}">${c.cycle} · ${c.responded}/${c.sent} resp</option>`).join('');
+    }
+
+    // Qualitative feedback list (the valuable bit)
+    const wrap = document.getElementById('luxfb-feedback');
+    const fb = d.feedback || [];
+    if (!fb.length) {
+      wrap.innerHTML = '<div style="color:var(--muted);font-size:.85rem;padding:8px;">No written feedback yet.</div>';
+    } else {
+      const esc = (t) => (t || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      wrap.innerHTML = fb.map(f => {
+        const tag = f.result === 'passed'
+          ? 'passed · ' + (f.helpfulness === 'not_much' ? 'NOT helped' : (f.helpfulness || '?'))
+          : (f.result || '');
+        const color = f.result === 'passed'
+          ? (f.helpfulness === 'essential' ? '#16a34a' : '#d97706')
+          : '#dc2626';
+        return `<div style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;background:var(--surface);">
+          <div style="display:flex;justify-content:space-between;gap:8px;font-size:.72rem;color:var(--muted);margin-bottom:4px;">
+            <span>${esc(f.email)} · ${esc(f.language) || '—'} · ${esc(f.cycle)}</span>
+            <span style="color:${color};font-weight:600;">${tag}</span>
+          </div>
+          <div style="font-size:.86rem;color:var(--text);white-space:pre-wrap;">${esc(f.free_text)}</div>
+        </div>`;
+      }).join('');
+    }
+    statusEl.textContent = (s.responded || 0) + ' responses · ' + fb.length + ' with written feedback';
+  } catch (e) {
+    statusEl.textContent = 'Network error: ' + e.message;
+  }
+}
+
 </script>
 <div class="modal-overlay" id="tpl-modal">
   <div class="modal">
