@@ -21,6 +21,12 @@
 
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+  // Expose the project URL globally so the shared /assets/js/sync.js can run.
+  // sync.js gates on `if (!window.SUPABASE_URL) return;` — without this, cloud
+  // sync is silently disabled on every page that loads this guard. (SUPABASE_KEY
+  // is left to sync.js's own publishable-key fallback, which the live products use.)
+  window.SUPABASE_URL = SUPABASE_URL;
+
   function redirectToLogin() {
     const returnUrl = window.location.pathname + window.location.search;
     window.location.href = LOGIN_URL + '?return=' + encodeURIComponent(returnUrl);
