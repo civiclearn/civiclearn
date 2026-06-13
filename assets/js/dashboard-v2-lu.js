@@ -287,8 +287,23 @@ function computeRollingAccuracy(history) {
     const sheetCancel = document.getElementById("sheetCancel");
     const sheetSave = document.getElementById("sheetSave");
 
+    // Returns the exam date string ("YYYY-MM-DD") from the stored value,
+    // handling both the JSON object form {date,ts} and legacy raw strings.
+    function getTestDate() {
+      var raw = localStorage.getItem("civicedge_testDate");
+      if (!raw) return "";
+      try {
+        var v = JSON.parse(raw);
+        if (v && typeof v === "object" && v.date) return v.date;
+        if (typeof v === "string") return v;
+        return "";
+      } catch (e) {
+        return raw; // legacy bare "YYYY-MM-DD"
+      }
+    }
+
     function renderCountdown() {
-      const saved = localStorage.getItem("civicedge_testDate");
+      const saved = getTestDate();
 
       // No date set
 if (!saved) {
@@ -347,7 +362,7 @@ if (!saved) {
       if (!sheet) return;
       sheet.classList.add("active");
       sheetOverlay.classList.add("active");
-      sheetInput.value = localStorage.getItem("civicedge_testDate") || "";
+      sheetInput.value = getTestDate() || "";
     }
 
     function closeSheet() {
@@ -363,7 +378,10 @@ if (!saved) {
       sheetSave.addEventListener("click", () => {
         const v = sheetInput.value;
         if (!v) return;
-        localStorage.setItem("civicedge_testDate", v);
+        // Store as JSON so sync.js readLS() (which JSON.parses) can read it.
+        // Previously this was a raw string, so JSON.parse threw and the push
+        // silently became a no-op — the date never reached user_sync.
+        localStorage.setItem("civicedge_testDate", JSON.stringify({ date: v, ts: Date.now() }));
         // Push to user_sync via the standard sync infrastructure. This uses
         // the correct site code (via CIVIC_SITE_CODE) and the same key name
         // on server and localStorage, so the date round-trips correctly on
@@ -372,7 +390,7 @@ if (!saved) {
         // (a) silently failed on every non-Luxembourg product because it
         // looked for window.luxAuth, and (b) on Luxembourg pushed to the
         // wrong key so cross-device pull didn't restore the date either.
-        if (window.CivicSync) CivicSync.push("civicedge_testDate");
+        if (window.CivicSync) CivicSync.pushNow("civicedge_testDate");
         closeSheet();
         renderCountdown();
       });
