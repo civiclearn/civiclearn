@@ -1,4 +1,6 @@
 window.CIVIC_SITE_CODE = "fi";
+window.SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
+window.SUPABASE_KEY = "sb_publishable_QWvR124i4h0hvQumyjBgDw_018SlMbp";
 
 window.CIVICEDGE_CONFIG = {
   country: "fi",
