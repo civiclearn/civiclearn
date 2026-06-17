@@ -286,13 +286,13 @@ main {
       <button type="button" class="promo-apply-btn" id="promoApplyBtn">Anvend</button>
     </div>
     <div class="promo-badge" id="promoBadge">
-      <span>✓ <strong>MARIE15</strong> — 74 kr rabat</span>
+      <span>✓ <strong id="promoBadgeCode">MARIE15</strong> — <span id="promoBadgeOff">74</span> kr rabat</span>
       <button type="button" class="promo-remove" id="promoRemoveBtn" title="Fjern">✕</button>
     </div>
     <div class="promo-error" id="promoError">Ugyldig rabatkode.</div>
     <div class="discount-line" id="discountLine">
-      <div class="discount-line-label">Rabat (MARIE15)</div>
-      <div class="discount-line-amount">−74 kr</div>
+      <div class="discount-line-label" id="discountLineLabel">Rabat (MARIE15)</div>
+      <div class="discount-line-amount" id="discountLineAmount">−74 kr</div>
     </div>
 
     <div id="link-auth-element"></div>
@@ -438,11 +438,12 @@ main {
   function err(text)  { msg.textContent = text; msg.className = 'checkout-message error'; msg.style.display = 'block'; }
   function info(text) { msg.textContent = text; msg.className = 'checkout-message info';  msg.style.display = 'block'; }
 
-  /* ── Promo code (hardcoded: MARIE15 = 74 DKK off solo) ── */
-  var PROMO_CODE     = 'MARIE15';
-  var PROMO_ID       = 'promo_1T1o6aLKpD57DT3qTUtPaYCy';
-  var PROMO_OFF      = 7400; // øre
-  var promoActive    = false;
+  /* ── Promo codes (solo only). Real discount is enforced server-side in the edge function. ── */
+  var PROMOS = {
+    'MARIE15': { id: 'promo_1T1o6aLKpD57DT3qTUtPaYCy', off: 7400, fixed: null },
+    'EXUS2':   { id: 'promo_1TjL57LKpD57DT3qjcHYJ0D8', off: null, fixed: 29900 }
+  };
+  var activePromoCode = null;
 
   var promoToggle    = document.getElementById('promoToggle');
   var promoRow       = document.getElementById('promoRow');
@@ -462,14 +463,18 @@ main {
   function applyPromo() {
     var code = promoInput.value.trim().toUpperCase();
     promoError.style.display = 'none';
-    if (code === PROMO_CODE && selectedPlan === 'solo') {
-      promoActive = true;
+    var promo = PROMOS[code];
+    if (promo && selectedPlan === 'solo') {
+      activePromoCode = code;
       promoRow.classList.remove('open');
       promoToggle.style.display = 'none';
+      var off = (promo.fixed != null) ? (PLANS.solo.amount - promo.fixed) : promo.off;
+      document.getElementById('promoBadgeCode').textContent = code;
+      document.getElementById('promoBadgeOff').textContent = Math.round(off / 100);
       promoBadge.classList.add('visible');
       updatePriceDisplay();
-    } else if (code === PROMO_CODE && selectedPlan !== 'solo') {
-      promoError.textContent = 'Denne kode gælder kun for Superpakken.';
+    } else if (promo && selectedPlan !== 'solo') {
+      promoError.textContent = 'Denne kode gælder kun ved køb af Indfødsretsprøven alene.';
       promoError.style.display = 'block';
     } else {
       promoError.textContent = 'Ugyldig rabatkode.';
@@ -478,7 +483,7 @@ main {
   }
 
   document.getElementById('promoRemoveBtn').addEventListener('click', function() {
-    promoActive = false;
+    activePromoCode = null;
     promoInput.value = '';
     promoBadge.classList.remove('visible');
     promoToggle.style.display = 'inline-flex';
@@ -487,7 +492,11 @@ main {
 
   function getEffectiveAmount() {
     var base = PLANS[selectedPlan].amount;
-    return (promoActive && selectedPlan === 'solo') ? base - PROMO_OFF : base;
+    if (activePromoCode && selectedPlan === 'solo') {
+      var p = PROMOS[activePromoCode];
+      return (p.fixed != null) ? p.fixed : base - p.off;
+    }
+    return base;
   }
 
   function updatePriceDisplay() {
@@ -495,6 +504,10 @@ main {
     var effective = getEffectiveAmount();
     var hasDiscount = effective < plan.amount;
     discountLine.classList.toggle('visible', hasDiscount);
+    if (hasDiscount && activePromoCode) {
+      document.getElementById('discountLineLabel').textContent = 'Rabat (' + activePromoCode + ')';
+      document.getElementById('discountLineAmount').textContent = '−' + Math.round((plan.amount - effective) / 100) + ' kr';
+    }
     document.getElementById('priceAmount').textContent = Math.round(effective / 100) + ' kr';
     document.getElementById('payBtn').textContent = 'Betal ' + Math.round(effective / 100) + ' kr';
     if (stripeElements) stripeElements.update({ amount: effective });
@@ -520,10 +533,10 @@ main {
     // Hide promo toggle for bundle (not applicable)
     if (plan === 'bundle') {
       promoToggle.style.display = 'none';
-      if (promoActive) { promoBadge.classList.remove('visible'); discountLine.classList.remove('visible'); }
+      if (activePromoCode) { promoBadge.classList.remove('visible'); discountLine.classList.remove('visible'); }
     } else {
-      if (!promoActive) promoToggle.style.display = 'inline-flex';
-      if (promoActive) { promoBadge.classList.add('visible'); }
+      if (!activePromoCode) promoToggle.style.display = 'inline-flex';
+      if (activePromoCode) { promoBadge.classList.add('visible'); }
     }
     mountStripeElements();
     updatePriceDisplay();
@@ -618,7 +631,7 @@ main {
         body: JSON.stringify({
           email: currentEmail,
           plan: selectedPlan,
-          promotion_code: (promoActive && selectedPlan === 'solo') ? PROMO_ID : undefined
+          promotion_code: (activePromoCode && selectedPlan === 'solo') ? PROMOS[activePromoCode].id : undefined
         })
       });
       var data = await res.json();
