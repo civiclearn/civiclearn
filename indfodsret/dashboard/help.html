@@ -159,14 +159,14 @@
         <div class="faq-item">
           <div class="faq-q">Hvorfor har nogle spørgsmål 4 valgmuligheder? <span class="faq-arrow">›</span></div>
           <div class="faq-a">
-            Den officielle indfødsretsprøve har 3 valgmuligheder per spørgsmål. Vores træningsspørgsmål bruger nogle gange 4 valgmuligheder for at gøre træningen sværere end den rigtige prøve — så du er bedre forberedt.
+            Den officielle indfødsretsprøve har 3 valgmuligheder per spørgsmål. Som standard viser vi også 3 valgmuligheder, så træningen matcher det rigtige prøveformat.
             <div style="margin-top:14px;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;">
                 <input type="checkbox" id="officialFormatToggle" style="accent-color:var(--accent);width:18px;height:18px;">
-                <span>Officielt prøveformat (3 valgmuligheder) <span style="color:var(--text-muted);">(valgfrit)</span></span>
+                <span>Udvidet træningsmodus (4 valgmuligheder) <span style="color:var(--text-muted);">(gør træningen sværere)</span></span>
               </label>
               <div id="officialFormatNote" style="margin-top:8px;font-size:13px;color:var(--text-muted);display:none;">
-                ✓ Officielt format er aktiveret. Alle spørgsmål vises nu med højst 3 valgmuligheder.
+                ✓ Udvidet modus er aktiveret. Træningsspørgsmål vises nu med 4 valgmuligheder for ekstra udfordring.
               </div>
             </div>
           </div>
@@ -264,15 +264,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const note = document.getElementById("officialFormatNote");
   if (!toggle) return;
   const KEY = "dk_official_format";
-  const isActive = localStorage.getItem(KEY) === "true";
-  toggle.checked = isActive;
-  if (isActive && note) note.style.display = "block";
+
+  // Default to 3 options (official format) for users who never set a preference
+  if (localStorage.getItem(KEY) === null) {
+    localStorage.setItem(KEY, "true");
+  }
+
+  // Toggle ON = extended mode (4 options) = remove the key
+  // Toggle OFF = official format (3 options) = key is "true"
+  const isExtended = localStorage.getItem(KEY) !== "true";
+  toggle.checked = isExtended;
+  if (isExtended && note) note.style.display = "block";
+
   toggle.addEventListener("change", () => {
     if (toggle.checked) {
-      localStorage.setItem(KEY, "true");
+      // User wants 4 options (extended mode)
+      localStorage.removeItem(KEY);
       if (note) note.style.display = "block";
     } else {
-      localStorage.removeItem(KEY);
+      // User wants 3 options (official format, default)
+      localStorage.setItem(KEY, "true");
       if (note) note.style.display = "none";
     }
   });
