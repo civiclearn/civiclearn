@@ -159,3 +159,6 @@ window.CivicLearnConfig = {
 };
 
 window.CIVIC_CONFIG = window.CIVICEDGE_CONFIG;
+
+/* Default to 3 answer options (official exam format) for users who never set a preference */
+if (localStorage.getItem('dk_official_format') === null) localStorage.setItem('dk_official_format', 'true');
