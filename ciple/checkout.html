@@ -462,6 +462,13 @@ applyLang('pt');
       localStorage.removeItem('ciple_checkout_pi');
       window.history.replaceState({}, '', window.location.pathname);
       document.getElementById('doneEmail').textContent = t('msg_logged_in') + data.email;
+      // Google Ads conversion — Purchase CIPLE
+      gtag('event', 'conversion', {
+        'send_to': 'AW-17999842911/_57rCKONvMIcEN-c_4ZD',
+        'value': 69,
+        'currency': 'EUR',
+        'transaction_id': paymentIntentId
+      });
       show('done');
     } catch (e) {
       err(t('msg_connection_error')); btn.disabled = false; btn.textContent = t('cta_create');
