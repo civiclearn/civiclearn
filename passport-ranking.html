@@ -68,6 +68,7 @@
   .rr-rank{width:1.6rem;text-align:right;font-weight:600;font-size:0.92rem;color:var(--muted);}
   .rr-rank.top{color:var(--brand);}
   .chip{display:inline-flex;align-items:center;justify-content:center;height:24px;min-width:30px;padding:0 0.4rem;border-radius:0.4rem;background:var(--brand-light);color:var(--brand-dark);font-weight:600;font-size:0.7rem;letter-spacing:0.08em;flex:none;}
+  .flag{width:31px;height:21px;flex:none;object-fit:cover;object-position:center;border-radius:3px;border:1px solid rgba(0,0,0,0.12);background:#fff;display:block;}
   .rr-body{flex:1;min-width:0;}
   .rr-name{font-size:0.98rem;font-weight:600;line-height:1.2;}
   .rr-tags{display:flex;align-items:center;gap:0.5rem;margin-top:0.15rem;}
@@ -168,6 +169,10 @@
 <script>
 const NAMES = {DE:"Germany",FR:"France",DK:"Denmark",CH:"Switzerland",BE:"Belgium",LU:"Luxembourg",IE:"Ireland",NL:"Netherlands",CA:"Canada",AT:"Austria",IS:"Iceland",PT:"Portugal",CZ:"Czechia",SE:"Sweden",MC:"Monaco",IT:"Italy",SI:"Slovenia",NO:"Norway",ES:"Spain",PL:"Poland",GB:"United Kingdom",AU:"Australia",SK:"Slovakia",HR:"Croatia",NZ:"New Zealand",MT:"Malta",FI:"Finland",JP:"Japan",RO:"Romania",EE:"Estonia",LV:"Latvia",BG:"Bulgaria",GR:"Greece",CL:"Chile",LT:"Lithuania",HU:"Hungary",CY:"Cyprus",UY:"Uruguay",BR:"Brazil",US:"United States",TW:"Taiwan",AR:"Argentina",AE:"UAE",TH:"Thailand",KR:"South Korea",IL:"Israel",SG:"Singapore",MX:"Mexico",RU:"Russia",TR:"Turkey"};
 
+// Flag filenames in /assets/images/flags/ (English name, lowercase, underscores; uk/usa/uae abbreviated)
+const FLAGFILE = {DE:"germany",FR:"france",DK:"denmark",CH:"switzerland",BE:"belgium",LU:"luxembourg",IE:"ireland",NL:"netherlands",CA:"canada",AT:"austria",IS:"iceland",PT:"portugal",CZ:"czechia",SE:"sweden",MC:"monaco",IT:"italy",SI:"slovenia",NO:"norway",ES:"spain",PL:"poland",GB:"uk",AU:"australia",SK:"slovakia",HR:"croatia",NZ:"new_zealand",MT:"malta",FI:"finland",JP:"japan",RO:"romania",EE:"estonia",LV:"latvia",BG:"bulgaria",GR:"greece",CL:"chile",LT:"lithuania",HU:"hungary",CY:"cyprus",UY:"uruguay",BR:"brazil",US:"usa",TW:"taiwan",AR:"argentina",AE:"uae",TH:"thailand",KR:"south_korea",IL:"israel",SG:"singapore",MX:"mexico",RU:"russia",TR:"turkey"};
+const FLAG = c => "https://civiclearn.com/assets/images/flags/"+FLAGFILE[c]+".svg";
+
 const SCORES_RAW = "DE:22.1|18.4|12.4|9.3|20.0|5.8|88.0,FR:20.8|15.4|14.9|10.0|20.0|4.4|85.6,DK:21.1|19.0|11.0|7.1|19.6|6.5|84.3,CH:22.1|19.6|11.2|6.4|17.5|6.9|83.7,BE:21.1|18.0|11.4|7.1|20.0|4.9|82.6,LU:21.7|17.6|12.6|5.0|20.0|5.7|82.6,IE:20.6|18.9|11.3|5.0|20.0|6.1|81.8,NL:20.0|18.7|8.6|7.9|20.0|5.5|80.7,CA:18.0|17.1|12.0|7.1|20.0|5.8|80.1,AT:21.6|16.7|9.5|7.1|18.1|6.5|79.6,IS:19.6|19.4|9.3|4.3|20.0|7.0|79.5,PT:20.0|13.7|13.5|6.4|20.0|5.4|79.0,CZ:17.7|15.2|13.3|7.1|20.0|5.4|78.8,SE:21.7|18.7|10.9|7.1|14.8|5.5|78.8,MC:18.6|19.2|8.1|6.4|20.0|6.1|78.4,IT:20.5|14.9|9.9|8.6|20.0|4.1|78.0,SI:20.0|16.0|10.4|5.7|20.0|5.4|77.4,NO:20.0|20.3|10.6|6.4|13.3|6.4|77.0,ES:19.4|15.1|9.2|8.6|20.0|4.4|76.7,PL:17.9|13.5|13.6|7.1|20.0|4.3|76.4,GB:16.9|16.9|9.9|7.9|18.4|5.6|75.5,AU:16.8|18.1|9.1|5.7|20.0|5.8|75.5,SK:21.2|12.2|10.5|6.4|20.0|3.8|74.1,HR:18.7|12.5|12.4|5.7|20.0|3.8|73.1,NZ:16.9|16.7|8.1|4.3|20.0|6.7|72.6,MT:17.2|15.5|10.3|5.0|20.0|4.1|72.1,FI:20.5|17.8|10.8|7.1|8.8|6.8|71.8,JP:16.6|15.8|9.5|2.9|20.0|5.6|70.4,EE:18.1|14.4|9.6|5.7|16.4|4.9|69.2,RO:18.2|10.0|12.6|5.7|20.0|2.7|69.2,LV:18.1|12.8|9.5|5.7|18.2|4.5|68.8,BG:18.2|9.1|12.2|5.7|20.0|3.5|68.7,GR:18.1|13.5|11.1|7.9|12.9|3.8|67.2,CL:18.9|11.5|10.7|2.9|19.5|3.5|67.1,LT:14.7|13.7|9.8|5.7|18.3|4.6|66.9,HU:18.7|10.2|12.8|5.7|15.1|4.1|66.6,CY:17.5|14.8|10.3|5.0|13.1|3.1|63.8,UY:17.6|10.9|8.6|2.9|20.0|3.3|63.2,BR:18.7|4.2|14.5|3.6|17.9|0.9|59.8,US:15.0|16.7|12.7|8.6|2.1|3.6|58.7,TW:10.4|16.6|12.8|2.1|11.4|4.0|57.3,AR:19.4|10.2|8.8|3.6|10.3|2.3|54.5,AE:17.5|12.3|7.5|3.6|9.3|3.8|53.9,TH:12.1|2.2|13.2|4.3|18.5|2.1|52.5,KR:17.0|15.8|8.8|3.6|2.0|5.2|52.3,IL:11.8|13.9|10.4|5.0|7.8|2.5|51.4,SG:17.1|15.9|2.9|3.6|3.6|6.6|49.7,MX:11.6|3.8|11.3|2.1|19.8|0.8|49.4,RU:11.4|4.5|14.6|3.6|12.2|1.9|48.1,TR:4.4|7.1|14.8|4.3|8.1|1.6|40.3";
 const ROWS = SCORES_RAW.split(",").map(s=>{
   const [code,rest]=s.split(":"); const n=rest.split("|").map(parseFloat);
@@ -202,7 +207,7 @@ ROWS.forEach(r=>{
   html += '<div class="rank-row" onclick="this.classList.toggle(\'open\')">'+
     '<div class="rr-main">'+
       '<span class="rr-rank'+(r.rank<=1?" top":"")+'">'+r.rank+'</span>'+
-      '<span class="chip">'+r.code+'</span>'+
+      '<img class="flag" src="'+FLAG(r.code)+'" alt="'+NAMES[r.code]+' flag" loading="lazy">'+
       '<div class="rr-body"><div class="rr-name">'+NAMES[r.code]+'</div>'+
       (rc?'<div class="rr-tags"><span class="reach" style="color:'+rc.cls+'">'+reachTxt(rc)+'</span></div>':'')+'</div>'+
       '<div class="rr-val"><b class="mono">'+r.total.toFixed(1)+'</b></div>'+
