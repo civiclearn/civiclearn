@@ -1824,35 +1824,51 @@ function updateProgress(question, correct) {
       if (q.topicLabel) topicsSet.add(q.topicLabel);
     });
 
-// Build per-question history for this session
-const answeredQuestions = sourceQuestions.map(q => {
-  
-  // --- NEW: Retrieve the actual text of the options selected/correct ---
-  const userOption = q.options.find(o => o.idx === q.userAnswer);
-  const correctOption = q.options.find(o => o.correct === true);
+// Build per-question history for this session.
+//
+// Question text is NO LONGER stored for questions carrying a stable DK-XXXX id.
+// history-dk.js resolves those from the bank at render time via
+// Engine.resolveQuestion(), using the userAnswer / correctAnswer indexes below.
+// Those indexes are safe: options are shuffled on a copy, so idx always refers
+// to the bank's own option order (see renderQuestion).
+//
+// Records whose id does NOT match the stable pattern (pre-v2 sessions used a
+// text-derived composite id) cannot be resolved against the current bank, so
+// they keep their text and stay renderable.
+const STABLE_ID_RE = /^DK-\d+$/;
 
-  return {
+const answeredQuestions = sourceQuestions.map(q => {
+  const opts = Array.isArray(q.options) ? q.options : [];
+
+  const rec = {
     id: q.id,
     topic: q.topicLabel || null,
 
     // Kept for backward compatibility (final correctness after Autopilot)
     correct: !!q._userCorrect,
 
-    // New: first attempt correctness (0/1). Default to NaN if not recorded, 
+    // First attempt correctness (0/1), or null when not recorded.
+    // Previously NaN, which JSON.stringify writes as null anyway — being
+    // explicit keeps "not recorded" distinguishable from a serialisation quirk.
     firstAttemptCorrect:
       typeof q.firstAttemptCorrect === "number"
         ? q.firstAttemptCorrect
-        : NaN,
+        : null,
 
-    // NEWLY SAVED TEXT DATA (makes history self-contained)
-    qText: q.text,
-    userAnswerText: userOption ? userOption.text : null,
-    correctAnswerText: correctOption ? correctOption.text : null,
-    
-    // Original indexes (for debugging, but not used for display anymore)
     userAnswer: q.userAnswer ?? null,
     correctAnswer: q.correctAnswer ?? null
   };
+
+  if (!STABLE_ID_RE.test(String(q.id || ""))) {
+    // q.options was previously accessed unguarded here and would throw if absent.
+    const userOption = opts.find(o => o.idx === q.userAnswer) || null;
+    const correctOption = opts.find(o => o.correct === true) || null;
+    rec.qText = q.text;
+    rec.userAnswerText = userOption ? userOption.text : null;
+    rec.correctAnswerText = correctOption ? correctOption.text : null;
+  }
+
+  return rec;
 });
 
 
