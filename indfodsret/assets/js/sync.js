@@ -98,8 +98,22 @@
   function writeLS(key, value) {
     try {
       localStorage.setItem(key, JSON.stringify(value));
+      return true;
     } catch (e) {
       console.warn("[Sync] Failed to write localStorage key:", key, e);
+      if (
+        e &&
+        (e.name === "QuotaExceededError" ||
+          e.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+          e.code === 22)
+      ) {
+        try {
+          window.dispatchEvent(
+            new CustomEvent("civicsync:quota-exceeded", { detail: { key: key } })
+          );
+        } catch (_) {}
+      }
+      return false;
     }
   }
 
@@ -262,8 +276,10 @@
           localDataSnapshot[row.key] = localData;
 
           if (!dataEqual(localData, merged)) {
-            writeLS(row.key, merged);
-            keysToWrite.push(row.key);
+            // Only claim the key was updated if the write actually landed.
+            // A swallowed QuotaExceededError previously looked identical to
+            // success, and triggered a reload of a page whose data never arrived.
+            if (writeLS(row.key, merged)) keysToWrite.push(row.key);
           }
 
           if (!dataEqual(remoteData, merged)) {

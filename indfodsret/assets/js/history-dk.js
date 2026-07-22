@@ -6,6 +6,21 @@
 
   let historySessions = [];
   let currentOpenIndex = -1;
+  let __bankReady = null;
+
+  // Kick the bank load off early but never block the list on it: the list view
+  // needs only scores and dates. Only the details panel needs question text.
+  function ensureBank() {
+    if (!__bankReady) {
+      __bankReady =
+        window.CivicEdgeEngine && CivicEdgeEngine.ensureBankLoaded
+          ? CivicEdgeEngine.ensureBankLoaded().catch((e) => {
+              console.warn("History: bank load failed, using stored text only", e);
+            })
+          : Promise.resolve();
+    }
+    return __bankReady;
+  }
 
   // --------- Helpers ---------
 
@@ -31,6 +46,53 @@ function getTopicDisplayFromRaw(raw) {
   return raw.topicLabel || raw.topic || "";
 }
 
+
+  // Stored text wins when present (legacy records); the bank fills the gap for
+  // slim records written after the storage migration.
+  function hydrateQuestion(rec) {
+    const E = window.CivicEdgeEngine;
+    const bankQ = E && E.resolveQuestion ? E.resolveQuestion(rec.id) : null;
+
+    const opts = bankQ && Array.isArray(bankQ.options) ? bankQ.options : [];
+    const userOpt =
+      rec.userAnswer == null
+        ? null
+        : opts.find((o) => o.idx === rec.userAnswer) || null;
+    const correctOpt =
+      (rec.correctAnswer == null
+        ? null
+        : opts.find((o) => o.idx === rec.correctAnswer)) ||
+      opts.find((o) => o.correct === true) ||
+      null;
+
+    return {
+      id: rec.id,
+      answered: rec.userAnswer != null,
+      correct: !!rec.correct,
+      qText: rec.qText || (bankQ ? bankQ.text : null),
+      userAnswerText: rec.userAnswerText || (userOpt ? userOpt.text : null),
+      correctAnswerText:
+        rec.correctAnswerText || (correctOpt ? correctOpt.text : null),
+      topic:
+        rec.topicDisplay ||
+        getTopicDisplayFromRaw(rec) ||
+        (bankQ ? bankQ.topicLabel : "") ||
+        ""
+    };
+  }
+
+  function unresolvedRowHtml(index) {
+    return `
+      <div class="question-row unresolved">
+        <div class="question-q">
+          ${index}. ${t(
+            "history_question_unavailable",
+            "Dette spørgsmål er ikke længere tilgængeligt."
+          )}
+        </div>
+      </div>
+    `;
+  }
 
   function readStats() {
     try {
@@ -279,6 +341,8 @@ function getTopicDisplayFromRaw(raw) {
     const session = historySessions[idx];
     if (!session || !anchorEl) return;
 
+    await ensureBank();
+
     if (currentOpenIndex === idx) {
       currentOpenIndex = -1;
       anchorEl.querySelector(".inline-details-panel")?.remove();
@@ -368,13 +432,17 @@ function getTopicDisplayFromRaw(raw) {
       let qIndex = 0;
 
       for (const [qId, attempts] of Object.entries(groupedAttempts)) {
-        const canonicalQ = qMap.get(qId);
-        if (!canonicalQ) continue;
-
         qIndex++;
 
-        // ✅ multilingual-safe topic display (prefer stored topicDisplay)
-        const topic = getTopicDisplayFromRaw(canonicalQ) || "—";
+        const hq = hydrateQuestion(qMap.get(qId) || { id: qId });
+
+        // Previously `continue` here dropped the row and its wave pills silently.
+        if (!hq.qText) {
+          html += unresolvedRowHtml(qIndex);
+          continue;
+        }
+
+        const topic = hq.topic || "—";
 
         html += `
           <div class="question-row history-full-detail">
@@ -382,7 +450,7 @@ function getTopicDisplayFromRaw(raw) {
             <div class="question-topic-label">${topic}</div>
 
             <div class="question-q">
-              ${qIndex}. ${canonicalQ.qText || canonicalQ.id || "Question"}
+              ${qIndex}. ${hq.qText}
             </div>
 
             <div class="wave-strip">
@@ -404,7 +472,7 @@ function getTopicDisplayFromRaw(raw) {
               <span class="final-answer-pill">
                 ${t("history_answer_label", "Svar")}
               </span>
-              ${canonicalQ.correctAnswerText || "—"}
+              ${hq.correctAnswerText || "—"}
             </div>
 
           </div>
@@ -416,21 +484,26 @@ function getTopicDisplayFromRaw(raw) {
     // OTHER MODES
     // --------------------------
     else {
-      qList.forEach((q, i) => {
-       const topic = q.topicDisplay || getTopicDisplayFromRaw(q) || "—";
+      qList.forEach((rec, i) => {
+        const hq = hydrateQuestion(rec);
 
+        if (!hq.qText) {
+          html += unresolvedRowHtml(i + 1);
+          return;
+        }
 
-        let questionText = q.qText || q.id || "";
-        questionText = questionText.replace(/Sujet\s*:\s*/i, "").trim();
+        const questionText = hq.qText.replace(/Sujet\s*:\s*/i, "").trim();
 
-        const userText = q.userAnswerText || "—";
-        const correctText = q.correctAnswerText || "—";
-        const isCorrect = !!q.correct;
+        // 16.9% of stored records have userAnswer === null (skipped or timed out).
+        const userText = hq.answered
+          ? hq.userAnswerText || "—"
+          : t("history_not_answered", "Ikke besvaret");
+        const correctText = hq.correctAnswerText || "—";
 
         html += `
-          <div class="question-row ${isCorrect ? "correct" : "incorrect"}">
+          <div class="question-row ${hq.correct ? "correct" : "incorrect"}">
 
-            <div class="question-topic-label">${topic || "—"}</div>
+            <div class="question-topic-label">${hq.topic || "—"}</div>
 
             <div class="question-q">
               ${i + 1}. ${questionText}
@@ -472,6 +545,8 @@ function getTopicDisplayFromRaw(raw) {
   // --------- Init ---------
 
   function initHistory() {
+    ensureBank();
+
     // We no longer depend on CivicLearnI18n. Just kick off rendering as soon
     // as the DOM is ready — and if it's already past DOMContentLoaded (the
     // common case, since this script is loaded dynamically from history.html),

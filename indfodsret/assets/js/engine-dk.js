@@ -38,6 +38,32 @@ Engine.ensureBankLoaded = async function () {
   __normalizedBank = fullBank;
 };
 
+// ── Shared question resolution (used by history-dk.js and my-list.js) ──
+// The index self-invalidates by comparing the bank array reference, so it stays
+// correct whether __normalizedBank was populated by ensureBankLoaded() or start().
+let __bankIndex = null;
+let __bankIndexSrc = null;
+
+Engine.resolveQuestion = function (id) {
+  if (id == null) return null;
+  const bank = __normalizedBank || [];
+  if (__bankIndexSrc !== bank) {
+    __bankIndex = new Map();
+    bank.forEach((q) => {
+      if (q && q.id != null) __bankIndex.set(String(q.id), q);
+    });
+    __bankIndexSrc = bank;
+  }
+  return __bankIndex.get(String(id)) || null;
+};
+
+// Resolve a stored answer index against a bank question's options.
+Engine.resolveOption = function (bankQ, idx) {
+  if (!bankQ || idx == null) return null;
+  const opts = Array.isArray(bankQ.options) ? bankQ.options : [];
+  return opts.find((o) => o.idx === idx) || null;
+};
+
 
   // ------------- Helpers -------------
   

@@ -87,7 +87,7 @@ card.appendChild(header);
 
 const resolvedOptions =
   q.options && q.options.length
-    ? q.options
+    ? q.options.slice()
     : (() => {
         const lang = window.CIVICEDGE_LANG || "en";
         const rawOpts = q._raw?.options?.[lang] || q._raw?.options?.en || [];
@@ -140,6 +140,37 @@ resolvedOptions.forEach(opt => {
   return card;
 }
 
+function renderMissing(id) {
+  const card = document.createElement("div");
+  card.className = "mylist-card mylist-card-missing";
+  card.style.opacity = "0.7";
+
+  const header = document.createElement("div");
+  header.className = "mylist-question-row";
+
+  const title = document.createElement("div");
+  title.className = "mylist-question";
+  title.textContent = "Dette spørgsmål er ikke længere en del af spørgsmålsbanken.";
+
+  const actions = document.createElement("div");
+  actions.className = "mylist-actions";
+
+  const removeBtn = document.createElement("button");
+  removeBtn.className = "mylist-remove";
+  removeBtn.textContent = "Fjern";
+  removeBtn.onclick = () => {
+    CivicEdgeEngine.toggleSavedQuestion(id);
+    if (window.CivicSync) CivicSync.pushNow("civicedge_saved");
+    render();
+  };
+
+  actions.appendChild(removeBtn);
+  header.appendChild(title);
+  header.appendChild(actions);
+  card.appendChild(header);
+  return card;
+}
+
 function updateCount(n) {
   const el = document.getElementById("myListCount");
   if (!el) return;
@@ -182,13 +213,17 @@ if (myListPage < 0) {
 const end = start + MY_LIST_RENDER_LIMIT;
 
 ids.slice(start, end).forEach((id) => {
-  const q =
-  map.get(id) ||
-  map.get(String(id)) ||
-  [...map.values()].find(x => String(x.id) === String(id));
+  const q = CivicEdgeEngine.resolveQuestion
+    ? CivicEdgeEngine.resolveQuestion(id)
+    : (map.get(id) || map.get(String(id)));
+
   if (q) {
     listEl.appendChild(renderItem(q));
     rendered++;
+  } else {
+    // Previously skipped silently: the card vanished while the counter still
+    // counted it. Render an explicit row the user can dismiss instead.
+    listEl.appendChild(renderMissing(id));
   }
 });
 
