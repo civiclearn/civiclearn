@@ -76,6 +76,10 @@
     <div class="card-icon" id="cardIcon">🔄</div>
     <h1 id="cardTitle">Opdaterer din app</h1>
     <p id="cardSubtitle">Vi rydder gammel data, så du får den nyeste version. Det tager kun et øjeblik.</p>
+    <p id="deepNote" style="display:none;font-size:0.82rem;color:var(--slate);background:var(--brand-dim);border-radius:10px;padding:12px 14px;margin-bottom:20px;line-height:1.55;">
+      <strong>Fuldstændig rydning.</strong> Al lokal data fjernes. Dine resultater er gemt
+      på vores servere og hentes automatisk, når du logger ind igen.
+    </p>
 
     <button class="action-btn" id="startBtn">Ryd og opdater</button>
 
@@ -101,7 +105,14 @@
 
 <script>
 (function () {
-  const LOGIN_URL = '/indfodsret/login.html';
+  const LOGIN_URL = '/indfodsret/login';
+
+  // Deep mode: /indfodsret/reset-cache.html?deep=1
+  // Clears ALL local data including training history. Only safe when the
+  // server copy is intact — sync pulls it back on next login. Used by support
+  // for users whose localStorage quota is full and who therefore cannot log
+  // in at all (the cl_auth write itself fails once the origin is at quota).
+  const DEEP = new URLSearchParams(location.search).has('deep');
   const bar = document.getElementById('bar');
   const statusEl = document.getElementById('status');
   const redirectMsg = document.getElementById('redirectMsg');
@@ -117,10 +128,16 @@
   function setBar(pct) { bar.style.width = pct + '%'; }
   function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+  if (DEEP) {
+    document.getElementById('deepNote').style.display = 'block';
+    document.getElementById('startBtn').textContent = 'Ryd alt og opdater';
+  }
+
   document.getElementById('startBtn').addEventListener('click', async function () {
     this.disabled = true;
     this.textContent = 'Rydder…';
     document.getElementById('barWrap').style.display = 'block';
+    if (DEEP) document.getElementById('s3').lastChild.textContent = ' Rydder al lokal data';
     document.getElementById('steps').style.display = 'flex';
 
     let errors = [];
@@ -153,6 +170,18 @@
     // Step 3 — Clear localStorage (auth keys only) & sessionStorage & cookies
     setStep('s3', 'active');
     try {
+      if (DEEP) {
+        // Full wipe. Required when the origin is at its storage quota: once
+        // full, even the small cl_auth write throws, so selective clearing
+        // cannot restore the ability to log in.
+        localStorage.clear();
+        if (window.indexedDB && indexedDB.databases) {
+          try {
+            const dbs = await indexedDB.databases();
+            await Promise.all(dbs.map(d => d.name && indexedDB.deleteDatabase(d.name)));
+          } catch (e) { /* not supported on all browsers */ }
+        }
+      } else {
       // Only clear auth-related keys, preserve progress data
       const authPrefixes = ['sb-', 'supabase', 'cl_auth', 'cl_email', 'cl_login_at', 'cl_bundle', 'cl_redirect_ts'];
       const toRemove = [];
@@ -163,6 +192,7 @@
         }
       }
       toRemove.forEach(k => localStorage.removeItem(k));
+      }
       sessionStorage.clear();
       document.cookie.split(';').forEach(c => {
         document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
