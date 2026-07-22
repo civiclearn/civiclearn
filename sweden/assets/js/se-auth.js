@@ -58,8 +58,17 @@
       auth.userId  = session.user.id;
       auth.session = session;
 
-      localStorage.setItem('cl_auth', 'ok');
-      localStorage.setItem('cl_email', session.user.email);
+      // Best-effort only. If the origin has hit its localStorage quota,
+      // setItem throws — and unguarded, that exception fell through to the
+      // catch below, which called redirectToLogin() on a user holding a
+      // perfectly valid session. A full disk is not an authentication
+      // failure, and must never log anyone out.
+      try {
+        localStorage.setItem('cl_auth', 'ok');
+        localStorage.setItem('cl_email', session.user.email);
+      } catch (e) {
+        console.warn('CivicAuth: could not persist auth flags (storage full?)', e);
+      }
 
       supabase.auth.onAuthStateChange((event, newSession) => {
         if (event === 'SIGNED_OUT') {
