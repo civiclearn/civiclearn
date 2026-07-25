@@ -49,8 +49,21 @@
       auth.userId  = session.user.id;
       auth.session = session;
 
-      localStorage.setItem('cl_auth', 'ok');
-      localStorage.setItem('cl_email', session.user.email);
+      // Persist auth markers, but NEVER let a storage failure bounce a validly
+      // authenticated user. When localStorage is at quota (e.g. a large
+      // civicedge_stats blob on Safari, which caps ~5MB in UTF-16), setItem
+      // throws QuotaExceededError. Previously this propagated to the outer
+      // catch, which calls redirectToLogin() — producing an infinite
+      // login->dashboard->login bounce on a user whose Supabase session is
+      // perfectly valid. The session is already established in memory above;
+      // these writes are only a convenience cache for sync.js (getEmail) and
+      // are non-essential to auth itself, so a failure here must be swallowed.
+      try {
+        localStorage.setItem('cl_auth', 'ok');
+        localStorage.setItem('cl_email', session.user.email);
+      } catch (storageErr) {
+        console.warn('CivicAuth: could not persist auth markers (storage full?). Continuing with in-memory session.', storageErr);
+      }
 
       supabase.auth.onAuthStateChange((event, newSession) => {
         // Only redirect on an explicit sign-out event.
