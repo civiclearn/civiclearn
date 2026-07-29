@@ -216,6 +216,10 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
   <!-- CHECKOUT FORM -->
   <div id="viewCheckout">
     <div id="link-auth-element"></div>
+    <div class="field" id="emailFallback" hidden>
+      <label for="emailInput">E-postadress</label>
+      <input type="email" id="emailInput" autocomplete="email" placeholder="din@epost.se">
+    </div>
     <div id="payment-element"><div class="stripe-loading">Laddar betalningsalternativ…</div></div>
     <button type="button" class="pay-btn" id="payBtn" disabled>Betala 499 kr</button>
     <div class="trust-strip">
@@ -250,6 +254,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
       <input type="password" id="pw2" autocomplete="new-password" placeholder="Upprepa lösenord">
     </div>
     <button type="button" class="pay-btn" id="setupBtn">Skapa konto</button>
+    <button type="button" id="startOver" style="width:100%;margin-top:.5rem;background:none;border:none;cursor:pointer;font-family:'Lexend',sans-serif;font-size:.75rem;color:#a8a29e;padding:.5rem">Börja om</button>
   </div>
 
   <!-- DONE -->
@@ -323,6 +328,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
 
   var currentEmail = '';
   var paymentIntentId = '';
+  var paymentClientSecret = '';
   var stripeElements = null;
   var isSubmitting = false;
 
@@ -349,6 +355,9 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
   var cardBundle = document.getElementById('planBundle');
 
   function selectPlan(plan) {
+    /* Swapping Elements between submit() and confirmPayment() sends Stripe an
+       instance that was never submitted. Ignore clicks while a payment runs. */
+    if (isSubmitting) return;
     selectedPlan = plan;
     cardSolo.classList.toggle('selected', plan === 'solo');
     cardBundle.classList.toggle('selected', plan === 'bundle');
@@ -362,9 +371,17 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
   cardSolo.addEventListener('click', function() { selectPlan('solo'); });
   cardBundle.addEventListener('click', function() { selectPlan('bundle'); });
 
-  /* ── Stripe — deferred intent ── */
+  /* ── Stripe — deferred intent ──
+     In deferred mode Stripe requires the Elements amount/currency to match the
+     PaymentIntent exactly at confirm time, or confirmPayment throws an opaque
+     integration error that reaches the customer as a generic failure. We track
+     what we mounted so we can compare against the server's amount. */
+  var mountedAmount = 0, mountedCurrency = '';
+
   function mountStripeElements() {
     var plan = PLANS[selectedPlan];
+    mountedAmount = plan.amount;
+    mountedCurrency = 'sek';
     stripeElements = stripe.elements({
       mode: 'payment',
       amount: plan.amount,
@@ -380,11 +397,15 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
     });
 
     document.getElementById('link-auth-element').innerHTML = '';
-    var linkAuth = stripeElements.create('linkAuthentication');
+    var linkAuth = stripeElements.create('linkAuthentication',
+      currentEmail ? { defaultValues: { email: currentEmail } } : {});
     linkAuth.mount('#link-auth-element');
     linkAuth.on('change', function(ev) {
       if (ev.value && ev.value.email) currentEmail = ev.value.email;
     });
+    /* The Link element is the only email capture on this page. If it fails to
+       load, there is no way to enter an address at all — reveal a plain field. */
+    linkAuth.on('loaderror', showEmailFallback);
 
     document.getElementById('payment-element').innerHTML = '';
     var pe = stripeElements.create('payment', {
@@ -393,63 +414,178 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
     pe.mount('#payment-element');
     pe.on('ready', function() { document.getElementById('payBtn').disabled = false; });
     pe.on('change', function(ev) { if (ev.complete) document.getElementById('payBtn').disabled = false; });
+    pe.on('loaderror', function() {
+      err('Betalningsformuläret kunde inte laddas. Ladda om sidan och försök igen.');
+    });
+  }
+
+  function showEmailFallback() {
+    var wrap = document.getElementById('emailFallback');
+    if (!wrap || !wrap.hidden) return;
+    wrap.hidden = false;
+    document.getElementById('emailInput').addEventListener('input', function() {
+      currentEmail = this.value.trim();
+    });
+  }
+
+  /* ── Checkout state persistence ──────────────────────────────────────────
+     Nothing is written until Stripe confirms the payment succeeded. Storing at
+     creation time meant every declined or abandoned attempt left a key behind
+     that sent the customer to the "payment confirmed" screen on their next
+     visit, where account setup then failed with no way out.                 */
+  function persistPaid(piId, clientSecret) {
+    try {
+      localStorage.setItem('sweden_checkout_pi', piId);
+      if (clientSecret) localStorage.setItem('sweden_checkout_cs', clientSecret);
+      localStorage.setItem('sweden_checkout_email', currentEmail);
+      localStorage.setItem('sweden_checkout_plan', selectedPlan);
+    } catch (e) {}
+  }
+  function clearCheckoutState() {
+    try {
+      localStorage.removeItem('sweden_checkout_pi');
+      localStorage.removeItem('sweden_checkout_cs');
+      localStorage.removeItem('sweden_checkout_email');
+      localStorage.removeItem('sweden_checkout_plan');
+    } catch (e) {}
+  }
+  /* Always re-mount before showing the form. The old code showed the checkout
+     view after a failed 3DS return without ever mounting Elements, leaving a
+     permanently-disabled button under a spinner that never resolved. */
+  function showCheckoutForm(message) {
+    paymentIntentId = ''; paymentClientSecret = ''; isSubmitting = false;
+    var btn = document.getElementById('payBtn');
+    btn.disabled = true;
+    btn.textContent = PLANS[selectedPlan].payLabel;
+    selectPlan(selectedPlan);
+    show('checkout');
+    if (message) err(message);
+  }
+  function restart(message) {
+    clearCheckoutState();
+    window.history.replaceState({}, '', window.location.pathname);
+    showCheckoutForm(message);
   }
 
   /* ── 3DS return + recovery ── */
   var urlParams = new URLSearchParams(window.location.search);
-  var returnedPI = urlParams.get('payment_intent'), returnedSecret = urlParams.get('payment_intent_client_secret'), returnedStatus = urlParams.get('redirect_status');
+  var returnedPI = urlParams.get('payment_intent'), returnedSecret = urlParams.get('payment_intent_client_secret');
+
   if (returnedPI && returnedSecret) {
     currentEmail = localStorage.getItem('sweden_checkout_email') || '';
     selectedPlan = localStorage.getItem('sweden_checkout_plan') || selectedPlan;
-    paymentIntentId = returnedPI;
-    localStorage.setItem('sweden_checkout_pi', returnedPI);
-    if (returnedStatus === 'succeeded') { show('password'); }
-    else {
-      stripe.retrievePaymentIntent(returnedSecret).then(function(r) {
-        var pi = r.paymentIntent;
-        if (pi && pi.status === 'succeeded') show('password');
-        else { err('Betalningen slutfördes inte.'); show('checkout'); }
-      });
-    }
+    info('Bekräftar din betalning…');
+    stripe.retrievePaymentIntent(returnedSecret).then(function(r) {
+      var pi = r.paymentIntent;
+      if (pi && pi.status === 'succeeded') {
+        paymentIntentId = pi.id; paymentClientSecret = returnedSecret;
+        persistPaid(pi.id, returnedSecret);
+        show('password');
+      } else if (pi && pi.status === 'processing') {
+        info('Din betalning behandlas fortfarande. Ladda om sidan om en stund.');
+      } else {
+        restart('Betalningen slutfördes inte och inget belopp har dragits. Försök gärna igen, eller använd ett annat kort.');
+      }
+    }).catch(function() {
+      restart('Vi kunde inte bekräfta betalningen. Försök igen.');
+    });
   } else {
     var savedPI = localStorage.getItem('sweden_checkout_pi');
-    if (savedPI) { currentEmail = localStorage.getItem('sweden_checkout_email') || ''; selectedPlan = localStorage.getItem('sweden_checkout_plan') || selectedPlan; paymentIntentId = savedPI; show('password'); }
-    else { selectPlan(selectedPlan); show('checkout'); }
+    var savedCS = localStorage.getItem('sweden_checkout_cs');
+    if (savedPI && savedCS) {
+      info('Återupptar din beställning…');
+      stripe.retrievePaymentIntent(savedCS).then(function(r) {
+        var pi = r.paymentIntent;
+        if (pi && pi.status === 'succeeded') {
+          currentEmail = localStorage.getItem('sweden_checkout_email') || '';
+          selectedPlan = localStorage.getItem('sweden_checkout_plan') || selectedPlan;
+          paymentIntentId = pi.id; paymentClientSecret = savedCS;
+          show('password');
+        } else {
+          restart();
+        }
+      }).catch(function() { restart(); });
+    } else {
+      /* Key written by an older build of this page — cannot be verified. */
+      if (savedPI) clearCheckoutState();
+      selectPlan(selectedPlan);
+      show('checkout');
+    }
   }
 
   /* ── Pay ── */
   document.getElementById('payBtn').onclick = async function() {
     if (isSubmitting) return;
-    if (!currentEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(currentEmail)) { err('Ange en giltig e-postadress.'); return; }
+    if (!currentEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(currentEmail)) {
+      showEmailFallback();
+      err('Ange en giltig e-postadress.');
+      return;
+    }
     isSubmitting = true;
     var btn = document.getElementById('payBtn'); btn.disabled = true;
+    var resetBtn = function() {
+      btn.disabled = false; btn.textContent = PLANS[selectedPlan].payLabel; isSubmitting = false;
+    };
     btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px"></span>Behandlas…';
     msg.style.display = 'none';
     try {
       var submitResult = await stripeElements.submit();
-      if (submitResult.error) { err(submitResult.error.message || 'Ett fel uppstod.'); btn.disabled = false; btn.textContent = PLANS[selectedPlan].payLabel; isSubmitting = false; return; }
+      if (submitResult.error) { err(submitResult.error.message || 'Ett fel uppstod.'); resetBtn(); return; }
       var res = await fetch(FUNCTIONS_URL + '/' + PLANS[selectedPlan].createFn, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: currentEmail, plan: selectedPlan })
       });
       var data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'Ett fel uppstod.');
+
+      /* Guard the deferred-intent contract. If the Stripe price no longer
+         matches the amount this page mounted with, confirmPayment would fail
+         with an opaque integration error. Re-mount at the real amount instead
+         so the customer gets a clear, recoverable message. */
+      if (data.amount && (data.amount !== mountedAmount ||
+          (data.currency && data.currency.toLowerCase() !== mountedCurrency))) {
+        console.error('Amount mismatch: mounted', mountedAmount, mountedCurrency,
+                      'server', data.amount, data.currency);
+        var kr = Math.round(data.amount / 100);
+        PLANS[selectedPlan].amount = data.amount;
+        PLANS[selectedPlan].price = kr + ' kr';
+        PLANS[selectedPlan].payLabel = 'Betala ' + kr + ' kr';
+        isSubmitting = false;
+        selectPlan(selectedPlan);
+        err('Priset har uppdaterats till ' + kr + ' kr. Kontrollera beloppet och tryck på Betala igen.');
+        return;
+      }
+
       paymentIntentId = data.payment_intent_id;
-      localStorage.setItem('sweden_checkout_pi', data.payment_intent_id);
-      localStorage.setItem('sweden_checkout_email', currentEmail);
-      localStorage.setItem('sweden_checkout_plan', selectedPlan);
+      paymentClientSecret = data.client_secret;
+      /* Deliberately not persisted yet — see persistPaid(). */
+
       var result = await stripe.confirmPayment({
         elements: stripeElements,
         clientSecret: data.client_secret,
         confirmParams: { return_url: RETURN_URL, receipt_email: currentEmail },
         redirect: 'if_required'
       });
-      if (result.error) { err(result.error.message || 'Betalningen misslyckades.'); btn.disabled = false; btn.textContent = PLANS[selectedPlan].payLabel; isSubmitting = false; return; }
-      if (result.paymentIntent && result.paymentIntent.status === 'succeeded') { paymentIntentId = result.paymentIntent.id; show('password'); }
+      if (result.error) {
+        var code = result.error.decline_code || result.error.code || '';
+        var text = result.error.message || 'Betalningen misslyckades.';
+        if (code === 'card_declined' || code === 'generic_decline' || code === 'do_not_honor') {
+          text = 'Din bank nekade betalningen. Inget belopp har dragits. Prova ett annat kort, eller kontakta din bank — utländska betalningar spärras ibland automatiskt.';
+        }
+        err(text);
+        resetBtn();
+        return;
+      }
+      if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
+        paymentIntentId = result.paymentIntent.id;
+        persistPaid(paymentIntentId, paymentClientSecret);
+        show('password');
+      }
       else if (result.paymentIntent && result.paymentIntent.status === 'processing') { info('Betalningen behandlas…'); }
+      else { err('Betalningen slutfördes inte. Försök igen.'); resetBtn(); return; }
     } catch (e) {
       err(e.message || 'Ett fel uppstod.');
-      btn.disabled = false; btn.textContent = PLANS[selectedPlan].payLabel;
+      resetBtn(); return;
     }
     isSubmitting = false;
   };
@@ -463,15 +599,24 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
     try {
       var res = await fetch(FUNCTIONS_URL + '/' + PLANS[selectedPlan].setupFn, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payment_intent_id: paymentIntentId, password: p1 })
+        body: JSON.stringify({
+          payment_intent_id: paymentIntentId,
+          payment_intent_client_secret: paymentClientSecret,
+          password: p1
+        })
       });
       var data = await res.json();
-      if (!data.success) { err(data.error || 'Det gick inte att skapa kontot.'); btn.disabled = false; btn.textContent = 'Skapa konto'; return; }
+      if (!data.success) {
+        if (data.code === 'payment_not_confirmed') {
+          restart('Vi kan inte hitta någon slutförd betalning för den här beställningen. Börja gärna om, eller mejla oss om du har blivit debiterad.');
+          return;
+        }
+        err(data.error || 'Det gick inte att skapa kontot. Mejla oss — din betalning är registrerad.');
+        btn.disabled = false; btn.textContent = 'Skapa konto'; return;
+      }
       var signIn = await sb.auth.signInWithPassword({ email: data.email, password: p1 });
       if (signIn.error) console.error('Auto-login failed:', signIn.error);
-      localStorage.removeItem('sweden_checkout_email');
-      localStorage.removeItem('sweden_checkout_pi');
-      localStorage.removeItem('sweden_checkout_plan');
+      clearCheckoutState();
       window.history.replaceState({}, '', window.location.pathname);
       document.getElementById('doneEmail').textContent = 'Inloggad som: ' + data.email;
       if (data.plan === 'bundle') localStorage.setItem('cl_bundle', 'se');
@@ -481,6 +626,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
     }
   };
   document.getElementById('pw2').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('setupBtn').click(); });
+  document.getElementById('startOver').onclick = function() { restart(); };
 
 })();
 </script>
