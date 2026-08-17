@@ -193,13 +193,13 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
   <div class="plan-toggle" id="planToggle">
     <div class="plan-card selected" id="planSolo">
       <div class="plan-name">Medborgarskapsprov</div>
-      <div class="plan-meta">1000 frågor · Simuleringar · Livstidsåtkomst</div>
+      <div class="plan-meta">1000 frågor · Simuleringar · Ljudkurs · Livstidsåtkomst</div>
       <div class="plan-price">499 kr</div>
     </div>
     <div class="plan-card" id="planBundle">
       <div class="plan-save">Spara 199 kr</div>
       <div class="plan-name">Medborgarskap + SvenskaProv</div>
-      <div class="plan-meta">1000 frågor + 10 språksimuleringar · AI-utvärdering</div>
+      <div class="plan-meta">1000 frågor + 10 språksimuleringar · Ljudkurs · AI-utvärdering</div>
       <div class="plan-price">999 kr</div>
     </div>
   </div>
@@ -208,7 +208,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
   <div class="price-line" id="priceLine">
     <div>
       <div class="price-line-label" id="priceLabel">Medborgarskapsprov · Premium</div>
-      <div class="price-line-meta" id="priceMeta">1000 frågor · Livstidsåtkomst</div>
+      <div class="price-line-meta" id="priceMeta">1000 frågor · Ljudkurs · Livstidsåtkomst</div>
     </div>
     <div style="flex-shrink:0;text-align:right"><span class="price-line-amount" id="priceAmount">499 kr</span></div>
   </div>
@@ -279,6 +279,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
   <div class="details-list" id="detailsList">
     <ul>
       <li>1000 frågor baserade på <em>Sverige i fokus</em> (UHR + Skolverket)</li>
+      <li>🎧 Ljudkursen — 30 ljudlektioner, en varje morgon i Telegram</li>
       <li>Hela studiehandledningen integrerad i HTML — läs och öva sida vid sida</li>
       <li>Obegränsade provsimuleringar</li>
       <li>Snabbtest, flashcards och vanliga fällor</li>
@@ -318,12 +319,16 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
   var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   var PLANS = {
-    solo:   { amount: 49900, price: '499 kr', payLabel: 'Betala 499 kr', label: 'Medborgarskapsprov · Premium',               meta: '1000 frågor · Livstidsåtkomst',                                    createFn: 'sweden-create-payment-intent', setupFn: 'sweden-setup-account' },
-    bundle: { amount: 99900, price: '999 kr', payLabel: 'Betala 999 kr', label: 'Medborgarskap + SvenskaProv · Paket', meta: '1000 frågor + 10 språksimuleringar · Livstidsåtkomst', createFn: 'sweden-create-payment-intent', setupFn: 'sweden-setup-account' },
+    solo:   { amount: 49900, price: '499 kr', payLabel: 'Betala 499 kr', label: 'Medborgarskapsprov · Premium',               meta: '1000 frågor · Ljudkurs · Livstidsåtkomst',                                    createFn: 'sweden-create-payment-intent', setupFn: 'sweden-setup-account' },
+    bundle: { amount: 99900, price: '999 kr', payLabel: 'Betala 999 kr', label: 'Medborgarskap + SvenskaProv · Paket', meta: '1000 frågor + 10 språksimuleringar · Ljudkurs · Livstidsåtkomst', createFn: 'sweden-create-payment-intent', setupFn: 'sweden-setup-account' },
   };
 
   var selectedPlan = 'solo';
   var urlPlan = new URLSearchParams(window.location.search).get('plan');
+
+  /* ── Telegram bot attribution (Ljudkursen) ── */
+  var tgChat = new URLSearchParams(window.location.search).get('tg') || localStorage.getItem('sweden_checkout_tg') || '';
+  if (/^\d{5,15}$/.test(tgChat)) { localStorage.setItem('sweden_checkout_tg', tgChat); } else { tgChat = ''; }
   if (urlPlan === 'bundle') selectedPlan = 'bundle';
 
   var currentEmail = '';
@@ -533,7 +538,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
       if (submitResult.error) { err(submitResult.error.message || 'Ett fel uppstod.'); resetBtn(); return; }
       var res = await fetch(FUNCTIONS_URL + '/' + PLANS[selectedPlan].createFn, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentEmail, plan: selectedPlan })
+        body: JSON.stringify(tgChat ? { email: currentEmail, plan: selectedPlan, tg_chat_id: tgChat } : { email: currentEmail, plan: selectedPlan })
       });
       var data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'Ett fel uppstod.');
