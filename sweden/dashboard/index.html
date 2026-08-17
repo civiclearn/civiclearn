@@ -135,6 +135,12 @@
           <div class="db-action-desc" data-i18n="action_fc_desc">Flip through questions and answers by topic.</div>
           <div class="db-action-go" data-i18n="action_open">Open →</div>
         </a>
+        <a href="#" class="db-action-card" id="audioCourseCard" style="display:none" target="_blank" rel="noopener">
+          <div class="db-action-icon">🎧</div>
+          <div class="db-action-title" id="audioCourseTitle">Ljudkursen</div>
+          <div class="db-action-desc" id="audioCourseDesc">30 ljudlektioner — en varje morgon i Telegram. Ingår i ditt paket.</div>
+          <div class="db-action-go" id="audioCourseGo">Aktivera →</div>
+        </a>
       </div>
 
       <!-- ④ Polar area chart + Sequential Practice -->
@@ -250,5 +256,49 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 <script src="/assets/js/maintenance-bar.js"></script>
 <script src="/assets/js/signout.js"></script>
+
+<!-- Ljudkursen activation card -->
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const card = document.getElementById("audioCourseCard");
+  if (!card) return;
+
+  function getEmail() {
+    try {
+      const raw = localStorage.getItem("sb-htgliokekeaovdiafrgs-auth-token");
+      if (raw) {
+        const j = JSON.parse(raw);
+        return (j.user && j.user.email) || (j.currentSession && j.currentSession.user && j.currentSession.user.email) || null;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  const email = getEmail();
+  if (!email) return; // no session, no card
+
+  try {
+    const res = await fetch("https://htgliokekeaovdiafrgs.supabase.co/functions/v1/sweden-bot-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.entitled || !data.link) return;
+
+    const en = window.CIVICEDGE_LANG === "en";
+    document.getElementById("audioCourseTitle").textContent = en ? "Audio Course" : "Ljudkursen";
+    document.getElementById("audioCourseDesc").textContent = en
+      ? "30 audio lessons — one every morning in Telegram. Included in your plan."
+      : "30 ljudlektioner — en varje morgon i Telegram. Ingår i ditt paket.";
+    document.getElementById("audioCourseGo").textContent = data.claimed
+      ? (en ? "Open in Telegram →" : "Öppna i Telegram →")
+      : (en ? "Activate →" : "Aktivera →");
+    card.href = data.link;
+    card.style.display = "";
+  } catch (e) { /* card stays hidden */ }
+});
+</script>
 </body>
 </html>
