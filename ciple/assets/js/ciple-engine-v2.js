@@ -334,6 +334,96 @@ const CIPLEEngine = {
   },
   
   // =============================================================================
+  // HYDRATE — pull submitted attempts from Supabase onto this device
+  // =============================================================================
+  //
+  // Called by the dashboard before rendering. Fetches all server-side attempts
+  // for the logged-in user (via the ciple-hydrate edge function) and writes any
+  // that are missing locally into localStorage in the exact shape the dashboard
+  // expects. A locally-submitted state is never overwritten — it is richer
+  // (it contains the actual answers), while hydrated states carry scores only.
+
+  async hydrate() {
+    const email = (localStorage.getItem('cl_email') || '').toLowerCase().trim();
+    if (!email || email === 'anonymous') {
+      console.warn('Hydrate skipped: no cl_email in localStorage');
+      return { hydrated: 0 };
+    }
+
+    let attempts;
+    try {
+      const res = await fetch(`${this.SUPABASE_URL}/functions/v1/ciple-hydrate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.SUPABASE_KEY}`
+        },
+        body: JSON.stringify({ email })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      attempts = data.attempts || [];
+    } catch (err) {
+      console.error('Hydrate failed:', err);
+      return { hydrated: 0, error: err.message };
+    }
+
+    let hydratedCount = 0;
+
+    // Attempts arrive oldest-first; if an exam has multiple attempts,
+    // the latest one wins by overwriting as we iterate.
+    attempts.forEach(a => {
+      const local = this.getTestState(a.exam_id);
+
+      // Never clobber a locally-submitted state (it has the full answers)
+      if (local && local.submitted && !local.hydrated) return;
+
+      const num = v => (typeof v === 'string' ? parseFloat(v) : v);
+
+      const state = {
+        exam_id: a.exam_id,
+        started_at: a.submitted_at,
+        submitted_at: a.submitted_at,
+        sections: {
+          reading: {
+            completed: true,
+            answers: {},
+            score: num(a.reading_score),
+            correct_count: a.reading_correct,
+            total_questions: a.reading_total
+          },
+          listening: {
+            completed: true,
+            answers: {},
+            score: num(a.listening_score),
+            correct_count: a.listening_correct,
+            total_questions: a.listening_total
+          },
+          writing: {
+            completed: true,
+            responses: {},
+            score: num(a.writing_score)
+          },
+          speaking: {
+            completed: true,
+            recordings: {},
+            score: num(a.speaking_score)
+          }
+        },
+        submitted: true,
+        result_id: a.id,
+        hydrated: true
+      };
+
+      this.saveTestState(a.exam_id, state);
+      hydratedCount++;
+    });
+
+    console.log(`Hydrated ${hydratedCount} attempt(s) from server`);
+    return { hydrated: hydratedCount };
+  },
+
+  // =============================================================================
   // HELPER FUNCTIONS
   // =============================================================================
   

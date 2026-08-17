@@ -447,13 +447,20 @@
 </div>
 
 
-<script src="/ciple/assets/js/ciple-engine-v2.js?v=4"></script>
+<script src="/ciple/assets/js/ciple-engine-v2.js?v=5"></script>
 <script>
   // ==========================================================================
   // DASHBOARD LOGIC
   // ==========================================================================
   
-  window.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('DOMContentLoaded', async () => {
+    // Pull submitted attempts from Supabase onto this device first,
+    // so results appear on any computer, not just where tests were taken.
+    try {
+      await CIPLEEngine.hydrate();
+    } catch (e) {
+      console.error('Hydrate error (rendering local data only):', e);
+    }
     generateTestsTable();
     updateStatsCards();
     updateCountdown();
