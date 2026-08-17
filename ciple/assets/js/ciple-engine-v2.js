@@ -344,9 +344,17 @@ const CIPLEEngine = {
   // (it contains the actual answers), while hydrated states carry scores only.
 
   async hydrate() {
-    const email = (localStorage.getItem('cl_email') || '').toLowerCase().trim();
+    // Wait for the auth guard to resolve the session first — cl_email is set
+    // asynchronously by ciple-auth.js, so on a fresh device it may not exist
+    // yet when the dashboard loads. cipleAuth.email is the authoritative source.
+    if (window.cipleAuth && window.cipleAuth.ready) {
+      try { await window.cipleAuth.ready; } catch (e) { /* guard redirects on failure */ }
+    }
+
+    const email = ((window.cipleAuth && window.cipleAuth.email) ||
+                   localStorage.getItem('cl_email') || '').toLowerCase().trim();
     if (!email || email === 'anonymous') {
-      console.warn('Hydrate skipped: no cl_email in localStorage');
+      console.warn('Hydrate skipped: no authenticated email available');
       return { hydrated: 0 };
     }
 
