@@ -51,6 +51,7 @@
       <a href="traps.html" data-i18n="nav_traps">Frequent Traps</a>
       <a href="flashcards.html" data-i18n="nav_flashcards">Flashcards</a>
       <a href="manual.html" data-i18n="se_nav_manual">Study material</a>
+      <a href="#" id="audioNavLink" style="display:none" target="_blank" rel="noopener">🎧 Ljudkurs</a>
       <div class="nav-sep"></div>
       <a href="history.html" data-i18n="nav_history">History</a>
       <a href="my-list.html" data-i18n="nav_my_list">My List</a>
@@ -135,13 +136,18 @@
           <div class="db-action-desc" data-i18n="action_fc_desc">Flip through questions and answers by topic.</div>
           <div class="db-action-go" data-i18n="action_open">Open →</div>
         </a>
-        <a href="#" class="db-action-card" id="audioCourseCard" style="display:none" target="_blank" rel="noopener">
-          <div class="db-action-icon">🎧</div>
-          <div class="db-action-title" id="audioCourseTitle">Ljudkursen</div>
-          <div class="db-action-desc" id="audioCourseDesc">30 ljudlektioner — en varje morgon i Telegram. Ingår i ditt paket.</div>
-          <div class="db-action-go" id="audioCourseGo">Aktivera →</div>
-        </a>
       </div>
+
+      <!-- Ljudkursen strip (hidden until entitlement confirms) -->
+      <a href="#" id="audioStrip" class="anim d3" target="_blank" rel="noopener"
+         style="display:none;align-items:center;gap:12px;background:var(--accent-soft);border-radius:14px;padding:13px 18px;text-decoration:none;color:inherit;font-family:var(--font)">
+        <span style="font-size:20px">🎧</span>
+        <span style="flex:1;min-width:0">
+          <strong id="audioStripTitle" style="font-size:14px">Ljudkursen ingår i ditt paket</strong>
+          <span id="audioStripDesc" style="display:block;font-size:12.5px;opacity:.75;margin-top:1px">30 ljudlektioner — en varje morgon i Telegram.</span>
+        </span>
+        <span id="audioStripGo" style="color:var(--accent);font-weight:600;white-space:nowrap;font-size:13.5px">Aktivera →</span>
+      </a>
 
       <!-- ④ Polar area chart + Sequential Practice -->
       <div class="db-insight-row anim d3">
@@ -257,27 +263,18 @@ document.addEventListener("DOMContentLoaded", () => {
 <script src="/assets/js/maintenance-bar.js"></script>
 <script src="/assets/js/signout.js"></script>
 
-<!-- Ljudkursen activation card -->
+<!-- Ljudkursen activation (strip + nav link) -->
 <script>
-document.addEventListener("DOMContentLoaded", async () => {
-  const card = document.getElementById("audioCourseCard");
-  if (!card) return;
-
-  function getEmail() {
-    try {
-      const raw = localStorage.getItem("sb-htgliokekeaovdiafrgs-auth-token");
-      if (raw) {
-        const j = JSON.parse(raw);
-        return (j.user && j.user.email) || (j.currentSession && j.currentSession.user && j.currentSession.user.email) || null;
-      }
-    } catch (e) {}
-    return null;
-  }
-
-  const email = getEmail();
-  if (!email) return; // no session, no card
+(async () => {
+  const strip = document.getElementById("audioStrip");
+  const navLink = document.getElementById("audioNavLink");
+  if (!strip || !navLink || !window.swedenAuth) return;
 
   try {
+    await window.swedenAuth.ready;
+    const email = window.swedenAuth.email;
+    if (!email) return;
+
     const res = await fetch("https://htgliokekeaovdiafrgs.supabase.co/functions/v1/sweden-bot-link", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -288,17 +285,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!data.entitled || !data.link) return;
 
     const en = window.CIVICEDGE_LANG === "en";
-    document.getElementById("audioCourseTitle").textContent = en ? "Audio Course" : "Ljudkursen";
-    document.getElementById("audioCourseDesc").textContent = en
-      ? "30 audio lessons — one every morning in Telegram. Included in your plan."
-      : "30 ljudlektioner — en varje morgon i Telegram. Ingår i ditt paket.";
-    document.getElementById("audioCourseGo").textContent = data.claimed
-      ? (en ? "Open in Telegram →" : "Öppna i Telegram →")
-      : (en ? "Activate →" : "Aktivera →");
-    card.href = data.link;
-    card.style.display = "";
-  } catch (e) { /* card stays hidden */ }
-});
+    document.getElementById("audioStripTitle").textContent = en
+      ? "Audio Course included in your plan" : "Ljudkursen ingår i ditt paket";
+    document.getElementById("audioStripDesc").textContent = en
+      ? "30 audio lessons — one every morning in Telegram."
+      : "30 ljudlektioner — en varje morgon i Telegram.";
+    const go = data.claimed ? (en ? "Open in Telegram →" : "Öppna i Telegram →")
+                            : (en ? "Activate →" : "Aktivera →");
+    document.getElementById("audioStripGo").textContent = go;
+    navLink.textContent = en ? "🎧 Audio Course" : "🎧 Ljudkurs";
+
+    strip.href = data.link;
+    navLink.href = data.link;
+    strip.style.display = "flex";
+    navLink.style.display = "";
+  } catch (e) { /* stays hidden */ }
+})();
 </script>
 </body>
 </html>
