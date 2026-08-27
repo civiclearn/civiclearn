@@ -206,7 +206,7 @@
     let total = 0, mastered = 0;
 
     Object.values(topics).forEach(t => { total += t.total; mastered += t.mastered; });
-    Object.values(extras).forEach(e => { total += e.total; mastered += e.mastered; });
+    // Chart topics only: Danske værdier / Aktuelle begivenheder (extras) are excluded on purpose.
 
     return {
       topics, extras, total, mastered,
