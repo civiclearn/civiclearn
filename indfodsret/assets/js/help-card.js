@@ -83,9 +83,13 @@
       icon: "⚡",
       title: "Sådan fungerer Hurtig test",
       body: `
-        <p>Hurtig test er et tilfældigt udvalg af spørgsmål fra hele
-        banken — ingen tidsbegrænsning, ingen særlig sammensætning.
-        En god måde at få lidt øvelse ind på farten.</p>
+        <p>Hurtig test er 5 tilfældige spørgsmål fra pensum —
+        læremidlerne, tidligere prøvespørgsmål og danske værdier.
+        Ingen tidsbegrænsning, ingen særlig sammensætning. En god måde
+        at få lidt øvelse ind på farten.</p>
+        <p>Spørgsmål om <em>aktuelle begivenheder</em> og
+        <em>avancerede spørgsmål</em> indgår ikke her — de har deres
+        egne sider.</p>
         <p>Spørgsmål du svarer rigtigt på, tæller som mestret i alle
         andre testformater.</p>
       `
