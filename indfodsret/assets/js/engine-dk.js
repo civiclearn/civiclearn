@@ -459,7 +459,13 @@ let stateScopeQuestions = null;
       (cfg.quicktest && cfg.quicktest.questionCount) ||
       options.limit ||
       5;
-    questions = sample(fullBank, n);
+    // Quick test = manual/pensum questions only. Current-events questions are
+    // time-bound and practised on current.html (and drawn into the simulation),
+    // so keep them out of the random quick sample.
+    const quickPool = fullBank.filter(q =>
+      normalizeLabel(q.topicLabel) !== normalizeLabel("Aktuelle begivenheder")
+    );
+    questions = sample(quickPool, n);
   }
 
   // =====================================================
