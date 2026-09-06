@@ -104,7 +104,22 @@
       .pd3-code-shown{justify-content:center;}
       .db-recommend-card{flex-direction:column;text-align:center;}
       .db-recommend-btn{width:100%;text-align:center;}
+      .rs-card{flex-direction:column;text-align:center;}
+      .rs-btn{width:100%;}
+      .rs-thumbs{display:none;}
     }
+
+    /* Revisionssæt download card */
+    .rs-card{display:none;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:14px 20px;margin:0 0 16px 0;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--shadow);}
+    .rs-card.show{display:flex;}
+    .rs-thumbs{display:flex;gap:4px;flex-shrink:0;}
+    .rs-thumbs img{height:44px;width:auto;border:1px solid var(--border);border-radius:3px;background:#fff;}
+    .rs-text{flex:1;min-width:220px;}
+    .rs-text strong{color:var(--text);font-size:.92rem;}
+    .rs-text span{display:block;color:var(--text-mid);font-size:.82rem;margin-top:2px;}
+    .rs-btn{background:var(--accent);color:#fff;border:none;cursor:pointer;font-family:inherit;padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;white-space:nowrap;transition:background .15s;}
+    .rs-btn:hover{background:#0b6265;}
+    .rs-btn[disabled]{opacity:.6;cursor:wait;}
 
     /* Organic Trustpilot review prompt (exposure-triggered, replaces chart row) */
     .review-card{display:none;background:var(--surface,#fff);border:1px solid var(--border,#e5e7eb);border-left:3px solid var(--accent,#0d7377);border-radius:var(--radius,14px);padding:24px 26px;margin:0 0 20px 0;box-shadow:var(--shadow,0 1px 3px rgba(0,0,0,.06));position:relative;}
@@ -296,6 +311,20 @@
           <div class="db-action-desc">Gennemgå spørgsmål og svar efter emne.</div>
           <div class="db-action-go">Åbn →</div>
         </a>
+      </div>
+
+      <!-- Revisionssæt (printable 6-page set, private bucket dk-materials) -->
+      <div class="rs-card" id="rsCard">
+        <div class="rs-thumbs" aria-hidden="true">
+          <img src="/indfodsret/assets/img/rs/tidslinje.png" alt="">
+          <img src="/indfodsret/assets/img/rs/staten.png" alt="">
+          <img src="/indfodsret/assets/img/rs/kortet.png" alt="">
+        </div>
+        <div class="rs-text">
+          <strong>Revisionssæt – 6 sider til væggen</strong>
+          <span>Tidslinje · Personer · Kortet · Staten &amp; verden · Tal &amp; samfund · Begreber &amp; fælder. Print i A4 (eller A3) og hæng op.</span>
+        </div>
+        <button class="rs-btn" id="rsBtn" type="button">Hent PDF →</button>
       </div>
 
       <!-- ③ Bar chart + Sequential Practice -->
@@ -516,6 +545,33 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem('cl_bundle', 'dk');
       el.classList.add('show');
     }
+  } catch(e) {}
+})();
+</script>
+
+<!-- Revisionssæt download (signed URL from private bucket; policy = any logged-in user) -->
+<script>
+(async function(){
+  var card = document.getElementById('rsCard'), btn = document.getElementById('rsBtn');
+  if (!card || !btn) return;
+  var PATH = 'revisionssaet/dk-revisionssaet-2026.pdf';
+  try {
+    if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
+    var sb = window.denmarkAuth && window.denmarkAuth.supabase;
+    if (!sb) return;
+    var sess = await sb.auth.getSession();
+    if (!sess.data.session) return;
+    card.classList.add('show');
+    btn.addEventListener('click', async function(){
+      btn.disabled = true; var label = btn.textContent; btn.textContent = 'Henter…';
+      try {
+        var r = await sb.storage.from('dk-materials').createSignedUrl(PATH, 600, { download: 'CivicLearn-revisionssaet-indfodsret-2026.pdf' });
+        if (r.error || !r.data) throw r.error || new Error('no url');
+        window.location.href = r.data.signedUrl;
+      } catch (e) {
+        alert('Kunne ikke hente filen. Prøv igen, eller kontakt os via Hjælp & Kontakt.');
+      } finally { btn.disabled = false; btn.textContent = label; }
+    });
   } catch(e) {}
 })();
 </script>
