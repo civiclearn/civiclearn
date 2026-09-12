@@ -58,6 +58,46 @@
       .bundle-banner { flex-direction: column; text-align: center; }
     }
 
+    /* ─── VE AUDIO COURSE (TELEGRAM) BANNER ─── */
+    .ve-audio-banner {
+      display: none;
+      align-items: center;
+      gap: 14px;
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+      color: #1e3a8a;
+      line-height: 1.5;
+    }
+    .ve-audio-banner.show { display: flex; }
+    .ve-audio-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .ve-audio-text { flex: 1; }
+    .ve-audio-text strong { font-weight: 600; }
+    .ve-audio-btn {
+      display: inline-block;
+      background: #2563eb;
+      color: #fff;
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .ve-audio-btn:hover { background: #1d4ed8; }
+    .ve-audio-banner.claimed { background: #f0fdf4; border-color: #bbf7d0; color: #14532d; }
+    .ve-audio-banner.claimed .ve-audio-btn { background: #16a34a; }
+    .ve-audio-banner.claimed .ve-audio-btn:hover { background: #15803d; }
+    @media (max-width: 640px) {
+      .ve-audio-banner { flex-direction: column; text-align: center; }
+    }
+
     /* ─── SPROOCHENTEST ADDON BANNER ─── */
     .st-addon-banner{display:none;background:linear-gradient(135deg,#eef2ff 0%,#e0e7ff 100%);border:1px solid #c7d2fe;border-radius:12px;padding:14px 20px;margin:0 0 20px 0;align-items:center;gap:14px;flex-wrap:wrap;position:relative;}
     .st-addon-banner.show{display:flex;}
@@ -223,6 +263,13 @@
     <span class="bundle-banner-icon">🎁</span>
     <div class="bundle-banner-text" id="bundleBannerText"></div>
     <a href="https://civiclearn.com/sproochentest/dashboard/" class="bundle-banner-btn" id="bundleBannerBtn"></a>
+  </div>
+
+  <!-- VE audio course banner (Telegram bot activation; shown to every entitled user, green once claimed) -->
+  <div class="ve-audio-banner" id="veAudioBanner">
+    <span class="ve-audio-icon">🎧</span>
+    <div class="ve-audio-text" id="veAudioText"></div>
+    <a href="#" class="ve-audio-btn" id="veAudioBtn" target="_blank" rel="noopener"></a>
   </div>
 
   <!-- Sproochentest Addon Banner (shown to non-bundle VE users) -->
@@ -616,6 +663,68 @@ CivicLearnI18n.onReady(() => {
   document.getElementById('bundleBannerText').innerHTML = t.text;
   document.getElementById('bundleBannerBtn').textContent = t.btn;
   document.getElementById('bundleBanner').classList.add('show');
+})();
+</script>
+
+<!-- VE audio course: personal Telegram activation link (lux-bot-link) -->
+<script>
+(async function () {
+  var banner = document.getElementById('veAudioBanner');
+  var textEl = document.getElementById('veAudioText');
+  var btn    = document.getElementById('veAudioBtn');
+  if (!banner || !textEl || !btn) return;
+
+  var lang = window.CIVICEDGE_LANG || 'fr';
+  var texts = {
+    fr: {
+      open:    '<strong>Cours audio « Vivre ensemble » — 24 leçons dans Telegram.</strong> Inclus dans votre accès. Une leçon par jour (≈10 min), avec une question après chaque leçon.',
+      openBtn: 'Activer le cours audio →',
+      done:    '<strong>Cours audio activé.</strong> Vos leçons arrivent chaque matin à 8h dans Telegram.',
+      doneBtn: 'Ouvrir dans Telegram →'
+    },
+    de: {
+      open:    '<strong>Audiokurs „Vivre ensemble“ — 24 Lektionen in Telegram.</strong> In Ihrem Zugang enthalten. Eine Lektion pro Tag (≈10 Min.), mit einer Frage nach jeder Lektion.',
+      openBtn: 'Audiokurs aktivieren →',
+      done:    '<strong>Audiokurs aktiviert.</strong> Ihre Lektionen kommen jeden Morgen um 8 Uhr in Telegram.',
+      doneBtn: 'In Telegram öffnen →'
+    },
+    en: {
+      open:    '<strong>"Living Together" audio course — 24 lessons in Telegram.</strong> Included in your access. One lesson a day (≈10 min), with a question after each lesson.',
+      openBtn: 'Activate the audio course →',
+      done:    '<strong>Audio course activated.</strong> Your lessons arrive every morning at 08:00 in Telegram.',
+      doneBtn: 'Open in Telegram →'
+    }
+  };
+  var t = texts[lang] || texts.fr;
+
+  try {
+    if (window.luxAuth && window.luxAuth.ready) await window.luxAuth.ready;
+    var sb = window.luxAuth && window.luxAuth.supabase;
+    if (!sb) return;
+    var sess = await sb.auth.getSession();
+    var email = sess && sess.data && sess.data.session && sess.data.session.user && sess.data.session.user.email;
+    if (!email) return;
+
+    var res = await fetch(window.SUPABASE_URL + '/functions/v1/lux-bot-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': window.SUPABASE_KEY },
+      body: JSON.stringify({ email: email })
+    });
+    if (!res.ok) return;                 // 403 = not entitled → no banner
+    var data = await res.json();
+    if (!data || !data.entitled || !data.link) return;
+
+    btn.href = data.link;
+    if (data.claimed) {
+      textEl.innerHTML = t.done;
+      btn.textContent = t.doneBtn;
+      banner.classList.add('claimed');
+    } else {
+      textEl.innerHTML = t.open;
+      btn.textContent = t.openBtn;
+    }
+    banner.classList.add('show');
+  } catch (e) { /* silent */ }
 })();
 </script>
 
