@@ -326,8 +326,8 @@ en: {
   cta_create:"Create account", done_title:"Your account is ready!", cta_go:"Start practising →",
   already:"Already have an account?", signin:"Sign in here",
   details_toggle:"What's included?",
-  feat_solo:["650+ questions across all topics","Unlimited exam-format simulations","Quick test, flashcards & frequent traps","Progress tracking & weak area analysis","Audio on every question & answer","Three languages: EN · FR · DE","Cross-device sync","Lifetime access — no subscription"],
-  feat_bundle:["Everything from Vivre-Ensemble (650+ questions)","10 Sproochentest simulations","Native Luxembourgish audio · Listening B1 + Speaking A2","AI evaluation & detailed feedback","One login for both platforms","Cross-device sync","Lifetime access — no subscription","Save €39 vs buying separately"],
+  feat_solo:["650+ questions across all topics","Unlimited exam-format simulations","Quick test, flashcards & frequent traps","Progress tracking & weak area analysis","Audio on every question & answer","Telegram audio course — 24 daily lessons (FR/EN)","Three languages: EN · FR · DE","Cross-device sync","Lifetime access — no subscription"],
+  feat_bundle:["Everything from Vivre-Ensemble (650+ questions)","Telegram audio course — 24 daily lessons (FR/EN)","10 Sproochentest simulations","Native Luxembourgish audio · Listening B1 + Speaking A2","AI evaluation & detailed feedback","One login for both platforms","Cross-device sync","Lifetime access — no subscription","Save €39 vs buying separately"],
   msg_email_required:"Please enter a valid email.", msg_processing:"Processing…",
   msg_error:"An error occurred.", msg_payment_failed:"Payment failed.",
   msg_payment_incomplete:"Payment was not completed.",
@@ -352,8 +352,8 @@ fr: {
   cta_create:"Créer le compte", done_title:"Votre compte est prêt !", cta_go:"Commencer l'entraînement →",
   already:"Déjà un compte ?", signin:"Se connecter",
   details_toggle:"Qu'est-ce qui est inclus ?",
-  feat_solo:["650+ questions sur tous les thèmes","Simulations au format examen illimitées","Test rapide, flashcards et pièges fréquents","Suivi de progression et analyse des points faibles","Audio sur chaque question et réponse","Trois langues : EN · FR · DE","Synchronisation multi-appareils","Accès à vie — aucun abonnement"],
-  feat_bundle:["Tout Vivre-Ensemble (650+ questions)","10 simulations Sproochentest","Audio luxembourgeois natif · Écoute B1 + Expression A2","Évaluation IA et feedback détaillé","Un seul login pour les deux plateformes","Synchronisation multi-appareils","Accès à vie — aucun abonnement","Économisez 39 € vs achat séparé"],
+  feat_solo:["650+ questions sur tous les thèmes","Simulations au format examen illimitées","Test rapide, flashcards et pièges fréquents","Suivi de progression et analyse des points faibles","Audio sur chaque question et réponse","Cours audio Telegram — 24 leçons quotidiennes (FR/EN)","Trois langues : EN · FR · DE","Synchronisation multi-appareils","Accès à vie — aucun abonnement"],
+  feat_bundle:["Tout Vivre-Ensemble (650+ questions)","Cours audio Telegram — 24 leçons quotidiennes (FR/EN)","10 simulations Sproochentest","Audio luxembourgeois natif · Écoute B1 + Expression A2","Évaluation IA et feedback détaillé","Un seul login pour les deux plateformes","Synchronisation multi-appareils","Accès à vie — aucun abonnement","Économisez 39 € vs achat séparé"],
   msg_email_required:"Veuillez entrer une adresse e-mail valide.", msg_processing:"Traitement en cours…",
   msg_error:"Une erreur est survenue.", msg_payment_failed:"Le paiement a échoué.",
   msg_payment_incomplete:"Le paiement n'a pas été finalisé.",
@@ -378,8 +378,8 @@ de: {
   cta_create:"Konto erstellen", done_title:"Ihr Konto ist bereit!", cta_go:"Training starten →",
   already:"Bereits ein Konto?", signin:"Anmelden",
   details_toggle:"Was ist enthalten?",
-  feat_solo:["650+ Fragen zu allen Themen","Unbegrenzte Simulationen im Prüfungsformat","Schnelltest, Lernkarten und häufige Fehler","Fortschrittsverfolgung und Schwächenanalyse","Audio bei jeder Frage und Antwort","Drei Sprachen: EN · FR · DE","Geräteübergreifende Synchronisierung","Lebenslanger Zugriff — kein Abo"],
-  feat_bundle:["Alles von Vivre-Ensemble (650+ Fragen)","10 Sproochentest-Simulationen","Lëtzebuergesch-Audio · Hören B1 + Sprechen A2","KI-Bewertung und detailliertes Feedback","Ein Login für beide Plattformen","Geräteübergreifende Synchronisierung","Lebenslanger Zugriff — kein Abo","39 € sparen vs. Einzelkauf"],
+  feat_solo:["650+ Fragen zu allen Themen","Unbegrenzte Simulationen im Prüfungsformat","Schnelltest, Lernkarten und häufige Fehler","Fortschrittsverfolgung und Schwächenanalyse","Audio bei jeder Frage und Antwort","Telegram-Audiokurs — 24 tägliche Lektionen (FR/EN)","Drei Sprachen: EN · FR · DE","Geräteübergreifende Synchronisierung","Lebenslanger Zugriff — kein Abo"],
+  feat_bundle:["Alles von Vivre-Ensemble (650+ Fragen)","Telegram-Audiokurs — 24 tägliche Lektionen (FR/EN)","10 Sproochentest-Simulationen","Lëtzebuergesch-Audio · Hören B1 + Sprechen A2","KI-Bewertung und detailliertes Feedback","Ein Login für beide Plattformen","Geräteübergreifende Synchronisierung","Lebenslanger Zugriff — kein Abo","39 € sparen vs. Einzelkauf"],
   msg_email_required:"Bitte geben Sie eine gültige E-Mail-Adresse ein.", msg_processing:"Wird verarbeitet…",
   msg_error:"Ein Fehler ist aufgetreten.", msg_payment_failed:"Zahlung fehlgeschlagen.",
   msg_payment_incomplete:"Zahlung nicht abgeschlossen.",
@@ -440,6 +440,14 @@ applyLang('fr');
   var selectedPlan = 'solo';
   var urlPlan = new URLSearchParams(window.location.search).get('plan');
   if (urlPlan === 'bundle') selectedPlan = 'bundle';
+
+  /* ── Telegram audio-course attribution (?tg=<chat_id> from @VivreEnsembleLux_bot) ── */
+  var tgChatId = '';
+  (function() {
+    var raw = String(new URLSearchParams(window.location.search).get('tg') || '').trim();
+    if (/^\d{5,15}$/.test(raw)) { tgChatId = raw; localStorage.setItem('lux_checkout_tg', raw); }
+    else { tgChatId = localStorage.getItem('lux_checkout_tg') || ''; }   // survives the 3DS redirect
+  })();
 
   var currentEmail = '';
   var paymentIntentId = '';
@@ -557,7 +565,7 @@ applyLang('fr');
       if (submitResult.error) { err(submitResult.error.message || t('msg_error')); btn.disabled = false; btn.textContent = t(PLANS[selectedPlan].payKey); isSubmitting = false; return; }
       var res = await fetch(FUNCTIONS_URL + '/lux-create-payment-intent', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentEmail, plan: selectedPlan })
+        body: JSON.stringify(tgChatId ? { email: currentEmail, plan: selectedPlan, tg_chat_id: tgChatId } : { email: currentEmail, plan: selectedPlan })
       });
       var data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || t('msg_error'));
@@ -599,6 +607,7 @@ applyLang('fr');
       localStorage.removeItem('lux_checkout_email');
       localStorage.removeItem('lux_checkout_pi');
       localStorage.removeItem('lux_checkout_plan');
+      localStorage.removeItem('lux_checkout_tg');
       window.history.replaceState({}, '', window.location.pathname);
       document.getElementById('doneEmail').textContent = t('msg_logged_in') + data.email;
       if (data.plan === 'bundle') localStorage.setItem('cl_bundle', 'lu');

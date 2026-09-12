@@ -138,6 +138,63 @@
         </a>
       </div>
 
+      <!-- Repetitionsserien download (shown to every logged-in user; the storage policy decides on click) -->
+      <style>
+        .rs-card{display:none;background:var(--surface,#fff);border:1px solid var(--border,#e5e7eb);border-left:3px solid var(--accent);border-radius:14px;padding:13px 18px;margin:0 0 20px 0;align-items:center;gap:16px;flex-wrap:wrap;font-family:var(--font);}
+        .rs-card.show{display:flex;}
+        .rs-thumbs{display:flex;gap:4px;flex-shrink:0;}
+        .rs-thumbs img{height:44px;width:auto;border:1px solid var(--border,#e5e7eb);border-radius:3px;background:#fff;}
+        .rs-text{flex:1;min-width:220px;}
+        .rs-text strong{font-size:14px;}
+        .rs-text span{display:block;font-size:12.5px;opacity:.75;margin-top:1px;}
+        .rs-btn{background:var(--accent);color:#fff;border:none;cursor:pointer;font-family:inherit;padding:9px 18px;border-radius:8px;font-size:13.5px;font-weight:600;white-space:nowrap;}
+        .rs-btn[disabled]{opacity:.6;cursor:wait;}
+        @media(max-width:600px){.rs-card{flex-direction:column;text-align:center;}.rs-btn{width:100%;}.rs-thumbs{display:none;}}
+      </style>
+      <div class="rs-card anim d3" id="rsCard">
+        <div class="rs-thumbs" aria-hidden="true">
+          <img src="/sweden/assets/img/rs/tidslinje.png" alt="">
+          <img src="/sweden/assets/img/rs/staten.png" alt="">
+          <img src="/sweden/assets/img/rs/kortet.png" alt="">
+        </div>
+        <div class="rs-text">
+          <strong id="rsTitle">Repetitionsserien – 6 sidor för väggen</strong>
+          <span id="rsDesc">Tidslinjen · Året &amp; tron · Kartan · Staten &amp; världen · Siffror &amp; samhälle · Rättigheter &amp; begrepp. Skriv ut i A4 (eller A3) och häng upp.</span>
+        </div>
+        <button class="rs-btn" id="rsBtn" type="button">Hämta PDF →</button>
+      </div>
+      <script>
+      (async function(){
+        var card = document.getElementById('rsCard'), btn = document.getElementById('rsBtn');
+        if (!card || !btn) return;
+        var PATH = 'repetitionsserie/se-repetitionsserie-2026-27.pdf';
+        var en = window.CIVICEDGE_LANG === 'en';
+        if (en) {
+          document.getElementById('rsTitle').textContent = 'Revision set – 6 pages for your wall';
+          document.getElementById('rsDesc').textContent = 'Timeline · The year & faith · The map · State & world · Numbers & society · Rights & concepts. Print in A4 (or A3) and hang it up.';
+          btn.textContent = 'Download PDF →';
+        }
+        try {
+          if (window.swedenAuth && window.swedenAuth.ready) await window.swedenAuth.ready;
+          var sb = window.swedenAuth && window.swedenAuth.supabase;
+          if (!sb) return;
+          var sess = await sb.auth.getSession();
+          if (!sess.data.session) return;
+          card.classList.add('show');
+          btn.addEventListener('click', async function(){
+            btn.disabled = true; var label = btn.textContent; btn.textContent = en ? 'Fetching…' : 'Hämtar…';
+            try {
+              var r = await sb.storage.from('se-materials').createSignedUrl(PATH, 600, { download: 'CivicLearn-repetitionsserie-medborgarskapsprov-2026-27.pdf' });
+              if (r.error || !r.data) throw r.error || new Error('no url');
+              window.location.href = r.data.signedUrl;
+            } catch (e) {
+              alert(en ? 'Could not fetch the file. Try again or contact us via Help & Contact.' : 'Kunde inte hämta filen. Försök igen eller kontakta oss via Hjälp & Kontakt.');
+            } finally { btn.disabled = false; btn.textContent = label; }
+          });
+        } catch (e) {}
+      })();
+      </script>
+
       <!-- Ljudkursen strip (hidden until entitlement confirms) -->
       <a href="#" id="audioStrip" class="anim d3" target="_blank" rel="noopener"
          style="display:none;align-items:center;gap:12px;background:var(--accent-soft);border-radius:14px;padding:13px 18px;margin-bottom:20px;text-decoration:none;color:inherit;font-family:var(--font)">
