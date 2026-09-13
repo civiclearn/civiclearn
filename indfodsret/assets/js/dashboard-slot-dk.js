@@ -29,7 +29,7 @@
   var KEY_PD3_DISMISSED = "pd3_banner_dismissed";       // legacy flag from the old banner — still honoured (never again)
   var KEY_PD3_SNOOZE = "cl_dk_pd3_snooze_until";
   var PD3_SNOOZE_DAYS = 30;
-  var NOTICE_TARGETS = ["*", "indfodsret", "denmark", "dk"];
+  var NOTICE_TARGETS = ["*", "indfodsret"];   // NOT "denmark" — that is the closed legacy version
 
   var T = {
     rsTitle: "Dit revisionssæt er klar",
