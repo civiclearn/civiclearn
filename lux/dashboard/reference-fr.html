@@ -311,7 +311,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (btn.dataset.lang === current) return;
       localStorage.setItem("civicedge_lang", btn.dataset.lang);
       // help-xx.html / reference-xx.html are per-language files
-      const m = location.pathname.match(/\/(help|reference)(-[a-z]{2})?\.html$/);
+      // Cloudflare Pages serves these with or without ".html" (/lux/dashboard/help-en)
+      const m = location.pathname.match(/\/(help|reference)(-[a-z]{2})?(\.html)?\/?$/);
       if (m) { location.href = `${m[1]}-${btn.dataset.lang}.html`; return; }
       location.reload();
     });
