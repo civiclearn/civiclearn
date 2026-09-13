@@ -185,6 +185,97 @@
         </a>
       </div>
 
+      <!-- Fiches de révision download (shown to every logged-in user; the storage policy decides on click) -->
+      <style>
+        .rs-card{display:none;background:var(--surface,#fff);border:1px solid var(--border,#e5e7eb);border-left:3px solid var(--accent);border-radius:14px;padding:13px 18px;margin:0 0 20px 0;align-items:center;gap:16px;flex-wrap:wrap;font-family:var(--font);}
+        .rs-card.show{display:flex;}
+        .rs-thumbs{display:flex;gap:4px;flex-shrink:0;}
+        .rs-thumbs img{height:44px;width:auto;border:1px solid var(--border,#e5e7eb);border-radius:3px;background:#fff;}
+        .rs-text{flex:1;min-width:220px;}
+        .rs-text strong{font-size:14px;}
+        .rs-text span{display:block;font-size:12.5px;opacity:.75;margin-top:1px;}
+        .rs-langs{display:block;font-size:11.5px;margin-top:4px;opacity:.7;}
+        .rs-langs a{color:var(--accent);font-weight:600;text-decoration:none;margin-right:8px;cursor:pointer;}
+        .rs-langs a:hover{text-decoration:underline;}
+        .rs-btn{background:var(--accent);color:#fff;border:none;cursor:pointer;font-family:inherit;padding:9px 18px;border-radius:8px;font-size:13.5px;font-weight:600;white-space:nowrap;}
+        .rs-btn[disabled]{opacity:.6;cursor:wait;}
+        @media(max-width:600px){.rs-card{flex-direction:column;text-align:center;}.rs-btn{width:100%;}.rs-thumbs{display:none;}}
+      </style>
+      <div class="rs-card anim d3" id="rsCard">
+        <div class="rs-thumbs" aria-hidden="true">
+          <img id="rsThumb1" src="/lux/assets/img/rs/fr/tidslinje.png" alt="">
+          <img id="rsThumb2" src="/lux/assets/img/rs/fr/staten.png" alt="">
+          <img id="rsThumb3" src="/lux/assets/img/rs/fr/juridictions.png" alt="">
+        </div>
+        <div class="rs-text">
+          <strong id="rsTitle">Fiches de révision – 6 pages pour le mur</strong>
+          <span id="rsDesc">Chronologie · L'État &amp; les pouvoirs · Les juridictions · Élections &amp; communes · Droits fondamentaux · Chiffres &amp; pièges. À imprimer en A4 (ou A3) et à afficher.</span>
+          <span class="rs-langs" id="rsLangs"></span>
+        </div>
+        <button class="rs-btn" id="rsBtn" type="button">Télécharger le PDF →</button>
+      </div>
+      <script>
+      // runs after the page scripts at the bottom (lang-bootstrap, auth) have executed
+      document.addEventListener('DOMContentLoaded', async function(){
+        var card = document.getElementById('rsCard'), btn = document.getElementById('rsBtn'), langsEl = document.getElementById('rsLangs');
+        if (!card || !btn) return;
+        var BUCKET = 'lux-materials';
+        var FILES = {
+          fr: { path: 'fiches-revision/lu-fiches-revision-2026-27.pdf',    name: 'CivicLearn-fiches-revision-vivre-ensemble-2026-27-FR.pdf' },
+          en: { path: 'fiches-revision/lu-fiches-revision-2026-27-en.pdf', name: 'CivicLearn-revision-sheets-vivre-ensemble-2026-27-EN.pdf' },
+          de: { path: 'fiches-revision/lu-fiches-revision-2026-27-de.pdf', name: 'CivicLearn-Lernblaetter-vivre-ensemble-2026-27-DE.pdf' }
+        };
+        var T = {
+          fr: { title: 'Fiches de révision – 6 pages pour le mur',
+                desc: 'Chronologie · L\'État & les pouvoirs · Les juridictions · Élections & communes · Droits fondamentaux · Chiffres & pièges. À imprimer en A4 (ou A3) et à afficher.',
+                btn: 'Télécharger le PDF →', busy: 'Chargement…', other: 'Aussi disponible :', names: { fr: 'Français', en: 'English', de: 'Deutsch' },
+                err: 'Impossible de récupérer le fichier. Réessayez ou contactez-nous via Aide & contact.' },
+          de: { title: 'Lernblätter – 6 Seiten für die Wand',
+                desc: 'Zeitleiste · Der Staat & die Gewalten · Die Gerichte · Wahlen & Gemeinden · Grundrechte · Zahlen & Fallen. In A4 (oder A3) ausdrucken und aufhängen.',
+                btn: 'PDF herunterladen →', busy: 'Wird geladen…', other: 'Auch verfügbar:', names: { fr: 'Français', en: 'English', de: 'Deutsch' },
+                err: 'Die Datei konnte nicht geladen werden. Versuchen Sie es erneut oder kontaktieren Sie uns über Hilfe & Kontakt.' },
+          en: { title: 'Revision sheets – 6 pages for your wall',
+                desc: 'Timeline · The State & the powers · The courts · Elections & municipalities · Fundamental rights · Figures & traps. Print in A4 (or A3) and hang it up.',
+                btn: 'Download PDF →', busy: 'Fetching…', other: 'Also available:', names: { fr: 'Français', en: 'English', de: 'Deutsch' },
+                err: 'Could not fetch the file. Try again or contact us via Help & Contact.' }
+        };
+        var lang = FILES[window.CIVICEDGE_LANG] ? window.CIVICEDGE_LANG : 'fr';
+        var t = T[lang];
+        document.getElementById('rsTitle').textContent = t.title;
+        document.getElementById('rsDesc').textContent = t.desc;
+        btn.textContent = t.btn;
+        ['tidslinje','staten','juridictions'].forEach(function(p, i){ document.getElementById('rsThumb' + (i + 1)).src = '/lux/assets/img/rs/' + lang + '/' + p + '.png'; });
+
+        var sb = null;
+        async function download(l){
+          btn.disabled = true; var label = btn.textContent; btn.textContent = t.busy;
+          try {
+            var r = await sb.storage.from(BUCKET).createSignedUrl(FILES[l].path, 600, { download: FILES[l].name });
+            if (r.error || !r.data) throw r.error || new Error('no url');
+            window.location.href = r.data.signedUrl;
+          } catch (e) {
+            alert(t.err);
+          } finally { btn.disabled = false; btn.textContent = label; }
+        }
+        try {
+          if (window.luxAuth && window.luxAuth.ready) await window.luxAuth.ready;
+          sb = window.luxAuth && window.luxAuth.supabase;
+          if (!sb) return;
+          var sess = await sb.auth.getSession();
+          if (!sess.data.session) return;
+          // links to the other two languages
+          langsEl.textContent = t.other + ' ';
+          Object.keys(FILES).filter(function(l){ return l !== lang; }).forEach(function(l){
+            var a = document.createElement('a'); a.textContent = t.names[l] + ' ↓';
+            a.addEventListener('click', function(ev){ ev.preventDefault(); download(l); });
+            langsEl.appendChild(a);
+          });
+          card.classList.add('show');
+          btn.addEventListener('click', function(){ download(lang); });
+        } catch (e) {}
+      });
+      </script>
+
       <!-- ④ Bar chart with flag reveal + Sequential Practice -->
       <div class="db-insight-row anim d3">
         <div class="db-chart-card db-polar-card">
