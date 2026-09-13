@@ -69,7 +69,14 @@
       <a href="traps.html" data-i18n="nav_traps">Pièges fréquents</a>
       <a href="flashcards.html" data-i18n="nav_flashcards">Flashcards</a>
       <a href="reference.html" data-i18n="nav_reference_texts">Textes de référence</a>
-      <a href="#" id="audioNavLink" style="display:none" target="_blank" rel="noopener">🎧 Cours audio</a>
+      <div class="nav-sep"></div>
+      <!-- Entitlements: permanent home for what the learner owns (filled by dashboard-slot-lu.js) -->
+      <div class="nav-group" id="navExtras" style="display:none">
+        <div class="nav-group-label" id="navExtrasLabel">Vos ressources</div>
+        <a href="#" id="navFiches">📄 <span>Fiches de révision</span></a>
+        <a href="#" id="navAudio" style="display:none" target="_blank" rel="noopener">🎧 <span>Cours audio</span><i class="nav-dot" id="navAudioDot" style="display:none"></i></a>
+        <a href="https://civiclearn.com/sproochentest/dashboard/" id="navBundle" style="display:none">🎁 <span>Sproochentest</span></a>
+      </div>
       <div class="nav-sep"></div>
       <a href="history.html" data-i18n="nav_history">Historique</a>
       <a href="my-list.html" data-i18n="nav_my_list">Ma liste</a>
@@ -137,24 +144,14 @@
         </div>
       </div>
 
-      <!-- ② Entitlement strips (hidden until JS confirms) -->
-      <div class="db-strip purple anim d2" id="bundleBanner">
-        <span class="db-strip-icon">🎁</span>
-        <span class="db-strip-text" id="bundleBannerText"></span>
-        <a href="https://civiclearn.com/sproochentest/dashboard/" class="db-strip-go" id="bundleBannerBtn"></a>
-      </div>
-
-      <div class="db-strip anim d2" id="veAudioBanner">
-        <span class="db-strip-icon">🎧</span>
-        <span class="db-strip-text" id="veAudioText"></span>
-        <a href="#" class="db-strip-go" id="veAudioBtn" target="_blank" rel="noopener"></a>
-      </div>
-
-      <div class="db-strip purple anim d2" id="stAddonBanner">
-        <span class="db-strip-icon">🗣️</span>
-        <span class="db-strip-text" id="stAddonText"></span>
-        <button class="db-strip-go" id="stAddonBtn"></button>
-        <button class="db-strip-dismiss" id="stAddonDismiss" title="✕">✕</button>
+      <!-- ② Message slot: shows at most ONE message, by priority (notice > audio activation > fiches > cross-sell).
+           Empties itself as items are done. Filled by dashboard-slot-lu.js -->
+      <div class="db-slot anim d2" id="dbSlot" style="display:none">
+        <span class="db-slot-icon" id="dbSlotIcon"></span>
+        <span class="db-slot-text" id="dbSlotText"></span>
+        <a class="db-slot-go" id="dbSlotGo" href="#"></a>
+        <span class="db-slot-pager" id="dbSlotPager" style="display:none"><button type="button" id="dbSlotPrev" aria-label="Previous">‹</button><span id="dbSlotCount"></span><button type="button" id="dbSlotNext" aria-label="Next">›</button></span>
+        <button class="db-slot-dismiss" id="dbSlotDismiss" type="button" title="✕" style="display:none">✕</button>
       </div>
 
       <!-- ③ Launchers -->
@@ -185,97 +182,6 @@
         </a>
       </div>
 
-      <!-- Fiches de révision download (shown to every logged-in user; the storage policy decides on click) -->
-      <style>
-        .rs-card{display:none;background:var(--surface,#fff);border:1px solid var(--border,#e5e7eb);border-left:3px solid var(--accent);border-radius:14px;padding:13px 18px;margin:0 0 20px 0;align-items:center;gap:16px;flex-wrap:wrap;font-family:var(--font);}
-        .rs-card.show{display:flex;}
-        .rs-thumbs{display:flex;gap:4px;flex-shrink:0;}
-        .rs-thumbs img{height:44px;width:auto;border:1px solid var(--border,#e5e7eb);border-radius:3px;background:#fff;}
-        .rs-text{flex:1;min-width:220px;}
-        .rs-text strong{font-size:14px;}
-        .rs-text span{display:block;font-size:12.5px;opacity:.75;margin-top:1px;}
-        .rs-langs{display:block;font-size:11.5px;margin-top:4px;opacity:.7;}
-        .rs-langs a{color:var(--accent);font-weight:600;text-decoration:none;margin-right:8px;cursor:pointer;}
-        .rs-langs a:hover{text-decoration:underline;}
-        .rs-btn{background:var(--accent);color:#fff;border:none;cursor:pointer;font-family:inherit;padding:9px 18px;border-radius:8px;font-size:13.5px;font-weight:600;white-space:nowrap;}
-        .rs-btn[disabled]{opacity:.6;cursor:wait;}
-        @media(max-width:600px){.rs-card{flex-direction:column;text-align:center;}.rs-btn{width:100%;}.rs-thumbs{display:none;}}
-      </style>
-      <div class="rs-card anim d3" id="rsCard">
-        <div class="rs-thumbs" aria-hidden="true">
-          <img id="rsThumb1" src="/lux/assets/img/rs/fr/tidslinje.png" alt="">
-          <img id="rsThumb2" src="/lux/assets/img/rs/fr/staten.png" alt="">
-          <img id="rsThumb3" src="/lux/assets/img/rs/fr/juridictions.png" alt="">
-        </div>
-        <div class="rs-text">
-          <strong id="rsTitle">Fiches de révision – 6 aide-mémoire visuels</strong>
-          <span id="rsDesc">Chronologie · L'État &amp; les pouvoirs · Les juridictions · Élections &amp; communes · Droits fondamentaux · Chiffres &amp; pièges. Tout l'essentiel en un coup d'œil – à l'écran ou imprimé en A4.</span>
-          <span class="rs-langs" id="rsLangs"></span>
-        </div>
-        <button class="rs-btn" id="rsBtn" type="button">Télécharger le PDF →</button>
-      </div>
-      <script>
-      // runs after the page scripts at the bottom (lang-bootstrap, auth) have executed
-      document.addEventListener('DOMContentLoaded', async function(){
-        var card = document.getElementById('rsCard'), btn = document.getElementById('rsBtn'), langsEl = document.getElementById('rsLangs');
-        if (!card || !btn) return;
-        var BUCKET = 'lux-materials';
-        var FILES = {
-          fr: { path: 'fiches-revision/lu-fiches-revision-2026-27.pdf',    name: 'CivicLearn-fiches-revision-vivre-ensemble-2026-27-FR.pdf' },
-          en: { path: 'fiches-revision/lu-fiches-revision-2026-27-en.pdf', name: 'CivicLearn-revision-sheets-vivre-ensemble-2026-27-EN.pdf' },
-          de: { path: 'fiches-revision/lu-fiches-revision-2026-27-de.pdf', name: 'CivicLearn-Lernblaetter-vivre-ensemble-2026-27-DE.pdf' }
-        };
-        var T = {
-          fr: { title: 'Fiches de révision – 6 aide-mémoire visuels',
-                desc: 'Chronologie · L\'État & les pouvoirs · Les juridictions · Élections & communes · Droits fondamentaux · Chiffres & pièges. Tout l\'essentiel en un coup d\'œil – à l\'écran ou imprimé en A4.',
-                btn: 'Télécharger le PDF →', busy: 'Chargement…', other: 'Aussi disponible :', names: { fr: 'Français', en: 'English', de: 'Deutsch' },
-                err: 'Impossible de récupérer le fichier. Réessayez ou contactez-nous via Aide & contact.' },
-          de: { title: 'Lernblätter – 6 visuelle Übersichten',
-                desc: 'Zeitleiste · Der Staat & die Gewalten · Die Gerichte · Wahlen & Gemeinden · Grundrechte · Zahlen & Fallen. Das Wesentliche auf einen Blick – am Bildschirm oder als A4-Ausdruck.',
-                btn: 'PDF herunterladen →', busy: 'Wird geladen…', other: 'Auch verfügbar:', names: { fr: 'Français', en: 'English', de: 'Deutsch' },
-                err: 'Die Datei konnte nicht geladen werden. Versuchen Sie es erneut oder kontaktieren Sie uns über Hilfe & Kontakt.' },
-          en: { title: 'Revision sheets – 6 visual summaries',
-                desc: 'Timeline · The State & the powers · The courts · Elections & municipalities · Fundamental rights · Figures & traps. The essentials at a glance – on screen or printed in A4.',
-                btn: 'Download PDF →', busy: 'Fetching…', other: 'Also available:', names: { fr: 'Français', en: 'English', de: 'Deutsch' },
-                err: 'Could not fetch the file. Try again or contact us via Help & Contact.' }
-        };
-        var lang = FILES[window.CIVICEDGE_LANG] ? window.CIVICEDGE_LANG : 'fr';
-        var t = T[lang];
-        document.getElementById('rsTitle').textContent = t.title;
-        document.getElementById('rsDesc').textContent = t.desc;
-        btn.textContent = t.btn;
-        ['tidslinje','staten','juridictions'].forEach(function(p, i){ document.getElementById('rsThumb' + (i + 1)).src = '/lux/assets/img/rs/' + lang + '/' + p + '.png'; });
-
-        var sb = null;
-        async function download(l){
-          btn.disabled = true; var label = btn.textContent; btn.textContent = t.busy;
-          try {
-            var r = await sb.storage.from(BUCKET).createSignedUrl(FILES[l].path, 600, { download: FILES[l].name });
-            if (r.error || !r.data) throw r.error || new Error('no url');
-            window.location.href = r.data.signedUrl;
-          } catch (e) {
-            alert(t.err);
-          } finally { btn.disabled = false; btn.textContent = label; }
-        }
-        try {
-          if (window.luxAuth && window.luxAuth.ready) await window.luxAuth.ready;
-          sb = window.luxAuth && window.luxAuth.supabase;
-          if (!sb) return;
-          var sess = await sb.auth.getSession();
-          if (!sess.data.session) return;
-          // links to the other two languages
-          langsEl.textContent = t.other + ' ';
-          Object.keys(FILES).filter(function(l){ return l !== lang; }).forEach(function(l){
-            var a = document.createElement('a'); a.textContent = t.names[l] + ' ↓';
-            a.addEventListener('click', function(ev){ ev.preventDefault(); download(l); });
-            langsEl.appendChild(a);
-          });
-          card.classList.add('show');
-          btn.addEventListener('click', function(){ download(lang); });
-        } catch (e) {}
-      });
-      </script>
-
       <!-- ④ Bar chart with flag reveal + Sequential Practice -->
       <div class="db-insight-row anim d3">
         <div class="db-chart-card db-polar-card">
@@ -303,22 +209,6 @@
               <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 5.5l3 3.5-3 3.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
           </div>
-        </div>
-      </div>
-
-      <!-- ⑤ Tips (permanent) -->
-      <div class="db-tips-row anim d4" id="tipsRow">
-        <div class="db-tip-card">
-          <div class="db-tip-title" data-i18n="tip_topics_title">Commencez par les thèmes</div>
-          <div class="db-tip-text" data-i18n="tip_topics_text">Les tests par thème utilisent la maîtrise progressive : vos erreurs reviennent jusqu'à ce que vous les corrigiez.</div>
-        </div>
-        <div class="db-tip-card">
-          <div class="db-tip-title" data-i18n="tip_star_title">Marquez les questions difficiles</div>
-          <div class="db-tip-text" data-i18n="tip_star_text">Utilisez l'étoile ☆ sur n'importe quelle question pour constituer votre liste de révision personnelle.</div>
-        </div>
-        <div class="db-tip-card">
-          <div class="db-tip-title" data-i18n="tip_sim_title">Les simulations sont des répétitions</div>
-          <div class="db-tip-text" data-i18n="tip_sim_text">Après quelques jours de tests par thème, testez-vous dans les conditions réelles : 40 questions, 60 minutes.</div>
         </div>
       </div>
 
@@ -422,126 +312,16 @@ document.addEventListener("DOMContentLoaded", () => {
   if (y) y.textContent = new Date().getFullYear();
 });
 </script>
-<script src="/assets/js/maintenance-bar.js"></script>
+<!-- maintenance-bar.js intentionally not loaded here: site notices render in the message slot -->
 <script src="/assets/js/signout.js"></script>
 
-<!-- Bundle strip (Sproochentest bundle) -->
-<script>
-(async function () {
-  let hasBundle = localStorage.getItem('cl_bundle') === 'lu';
-
-  if (!hasBundle) {
-    try {
-      if (window.luxAuth && window.luxAuth.ready) await window.luxAuth.ready;
-      const sb = window.luxAuth && window.luxAuth.supabase;
-      const userId = window.luxAuth && window.luxAuth.userId;
-      if (!sb || !userId) return;
-      const { data } = await sb.from('users').select('bundle').eq('id', userId).maybeSingle();
-      if (data && data.bundle === 'lux') {
-        localStorage.setItem('cl_bundle', 'lu');
-        hasBundle = true;
-      }
-    } catch(e) { /* silent */ }
-  }
-
-  if (!hasBundle) return;
-
-  const lang = window.CIVICEDGE_LANG || 'fr';
-  const texts = {
-    fr: { text: '<strong>Votre offre pack est active !</strong>Vous avez également accès au Sproochentest Training — même e-mail et mot de passe.', btn: 'Ouvrir Sproochentest →' },
-    de: { text: '<strong>Ihr Paketangebot ist aktiv!</strong>Sie haben auch Zugang zum Sproochentest Training — gleiche E-Mail und Passwort.', btn: 'Sproochentest öffnen →' },
-    en: { text: '<strong>Your bundle offer is active!</strong>You also have access to Sproochentest Training — same email and password.', btn: 'Open Sproochentest →' }
-  };
-  const t = texts[lang] || texts.fr;
-  document.getElementById('bundleBannerText').innerHTML = t.text;
-  document.getElementById('bundleBannerBtn').textContent = t.btn;
-  document.getElementById('bundleBanner').classList.add('show');
-})();
-</script>
-
-<!-- VE audio course: personal Telegram activation link (lux-bot-link) — strip + nav link -->
-<script>
-(async function () {
-  var banner  = document.getElementById('veAudioBanner');
-  var textEl  = document.getElementById('veAudioText');
-  var btn     = document.getElementById('veAudioBtn');
-  var navLink = document.getElementById('audioNavLink');
-  if (!banner || !textEl || !btn) return;
-
-  var lang = window.CIVICEDGE_LANG || 'fr';
-  var texts = {
-    fr: {
-      open:    '<strong>Cours audio « Vivre ensemble » — 24 leçons dans Telegram</strong>Inclus dans votre accès. Une leçon par jour (≈10 min), avec une question après chaque leçon.',
-      openBtn: 'Activer le cours audio →',
-      done:    '<strong>Cours audio activé</strong>Vos leçons arrivent chaque matin à 8h dans Telegram.',
-      doneBtn: 'Ouvrir dans Telegram →',
-      nav:     '🎧 Cours audio'
-    },
-    de: {
-      open:    '<strong>Audiokurs „Vivre ensemble“ — 24 Lektionen in Telegram</strong>In Ihrem Zugang enthalten. Eine Lektion pro Tag (≈10 Min.), mit einer Frage nach jeder Lektion.',
-      openBtn: 'Audiokurs aktivieren →',
-      done:    '<strong>Audiokurs aktiviert</strong>Ihre Lektionen kommen jeden Morgen um 8 Uhr in Telegram.',
-      doneBtn: 'In Telegram öffnen →',
-      nav:     '🎧 Audiokurs'
-    },
-    en: {
-      open:    '<strong>"Living Together" audio course — 24 lessons in Telegram</strong>Included in your access. One lesson a day (≈10 min), with a question after each lesson.',
-      openBtn: 'Activate the audio course →',
-      done:    '<strong>Audio course activated</strong>Your lessons arrive every morning at 08:00 in Telegram.',
-      doneBtn: 'Open in Telegram →',
-      nav:     '🎧 Audio course'
-    }
-  };
-  var t = texts[lang] || texts.fr;
-
-  try {
-    if (window.luxAuth && window.luxAuth.ready) await window.luxAuth.ready;
-    var sb = window.luxAuth && window.luxAuth.supabase;
-    if (!sb) return;
-    var sess = await sb.auth.getSession();
-    var email = sess && sess.data && sess.data.session && sess.data.session.user && sess.data.session.user.email;
-    if (!email) return;
-
-    var res = await fetch(window.SUPABASE_URL + '/functions/v1/lux-bot-link', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': window.SUPABASE_KEY },
-      body: JSON.stringify({ email: email })
-    });
-    if (!res.ok) return;                 // 403 = not entitled → no strip
-    var data = await res.json();
-    if (!data || !data.entitled || !data.link) return;
-
-    btn.href = data.link;
-    if (data.claimed) {
-      textEl.innerHTML = t.done;
-      btn.textContent = t.doneBtn;
-      banner.classList.add('claimed');
-    } else {
-      textEl.innerHTML = t.open;
-      btn.textContent = t.openBtn;
-    }
-    banner.classList.add('show');
-
-    if (navLink) {
-      navLink.textContent = t.nav;
-      navLink.href = data.link;
-      navLink.style.display = '';
-    }
-  } catch (e) { /* silent */ }
-})();
-</script>
-
-<!-- Sproochentest add-on: cross-sell for VE customers (strip + Stripe modal) -->
+<!-- Sproochentest add-on: Stripe modal. Exposed as window.stAddon = { eligible(), open(), texts } for the message slot -->
 <script>
 (function() {
   var SUPABASE_URL = "https://htgliokekeaovdiafrgs.supabase.co";
   var STRIPE_PK    = "pk_live_FLDkT3LcdsvBJu0zHmR91TVE";
   var EDGE_FN_BASE = SUPABASE_URL + "/functions/v1";
 
-  var banner     = document.getElementById("stAddonBanner");
-  var addonText  = document.getElementById("stAddonText");
-  var addonBtn   = document.getElementById("stAddonBtn");
-  var dismissBtn = document.getElementById("stAddonDismiss");
   var overlay    = document.getElementById("stModalOverlay");
   var closeBtn   = document.getElementById("stModalClose");
   var emailEl    = document.getElementById("stEmailDisplay");
@@ -630,8 +410,6 @@ document.addEventListener("DOMContentLoaded", () => {
   var t = i18n[lang] || i18n.fr;
 
   // Populate static text
-  addonText.innerHTML = '<strong>' + t.banner_title + '</strong>' + t.banner_sub;
-  addonBtn.textContent = t.banner_btn;
   document.getElementById("stModalTitle").textContent = t.modal_title;
   var featuresHtml = t.features.map(function(f) { return '<div class="st-feature">✓ ' + f + '</div>'; }).join('');
   document.getElementById("stModalFeatures").innerHTML = featuresHtml;
@@ -642,29 +420,27 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("stSuccessText").textContent = t.success_text;
   document.getElementById("stSuccessBtn").textContent = t.success_btn;
 
-  // 1. Show strip if eligible (non-bundle VE user)
-  async function initBanner() {
-    if (sessionStorage.getItem("st_addon_dismissed")) return;
-    if (localStorage.getItem("cl_bundle") === "lu") return;
-
+  // 1. Eligibility (non-bundle VE user). Resolves true/false; also captures the session for the payment call.
+  async function eligible() {
+    if (localStorage.getItem("cl_bundle") === "lu") return false;
     try {
       if (window.luxAuth && window.luxAuth.ready) await window.luxAuth.ready;
       var sb = window.luxAuth && window.luxAuth.supabase;
       var userId = window.luxAuth && window.luxAuth.userId;
-      if (!sb || !userId) return;
+      if (!sb || !userId) return false;
 
       var sess = await sb.auth.getSession();
-      if (!sess.data.session) return;
+      if (!sess.data.session) return false;
       accessToken = sess.data.session.access_token;
       userEmail = sess.data.session.user.email;
 
       var result = await sb.from("users").select("bundle").eq("id", userId).maybeSingle();
       if (result.data && result.data.bundle === "lux") {
         localStorage.setItem("cl_bundle", "lu");
-        return;
+        return false;
       }
-      banner.classList.add("show");
-    } catch(e) { /* silent */ }
+      return true;
+    } catch(e) { return false; }
   }
 
   // 2. Load Stripe.js on demand
@@ -769,21 +545,8 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("cl_bundle", "lu");
       step1.style.display = "none";
       step2.style.display = "block";
-      banner.classList.remove("show");
-
-      // Show the bundle strip right away
-      var bundleBanner = document.getElementById("bundleBanner");
-      if (bundleBanner) {
-        var bundleTexts = {
-          fr: { text: '<strong>Votre offre pack est active !</strong>Vous avez également accès au Sproochentest Training — même e-mail et mot de passe.', btn: 'Ouvrir Sproochentest →' },
-          de: { text: '<strong>Ihr Paketangebot ist aktiv!</strong>Sie haben auch Zugang zum Sproochentest Training — gleiche E-Mail und Passwort.', btn: 'Sproochentest öffnen →' },
-          en: { text: '<strong>Your bundle offer is active!</strong>You also have access to Sproochentest Training — same email and password.', btn: 'Open Sproochentest →' }
-        };
-        var btt = bundleTexts[lang] || bundleTexts.fr;
-        document.getElementById('bundleBannerText').innerHTML = btt.text;
-        document.getElementById('bundleBannerBtn').textContent = btt.btn;
-        bundleBanner.classList.add("show");
-      }
+      // tell the slot / sidebar the bundle is now owned
+      try { window.dispatchEvent(new CustomEvent("cl:bundle-activated")); } catch(e) {}
     } catch(err) {
       errorEl.textContent = err.message;
       payBtn.disabled = false;
@@ -792,20 +555,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 6. Dismiss
-  function dismissBanner() {
-    banner.classList.remove("show");
-    sessionStorage.setItem("st_addon_dismissed", "1");
-  }
-
-  addonBtn.addEventListener("click", openModal);
-  dismissBtn.addEventListener("click", dismissBanner);
   closeBtn.addEventListener("click", closeModal);
   overlay.addEventListener("click", function(e) { if (e.target === overlay) closeModal(); });
   payBtn.addEventListener("click", submitPayment);
 
-  initBanner();
+  window.stAddon = { eligible: eligible, open: openModal, texts: t };
 })();
 </script>
+<!-- Sidebar extras + message slot (entitlements, notices, cross-sell) -->
+<script src="/lux/assets/js/dashboard-slot-lu.js"></script>
 </body>
 </html>

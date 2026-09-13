@@ -661,3 +661,34 @@ body.mastery-complete .chart-mastery-sub::after {
 .st-success p{color:var(--text-mid);font-size:.88rem;margin:0 0 24px;line-height:1.5;}
 .st-success-btn{display:inline-block;background:#6b4eff;color:#fff;text-decoration:none;padding:12px 28px;border-radius:10px;font-weight:600;font-size:.92rem;transition:background .15s;}
 .st-success-btn:hover{background:#5a3de6;}
+
+/* ── Message slot: one message at a time, by priority ── */
+.db-slot {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--accent-soft); border-radius: 14px; padding: 13px 18px; margin-bottom: 20px;
+  font-family: var(--font); position: relative;
+}
+.db-slot-icon { font-size: 20px; flex-shrink: 0; }
+.db-slot-text { flex: 1; min-width: 0; font-size: 12.5px; line-height: 1.45; color: var(--text-mid); }
+.db-slot-text strong { display: block; font-size: 14px; color: var(--text); font-weight: 700; letter-spacing: -0.01em; margin-bottom: 1px; }
+.db-slot-extra { display: block; font-size: 11.5px; margin-top: 3px; opacity: .8; }
+.db-slot-extra a { color: var(--accent); font-weight: 600; text-decoration: none; margin-left: 6px; }
+.db-slot-extra a:hover { text-decoration: underline; }
+.db-slot-go { color: var(--accent); font-weight: 600; white-space: nowrap; font-size: 13.5px; text-decoration: none; cursor: pointer; }
+.db-slot-go[aria-busy] { opacity: .6; cursor: wait; }
+.db-slot-pager { display: inline-flex; align-items: center; gap: 2px; font-size: 11px; color: var(--text-muted); margin-left: 4px; }
+.db-slot-pager button { background: none; border: 1px solid var(--border); border-radius: 6px; width: 22px; height: 22px; cursor: pointer; color: var(--text-mid); font-size: 14px; line-height: 1; padding: 0; }
+.db-slot-pager button:hover { border-color: var(--accent); color: var(--accent); }
+.db-slot-dismiss { position: absolute; top: 6px; right: 10px; background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 12px; opacity: .6; font-family: var(--font); }
+.db-slot-dismiss:hover { opacity: 1; }
+/* tones */
+.db-slot-warning, .db-slot-outage { background: #fdf4e8; }
+.db-slot-warning .db-slot-go, .db-slot-outage .db-slot-go { color: #8a5a1e; }
+.db-slot-outage { background: #f9e4e1; }
+.db-slot-success { background: var(--correct-bg); }
+.db-slot-promo { background: #f3f0ff; }
+.db-slot-promo .db-slot-go { color: #5a3de6; }
+@media (max-width: 640px) {
+  .db-slot { flex-direction: column; text-align: center; padding-right: 18px; }
+  .db-slot-pager { margin-left: 0; }
+}
