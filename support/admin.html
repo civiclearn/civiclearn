@@ -962,6 +962,27 @@ body {
 .ct-editor-status.err { color: var(--red); }
 .ct-empty { font-size: 0.82rem; color: var(--muted); padding: 1.5rem 0; text-align: center; }
 
+/* ── COUNTRIES TAB ── */
+#tab-countries { overflow-y: auto; padding: 1.5rem; background: var(--bg); }
+.cty-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+@media (max-width: 900px) { .cty-grid { grid-template-columns: 1fr; } .cty-kpi-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+.cty-chart-wrap { position: relative; height: 300px; }
+.cty-legend { display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; margin-top: 1rem; font-size: 0.78rem; color: var(--muted); }
+.cty-legend-item { display: flex; align-items: center; gap: 6px; }
+.cty-legend-swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.cty-legend-item b { color: var(--text); font-weight: 500; }
+.cty-table tbody tr:first-child td { color: inherit; font-weight: inherit; }
+.cty-table tbody td:first-child { color: var(--text); font-weight: 500; }
+.cty-table .cty-flag { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; vertical-align: middle; }
+.cty-table .cty-code { color: var(--muted); font-weight: 400; font-size: 0.72rem; margin-left: 6px; }
+.cty-bar { display: inline-block; height: 6px; border-radius: 3px; background: var(--brand-dim); vertical-align: middle; margin-right: 6px; }
+.cty-table tfoot td { padding: 0.6rem 0.6rem 0; text-align: right; color: var(--muted); border-top: 1px solid var(--border); }
+.cty-table tfoot td:first-child { text-align: left; }
+.cty-refresh-btn { background: var(--surface2); color: var(--text); padding: 0.35rem 0.8rem; font-size: 0.75rem; text-transform: none; letter-spacing: 0; }
+.cty-k-time { font-size: 1.05rem !important; padding-top: 0.3rem; }
+#cty-status.ok { display: none; }
+#cty-status.err { color: var(--red); }
+
 /* ── USERS TAB ── */
 #tab-users { overflow-y: auto; padding: 1.5rem; background: var(--bg); }
 .usr-section { margin-bottom: 2.5rem; }
@@ -1059,6 +1080,7 @@ body {
       <button class="tab-btn" id="tab-btn-exam" onclick="switchTab('exam')">Exam</button>
       <button class="tab-btn" id="tab-btn-gp" onclick="switchTab('gp')">Generalprøve</button>
       <button class="tab-btn" id="tab-btn-luxfb" onclick="switchTab('luxfb')">Lux Feedback</button>
+      <button class="tab-btn" id="tab-btn-countries" onclick="switchTab('countries')">Countries</button>
     </div>
     <button class="tpl-btn" id="tpl-btn-topbar" style="font-size:0.76rem;padding:4px 12px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif" onclick="openTemplateManager()">📋 Templates</button>
     <div class="mob-topbar-actions">
@@ -1517,6 +1539,32 @@ body {
     </div>
 
   </div><!-- /tab-luxfb -->
+
+  <!-- COUNTRIES TAB -->
+  <div class="tab-panel" id="tab-countries">
+    <div class="rev-load-bar" id="cty-status"><span>Loading users by country…</span></div>
+    <div class="rev-kpi-grid cty-kpi-grid">
+      <div class="rev-kpi-card"><div class="rev-kpi-label">Total users</div><div class="rev-kpi-value" id="cty-k-total">—</div></div>
+      <div class="rev-kpi-card"><div class="rev-kpi-label">Countries / markets</div><div class="rev-kpi-value" id="cty-k-count">—</div></div>
+      <div class="rev-kpi-card"><div class="rev-kpi-label">Largest market</div><div class="rev-kpi-value" id="cty-k-top">—</div><div class="rev-kpi-yoy flat" id="cty-k-top-share"></div></div>
+      <div class="rev-kpi-card"><div class="rev-kpi-label">Last refreshed</div><div class="rev-kpi-value cty-k-time" id="cty-k-time">—</div></div>
+    </div>
+    <div class="cty-grid">
+      <div class="rev-chart-card">
+        <div class="rev-card-title" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>Users by purchase country</span>
+          <button class="usr-btn cty-refresh-btn" onclick="ctyLoad()">Refresh</button>
+        </div>
+        <div class="cty-chart-wrap"><canvas id="cty-chart"></canvas></div>
+        <div class="cty-legend" id="cty-legend"></div>
+        <div class="rev-note">Top 8 markets shown as slices; the rest are grouped as “Other”. Source: Supabase view <code>users_by_country</code> (live count of the <code>users</code> table by <code>purchase_country</code>).</div>
+      </div>
+      <div class="rev-table-card">
+        <div class="rev-card-title">All countries</div>
+        <table class="rev-table cty-table" id="cty-table"></table>
+      </div>
+    </div>
+  </div><!-- /tab-countries -->
 
 </div><!-- /app -->
 
@@ -2307,6 +2355,7 @@ function switchTab(name) {
   if (name === 'exam') examLoadStats();
   if (name === 'gp') gpLoadEvents();
   if (name === 'luxfb' && !luxfbLoaded) luxfbLoad();
+  if (name === 'countries') ctyLoad();   // always re-fetch so the chart is live on every open
   // 'users' tab needs no lazy load
 }
 
@@ -3396,6 +3445,123 @@ async function luxfbLoad(cycle) {
   } catch (e) {
     statusEl.textContent = 'Network error: ' + e.message;
   }
+}
+
+// ── COUNTRIES TAB ─────────────────────────────────────────────────────────────
+// Reads the public.users_by_country view (purchase_country, total_users) via
+// PostgREST with the publishable key. Re-fetched every time the tab is opened
+// and on the Refresh button, so the chart always reflects the live users table.
+const CTY_SB = 'https://htgliokekeaovdiafrgs.supabase.co';
+const CTY_SB_KEY = EXAM_SB_KEY;
+// Fixed categorical order (never cycled) — validated for CVD separation on the dark surface.
+const CTY_COLORS = ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767'];
+const CTY_OTHER_COLOR = '#5b5a6e';
+const CTY_MAX_SLICES = 8;
+// purchase_country code -> display name (language-market codes as stored in users.purchase_country)
+const CTY_NAMES = {
+  'da-dk': 'Denmark', 'fr-lu': 'Luxembourg (FR)', 'lb-lu': 'Luxembourg (LB)', 'pt-pt': 'Portugal',
+  'fr-ca': 'Canada (FR)', 'fr-ch': 'Switzerland (FR)', 'fr-fr': 'France', 'sv-fi': 'Finland (SV)',
+  'fi-fi': 'Finland (FI)', 'sv-se': 'Sweden', 'de-at': 'Austria', 'ro-ro': 'Romania', 'es-es': 'Spain',
+  'es': 'Spain', 'is-is': 'Iceland', 'is': 'Iceland', 'sk': 'Slovakia', 'lt-lt': 'Lithuania',
+  'pt-br': 'Brazil', 'en-au': 'Australia', 'en-gb': 'United Kingdom', 'en-ie': 'Ireland', 'pl-pl': 'Poland'
+};
+let ctyChart = null;
+let ctyLoading = false;
+
+function ctyName(code) {
+  if (!code) return 'Unknown';
+  return CTY_NAMES[code] || code;
+}
+
+async function ctyLoad() {
+  if (ctyLoading) return;
+  ctyLoading = true;
+  const status = document.getElementById('cty-status');
+  status.className = 'rev-load-bar';
+  status.innerHTML = '<span>Loading users by country…</span>';
+  try {
+    const res = await fetch(CTY_SB + '/rest/v1/users_by_country?select=purchase_country,total_users&order=total_users.desc', {
+      headers: { 'apikey': CTY_SB_KEY, 'Authorization': 'Bearer ' + CTY_SB_KEY }
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).slice(0, 200));
+    const rows = (await res.json()).map(r => ({ code: r.purchase_country, n: Number(r.total_users) || 0 }))
+      .sort((a, b) => b.n - a.n);
+    ctyRender(rows);
+    status.className = 'rev-load-bar ok';
+  } catch (e) {
+    status.className = 'rev-load-bar err';
+    status.innerHTML = '<span>Could not load users by country: ' + e.message + '</span>';
+    console.error('Countries tab error:', e);
+  } finally {
+    ctyLoading = false;
+  }
+}
+
+function ctyRender(rows) {
+  const total = rows.reduce((s, r) => s + r.n, 0);
+  const fmt = n => n.toLocaleString('en-GB');
+  const pct = n => total ? (100 * n / total).toFixed(n / total < 0.01 ? 2 : 1) + '%' : '—';
+
+  // KPIs
+  document.getElementById('cty-k-total').textContent = fmt(total);
+  document.getElementById('cty-k-count').textContent = rows.length;
+  document.getElementById('cty-k-top').textContent = rows[0] ? ctyName(rows[0].code) : '—';
+  document.getElementById('cty-k-top-share').textContent = rows[0] ? pct(rows[0].n) + ' of all users' : '';
+  document.getElementById('cty-k-time').textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+  // Slices: top N + Other
+  const top = rows.slice(0, CTY_MAX_SLICES);
+  const rest = rows.slice(CTY_MAX_SLICES);
+  const otherN = rest.reduce((s, r) => s + r.n, 0);
+  const slices = top.map((r, i) => ({ label: ctyName(r.code), code: r.code, n: r.n, color: CTY_COLORS[i] }));
+  if (otherN > 0) slices.push({ label: 'Other (' + rest.length + ')', code: '', n: otherN, color: CTY_OTHER_COLOR });
+
+  const colorByCode = {};
+  top.forEach((r, i) => colorByCode[r.code] = CTY_COLORS[i]);
+
+  // Chart
+  if (ctyChart) ctyChart.destroy();
+  ctyChart = new Chart(document.getElementById('cty-chart').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: slices.map(s => s.label),
+      datasets: [{
+        data: slices.map(s => s.n),
+        backgroundColor: slices.map(s => s.color),
+        borderColor: '#13131d',
+        borderWidth: 2,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '58%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' ' + fmt(ctx.raw) + ' users · ' + pct(ctx.raw)
+          }
+        }
+      }
+    }
+  });
+
+  // Custom legend (name + count + share), fixed order = slice order
+  document.getElementById('cty-legend').innerHTML = slices.map(s =>
+    `<div class="cty-legend-item"><span class="cty-legend-swatch" style="background:${s.color}"></span><b>${s.label}</b> ${fmt(s.n)} · ${pct(s.n)}</div>`
+  ).join('');
+
+  // Full table — every country, with a proportional bar
+  const maxN = rows[0] ? rows[0].n : 1;
+  let html = '<thead><tr><th>Country</th><th>Users</th><th>Share</th></tr></thead><tbody>';
+  rows.forEach(r => {
+    const w = Math.max(2, Math.round(80 * r.n / maxN));
+    const sw = colorByCode[r.code] || CTY_OTHER_COLOR;
+    html += `<tr><td><span class="cty-flag" style="background:${sw}"></span>${ctyName(r.code)}<span class="cty-code">${r.code || '—'}</span></td>` +
+            `<td>${fmt(r.n)}</td><td><span class="cty-bar" style="width:${w}px"></span>${pct(r.n)}</td></tr>`;
+  });
+  html += `</tbody><tfoot><tr><td style="font-weight:600;color:var(--text)">Total</td><td style="font-weight:600;color:var(--text)">${fmt(total)}</td><td>100%</td></tr></tfoot>`;
+  document.getElementById('cty-table').innerHTML = html;
 }
 
 </script>
