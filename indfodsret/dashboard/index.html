@@ -17,73 +17,14 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script src="/indfodsret/assets/js/denmark-auth.js?v=3"></script>
 
-  <!-- Trustpilot JS Integration -->
-  <script>
-    (function(w,d,s,r,n){w.TrustpilotObject=n;w[n]=w[n]||function(){(w[n].q=w[n].q||[]).push(arguments)};
-    a=d.createElement(s);a.async=1;a.src=r;a.type='text/java'+s;f=d.getElementsByTagName(s)[0];
-    f.parentNode.insertBefore(a,f)})(window,document,'script','https://invitejs.trustpilot.com/tp.min.js','tp');
-    tp('register', 'llCAmjJMQXGuWAke');
-    /* ORGANIC-ONLY REVIEW POLICY: verified createInvitation disabled. Flip to true to re-enable verified invites. */
-    window.TP_VERIFIED_INVITES_ENABLED = false;
-  </script>
 
   <style>
-    /* Bundle banner */
-    .bundle-banner{display:none;background:var(--accent-soft,#f5f3ff);border:1px solid var(--border,#ddd6fe);border-radius:var(--radius,14px);padding:14px 20px;margin:0 0 16px 0;align-items:center;gap:14px;flex-wrap:wrap;}
-    .bundle-banner.show{display:flex;}
-    .bundle-banner-icon{font-size:1.3rem;flex-shrink:0;}
-    .bundle-banner-text{flex:1;min-width:200px;}
-    .bundle-banner-text strong{color:var(--accent,#0d7377);font-size:.92rem;}
-    .bundle-banner-text span{display:block;color:var(--text-mid);font-size:.82rem;margin-top:2px;}
-    .bundle-banner-btn{background:var(--accent,#0d7377);color:#fff;text-decoration:none;padding:8px 18px;border-radius:8px;font-size:.85rem;font-weight:600;white-space:nowrap;transition:background .15s;}
-    .bundle-banner-btn:hover{background:#0b6265;}
-
-    /* PD3 Addon banner */
-    .pd3-addon-banner{display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px;margin:0 0 16px 0;align-items:center;gap:14px;flex-wrap:wrap;position:relative;}
-    .pd3-addon-banner.show{display:flex;}
-    .pd3-addon-icon{font-size:1.3rem;flex-shrink:0;}
-    .pd3-addon-text{flex:1;min-width:200px;}
-    .pd3-addon-text strong{color:var(--text);font-size:.92rem;}
-    .pd3-addon-text span{display:block;color:var(--text-mid);font-size:.82rem;margin-top:2px;}
-    .pd3-addon-dismiss{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:.8rem;opacity:.5;transition:opacity .15s;font-family:inherit;}
-    .pd3-addon-dismiss:hover{opacity:1;}
-    .pd3-code-block{background:var(--accent-soft);border:1px solid var(--border);border-radius:8px;padding:10px 14px;min-width:210px;}
-    .pd3-code-label{font-size:.7rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
-    .pd3-code-reveal{display:flex;align-items:center;gap:8px;}
-    .pd3-code-masked{font-size:1.05rem;color:var(--text-muted);letter-spacing:.15em;font-family:monospace;}
-    .pd3-code-show-btn{background:var(--accent);color:#fff;border:none;cursor:pointer;padding:5px 12px;border-radius:6px;font-size:.78rem;font-weight:600;font-family:inherit;transition:background .15s;}
-    .pd3-code-show-btn:hover{background:#0b6265;}
-    .pd3-code-shown{display:none;align-items:center;gap:8px;flex-wrap:wrap;}
-    .pd3-code-value{font-family:monospace;font-size:1rem;font-weight:700;color:var(--accent);letter-spacing:.1em;background:var(--accent-soft);padding:4px 10px;border-radius:6px;}
-    .pd3-copy-btn{background:none;border:none;cursor:pointer;font-size:.95rem;padding:2px 4px;opacity:.65;transition:opacity .15s;line-height:1;}
-    .pd3-copy-btn:hover{opacity:1;}
-    .pd3-goto-btn{background:var(--accent);color:#fff;text-decoration:none;padding:6px 14px;border-radius:6px;font-size:.82rem;font-weight:600;white-space:nowrap;transition:background .15s;}
-    .pd3-goto-btn:hover{background:#0b6265;}
-
-    /* Trustpilot notice */
-    .tp-notice{display:none;background:#e6f5f5;border:1px solid #b2dfdb;border-radius:var(--radius);padding:14px 20px;margin:0 0 16px 0;align-items:center;gap:14px;flex-wrap:wrap;position:relative;}
-    .tp-notice.show{display:flex;}
-    .tp-notice-icon{font-size:1.3rem;flex-shrink:0;}
-    .tp-notice-text{flex:1;min-width:200px;}
-    .tp-notice-text strong{color:#0a5c5f;font-size:.92rem;}
-    .tp-notice-text span{display:block;color:#0d7377;font-size:.82rem;margin-top:2px;line-height:1.45;}
-    .tp-notice-dismiss{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:#0d7377;font-size:.8rem;opacity:.5;transition:opacity .15s;font-family:inherit;}
-    .tp-notice-dismiss:hover{opacity:1;}
-
     /* Bonus row (Advanced questions) */
     .bonus-row{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border-left:3px solid var(--accent);margin-bottom:20px;}
     .bonus-row-title{font-size:13.5px;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px;}
     .bonus-row-desc{font-size:12px;color:var(--text-mid);line-height:1.5;margin-bottom:12px;}
     .bonus-row-stat{font-size:12px;color:var(--text-muted);margin-bottom:10px;}
     .bonus-row-stat strong{color:var(--text);font-weight:700;}
-
-    /* Personalized recommendation card (replaces static tip cards) */
-    .db-recommend-card{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:16px 22px;margin-bottom:16px;box-shadow:var(--shadow);}
-    .db-recommend-icon{font-size:1.5rem;flex-shrink:0;}
-    .db-recommend-text{flex:1;min-width:200px;color:var(--text-mid);font-size:.92rem;line-height:1.45;}
-    .db-recommend-text strong{color:var(--text);font-weight:600;}
-    .db-recommend-btn{background:var(--accent);color:#fff;text-decoration:none;padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;white-space:nowrap;transition:background .15s;}
-    .db-recommend-btn:hover{background:#0b6265;}
 
     /* Subtle troubleshooting link in dashboard footer */
     .db-footer-link{color:var(--text-muted);text-decoration:underline;text-underline-offset:2px;}
@@ -97,29 +38,7 @@
     .exam-date-label{font-size:14px;font-weight:500;}
     .exam-date-card.muted .exam-date-label{color:var(--text-muted);}
 
-    @media(max-width:600px){
-      .bundle-banner,.pd3-addon-banner,.tp-notice{flex-direction:column;text-align:center;}
-      .bundle-banner-btn,.pd3-goto-btn{width:100%;text-align:center;}
-      .pd3-code-block{width:100%;}
-      .pd3-code-shown{justify-content:center;}
-      .db-recommend-card{flex-direction:column;text-align:center;}
-      .db-recommend-btn{width:100%;text-align:center;}
-      .rs-card{flex-direction:column;text-align:center;}
-      .rs-btn{width:100%;}
-      .rs-thumbs{display:none;}
-    }
 
-    /* Revisionssæt download card */
-    .rs-card{display:none;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:14px 20px;margin:0 0 16px 0;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--shadow);}
-    .rs-card.show{display:flex;}
-    .rs-thumbs{display:flex;gap:4px;flex-shrink:0;}
-    .rs-thumbs img{height:44px;width:auto;border:1px solid var(--border);border-radius:3px;background:#fff;}
-    .rs-text{flex:1;min-width:220px;}
-    .rs-text strong{color:var(--text);font-size:.92rem;}
-    .rs-text span{display:block;color:var(--text-mid);font-size:.82rem;margin-top:2px;}
-    .rs-btn{background:var(--accent);color:#fff;border:none;cursor:pointer;font-family:inherit;padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;white-space:nowrap;transition:background .15s;}
-    .rs-btn:hover{background:#0b6265;}
-    .rs-btn[disabled]{opacity:.6;cursor:wait;}
 
     /* Organic Trustpilot review prompt (exposure-triggered, replaces chart row) */
     .review-card{display:none;background:var(--surface,#fff);border:1px solid var(--border,#e5e7eb);border-left:3px solid var(--accent,#0d7377);border-radius:var(--radius,14px);padding:24px 26px;margin:0 0 20px 0;box-shadow:var(--shadow,0 1px 3px rgba(0,0,0,.06));position:relative;}
@@ -177,6 +96,11 @@
       <a href="manual.html">Læremateriale</a>
       <a href="audio.html">Lyd</a>
       <a href="advanced.html" id="advancedNavLink" style="display:none">Avancerede spørgsmål</a>
+      <div class="nav-group" id="navExtras" style="display:none">
+        <div class="nav-group-label">Dine ressourcer</div>
+        <a href="#" id="navRs">📄 <span>Revisionssæt (PDF)</span></a>
+        <a href="https://civiclearn.com/dansk3/dashboard/" id="navBundle" style="display:none">🎁 <span>Prøve i Dansk 3</span></a>
+      </div>
       <div class="nav-sep"></div>
       <a href="history.html">Historik</a>
       <a href="my-list.html">Min liste</a>
@@ -193,48 +117,6 @@
     <div id="quiz" style="display:none"></div>
 
     <div class="dashboard-container">
-
-      <!-- Trustpilot Review Notice -->
-      <div class="tp-notice" id="tpNotice">
-        <button class="tp-notice-dismiss" id="tpNoticeDismiss" title="Luk">✕</button>
-        <div class="tp-notice-icon">⭐</div>
-        <div class="tp-notice-text">
-          <strong>Din mening betyder noget for os!</strong>
-          <span>Du modtager snart en e-mail fra <strong>Trustpilot</strong> — det tager kun et minut at dele din oplevelse.</span>
-        </div>
-      </div>
-
-      <!-- Bundle banner -->
-      <div class="bundle-banner" id="bundleBanner">
-        <div class="bundle-banner-icon">🎁</div>
-        <div class="bundle-banner-text">
-          <strong>Du har også adgang til Prøve i Dansk 3 Træning</strong>
-          <span>Din kombipakke inkluderer 10 simulationer med AI-evaluering og karakterer</span>
-        </div>
-        <a href="https://civiclearn.com/dansk3/dashboard/" class="bundle-banner-btn">Åbn Dansk 3 →</a>
-      </div>
-
-      <!-- PD3 Addon Banner -->
-      <div class="pd3-addon-banner" id="pd3AddonBanner">
-        <button class="pd3-addon-dismiss" id="pd3AddonDismiss" title="Skjul">✕</button>
-        <div class="pd3-addon-icon">📘</div>
-        <div class="pd3-addon-text">
-          <strong>Har du også brug for Prøve i Dansk 3?</strong>
-          <span>10 komplette simulationer · alle 9 delprøver · 7-trins evaluering · Normalpris 899 kr.</span>
-        </div>
-        <div class="pd3-code-block">
-          <div class="pd3-code-label">Din rabatkode</div>
-          <div class="pd3-code-reveal" id="pd3CodeReveal">
-            <span class="pd3-code-masked">••••••••</span>
-            <button class="pd3-code-show-btn" id="pd3ShowCodeBtn">Vis kode</button>
-          </div>
-          <div class="pd3-code-shown" id="pd3CodeShown">
-            <span class="pd3-code-value">PD3DIS26</span>
-            <button class="pd3-copy-btn" id="pd3CopyBtn" title="Kopiér kode">📋</button>
-            <a href="https://dansk3.dk/" target="_blank" class="pd3-goto-btn">Gå til Dansk 3 →</a>
-          </div>
-        </div>
-      </div>
 
       <!-- ① Stats (5 cards) -->
       <div class="db-stats-row anim d1">
@@ -285,6 +167,15 @@
         </div>
       </div>
 
+      <!-- Message slot: one message at a time, by priority (dashboard-slot-dk.js) -->
+      <div class="db-slot anim d2" id="dbSlot" style="display:none">
+        <span class="db-slot-icon" id="dbSlotIcon"></span>
+        <span class="db-slot-text" id="dbSlotText"></span>
+        <a class="db-slot-go" id="dbSlotGo" href="#"></a>
+        <span class="db-slot-pager" id="dbSlotPager" style="display:none"><button type="button" id="dbSlotPrev" aria-label="Forrige">‹</button><span id="dbSlotCount"></span><button type="button" id="dbSlotNext" aria-label="Næste">›</button></span>
+        <button class="db-slot-dismiss" id="dbSlotDismiss" type="button" title="Senere" style="display:none">✕</button>
+      </div>
+
       <!-- ② Launchers -->
       <div class="db-actions-row anim d2">
         <a href="simulation.html" class="db-action-card hide-mobile">
@@ -311,20 +202,6 @@
           <div class="db-action-desc">Gennemgå spørgsmål og svar efter emne.</div>
           <div class="db-action-go">Åbn →</div>
         </a>
-      </div>
-
-      <!-- Revisionssæt (printable 6-page set, private bucket dk-materials) -->
-      <div class="rs-card" id="rsCard">
-        <div class="rs-thumbs" aria-hidden="true">
-          <img src="/indfodsret/assets/img/rs/tidslinje.png" alt="">
-          <img src="/indfodsret/assets/img/rs/staten.png" alt="">
-          <img src="/indfodsret/assets/img/rs/kortet.png" alt="">
-        </div>
-        <div class="rs-text">
-          <strong>Revisionssæt – 6 visuelle oversigter</strong>
-          <span>Tidslinje · Personer · Kortet · Staten &amp; verden · Tal &amp; samfund · Begreber &amp; fælder. Det vigtigste på ét blik – på skærmen eller printet i A4.</span>
-        </div>
-        <button class="rs-btn" id="rsBtn" type="button">Hent PDF →</button>
       </div>
 
       <!-- ③ Bar chart + Sequential Practice -->
@@ -377,13 +254,6 @@
         </div>
         <div class="bonus-row-stat">Besvaret: <strong id="bonusMastered">0</strong> / <span id="bonusCount2">0</span></div>
         <a href="advanced.html" class="btn">Åbn avancerede spørgsmål →</a>
-      </div>
-
-      <!-- ⑤ Personalized recommendation (replaces static tips) -->
-      <div class="db-recommend-card anim d4" id="recommendCard" style="display:none">
-        <div class="db-recommend-icon" id="recommendIcon">💡</div>
-        <div class="db-recommend-text" id="recommendText"></div>
-        <a class="db-recommend-btn" id="recommendBtn" href="#"></a>
       </div>
 
       <div class="db-footer">
@@ -471,8 +341,10 @@ document.addEventListener("DOMContentLoaded", () => {
     examNoDate.style.display = "none";
     openDateSheet.textContent = "Rediger prøvedato";
 
-    if (diff >= 0) {
-      countdownValue.textContent = "J-" + diff;
+    if (diff === 0) {
+      countdownValue.textContent = "I dag";
+    } else if (diff > 0) {
+      countdownValue.textContent = diff + (diff === 1 ? " dag" : " dage");
     } else {
       countdownValue.textContent = "Afsluttet";
     }
@@ -526,287 +398,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-<script src="/indfodsret/assets/js/maintenance-bar.js"></script>
+<!-- maintenance-bar.js not loaded here: site notices are shown in the message slot (dashboard-slot-dk.js) -->
 <script src="/indfodsret/assets/js/signout.js"></script>
-
-<!-- Bundle banner -->
-<script>
-(async function(){
-  var el = document.getElementById('bundleBanner');
-  if (!el) return;
-  if (localStorage.getItem('cl_bundle') === 'dk') { el.classList.add('show'); return; }
-  try {
-    if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
-    var sb = window.denmarkAuth && window.denmarkAuth.supabase;
-    var userId = window.denmarkAuth && window.denmarkAuth.userId;
-    if (!sb || !userId) return;
-    var result = await sb.from('users').select('bundle').eq('id', userId).maybeSingle();
-    if (result.data && result.data.bundle === 'dk') {
-      localStorage.setItem('cl_bundle', 'dk');
-      el.classList.add('show');
-    }
-  } catch(e) {}
-})();
-</script>
-
-<!-- Revisionssæt download (signed URL from private bucket; policy = any logged-in user) -->
-<script>
-(async function(){
-  var card = document.getElementById('rsCard'), btn = document.getElementById('rsBtn');
-  if (!card || !btn) return;
-  var PATH = 'revisionssaet/dk-revisionssaet-2026.pdf';
-  try {
-    if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
-    var sb = window.denmarkAuth && window.denmarkAuth.supabase;
-    if (!sb) return;
-    var sess = await sb.auth.getSession();
-    if (!sess.data.session) return;
-    card.classList.add('show');
-    btn.addEventListener('click', async function(){
-      btn.disabled = true; var label = btn.textContent; btn.textContent = 'Henter…';
-      try {
-        var r = await sb.storage.from('dk-materials').createSignedUrl(PATH, 600, { download: 'CivicLearn-revisionssaet-indfodsret-2026.pdf' });
-        if (r.error || !r.data) throw r.error || new Error('no url');
-        window.location.href = r.data.signedUrl;
-      } catch (e) {
-        alert('Kunne ikke hente filen. Prøv igen, eller kontakt os via Hjælp & Kontakt.');
-      } finally { btn.disabled = false; btn.textContent = label; }
-    });
-  } catch(e) {}
-})();
-</script>
-
-<!-- PD3 Addon -->
-<script>
-(function() {
-  var banner = document.getElementById("pd3AddonBanner");
-  var dismissBtn = document.getElementById("pd3AddonDismiss");
-  var showCodeBtn = document.getElementById("pd3ShowCodeBtn");
-  var codeReveal = document.getElementById("pd3CodeReveal");
-  var codeShown = document.getElementById("pd3CodeShown");
-  var copyBtn = document.getElementById("pd3CopyBtn");
-  var CODE = "PD3DIS26";
-
-  var PD3_DISMISSED = "pd3_banner_dismissed";
-  var PD3_SEEN      = "pd3_banner_seen";
-
-  async function initBanner() {
-    if (localStorage.getItem(PD3_DISMISSED)) return;
-    if (localStorage.getItem(PD3_SEEN))      return;
-    if (localStorage.getItem("cl_bundle") === "dk") return;
-    try {
-      if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
-      var sb = window.denmarkAuth && window.denmarkAuth.supabase;
-      var userId = window.denmarkAuth && window.denmarkAuth.userId;
-      if (!sb || !userId) return;
-      var sess = await sb.auth.getSession();
-      if (!sess.data.session) return;
-      var result = await sb.from("users").select("bundle").eq("id", userId).maybeSingle();
-      if (result.data && result.data.bundle === "dk") {
-        localStorage.setItem("cl_bundle", "dk");
-        return;
-      }
-      banner.classList.add("show");
-      // Mark as seen on first display — banner won't auto-show on future visits,
-      // even if user didn't explicitly dismiss. The × button still works for
-      // immediate kill; this flag handles the "ignored" case so we don't nag.
-      localStorage.setItem(PD3_SEEN, "1");
-    } catch(e) {}
-  }
-
-  showCodeBtn.addEventListener("click", function() {
-    codeReveal.style.display = "none";
-    codeShown.style.display = "flex";
-  });
-
-  copyBtn.addEventListener("click", function() {
-    navigator.clipboard.writeText(CODE).then(function() {
-      copyBtn.textContent = "✓";
-      setTimeout(function() { copyBtn.textContent = "📋"; }, 1500);
-    }).catch(function() {
-      copyBtn.textContent = "✓";
-      setTimeout(function() { copyBtn.textContent = "📋"; }, 1500);
-    });
-  });
-
-  dismissBtn.addEventListener("click", function() {
-    banner.classList.remove("show");
-    localStorage.setItem(PD3_DISMISSED, "1");
-  });
-
-  initBanner();
-})();
-</script>
-
-<!-- Personalized recommendation card -->
-<script>
-(function () {
-  // Picks ONE recommendation based on user state. Three branches:
-  //   A. Brand-new user (no answered questions)  → start with Officielle
-  //   B. All topics mastered                     → take a Prøvesimulation
-  //   C. Default — show weakest topic, deep-link to topics.html?topic=X
-  //
-  // Runs after the engine + bank are loaded. Reuses civicedge_progress
-  // (the same global mastery map all modes write to).
-
-  function normalizeLabel(str) {
-    return (str || "").normalize("NFD").replace(/\p{Diacritic}/gu, "")
-      .toLowerCase().trim().replace(/\s+/g, " ");
-  }
-
-  function getProgressKey(q) {
-    return `${q.topic || "topic"}:${q.q || ""}`;
-  }
-
-  async function buildRecommendation() {
-    const cardEl = document.getElementById("recommendCard");
-    const iconEl = document.getElementById("recommendIcon");
-    const textEl = document.getElementById("recommendText");
-    const btnEl  = document.getElementById("recommendBtn");
-    if (!cardEl || !textEl || !btnEl || !iconEl) return;
-
-    // Wait for engine/bank
-    if (!window.CivicEdgeEngine || !window.CivicEdgeEngine.ensureBankLoaded) return;
-    try { await window.CivicEdgeEngine.ensureBankLoaded(); } catch { return; }
-    const bank = window.CivicEdgeEngine.getBank ? window.CivicEdgeEngine.getBank() : [];
-    if (!bank.length) return;
-
-    let progress = {};
-    try { progress = JSON.parse(localStorage.getItem("civicedge_progress") || "{}"); } catch {}
-
-    const totalEntries = Object.keys(progress).length;
-
-    // ── Branch A: brand-new user ─────────────────────────
-    if (totalEntries === 0) {
-      iconEl.textContent = "👋";
-      textEl.innerHTML = "Velkommen! Vi anbefaler at starte med <strong>Officielle prøvespørgsmål</strong> — det er det vigtigste materiale.";
-      btnEl.textContent = "Start →";
-      btnEl.href = "official.html";
-      cardEl.style.display = "";
-      return;
-    }
-
-    // Compute per-topic stats (same logic as topics.html)
-    const cfg = window.CIVICEDGE_CONFIG || {};
-    const topicLabels = (cfg.topics && cfg.topics.topicLabels) || {};
-    const topicStats = {};
-    Object.keys(topicLabels).forEach(key => {
-      topicStats[key] = { label: topicLabels[key] || key, total: 0, mastered: 0 };
-    });
-
-    const eligible = bank.filter(q => q.depth !== "deep");
-    eligible.forEach(q => {
-      const normQ = normalizeLabel(q.topic || "");
-      const matchedKey = Object.keys(topicLabels).find(k => normalizeLabel(topicLabels[k]) === normQ);
-      if (!matchedKey || !topicStats[matchedKey]) return;
-      topicStats[matchedKey].total++;
-      const entry = progress[getProgressKey(q)];
-      if (entry && (entry.correct === 1 || entry.rights > 0)) {
-        topicStats[matchedKey].mastered++;
-      }
-    });
-
-    // Find weakest non-fully-mastered topic
-    let weakestKey = null;
-    let weakestPct = 101;
-    Object.keys(topicStats).forEach(key => {
-      const s = topicStats[key];
-      if (s.total === 0) return;
-      const pct = (s.mastered / s.total) * 100;
-      if (pct >= 100) return;             // skip fully mastered
-      if (pct < weakestPct) {
-        weakestPct = pct;
-        weakestKey = key;
-      }
-    });
-
-    // ── Branch B: all topics fully mastered ─────────────
-    if (weakestKey === null) {
-      iconEl.textContent = "🏆";
-      textEl.innerHTML = "Du har mestret alle emner. Test dig selv med en <strong>prøvesimulation</strong>.";
-      btnEl.textContent = "Start simulation →";
-      btnEl.href = "simulation.html";
-      cardEl.style.display = "";
-      return;
-    }
-
-    // ── Branch C: weakest topic ─────────────────────────
-    const weakest = topicStats[weakestKey];
-    iconEl.textContent = "🎯";
-    textEl.innerHTML = `Din svageste emne er <strong>${weakest.label}</strong> (${Math.round(weakestPct)} %). Brug 10 minutter på det nu.`;
-    btnEl.textContent = `Øv ${weakest.label} →`;
-    btnEl.href = `topics.html?topic=${encodeURIComponent(weakestKey)}`;
-    cardEl.style.display = "";
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", buildRecommendation);
-  } else {
-    buildRecommendation();
-  }
-})();
-</script>
-
-<!-- Trustpilot -->
-<script>
-(function(){
-  var TP_SINCE = 'tp_banner_since';
-  var TP_DISMISSED = 'tp_banner_dismissed';
-  var HOURS_72 = 72 * 60 * 60 * 1000;
-
-  function showBannerIfActive() {
-    var since = localStorage.getItem(TP_SINCE);
-    if (!since) return;
-    if (localStorage.getItem(TP_DISMISSED)) return;
-    if (Date.now() - parseInt(since, 10) > HOURS_72) return;
-    var notice = document.getElementById('tpNotice');
-    if (notice) {
-      notice.classList.add('show');
-      document.getElementById('tpNoticeDismiss').addEventListener('click', function() {
-        notice.classList.remove('show');
-        localStorage.setItem(TP_DISMISSED, '1');
-      });
-    }
-  }
-
-  showBannerIfActive();
-
-  if (sessionStorage.getItem('tp_checked')) return;
-
-  (async function(){
-    try {
-      if (window.denmarkAuth && window.denmarkAuth.ready) await window.denmarkAuth.ready;
-      var sb = window.denmarkAuth && window.denmarkAuth.supabase;
-      if (!sb) return;
-      var sess = await sb.auth.getSession();
-      if (!sess.data.session) return;
-      var email = sess.data.session.user.email;
-      if (!email) return;
-      sessionStorage.setItem('tp_checked', '1');
-
-      var res = await fetch(
-        'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/tp-check-eligibility',
-        { method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email }) }
-      );
-      var data = await res.json();
-      if (window.TP_VERIFIED_INVITES_ENABLED && data.eligible && typeof tp === 'function') {
-        tp('createInvitation', {
-          recipientEmail: data.email,
-          recipientName: data.name,
-          referenceId: data.referenceId,
-          source: 'InvitationScript'
-        });
-        if (!localStorage.getItem(TP_SINCE)) {
-          localStorage.setItem(TP_SINCE, String(Date.now()));
-        }
-        showBannerIfActive();
-      }
-    } catch(e) {}
-  })();
-})();
-</script>
 
 <!-- WonderPush notifications -->
 <script src="https://cdn.by.wonderpush.com/sdk/1.1/wonderpush-loader.min.js" async></script>
@@ -888,6 +481,9 @@ WonderPush.push(["addTag", "country:dk"]);
   else run();
 })();
 </script>
+
+<!-- Sidebar extras + message slot -->
+<script src="/indfodsret/assets/js/dashboard-slot-dk.js"></script>
 
 </body>
 </html>
