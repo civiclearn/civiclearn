@@ -1,355 +1,205 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title_reference_texts">Reference texts</title>
   <link rel="manifest" href="/lux/manifest.json">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-
-  <title data-i18n="title_reference_texts"></title>
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="mobile-web-app-capable" content="yes">
 
-  <!-- Core Styles -->
-  <link rel="stylesheet" href="/assets/css/dashboard-core-lt.css">
-  <link rel="stylesheet" href="/assets/css/reference-text.css">
-
-  <!-- Flag size override -->
+  <link rel="stylesheet" href="/lux/assets/css/civic-v2.css">
   <style>
-    .brand svg {
-      width: 30px !important;
-      height: 30px !important;
-    }
+    .reference-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 22px; }
+    .reference-filters { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ref-filter { font-family: var(--font); font-size: 12.5px; font-weight: 600; padding: 6px 13px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text-mid); cursor: pointer; transition: all 0.15s; }
+    .ref-filter:hover { border-color: var(--accent); color: var(--accent); }
+    .ref-filter.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    #referenceSearch { margin-left: auto; min-width: 220px; padding: 8px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font); font-size: 13.5px; background: var(--surface); color: var(--text); }
+    #referenceSearch:focus { outline: none; border-color: var(--accent); }
+    .reference-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; max-width: 1100px; }
+    .reference-card { background: var(--surface); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); border: 1.5px solid transparent; display: flex; flex-direction: column; transition: all 0.2s ease; }
+    .reference-card:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .ref-badge { align-self: flex-start; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); margin-bottom: 12px; }
+    .reference-card h3 { font-size: 14px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; line-height: 1.35; }
+    .reference-card p { font-size: 12.5px; color: var(--text-mid); line-height: 1.5; flex: 1; }
+    .reference-card a { margin-top: 14px; font-size: 12.5px; font-weight: 600; color: var(--accent); text-decoration: none; }
+    .reference-card a:hover { text-decoration: underline; }
+    @media (max-width: 640px) { #referenceSearch { margin-left: 0; width: 100%; } }
   </style>
 
-  <script>
-    document.documentElement.classList.add("i18n-hidden");
-  </script>
+  <script>document.documentElement.classList.add("i18n-hidden");</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
- <script src="/lux/assets/js/lux-auth.js?v=2"></script>
+  <script src="/lux/assets/js/lux-auth.js?v=2"></script>
 </head>
-
 
 <body>
 
-<!-- MOBILE MENU -->
 <button class="menu-toggle" aria-label="Menu">☰</button>
 
 <div class="wrap">
-
-  <!-- SIDEBAR -->
   <aside class="sidebar">
-
-<div class="brand">
-  CivicLearn®
-  <svg
-    viewBox="0 0 12000 6000"
-    width="30"
-    height="30"
-    style="margin-left:6px;vertical-align:middle;border-radius:3px;overflow:hidden"
-    aria-label="Luxembourg"
-  >
-    <defs>
-      <clipPath id="clip-lu">
-        <rect width="12000" height="6000" />
-      </clipPath>
-    </defs>
-
-    <g clip-path="url(#clip-lu)">
-      <!-- Top: Red -->
-      <rect x="0" y="0" width="12000" height="2000" fill="#ED2939"/>
-
-      <!-- Middle: White -->
-      <rect x="0" y="2000" width="12000" height="2000" fill="#FFFFFF"/>
-
-      <!-- Bottom: Light Blue -->
-      <rect x="0" y="4000" width="12000" height="2000" fill="#00A1DE"/>
-    </g>
-  </svg>
-</div>
-
-
-
-
-          <nav class="nav">
-  <a href="index.html"  data-i18n="nav_dashboard"></a>
-  <a href="simulation.html" data-i18n="nav_simulation"></a>
-  <a href="quick.html" data-i18n="nav_quick"></a>
-  <a href="topics.html" data-i18n="nav_topics"></a>
-  <a href="traps.html" data-i18n="nav_traps"></a>
-  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
-  <a href="reference.html"  class="sub active" data-i18n="nav_reference_texts"></a>
-  <a href="history.html" data-i18n="nav_history"></a>
-  <a href="my-list.html" data-i18n="nav_my_list"></a>
-  <a href="help.html" data-i18n="nav_help"></a>
-  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
-</nav>
-
-   <div class="spacer"></div>
-<div class="profile">
-
-  <div class="global-controls">
-
-  
-    <div class="lang-switch">
-      <button data-lang="fr">FR</button>
-      <button data-lang="de">DE</button>
-      <button data-lang="en">EN</button>
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Luxembourg">
+        <rect x="0" y="0" width="640" height="134" fill="#ED2939"/>
+        <rect x="0" y="133" width="640" height="134" fill="#FFFFFF"/>
+        <rect x="0" y="266" width="640" height="134" fill="#00A1DE"/>
+      </svg>
     </div>
+    <!-- Sidebar gauge -->
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Score estimé</span>
+        <span class="sidebar-gauge-score" id="clGaugeScore">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugePass"></div>
+      </div>
+      <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
+    </div>
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav_dashboard">Tableau de bord</a>
+      <a href="simulation.html" data-i18n="nav_simulation">Simulation du test</a>
+      <a href="quick.html" data-i18n="nav_quick">Test rapide</a>
+      <a href="topics.html" data-i18n="nav_topics">Tests par thème</a>
+      <a href="traps.html" data-i18n="nav_traps">Pièges fréquents</a>
+      <a href="flashcards.html" data-i18n="nav_flashcards">Flashcards</a>
+      <a href="reference.html" class="active" data-i18n="nav_reference_texts">Textes de référence</a>
+      <div class="nav-sep"></div>
+      <a href="history.html" data-i18n="nav_history">Historique</a>
+      <a href="my-list.html" data-i18n="nav_my_list">Ma liste</a>
+      <a href="help.html" data-i18n="nav_help">Aide & contact</a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink">Se déconnecter</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="global-controls">
+      <div class="lang-switch">
+        <button data-lang="fr">FR</button>
+        <button data-lang="de">DE</button>
+        <button data-lang="en">EN</button>
+      </div>
+      <button id="readingToggle" class="reading-btn tool" data-i18n="reading_tooltip" data-i18n-attr="title" aria-label="Reading assist">
+        <svg class="reading-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 9v6h4l5 5V4L7 9H3z"/>
+          <path d="M16.5 12l4.5 4.5-1.5 1.5L15 13.5l-4.5 4.5-1.5-1.5L13.5 12 9 7.5 10.5 6l4.5 4.5 4.5-4.5 1.5 1.5L16.5 12z"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
 
-  </div>
-
-</div>
-
-</aside>
-
-  <!-- OVERLAY -->
   <div class="overlay" id="menuOverlay"></div>
 
-  <!-- MAIN -->
   <main>
+    <header class="ce-header">
+      <div>
+        <h1 data-i18n="title_reference_texts">Reference texts</h1>
+        <div class="muted" data-i18n="reference_texts_subtitle"></div>
+      </div>
+    </header>
 
-<header class="ce-header ce-header-top">
-  <div class="reference-toolbar">
-    <div class="reference-filters">
-      <button class="ref-filter active" data-filter="all">All</button>
-      <button class="ref-filter" data-filter="history">History</button>
-      <button class="ref-filter" data-filter="institutions">Institutions</button>
-      <button class="ref-filter" data-filter="rights">Rights</button>
-      <button class="ref-filter" data-filter="culture">Culture</button>
+    <div class="reference-toolbar">
+      <div class="reference-filters">
+        <button class="ref-filter active" data-filter="all">All</button>
+        <button class="ref-filter" data-filter="history">History</button>
+        <button class="ref-filter" data-filter="institutions">Institutions</button>
+        <button class="ref-filter" data-filter="rights">Rights</button>
+        <button class="ref-filter" data-filter="culture">Culture</button>
+      </div>
+      <input type="text" id="referenceSearch" placeholder="Search a document…">
     </div>
 
-    <input
-      type="text"
-      id="referenceSearch"
-      placeholder="Search a document…"
-    />
-  </div>
-
-  <h1 data-i18n="title_reference_texts"></h1>
-  <div class="muted" data-i18n="reference_texts_subtitle"></div>
-</header><br><br>
-
-
-     <div class="dashboard-container">
-
-<div class="reference-grid" id="referenceGrid"></div>
-<div style="height:96px;"></div>
-
-
-  </div>
-
+    <div class="reference-grid" id="referenceGrid"></div>
   </main>
-
 </div>
 
-<!-- CONFIG + I18N -->
+<!-- Config + i18n (Lux files live at the CivicLearn root) -->
 <script src="/assets/js/lang-bootstrap-lu.js"></script>
-<script src="/assets/js/config-lu.js"></script>
+<script src="/assets/js/config-lu.js?v=2"></script>
 <script src="/assets/js/i18n.js"></script>
-<script>
-  CivicLearnI18n.init();
-</script>
-
-<!-- ENGINE -->
+<script>CivicLearnI18n.init();</script>
+<script src="/assets/js/reading.js"></script>
 <script src="/assets/js/engine-lu.js"></script>
 
 <script>
-
 const REFERENCE_TEXTS_EN = [
-  {
-    title: "About the History of Luxembourg",
-    description: "An essential overview of Luxembourg's history, its key events, and its development.",
-    file: "about-the-history-of-luxembourg-en-1.pdf",
-    category: "history",
-    badge: "Official"
-  },
-  {
-    title: "About Political Institutions in Luxembourg",
-    description: "A guide to Luxembourg's political institutions and how they function.",
-    file: "A_propos_Institutions_politiques-EN-1.pdf",
-    category: "institutions",
-    badge: "Official"
-  },
-  {
-    title: "About Luxembourg and the European Union",
-    description: "An introduction to the relations between Luxembourg and the European Union.",
-    file: "about-luxembourg-and-the-european-union-en.pdf",
-    category: "institutions",
-    badge: "Official"
-  },
-  {
-    title: "Everything You Need to Know About the Grand Duchy of Luxembourg",
-    description: "A comprehensive presentation of the Grand Duchy of Luxembourg, its identity, and its unique characteristics.",
-    file: "tout-savoir-sur-le-grand-duche-de-luxembourg-en.pdf",
-    category: "history",
-    badge: "Official"
-  },
-  {
-    title: "10 Fact Sheets About the Grand Duchy of Luxembourg",
-    description: "A brochure in 10 chapters offering a visual and engaging presentation of Luxembourg: history, culture, population, politics, economy, and more.",
-    file: "10-fact-sheets-grand-duchy-luxembourg-en.pdf",
-    category: "history",
-    badge: "Official"
-  },
-  {
-    title: "Constitution of the Grand Duchy of Luxembourg",
-    description: "The fundamental text establishing the organization and functioning of the Grand Duchy of Luxembourg.",
-    file: "constitution.pdf",
-    category: "institutions",
-    badge: "Official"
-  },
-  {
-    title: "The Universal Declaration of Human Rights",
-    description: "The key text proclaiming the fundamental rights and freedoms of every human being.",
-    file: "universal-declaration-of-human-rights-en.pdf",
-    category: "rights",
-    badge: "Official"
-  },
-  {
-    title: "About Languages in Luxembourg",
-    description: "An introduction to multilingualism and the use of languages in Luxembourg.",
-    file: "a-propos-des-langues-en.pdf",
-    category: "culture",
-    badge: "Official"
-  },
-  {
-    title: "Symbols of the State and of the Nation",
-    description: "A presentation of the official symbols of the State and the Luxembourgish nation.",
-    file: "symbols-of-the-state-and-of-the-nation-en.pdf",
-    category: "culture",
-    badge: "Official"
-  },
-  {
-    title: "About Festivals and Traditions in Luxembourg",
-    description: "An exploration of the festivals and traditions that enrich Luxembourgish culture.",
-    file: "a-propos-des-fetes-et-traditions-au-luxembourg-en.pdf",
-    category: "culture",
-    badge: "Official"
-  },
-  {
-    title: "About Theatre in Luxembourg",
-    description: "A look at the history and significance of theatre in Luxembourg’s cultural life.",
-    file: "a-propos-du-theatre-au-luxembourg-en.pdf",
-    category: "culture",
-    badge: "Official"
-  },
-  {
-    title: "About Literature in Luxembourg",
-    description: "An introduction to the richness and diversity of Luxembourgish literature.",
-    file: "a-propos-de-la-litterature-au-luxembourg-en.pdf",
-    category: "culture",
-    badge: "Official"
-  }
+  { title: "About the History of Luxembourg", description: "An essential overview of Luxembourg's history, its key events, and its development.", file: "about-the-history-of-luxembourg-en-1.pdf", category: "history", badge: "Official" },
+  { title: "About Political Institutions in Luxembourg", description: "A guide to Luxembourg's political institutions and how they function.", file: "A_propos_Institutions_politiques-EN-1.pdf", category: "institutions", badge: "Official" },
+  { title: "About Luxembourg and the European Union", description: "An introduction to the relations between Luxembourg and the European Union.", file: "about-luxembourg-and-the-european-union-en.pdf", category: "institutions", badge: "Official" },
+  { title: "Everything You Need to Know About the Grand Duchy of Luxembourg", description: "A comprehensive presentation of the Grand Duchy of Luxembourg, its identity, and its unique characteristics.", file: "tout-savoir-sur-le-grand-duche-de-luxembourg-en.pdf", category: "history", badge: "Official" },
+  { title: "10 Fact Sheets About the Grand Duchy of Luxembourg", description: "A brochure in 10 chapters offering a visual and engaging presentation of Luxembourg: history, culture, population, politics, economy, and more.", file: "10-fact-sheets-grand-duchy-luxembourg-en.pdf", category: "history", badge: "Official" },
+  { title: "Constitution of the Grand Duchy of Luxembourg", description: "The fundamental text establishing the organization and functioning of the Grand Duchy of Luxembourg.", file: "constitution.pdf", category: "institutions", badge: "Official" },
+  { title: "The Universal Declaration of Human Rights", description: "The key text proclaiming the fundamental rights and freedoms of every human being.", file: "universal-declaration-of-human-rights-en.pdf", category: "rights", badge: "Official" },
+  { title: "About Languages in Luxembourg", description: "An introduction to multilingualism and the use of languages in Luxembourg.", file: "a-propos-des-langues-en.pdf", category: "culture", badge: "Official" },
+  { title: "Symbols of the State and of the Nation", description: "A presentation of the official symbols of the State and the Luxembourgish nation.", file: "symbols-of-the-state-and-of-the-nation-en.pdf", category: "culture", badge: "Official" },
+  { title: "About Festivals and Traditions in Luxembourg", description: "An exploration of the festivals and traditions that enrich Luxembourgish culture.", file: "a-propos-des-fetes-et-traditions-au-luxembourg-en.pdf", category: "culture", badge: "Official" },
+  { title: "About Theatre in Luxembourg", description: "A look at the history and significance of theatre in Luxembourg’s cultural life.", file: "a-propos-du-theatre-au-luxembourg-en.pdf", category: "culture", badge: "Official" },
+  { title: "About Literature in Luxembourg", description: "An introduction to the richness and diversity of Luxembourgish literature.", file: "a-propos-de-la-litterature-au-luxembourg-en.pdf", category: "culture", badge: "Official" }
 ];
 
 const grid = document.getElementById("referenceGrid");
-
 REFERENCE_TEXTS_EN.forEach(f => {
   const card = document.createElement("div");
   card.className = "reference-card";
   card.dataset.category = f.category || "other";
-
   card.innerHTML = `
-    <div class="ref-badge">PDF</div>
+    <div class="ref-badge">PDF · ${f.badge}</div>
     <h3>${f.title}</h3>
     <p>${f.description}</p>
-    <a href="https://media.civiclearn.com/lux/en/${f.file}" target="_blank" rel="noopener">
-      Download →
-    </a>
+    <a href="https://media.civiclearn.com/lux/en/${f.file}" target="_blank" rel="noopener">Download →</a>
   `;
-
   grid.appendChild(card);
 });
-</script>
-<script>
+
 const filterButtons = document.querySelectorAll(".ref-filter");
 const searchInput = document.getElementById("referenceSearch");
 const cards = Array.from(document.querySelectorAll(".reference-card"));
-
 function applyFilters() {
-  const activeFilter =
-    document.querySelector(".ref-filter.active")?.dataset.filter || "all";
+  const activeFilter = document.querySelector(".ref-filter.active")?.dataset.filter || "all";
   const query = searchInput.value.toLowerCase();
-
   cards.forEach(card => {
-    const matchesFilter =
-      activeFilter === "all" || card.dataset.category === activeFilter;
-
-    const text = card.innerText.toLowerCase();
-    const matchesSearch = text.includes(query);
-
+    const matchesFilter = activeFilter === "all" || card.dataset.category === activeFilter;
+    const matchesSearch = card.innerText.toLowerCase().includes(query);
     card.style.display = matchesFilter && matchesSearch ? "" : "none";
   });
 }
-
-filterButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    filterButtons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    applyFilters();
-  });
-});
-
+filterButtons.forEach(btn => btn.addEventListener("click", () => {
+  filterButtons.forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  applyFilters();
+}));
 searchInput.addEventListener("input", applyFilters);
 </script>
 
-
-
+<!-- Mobile menu + lang switch -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-
-  /* MOBILE MENU */
   const toggle = document.querySelector(".menu-toggle");
   const overlay = document.getElementById("menuOverlay");
-  toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
-  overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
 
-  /* THEME */
-  try {
-    const s = JSON.parse(localStorage.getItem("civicedge_settings") || "{}");
-    if (s.theme) document.documentElement.dataset.theme = s.theme;
-  } catch {}
-});
-</script>
-<script>
-(function () {
   const current = window.CIVICEDGE_LANG;
-
   document.querySelectorAll(".lang-switch button").forEach(btn => {
-    const lang = btn.dataset.lang;
-
-    if (lang === current) {
-      btn.classList.add("active");
-    }
-
+    if (btn.dataset.lang === current) btn.classList.add("active");
     btn.addEventListener("click", () => {
-      if (lang === current) return;
-
-      localStorage.setItem("civicedge_lang", lang);
-
-      const path = window.location.pathname;
-
-      // Help pages
-      if (path.includes("help")) {
-        window.location.href = `/lux/dashboard/help-${lang}.html`;
-        return;
-      }
-
-      // Reference pages
-      if (path.includes("reference")) {
-        window.location.href = `/lux/dashboard/reference-${lang}.html`;
-        return;
-      }
-
-      // Fallback
+      if (btn.dataset.lang === current) return;
+      localStorage.setItem("civicedge_lang", btn.dataset.lang);
+      // help-xx.html / reference-xx.html are per-language files
+      const m = location.pathname.match(/\/(help|reference)(-[a-z]{2})?\.html$/);
+      if (m) { location.href = `${m[1]}-${btn.dataset.lang}.html`; return; }
       location.reload();
     });
   });
-})();
+});
 </script>
-
+<script src="/lux/assets/js/gauge-bar.js"></script>
+<script src="/lux/assets/js/study-timer.js"></script>
+<script src="/assets/js/maintenance-bar.js"></script>
 <script src="/assets/js/signout.js"></script>
 </body>
 </html>
