@@ -964,7 +964,7 @@ body {
 
 /* ── COUNTRIES TAB ── */
 #tab-countries { overflow-y: auto; padding: 1.5rem; background: var(--bg); }
-.cty-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+.cty-grid { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.25fr); gap: 1.25rem; align-items: start; }
 @media (max-width: 900px) { .cty-grid { grid-template-columns: 1fr; } .cty-kpi-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
 .cty-chart-wrap { position: relative; height: 300px; }
 .cty-legend { display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; margin-top: 1rem; font-size: 0.78rem; color: var(--muted); }
@@ -978,6 +978,18 @@ body {
 .cty-bar { display: inline-block; height: 6px; border-radius: 3px; background: var(--brand-dim); vertical-align: middle; margin-right: 6px; }
 .cty-table tfoot td { padding: 0.6rem 0.6rem 0; text-align: right; color: var(--muted); border-top: 1px solid var(--border); }
 .cty-table tfoot td:first-child { text-align: left; }
+.cty-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem; margin-bottom: 1.25rem; }
+.cty-toolbar .cty-refresh-btn { margin-left: auto; }
+.cty-seg { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 3px; gap: 2px; }
+.cty-seg-btn { border: none; background: transparent; color: var(--muted); font-family: inherit; font-size: 0.78rem; font-weight: 500; padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer; }
+.cty-seg-btn:hover { color: var(--text); }
+.cty-seg-btn.active { background: var(--brand-dim); color: var(--brand); }
+.cty-ctl { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--muted); }
+.cty-ctl select { padding: 0.35rem 0.5rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.78rem; }
+.cty-table td.cty-dim { color: var(--muted); opacity: 0.6; }
+.cty-table td.cty-hi { color: var(--text); font-weight: 600; }
+.cty-table th.cty-hi { color: var(--brand); }
+.cty-k-idle { color: var(--muted) !important; }
 .cty-refresh-btn { background: var(--surface2); color: var(--text); padding: 0.35rem 0.8rem; font-size: 0.75rem; text-transform: none; letter-spacing: 0; }
 .cty-k-time { font-size: 1.05rem !important; padding-top: 0.3rem; }
 #cty-status.ok { display: none; }
@@ -1542,26 +1554,48 @@ body {
 
   <!-- COUNTRIES TAB -->
   <div class="tab-panel" id="tab-countries">
+    <div class="cty-toolbar">
+      <div class="cty-seg" id="cty-mode">
+        <button class="cty-seg-btn active" data-mode="relevant" onclick="ctySetMode('relevant')">Relevant users</button>
+        <button class="cty-seg-btn" data-mode="active" onclick="ctySetMode('active')">Active only</button>
+        <button class="cty-seg-btn" data-mode="all" onclick="ctySetMode('all')">All users</button>
+      </div>
+      <label class="cty-ctl">Registered within
+        <select id="cty-reg-days" onchange="ctyLoad()">
+          <option value="30">30 days</option><option value="60">60 days</option><option value="90" selected>90 days</option>
+          <option value="180">180 days</option><option value="365">1 year</option>
+        </select>
+      </label>
+      <label class="cty-ctl">Active within
+        <select id="cty-act-days" onchange="ctyLoad()">
+          <option value="30">30 days</option><option value="90">90 days</option><option value="180" selected>180 days</option>
+          <option value="365">1 year</option><option value="730">2 years</option>
+        </select>
+      </label>
+      <button class="usr-btn cty-refresh-btn" onclick="ctyLoad()">Refresh</button>
+    </div>
     <div class="rev-load-bar" id="cty-status"><span>Loading users by country…</span></div>
     <div class="rev-kpi-grid cty-kpi-grid">
-      <div class="rev-kpi-card"><div class="rev-kpi-label">Total users</div><div class="rev-kpi-value" id="cty-k-total">—</div></div>
-      <div class="rev-kpi-card"><div class="rev-kpi-label">Countries / markets</div><div class="rev-kpi-value" id="cty-k-count">—</div></div>
+      <div class="rev-kpi-card"><div class="rev-kpi-label" id="cty-k-main-label">Relevant users</div><div class="rev-kpi-value" id="cty-k-total">—</div><div class="rev-kpi-yoy flat" id="cty-k-total-sub"></div></div>
+      <div class="rev-kpi-card"><div class="rev-kpi-label">Active last 30 days</div><div class="rev-kpi-value" id="cty-k-30d">—</div><div class="rev-kpi-yoy flat" id="cty-k-30d-sub"></div></div>
       <div class="rev-kpi-card"><div class="rev-kpi-label">Largest market</div><div class="rev-kpi-value" id="cty-k-top">—</div><div class="rev-kpi-yoy flat" id="cty-k-top-share"></div></div>
-      <div class="rev-kpi-card"><div class="rev-kpi-label">Last refreshed</div><div class="rev-kpi-value cty-k-time" id="cty-k-time">—</div></div>
+      <div class="rev-kpi-card"><div class="rev-kpi-label">Idle (excluded)</div><div class="rev-kpi-value cty-k-idle" id="cty-k-idle">—</div><div class="rev-kpi-yoy flat" id="cty-k-idle-sub"></div></div>
     </div>
     <div class="cty-grid">
       <div class="rev-chart-card">
-        <div class="rev-card-title" style="display:flex;justify-content:space-between;align-items:center;">
-          <span>Users by purchase country</span>
-          <button class="usr-btn cty-refresh-btn" onclick="ctyLoad()">Refresh</button>
-        </div>
+        <div class="rev-card-title" id="cty-chart-title">Relevant users by purchase country</div>
         <div class="cty-chart-wrap"><canvas id="cty-chart"></canvas></div>
         <div class="cty-legend" id="cty-legend"></div>
-        <div class="rev-note">Top 8 markets shown as slices; the rest are grouped as “Other”. Source: Supabase view <code>users_by_country</code> (live count of the <code>users</code> table by <code>purchase_country</code>).</div>
+        <div class="rev-note" id="cty-note"></div>
       </div>
       <div class="rev-table-card">
         <div class="rev-card-title">All countries</div>
-        <table class="rev-table cty-table" id="cty-table"></table>
+        <div style="overflow-x:auto"><table class="rev-table cty-table" id="cty-table"></table></div>
+        <div class="rev-note">
+          <b>Recent</b> = registered within the “registered within” window (counted even if never used).
+          <b>Active</b> = signed in or synced training progress within the “active within” window (counted however old the purchase).
+          <b>Relevant</b> = recent or active. <b>Idle</b> = neither — mostly accounts imported from the old site that never touched the new platform.
+        </div>
       </div>
     </div>
   </div><!-- /tab-countries -->
@@ -3448,9 +3482,14 @@ async function luxfbLoad(cycle) {
 }
 
 // ── COUNTRIES TAB ─────────────────────────────────────────────────────────────
-// Reads the public.users_by_country view (purchase_country, total_users) via
-// PostgREST with the publishable key. Re-fetched every time the tab is opened
-// and on the Refresh button, so the chart always reflects the live users table.
+// Calls the users_by_country_activity(reg_days, active_days) RPC (aggregates only):
+//   total_users    all rows in users for that purchase_country
+//   recent_users   registered within reg_days (counted even if never used)
+//   active_users   signed in (auth.users.last_sign_in_at) or synced progress
+//                  (user_sync.updated_at) within active_days
+//   relevant_users recent OR active  — idle legacy imports drop out here
+//   active_30d     active in the last 30 days (fixed window)
+// Re-fetched every time the tab is opened, on Refresh, and when a window changes.
 const CTY_SB = 'https://htgliokekeaovdiafrgs.supabase.co';
 const CTY_SB_KEY = EXAM_SB_KEY;
 // Fixed categorical order (never cycled) — validated for CVD separation on the dark surface.
@@ -3465,12 +3504,25 @@ const CTY_NAMES = {
   'es': 'Spain', 'is-is': 'Iceland', 'is': 'Iceland', 'sk': 'Slovakia', 'lt-lt': 'Lithuania',
   'pt-br': 'Brazil', 'en-au': 'Australia', 'en-gb': 'United Kingdom', 'en-ie': 'Ireland', 'pl-pl': 'Poland'
 };
+const CTY_MODES = {
+  relevant: { key: 'relevant', label: 'Relevant users', title: 'Relevant users by purchase country' },
+  active:   { key: 'active',   label: 'Active users',   title: 'Active users by purchase country' },
+  all:      { key: 'total',    label: 'All users',      title: 'All users by purchase country' }
+};
 let ctyChart = null;
 let ctyLoading = false;
+let ctyMode = 'relevant';
+let ctyRows = null;
 
 function ctyName(code) {
   if (!code) return 'Unknown';
   return CTY_NAMES[code] || code;
+}
+
+function ctySetMode(mode) {
+  ctyMode = mode;
+  document.querySelectorAll('#cty-mode .cty-seg-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  if (ctyRows) ctyRender(ctyRows);
 }
 
 async function ctyLoad() {
@@ -3479,14 +3531,25 @@ async function ctyLoad() {
   const status = document.getElementById('cty-status');
   status.className = 'rev-load-bar';
   status.innerHTML = '<span>Loading users by country…</span>';
+  const reg_days = parseInt(document.getElementById('cty-reg-days').value) || 90;
+  const active_days = parseInt(document.getElementById('cty-act-days').value) || 180;
   try {
-    const res = await fetch(CTY_SB + '/rest/v1/users_by_country?select=purchase_country,total_users&order=total_users.desc', {
-      headers: { 'apikey': CTY_SB_KEY, 'Authorization': 'Bearer ' + CTY_SB_KEY }
+    const res = await fetch(CTY_SB + '/rest/v1/rpc/users_by_country_activity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': CTY_SB_KEY, 'Authorization': 'Bearer ' + CTY_SB_KEY },
+      body: JSON.stringify({ reg_days, active_days })
     });
     if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).slice(0, 200));
-    const rows = (await res.json()).map(r => ({ code: r.purchase_country, n: Number(r.total_users) || 0 }))
-      .sort((a, b) => b.n - a.n);
-    ctyRender(rows);
+    ctyRows = (await res.json()).map(r => ({
+      code: r.purchase_country,
+      total: Number(r.total_users) || 0,
+      recent: Number(r.recent_users) || 0,
+      active: Number(r.active_users) || 0,
+      relevant: Number(r.relevant_users) || 0,
+      a30: Number(r.active_30d) || 0
+    }));
+    ctyRows.forEach(r => r.idle = r.total - r.relevant);
+    ctyRender(ctyRows);
     status.className = 'rev-load-bar ok';
   } catch (e) {
     status.className = 'rev-load-bar err';
@@ -3497,29 +3560,46 @@ async function ctyLoad() {
   }
 }
 
-function ctyRender(rows) {
-  const total = rows.reduce((s, r) => s + r.n, 0);
+function ctyRender(rowsIn) {
+  const mode = CTY_MODES[ctyMode];
+  const key = mode.key;
+  const regDays = document.getElementById('cty-reg-days').value;
+  const actDays = document.getElementById('cty-act-days').value;
+  const rows = rowsIn.slice().sort((a, b) => b[key] - a[key] || b.total - a.total);
+  const sum = k => rows.reduce((s, r) => s + r[k], 0);
+  const total = sum(key);
+  const allTotal = sum('total');
   const fmt = n => n.toLocaleString('en-GB');
-  const pct = n => total ? (100 * n / total).toFixed(n / total < 0.01 ? 2 : 1) + '%' : '—';
+  const pctOf = (n, d) => d ? (100 * n / d).toFixed(n / d < 0.01 ? 2 : 1) + '%' : '—';
+  const pct = n => pctOf(n, total);
 
   // KPIs
+  document.getElementById('cty-k-main-label').textContent = mode.label;
   document.getElementById('cty-k-total').textContent = fmt(total);
-  document.getElementById('cty-k-count').textContent = rows.length;
-  document.getElementById('cty-k-top').textContent = rows[0] ? ctyName(rows[0].code) : '—';
-  document.getElementById('cty-k-top-share').textContent = rows[0] ? pct(rows[0].n) + ' of all users' : '';
-  document.getElementById('cty-k-time').textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  document.getElementById('cty-k-total-sub').textContent = ctyMode === 'all'
+    ? rows.length + ' markets'
+    : pctOf(total, allTotal) + ' of ' + fmt(allTotal) + ' accounts · ' + rows.length + ' markets';
+  const a30 = sum('a30');
+  document.getElementById('cty-k-30d').textContent = fmt(a30);
+  document.getElementById('cty-k-30d-sub').textContent = pctOf(a30, sum('relevant')) + ' of relevant users';
+  const topRow = rows.find(r => r[key] > 0);
+  document.getElementById('cty-k-top').textContent = topRow ? ctyName(topRow.code) : '—';
+  document.getElementById('cty-k-top-share').textContent = topRow ? pct(topRow[key]) + ' of ' + mode.label.toLowerCase() : '';
+  const idle = sum('idle');
+  document.getElementById('cty-k-idle').textContent = fmt(idle);
+  document.getElementById('cty-k-idle-sub').textContent = 'not registered in ' + regDays + 'd, no use in ' + actDays + 'd';
 
-  // Slices: top N + Other
-  const top = rows.slice(0, CTY_MAX_SLICES);
-  const rest = rows.slice(CTY_MAX_SLICES);
-  const otherN = rest.reduce((s, r) => s + r.n, 0);
-  const slices = top.map((r, i) => ({ label: ctyName(r.code), code: r.code, n: r.n, color: CTY_COLORS[i] }));
+  // Slices: top N + Other (only countries with a non-zero value in this mode)
+  const nz = rows.filter(r => r[key] > 0);
+  const top = nz.slice(0, CTY_MAX_SLICES);
+  const rest = nz.slice(CTY_MAX_SLICES);
+  const otherN = rest.reduce((s, r) => s + r[key], 0);
+  const slices = top.map((r, i) => ({ label: ctyName(r.code), code: r.code, n: r[key], color: CTY_COLORS[i] }));
   if (otherN > 0) slices.push({ label: 'Other (' + rest.length + ')', code: '', n: otherN, color: CTY_OTHER_COLOR });
-
   const colorByCode = {};
   top.forEach((r, i) => colorByCode[r.code] = CTY_COLORS[i]);
 
-  // Chart
+  document.getElementById('cty-chart-title').textContent = mode.title;
   if (ctyChart) ctyChart.destroy();
   ctyChart = new Chart(document.getElementById('cty-chart').getContext('2d'), {
     type: 'doughnut',
@@ -3537,30 +3617,39 @@ function ctyRender(rows) {
       responsive: true, maintainAspectRatio: false, cutout: '58%',
       plugins: {
         legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => ' ' + fmt(ctx.raw) + ' users · ' + pct(ctx.raw)
-          }
-        }
+        tooltip: { callbacks: { label: ctx => ' ' + fmt(ctx.raw) + ' users · ' + pct(ctx.raw) } }
       }
     }
   });
 
-  // Custom legend (name + count + share), fixed order = slice order
   document.getElementById('cty-legend').innerHTML = slices.map(s =>
     `<div class="cty-legend-item"><span class="cty-legend-swatch" style="background:${s.color}"></span><b>${s.label}</b> ${fmt(s.n)} · ${pct(s.n)}</div>`
   ).join('');
 
-  // Full table — every country, with a proportional bar
-  const maxN = rows[0] ? rows[0].n : 1;
-  let html = '<thead><tr><th>Country</th><th>Users</th><th>Share</th></tr></thead><tbody>';
+  const noteByMode = {
+    relevant: `Relevant = registered in the last ${regDays} days <i>or</i> used the platform in the last ${actDays} days. Idle accounts (${fmt(idle)}) are excluded.`,
+    active:   `Active = signed in or synced training progress in the last ${actDays} days, regardless of purchase date.`,
+    all:      `Every account in the users table, including idle legacy imports.`
+  };
+  document.getElementById('cty-note').innerHTML = 'Top 8 markets as slices; the rest grouped as “Other”. ' + noteByMode[ctyMode] +
+    ' Source: Supabase RPC <code>users_by_country_activity</code>.';
+
+  // Full table — every country, every measure; the active mode's column is highlighted
+  const hi = c => c === key ? ' class="cty-hi"' : '';
+  const maxN = nz[0] ? nz[0][key] : 1;
+  let html = `<thead><tr><th>Country</th><th${hi('total')}>All</th><th${hi('recent')}>Recent</th><th${hi('active')}>Active</th><th>30d</th><th${hi('relevant')}>Relevant</th><th>Idle</th><th>Share</th></tr></thead><tbody>`;
   rows.forEach(r => {
-    const w = Math.max(2, Math.round(80 * r.n / maxN));
+    const w = Math.max(r[key] ? 2 : 0, Math.round(60 * r[key] / maxN));
     const sw = colorByCode[r.code] || CTY_OTHER_COLOR;
+    const cell = (k, cls) => `<td${cls ? ' class="' + cls + '"' : ''}>${fmt(r[k])}</td>`;
     html += `<tr><td><span class="cty-flag" style="background:${sw}"></span>${ctyName(r.code)}<span class="cty-code">${r.code || '—'}</span></td>` +
-            `<td>${fmt(r.n)}</td><td><span class="cty-bar" style="width:${w}px"></span>${pct(r.n)}</td></tr>`;
+      cell('total', key === 'total' ? 'cty-hi' : '') + cell('recent', key === 'recent' ? 'cty-hi' : '') +
+      cell('active', key === 'active' ? 'cty-hi' : '') + cell('a30') +
+      cell('relevant', key === 'relevant' ? 'cty-hi' : '') + cell('idle', 'cty-dim') +
+      `<td><span class="cty-bar" style="width:${w}px"></span>${pct(r[key])}</td></tr>`;
   });
-  html += `</tbody><tfoot><tr><td style="font-weight:600;color:var(--text)">Total</td><td style="font-weight:600;color:var(--text)">${fmt(total)}</td><td>100%</td></tr></tfoot>`;
+  const tf = k => `<td style="font-weight:600;color:var(--text)">${fmt(sum(k))}</td>`;
+  html += `</tbody><tfoot><tr><td style="font-weight:600;color:var(--text)">Total</td>${tf('total')}${tf('recent')}${tf('active')}${tf('a30')}${tf('relevant')}<td class="cty-dim">${fmt(idle)}</td><td>100%</td></tr></tfoot>`;
   document.getElementById('cty-table').innerHTML = html;
 }
 
