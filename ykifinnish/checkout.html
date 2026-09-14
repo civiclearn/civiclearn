@@ -66,11 +66,31 @@ a { color: inherit; }
 main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
 @media (max-width: 520px) { main { padding: 1.8rem 1.15rem 3rem; } }
 
-.page-title { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2rem; line-height: 1.2; letter-spacing: -.025em; }
+.page-title { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 1.5rem; line-height: 1.2; letter-spacing: -.025em; }
+
+/* ── PLAN TOGGLE ── */
+.plan-toggle {
+  display: grid; grid-template-columns: 1fr 1fr; gap: .65rem;
+  margin-bottom: 1.5rem;
+}
+.plan-card {
+  border: 1.5px solid #e8e0d4; border-radius: .95rem; padding: 1rem 1.1rem;
+  cursor: pointer; transition: all .18s; position: relative; background: #fff;
+}
+.plan-card:hover { border-color: #003580; }
+.plan-card.selected { border-color: #003580; background: #eff3ff; box-shadow: 0 0 0 2px rgba(0,53,128,.18); }
+.plan-name { font-size: .82rem; font-weight: 700; margin-bottom: .15rem; }
+.plan-meta { font-size: .68rem; color: #78716c; line-height: 1.4; }
+.plan-price { font-size: 1rem; font-weight: 700; margin-top: .45rem; }
+.plan-save {
+  position: absolute; top: -.55rem; right: .7rem;
+  background: #003580; color: #fff; font-size: .6rem; font-weight: 700;
+  padding: .15rem .55rem; border-radius: .4rem; letter-spacing: .02em;
+}
 
 .price-line {
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  padding-bottom: 1.6rem; margin-bottom: 1.6rem;
+  padding-bottom: 1.2rem; margin-bottom: 1.4rem;
   border-bottom: 1px solid #e8e0d4;
 }
 .price-line-label { font-size: .82rem; font-weight: 500; color: #78716c; }
@@ -180,18 +200,33 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
 
   <div class="page-title" data-t="page_title">Activate your full access</div>
 
+  <!-- PLAN TOGGLE -->
+  <div class="plan-toggle" id="planToggle">
+    <div class="plan-card selected" id="planSolo">
+      <div class="plan-name" data-t="plan_solo_name">YKI Finnish</div>
+      <div class="plan-meta" data-t="plan_solo_meta">15 simulations · AI evaluation · Lifetime access</div>
+      <div class="plan-price">€69</div>
+    </div>
+    <div class="plan-card" id="planBundle">
+      <div class="plan-save" data-t="plan_save">Save €39</div>
+      <div class="plan-name" data-t="plan_bundle_name">YKI Finnish + Kansalaisuuskoe</div>
+      <div class="plan-meta" data-t="plan_bundle_meta">15 simulations + 800 citizenship test questions</div>
+      <div class="plan-price">€99</div>
+    </div>
+  </div>
+
   <div class="price-line" id="priceLine">
     <div>
-      <div class="price-line-label" data-t="price_label">YKI Finnish · Intermediate</div>
-      <div class="price-line-meta" data-t="price_meta">15 simulations · Lifetime access</div>
+      <div class="price-line-label" id="priceLabel">YKI Finnish · Intermediate</div>
+      <div class="price-line-meta" id="priceMeta">15 simulations · Lifetime access</div>
     </div>
-    <div style="flex-shrink:0;text-align:right"><span class="price-line-amount">€69</span></div>
+    <div style="flex-shrink:0;text-align:right"><span class="price-line-amount" id="priceAmount">€69</span></div>
   </div>
 
   <div id="viewCheckout">
     <div id="link-auth-element"></div>
     <div id="payment-element"><div class="stripe-loading" data-t="stripe_loading">Loading payment options…</div></div>
-    <button type="button" class="pay-btn" id="payBtn" disabled data-t="cta_pay">Pay €69</button>
+    <button type="button" class="pay-btn" id="payBtn" disabled>Pay €69</button>
     <div class="trust-strip">
       <div class="trust-item"><span>🔒</span><span data-t="ts_secure">Stripe-secured</span></div>
       <div class="trust-item"><span>⚡</span><span data-t="ts_instant">Instant access</span></div>
@@ -231,6 +266,9 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
     <div class="done-sub" id="doneEmail"></div>
     <a href="/ykifinnish/dashboard/index.html" class="pay-btn" id="doneCta"
        style="text-align:center;text-decoration:none;display:block" data-t="cta_go">Start practising →</a>
+    <p id="doneBundleNote" hidden style="font-size:.78rem;color:#78716c;text-align:center;margin-top:.9rem">
+      <span data-t="done_bundle_note">Your bundle also includes the citizenship test:</span> <a href="/kansalaisuuskoe/dashboard/index.html" style="color:#003580;font-weight:500">Kansalaisuuskoe →</a>
+    </p>
   </div>
 
   <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
@@ -263,10 +301,15 @@ var I18N = {
 fi: {
   header_contact:"Kysyttävää?",
   page_title:"Aktivoi premium-käyttöoikeus",
+  plan_solo_name:"YKI Suomi", plan_solo_meta:"15 simulaatiota · Tekoälyarviointi · Elinikäinen käyttöoikeus",
+  plan_save:"Säästä 39 €", plan_bundle_name:"YKI Suomi + Kansalaisuuskoe", plan_bundle_meta:"15 simulaatiota + 800 kansalaisuuskokeen kysymystä",
   price_label:"YKI Suomi · Keskitaso",
   price_meta:"15 simulaatiota · Elinikäinen käyttöoikeus",
+  bundle_price_label:"YKI Suomi + Kansalaisuuskoe · Paketti",
+  bundle_price_meta:"15 simulaatiota + 800 kysymystä · Elinikäinen käyttöoikeus",
   stripe_loading:"Ladataan maksuvaihtoehtoja…",
-  cta_pay:"Maksa 69 €",
+  cta_pay:"Maksa 69 €", cta_pay_bundle:"Maksa 99 €",
+  done_bundle_note:"Pakettiisi kuuluu myös kansalaisuuskoe:",
   ts_secure:"Stripe-suojattu", ts_instant:"Välitön käyttöoikeus", ts_onetime:"Kertamaksu", tp_word:"arvostelua vuonna",
   pay_confirmed:"Maksu vahvistettu!", pwd_instr:"Valitse nyt salasana tilillesi.",
   pwd_label:"Salasana", pwd_confirm_label:"Vahvista salasana",
@@ -285,10 +328,15 @@ fi: {
 en: {
   header_contact:"Any questions?",
   page_title:"Activate your full access",
+  plan_solo_name:"YKI Finnish", plan_solo_meta:"15 simulations · AI evaluation · Lifetime access",
+  plan_save:"Save €39", plan_bundle_name:"YKI Finnish + Kansalaisuuskoe", plan_bundle_meta:"15 simulations + 800 citizenship test questions",
   price_label:"YKI Finnish · Intermediate",
   price_meta:"15 simulations · Lifetime access",
+  bundle_price_label:"YKI Finnish + Kansalaisuuskoe · Bundle",
+  bundle_price_meta:"15 simulations + 800 questions · Lifetime access",
   stripe_loading:"Loading payment options…",
-  cta_pay:"Pay €69",
+  cta_pay:"Pay €69", cta_pay_bundle:"Pay €99",
+  done_bundle_note:"Your bundle also includes the citizenship test:",
   ts_secure:"Stripe-secured", ts_instant:"Instant access", ts_onetime:"One-time payment", tp_word:"reviews in",
   pay_confirmed:"Payment confirmed!", pwd_instr:"Choose a password for your account.",
   pwd_label:"Password", pwd_confirm_label:"Confirm password",
@@ -331,6 +379,8 @@ function applyLang(lang) {
   var pw1 = document.getElementById('pw1'), pw2 = document.getElementById('pw2');
   if (pw1) pw1.placeholder = t('pwd_placeholder');
   if (pw2) pw2.placeholder = t('pwd_confirm_placeholder');
+  /* Plan-dependent texts (price line, pay button) are owned by the checkout script. */
+  if (typeof window.refreshPlanTexts === 'function') window.refreshPlanTexts();
 }
 document.querySelectorAll('.lang-switch button').forEach(function(b) {
   b.onclick = function() { applyLang(b.dataset.lang); };
@@ -355,6 +405,21 @@ applyLang('en');
   var stripe = Stripe(STRIPE_PK);
   var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+  /* Solo goes through the YKI Finnish functions; the bundle is the same product
+     as the Kansalaisuuskoe-page bundle (plan bundle-fi) and reuses its functions.
+     source:'ykifinnish' keeps YKI Finnish as the buyer's primary product. */
+  var PLANS = {
+    solo:   { amount: 6900, price: '€69', labelKey: 'price_label',        metaKey: 'price_meta',        payKey: 'cta_pay',
+              createFn: 'ykifinnish-create-payment-intent', setupFn: 'ykifinnish-setup-account', body: function(email){ return { email: email }; } },
+    bundle: { amount: 9900, price: '€99', labelKey: 'bundle_price_label', metaKey: 'bundle_price_meta', payKey: 'cta_pay_bundle',
+              createFn: 'fi-create-payment-intent', setupFn: 'fi-setup-account', body: function(email){ return { email: email, plan: 'bundle-fi', source: 'ykifinnish' }; } },
+  };
+  function payLabel() { return t(PLANS[selectedPlan].payKey); }
+
+  var selectedPlan = 'solo';
+  var urlPlan = new URLSearchParams(window.location.search).get('plan');
+  if (urlPlan === 'bundle' || urlPlan === 'bundle-fi') selectedPlan = 'bundle';
+
   var currentEmail = '';
   var paymentIntentId = '';
   var stripeElements = null;
@@ -363,6 +428,7 @@ applyLang('en');
   var viewCheckout = document.getElementById('viewCheckout');
   var viewPassword = document.getElementById('viewPassword');
   var viewDone     = document.getElementById('viewDone');
+  var planToggle   = document.getElementById('planToggle');
   var priceLine    = document.getElementById('priceLine');
   var msg          = document.getElementById('checkoutMessage');
 
@@ -370,16 +436,41 @@ applyLang('en');
     viewCheckout.hidden = (name !== 'checkout');
     viewPassword.hidden = (name !== 'password');
     viewDone.hidden     = (name !== 'done');
+    planToggle.style.display = (name === 'checkout') ? 'grid' : 'none';
     priceLine.style.display = (name === 'checkout') ? 'flex' : 'none';
     msg.style.display = 'none';
   }
   function err(text)  { msg.textContent = text; msg.className = 'checkout-message error'; msg.style.display = 'block'; }
   function info(text) { msg.textContent = text; msg.className = 'checkout-message info';  msg.style.display = 'block'; }
 
+  /* ── Plan selection ── */
+  var cardSolo   = document.getElementById('planSolo');
+  var cardBundle = document.getElementById('planBundle');
+
+  function refreshPlanTexts() {
+    var plan = PLANS[selectedPlan];
+    document.getElementById('priceLabel').textContent = t(plan.labelKey);
+    document.getElementById('priceMeta').textContent = t(plan.metaKey);
+    document.getElementById('priceAmount').textContent = plan.price;
+    if (!isSubmitting) document.getElementById('payBtn').textContent = payLabel();
+  }
+  window.refreshPlanTexts = refreshPlanTexts;
+
+  function selectPlan(plan) {
+    if (isSubmitting) return;
+    selectedPlan = plan;
+    cardSolo.classList.toggle('selected', plan === 'solo');
+    cardBundle.classList.toggle('selected', plan === 'bundle');
+    refreshPlanTexts();
+    mountStripeElements();
+  }
+  cardSolo.addEventListener('click', function() { selectPlan('solo'); });
+  cardBundle.addEventListener('click', function() { selectPlan('bundle'); });
+
   function mountStripeElements() {
     stripeElements = stripe.elements({
       mode: 'payment',
-      amount: 6900,
+      amount: PLANS[selectedPlan].amount,
       currency: 'eur',
       appearance: {
         theme: 'stripe',
@@ -410,8 +501,13 @@ applyLang('en');
   /* 3DS return + recovery */
   var urlParams = new URLSearchParams(window.location.search);
   var returnedPI = urlParams.get('payment_intent'), returnedSecret = urlParams.get('payment_intent_client_secret'), returnedStatus = urlParams.get('redirect_status');
+  function restorePlan() {
+    var p = localStorage.getItem('ykifinnish_checkout_plan');
+    if (PLANS[p]) selectedPlan = p;
+  }
   if (returnedPI && returnedSecret) {
     currentEmail = localStorage.getItem('ykifinnish_checkout_email') || '';
+    restorePlan();
     paymentIntentId = returnedPI;
     localStorage.setItem('ykifinnish_checkout_pi', returnedPI);
     if (returnedStatus === 'succeeded') { show('password'); }
@@ -419,13 +515,13 @@ applyLang('en');
       stripe.retrievePaymentIntent(returnedSecret).then(function(r) {
         var pi = r.paymentIntent;
         if (pi && pi.status === 'succeeded') show('password');
-        else { err(t('msg_payment_incomplete')); show('checkout'); }
+        else { err(t('msg_payment_incomplete')); selectPlan(selectedPlan); show('checkout'); }
       });
     }
   } else {
     var savedPI = localStorage.getItem('ykifinnish_checkout_pi');
-    if (savedPI) { currentEmail = localStorage.getItem('ykifinnish_checkout_email') || ''; paymentIntentId = savedPI; show('password'); }
-    else { mountStripeElements(); show('checkout'); }
+    if (savedPI) { currentEmail = localStorage.getItem('ykifinnish_checkout_email') || ''; restorePlan(); paymentIntentId = savedPI; show('password'); }
+    else { selectPlan(selectedPlan); show('checkout'); }
   }
 
   document.getElementById('payBtn').onclick = async function() {
@@ -436,29 +532,31 @@ applyLang('en');
     btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px"></span>' + t('msg_processing');
     msg.style.display = 'none';
     try {
+      var plan = PLANS[selectedPlan];
       var submitResult = await stripeElements.submit();
-      if (submitResult.error) { err(submitResult.error.message || t('msg_error')); btn.disabled = false; btn.textContent = t('cta_pay'); isSubmitting = false; return; }
-      var res = await fetch(FUNCTIONS_URL + '/ykifinnish-create-payment-intent', {
+      if (submitResult.error) { err(submitResult.error.message || t('msg_error')); btn.disabled = false; btn.textContent = payLabel(); isSubmitting = false; return; }
+      var res = await fetch(FUNCTIONS_URL + '/' + plan.createFn, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentEmail })
+        body: JSON.stringify(plan.body(currentEmail))
       });
       var data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || t('msg_error'));
       paymentIntentId = data.payment_intent_id;
       localStorage.setItem('ykifinnish_checkout_pi', data.payment_intent_id);
       localStorage.setItem('ykifinnish_checkout_email', currentEmail);
+      localStorage.setItem('ykifinnish_checkout_plan', selectedPlan);
       var result = await stripe.confirmPayment({
         elements: stripeElements,
         clientSecret: data.client_secret,
         confirmParams: { return_url: RETURN_URL, receipt_email: currentEmail },
         redirect: 'if_required'
       });
-      if (result.error) { err(result.error.message || t('msg_payment_failed')); btn.disabled = false; btn.textContent = t('cta_pay'); isSubmitting = false; return; }
+      if (result.error) { err(result.error.message || t('msg_payment_failed')); btn.disabled = false; btn.textContent = payLabel(); isSubmitting = false; return; }
       if (result.paymentIntent && result.paymentIntent.status === 'succeeded') { paymentIntentId = result.paymentIntent.id; show('password'); }
       else if (result.paymentIntent && result.paymentIntent.status === 'processing') { info(t('msg_processing')); }
     } catch (e) {
       err(e.message || t('msg_error'));
-      btn.disabled = false; btn.textContent = t('cta_pay');
+      btn.disabled = false; btn.textContent = payLabel();
     }
     isSubmitting = false;
   };
@@ -469,7 +567,7 @@ applyLang('en');
     if (p1 !== p2) { err(t('msg_pwd_mismatch')); return; }
     var btn = document.getElementById('setupBtn'); btn.disabled = true; btn.textContent = t('msg_creating'); msg.style.display = 'none';
     try {
-      var res = await fetch(FUNCTIONS_URL + '/ykifinnish-setup-account', {
+      var res = await fetch(FUNCTIONS_URL + '/' + PLANS[selectedPlan].setupFn, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ payment_intent_id: paymentIntentId, password: p1 })
       });
@@ -479,8 +577,10 @@ applyLang('en');
       if (signIn.error) console.error('Auto-login failed:', signIn.error);
       localStorage.removeItem('ykifinnish_checkout_email');
       localStorage.removeItem('ykifinnish_checkout_pi');
+      localStorage.removeItem('ykifinnish_checkout_plan');
       window.history.replaceState({}, '', window.location.pathname);
       document.getElementById('doneEmail').textContent = t('msg_logged_in') + data.email;
+      if (selectedPlan === 'bundle') { localStorage.setItem('cl_bundle', 'fi+fi'); document.getElementById('doneBundleNote').hidden = false; }
       show('done');
     } catch (e) {
       err(t('msg_connection_error')); btn.disabled = false; btn.textContent = t('cta_create');

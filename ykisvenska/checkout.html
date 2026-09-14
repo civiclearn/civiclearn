@@ -61,12 +61,32 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
 @media (max-width: 520px) { main { padding: 1.8rem 1.15rem 3rem; } }
 
 /* ── TITLE ── */
-.page-title { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2rem; line-height: 1.2; letter-spacing: -.025em; }
+.page-title { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 1.5rem; line-height: 1.2; letter-spacing: -.025em; }
+
+/* ── PLAN TOGGLE ── */
+.plan-toggle {
+  display: grid; grid-template-columns: 1fr 1fr; gap: .65rem;
+  margin-bottom: 1.5rem;
+}
+.plan-card {
+  border: 1.5px solid #e8e0d4; border-radius: .95rem; padding: 1rem 1.1rem;
+  cursor: pointer; transition: all .18s; position: relative; background: #fff;
+}
+.plan-card:hover { border-color: #003580; }
+.plan-card.selected { border-color: #003580; background: #eff3ff; box-shadow: 0 0 0 2px rgba(0,53,128,.18); }
+.plan-name { font-size: .82rem; font-weight: 700; margin-bottom: .15rem; }
+.plan-meta { font-size: .68rem; color: #78716c; line-height: 1.4; }
+.plan-price { font-size: 1rem; font-weight: 700; margin-top: .45rem; }
+.plan-save {
+  position: absolute; top: -.55rem; right: .7rem;
+  background: #003580; color: #fff; font-size: .6rem; font-weight: 700;
+  padding: .15rem .55rem; border-radius: .4rem; letter-spacing: .02em;
+}
 
 /* ── PRICE LINE ── */
 .price-line {
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  padding-bottom: 1.6rem; margin-bottom: 1.6rem;
+  padding-bottom: 1.2rem; margin-bottom: 1.4rem;
   border-bottom: 1px solid #e8e0d4;
 }
 .price-line-label { font-size: .82rem; font-weight: 500; color: #78716c; }
@@ -182,13 +202,28 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
 
   <div class="page-title">Aktivera din premium-tillgång</div>
 
+  <!-- PLAN TOGGLE -->
+  <div class="plan-toggle" id="planToggle">
+    <div class="plan-card selected" id="planSolo">
+      <div class="plan-name">YKI Svenska</div>
+      <div class="plan-meta">20 simuleringar · AI-utvärdering · Livstidsåtkomst</div>
+      <div class="plan-price">69 €</div>
+    </div>
+    <div class="plan-card" id="planBundle">
+      <div class="plan-save">Spara 39 €</div>
+      <div class="plan-name">YKI Svenska + Kansalaisuuskoe</div>
+      <div class="plan-meta">20 simuleringar + 800 frågor till medborgarskapsprovet</div>
+      <div class="plan-price">99 €</div>
+    </div>
+  </div>
+
   <!-- PRICE LINE -->
   <div class="price-line" id="priceLine">
     <div>
-      <div class="price-line-label">YKI Svenska · Medelnivå</div>
-      <div class="price-line-meta">20 simuleringar · Livstidsåtkomst</div>
+      <div class="price-line-label" id="priceLabel">YKI Svenska · Medelnivå</div>
+      <div class="price-line-meta" id="priceMeta">20 simuleringar · Livstidsåtkomst</div>
     </div>
-    <div style="flex-shrink:0;text-align:right"><span class="price-line-amount">€69</span></div>
+    <div style="flex-shrink:0;text-align:right"><span class="price-line-amount" id="priceAmount">69 €</span></div>
   </div>
 
   <!-- ══ CHECKOUT FORM ══ -->
@@ -237,6 +272,9 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
     <div class="done-sub" id="doneEmail"></div>
     <a href="/ykisvenska/dashboard/index.html" class="pay-btn" id="doneCta"
        style="text-align:center;text-decoration:none;display:block">Börja träna →</a>
+    <p id="doneBundleNote" hidden style="font-size:.78rem;color:#78716c;text-align:center;margin-top:.9rem">
+      Ditt paket omfattar även medborgarskapsprovet: <a href="/kansalaisuuskoe/dashboard/index.html" style="color:#003580;font-weight:500">Kansalaisuuskoe →</a>
+    </p>
   </div>
 
   <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
@@ -291,6 +329,20 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
   var stripe = Stripe(STRIPE_PK);
   var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+  /* Solo goes through the YKI Svenska functions; the bundle is the same product
+     as the Kansalaisuuskoe-page bundle (plan bundle-sv) and reuses its functions.
+     source:'ykisvenska' keeps YKI Svenska as the buyer's primary product. */
+  var PLANS = {
+    solo:   { amount: 6900, price: '69 €', payLabel: 'Betala 69 €', label: 'YKI Svenska · Medelnivå',            meta: '20 simuleringar · Livstidsåtkomst',
+              createFn: 'ykisvenska-create-payment-intent', setupFn: 'ykisvenska-setup-account', body: function(email){ return { email: email }; } },
+    bundle: { amount: 9900, price: '99 €', payLabel: 'Betala 99 €', label: 'YKI Svenska + Kansalaisuuskoe · Paket', meta: '20 simuleringar + 800 frågor · Livstidsåtkomst',
+              createFn: 'fi-create-payment-intent', setupFn: 'fi-setup-account', body: function(email){ return { email: email, plan: 'bundle-sv', source: 'ykisvenska' }; } },
+  };
+
+  var selectedPlan = 'solo';
+  var urlPlan = new URLSearchParams(window.location.search).get('plan');
+  if (urlPlan === 'bundle' || urlPlan === 'bundle-sv') selectedPlan = 'bundle';
+
   var currentEmail = '';
   var paymentIntentId = '';
   var stripeElements = null;
@@ -300,6 +352,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
   var viewCheckout = document.getElementById('viewCheckout');
   var viewPassword = document.getElementById('viewPassword');
   var viewDone     = document.getElementById('viewDone');
+  var planToggle   = document.getElementById('planToggle');
   var priceLine    = document.getElementById('priceLine');
   var msg          = document.getElementById('checkoutMessage');
 
@@ -307,17 +360,36 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
     viewCheckout.hidden = (name !== 'checkout');
     viewPassword.hidden = (name !== 'password');
     viewDone.hidden     = (name !== 'done');
+    planToggle.style.display = (name === 'checkout') ? 'grid' : 'none';
     priceLine.style.display = (name === 'checkout') ? 'flex' : 'none';
     msg.style.display = 'none';
   }
   function err(text)  { msg.textContent = text; msg.className = 'checkout-message error'; msg.style.display = 'block'; }
   function info(text) { msg.textContent = text; msg.className = 'checkout-message info';  msg.style.display = 'block'; }
 
+  /* ── Plan selection ── */
+  var cardSolo   = document.getElementById('planSolo');
+  var cardBundle = document.getElementById('planBundle');
+
+  function selectPlan(plan) {
+    if (isSubmitting) return;
+    selectedPlan = plan;
+    cardSolo.classList.toggle('selected', plan === 'solo');
+    cardBundle.classList.toggle('selected', plan === 'bundle');
+    document.getElementById('priceLabel').textContent = PLANS[plan].label;
+    document.getElementById('priceMeta').textContent = PLANS[plan].meta;
+    document.getElementById('priceAmount').textContent = PLANS[plan].price;
+    document.getElementById('payBtn').textContent = PLANS[plan].payLabel;
+    mountStripeElements();
+  }
+  cardSolo.addEventListener('click', function() { selectPlan('solo'); });
+  cardBundle.addEventListener('click', function() { selectPlan('bundle'); });
+
   /* ── Stripe — deferred intent ── */
   function mountStripeElements() {
     stripeElements = stripe.elements({
       mode: 'payment',
-      amount: 6900,
+      amount: PLANS[selectedPlan].amount,
       currency: 'eur',
       appearance: {
         theme: 'stripe',
@@ -350,6 +422,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
   var returnedPI = urlParams.get('payment_intent'), returnedSecret = urlParams.get('payment_intent_client_secret'), returnedStatus = urlParams.get('redirect_status');
   if (returnedPI && returnedSecret) {
     currentEmail = localStorage.getItem('ykisvenska_checkout_email') || '';
+    selectedPlan = PLANS[localStorage.getItem('ykisvenska_checkout_plan')] ? localStorage.getItem('ykisvenska_checkout_plan') : selectedPlan;
     paymentIntentId = returnedPI;
     localStorage.setItem('ykisvenska_checkout_pi', returnedPI);
     if (returnedStatus === 'succeeded') { show('password'); }
@@ -357,13 +430,17 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
       stripe.retrievePaymentIntent(returnedSecret).then(function(r) {
         var pi = r.paymentIntent;
         if (pi && pi.status === 'succeeded') show('password');
-        else { err('Betalningen slutfördes inte.'); show('checkout'); }
+        else { err('Betalningen slutfördes inte.'); selectPlan(selectedPlan); show('checkout'); }
       });
     }
   } else {
     var savedPI = localStorage.getItem('ykisvenska_checkout_pi');
-    if (savedPI) { currentEmail = localStorage.getItem('ykisvenska_checkout_email') || ''; paymentIntentId = savedPI; show('password'); }
-    else { mountStripeElements(); show('checkout'); }
+    if (savedPI) {
+      currentEmail = localStorage.getItem('ykisvenska_checkout_email') || '';
+      selectedPlan = PLANS[localStorage.getItem('ykisvenska_checkout_plan')] ? localStorage.getItem('ykisvenska_checkout_plan') : selectedPlan;
+      paymentIntentId = savedPI; show('password');
+    }
+    else { selectPlan(selectedPlan); show('checkout'); }
   }
 
   /* ── Pay ── */
@@ -375,29 +452,31 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
     btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px"></span>Behandlas…';
     msg.style.display = 'none';
     try {
+      var plan = PLANS[selectedPlan];
       var submitResult = await stripeElements.submit();
-      if (submitResult.error) { err(submitResult.error.message || 'Ett fel uppstod.'); btn.disabled = false; btn.textContent = 'Betala 69 €'; isSubmitting = false; return; }
-      var res = await fetch(FUNCTIONS_URL + '/ykisvenska-create-payment-intent', {
+      if (submitResult.error) { err(submitResult.error.message || 'Ett fel uppstod.'); btn.disabled = false; btn.textContent = plan.payLabel; isSubmitting = false; return; }
+      var res = await fetch(FUNCTIONS_URL + '/' + plan.createFn, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentEmail })
+        body: JSON.stringify(plan.body(currentEmail))
       });
       var data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'Ett fel uppstod.');
       paymentIntentId = data.payment_intent_id;
       localStorage.setItem('ykisvenska_checkout_pi', data.payment_intent_id);
       localStorage.setItem('ykisvenska_checkout_email', currentEmail);
+      localStorage.setItem('ykisvenska_checkout_plan', selectedPlan);
       var result = await stripe.confirmPayment({
         elements: stripeElements,
         clientSecret: data.client_secret,
         confirmParams: { return_url: RETURN_URL, receipt_email: currentEmail },
         redirect: 'if_required'
       });
-      if (result.error) { err(result.error.message || 'Betalningen misslyckades.'); btn.disabled = false; btn.textContent = 'Betala 69 €'; isSubmitting = false; return; }
+      if (result.error) { err(result.error.message || 'Betalningen misslyckades.'); btn.disabled = false; btn.textContent = plan.payLabel; isSubmitting = false; return; }
       if (result.paymentIntent && result.paymentIntent.status === 'succeeded') { paymentIntentId = result.paymentIntent.id; show('password'); }
       else if (result.paymentIntent && result.paymentIntent.status === 'processing') { info('Behandlas…'); }
     } catch (e) {
       err(e.message || 'Ett fel uppstod.');
-      btn.disabled = false; btn.textContent = 'Betala 69 €';
+      btn.disabled = false; btn.textContent = PLANS[selectedPlan].payLabel;
     }
     isSubmitting = false;
   };
@@ -409,7 +488,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
     if (p1 !== p2) { err('Lösenorden matchar inte.'); return; }
     var btn = document.getElementById('setupBtn'); btn.disabled = true; btn.textContent = 'Skapar konto…'; msg.style.display = 'none';
     try {
-      var res = await fetch(FUNCTIONS_URL + '/ykisvenska-setup-account', {
+      var res = await fetch(FUNCTIONS_URL + '/' + PLANS[selectedPlan].setupFn, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ payment_intent_id: paymentIntentId, password: p1 })
       });
@@ -419,8 +498,10 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
       if (signIn.error) console.error('Auto-login failed:', signIn.error);
       localStorage.removeItem('ykisvenska_checkout_email');
       localStorage.removeItem('ykisvenska_checkout_pi');
+      localStorage.removeItem('ykisvenska_checkout_plan');
       window.history.replaceState({}, '', window.location.pathname);
       document.getElementById('doneEmail').textContent = 'Inloggad som: ' + data.email;
+      if (selectedPlan === 'bundle') { localStorage.setItem('cl_bundle', 'fi+sv'); document.getElementById('doneBundleNote').hidden = false; }
       show('done');
     } catch (e) {
       err('Anslutningsfel. Försök igen.'); btn.disabled = false; btn.textContent = 'Skapa konto';
