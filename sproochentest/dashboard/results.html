@@ -130,6 +130,23 @@
     .mistake-original { color: #c53030; text-decoration: line-through; }
     .mistake-correction { color: #276749; font-weight: 500; }
     
+    /* INLL grid — criteria bars (0–5) */
+    .grid-card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .grid-card h3 { margin: 0 0 4px; font-size: 1.1rem; color: #2d3748; }
+    .grid-card .grid-note { font-size: 0.82rem; color: #718096; margin: 0 0 14px; line-height: 1.5; }
+    .grid-rows { display: grid; gap: 10px; }
+    .grid-row { display: grid; grid-template-columns: 170px 1fr 44px; align-items: center; gap: 12px; }
+    .grid-row.compact { grid-template-columns: 140px 1fr 40px; gap: 8px; }
+    .grid-label { font-size: 0.85rem; font-weight: 600; color: #2d3748; line-height: 1.25; }
+    .grid-label small { display: block; font-weight: 400; color: #a0aec0; font-size: 0.72rem; }
+    .grid-track { height: 10px; background: #edf2f7; border-radius: 999px; overflow: hidden; }
+    .grid-fill { height: 100%; border-radius: 999px; background: #d4145a; transition: width .6s ease; }
+    .grid-fill.ok { background: #38a169; } .grid-fill.mid { background: #d69e2e; } .grid-fill.low { background: #e53e3e; }
+    .grid-value { font-size: 0.85rem; font-weight: 700; color: #2d3748; text-align: right; font-variant-numeric: tabular-nums; }
+    .grid-mini { margin: 8px 0 10px; padding: 10px 12px; background: #fafafa; border: 1px solid #edf2f7; border-radius: 8px; }
+    .tipp-phoneetik { margin-top: 6px; padding: 8px 12px; background: #fffbeb; border-left: 3px solid #f59e0b; border-radius: 6px; font-size: 0.85rem; color: #78350f; line-height: 1.5; }
+    @media (max-width: 520px) { .grid-row, .grid-row.compact { grid-template-columns: 1fr 36px; } .grid-row .grid-track { grid-column: 1 / -1; order: 3; } }
+
     .test-badge {
       display: inline-block; background: rgba(255,255,255,0.2);
       color: white; padding: 6px 16px; border-radius: 20px;
@@ -176,7 +193,8 @@
       <div class="citizenship-card" id="pass-card" style="display: none;">
         <h3><img src="/assets/images/lu.svg" alt="LU" style="height:1.1em;vertical-align:middle;margin-right:6px;">Sproochentest Resultat</h3>
         <p style="font-size: 0.85rem; color: #718096; margin: 0 0 12px;">
-          Fir de Lëtzebuerger Sproochentest muss een béid Deeler (Schwätzen + Héierverstoen) bestoen.
+          Reegel vum INLL: Dir musst op d'mannst 50&nbsp;% am Schwätzen hunn. Läit d'Schwätzen ënner 50&nbsp;%,
+          kann d'Héierverstoen dat kompenséieren — dann zielt d'Moyenne vu béiden Deeler (op d'mannst 50&nbsp;%).
         </p>
         <div id="pass-speaking"></div>
         <div id="pass-listening"></div>
@@ -222,6 +240,17 @@
         <div class="corrections-content" id="listening-corrections-content"></div>
       </div>
       
+      <!-- INLL GRID SUMMARY (speaking, 4 criteria) -->
+      <div class="grid-card" id="grid-card" style="display: none;">
+        <h3>🗣️ Schwätzen — no der INLL-Bewäertungsgrille</h3>
+        <p class="grid-note">
+          Den offiziellen Examinateur bewäert de mëndlechen Deel no véier Kritären, all vun 0 bis 5 Punkten.
+          Hei gesitt Dir Är Moyenne iwwer déi véier Äntwerten. <strong>Phoneetik</strong> (Aussprooch) kann an dësem
+          schrëftleche Format net bewäert ginn — mir bewäerten amplaz d'Kloerheet an de Floss vun Ären Sätz.
+        </p>
+        <div class="grid-rows" id="grid-rows"></div>
+      </div>
+
       <!-- SPEAKING FEEDBACK -->
       <div class="feedback-card" id="speaking-feedback-card" style="display: none;">
         <h3>🗣️ Schwätzen — Feedback</h3>
@@ -353,6 +382,7 @@
         if (result.speaking_feedback) {
           document.getElementById('speaking-feedback-card').style.display = 'block';
           document.getElementById('speaking-feedback-content').innerHTML = formatSpeakingFeedback(result.speaking_feedback);
+          renderGridSummary(result.speaking_feedback);
         }
       } else if (result.speaking_status === 'failed') {
         document.getElementById('speaking-score').innerHTML = '❌';
@@ -383,39 +413,44 @@
         const overall = Math.round((result.listening_score * 0.5) + (result.speaking_score * 0.5));
         document.getElementById('grade-display').textContent = overall + '%';
         
+        // INLL rule (inll.lu/fr/sproochentest): the oral must reach 50%; an oral below 50%
+        // can be compensated by the listening score if the average of both is ≥ 50%.
         const speakingPass = result.speaking_score >= 50;
-        const listeningPass = result.listening_score >= 50;
-        const passed = speakingPass && listeningPass;
-        
+        const compensated = !speakingPass && overall >= 50;
+        const passed = speakingPass || compensated;
+        const listeningOk = result.listening_score >= 50;
+
         document.getElementById('grade-label').textContent = passed
-          ? 'Bestanen ✅' : 'Net bestanen';
-        
+          ? (compensated ? 'Bestanen (kompenséiert) ✅' : 'Bestanen ✅') : 'Net bestanen';
+
         // Pass/fail card
         document.getElementById('pass-card').style.display = 'block';
-        
+
         document.getElementById('pass-speaking').innerHTML = `
-          <div class="citizenship-result ${speakingPass ? 'citizenship-pass' : 'citizenship-fail'}">
-            <span class="citizenship-icon">${speakingPass ? '✅' : '❌'}</span>
+          <div class="citizenship-result ${speakingPass ? 'citizenship-pass' : (compensated ? 'citizenship-pending' : 'citizenship-fail')}">
+            <span class="citizenship-icon">${speakingPass ? '✅' : (compensated ? '⚖️' : '❌')}</span>
             <span class="citizenship-text">
               <strong>Schwätzen:</strong> ${result.speaking_score.toFixed(0)}%
-              — ${speakingPass ? 'Bestanen' : 'Net bestanen'} (≥50% noutwendeg)
+              — ${speakingPass ? 'Bestanen (≥50%)' : (compensated ? 'Ënner 50%, awer duerch d\'Héierverstoen kompenséiert' : 'Ënner 50% — net kompenséiert')}
             </span>
           </div>`;
-        
+
         document.getElementById('pass-listening').innerHTML = `
-          <div class="citizenship-result ${listeningPass ? 'citizenship-pass' : 'citizenship-fail'}">
-            <span class="citizenship-icon">${listeningPass ? '✅' : '❌'}</span>
+          <div class="citizenship-result ${listeningOk ? 'citizenship-pass' : 'citizenship-pending'}">
+            <span class="citizenship-icon">${listeningOk ? '✅' : '➖'}</span>
             <span class="citizenship-text">
               <strong>Héierverstoen:</strong> ${result.listening_score.toFixed(0)}%
-              — ${listeningPass ? 'Bestanen' : 'Net bestanen'} (≥50% noutwendeg)
+              — Moyenne vu béiden Deeler: <strong>${overall}%</strong>
             </span>
           </div>`;
-        
+
         const verdictEl = document.getElementById('pass-verdict');
-        if (passed) {
+        if (speakingPass) {
           verdictEl.innerHTML = '🎉 <span style="color: #276749;">Sproochentest BESTANEN!</span>';
+        } else if (compensated) {
+          verdictEl.innerHTML = '🎉 <span style="color: #276749;">Sproochentest BESTANEN — d\'Moyenne läit iwwer 50%.</span> <span style="color:#975a16; font-weight:500; font-size:0.9rem;">Am richtegen Examen ass dat knapp: trainéiert d\'Schwätzen weider.</span>';
         } else {
-          verdictEl.innerHTML = '⚠️ <span style="color: #c53030;">Sproochentest net bestanen — béid Deeler mussen op mannst 50% hunn.</span>';
+          verdictEl.innerHTML = '⚠️ <span style="color: #c53030;">Sproochentest net bestanen — d\'Schwätzen läit ënner 50% an d\'Moyenne vu béiden Deeler erreecht keng 50%.</span>';
         }
       } else {
         document.getElementById('grade-display').textContent = '⏳';
@@ -426,8 +461,51 @@
       displayListeningCorrections(result);
     }
     
+    // ─── INLL grid helpers (4 criteria × 0–5) ───
+
+    const GRID_LABELS = {
+      lexik:             { name: 'Lexik',              sub: 'Vocabulaire vum Niveau A2' },
+      morphosyntax:      { name: 'Morphosyntax',       sub: 'Grammatik a Satzbau' },
+      kloerheet_a_fless: { name: 'Kloerheet a Flëss',  sub: 'amplaz Phoneetik (Aussprooch)' },
+      aufgabenerfellung: { name: 'Aufgabenerfëllung',  sub: 'Interagéieren, beschreiwen, kohärent' }
+    };
+    const GRID_KEYS = Object.keys(GRID_LABELS);
+
+    function isGridCriteria(c) { return c && GRID_KEYS.every(k => k in c); }
+
+    function gridRowsHTML(criteria, compact) {
+      return GRID_KEYS.map(k => {
+        const v = Math.max(0, Math.min(5, Number(criteria[k]) || 0));
+        const cls = v >= 4 ? 'ok' : (v >= 3 ? 'mid' : 'low');
+        const shown = Number.isInteger(v) ? `${v}/5` : `${v.toFixed(1)}/5`;
+        return `<div class="grid-row${compact ? ' compact' : ''}">
+          <div class="grid-label">${GRID_LABELS[k].name}${compact ? '' : `<small>${GRID_LABELS[k].sub}</small>`}</div>
+          <div class="grid-track"><div class="grid-fill ${cls}" style="width:${(v / 5) * 100}%"></div></div>
+          <div class="grid-value">${shown}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderGridSummary(feedback) {
+      if (!feedback || typeof feedback !== 'object' || feedback.grid !== 'inll-2026') return;
+      let avg = feedback.gridAverage;
+      if (!isGridCriteria(avg)) {
+        // derive from tasks if the function did not store an average
+        const sets = [];
+        (feedback.tasks || []).forEach(t => {
+          if (t.prompts) t.prompts.forEach(p => isGridCriteria(p.criteria) && sets.push(p.criteria));
+          else if (isGridCriteria(t.criteria)) sets.push(t.criteria);
+        });
+        if (!sets.length) return;
+        avg = {};
+        GRID_KEYS.forEach(k => avg[k] = Math.round(sets.reduce((s, c) => s + Number(c[k] || 0), 0) / sets.length * 10) / 10);
+      }
+      document.getElementById('grid-rows').innerHTML = gridRowsHTML(avg, false);
+      document.getElementById('grid-card').style.display = 'block';
+    }
+
     // ─── Speaking Feedback Formatter ───
-    
+
     function formatSpeakingFeedback(feedback) {
       if (typeof feedback === 'string') {
         return `<div class="task-feedback"><p>${feedback.replace(/\n/g, '<br>')}</p></div>`;
@@ -451,12 +529,17 @@
             task.prompts.forEach(prompt => {
               html += `<div style="margin: 10px 0; padding: 10px; background: white; border-radius: 6px; border-left: 3px solid #d4145a;">`;
               html += `<div style="font-weight: 600; font-size: 0.85rem; color: #d4145a; margin-bottom: 6px;">Fro ${prompt.promptIndex}: ${prompt.promptText || ''}</div>`;
-              
+
+              if (isGridCriteria(prompt.criteria)) {
+                html += `<div class="grid-mini">${gridRowsHTML(prompt.criteria, true)}</div>`;
+              }
+
               if (prompt.feedback) {
                 if (prompt.feedback.wat_war_gutt) html += `<p><strong>Wat war gutt:</strong> ${prompt.feedback.wat_war_gutt}</p>`;
                 if (prompt.feedback.wat_kann_verbessert_ginn) html += `<p><strong>Wat kann verbessert ginn:</strong> ${prompt.feedback.wat_kann_verbessert_ginn}</p>`;
                 if (prompt.feedback.verbesserte_versioun) html += `<p><strong>Verbesserte Versioun:</strong> <em>${prompt.feedback.verbesserte_versioun}</em></p>`;
                 if (prompt.feedback.global_bewaertung) html += `<p><strong>Global Bewäertung:</strong> ${prompt.feedback.global_bewaertung}</p>`;
+                if (prompt.feedback.tipp_phoneetik && prompt.feedback.tipp_phoneetik !== '—') html += `<div class="tipp-phoneetik">🔊 <strong>Tipp Phoneetik:</strong> ${prompt.feedback.tipp_phoneetik}</div>`;
               }
               
               if (prompt.score) html += `<p style="font-weight:600;">Score: ${prompt.score.raw}/${prompt.score.max}</p>`;
@@ -472,11 +555,15 @@
           
           // For photo description: show direct feedback
           if (isPhoto || !task.prompts) {
+            if (isGridCriteria(task.criteria)) {
+              html += `<div class="grid-mini">${gridRowsHTML(task.criteria, true)}</div>`;
+            }
             if (task.feedback) {
               if (task.feedback.wat_war_gutt) html += `<p><strong>Wat war gutt:</strong> ${task.feedback.wat_war_gutt}</p>`;
               if (task.feedback.wat_kann_verbessert_ginn) html += `<p><strong>Wat kann verbessert ginn:</strong> ${task.feedback.wat_kann_verbessert_ginn}</p>`;
               if (task.feedback.verbesserte_versioun) html += `<p><strong>Verbesserte Versioun:</strong> <em>${task.feedback.verbesserte_versioun}</em></p>`;
               if (task.feedback.global_bewaertung) html += `<p><strong>Global Bewäertung:</strong> ${task.feedback.global_bewaertung}</p>`;
+              if (task.feedback.tipp_phoneetik && task.feedback.tipp_phoneetik !== '—') html += `<div class="tipp-phoneetik">🔊 <strong>Tipp Phoneetik:</strong> ${task.feedback.tipp_phoneetik}</div>`;
             }
             
             if (task.mistakes && task.mistakes.length > 0) {
