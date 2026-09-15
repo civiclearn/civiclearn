@@ -27,6 +27,15 @@ window.CIVICEDGE_CONFIG = {
   path: "/lux/banks/lux/factofday-lu.json"
 },
 
+  /* Learner-facing "Bon a savoir" card shown under an answered question.
+     Remove this block to switch the card off everywhere.
+     excludeModes: list any of "simulation" | "quick" | "topics" | "traps"
+     to suppress the card in that mode. */
+  explanations: {
+    path: "/lux/banks/lux/explanations-lu.json",
+    excludeModes: []
+  },
+
   manual: {
     chapters: []
   },

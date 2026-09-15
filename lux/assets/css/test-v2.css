@@ -679,3 +679,112 @@ body.qz-v3 .ce-next-btn {
     font-size: 15px;
   }
 }
+
+/* ══════════════════════════════════════════════════════════
+   "BON À SAVOIR" EXPLANATION CARD — added 15 Sep 2026
+   Rendered by engine-lu.js between the options and the footer
+   once a question has been answered. Warm tone, deliberately
+   not the green/red of the answer itself.
+   ══════════════════════════════════════════════════════════ */
+
+.ce-explain {
+  position: relative;
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border: 1px solid #ecdfc4;
+  border-radius: var(--radius-sm, 10px);
+  background: #fdf9f0;
+}
+
+.ce-explain-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8a6417;
+}
+
+.ce-explain-title::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c79a3a;
+}
+
+.ce-explain-body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.62;
+  color: var(--text-mid, #57534e);
+}
+
+.ce-explain-long .ce-explain-body {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ce-explain-long.is-open .ce-explain-body {
+  display: block;
+  overflow: visible;
+}
+
+.ce-explain-toggle {
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #8a6417;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.ce-explain-toggle:hover { color: #6d4e11; }
+
+.ce-explain-toggle:focus-visible {
+  outline: 2px solid #c79a3a;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+.ce-explain .ce-speak-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* v3 quiz layer: slightly rounder, to match the lettered options */
+body.qz-v3 .ce-explain {
+  padding: 15px 18px;
+  border-radius: 13px;
+  animation: ce-explain-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes ce-explain-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.qz-v3 .ce-explain { animation: none; }
+}
+
+/* On mobile the card chrome is dropped, so this box carries its own */
+@media (max-width: 768px) {
+  .ce-explain {
+    margin-bottom: 18px;
+    padding: 13px 15px;
+  }
+  .ce-explain-body { font-size: 13.5px; line-height: 1.6; }
+}

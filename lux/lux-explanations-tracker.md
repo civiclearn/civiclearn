@@ -23,13 +23,13 @@
 
 ## 1. The file
 
-`banks/lux/explanations-lu.json`, CRLF, ~90 KB.
+`banks/lux/explanations-lu.json`, CRLF, ~120 KB.
 
 ```
 {
   "version": 1,
-  "microtopics": { "<microtopic.en>": { "fr": "…", "en": "…", "de": "" } },
-  "questions":   { "<id>":           { "fr": "…", "en": "…", "de": "" } },
+  "microtopics": { "<microtopic.en>": { "fr": "…", "en": "…", "de": "…" } },
+  "questions":   { "<id>":           { "fr": "…", "en": "…", "de": "…" } },
   "qMicrotopic": { "<id>": "<microtopic.en>" }
 }
 ```
