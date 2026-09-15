@@ -10,10 +10,11 @@
 
 | | FR | EN | DE |
 |---|---|---|---|
-| Microtopic explainers (21) | ✅ 21 | ✅ 21 | ⬜ 0 |
-| Trap cards (50) | ✅ 50 | ✅ 50 | ⬜ 0 |
+| Microtopic explainers (21) | ✅ 21 | ✅ 21 | ✅ 21 |
+| Trap cards (50) | ✅ 50 | ✅ 50 | ✅ 50 |
 
-**Coverage:** 718 / 718 questions resolve to a card (50 own, 668 by microtopic fallback).
+**All three languages complete — 213 texts.**
+**Coverage:** 718 / 718 questions resolve to a card in FR, EN and DE (50 own, 668 by microtopic fallback).
 `sequential-lu.json` resolves through the same file and needed no change.
 
 **Bank corrections:** all applied 15 Sep 2026 — see §4.
@@ -37,7 +38,7 @@
 `questions[id][lang]` → `microtopics[qMicrotopic[id]][lang]` → no card.
 
 An empty string means "not written yet" — the card should be hidden, not rendered blank.
-That is currently the case for every `de` value.
+No value is currently empty, but the rule should still be implemented.
 
 **Why a separate file:** `questions.json` and `sequential-lu.json` stay untouched;
 both are keyed by `id`, so the same file serves both. Keys use `microtopic.en`,
@@ -48,10 +49,21 @@ which is also what progress keys use, so nothing here can affect stored progress
 ## 2. Conventions
 
 - Microtopic explainers: 2–5 sentences, longer for the large microtopics
-  (65–217 words FR, average 136). Written to be consistent with **every** question
+  (65–217 words FR, 61–193 DE). Written to be consistent with **every** question
   in that microtopic, since the card appears under all of them.
-- Trap cards: 1–3 sentences (24–54 words FR, average 35). Each one names the
+- Trap cards: 1–3 sentences (24–54 words FR, 20–47 DE). Each one names the
   distinctions the wrong answers are actually testing.
+- **German is written from the bank's own German, not translated from the French.**
+  Every institutional term used appears verbatim somewhere in the bank's DE fields:
+  *Verfassungsgerichtshof* (not *Verfassungsgericht*), *Verwaltungsgericht erster
+  Instanz* / *Verwaltungsgerichtshof*, *ordentliche Gerichtsbarkeit*,
+  *Bürgermeister- und Schöffenrat*, *Freiheitsrechte / Teilhaberechte /
+  Leistungsrechte / Verfassungsziele*, *Rechte der beschuldigten oder
+  prozessbeteiligten Person*, *Clerf* for Clervaux. A script checks this and should
+  be re-run if the German is edited.
+- One German mnemonic is better than its FR/EN counterpart and is used deliberately:
+  the appeal court differs from the first-instance one by the syllable **-hof**
+  (*Verwaltungsgericht* → *Verwaltungsgerichtshof*).
 - Source of truth is the **question bank**, not the audio course. The course is a
   bonus product; explanations must never contradict the bank.
 - Standing editorial rules kept: ECHR = **1951** (LUX_00138, matches the official
@@ -146,15 +158,12 @@ Both files verified after patching: JSON parses, question counts unchanged
 
 ## 5. Still open
 
-1. **German (63 texts: 21 microtopics + 50 traps, minus none).** No source exists in
-   the product's voice — the audio course is FR/EN only. To be written against the
-   official *matières* PDF and `reference-de.html`. Slots are already in the file.
-2. **The UI card.** The field now exists; the "Bon à savoir" card under each answered
+1. **The UI card.** The field now exists; the "Bon à savoir" card under each answered
    question still has to be built into the quiz pages, honouring the lookup order
-   and the hide-when-empty rule.
-3. **Label duplicates** (21 vs 26 microtopics, "Droits fondamentaux" vs "Droits" on
+   and the hide-when-empty rule. Nothing else is blocking it.
+2. **Label duplicates** (21 vs 26 microtopics, "Droits fondamentaux" vs "Droits" on
    LUX_00645–00656). Deliberately left for a later pass. Safe to do — verified that
    all pairs share `microtopic.en`.
-4. **Refresh the trap ranking** after the explanations ship, to see whether the
+3. **Refresh the trap ranking** after the explanations ship, to see whether the
    cards move the miss rates. LUX_00415 in particular should fall now that the
    `sequential-lu.json` answer is correct.
