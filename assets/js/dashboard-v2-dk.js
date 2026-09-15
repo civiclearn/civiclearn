@@ -452,7 +452,15 @@ if (!saved) {
       const ctx = trendCanvas.getContext("2d");
       const labels = trendPoints.map((_, i) => `S${i + 1}`);
 
-      new Chart(ctx, {
+      // initDashboard re-runs on civiclearn:progress-updated, so the
+      // previous instance must be released before the canvas is reused
+      // (the global and topics charts above already do this).
+      if (__trendChart) {
+        __trendChart.destroy();
+        __trendChart = null;
+      }
+
+      __trendChart = new Chart(ctx, {
         type: "line",
         data: {
           labels,
