@@ -319,6 +319,72 @@
       max-width: 400px;
     }
     
+    /* Listening transcript (collapsed under the audio player) */
+    .correction-transcript {
+      margin-top: 0.75rem;
+      max-width: 640px;
+    }
+    
+    .correction-transcript summary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      list-style: none;
+      color: #667eea;
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 0.25rem 0;
+      user-select: none;
+    }
+    
+    .correction-transcript summary::-webkit-details-marker {
+      display: none;
+    }
+    
+    .correction-transcript summary::before {
+      content: '▸';
+      display: inline-block;
+      transition: transform 0.2s;
+    }
+    
+    .correction-transcript[open] summary::before {
+      transform: rotate(90deg);
+    }
+    
+    .correction-transcript summary:hover {
+      opacity: 0.8;
+    }
+    
+    .correction-transcript summary:focus-visible {
+      outline: 2px solid #667eea;
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+    
+    .correction-transcript-text {
+      margin-top: 0.5rem;
+      padding: 0.875rem 1rem;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-left: 3px solid #667eea;
+      border-radius: 6px;
+      color: #374151;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      white-space: pre-line;
+    }
+    
+    .correction-transcript-text strong {
+      color: #4b5563;
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      .correction-transcript summary::before {
+        transition: none;
+      }
+    }
+    
     .correction-item {
       padding: 1.25rem;
       border-bottom: 1px solid #f3f4f6;
@@ -870,6 +936,16 @@
       }
     }
     
+    // Escape transcript text and bold speaker labels ("A:", "B:") at line start.
+    // Line breaks are kept by white-space: pre-line in CSS.
+    function formatTranscript(text) {
+      const escaped = String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      return escaped.replace(/^([A-Z]):/gm, '<strong>$1:</strong>');
+    }
+    
     function generateCorrectionsHTML(tasks, userAnswers, sectionType) {
       let html = '';
       
@@ -955,6 +1031,11 @@
                     O seu navegador não suporta o elemento de áudio.
                   </audio>
                 </div>
+                ${task.content.transcript ? `
+                <details class="correction-transcript">
+                  <summary>Ver transcrição</summary>
+                  <div class="correction-transcript-text">${formatTranscript(task.content.transcript)}</div>
+                </details>` : ''}
               </div>
             `;
           }
