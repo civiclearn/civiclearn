@@ -37,6 +37,15 @@ Engine.ensureBankLoaded = async function () {
     }
     return fallback || key;
   }
+
+  // CivicLearnI18n.t() ignores a second argument and returns the KEY itself when
+  // the dictionaries have no entry, so t("foo", "Foo") renders "foo" on screen.
+  // Use this wherever a key may legitimately be missing.
+  function tSafe(key, fallback) {
+    const value = t(key, fallback);
+    if (!value || value === key) return fallback;
+    return value;
+  }
   
   function getMainTopicDisplay(rawQ) {
   if (!rawQ || !rawQ.topic) return "";
@@ -351,7 +360,7 @@ function getTopicDisplay(rawQ) {
       createEl(
         "div",
         "ce-explain-title",
-        t("quiz_explain_title", EXPLAIN_TITLES[lang] || EXPLAIN_TITLES.en)
+        tSafe("quiz_explain_title", EXPLAIN_TITLES[lang] || EXPLAIN_TITLES.en)
       )
     );
     box.appendChild(createEl("p", "ce-explain-body", text));
@@ -362,7 +371,7 @@ function getTopicDisplay(rawQ) {
       const toggle = createEl(
         "button",
         "ce-explain-toggle",
-        t("quiz_explain_more", EXPLAIN_MORE[lang] || EXPLAIN_MORE.en)
+        tSafe("quiz_explain_more", EXPLAIN_MORE[lang] || EXPLAIN_MORE.en)
       );
       toggle.type = "button";
       toggle.setAttribute("aria-expanded", "false");
@@ -371,8 +380,8 @@ function getTopicDisplay(rawQ) {
         const open = box.classList.toggle("is-open");
         toggle.setAttribute("aria-expanded", open ? "true" : "false");
         toggle.textContent = open
-          ? t("quiz_explain_less", EXPLAIN_LESS[lang] || EXPLAIN_LESS.en)
-          : t("quiz_explain_more", EXPLAIN_MORE[lang] || EXPLAIN_MORE.en);
+          ? tSafe("quiz_explain_less", EXPLAIN_LESS[lang] || EXPLAIN_LESS.en)
+          : tSafe("quiz_explain_more", EXPLAIN_MORE[lang] || EXPLAIN_MORE.en);
       });
 
       box.appendChild(toggle);
