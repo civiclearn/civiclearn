@@ -162,25 +162,76 @@
     };
   }
 
-  function renderChart() {
-    const canvas = document.getElementById("polarChart");
-    if (!canvas || typeof Chart === "undefined") return;
+  // v3 mastery scale — red under 50 %, amber 50-74 %, green 75 %+
+  function masteryColor(v) {
+    return v >= 75 ? "#16A34A" : v >= 50 ? "#D99133" : "#D4573A";
+  }
 
+  // v3: horizontal mastery rows. Same data as the bar chart, but a
+  // DOM list instead of a canvas — it reads well with three topics
+  // and scales to a dozen without going stringy.
+  // v3: overall mastery ring. Carries the headline number so the
+  // card has vertical presence with only three topic rows.
+  function renderMasteryRing(cd) {
+    const host = document.getElementById("masteryRing");
+    if (!host) return;
+    const r = 62, c = 2 * Math.PI * r;
+    const pct = Math.max(0, Math.min(100, cd.overallPct)) / 100;
+    host.innerHTML =
+      '<svg width="152" height="152" viewBox="0 0 152 152" aria-hidden="true">' +
+        '<circle cx="76" cy="76" r="' + r + '" fill="none" stroke="#eceae4" stroke-width="15"/>' +
+        '<circle class="mastery-ring-arc" cx="76" cy="76" r="' + r + '" fill="none" ' +
+          'stroke="var(--accent)" stroke-width="15" stroke-linecap="round" ' +
+          'stroke-dasharray="' + c + '" stroke-dashoffset="' + c * (1 - pct) + '" ' +
+          'transform="rotate(-90 76 76)"/>' +
+      '</svg>' +
+      '<div class="mastery-ring-lbl">' +
+        '<span class="mastery-ring-pct">' + cd.overallPct + '%</span>' +
+        '<span class="mastery-ring-sub">' + cd.masteredAll + ' / ' + cd.totalAll + '</span>' +
+      '</div>';
+  }
+
+  function renderMasteryRows(cd) {
+    const host = document.getElementById("masteryRows");
+    if (!host) return;
+    host.innerHTML = cd.labels.map(function (label, i) {
+      const v = cd.data[i];
+      const c = masteryColor(v);
+      return '<div class="mastery-row">' +
+               '<span class="mastery-row-label">' + label + '</span>' +
+               '<span class="mastery-row-track">' +
+                 '<i style="width:' + v + '%;background:' + c + '"></i>' +
+               '</span>' +
+               '<b class="mastery-row-pct" style="color:' + c + '">' + v + '%</b>' +
+             '</div>';
+    }).join("");
+  }
+
+  function renderChart() {
     const cd = getChartData();
     if (!cd.labels.length) return;
 
-    const colors = cd.labels.map((_, i) => TOPIC_COLORS[i % TOPIC_COLORS.length]);
+    // Header, ring and rows do not need the canvas — draw them first, so
+    // the panel still works on pages where the bar chart is not present.
+    const hdr = document.getElementById("chartMasteryPct");
+    const sub = document.getElementById("chartMasterySub");
+    if (hdr) hdr.textContent = cd.overallPct + "%";
+    if (sub) sub.textContent = cd.masteredAll + " / " + cd.totalAll;
+
+    renderMasteryRing(cd);
+    renderMasteryRows(cd);
+
+    const canvas = document.getElementById("polarChart");
+    if (!canvas || typeof Chart === "undefined") return;
+
+    // v3: colour by mastery level, not by topic index, so the
+    // chart says something ("À travailler" / "En cours" / "Maîtrisé").
+    const colors = cd.data.map(masteryColor);
 
     if (__barChart) {
       __barChart.destroy();
       __barChart = null;
     }
-
-    // Update overall mastery header
-    const hdr = document.getElementById("chartMasteryPct");
-    const sub = document.getElementById("chartMasterySub");
-    if (hdr) hdr.textContent = cd.overallPct + "%";
-    if (sub) sub.textContent = cd.masteredAll + " / " + cd.totalAll;
 
     // Update background — faded flag reveal
     const bgFill = document.getElementById("chartBgFill");
@@ -289,6 +340,13 @@
     const cd = getChartData();
 
     __barChart.data.datasets[0].data = cd.data;
+    // keep the mastery colours in step with the new values
+    renderMasteryRing(cd);
+    renderMasteryRows(cd);
+
+    const c = cd.data.map(masteryColor);
+    __barChart.data.datasets[0].backgroundColor = c.map(x => x + "CC");
+    __barChart.data.datasets[0].borderColor = c;
     __barChart.update();
 
     const hdr = document.getElementById("chartMasteryPct");

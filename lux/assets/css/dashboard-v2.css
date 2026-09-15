@@ -692,3 +692,229 @@ body.mastery-complete .chart-mastery-sub::after {
   .db-slot { flex-direction: column; text-align: center; padding-right: 18px; }
   .db-slot-pager { margin-left: 0; }
 }
+
+/* ══════════════════════════════════════════════════════════
+   v3 ACCENT LAYER — added 15 Sep 2026
+   Everything below is additive and scoped to body.db-v3.
+   Delete this block and remove class="db-v3" from
+   dashboard/index.html to return to the previous look.
+   ══════════════════════════════════════════════════════════ */
+
+body.db-v3 {
+  background: #faf7f1;
+  --tile-a:  #14655d;
+  --tile-b:  #0c3f3a;
+  --hero-a:  #0f5850;
+  --hero-b:  #08312d;
+  --amber-a: #d99133;
+  --amber-b: #b26a18;
+}
+
+/* the hero tile takes over from the sidebar gauge on this page */
+body.db-v3 .sidebar-gauge { display: none; }
+
+/* ── STATS ROW: hero + four solid tiles ── */
+body.db-v3 .db-stats-row {
+  grid-template-columns: 1.62fr repeat(4, 1fr);
+}
+
+body.db-v3 .db-stat-card {
+  background: linear-gradient(160deg, var(--tile-a), var(--tile-b));
+  box-shadow: 0 6px 16px rgba(12, 63, 58, 0.16);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 16px;
+}
+body.db-v3 .db-stat-card::before { display: none; }
+body.db-v3 .db-stat-value { color: #ffffff; font-size: 28px; }
+body.db-v3 .db-stat-label { color: #a9c9c5; font-weight: 600; }
+
+body.db-v3 .db-stat-card.streak {
+  background: linear-gradient(160deg, var(--amber-a), var(--amber-b));
+  box-shadow: 0 6px 16px rgba(178, 106, 24, 0.18);
+}
+body.db-v3 .db-stat-card.streak .db-stat-label { color: #f6e3c5; }
+
+/* ── HERO TILE (countdown + estimated-score ring) ── */
+body.db-v3 .db-stat-card.cd {
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  padding: 12px 20px;
+  background: linear-gradient(150deg, var(--hero-a), var(--hero-b));
+  box-shadow: 0 8px 22px rgba(8, 49, 45, 0.24);
+}
+body.db-v3 .hero-ring-slot { flex: 0 0 auto; line-height: 0; }
+body.db-v3 .hero-txt { min-width: 0; }
+body.db-v3 .db-stat-card.cd .db-stat-value { font-size: 27px; margin-bottom: 2px; }
+body.db-v3 #openDateSheet { display: block; color: #79e0d1 !important; }
+
+body.db-v3 .hero-ring-arc,
+body.db-v3 #clHeroArc {
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+body.db-v3 .hero-ring-score {
+  fill: #ffffff; font-family: var(--font);
+  font-size: 27px; font-weight: 800; letter-spacing: -0.04em;
+}
+body.db-v3 .hero-ring-total {
+  fill: #9fc3be; font-family: var(--font);
+  font-size: 11px; font-weight: 600;
+}
+
+body.db-v3 .hero-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: rgba(47, 163, 150, 0.24);
+  color: #79e0d1;
+}
+body.db-v3 .hero-badge:empty { display: none; }
+body.db-v3 .hero-badge[data-state="close"] { background: rgba(217, 145, 51, 0.22); color: #f0b768; }
+body.db-v3 .hero-badge[data-state="fail"]  { background: rgba(212, 87, 58, 0.22);  color: #f0a08c; }
+
+/* ── ACTION CARDS: real buttons, tinted icons ── */
+body.db-v3 .db-action-go {
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: 12px;
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  transition: background 0.2s ease;
+}
+body.db-v3 .db-action-card:hover .db-action-go { background: #0a5f62; }
+
+body.db-v3 .db-actions-row .db-action-card:nth-child(1) .db-action-icon { background: #e6f0ee; color: #0f5f58; }
+body.db-v3 .db-actions-row .db-action-card:nth-child(2) .db-action-icon { background: #fbf0de; color: #b4761b; }
+body.db-v3 .db-actions-row .db-action-card:nth-child(3) .db-action-icon { background: #e7eff9; color: #2e6fb8; }
+body.db-v3 .db-actions-row .db-action-card:nth-child(4) .db-action-icon { background: #fbebe6; color: #c1573a; }
+
+/* ── MASTERY CHART ──
+   The partial flag reveal reads as a rendering artefact at
+   mid-progress, so it is hidden until 100 %, where the full
+   flag still takes over as the celebration. */
+body.db-v3 .chart-bg-fill { display: none; }
+body.db-v3.mastery-complete .chart-bg-fill { display: block; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  body.db-v3 .db-stats-row { grid-template-columns: repeat(2, 1fr); }
+  body.db-v3 .db-stat-card.cd { grid-column: 1 / -1; }
+}
+
+@media (max-width: 768px) {
+  body.db-v3 .db-stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  body.db-v3 .db-stat-card { padding: 13px 14px; text-align: left; }
+  body.db-v3 .db-stat-value { font-size: 22px; }
+  body.db-v3 .db-stat-card.cd { grid-column: 1 / -1; padding: 13px 16px; }
+  body.db-v3 .db-action-go { margin-top: 8px; padding: 7px 14px; font-size: 11.5px; }
+  /* study time stays visible on mobile here: the hero spans the row,
+     so the four remaining tiles make a clean 2x2 instead of an orphan */
+  body.db-v3 .db-stat-card.time-card { display: flex; }
+}
+
+/* ── MASTERY PANEL: ring + rows ──
+   Built by renderMasteryRing() / renderMasteryRows() in
+   dashboard-extra-lu.js. Replaces the vertical bar chart, which
+   was mostly empty space with only three topics. */
+body.db-v3 .db-polar-card { justify-content: center; }
+body.db-v3 .chart-mastery-header { display: none; }
+
+body.db-v3 .mastery-split {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+}
+
+body.db-v3 .mastery-ring {
+  flex: 0 0 auto;
+  position: relative;
+  line-height: 0;
+}
+body.db-v3 .mastery-ring-arc {
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+body.db-v3 .mastery-ring-lbl {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.15;
+}
+body.db-v3 .mastery-ring-pct {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--accent);
+}
+body.db-v3 .mastery-ring-sub {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+body.db-v3 .mastery-rows { flex: 1; min-width: 0; }
+
+body.db-v3 .mastery-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+body.db-v3 .mastery-row:last-child { margin-bottom: 0; }
+
+body.db-v3 .mastery-row-label {
+  flex: 0 0 116px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-mid);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.db-v3 .mastery-row-track {
+  flex: 1;
+  height: 11px;
+  border-radius: 6px;
+  background: #eceae4;
+  overflow: hidden;
+}
+body.db-v3 .mastery-row-track i {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+body.db-v3 .mastery-row-pct {
+  flex: 0 0 46px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  /* the ring gives way to the text header; rows stack underneath */
+  body.db-v3 .mastery-split { display: block; }
+  body.db-v3 .mastery-ring { display: none; }
+  body.db-v3 .chart-mastery-header { display: flex; }
+  body.db-v3 .mastery-rows { margin-top: 14px; }
+  body.db-v3 .mastery-row { gap: 10px; margin-bottom: 9px; }
+  body.db-v3 .mastery-row-label { flex: 0 0 88px; font-size: 11.5px; }
+  body.db-v3 .mastery-row-track { height: 9px; }
+  body.db-v3 .mastery-row-pct { flex: 0 0 40px; font-size: 12px; }
+
+  /* all four launchers on mobile, compact (descriptions stay hidden) */
+  body.db-v3 .db-action-card.hide-mobile { display: flex; }
+}
