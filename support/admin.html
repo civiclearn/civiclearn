@@ -662,6 +662,16 @@ body {
   margin-bottom: 0.45rem;
 }
 .rev-kpi-value.pending { color: var(--muted); }
+.rev-kpi-eur {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--amber);
+  letter-spacing: 0;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
 .rev-kpi-yoy {
   font-size: 0.75rem;
   font-weight: 500;
@@ -2382,27 +2392,39 @@ function switchTab(name) {
 }
 
 // ── WEEKLY PAYOUTS ──────────────────────────────────────────────────────────
-// ── SGD → EUR conversion (shown above the bars only) ──
-const FX_FN = 'https://api.frankfurter.app/latest?from=SGD&to=EUR';  // ECB rates, no key
-const EUR_RATE_FALLBACK = 0.71;   // used only if the FX call fails
+// ── SGD → EUR conversion (shown in the payout KPI cards) ──
+// Two ECB-backed endpoints, tried in order; .dev is frankfurter's current host,
+// .app the legacy one. Falls back to a fixed rate only if both are unreachable.
+const FX_ENDPOINTS = [
+  { url: 'https://api.frankfurter.dev/v1/latest?base=SGD&symbols=EUR', pick: d => d && d.rates && d.rates.EUR },
+  { url: 'https://api.frankfurter.app/latest?from=SGD&to=EUR',         pick: d => d && d.rates && d.rates.EUR },
+];
+const EUR_RATE_FALLBACK = 0.71;   // used only if every endpoint fails
 let eurRate = null;               // SGD → EUR multiplier
 let eurRateNote = '';             // provenance, shown next to the legend
 
 async function ensureEurRate() {
   if (eurRate !== null) return eurRate;
-  try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 8000);
-    let res;
-    try { res = await fetch(FX_FN, { signal: ctrl.signal }); } finally { clearTimeout(t); }
-    const d = await res.json();
-    if (!d || !d.rates || !d.rates.EUR) throw new Error('unexpected payload');
-    eurRate = d.rates.EUR;
-    eurRateNote = 'EUR at ECB rate ' + d.rates.EUR.toFixed(4) + ' (' + (d.date || 'latest') + ')';
-  } catch (e) {
-    eurRate = EUR_RATE_FALLBACK;
-    eurRateNote = 'EUR at fallback rate ' + EUR_RATE_FALLBACK.toFixed(4) + ' — live FX unavailable';
+  for (const ep of FX_ENDPOINTS) {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 8000);
+      let res;
+      try { res = await fetch(ep.url, { signal: ctrl.signal, cache: 'no-store' }); }
+      finally { clearTimeout(t); }
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const d = await res.json();
+      const rate = ep.pick(d);
+      if (!rate) throw new Error('unexpected payload');
+      eurRate = rate;
+      eurRateNote = 'EUR at ECB rate ' + rate.toFixed(4) + ' (' + (d.date || 'latest') + ')';
+      return eurRate;
+    } catch (e) {
+      console.warn('FX lookup failed for ' + ep.url + ': ' + e.message);
+    }
   }
+  eurRate = EUR_RATE_FALLBACK;
+  eurRateNote = 'EUR at fallback rate ' + EUR_RATE_FALLBACK.toFixed(4) + ' — live FX unavailable';
   return eurRate;
 }
 function eurFmt(n) {
@@ -2502,23 +2524,23 @@ function renderPayouts() {
   const latest = payoutData[payoutData.length - 1];
   const latestDelta = latest.amount - PO_TARGET;
 
-  // KPIs
+  // KPIs — `eur` carries the SGD amount to convert; omitted where the figure isn't money
   kpis.innerHTML = [
-    { label: 'Latest payout', val: poFmt(latest.amount),
+    { label: 'Latest payout', val: poFmt(latest.amount), eur: latest.amount,
       sub: (latestDelta >= 0 ? '▲ ' : '▼ ') + poFmt(Math.abs(latestDelta)) + ' vs target',
       cls: latestDelta >= 0 ? 'up' : 'down' },
     { label: 'On-target weeks', val: onTarget + ' / ' + payoutData.length,
       sub: Math.round(onTarget / payoutData.length * 100) + '% hit S$4,000+',
       cls: onTarget === payoutData.length ? 'up' : 'flat' },
-    { label: 'Average / week', val: poFmt(avg),
+    { label: 'Average / week', val: poFmt(avg), eur: avg,
       sub: (avg >= PO_TARGET ? '▲ ' : '▼ ') + poFmt(Math.abs(avg - PO_TARGET)) + ' vs target',
       cls: avg >= PO_TARGET ? 'up' : 'down' },
-    { label: 'Total paid out', val: poFmt(total),
+    { label: 'Total paid out', val: poFmt(total), eur: total,
       sub: payoutData.length + ' weeks YTD', cls: 'flat' },
   ].map(k => `
     <div class="rev-kpi-card">
       <div class="rev-kpi-label">${k.label}</div>
-      <div class="rev-kpi-value">${k.val}</div>
+      <div class="rev-kpi-value">${k.val}${k.eur != null ? `<span class="rev-kpi-eur">${eurRate ? eurFmt(k.eur * eurRate) : '…'}</span>` : ''}</div>
       <div class="rev-kpi-yoy ${k.cls}">${k.sub}</div>
     </div>`).join('');
 
@@ -2544,45 +2566,12 @@ function renderPayouts() {
     }
   };
 
-  // SGD value above each bar, with the EUR conversion beside it in a
-  // smaller font and the brand colour. Chart only — not the table or KPIs.
-  const valueLabels = {
-    id: 'poValueLabels',
-    afterDatasetsDraw(chart) {
-      const ctx = chart.ctx;
-      const meta = chart.getDatasetMeta(0);
-      const SGD_FONT = '600 11px "DM Sans", sans-serif';
-      const EUR_FONT = '500 9px "DM Sans", sans-serif';
-      ctx.save();
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'alphabetic';
-      meta.data.forEach((bar, i) => {
-        const v = chart.data.datasets[0].data[i];
-        if (v == null) return;
-        const sgdTxt = poFmt(v);
-        const eurTxt = eurRate ? '  ' + eurFmt(v * eurRate) : '';
-        ctx.font = SGD_FONT; const wS = ctx.measureText(sgdTxt).width;
-        ctx.font = EUR_FONT; const wE = eurTxt ? ctx.measureText(eurTxt).width : 0;
-        let x = bar.x - (wS + wE) / 2;
-        const y = bar.y - 7;
-        // keep the label inside the plot area at the edges
-        const { left, right } = chart.chartArea;
-        if (x < left) x = left;
-        if (x + wS + wE > right) x = right - wS - wE;
-        ctx.font = SGD_FONT; ctx.fillStyle = '#e8e6f0'; ctx.fillText(sgdTxt, x, y);
-        if (eurTxt) { ctx.font = EUR_FONT; ctx.fillStyle = '#7c5ce8'; ctx.fillText(eurTxt, x + wS, y); }
-      });
-      ctx.restore();
-    }
-  };
-
   if (payoutChart) payoutChart.destroy();
   payoutChart = new Chart(document.getElementById('po-chart').getContext('2d'), {
     type: 'bar',
     data: { labels, datasets: [{ data: amounts, backgroundColor: colors, borderRadius: 4, borderSkipped: false }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      layout: { padding: { top: 22 } },   // headroom for the value labels
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -2601,7 +2590,7 @@ function renderPayouts() {
              ticks: { color: '#7c7a90', font: { size: 10 }, callback: v => v >= 1000 ? 'S$' + (v / 1000).toFixed(0) + 'k' : 'S$' + v } }
       }
     },
-    plugins: [targetLine, valueLabels]
+    plugins: [targetLine]
   });
 
   // fetch the FX rate on first render, then repaint so EUR appears above the bars
@@ -2609,7 +2598,7 @@ function renderPayouts() {
     ensureEurRate().then(() => {
       const note = document.getElementById('po-fx-note');
       if (note) note.textContent = eurRateNote;
-      if (payoutChart) payoutChart.update('none');
+      renderPayouts();   // rate now known — repaint the KPI cards with real EUR figures
     });
   } else {
     const note = document.getElementById('po-fx-note');
