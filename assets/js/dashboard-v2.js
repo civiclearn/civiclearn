@@ -477,6 +477,13 @@ function computeTrendPointsFromFirstAttempts(history) {
       }
     }
 
+    // Collapsed sessions (sync v44): question detail was dropped server-side,
+    // but first-attempt accuracy was precomputed from it before dropping.
+    // Must run BEFORE the topics-mode-returns-0 fallback below.
+    if (typeof sess.firstAttemptPct === "number" && !isNaN(sess.firstAttemptPct)) {
+      return Math.round(sess.firstAttemptPct);
+    }
+
     // --- FALLBACK LOGIC ---
     
     // 1. Topics Mode: If it's Topics mode and we have no first-attempt data, we return 0%
@@ -782,4 +789,4 @@ function computePerTopicProgressFromProgressRaw(progressRaw) {
 
   })();
 
-  
+  

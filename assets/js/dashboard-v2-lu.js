@@ -625,6 +625,13 @@ function computeTrendPointsFromFirstAttempts(history) {
       }
     }
 
+    // Collapsed sessions (sync v44): question detail was dropped server-side,
+    // but first-attempt accuracy was precomputed from it before dropping.
+    // Must run BEFORE the topics-mode-returns-0 fallback below.
+    if (typeof sess.firstAttemptPct === "number" && !isNaN(sess.firstAttemptPct)) {
+      return Math.round(sess.firstAttemptPct);
+    }
+
     // --- FALLBACK LOGIC ---
     
     // 1. Topics Mode: If it's Topics mode and we have no first-attempt data, we return 0%
@@ -930,7 +937,9 @@ if (
       if (gauge) gauge.setAttribute("data-value", mastery.toFixed(3));
 
       // 3. Charts
-      const perTopic = computePerTopicProgressFromHistory(stats.history || []);
+      // v44: per-topic chart now reads civicedge_progress (per-question mastery),
+      // not history question detail, which is trimmed for older sessions.
+      const perTopic = computePerTopicProgressFromProgressRaw(progress || {});
 	  // --- MERGE SEQUENTIAL PER-TOPIC (LU) INTO TOPIC CHART DATA ---
 try {
   const bank = window.__ceBank || [];

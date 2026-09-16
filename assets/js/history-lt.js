@@ -359,7 +359,16 @@ function getTopicDisplayFromRaw(raw) {
     // --------------------------
     // TOPICS MODE (NEW DESIGN)
     // --------------------------
-    if (session.mode === "topics" && attemptLog.length > qList.length) {
+    // v44: older sessions keep only their summary (score, duration, topics);
+    // question-by-question detail is retained for the most recent sessions only.
+    if (session.detailTrimmed === true || (qList.length === 0 && attemptLog.length === 0)) {
+      html += `
+        <div class="question-row history-no-detail">
+          ${t("history_detail_trimmed", "Question-by-question detail is kept only for your most recent sessions. The score above is complete.")}
+        </div>
+      `;
+    }
+    else if (session.mode === "topics" && attemptLog.length > qList.length) {
       const qMap = new Map();
       qList.forEach((q) => qMap.set(q.id, q));
 
