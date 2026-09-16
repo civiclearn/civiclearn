@@ -33,6 +33,7 @@ body {
   background: var(--bg);
   color: var(--text);
   height: 100vh;
+  height: 100dvh;      /* Android/iOS: vh = URL-bar-hidden height, dvh tracks the real one */
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -432,7 +433,7 @@ body {
 
   body.app-visible { overflow: hidden; }
 
-  #app { height: 100vh; overflow: hidden; flex-direction: column; }
+  #app { height: 100vh; height: 100dvh; overflow: hidden; flex-direction: column; }
 
   /* Topbar */
   .topbar { padding: 0 0.75rem; height: 48px; }
@@ -496,7 +497,9 @@ body {
 
   /* Action bar */
   .action-bar {
-    padding: 0.75rem 1rem; flex-direction: column; gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+    flex-direction: column; gap: 0.5rem;
     position: sticky; bottom: 0;
     background: var(--surface); border-top: 1px solid var(--border2);
     flex-shrink: 0;
@@ -1074,7 +1077,7 @@ body {
 </div>
 
 <!-- APP -->
-<div id="app" style="display:none; flex:1; flex-direction:column; height:100vh; overflow:hidden;">
+<div id="app" style="display:none; flex:1; flex-direction:column; height:100vh; height:100dvh; overflow:hidden;">
 
   <!-- TOP BAR -->
   <div class="topbar">
@@ -1148,21 +1151,6 @@ body {
 
   <!-- REVENUE TAB -->
   <div class="tab-panel" id="tab-revenue">
-    <div class="rev-load-bar">
-      <span id="rev-status">Historical data loaded · click “Load live” for current Stripe figures</span>
-      <button onclick="loadRevLive()" id="rev-load-btn" style="background:var(--brand);color:#fff;border:none;border-radius:6px;padding:4px 14px;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:500;cursor:pointer">Load live</button>
-    </div>
-    <div class="rev-kpi-grid" id="rev-kpi-grid"></div>
-    <div class="rev-chart-card">
-      <div class="rev-card-title">Monthly revenue — last 24 months</div>
-      <div class="rev-chart-wrap"><canvas id="rev-chart"></canvas></div>
-    </div>
-    <div class="rev-table-card">
-      <div class="rev-card-title">Year-over-year comparison</div>
-      <table class="rev-table" id="rev-yoy-table"></table>
-      <div class="rev-note">Months before this year are from the Stripe payouts export (net of fees). The current year (YTD, KPIs, and this year's bars) is pulled live from the Stripe charges API when you click “Load live”.</div>
-    </div>
-
     <!-- WEEKLY PAYOUTS -->
     <div class="rev-chart-card">
       <div class="po-head">
@@ -1175,6 +1163,7 @@ body {
         <span class="po-legend-item"><span class="po-dot below"></span> Below target (&lt; S$4,000)</span>
         <span class="po-legend-item"><span class="po-dot met"></span> Met (S$4,000–5,999)</span>
         <span class="po-legend-item"><span class="po-dot over"></span> Significantly exceeded (≥ S$6,000)</span>
+        <span class="po-legend-item" id="po-fx-note" style="margin-left:auto;color:var(--muted)"></span>
       </div>
       <div class="rev-chart-wrap" id="po-chart-wrap" style="height:240px;display:none"><canvas id="po-chart"></canvas></div>
       <div id="po-empty" class="po-empty" style="display:none">No payouts found since 1 Jan 2026.</div>
@@ -1700,7 +1689,6 @@ async function tryLogin() {
     document.getElementById('app').style.display = 'flex';
     document.body.classList.add('app-visible');
     loadMessages();
-    renderRevenue();
   } catch(e) {
     errEl.textContent = 'Connection error. Try again.';
     btn.disabled = false;
@@ -2383,7 +2371,7 @@ function switchTab(name) {
     const el = document.getElementById(id);
     if (el) el.style.display = name === 'support' ? '' : 'none';
   });
-  if (name === 'revenue') renderRevenue();
+  if (name === 'revenue' && payoutData) renderPayouts();
   if (name === 'kb' && !kbLoaded) kbLoad();
   if (name === 'content' && !ctLoaded) ctLoad();
   if (name === 'exam') examLoadStats();
@@ -2393,165 +2381,35 @@ function switchTab(name) {
   // 'users' tab needs no lazy load
 }
 
-// ── REVENUE ───────────────────────────────────────────────────────────────────
-const REV_HISTORY = [
-  { month: '2024-04', eur: 15081.65 },
-  { month: '2024-05', eur: 21369.35 },
-  { month: '2024-06', eur: 19916.16 },
-  { month: '2024-07', eur:  7500.99 },
-  { month: '2024-08', eur:  6353.04 },
-  { month: '2024-09', eur: 10873.29 },
-  { month: '2024-10', eur: 12523.55 },
-  { month: '2024-11', eur: 20671.70 },
-  { month: '2024-12', eur: 19192.93 },
-  { month: '2025-01', eur:  4877.82 },
-  { month: '2025-02', eur: 10247.71 },
-  { month: '2025-03', eur: 12303.46 },
-  { month: '2025-04', eur: 14893.30 },
-  { month: '2025-05', eur: 21010.02 },
-  { month: '2025-06', eur: 19547.69 },
-  { month: '2025-07', eur:  5418.83 },
-  { month: '2025-08', eur:  6639.11 },
-  { month: '2025-09', eur:  9263.03 },
-  { month: '2025-10', eur: 15028.99 },
-  { month: '2025-11', eur: 23586.24 },
-  { month: '2025-12', eur: 21525.76 },
-  { month: '2026-01', eur: 19433.01 },
-  { month: '2026-02', eur: 16523.80 },
-];
-const REV_FN = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/stripe_metrics_summary';
-let revLiveData = null;
-let revChart = null;
+// ── WEEKLY PAYOUTS ──────────────────────────────────────────────────────────
+// ── SGD → EUR conversion (shown above the bars only) ──
+const FX_FN = 'https://api.frankfurter.app/latest?from=SGD&to=EUR';  // ECB rates, no key
+const EUR_RATE_FALLBACK = 0.71;   // used only if the FX call fails
+let eurRate = null;               // SGD → EUR multiplier
+let eurRateNote = '';             // provenance, shown next to the legend
 
-function revFmt(n) {
-  if (n == null) return '—';
-  return n >= 1000 ? '€' + (n / 1000).toFixed(1) + 'k' : '€' + Math.round(n);
+async function ensureEurRate() {
+  if (eurRate !== null) return eurRate;
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 8000);
+    let res;
+    try { res = await fetch(FX_FN, { signal: ctrl.signal }); } finally { clearTimeout(t); }
+    const d = await res.json();
+    if (!d || !d.rates || !d.rates.EUR) throw new Error('unexpected payload');
+    eurRate = d.rates.EUR;
+    eurRateNote = 'EUR at ECB rate ' + d.rates.EUR.toFixed(4) + ' (' + (d.date || 'latest') + ')';
+  } catch (e) {
+    eurRate = EUR_RATE_FALLBACK;
+    eurRateNote = 'EUR at fallback rate ' + EUR_RATE_FALLBACK.toFixed(4) + ' — live FX unavailable';
+  }
+  return eurRate;
 }
-function revFmtFull(n) {
-  if (n == null) return '—';
+function eurFmt(n) {
+  if (n == null) return '';
   return '€' + Math.round(n).toLocaleString('en');
 }
-function revYoyBadge(cur, prev) {
-  if (cur == null) return `<span class="rev-kpi-yoy flat">— load for live data</span>`;
-  if (!prev)       return `<span class="rev-kpi-yoy flat">—</span>`;
-  const p = (cur - prev) / prev * 100;
-  const cls = p > 0 ? 'up' : p < 0 ? 'down' : 'flat';
-  const arrow = p > 0 ? '▲' : p < 0 ? '▼' : '–';
-  return `<div class="rev-kpi-yoy ${cls}">${arrow} ${Math.abs(p).toFixed(1)}% vs prior year</div>`;
-}
 
-function renderRevenue() {
-  const L = revLiveData;
-  const today = L ? L.today : null;
-  const wtd   = L ? L.wtd   : null;
-  const mtd   = L ? L.mtd   : null;
-  const ytd2026 = L ? L.ytd      : null;
-  const ytd2025 = L ? L.ytd_prev : null;
-
-  document.getElementById('rev-kpi-grid').innerHTML = [
-    { label: 'Today',         cur: today,   prev: L ? L.today_prev : null },
-    { label: 'Week to date',  cur: wtd,     prev: L ? L.wtd_prev   : null },
-    { label: 'Month to date', cur: mtd,     prev: L ? L.mtd_prev   : null },
-    { label: 'Year to date',  cur: ytd2026, prev: ytd2025 },
-  ].map(k => `
-    <div class="rev-kpi-card">
-      <div class="rev-kpi-label">${k.label}</div>
-      <div class="rev-kpi-value ${k.cur == null ? 'pending' : ''}">${revFmt(k.cur)}</div>
-      ${revYoyBadge(k.cur, k.prev)}
-    </div>`).join('');
-
-  // Chart: months before the current year come from REV_HISTORY; the current
-  // year's months come live from Stripe (avoids stale/missing-month gaps).
-  const curYear = new Date().getFullYear();
-  const pastMonths = REV_HISTORY.filter(d => +d.month.slice(0, 4) < curYear);
-  let curMonths;
-  if (L && L.months && L.months.length) {
-    curMonths = L.months.map(m => ({ month: m.month, eur: m.eur, partial: !!m.partial }));
-  } else {
-    // Not loaded yet — fall back to whatever current-year history we have.
-    curMonths = REV_HISTORY.filter(d => +d.month.slice(0, 4) === curYear);
-  }
-  const chartData = [...pastMonths, ...curMonths].slice(-24);
-  const labels = chartData.map(({ month }) => {
-    const [y, mo] = month.split('-');
-    return new Date(+y, +mo - 1, 1).toLocaleString('default', { month: 'short' }) + " '" + String(+y).slice(2);
-  });
-
-  if (revChart) revChart.destroy();
-  revChart = new Chart(document.getElementById('rev-chart').getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        data: chartData.map(d => d.eur),
-        backgroundColor: chartData.map(d => d.partial ? 'rgba(124,92,232,0.3)' : 'rgba(124,92,232,0.7)'),
-        borderRadius: 4,
-        borderSkipped: false,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => revFmtFull(ctx.raw) + (chartData[ctx.dataIndex].partial ? ' (in progress)' : '')
-          }
-        }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { color: '#7c7a90', font: { size: 10 }, maxRotation: 45 } },
-        y: {
-          beginAtZero: true,
-          grid: { color: 'rgba(255,255,255,0.04)' },
-          ticks: { color: '#7c7a90', font: { size: 10 }, callback: v => v >= 1000 ? '€' + (v/1000).toFixed(0) + 'k' : '€' + v }
-        }
-      }
-    }
-  });
-
-  let html = `<thead><tr><th>Year</th><th>Day</th><th>WTD</th><th>MTD</th><th>YTD</th></tr></thead><tbody>`;
-  html += `<tr>
-    <td>2026${L ? '<span class="rev-live-dot"></span>' : ''}</td>
-    <td>${revFmtFull(today)}</td><td>${revFmtFull(wtd)}</td>
-    <td>${revFmtFull(mtd)}</td><td>${revFmtFull(ytd2026)}</td></tr>`;
-  html += `<tr><td>2025</td>
-    <td>${revFmtFull(L ? L.today_prev : null)}</td><td>${revFmtFull(L ? L.wtd_prev : null)}</td>
-    <td>${revFmtFull(L ? L.mtd_prev : null)}</td><td>${revFmtFull(ytd2025)}</td></tr>`;
-  html += '</tbody>';
-  document.getElementById('rev-yoy-table').innerHTML = html;
-  if (payoutData) renderPayouts();
-}
-
-async function loadRevLive() {
-  if (!adminPw) return;
-  const btn = document.getElementById('rev-load-btn');
-  btn.disabled = true; btn.textContent = 'Loading…';
-  document.getElementById('rev-status').textContent = 'Fetching live data…';
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 90000);
-    let res;
-    try {
-      res = await fetch(REV_FN, { signal: controller.signal, headers: { 'X-Admin-Key': adminPw, 'Content-Type': 'application/json' } });
-    } finally { clearTimeout(timeout); }
-    const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.error || 'Request failed');
-    const cur = data.summary[0], prev = data.summary[1];
-    revLiveData = { today: cur.day_eur, wtd: cur.week_eur, mtd: cur.mtd_eur, ytd: cur.ytd_eur, today_prev: prev.day_eur, wtd_prev: prev.week_eur, mtd_prev: prev.mtd_eur, ytd_prev: prev.ytd_eur, months: data.months || [] };
-    document.getElementById('rev-status').textContent = 'Live · as of ' + data.as_of;
-    btn.textContent = 'Refresh';
-    renderRevenue();
-  } catch(e) {
-    document.getElementById('rev-status').textContent = 'Error: ' + e.message;
-    btn.textContent = 'Retry';
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-// ── WEEKLY PAYOUTS ──────────────────────────────────────────────────────────
 const PAYOUTS_FN = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/stripe_payouts';
 const PO_TARGET = 4000;          // S$ minimum per weekly payout
 const PO_SIGNIF = PO_TARGET * 1.5; // ≥ this counts as "significantly exceeded"
@@ -2686,12 +2544,45 @@ function renderPayouts() {
     }
   };
 
+  // SGD value above each bar, with the EUR conversion beside it in a
+  // smaller font and the brand colour. Chart only — not the table or KPIs.
+  const valueLabels = {
+    id: 'poValueLabels',
+    afterDatasetsDraw(chart) {
+      const ctx = chart.ctx;
+      const meta = chart.getDatasetMeta(0);
+      const SGD_FONT = '600 11px "DM Sans", sans-serif';
+      const EUR_FONT = '500 9px "DM Sans", sans-serif';
+      ctx.save();
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      meta.data.forEach((bar, i) => {
+        const v = chart.data.datasets[0].data[i];
+        if (v == null) return;
+        const sgdTxt = poFmt(v);
+        const eurTxt = eurRate ? '  ' + eurFmt(v * eurRate) : '';
+        ctx.font = SGD_FONT; const wS = ctx.measureText(sgdTxt).width;
+        ctx.font = EUR_FONT; const wE = eurTxt ? ctx.measureText(eurTxt).width : 0;
+        let x = bar.x - (wS + wE) / 2;
+        const y = bar.y - 7;
+        // keep the label inside the plot area at the edges
+        const { left, right } = chart.chartArea;
+        if (x < left) x = left;
+        if (x + wS + wE > right) x = right - wS - wE;
+        ctx.font = SGD_FONT; ctx.fillStyle = '#e8e6f0'; ctx.fillText(sgdTxt, x, y);
+        if (eurTxt) { ctx.font = EUR_FONT; ctx.fillStyle = '#7c5ce8'; ctx.fillText(eurTxt, x + wS, y); }
+      });
+      ctx.restore();
+    }
+  };
+
   if (payoutChart) payoutChart.destroy();
   payoutChart = new Chart(document.getElementById('po-chart').getContext('2d'), {
     type: 'bar',
     data: { labels, datasets: [{ data: amounts, backgroundColor: colors, borderRadius: 4, borderSkipped: false }] },
     options: {
       responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 22 } },   // headroom for the value labels
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -2710,8 +2601,20 @@ function renderPayouts() {
              ticks: { color: '#7c7a90', font: { size: 10 }, callback: v => v >= 1000 ? 'S$' + (v / 1000).toFixed(0) + 'k' : 'S$' + v } }
       }
     },
-    plugins: [targetLine]
+    plugins: [targetLine, valueLabels]
   });
+
+  // fetch the FX rate on first render, then repaint so EUR appears above the bars
+  if (eurRate === null) {
+    ensureEurRate().then(() => {
+      const note = document.getElementById('po-fx-note');
+      if (note) note.textContent = eurRateNote;
+      if (payoutChart) payoutChart.update('none');
+    });
+  } else {
+    const note = document.getElementById('po-fx-note');
+    if (note) note.textContent = eurRateNote;
+  }
 
   // table (most recent first)
   let html = '<thead><tr><th>Week of</th><th>Payout</th><th>vs target</th><th>Status</th></tr></thead><tbody>';
