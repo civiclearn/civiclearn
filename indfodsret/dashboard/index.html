@@ -38,19 +38,6 @@
     .exam-date-label{font-size:14px;font-weight:500;}
     .exam-date-card.muted .exam-date-label{color:var(--text-muted);}
 
-
-
-    /* Organic Trustpilot review prompt (exposure-triggered, replaces chart row) */
-    .review-card{display:none;background:var(--surface,#fff);border:1px solid var(--border,#e5e7eb);border-left:3px solid var(--accent,#0d7377);border-radius:var(--radius,14px);padding:24px 26px;margin:0 0 20px 0;box-shadow:var(--shadow,0 1px 3px rgba(0,0,0,.06));position:relative;}
-    .review-card.show{display:block;}
-    .review-card-star{font-size:1.6rem;line-height:1;}
-    .review-card h3{margin:10px 0 6px;font-size:1.06rem;color:var(--text-dark,#1f2937);font-weight:700;}
-    .review-card p{margin:0 0 18px;font-size:.9rem;color:var(--text-mid,#6b7280);line-height:1.55;max-width:64ch;}
-    .review-card-actions{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
-    .review-card-btn{background:var(--accent,#0d7377);color:#fff;text-decoration:none;padding:11px 22px;border-radius:8px;font-size:.9rem;font-weight:600;white-space:nowrap;transition:background .15s;}
-    .review-card-btn:hover{background:#0b6265;}
-    .review-card-later{background:none;border:none;cursor:pointer;color:var(--text-mid,#6b7280);font-size:.85rem;font-family:inherit;opacity:.8;padding:6px 4px;}
-    .review-card-later:hover{opacity:1;text-decoration:underline;}
   </style>
 </head>
 
@@ -239,17 +226,6 @@
         </div>
       </div>
 
-      <!-- Organic Trustpilot review prompt (exposure-triggered, outcome-blind). Replaces the chart row above. -->
-      <div class="review-card" id="reviewCard">
-        <div class="review-card-star">⭐</div>
-        <h3>Del din oplevelse med CivicLearn</h3>
-        <p>Du har øvet dig på platformen et stykke tid nu. Vi vil meget gerne høre om din oplevelse — en kort, ærlig anmeldelse på Trustpilot tager under et minut og hjælper andre, der forbereder sig til prøven.</p>
-        <div class="review-card-actions">
-          <a class="review-card-btn" id="reviewCardBtn" href="https://www.trustpilot.com/evaluate/civiclearn.com" target="_blank" rel="noopener">Skriv en anmeldelse →</a>
-          <button class="review-card-later" id="reviewCardLater" type="button">Måske senere</button>
-        </div>
-      </div>
-
       <!-- ④ Bonus / Advanced (hidden until 100% mastery) -->
       <div id="bonusRow" class="bonus-row anim d4" style="display:none">
         <div class="bonus-row-title">🎯 Avancerede bonusspørgsmål</div>
@@ -413,79 +389,6 @@ document.addEventListener("DOMContentLoaded", () => {
 window.WonderPush = window.WonderPush || [];
 WonderPush.push(["init", { webKey: "256f5d8dc847c1f1f9a267c4d77a121616a872c88e1618da8097a0d20b43fbfd" }]);
 WonderPush.push(["addTag", "country:dk"]);
-</script>
-
-<!-- Organic review prompt trigger (exposure-based, outcome-blind) -->
-<script>
-(function(){
-  var CFG = {
-    minActiveDays: 3,            // exposure threshold (Denis: >=3 active days AND >=5 sessions)
-    minSessions: 5,
-    reviewUrl: 'https://www.trustpilot.com/evaluate/civiclearn.com',
-    statsKey: 'civicedge_stats', // synced study-session log {history:[{startedAt,...}]}
-    doneKey: 'cl_review_prompt_done',
-    snoozeKey: 'cl_review_prompt_snooze_until',
-    snoozeDays: 90,            // explicit "Maybe later" -> long snooze
-    showSnoozeDays: 7          // shown but ignored -> short auto-snooze (chart returns next visit)
-  };
-
-  function exposure(){
-    try{
-      var raw = localStorage.getItem(CFG.statsKey);
-      if(!raw) return {sessions:0, activeDays:0};
-      var hist = (JSON.parse(raw) || {}).history;
-      if(!Array.isArray(hist)) return {sessions:0, activeDays:0};
-      var days = {};
-      for(var i=0;i<hist.length;i++){
-        var t = hist[i] && hist[i].startedAt;       // exposure only: session timestamp, NOT score/mastery
-        if(t) days[new Date(Number(t)).toDateString()] = 1;
-      }
-      return { sessions: hist.length, activeDays: Object.keys(days).length };
-    }catch(e){ return {sessions:0, activeDays:0}; }
-  }
-
-  function snoozed(){
-    var until = parseInt(localStorage.getItem(CFG.snoozeKey) || '0', 10);
-    return until && Date.now() < until;
-  }
-
-  function maybeShow(){
-    if(localStorage.getItem(CFG.doneKey)) return true;   // already reviewed/clicked -> stop
-    if(snoozed()) return true;                            // dismissed recently -> stop for now
-    var ex = exposure();
-    if(ex.activeDays < CFG.minActiveDays || ex.sessions < CFG.minSessions) return false; // not eligible yet
-    var card = document.getElementById('reviewCard');
-    if(!card) return true;
-    var row = document.getElementById('insightRow');
-    if(row) row.style.display = 'none';                  // replace the chart row, like the old prompt did
-    card.classList.add('show');
-    // Auto-snooze on display: an ignored prompt won't take over the chart again until
-    // showSnoozeDays pass. Explicit choices below override this (done=forever, later=90d).
-    localStorage.setItem(CFG.snoozeKey, String(Date.now() + CFG.showSnoozeDays*86400000));
-    var btn = document.getElementById('reviewCardBtn');
-    var later = document.getElementById('reviewCardLater');
-    if(btn) btn.addEventListener('click', function(){
-      localStorage.setItem(CFG.doneKey, String(Date.now()));   // clicked through -> never show again
-    });
-    if(later) later.addEventListener('click', function(){
-      card.classList.remove('show');
-      if(row) row.style.display = '';                          // restore the chart
-      localStorage.setItem(CFG.snoozeKey, String(Date.now() + CFG.snoozeDays*86400000));
-    });
-    return true;
-  }
-
-  function run(){
-    if(maybeShow()) return;
-    // synced stats may hydrate shortly after load; retry a few times then give up
-    var tries = 0, iv = setInterval(function(){
-      if(maybeShow() || ++tries >= 4) clearInterval(iv);
-    }, 1500);
-  }
-
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
-  else run();
-})();
 </script>
 
 <!-- Sidebar extras + message slot -->
