@@ -8,7 +8,7 @@
   <meta name="mobile-web-app-capable" content="yes">
 
   <link rel="stylesheet" href="/sweden/assets/css/civic-v2.css">
-  <link rel="stylesheet" href="/sweden/assets/css/dashboard-v2.css">
+  <link rel="stylesheet" href="/sweden/assets/css/dashboard-v2.css?v=3">
 
   <script>document.documentElement.classList.add("i18n-hidden");</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -16,7 +16,7 @@
   <script src="/sweden/assets/js/se-auth.js"></script>
 </head>
 
-<body>
+<body class="db-v3">
 
 <button class="menu-toggle" aria-label="Menu">☰</button>
 
@@ -77,9 +77,13 @@
       <!-- ① Stats (5 cards, time-card hidden on mobile) -->
       <div class="db-stats-row anim d1">
         <div class="db-stat-card cd" id="countdownCard">
-          <div class="db-stat-value" id="examCountdown"></div>
-          <div class="db-stat-label" id="examNoDate" data-i18n="countdown_enter_date"></div>
-          <button class="db-stat-label" id="openDateSheet" style="background:none;border:none;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11.5px;font-weight:600;padding:0" data-i18n="countdown_set_date_btn"></button>
+          <div class="hero-ring-slot" id="heroRingSlot"></div>
+          <div class="hero-txt">
+            <div class="db-stat-value" id="examCountdown"></div>
+            <div class="db-stat-label" id="examNoDate" data-i18n="countdown_enter_date"></div>
+            <button class="db-stat-label" id="openDateSheet" style="background:none;border:none;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11.5px;font-weight:600;padding:0" data-i18n="countdown_set_date_btn"></button>
+            <div class="hero-badge" id="heroGaugeBadge"></div>
+          </div>
         </div>
         <div class="db-stat-card ans">
           <div class="db-stat-value" id="tmAnswered">0</div>
@@ -207,7 +211,7 @@
         <span id="audioStripGo" style="color:var(--accent);font-weight:600;white-space:nowrap;font-size:13.5px">Aktivera →</span>
       </a>
 
-      <!-- ④ Polar area chart + Sequential Practice -->
+      <!-- ④ Mastery ring + rows (v3) + Sequential Practice -->
       <div class="db-insight-row anim d3">
         <div class="db-chart-card db-polar-card">
           <div class="chart-bg-fill" id="chartBgFill"></div>
@@ -215,8 +219,9 @@
             <span class="chart-mastery-pct" id="chartMasteryPct">0%</span>
             <span class="chart-mastery-sub" id="chartMasterySub">0 / 0</span>
           </div>
-          <div class="polar-wrap">
-            <div class="chart-wrap" style="height:260px"><canvas id="polarChart"></canvas></div>
+          <div class="mastery-split">
+            <div class="mastery-ring" id="masteryRing"></div>
+            <div class="mastery-rows" id="masteryRows"></div>
           </div>
         </div>
         <div class="db-chart-card" id="seqCard">
@@ -282,6 +287,7 @@
 
 <!-- Shared: gauge + study timer -->
 <script src="/sweden/assets/js/gauge-bar.js"></script>
+<script src="/sweden/assets/js/hero-gauge-se.js"></script>
 <script src="/sweden/assets/js/study-timer.js"></script>
 
 <!-- Dashboard logic -->
@@ -294,7 +300,7 @@ CivicLearnI18n.onReady(() => {
 </script>
 
 <!-- Dashboard extra (computes + caches gauge, renders radar) -->
-<script src="/sweden/assets/js/dashboard-extra-se.js"></script>
+<script src="/sweden/assets/js/dashboard-extra-se.js?v=3"></script>
 
 <!-- Sequential practice widget -->
 <script src="/sweden/assets/js/dashboard-sequential-se.js"></script>
