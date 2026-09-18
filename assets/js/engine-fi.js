@@ -37,6 +37,56 @@ Engine.ensureBankLoaded = async function () {
     }
     return fallback || key;
   }
+
+  // /assets/js/i18n.js returns the KEY itself when a dictionary has no
+  // entry, so t(key, fallback) can render "quiz_explain_title" on screen.
+  // tSafe treats value === key as a miss and uses the fallback instead.
+  function tSafe(key, fallback) {
+    const v = t(key, fallback);
+    return (!v || v === key) ? fallback : v;
+  }
+
+  // ── "Bra att veta" explanation card ──
+  // Shown when a question carries explanation {fi, sv, en} (none in the FI bank yet). Shown after the answer
+  // in every mode except the timed simulation (kept exam-like), and in the
+  // post-test review of wrong answers.
+  const EXPLAIN_TITLES = { fi: "Hyvä tietää", sv: "Bra att veta", en: "Good to know" };
+  const EXPLAIN_EXCLUDE_MODES = ["simulation"];
+
+  function explanationText(rawQ) {
+    if (!rawQ || !rawQ.explanation) return "";
+    const ex = rawQ.explanation;
+    if (typeof ex === "string") return ex.trim();
+    const lang = getLang();
+    return String(ex[lang] || ex.fi || ex.sv || ex.en || "").trim();
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function explainTitle() {
+    const lang = getLang();
+    return tSafe("quiz_explain_title", EXPLAIN_TITLES[lang] || EXPLAIN_TITLES.en);
+  }
+
+  function buildExplanationEl(rawQ) {
+    const text = explanationText(rawQ);
+    if (!text) return null;
+    const box = createEl("div", "ce-explain");
+    box.appendChild(createEl("div", "ce-explain-title", explainTitle()));
+    box.appendChild(createEl("p", "ce-explain-body", text));
+    return box;
+  }
+
+  function explanationHtml(rawQ) {
+    const text = explanationText(rawQ);
+    if (!text) return "";
+    return '<div class="ce-explain"><div class="ce-explain-title">' + escapeHtml(explainTitle()) +
+           '</div><p class="ce-explain-body">' + escapeHtml(text) + '</p></div>';
+  }
   
   function getMainTopicDisplay(rawQ) {
   if (!rawQ || !rawQ.topic) return "";
@@ -893,21 +943,13 @@ if (!answered.includes(question.id)) {
     const nextBtn = document.querySelector(".ce-next-btn");
     if (nextBtn) nextBtn.disabled = false;
 
-    // === EXPLANATION (Topics mode only) ===
-    if (state.mode === "topics" && question._raw && question._raw.explanation) {
-      const expl = question._raw.explanation;
-      const explText = (typeof expl === "object")
-        ? (expl[getLang()] || expl.en || "")
-        : String(expl);
-      if (explText) {
-        const explDiv = document.createElement("div");
-        explDiv.className = "ce-explanation";
-        explDiv.textContent = explText;
-        // Insert between optionsWrap and footer
-        const footer = document.querySelector(".ce-q-footer");
-        if (footer && footer.parentElement) {
-          footer.parentElement.insertBefore(explDiv, footer);
-        }
+    // === "Bra att veta" EXPLANATION (all modes except the timed simulation) ===
+    if (EXPLAIN_EXCLUDE_MODES.indexOf(state.mode) === -1 && question._raw) {
+      const footer = document.querySelector(".ce-q-footer");
+      const card = footer && footer.parentElement;
+      if (card && !card.querySelector(".ce-explain")) {
+        const box = buildExplanationEl(question._raw);
+        if (box) card.insertBefore(box, footer);
       }
     }
 
@@ -1512,6 +1554,7 @@ if (i18n && typeof i18n.apply === "function") {
 
       html += `
           </div>
+          ${explanationHtml(q._raw)}
         </div>
       `;
     });
