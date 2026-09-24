@@ -19,7 +19,7 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
   const LOGIN_URL         = '/medborgerskab/login.html';
 
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storage: window.clAuthStorage } });
 
   function redirectToLogin() {
     const returnUrl = window.location.pathname + window.location.search;
@@ -52,8 +52,17 @@
       auth.userId  = session.user.id;
       auth.session = session;
 
-      localStorage.setItem('cl_auth', 'ok');
-      localStorage.setItem('cl_email', session.user.email);
+      // Session is being kept in sessionStorage/memory because localStorage refused it.
+      if (window.clAuthStorage) window.clAuthStorage.showBanner();
+
+      // Best-effort only: a full or blocked localStorage is not an auth failure
+      // and must never reach the catch below (which redirects to login).
+      try {
+        localStorage.setItem('cl_auth', 'ok');
+        localStorage.setItem('cl_email', session.user.email);
+      } catch (e) {
+        console.warn('CivicAuth: could not persist auth flags (storage full?)', e);
+      }
 
       supabase.auth.onAuthStateChange((event, newSession) => {
         if (event === 'SIGNED_OUT') {

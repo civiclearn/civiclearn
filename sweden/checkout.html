@@ -304,6 +304,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
 
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/assets/js/cl-auth-storage.js"></script>
 
 <script>
 (function(){
@@ -316,7 +317,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
   var RETURN_URL    = 'https://civiclearn.com/sweden/checkout.html';
 
   var stripe = Stripe(STRIPE_PK);
-  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: window.clAuthStorage } });
 
   var PLANS = {
     solo:   { amount: 49900, price: '499 kr', payLabel: 'Betala 499 kr', label: 'Medborgarskapsprov · Premium',               meta: '1000 frågor · Ljudkurs · Livstidsåtkomst',                                    createFn: 'sweden-create-payment-intent', setupFn: 'sweden-setup-account' },

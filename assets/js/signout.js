@@ -24,7 +24,7 @@
     // Fallback: build a client from config globals if a guard isn't found.
     if (window.supabase && typeof window.supabase.createClient === "function"
         && window.SUPABASE_URL && window.SUPABASE_KEY) {
-      try { return window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY); }
+      try { return window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY, { auth: { storage: window.clAuthStorage } }); }
       catch (e) { /* ignore */ }
     }
     return null;
@@ -37,6 +37,12 @@
     try {
       Object.keys(localStorage).forEach(function (k) {
         if (/^sb-.*-auth-token$/.test(k)) localStorage.removeItem(k);
+      });
+    } catch (e) { /* ignore */ }
+    // Same for the sessionStorage fallback used when localStorage is full/blocked.
+    try {
+      Object.keys(sessionStorage).forEach(function (k) {
+        if (/^sb-.*-auth-token$/.test(k)) sessionStorage.removeItem(k);
       });
     } catch (e) { /* ignore */ }
   }

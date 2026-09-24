@@ -19,7 +19,7 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
   const LOGIN_URL         = '/sweden/login.html';
 
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storage: window.clAuthStorage } });
 
   // Expose the project URL globally so the shared /assets/js/sync.js can run.
   // sync.js gates on `if (!window.SUPABASE_URL) return;` — without this, cloud
@@ -57,6 +57,9 @@
       auth.email   = session.user.email;
       auth.userId  = session.user.id;
       auth.session = session;
+
+      // Session is being kept in sessionStorage/memory because localStorage refused it.
+      if (window.clAuthStorage) window.clAuthStorage.showBanner();
 
       // Best-effort only. If the origin has hit its localStorage quota,
       // setItem throws — and unguarded, that exception fell through to the

@@ -368,6 +368,7 @@ main {
 
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/assets/js/cl-auth-storage.js"></script>
 
 <script>
 (function(){
@@ -380,7 +381,7 @@ main {
   var RETURN_URL    = 'https://civiclearn.com/indfodsret/checkout.html';
 
   var stripe = Stripe(STRIPE_PK);
-  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: window.clAuthStorage } });
 
   var PLANS = {
     solo:   { amount: 49900, price: '499 kr', payLabel: 'Betal 499 kr', label: 'Indfødsretsprøve · Premium',         meta: '3.000+ spørgsmål · Livstidsadgang', createFn: 'denmark-create-payment-intent', setupFn: 'denmark-setup-account' },
