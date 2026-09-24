@@ -16,7 +16,7 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
   const LOGIN_URL         = '/lux/login.html';
 
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storage: window.clAuthStorage } });
 
   function redirectToLogin() {
     const returnUrl = window.location.pathname + window.location.search;
@@ -48,6 +48,9 @@
       auth.email   = session.user.email;
       auth.userId  = session.user.id;
       auth.session = session;
+
+      // Session is being kept in sessionStorage/memory because localStorage refused it.
+      if (window.clAuthStorage) window.clAuthStorage.showBanner();
 
       // Persist auth markers, but NEVER let a storage failure bounce a validly
       // authenticated user. When localStorage is at quota (e.g. a large

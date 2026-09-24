@@ -418,6 +418,7 @@ applyLang('fr');
 <!-- STRIPE + SUPABASE -->
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/assets/js/cl-auth-storage.js"></script>
 
 <script>
 (function(){
@@ -430,7 +431,7 @@ applyLang('fr');
   var RETURN_URL    = 'https://civiclearn.com/lux/checkout.html';
 
   var stripe = Stripe(STRIPE_PK);
-  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: window.clAuthStorage } });
 
   var PLANS = {
     solo:   { amount: 6900, currency: 'eur', price: '€69', payKey: 'pay_solo', labelKey: 'price_label', metaKey: 'price_meta', featKey: 'feat_solo' },

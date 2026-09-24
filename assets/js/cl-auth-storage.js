@@ -141,6 +141,20 @@
           fix:     'Ryd lageret',
           close:   'Luk'
         },
+        fr: {
+          full:    'Vous êtes connecté, mais le stockage de votre navigateur pour ce site est plein, la connexion ne peut donc pas être enregistrée. Cliquez sur le lien ci-dessous pour le vider, puis reconnectez-vous. Votre progression est conservée sur notre serveur.',
+          blocked: 'Vous êtes connecté, mais votre navigateur empêche ce site d\'enregistrer votre connexion. Cela vient généralement d\'une extension (antivirus, bloqueur de publicité) ou d\'un réglage qui bloque les données des sites. Autorisez civiclearn.com dans l\'extension ou essayez un autre navigateur.',
+          session: 'Le stockage de votre navigateur pour ce site est plein. Vous êtes connecté dans cet onglet, mais votre nouvelle progression risque de ne pas être enregistrée.',
+          fix:     'Vider le stockage',
+          close:   'Fermer'
+        },
+        de: {
+          full:    'Sie sind angemeldet, aber der Browserspeicher für diese Website ist voll, daher kann die Anmeldung nicht gespeichert werden. Klicken Sie auf den Link unten, um ihn zu leeren, und melden Sie sich dann erneut an. Ihr Fortschritt bleibt auf unserem Server erhalten.',
+          blocked: 'Sie sind angemeldet, aber Ihr Browser verhindert, dass diese Website Ihre Anmeldung speichert. Meist liegt das an einer Erweiterung (z. B. Virenschutz oder Werbeblocker) oder an einer Einstellung, die Websitedaten blockiert. Erlauben Sie civiclearn.com in der Erweiterung oder verwenden Sie einen anderen Browser.',
+          session: 'Der Browserspeicher für diese Website ist voll. Sie sind in diesem Tab angemeldet, aber neuer Fortschritt wird möglicherweise nicht gespeichert.',
+          fix:     'Speicher leeren',
+          close:   'Schließen'
+        },
         en: {
           full:    'You are logged in, but your browser\'s storage for this site is full, so the login cannot be saved. Click the link below to clear it, then log in again. Your progress is kept on our server.',
           blocked: 'You are logged in, but your browser is blocking this site from saving your login. This is usually caused by an extension (e.g. antivirus or ad blocker) or a setting that blocks site data. Allow civiclearn.com in the extension, or try another browser.',

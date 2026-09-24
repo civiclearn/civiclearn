@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Connexion — Vivre-Ensemble.lu</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/assets/js/cl-auth-storage.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -574,7 +575,7 @@ en: {
   const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
   const DASHBOARD_URL = '/lux/dashboard/index.html';
 
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: window.clAuthStorage } });
   const params    = new URLSearchParams(location.search);
   const returnUrl = params.get('return') || DASHBOARD_URL;
 
@@ -614,6 +615,25 @@ en: {
   })();
 
   /* ── Helpers ── */
+
+  /* Login succeeded but the browser would not store the session anywhere
+     (see /assets/js/cl-auth-storage.js). Navigating on would bounce straight
+     back here, so explain instead of redirecting. */
+  function showStorageProblem(id) {
+    const cs = window.clAuthStorage, st = cs.status();
+    const el = document.getElementById(id);
+    el.className = 'msg visible error';
+    el.textContent = cs.message(st.reason === 'full' ? 'full' : 'blocked');
+    if (st.reason === 'full') {
+      const a = document.createElement('a');
+      a.href = cs.resetUrl(); a.textContent = cs.message('fix');
+      a.style.cssText = 'display:block;margin-top:8px;font-weight:600';
+      el.appendChild(a);
+    }
+  }
+  function sessionCannotPersist() {
+    return !!(window.clAuthStorage && window.clAuthStorage.status().level === 'memory');
+  }
   function showState(name) {
     document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
     document.getElementById('state-' + name).classList.add('active');
@@ -700,8 +720,8 @@ en: {
         return;
       }
       try { await sb.from('login_history').insert({ email, status: 'success', method: 'password' }); } catch(e) {}
-      localStorage.setItem('cl_auth', 'ok');
-      localStorage.setItem('cl_email', email);
+      try { localStorage.setItem('cl_auth', 'ok'); localStorage.setItem('cl_email', email); } catch (e) {}
+      if (sessionCannotPersist()) { showStorageProblem('login-msg'); setLoading('login-btn', false); return; }
       markRedirect();
       window.location.href = returnUrl;
     } catch (err) { showMsg('login-msg', t('err_generic'), 'error'); setLoading('login-btn', false); }
@@ -773,8 +793,7 @@ en: {
       if (!res.ok || data.error) { msgEl.className = 'msg visible error'; msgEl.textContent = data.error || 'Failed.'; btn.disabled = false; btn.textContent = 'Impersonate'; return; }
       const { error: otpError } = await sb.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' });
       if (otpError) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Session failed: ' + otpError.message; btn.disabled = false; btn.textContent = 'Impersonate'; return; }
-      localStorage.setItem('cl_auth', 'ok');
-      localStorage.setItem('cl_email', data.email);
+      try { localStorage.setItem('cl_auth', 'ok'); localStorage.setItem('cl_email', data.email); } catch (e) {}
       markRedirect();
       window.location.href = returnUrl;
     } catch (err) { msgEl.className = 'msg visible error'; msgEl.textContent = 'Error: ' + err.message; btn.disabled = false; btn.textContent = 'Impersonate'; }
