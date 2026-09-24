@@ -17,6 +17,13 @@
   <script src="/medborgerskab/assets/js/dkpr-auth.js"></script>
 
   <style>
+    /* Date picker radio cards (same as indfødsret) */
+    .exam-date-cards{display:flex;flex-direction:column;gap:8px;padding:16px 0;}
+    .exam-date-card{display:flex;align-items:center;gap:10px;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;}
+    .exam-date-card:has(input:checked){border-color:var(--accent);background:var(--accent-soft);}
+    .exam-date-card input{accent-color:var(--accent);}
+    .exam-date-label{font-size:14px;font-weight:500;}
+
     /* Bundle banner (combo users) */
     .bundle-banner{display:none;background:var(--accent-soft,#f5f3ff);border:1px solid var(--border,#ddd6fe);border-radius:var(--radius,14px);padding:14px 20px;margin:0 0 16px 0;align-items:center;gap:14px;flex-wrap:wrap;}
     .bundle-banner.show{display:flex;}
@@ -56,22 +63,10 @@
       .pd3-code-shown{justify-content:center;}
       .pd3-goto-btn{width:100%;text-align:center;}
     }
-
-    /* Organic Trustpilot review prompt (exposure-triggered, replaces chart row) */
-    .review-card{display:none;background:var(--surface,#fff);border:1px solid var(--border,#e5e7eb);border-left:3px solid var(--accent,#0d7377);border-radius:var(--radius,14px);padding:24px 26px;margin:0 0 20px 0;box-shadow:var(--shadow,0 1px 3px rgba(0,0,0,.06));position:relative;}
-    .review-card.show{display:block;}
-    .review-card-star{font-size:1.6rem;line-height:1;}
-    .review-card h3{margin:10px 0 6px;font-size:1.06rem;color:var(--text-dark,#1f2937);font-weight:700;}
-    .review-card p{margin:0 0 18px;font-size:.9rem;color:var(--text-mid,#6b7280);line-height:1.55;max-width:64ch;}
-    .review-card-actions{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
-    .review-card-btn{background:var(--accent,#0d7377);color:#fff;text-decoration:none;padding:11px 22px;border-radius:8px;font-size:.9rem;font-weight:600;white-space:nowrap;transition:background .15s;}
-    .review-card-btn:hover{background:#0b6265;}
-    .review-card-later{background:none;border:none;cursor:pointer;color:var(--text-mid,#6b7280);font-size:.85rem;font-family:inherit;opacity:.8;padding:6px 4px;}
-    .review-card-later:hover{opacity:1;text-decoration:underline;}
   </style>
 </head>
 
-<body>
+<body class="db-v3">
 
 <button class="menu-toggle" aria-label="Menu">☰</button>
 
@@ -164,9 +159,13 @@
       <!-- ① Stats (5 cards, time-card hidden on mobile) -->
       <div class="db-stats-row anim d1">
         <div class="db-stat-card cd" id="countdownCard">
-          <div class="db-stat-value" id="examCountdown"></div>
-          <div class="db-stat-label" id="examNoDate" data-i18n="countdown_enter_date"></div>
-          <button class="db-stat-label" id="openDateSheet" style="background:none;border:none;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11.5px;font-weight:600;padding:0" data-i18n="countdown_set_date_btn"></button>
+          <div class="hero-ring-slot" id="heroRingSlot"></div>
+          <div class="hero-txt">
+            <div class="db-stat-value" id="examCountdown"></div>
+            <div class="db-stat-label" id="examNoDate" data-i18n="countdown_enter_date"></div>
+            <button class="db-stat-label" id="openDateSheet" style="background:none;border:none;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11.5px;font-weight:600;padding:0" data-i18n="countdown_set_date_btn"></button>
+            <div class="hero-badge" id="heroGaugeBadge"></div>
+          </div>
         </div>
         <div class="db-stat-card ans">
           <div class="db-stat-value" id="tmAnswered">0</div>
@@ -190,7 +189,13 @@
       <div class="date-sheet-overlay" id="dateSheetOverlay"></div>
       <div class="date-sheet" id="dateSheet">
         <h3 data-i18n="countdown_sheet_title">Set your exam date</h3>
-        <input type="date" id="examDateInput">
+        <input type="hidden" id="examDateInput">
+        <div class="exam-date-cards">
+          <label class="exam-date-card">
+            <input type="radio" name="examDate" value="2026-11-25">
+            <span class="exam-date-label">25. november 2026</span>
+          </label>
+        </div>
         <div class="date-sheet-actions">
           <button class="btn secondary" id="sheetCancel" data-i18n="countdown_cancel">Cancel</button>
           <button class="btn" id="sheetSave" data-i18n="countdown_save">Save</button>
@@ -233,8 +238,9 @@
             <span class="chart-mastery-pct" id="chartMasteryPct">0%</span>
             <span class="chart-mastery-sub" id="chartMasterySub">0 / 0</span>
           </div>
-          <div class="polar-wrap">
-            <div class="chart-wrap" style="height:260px"><canvas id="polarChart"></canvas></div>
+          <div class="mastery-split">
+            <div class="mastery-ring" id="masteryRing"></div>
+            <div class="mastery-rows" id="masteryRows"></div>
           </div>
         </div>
         <div class="db-chart-card" id="seqCard">
@@ -252,17 +258,6 @@
               <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 5.5l3 3.5-3 3.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
           </div>
-        </div>
-      </div>
-
-      <!-- Organic Trustpilot review prompt (exposure-triggered, outcome-blind). Replaces the chart row above. -->
-      <div class="review-card" id="reviewCard">
-        <div class="review-card-star">⭐</div>
-        <h3 data-i18n="review_card_title">Share your experience with CivicLearn</h3>
-        <p data-i18n="review_card_text">You’ve been practising on the platform for a while now. We’d love to hear how it’s going — a short, honest review on Trustpilot takes under a minute and helps others preparing for the test.</p>
-        <div class="review-card-actions">
-          <a class="review-card-btn" id="reviewCardBtn" data-i18n="review_card_btn" href="https://www.trustpilot.com/evaluate/civiclearn.com" target="_blank" rel="noopener">Write a review →</a>
-          <button class="review-card-later" id="reviewCardLater" data-i18n="review_card_later" type="button">Maybe later</button>
         </div>
       </div>
 
@@ -312,7 +307,43 @@
 
 <!-- Shared: gauge + study timer -->
 <script src="/medborgerskab/assets/js/gauge-bar.js"></script>
+<script src="/medborgerskab/assets/js/hero-gauge-dkpr.js"></script>
 <script src="/medborgerskab/assets/js/study-timer.js"></script>
+
+<!-- Exam date: official sittings only (same as indfødsret).
+     Defaults to the next sitting when nothing is saved, and mirrors the radio cards
+     into the hidden #examDateInput that dashboard-v2-lu.js reads on save. -->
+<script>
+(function () {
+  var DATES = ["2026-11-25"]; // 2027 dates not published yet — add them here when SIRI announces them
+  function saved() {
+    var raw = localStorage.getItem("civicedge_testDate");
+    if (!raw) return "";
+    try { var v = JSON.parse(raw); return (v && v.date) || (typeof v === "string" ? v : ""); }
+    catch (e) { return raw; }
+  }
+  if (!saved()) {
+    var today = new Date().toISOString().slice(0, 10);
+    var next = DATES.find(function (d) { return d >= today; }) || DATES[DATES.length - 1];
+    localStorage.setItem("civicedge_testDate", JSON.stringify({ date: next, ts: Date.now() }));
+  }
+  document.addEventListener("DOMContentLoaded", function () {
+    var hidden = document.getElementById("examDateInput");
+    var sheet = document.getElementById("dateSheet");
+    var radios = document.querySelectorAll('input[name="examDate"]');
+    radios.forEach(function (r) {
+      r.addEventListener("change", function () { if (r.checked) hidden.value = r.value; });
+    });
+    // when the sheet opens, select the saved date
+    new MutationObserver(function () {
+      if (!sheet.classList.contains("active")) return;
+      var cur = saved();
+      radios.forEach(function (r) { r.checked = r.value === cur; });
+      hidden.value = cur;
+    }).observe(sheet, { attributes: true, attributeFilter: ["class"] });
+  });
+})();
+</script>
 
 <!-- Dashboard logic -->
 <script>
@@ -324,7 +355,7 @@ CivicLearnI18n.onReady(() => {
 </script>
 
 <!-- Dashboard extra (computes + caches gauge, renders radar) -->
-<script src="/medborgerskab/assets/js/dashboard-extra-dkpr.js"></script>
+<script src="/medborgerskab/assets/js/dashboard-extra-dkpr.js?v=3"></script>
 
 <!-- Sequential practice widget -->
 <script src="/medborgerskab/assets/js/dashboard-sequential-dkpr.js"></script>
@@ -435,72 +466,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initBanner();
 })();
 </script>
-<!-- Organic review prompt trigger (exposure-based, outcome-blind) -->
-<script>
-(function(){
-  var CFG = {
-    minActiveDays: 3,
-    minSessions: 5,
-    reviewUrl: 'https://www.trustpilot.com/evaluate/civiclearn.com',
-    statsKey: 'civicedge_stats',
-    doneKey: 'cl_review_prompt_done',
-    snoozeKey: 'cl_review_prompt_snooze_until',
-    snoozeDays: 90,            // explicit "Maybe later" -> long snooze
-    showSnoozeDays: 7          // shown but ignored -> short auto-snooze (chart returns next visit)
-  };
-  function exposure(){
-    try{
-      var raw = localStorage.getItem(CFG.statsKey);
-      if(!raw) return {sessions:0, activeDays:0};
-      var hist = (JSON.parse(raw) || {}).history;
-      if(!Array.isArray(hist)) return {sessions:0, activeDays:0};
-      var days = {};
-      for(var i=0;i<hist.length;i++){
-        var t = hist[i] && hist[i].startedAt;       // exposure only: session timestamp, NOT score/mastery
-        if(t) days[new Date(Number(t)).toDateString()] = 1;
-      }
-      return { sessions: hist.length, activeDays: Object.keys(days).length };
-    }catch(e){ return {sessions:0, activeDays:0}; }
-  }
-  function snoozed(){
-    var until = parseInt(localStorage.getItem(CFG.snoozeKey) || '0', 10);
-    return until && Date.now() < until;
-  }
-  function maybeShow(){
-    if(localStorage.getItem(CFG.doneKey)) return true;
-    if(snoozed()) return true;
-    var ex = exposure();
-    if(ex.activeDays < CFG.minActiveDays || ex.sessions < CFG.minSessions) return false;
-    var card = document.getElementById('reviewCard');
-    if(!card) return true;
-    var row = document.getElementById('insightRow');
-    if(row) row.style.display = 'none';
-    card.classList.add('show');
-    // Auto-snooze on display: an ignored prompt won't take over the chart again until
-    // showSnoozeDays pass. Explicit choices below override this (done=forever, later=90d).
-    localStorage.setItem(CFG.snoozeKey, String(Date.now() + CFG.showSnoozeDays*86400000));
-    var btn = document.getElementById('reviewCardBtn');
-    var later = document.getElementById('reviewCardLater');
-    if(btn) btn.addEventListener('click', function(){
-      localStorage.setItem(CFG.doneKey, String(Date.now()));
-    });
-    if(later) later.addEventListener('click', function(){
-      card.classList.remove('show');
-      if(row) row.style.display = '';
-      localStorage.setItem(CFG.snoozeKey, String(Date.now() + CFG.snoozeDays*86400000));
-    });
-    return true;
-  }
-  function run(){
-    if(maybeShow()) return;
-    var tries = 0, iv = setInterval(function(){
-      if(maybeShow() || ++tries >= 4) clearInterval(iv);
-    }, 1500);
-  }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
-  else run();
-})();
-</script>
-
 </body>
 </html>

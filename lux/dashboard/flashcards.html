@@ -1,229 +1,153 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="manifest" href="/lux/manifest.json">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title data-i18n="title_flashcards">Flashcards</title>
+  <link rel="manifest" href="/lux/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="mobile-web-app-capable" content="yes">
 
-  <!-- CORE STYLES -->
-  <link rel="stylesheet" href="/assets/css/dashboard-core-lt.css">
-  <link rel="stylesheet" href="/assets/css/flashcards.css">
-    <!-- Flag size override -->
-  <style>
-    .brand svg {
-      width: 30px !important;
-      height: 30px !important;
-    }
-  </style>
-    <script>
-  document.documentElement.classList.add("i18n-hidden");
-</script>
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
- <script src="/lux/assets/js/lux-auth.js"></script>
+  <link rel="stylesheet" href="/lux/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/lux/assets/css/test-v2.css">
+  <link rel="stylesheet" href="/lux/assets/css/flashcards-v2.css">
+
+  <script>document.documentElement.classList.add("i18n-hidden");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/lux/assets/js/lux-auth.js?v=2"></script>
 </head>
 
 <body class="test-page">
 
-  <!-- MOBILE MENU TOGGLE -->
-  <button class="menu-toggle" aria-label="Menu">☰</button>
+<button class="menu-toggle" aria-label="Menu">☰</button>
 
-  <div class="wrap">
-
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-<div class="brand">
-  CivicLearn®
-  <svg
-    viewBox="0 0 12000 6000"
-    width="30"
-    height="30"
-    style="margin-left:6px;vertical-align:middle;border-radius:3px;overflow:hidden"
-    aria-label="Luxembourg"
-  >
-    <defs>
-      <clipPath id="clip-lu">
-        <rect width="12000" height="6000" />
-      </clipPath>
-    </defs>
-
-    <g clip-path="url(#clip-lu)">
-      <!-- Top: Red -->
-      <rect x="0" y="0" width="12000" height="2000" fill="#ED2939"/>
-
-      <!-- Middle: White -->
-      <rect x="0" y="2000" width="12000" height="2000" fill="#FFFFFF"/>
-
-      <!-- Bottom: Light Blue -->
-      <rect x="0" y="4000" width="12000" height="2000" fill="#00A1DE"/>
-    </g>
-  </svg>
-</div>
-
-
-
-       <nav class="nav">
-  <a href="index.html"  data-i18n="nav_dashboard"></a>
-  <a href="simulation.html" data-i18n="nav_simulation"></a>
-  <a href="quick.html" data-i18n="nav_quick"></a>
-  <a href="topics.html" data-i18n="nav_topics"></a>
-  <a href="traps.html" data-i18n="nav_traps"></a>
-  <a href="flashcards.html" class="sub active" data-i18n="nav_flashcards"></a>
-  <a href="reference.html"  data-i18n="nav_reference_texts"></a>
-  <a href="history.html" data-i18n="nav_history"></a>
-  <a href="my-list.html" data-i18n="nav_my_list"></a>
-  <a href="help.html" data-i18n="nav_help"></a>
-  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
-</nav>
-
-<div class="spacer"></div>
-<div class="profile">
-
-  <div class="global-controls">
-
-  
-    <div class="lang-switch">
-      <button data-lang="fr">FR</button>
-      <button data-lang="de">DE</button>
-      <button data-lang="en">EN</button>
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Luxembourg">
+        <rect x="0" y="0" width="640" height="134" fill="#ED2939"/>
+        <rect x="0" y="133" width="640" height="134" fill="#FFFFFF"/>
+        <rect x="0" y="266" width="640" height="134" fill="#00A1DE"/>
+      </svg>
     </div>
+    <!-- Sidebar gauge -->
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Score estimé</span>
+        <span class="sidebar-gauge-score" id="clGaugeScore">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugePass"></div>
+      </div>
+      <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
+    </div>
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav_dashboard">Tableau de bord</a>
+      <a href="simulation.html" data-i18n="nav_simulation">Simulation du test</a>
+      <a href="quick.html" data-i18n="nav_quick">Test rapide</a>
+      <a href="topics.html" data-i18n="nav_topics">Tests par thème</a>
+      <a href="traps.html" data-i18n="nav_traps">Pièges fréquents</a>
+      <a href="flashcards.html" class="active" data-i18n="nav_flashcards">Flashcards</a>
+      <a href="reference.html" data-i18n="nav_reference_texts">Textes de référence</a>
+      <div class="nav-sep"></div>
+      <a href="history.html" data-i18n="nav_history">Historique</a>
+      <a href="my-list.html" data-i18n="nav_my_list">Ma liste</a>
+      <a href="help.html" data-i18n="nav_help">Aide & contact</a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink">Se déconnecter</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="global-controls">
+      <div class="lang-switch">
+        <button data-lang="fr">FR</button>
+        <button data-lang="de">DE</button>
+        <button data-lang="en">EN</button>
+      </div>
+      <button id="readingToggle" class="reading-btn tool" data-i18n="reading_tooltip" data-i18n-attr="title" aria-label="Reading assist">
+        <svg class="reading-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 9v6h4l5 5V4L7 9H3z"/>
+          <path d="M16.5 12l4.5 4.5-1.5 1.5L15 13.5l-4.5 4.5-1.5-1.5L13.5 12 9 7.5 10.5 6l4.5 4.5 4.5-4.5 1.5 1.5L16.5 12z"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
 
-  </div>
+  <div class="overlay" id="menuOverlay"></div>
 
+  <main class="flashcards-layout left">
+    <header class="ce-header"><h1 data-i18n="title_flashcards">Flashcards</h1></header>
+    <section id="flashcardsApp">
+      <div id="topicsWrapper" class="fc-topics-wrapper">
+        <p class="muted" data-i18n="flashcards_select_topics"></p>
+        <div class="fc-segmented">
+          <button id="fcAllTopics" class="active" data-i18n="flashcards_all_topics"></button>
+          <button id="fcWeakTopics" data-i18n="flashcards_focus_weak"></button>
+        </div>
+        <div id="topicContainer" class="fc-topic-toggles"></div>
+        <button id="startBtn" class="btn fc-btn-primary" data-i18n="flashcards_start"></button>
+      </div>
+      <div class="flashcard" id="card">
+        <div class="card-inner">
+          <div class="card-front" id="qText"></div>
+          <div class="card-back" id="aText"></div>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="flipBtn" data-i18n="flashcards_flip"></button>
+        <button id="knownBtn" class="primary" data-i18n="flashcards_known"></button>
+        <button id="againBtn" data-i18n="flashcards_again"></button>
+      </div>
+      <div class="controls-row">
+        <button id="fcPrev" class="fc-nav"><svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" stroke="var(--accent)" stroke-width="2" fill="none"/><path d="M11 6 L7 10 L11 14" stroke="var(--accent)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button id="fcNext" class="fc-nav"><svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" stroke="var(--accent)" stroke-width="2" fill="none"/><path d="M9 6 L13 10 L9 14" stroke="var(--accent)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+      <div id="status" class="fc-status"></div>
+    </section>
+  </main>
 </div>
 
-</aside>
-
-    <!-- OVERLAY -->
-    <div class="overlay" id="menuOverlay"></div>
-
-    <!-- MAIN CONTENT -->
-    <main class="flashcards-layout left">
-
-      <header class="ce-header ce-header-top">
-        <h1 data-i18n="title_flashcards">Flashcards</h1>
-      </header>
-
-      <section id="flashcardsApp">
-
-        <!-- TOPIC SELECTOR -->
-        <div id="topicsWrapper" class="fc-topics-wrapper">
-          <p class="muted" data-i18n="flashcards_select_topics"></p>
-<div class="fc-segmented">
-  <button id="fcAllTopics" class="active" data-i18n="flashcards_all_topics"></button>
-  <button id="fcWeakTopics" data-i18n="flashcards_focus_weak"></button>
-</div>
-
-
-          <div id="topicContainer" class="fc-topic-toggles"></div>
-
-          <button id="startBtn"
-                  class="btn fc-btn-primary"
-                  data-i18n="flashcards_start">
-          </button>
-        </div>
-
-        <!-- CARD -->
-        <div class="flashcard" id="card">
-          <div class="card-inner">
-            <div class="card-front" id="qText"></div>
-            <div class="card-back" id="aText"></div>
-          </div>
-        </div>
-
-        <!-- CONTROLS -->
-        <div class="controls">
-          <button id="flipBtn" data-i18n="flashcards_flip"></button>
-          <button id="knownBtn" class="primary" data-i18n="flashcards_known"></button>
-          <button id="againBtn" data-i18n="flashcards_again"></button>
-        </div>
-
-        <!-- NAVIGATION -->
-        <div class="controls-row">
-       <button id="fcPrev" class="fc-nav">
-  <svg width="20" height="20" viewBox="0 0 20 20">
-    <circle cx="10" cy="10" r="9" stroke="#6A38FF" stroke-width="2" fill="none"/>
-    <path d="M11 6 L7 10 L11 14" stroke="#6A38FF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-</button>
-
-<button id="fcNext" class="fc-nav">
-  <svg width="20" height="20" viewBox="0 0 20 20">
-    <circle cx="10" cy="10" r="9" stroke="#6A38FF" stroke-width="2" fill="none"/>
-    <path d="M9 6 L13 10 L9 14" stroke="#6A38FF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-</button>
-
-        </div>
-
-        <!-- STATUS -->
-        <div id="status" class="fc-status"></div>
-
-      </section>
-
-    </main>
-  </div>
-
-<!-- === CONFIG + I18N === -->
+<!-- Config + i18n (Lux files live at the CivicLearn root) -->
 <script src="/assets/js/lang-bootstrap-lu.js"></script>
 <script src="/assets/js/config-lu.js?v=2"></script>
 <script src="/assets/js/i18n.js"></script>
-
+<script>CivicLearnI18n.init();</script>
+<script src="/assets/js/reading.js"></script>
+<script src="/assets/js/sync.js"></script>
 <script>
-  // Start i18n
-  CivicLearnI18n.init();
+// Flashcards logic (unchanged Lux file) loads once translations are ready
+CivicLearnI18n.onReady(() => {
+  const s = document.createElement("script");
+  s.src = "/assets/js/flashcards-lu.js";
+  document.body.appendChild(s);
+});
 </script>
 
+<!-- Mobile menu + lang switch -->
 <script>
-  // Load flashcards logic ONLY when translations are ready
-  CivicLearnI18n.onReady(() => {
-    const s = document.createElement("script");
-    s.src = "/assets/js/flashcards-lu.js";
-    document.body.appendChild(s);
-  });
-</script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
 
-<!-- === MOBILE MENU TOGGLE === -->
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const toggle = document.querySelector(".menu-toggle");
-    const overlay = document.getElementById("menuOverlay");
-
-    if (toggle && overlay) {
-      toggle.addEventListener("click", () => {
-        document.body.classList.toggle("menu-open");
-      });
-      overlay.addEventListener("click", () => {
-        document.body.classList.remove("menu-open");
-      });
-    }
-  });
-</script>
-<script>
-  (function () {
-    const current = window.CIVICEDGE_LANG;
-
-    document.querySelectorAll(".lang-switch button").forEach(btn => {
-      const lang = btn.dataset.lang;
-
-      // Highlight active language
-      if (lang === current) {
-        btn.classList.add("active");
-      }
-
-      btn.addEventListener("click", () => {
-        if (lang === current) return;
-        localStorage.setItem("civicedge_lang", lang);
-        location.reload();
-      });
+  const current = window.CIVICEDGE_LANG;
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    if (btn.dataset.lang === current) btn.classList.add("active");
+    btn.addEventListener("click", () => {
+      if (btn.dataset.lang === current) return;
+      localStorage.setItem("civicedge_lang", btn.dataset.lang);
+      location.reload();
     });
-  })();
+  });
+});
 </script>
+<script src="/lux/assets/js/gauge-bar.js"></script>
+<script src="/lux/assets/js/study-timer.js"></script>
+<script src="/assets/js/maintenance-bar.js"></script>
 <script src="/assets/js/signout.js"></script>
 </body>
 </html>

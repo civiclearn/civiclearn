@@ -660,6 +660,68 @@
       }
     }
 
+
+    /* ══════════════════════════════════════════════════════════
+       HERO — wider image column (15 Sep 2026)
+       The devices were rendering at 453px inside a 1100px hero, and
+       19% of that was the image's own transparent margin, so only
+       ~368px was actual device. Cropped image + these rules take it
+       to ~650px at 1440. Scoped above 960px so the existing mobile
+       stacking is untouched.
+       ══════════════════════════════════════════════════════════ */
+
+    @media (min-width: 961px) {
+      .hero {
+        max-width: 1240px;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+        gap: 2.25rem;
+      }
+    }
+
+    /* Let the devices run a little past the container on wide screens.
+       Only above 1340px, where there is room for it without overflow. */
+    @media (min-width: 1340px) {
+      .hero-right {
+        width: calc(100% + 4vw);
+      }
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       MOBILE HEADER OVERFLOW FIX (15 Sep 2026)
+       .header-left + .header-right needed ~443px, so the page
+       scrolled sideways at 360, 390 and 430px. The brand now
+       shrinks, and below 560px the secondary "J'ai déjà un accès"
+       is dropped from the header — the same action is a button in
+       the hero just below it.
+       ══════════════════════════════════════════════════════════ */
+
+    @media (max-width: 720px) {
+      .header-inner { gap: 0.6rem; }
+      .header-left { min-width: 0; }
+      .brand-main { min-width: 0; }
+      .brand-powered { display: none; }
+      .brand-title {
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .header-right { flex: 0 0 auto; }
+    }
+
+    @media (max-width: 560px) {
+      .header-right .btn-ghost { display: none; }
+      .btn-small-purple { padding: 0.45rem 0.8rem; }
+      /* wrap to two lines rather than truncate the brand */
+      .brand-title {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        font-size: 0.9rem;
+        line-height: 1.18;
+      }
+    }
+
     @media (max-width: 720px) {
       .header-inner,
       .hero,

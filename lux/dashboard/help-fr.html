@@ -1,554 +1,435 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title_help">Aide & contact</title>
   <link rel="manifest" href="/lux/manifest.json">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title data-i18n="title_help">Help & Contact</title>
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="mobile-web-app-capable" content="yes">
 
-  <link rel="stylesheet" href="/assets/css/dashboard-core-lt.css">
-
+  <link rel="stylesheet" href="/lux/assets/css/civic-v2.css">
   <style>
-    .brand svg {
-      width: 30px !important;
-      height: 30px !important;
-    }
-
-   button,
-input,
-textarea,
-.help-btn {
-  font-family: "Space Grotesk", system-ui, sans-serif !important;
-}
-    main {
-  padding: 100px 32px 40px; /* ✅ top padding leaves room for hamburger */
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  max-width: 1200px;
-  margin: auto;
-}
-    h1{font-size:24px;margin:0 0 4px}
-    .muted{color:var(--muted);font-size:15px;margin-bottom:20px}
-
-    /* FAQ Accordion */
-    #faq{display:grid;gap:16px}
-    @media(min-width:900px){
-      #faq{grid-template-columns:1fr 1fr;align-items:start}
-    }
-    .faq-item{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-    .faq-question{padding:16px 20px;cursor:pointer;font-weight:600;display:flex;justify-content:space-between;align-items:center}
-    .faq-question:hover{background:rgba(0,0,0,.03)}
-    .faq-answer{max-height:0;overflow:hidden;padding:0 20px;transition:all .3s ease;color:var(--muted);font-size:15px}
-    .faq-item.active .faq-answer{max-height:none;padding:16px 20px}
-    .faq-item.active .faq-question{color:var(--brand)}
-
-    /* Contact reveal */
-    #contactWrapper{overflow:hidden;max-height:0;transition:max-height .5s ease,opacity .5s ease;opacity:0}
-    #contactWrapper.visible{max-height:800px;opacity:1;margin-top:10px}
-
-    form{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
-      padding:24px;display:flex;flex-direction:column;gap:14px}
-    input,textarea{font-family:inherit;font-size:15px;padding:12px 14px;border:1px solid var(--line);
-      border-radius:10px;resize:none;width:100%;background:var(--bg);color:var(--ink)}
-    button{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;
-      border:none;padding:12px 20px;font-weight:600;border-radius:10px;cursor:pointer}
-    button:hover{opacity:.9}
-    .contactBtn{margin-top:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
-      color:#fff;padding:10px 16px;border:none;border-radius:10px;font-weight:600;cursor:pointer}
-	  
-	  .faq-item:last-of-type {
-  background: linear-gradient(
-    135deg,
-    rgba(213, 43, 30, 0.06),
-    rgba(213, 43, 30, 0.03)
-  );
-  border: 1px solid rgba(213, 43, 30, 0.12);
-}
-
+    .help-container { max-width: 760px; }
+    .help-section { margin-bottom: 28px; }
+    .help-section h2 { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; overflow: hidden; }
+    .faq-q { padding: 14px 18px; cursor: pointer; font-size: 14px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .faq-q:hover { background: var(--accent-soft); }
+    .faq-arrow { font-size: 12px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
+    .faq-item.open .faq-arrow { transform: rotate(90deg); }
+    .faq-a { display: none; padding: 0 18px 14px; font-size: 13px; color: var(--text-mid); line-height: 1.6; }
+    .faq-a ul { padding-left: 18px; margin: 6px 0; }
+    .faq-a li { margin: 3px 0; }
+    .faq-item.open .faq-a { display: block; }
+    .faq-item.contact-cta { background: var(--accent-soft); border-color: transparent; }
+    .contact-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+    .contact-form label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
+    .contact-form input, .contact-form textarea { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font); font-size: 14px; margin-bottom: 14px; background: var(--surface); color: var(--text); }
+    .contact-form input:focus, .contact-form textarea:focus { outline: none; border-color: var(--accent); }
+    .contact-form textarea { min-height: 100px; resize: vertical; }
+    .contact-success { text-align: center; padding: 20px 0; }
+    .contact-success h3 { font-size: 18px; margin-bottom: 4px; }
+    .contact-success p { color: var(--text-muted); font-size: 13px; }
+    .help-reset { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); }
+    .reset-btn { padding: 8px 20px; border-radius: var(--radius-sm); font-family: var(--font); font-size: 13px; font-weight: 600; background: var(--wrong-bg); color: #991b1b; border: 1px solid #fecaca; cursor: pointer; transition: all 0.15s; }
+    .reset-btn:hover { background: #fecaca; }
+    .btn.small { padding: 8px 18px; font-size: 13px; }
+    #wonderpush-subscription-switch { margin-top: 6px; }
   </style>
-      <script>
-  document.documentElement.classList.add("i18n-hidden");
-</script>
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
- <script src="/lux/assets/js/lux-auth.js?v=2"></script>
 
+  <script>document.documentElement.classList.add("i18n-hidden");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/lux/assets/js/lux-auth.js?v=2"></script>
 </head>
 
-<body class="test-page">
+<body>
 
 <button class="menu-toggle" aria-label="Menu">☰</button>
 
 <div class="wrap">
-
-  <!-- SIDEBAR -->
   <aside class="sidebar">
-<div class="brand">
-  CivicLearn®
-  <svg
-    viewBox="0 0 12000 6000"
-    width="30"
-    height="30"
-    style="margin-left:6px;vertical-align:middle;border-radius:3px;overflow:hidden"
-    aria-label="Luxembourg"
-  >
-    <defs>
-      <clipPath id="clip-lu">
-        <rect width="12000" height="6000" />
-      </clipPath>
-    </defs>
-
-    <g clip-path="url(#clip-lu)">
-      <!-- Top: Red -->
-      <rect x="0" y="0" width="12000" height="2000" fill="#ED2939"/>
-
-      <!-- Middle: White -->
-      <rect x="0" y="2000" width="12000" height="2000" fill="#FFFFFF"/>
-
-      <!-- Bottom: Light Blue -->
-      <rect x="0" y="4000" width="12000" height="2000" fill="#00A1DE"/>
-    </g>
-  </svg>
-</div>
-
-
-
-       <nav class="nav">
-  <a href="index.html"  data-i18n="nav_dashboard"></a>
-  <a href="simulation.html" data-i18n="nav_simulation"></a>
-  <a href="quick.html" data-i18n="nav_quick"></a>
-  <a href="topics.html" data-i18n="nav_topics"></a>
-  <a href="traps.html" data-i18n="nav_traps"></a>
-  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
-  <a href="reference.html"  data-i18n="nav_reference_texts"></a>
-  <a href="history.html" data-i18n="nav_history"></a>
-  <a href="my-list.html" data-i18n="nav_my_list"></a>
-  <a href="help.html" class="sub active" data-i18n="nav_help"></a>
-  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
-</nav>
-
-<div class="spacer"></div>
-<div class="profile">
-
-  <div class="global-controls">
-
-  
-    <div class="lang-switch">
-      <button data-lang="fr">FR</button>
-      <button data-lang="de">DE</button>
-      <button data-lang="en">EN</button>
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Luxembourg">
+        <rect x="0" y="0" width="640" height="134" fill="#ED2939"/>
+        <rect x="0" y="133" width="640" height="134" fill="#FFFFFF"/>
+        <rect x="0" y="266" width="640" height="134" fill="#00A1DE"/>
+      </svg>
     </div>
+    <!-- Sidebar gauge -->
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Score estimé</span>
+        <span class="sidebar-gauge-score" id="clGaugeScore">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugePass"></div>
+      </div>
+      <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
+    </div>
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav_dashboard">Tableau de bord</a>
+      <a href="simulation.html" data-i18n="nav_simulation">Simulation du test</a>
+      <a href="quick.html" data-i18n="nav_quick">Test rapide</a>
+      <a href="topics.html" data-i18n="nav_topics">Tests par thème</a>
+      <a href="traps.html" data-i18n="nav_traps">Pièges fréquents</a>
+      <a href="flashcards.html" data-i18n="nav_flashcards">Flashcards</a>
+      <a href="reference.html" data-i18n="nav_reference_texts">Textes de référence</a>
+      <div class="nav-sep"></div>
+      <a href="history.html" data-i18n="nav_history">Historique</a>
+      <a href="my-list.html" data-i18n="nav_my_list">Ma liste</a>
+      <a href="help.html" class="active" data-i18n="nav_help">Aide & contact</a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink">Se déconnecter</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="global-controls">
+      <div class="lang-switch">
+        <button data-lang="fr">FR</button>
+        <button data-lang="de">DE</button>
+        <button data-lang="en">EN</button>
+      </div>
+      <button id="readingToggle" class="reading-btn tool" data-i18n="reading_tooltip" data-i18n-attr="title" aria-label="Reading assist">
+        <svg class="reading-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 9v6h4l5 5V4L7 9H3z"/>
+          <path d="M16.5 12l4.5 4.5-1.5 1.5L15 13.5l-4.5 4.5-1.5-1.5L13.5 12 9 7.5 10.5 6l4.5 4.5 4.5-4.5 1.5 1.5L16.5 12z"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
 
-  </div>
-
-</div>
-
-</aside>
-
-  <!-- OVERLAY -->
   <div class="overlay" id="menuOverlay"></div>
 
-  <!-- MAIN -->
-  <main class="main">
-
-     <header class="ce-header ce-header-top">
-      <h1 data-i18n="title_help">Help & Contact</h1>
-      <div class="muted" data-i18n="help_subtitle">Frequently asked questions</div>
+  <main>
+    <header class="ce-header">
+      <h1 data-i18n="title_help">Aide & contact</h1>
+      <div class="muted" data-i18n="help_subtitle">Questions fréquentes</div>
     </header>
 
-<!-- FAQ SECTION (UK-specific content) -->
-<!-- FAQ SECTION (Luxembourg – Test Vivre-Ensemble, FR) -->
-<section id="faq">
-
-  <div class="faq-item">
-    <div class="faq-question">Comment réinitialiser complètement ma préparation&nbsp;?</div>
-    <div class="faq-answer">
-      Cliquez sur le bouton ci-dessous pour repartir de zéro.
-      Cela supprimera toutes vos statistiques et votre progression, tout en conservant vos paramètres personnels.<br><br>
-      <button id="resetAllFull" class="contactBtn">🔄 Réinitialiser ma progression</button>
-    </div>
-  </div>
-
-<div class="faq-item">
-  <div class="faq-question">Comment fonctionnent les rappels quotidiens&nbsp;?</div>
-  <div class="faq-answer">
-
-    Les rappels quotidiens sont de courtes notifications qui vous aident à maintenir
-    un rythme d’entraînement régulier.
-    Une fois activés, vous recevez une notification lorsque votre test quotidien est prêt.<br><br>
-
-    <strong>Utilisateurs iPhone / iPad&nbsp;:</strong>
-    pour recevoir les rappels quotidiens, vous devez utiliser Safari,
-    appuyer sur l’icône Partager, choisir <em>«&nbsp;Ajouter à l’écran d’accueil&nbsp;»</em>,
-    puis ouvrir CivicLearn depuis l’écran d’accueil avant d’activer l’interrupteur ci-dessous.<br><br>
-	<p style="margin-bottom:8px;">
-  Activez les rappels quotidiens ci-dessous :
-</p>
-
-    <!-- WonderPush subscription switch -->
-    <div id="wonderpush-subscription-switch"></div>
-
-  </div>
-</div>
-
-  <div class="faq-item">
-    <div class="faq-question">Les questions du test sont-elles officielles&nbsp;?</div>
-    <div class="faq-answer">
-      Non. Les questions proposées sur CivicLearn sont des <strong>simulations pédagogiques</strong>
-      conçues pour refléter la structure, le niveau de difficulté et les thèmes clés
-      du test luxembourgeois <em>Vivre-Ensemble</em>.
-      <br><br>
-      Il ne s’agit <strong>pas de questions officielles</strong> et elles ne proviennent
-      d’aucune base de données gouvernementale. Les questions officielles ne sont pas
-      rendues publiques par les autorités luxembourgeoises.
-    </div>
-  </div>
-  
-<div class="faq-item">
-  <div class="faq-question">
-    Que représentent les questions affichées sur le tableau de bord ?
-  </div>
-  <div class="faq-answer">
-    Les questions affichées sur le tableau de bord font partie d’un <strong>mode d’entraînement séquentiel</strong>
-    qui regroupe <strong>l’ensemble des questions du questionnaire luxembourgeois</strong>, présentées
-    une par une dans un ordre fixe.
-    <br><br>
-    Vous pouvez <strong>passer à la question suivante ou revenir à la précédente</strong>, ce qui permet
-    de sauter certaines questions et d’y revenir plus tard. C’est le seul mode d’entraînement
-    dans lequel les questions peuvent être ignorées temporairement.
-    <br><br>
-    Votre progression est <strong>enregistrée automatiquement</strong> : si vous quittez la page ou la
-    rechargez, le tableau de bord s’ouvrira sur <strong>la dernière question consultée</strong>.
-  </div>
-</div>
-
-
-<div class="faq-item">
-  <div class="faq-question">À quoi sert la fonctionnalité « Ma liste »&nbsp;?</div>
-  <div class="faq-answer">
-    Sur chaque question, une <strong>petite étoile</strong> permet d’ajouter la question à votre liste personnelle de révision.
-    En cliquant sur cette étoile, la question est enregistrée dans <strong>« Ma liste »</strong>.
-    <br><br>
-    Cette fonctionnalité vous permet de <strong>mettre de côté les questions importantes ou difficiles</strong>
-    afin de les revoir plus tard, à votre rythme, et de cibler plus efficacement vos révisions.
-  </div>
-</div>
-
-  <div class="faq-item">
-    <div class="faq-question">Quelle est la différence entre les modes de test&nbsp;?</div>
-    <div class="faq-answer">
-      CivicLearn propose plusieurs modes d’entraînement adaptés à différents besoins&nbsp;:
-      <ul>
-        <li><strong>Simulation d’examen&nbsp;:</strong> Reproduit le format officiel du test (plusieurs questions, chronomètre, résultats à la fin).</li>
-        <li><strong>Test rapide&nbsp;:</strong> 5 questions aléatoires, sans limite de temps, correction immédiate.</li>
-        <li><strong>Test par thème&nbsp;:</strong> Vous choisissez un ou plusieurs thèmes.
-          Ce mode est <em>adaptatif</em>&nbsp;: les questions se répètent jusqu’à ce qu’elles soient toutes maîtrisées.
-        </li>
-        <li><strong>Pièges fréquents&nbsp;:</strong> Entraînement ciblé sur les erreurs les plus courantes, sans chronomètre.</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="faq-item">
-    <div class="faq-question">Comment fonctionne le mode progressif&nbsp;?</div>
-    <div class="faq-answer">
-      Le mode progressif ne s’arrête pas après un nombre fixe de questions.
-      Les questions mal répondues sont automatiquement reposées jusqu’à ce qu’elles soient toutes maîtrisées.
-      Lorsqu’il n’en reste plus, le message suivant s’affiche&nbsp;:
-      <strong>«&nbsp;Tout est maîtrisé&nbsp;»</strong>.
-    </div>
-  </div>
-
-  <div class="faq-item">
-    <div class="faq-question">Pourquoi certains tests affichent-ils les boutons «&nbsp;Recommencer&nbsp;» ou «&nbsp;Revoir les erreurs&nbsp;»&nbsp;?</div>
-    <div class="faq-answer">
-      Ces boutons apparaissent uniquement dans les tests <strong>non progressifs</strong>
-      (comme la simulation).
-      Le test se termine une fois toutes les questions répondues, puis vous pouvez revoir vos erreurs
-      ou recommencer une nouvelle tentative.
-    </div>
-  </div>
-
-  <div class="faq-item">
-    <div class="faq-question">Quel mode utiliser pour se préparer efficacement&nbsp;?</div>
-    <div class="faq-answer">
-      Pour une préparation complète&nbsp;:
-      <ul>
-        <li>Commencez par le <strong>Test par thème</strong> afin de consolider vos connaissances par thème.</li>
-        <li>Utilisez le <strong>Test rapide</strong> pour des révisions quotidiennes légères.</li>
-        <li>Terminez par une <strong>Simulation d’examen</strong> pour évaluer votre niveau dans des conditions proches du réel.</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="faq-item">
-    <div class="faq-question">Pourquoi la voix du mode «&nbsp;Assistance à la lecture&nbsp;» semble-t-elle étrangère&nbsp;?</div>
-    <div class="faq-answer">
-      CivicLearn utilise le système de <strong>synthèse vocale</strong> intégré à votre navigateur
-      pour lire les questions à voix haute.
-      <br><br>
-      Si votre appareil ne dispose pas d’une voix de bonne qualité pour la langue sélectionnée
-      (français, allemand ou luxembourgeois),
-      le navigateur peut utiliser une voix générique ou avec un accent différent.
-      <br><br>
-      Pour améliorer la prononciation, installez des voix supplémentaires dans les paramètres
-      d’accessibilité ou de langue de votre appareil, puis rechargez la page.
-    </div>
-  </div>
-
-<div class="faq-item">
-  <div class="faq-question">Comment est notée la simulation du test Vivre-Ensemble&nbsp;?</div>
-  <div class="faq-answer">
-    La simulation CivicLearn <strong>reproduit fidèlement le format officiel du test luxembourgeois Vivre-Ensemble</strong>.
-    <br><br>
-    Chaque simulation comporte <strong>40 questions</strong>, réparties exactement comme lors du test officiel&nbsp;:
-    <ul>
-      <li><strong>10 questions</strong> sur l’histoire du Luxembourg</li>
-      <li><strong>10 questions</strong> sur les droits fondamentaux</li>
-      <li><strong>20 questions</strong> sur les institutions</li>
-    </ul>
-    <br>
-    Pour réussir, vous devez obtenir <strong>au moins 28 réponses correctes sur 40</strong>.
-    <br><br>
-    Vous disposez d’<strong>une heure</strong> pour répondre à l’ensemble des questions.
-    Cette limite de temps est appliquée afin de <strong>reproduire les conditions réelles du test officiel</strong>.
-    <br><br>
-    Toutes les questions ont le même poids&nbsp;: il n’y a <strong>ni pénalité pour les mauvaises réponses</strong>,
-    ni obligation de réussir un thème spécifique à 100&nbsp;%.
-  </div>
-</div>
-
-  <div class="faq-item">
-    <div class="faq-question">Qu’est-ce que la section «&nbsp;Pièges fréquents&nbsp;»&nbsp;?</div>
-    <div class="faq-answer">
-      Cette section regroupe les questions auxquelles les utilisateurs répondent le plus souvent incorrectement.
-      Elle vous aide à cibler vos points faibles et à vous préparer plus efficacement
-      avant de tenter une simulation complète.
-    </div>
-  </div>
-
-  <div class="faq-item">
-    <div class="faq-question">Puis-je utiliser CivicLearn sur mon téléphone&nbsp;?</div>
-    <div class="faq-answer">
-      Oui. CivicLearn est une application web optimisée pour les ordinateurs, tablettes et smartphones.
-      Vous pouvez l’ajouter à votre écran d’accueil pour un accès rapide.
-    </div>
-  </div>
-
-<div class="faq-item">
-    <div class="faq-question">Ma progression est-elle enregistrée automatiquement&nbsp;?</div>
-    <div class="faq-answer">
-      Oui. Vos résultats et statistiques sont enregistrés automatiquement et
-      synchronisés dans le cloud. Vous pouvez poursuivre votre entraînement
-      sur un autre appareil en vous connectant simplement avec la même adresse e-mail.
-    </div>
-</div>
-
-  <div class="faq-item">
-    <div class="faq-question">Puis-je étudier hors ligne&nbsp;?</div>
-    <div class="faq-answer">
-      Oui. Une fois les pages chargées, la plupart des fonctionnalités
-      (tests, cartes mémoire, guide)
-      restent accessibles sans connexion Internet,
-      à l’exception de l’envoi du formulaire de contact.
-    </div>
-  </div>
-
-  <div class="faq-item">
-    <div class="faq-question">Comment fonctionne l’accès Premium&nbsp;?</div>
-    <div class="faq-answer">
-      L’accès Premium est un achat unique, sans limite de durée.
-      Une fois le paiement confirmé par <strong>Stripe</strong>, votre compte est activé immédiatement
-      et vous bénéficiez d’un accès à vie, sans renouvellement automatique.
-    </div>
-  </div>
-
-  <div class="faq-item">
-    <div class="faq-question">Puis-je obtenir un reçu&nbsp;?</div>
-    <div class="faq-answer">
-      Les paiements sont traités par <strong>Stripe</strong>,
-      qui vous envoie automatiquement un e-mail de confirmation après l’achat.
-      Cet e-mail fait office de reçu officiel&nbsp;; nous n’émettons pas de factures PDF séparées.
-    </div>
-  </div>
-
-<div class="faq-item">
-    <div class="faq-question">Puis-je utiliser mon compte sur plusieurs appareils&nbsp;?</div>
-    <div class="faq-answer">
-      Oui. Votre progression, votre historique et vos questions sauvegardées
-      sont synchronisés automatiquement entre tous vos appareils.
-      Connectez-vous simplement avec la même adresse e-mail et vos données
-      seront disponibles immédiatement.
-    </div>
-</div>
-
-  <div class="faq-item">
-    <div class="faq-question">Comment signaler une erreur ou une faute&nbsp;?</div>
-    <div class="faq-answer">
-      Ouvrez le formulaire de contact ci-dessous et précisez la question concernée.
-      Notre équipe examinera votre signalement et mettra à jour la base de données si nécessaire.
-    </div>
-  </div>
-
-  <!-- Contact button -->
-  <div class="faq-item">
-    <div class="faq-question" data-i18n="contact_open_form"></div>
-    <div class="faq-answer">
-      <button id="revealContact" class="contactBtn" data-i18n="contact_open_form"></button>
-    </div>
-  </div>
-
-</section>
-
-<!-- CONTACT FORM -->
-<section id="contactWrapper" class="hidden-section">
-
-  <form id="contactForm">
-
-    <h2 data-i18n="contact_title"></h2>
-    <p class="muted" data-i18n="contact_subtitle"></p>
-
-    <label data-i18n="contact_name_label"></label>
-    <input type="text" name="name" required />
-
-    <label data-i18n="contact_email_label"></label>
-    <input type="email" name="_replyto" required />
-
-    <label data-i18n="contact_message_label"></label>
-    <textarea name="message" rows="5" required></textarea>
-
-    <input type="hidden" name="_subject" value="Message de CivicLearn">
-    <button type="submit" data-i18n="contact_submit_btn"></button>
-  </form>
-
-</section>
-
-
-
-  </main>
-
-</div>
-<script src="/assets/js/lang-bootstrap-lu.js"></script>
-<script src="/assets/js/config-lu.js"></script>
-<script src="/assets/js/i18n.js"></script>
-<script>
-  CivicLearnI18n.init();
-</script>
-<script>
-  // FAQ toggle
-  document.querySelectorAll('.faq-question').forEach(q => {
-    q.addEventListener('click', () => q.parentElement.classList.toggle('active'));
-  });
-
-  // Reveal contact
-  document.getElementById("revealContact")?.addEventListener("click", () => {
-    const form = document.getElementById("contactWrapper");
-    form.style.maxHeight = "1000px";
-    form.style.opacity = "1";
-    form.scrollIntoView({ behavior: "smooth" });
-  });
-
-// Contact submission
-const contactForm = document.getElementById("contactForm");
-if (contactForm) {
-  contactForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const submitBtn = contactForm.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-
-    const payload = {
-      site: window.location.hostname,
-      page: window.location.pathname,
-      name: contactForm.querySelector('input[name="name"]').value,
-      email: contactForm.querySelector('input[name="_replyto"]').value,
-      message: contactForm.querySelector('textarea[name="message"]').value
-    };
-
-    try {
-      const res = await fetch("https://civiclearn.app.n8n.cloud/webhook/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) throw new Error();
-
-      contactForm.innerHTML = `
-        <div style="text-align:center; padding:20px;">
-          <h3 data-i18n="contact_success_title"></h3>
-          <p data-i18n="contact_success_text"></p>
+    <div class="help-container">
+      <!-- FAQ (language-specific content — this block differs between help-fr / help-de / help-en) -->
+      <div class="help-section" id="faq">
+        <div class="faq-item">
+          <div class="faq-q"><span>Comment réinitialiser complètement ma préparation&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Cliquez sur le bouton ci-dessous pour repartir de zéro.
+            Cela supprimera toutes vos statistiques et votre progression, tout en conservant vos paramètres personnels.<br><br>
+            <button id="resetAllFull" class="reset-btn">🔄 Réinitialiser ma progression</button>
+          </div>
         </div>
-      `;
-      CivicLearnI18n.apply();
+        <div class="faq-item">
+          <div class="faq-q"><span>Comment fonctionnent les rappels quotidiens&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Les rappels quotidiens sont de courtes notifications qui vous aident à maintenir
+            un rythme d’entraînement régulier.
+            Une fois activés, vous recevez une notification lorsque votre test quotidien est prêt.<br><br>
+            <strong>Utilisateurs iPhone / iPad&nbsp;:</strong>
+            pour recevoir les rappels quotidiens, vous devez utiliser Safari,
+            appuyer sur l’icône Partager, choisir <em>«&nbsp;Ajouter à l’écran d’accueil&nbsp;»</em>,
+            puis ouvrir CivicLearn depuis l’écran d’accueil avant d’activer l’interrupteur ci-dessous.<br><br>
+            Activez les rappels quotidiens ci-dessous :
+            <div id="wonderpush-subscription-switch">
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Les questions du test sont-elles officielles&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Non. Les questions proposées sur CivicLearn sont des <strong>simulations pédagogiques</strong>
+            conçues pour refléter la structure, le niveau de difficulté et les thèmes clés
+            du test luxembourgeois <em>Vivre-Ensemble</em>.
+            <br><br>
+            Il ne s’agit <strong>pas de questions officielles</strong> et elles ne proviennent
+            d’aucune base de données gouvernementale. Les questions officielles ne sont pas
+            rendues publiques par les autorités luxembourgeoises.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Que représentent les questions affichées sur le tableau de bord ?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Les questions affichées sur le tableau de bord font partie d’un <strong>mode d’entraînement séquentiel</strong>
+            qui regroupe <strong>l’ensemble des questions du questionnaire luxembourgeois</strong>, présentées
+            une par une dans un ordre fixe.
+            <br><br>
+            Vous pouvez <strong>passer à la question suivante ou revenir à la précédente</strong>, ce qui permet
+            de sauter certaines questions et d’y revenir plus tard. C’est le seul mode d’entraînement
+            dans lequel les questions peuvent être ignorées temporairement.
+            <br><br>
+            Votre progression est <strong>enregistrée automatiquement</strong> : si vous quittez la page ou la
+            rechargez, le tableau de bord s’ouvrira sur <strong>la dernière question consultée</strong>.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Que signifie le « Score estimé » dans la barre latérale ?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">C'est une estimation du score que vous obtiendriez aujourd'hui à une simulation, sur 40, calculée à partir du nombre de questions maîtrisées dans chaque thème et pondérée comme le test officiel (10 histoire, 20 institutions, 10 droits). Le petit repère sur la barre est le seuil de réussite de 28. Elle se met à jour à chaque question répondue, où que ce soit sur la plateforme.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>À quoi sert la fonctionnalité « Ma liste »&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Sur chaque question, une <strong>petite étoile</strong> permet d’ajouter la question à votre liste personnelle de révision.
+            En cliquant sur cette étoile, la question est enregistrée dans <strong>« Ma liste »</strong>.
+            <br><br>
+            Cette fonctionnalité vous permet de <strong>mettre de côté les questions importantes ou difficiles</strong>
+            afin de les revoir plus tard, à votre rythme, et de cibler plus efficacement vos révisions.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Quelle est la différence entre les modes de test&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            CivicLearn propose plusieurs modes d’entraînement adaptés à différents besoins&nbsp;:
+            <ul>
+            <li><strong>Simulation d’examen&nbsp;:</strong> Reproduit le format officiel du test (plusieurs questions, chronomètre, résultats à la fin).</li>
+            <li><strong>Test rapide&nbsp;:</strong> 5 questions aléatoires, sans limite de temps, correction immédiate.</li>
+            <li><strong>Test par thème&nbsp;:</strong> Vous choisissez un ou plusieurs thèmes.
+            Ce mode est <em>adaptatif</em>&nbsp;: les questions se répètent jusqu’à ce qu’elles soient toutes maîtrisées.
+            </li>
+            <li><strong>Pièges fréquents&nbsp;:</strong> Entraînement ciblé sur les erreurs les plus courantes, sans chronomètre.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Comment fonctionne le mode progressif&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Le mode progressif ne s’arrête pas après un nombre fixe de questions.
+            Les questions mal répondues sont automatiquement reposées jusqu’à ce qu’elles soient toutes maîtrisées.
+            Lorsqu’il n’en reste plus, le message suivant s’affiche&nbsp;:
+            <strong>«&nbsp;Tout est maîtrisé&nbsp;»</strong>.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Pourquoi certains tests affichent-ils les boutons «&nbsp;Recommencer&nbsp;» ou «&nbsp;Revoir les erreurs&nbsp;»&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Ces boutons apparaissent uniquement dans les tests <strong>non progressifs</strong>
+            (comme la simulation).
+            Le test se termine une fois toutes les questions répondues, puis vous pouvez revoir vos erreurs
+            ou recommencer une nouvelle tentative.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Quel mode utiliser pour se préparer efficacement&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Pour une préparation complète&nbsp;:
+            <ul>
+            <li>Commencez par le <strong>Test par thème</strong> afin de consolider vos connaissances par thème.</li>
+            <li>Utilisez le <strong>Test rapide</strong> pour des révisions quotidiennes légères.</li>
+            <li>Terminez par une <strong>Simulation d’examen</strong> pour évaluer votre niveau dans des conditions proches du réel.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Pourquoi la voix du mode «&nbsp;Assistance à la lecture&nbsp;» semble-t-elle étrangère&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            CivicLearn utilise le système de <strong>synthèse vocale</strong> intégré à votre navigateur
+            pour lire les questions à voix haute.
+            <br><br>
+            Si votre appareil ne dispose pas d’une voix de bonne qualité pour la langue sélectionnée
+            (français, allemand ou luxembourgeois),
+            le navigateur peut utiliser une voix générique ou avec un accent différent.
+            <br><br>
+            Pour améliorer la prononciation, installez des voix supplémentaires dans les paramètres
+            d’accessibilité ou de langue de votre appareil, puis rechargez la page.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Comment est notée la simulation du test Vivre-Ensemble&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            La simulation CivicLearn <strong>reproduit fidèlement le format officiel du test luxembourgeois Vivre-Ensemble</strong>.
+            <br><br>
+            Chaque simulation comporte <strong>40 questions</strong>, réparties exactement comme lors du test officiel&nbsp;:
+            <ul>
+            <li><strong>10 questions</strong> sur l’histoire du Luxembourg</li>
+            <li><strong>10 questions</strong> sur les droits fondamentaux</li>
+            <li><strong>20 questions</strong> sur les institutions</li>
+            </ul>
+            <br>
+            Pour réussir, vous devez obtenir <strong>au moins 28 réponses correctes sur 40</strong>.
+            <br><br>
+            Vous disposez d’<strong>une heure</strong> pour répondre à l’ensemble des questions.
+            Cette limite de temps est appliquée afin de <strong>reproduire les conditions réelles du test officiel</strong>.
+            <br><br>
+            Toutes les questions ont le même poids&nbsp;: il n’y a <strong>ni pénalité pour les mauvaises réponses</strong>,
+            ni obligation de réussir un thème spécifique à 100&nbsp;%.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Qu’est-ce que la section «&nbsp;Pièges fréquents&nbsp;»&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Cette section regroupe les questions auxquelles les utilisateurs répondent le plus souvent incorrectement.
+            Elle vous aide à cibler vos points faibles et à vous préparer plus efficacement
+            avant de tenter une simulation complète.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Puis-je utiliser CivicLearn sur mon téléphone&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Oui. CivicLearn est une application web optimisée pour les ordinateurs, tablettes et smartphones.
+            Vous pouvez l’ajouter à votre écran d’accueil pour un accès rapide.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Ma progression est-elle enregistrée automatiquement&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Oui. Vos résultats et statistiques sont enregistrés automatiquement et
+            synchronisés dans le cloud. Vous pouvez poursuivre votre entraînement
+            sur un autre appareil en vous connectant simplement avec la même adresse e-mail.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Puis-je étudier hors ligne&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Oui. Une fois les pages chargées, la plupart des fonctionnalités
+            (tests, cartes mémoire, guide)
+            restent accessibles sans connexion Internet,
+            à l’exception de l’envoi du formulaire de contact.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Comment fonctionne l’accès Premium&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            L’accès Premium est un achat unique, sans limite de durée.
+            Une fois le paiement confirmé par <strong>Stripe</strong>, votre compte est activé immédiatement
+            et vous bénéficiez d’un accès à vie, sans renouvellement automatique.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Puis-je obtenir un reçu&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Les paiements sont traités par <strong>Stripe</strong>,
+            qui vous envoie automatiquement un e-mail de confirmation après l’achat.
+            Cet e-mail fait office de reçu officiel&nbsp;; nous n’émettons pas de factures PDF séparées.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Puis-je utiliser mon compte sur plusieurs appareils&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Oui. Votre progression, votre historique et vos questions sauvegardées
+            sont synchronisés automatiquement entre tous vos appareils.
+            Connectez-vous simplement avec la même adresse e-mail et vos données
+            seront disponibles immédiatement.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Comment signaler une erreur ou une faute&nbsp;?</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a">
+            Ouvrez le formulaire de contact ci-dessous et précisez la question concernée.
+            Notre équipe examinera votre signalement et mettra à jour la base de données si nécessaire.
+          </div>
+        </div>
+        <div class="faq-item contact-cta">
+          <div class="faq-q"><span data-i18n="contact_open_form">Nous contacter</span><span class="faq-arrow">›</span></div>
+          <div class="faq-a"><button id="revealContact" class="btn small" data-i18n="contact_open_form">Nous contacter</button></div>
+        </div>
+      </div>
 
-    } catch (err) {
-      submitBtn.disabled = false;
-      alert("Error sending message");
-    }
-  });
-}
+      <!-- Contact form (revealed on demand) -->
+      <div class="help-section" id="contactWrapper" hidden>
+        <h2 data-i18n="contact_title">Envoyer un message</h2>
+        <form class="contact-form" id="contactForm">
+          <label data-i18n="contact_name_label">Votre nom</label>
+          <input type="text" name="name" required>
+          <label data-i18n="contact_email_label">Votre e-mail</label>
+          <input type="email" name="_replyto" required>
+          <label data-i18n="contact_message_label">Votre message</label>
+          <textarea name="message" rows="5" required></textarea>
+          <input type="hidden" name="_subject" value="Message de CivicLearn">
+          <button type="submit" class="btn" data-i18n="contact_submit_btn">Envoyer</button>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
 
-  // Mobile menu
-  document.addEventListener("DOMContentLoaded", () => {
-    const toggle = document.querySelector(".menu-toggle");
-    const overlay = document.getElementById("menuOverlay");
-    toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
-    overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+<!-- Config + i18n (Lux files live at the CivicLearn root) -->
+<script src="/assets/js/lang-bootstrap-lu.js"></script>
+<script src="/assets/js/config-lu.js?v=2"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>CivicLearnI18n.init();</script>
+<script src="/assets/js/reading.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // FAQ accordion
+  document.querySelectorAll(".faq-q").forEach(q => {
+    q.addEventListener("click", () => q.closest(".faq-item").classList.toggle("open"));
   });
+
+  // Reveal contact form
+  document.getElementById("revealContact")?.addEventListener("click", () => {
+    const w = document.getElementById("contactWrapper");
+    w.hidden = false;
+    w.scrollIntoView({ behavior: "smooth" });
+  });
+
+  // Contact submission (same n8n webhook as before)
+  const contactForm = document.getElementById("contactForm");
+  if (contactForm) {
+    contactForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const submitBtn = contactForm.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      const payload = {
+        site: window.location.hostname,
+        page: window.location.pathname,
+        name: contactForm.querySelector('input[name="name"]').value,
+        email: contactForm.querySelector('input[name="_replyto"]').value,
+        message: contactForm.querySelector('textarea[name="message"]').value
+      };
+      try {
+        const res = await fetch("https://civiclearn.app.n8n.cloud/webhook/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error();
+        contactForm.innerHTML = `<div class="contact-success"><h3 data-i18n="contact_success_title"></h3><p data-i18n="contact_success_text"></p></div>`;
+        CivicLearnI18n.apply();
+      } catch (err) {
+        submitBtn.disabled = false;
+        alert("Error sending message");
+      }
+    });
+  }
+});
 </script>
-
 <script src="/assets/js/reset-lu.js"></script>
+
+<!-- Daily reminders (WonderPush) -->
 <script src="https://cdn.by.wonderpush.com/sdk/1.1/wonderpush-loader.min.js" async></script>
 <script>
   window.WonderPush = window.WonderPush || [];
-  WonderPush.push(["init", {
-      webKey: "256f5d8dc847c1f1f9a267c4d77a121616a872c88e1618da8097a0d20b43fbfd",
-  }]);
-
-  // Tag this user as Luxembourg FR user
+  WonderPush.push(["init", { webKey: "256f5d8dc847c1f1f9a267c4d77a121616a872c88e1618da8097a0d20b43fbfd" }]);
   WonderPush.push(["addTag", "country:lu-fr"]);
 </script>
+
+<!-- Mobile menu + lang switch -->
 <script>
-(function () {
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+
   const current = window.CIVICEDGE_LANG;
-
   document.querySelectorAll(".lang-switch button").forEach(btn => {
-    const lang = btn.dataset.lang;
-
-    if (lang === current) {
-      btn.classList.add("active");
-    }
-
+    if (btn.dataset.lang === current) btn.classList.add("active");
     btn.addEventListener("click", () => {
-      if (lang === current) return;
-
-      localStorage.setItem("civicedge_lang", lang);
-
-      const path = window.location.pathname;
-
-      // Help pages
-      if (path.includes("help")) {
-        window.location.href = `/lux/dashboard/help-${lang}.html`;
-        return;
-      }
-
-      // Reference pages
-      if (path.includes("reference")) {
-        window.location.href = `/lux/dashboard/reference-${lang}.html`;
-        return;
-      }
-
-      // Fallback
+      if (btn.dataset.lang === current) return;
+      localStorage.setItem("civicedge_lang", btn.dataset.lang);
+      // help-xx.html / reference-xx.html are per-language files
+      // Cloudflare Pages serves these with or without ".html" (/lux/dashboard/help-en)
+      const m = location.pathname.match(/\/(help|reference)(-[a-z]{2})?(\.html)?\/?$/);
+      if (m) { location.href = `${m[1]}-${btn.dataset.lang}.html`; return; }
       location.reload();
     });
   });
-})();
+});
 </script>
+<script src="/lux/assets/js/gauge-bar.js"></script>
+<script src="/lux/assets/js/study-timer.js"></script>
+<script src="/assets/js/maintenance-bar.js"></script>
 <script src="/assets/js/signout.js"></script>
 </body>
 </html>

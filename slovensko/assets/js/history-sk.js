@@ -483,7 +483,16 @@
     const attemptLog = Array.isArray(session.attemptLog) ? session.attemptLog : [];
 
     // TOPICS MODE (wave display)
-    if (session.mode === "topics" && attemptLog.length > qList.length) {
+    // v44: older sessions keep only their summary (score, duration, topics);
+    // question-by-question detail is retained for the most recent sessions only.
+    if (session.detailTrimmed === true || (qList.length === 0 && attemptLog.length === 0)) {
+      html += `
+        <div class="question-row history-no-detail">
+          Podrobnosti o jednotlivých otázkach sa uchovávajú len pri najnovších reláciách. Skóre vyššie je úplné.
+        </div>
+      `;
+    }
+    else if (session.mode === "topics" && attemptLog.length > qList.length) {
       const qMap = new Map();
       qList.forEach((q) => qMap.set(q.id, q));
 

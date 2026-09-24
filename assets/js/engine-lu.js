@@ -37,6 +37,15 @@ Engine.ensureBankLoaded = async function () {
     }
     return fallback || key;
   }
+
+  // CivicLearnI18n.t() ignores a second argument and returns the KEY itself when
+  // the dictionaries have no entry, so t("foo", "Foo") renders "foo" on screen.
+  // Use this wherever a key may legitimately be missing.
+  function tSafe(key, fallback) {
+    const value = t(key, fallback);
+    if (!value || value === key) return fallback;
+    return value;
+  }
   
   function getMainTopicDisplay(rawQ) {
   if (!rawQ || !rawQ.topic) return "";
@@ -263,6 +272,153 @@ function getTopicDisplay(rawQ) {
     return normalizeBank(questionsArray);
   }
 
+
+  // ------------- Explanations ("Bon a savoir") -------------
+  // Data lives in a separate file so the question bank is never rewritten.
+  // Lookup order: questions[id][lang] -> microtopics[qMicrotopic[id]][lang]
+  // -> nothing. An empty string means "not written yet": no card is shown.
+
+  let __explanations = null;
+  let __explanationsTried = false;
+
+  const EXPLAIN_TITLES = {
+    fr: "Bon \u00e0 savoir",
+    en: "Good to know",
+    de: "Gut zu wissen"
+  };
+
+  const EXPLAIN_MORE = { fr: "Lire la suite", en: "Read more",  de: "Mehr lesen" };
+  const EXPLAIN_LESS = { fr: "R\u00e9duire",     en: "Show less", de: "Weniger anzeigen" };
+
+  // Per-question cards run ~150-350 characters; the microtopic explainers that
+  // stand in for them are 400-1400 and would be a wall of text on a phone.
+  // Anything above this is collapsed to a few lines with a toggle.
+  const EXPLAIN_COLLAPSE_OVER = 380;
+
+  async function loadExplanationsIfNeeded() {
+    if (__explanationsTried) return __explanations;
+    __explanationsTried = true;
+
+    const cfg = getConfig();
+    const path = cfg.explanations && cfg.explanations.path;
+    if (!path) return null;               // feature simply not configured
+
+    try {
+      const res = await fetch(path);
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const raw = await res.json();
+      __explanations = (raw && typeof raw === "object") ? raw : null;
+    } catch (err) {
+      // Never let this break a quiz in progress.
+      console.warn("Explanations unavailable:", err);
+      __explanations = null;
+    }
+    return __explanations;
+  }
+
+  function getExplanationText(rawQ) {
+    const data = __explanations;
+    if (!data || !rawQ) return "";
+
+    const lang = getLang();
+    const id = rawQ.id;
+
+    const own = id && data.questions && data.questions[id];
+    if (own && typeof own[lang] === "string" && own[lang].trim()) {
+      return own[lang].trim();
+    }
+
+    const key =
+      (id && data.qMicrotopic && data.qMicrotopic[id]) ||
+      getMicrotopicCanonical(rawQ);
+
+    const shared = key && data.microtopics && data.microtopics[key];
+    if (shared && typeof shared[lang] === "string" && shared[lang].trim()) {
+      return shared[lang].trim();
+    }
+
+    return "";
+  }
+
+  function explanationsEnabledForMode() {
+    const ex = getConfig().explanations || {};
+    if (!Array.isArray(ex.excludeModes)) return true;
+    return ex.excludeModes.indexOf(state && state.mode) === -1;
+  }
+
+  function buildExplanationEl(question) {
+    if (!question || !question._raw) return null;
+    if (!explanationsEnabledForMode()) return null;
+
+    const text = getExplanationText(question._raw);
+    if (!text) return null;
+
+    const lang = getLang();
+    const box = createEl("div", "ce-explain");
+
+    box.appendChild(
+      createEl(
+        "div",
+        "ce-explain-title",
+        tSafe("quiz_explain_title", EXPLAIN_TITLES[lang] || EXPLAIN_TITLES.en)
+      )
+    );
+    box.appendChild(createEl("p", "ce-explain-body", text));
+
+    if (text.length > EXPLAIN_COLLAPSE_OVER) {
+      box.classList.add("ce-explain-long");
+
+      const toggle = createEl(
+        "button",
+        "ce-explain-toggle",
+        tSafe("quiz_explain_more", EXPLAIN_MORE[lang] || EXPLAIN_MORE.en)
+      );
+      toggle.type = "button";
+      toggle.setAttribute("aria-expanded", "false");
+
+      toggle.addEventListener("click", () => {
+        const open = box.classList.toggle("is-open");
+        toggle.setAttribute("aria-expanded", open ? "true" : "false");
+        toggle.textContent = open
+          ? tSafe("quiz_explain_less", EXPLAIN_LESS[lang] || EXPLAIN_LESS.en)
+          : tSafe("quiz_explain_more", EXPLAIN_MORE[lang] || EXPLAIN_MORE.en);
+      });
+
+      box.appendChild(toggle);
+    }
+
+    if (
+      window.CivicReading &&
+      typeof window.CivicReading.speak === "function" &&
+      window.CivicReading.isEnabled()
+    ) {
+      const speakBtn = createEl("button", "ce-speak-btn ce-speak-small", "\ud83d\udd0a");
+      speakBtn.type = "button";
+      speakBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        window.CivicReading.speak(text);
+      });
+      box.appendChild(speakBtn);
+    }
+
+    return box;
+  }
+
+  // Insert between the options and the footer, at most once per card.
+  function showExplanation(optionsWrap, question) {
+    if (!optionsWrap) return;
+
+    const card = optionsWrap.closest(".ce-card") || optionsWrap.parentElement;
+    if (!card || card.querySelector(".ce-explain")) return;
+
+    const box = buildExplanationEl(question);
+    if (!box) return;
+
+    const footer = card.querySelector(".ce-q-footer");
+    if (footer) card.insertBefore(box, footer);
+    else card.appendChild(box);
+  }
+
   function normalizeBank(rawQuestions) {
     // Classic engine expects:
     // {
@@ -360,6 +516,7 @@ state = {
     const cfg = getConfig();
     const fullBank = await loadBankIfNeeded(options);
 	__normalizedBank = fullBank;
+    await loadExplanationsIfNeeded();
 
     let questions;
 	let filtered = null;
@@ -820,6 +977,12 @@ shuffledOptions.forEach((opt) => {
 
     card.appendChild(optionsWrap);
 
+    // Review mode already reveals the answer, so the card belongs here too
+    if (document.body.classList.contains("review-mode")) {
+      const reviewExplain = buildExplanationEl(q);
+      if (reviewExplain) card.appendChild(reviewExplain);
+    }
+
     // Footer with Next button
     const footer = createEl("div", "ce-q-footer");
     const nextBtn = createEl(
@@ -864,6 +1027,8 @@ shuffledOptions.forEach((opt) => {
       if (b === btn && o && !o.correct) b.classList.add("wrong");
       b.disabled = true;
     });
+
+    showExplanation(optionsWrap, question);
 
     if (typeof question.firstAttemptCorrect === "undefined") {
       const trueCorrect = question.options[opt.idx].correct ? 1 : 0;

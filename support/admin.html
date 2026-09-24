@@ -33,6 +33,7 @@ body {
   background: var(--bg);
   color: var(--text);
   height: 100vh;
+  height: 100dvh;      /* Android/iOS: vh = URL-bar-hidden height, dvh tracks the real one */
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -432,7 +433,7 @@ body {
 
   body.app-visible { overflow: hidden; }
 
-  #app { height: 100vh; overflow: hidden; flex-direction: column; }
+  #app { height: 100vh; height: 100dvh; overflow: hidden; flex-direction: column; }
 
   /* Topbar */
   .topbar { padding: 0 0.75rem; height: 48px; }
@@ -496,7 +497,9 @@ body {
 
   /* Action bar */
   .action-bar {
-    padding: 0.75rem 1rem; flex-direction: column; gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+    flex-direction: column; gap: 0.5rem;
     position: sticky; bottom: 0;
     background: var(--surface); border-top: 1px solid var(--border2);
     flex-shrink: 0;
@@ -659,6 +662,16 @@ body {
   margin-bottom: 0.45rem;
 }
 .rev-kpi-value.pending { color: var(--muted); }
+.rev-kpi-eur {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--amber);
+  letter-spacing: 0;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
 .rev-kpi-yoy {
   font-size: 0.75rem;
   font-weight: 500;
@@ -962,6 +975,39 @@ body {
 .ct-editor-status.err { color: var(--red); }
 .ct-empty { font-size: 0.82rem; color: var(--muted); padding: 1.5rem 0; text-align: center; }
 
+/* ── COUNTRIES TAB ── */
+#tab-countries { overflow-y: auto; padding: 1.5rem; background: var(--bg); }
+.cty-grid { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.25fr); gap: 1.25rem; align-items: start; }
+@media (max-width: 900px) { .cty-grid { grid-template-columns: 1fr; } .cty-kpi-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+.cty-chart-wrap { position: relative; height: 300px; }
+.cty-legend { display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; margin-top: 1rem; font-size: 0.78rem; color: var(--muted); }
+.cty-legend-item { display: flex; align-items: center; gap: 6px; }
+.cty-legend-swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.cty-legend-item b { color: var(--text); font-weight: 500; }
+.cty-table tbody tr:first-child td { color: inherit; font-weight: inherit; }
+.cty-table tbody td:first-child { color: var(--text); font-weight: 500; }
+.cty-table .cty-flag { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; vertical-align: middle; }
+.cty-table .cty-code { color: var(--muted); font-weight: 400; font-size: 0.72rem; margin-left: 6px; }
+.cty-bar { display: inline-block; height: 6px; border-radius: 3px; background: var(--brand-dim); vertical-align: middle; margin-right: 6px; }
+.cty-table tfoot td { padding: 0.6rem 0.6rem 0; text-align: right; color: var(--muted); border-top: 1px solid var(--border); }
+.cty-table tfoot td:first-child { text-align: left; }
+.cty-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem; margin-bottom: 1.25rem; }
+.cty-toolbar .cty-refresh-btn { margin-left: auto; }
+.cty-seg { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 3px; gap: 2px; }
+.cty-seg-btn { border: none; background: transparent; color: var(--muted); font-family: inherit; font-size: 0.78rem; font-weight: 500; padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer; }
+.cty-seg-btn:hover { color: var(--text); }
+.cty-seg-btn.active { background: var(--brand-dim); color: var(--brand); }
+.cty-ctl { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--muted); }
+.cty-ctl select { padding: 0.35rem 0.5rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.78rem; }
+.cty-table td.cty-dim { color: var(--muted); opacity: 0.6; }
+.cty-table td.cty-hi { color: var(--text); font-weight: 600; }
+.cty-table th.cty-hi { color: var(--brand); }
+.cty-k-idle { color: var(--muted) !important; }
+.cty-refresh-btn { background: var(--surface2); color: var(--text); padding: 0.35rem 0.8rem; font-size: 0.75rem; text-transform: none; letter-spacing: 0; }
+.cty-k-time { font-size: 1.05rem !important; padding-top: 0.3rem; }
+#cty-status.ok { display: none; }
+#cty-status.err { color: var(--red); }
+
 /* ── USERS TAB ── */
 #tab-users { overflow-y: auto; padding: 1.5rem; background: var(--bg); }
 .usr-section { margin-bottom: 2.5rem; }
@@ -1041,7 +1087,7 @@ body {
 </div>
 
 <!-- APP -->
-<div id="app" style="display:none; flex:1; flex-direction:column; height:100vh; overflow:hidden;">
+<div id="app" style="display:none; flex:1; flex-direction:column; height:100vh; height:100dvh; overflow:hidden;">
 
   <!-- TOP BAR -->
   <div class="topbar">
@@ -1059,6 +1105,7 @@ body {
       <button class="tab-btn" id="tab-btn-exam" onclick="switchTab('exam')">Exam</button>
       <button class="tab-btn" id="tab-btn-gp" onclick="switchTab('gp')">Generalprøve</button>
       <button class="tab-btn" id="tab-btn-luxfb" onclick="switchTab('luxfb')">Lux Feedback</button>
+      <button class="tab-btn" id="tab-btn-countries" onclick="switchTab('countries')">Countries</button>
     </div>
     <button class="tpl-btn" id="tpl-btn-topbar" style="font-size:0.76rem;padding:4px 12px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif" onclick="openTemplateManager()">📋 Templates</button>
     <div class="mob-topbar-actions">
@@ -1114,21 +1161,6 @@ body {
 
   <!-- REVENUE TAB -->
   <div class="tab-panel" id="tab-revenue">
-    <div class="rev-load-bar">
-      <span id="rev-status">Historical data loaded · click “Load live” for current Stripe figures</span>
-      <button onclick="loadRevLive()" id="rev-load-btn" style="background:var(--brand);color:#fff;border:none;border-radius:6px;padding:4px 14px;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:500;cursor:pointer">Load live</button>
-    </div>
-    <div class="rev-kpi-grid" id="rev-kpi-grid"></div>
-    <div class="rev-chart-card">
-      <div class="rev-card-title">Monthly revenue — last 24 months</div>
-      <div class="rev-chart-wrap"><canvas id="rev-chart"></canvas></div>
-    </div>
-    <div class="rev-table-card">
-      <div class="rev-card-title">Year-over-year comparison</div>
-      <table class="rev-table" id="rev-yoy-table"></table>
-      <div class="rev-note">Months before this year are from the Stripe payouts export (net of fees). The current year (YTD, KPIs, and this year's bars) is pulled live from the Stripe charges API when you click “Load live”.</div>
-    </div>
-
     <!-- WEEKLY PAYOUTS -->
     <div class="rev-chart-card">
       <div class="po-head">
@@ -1141,6 +1173,7 @@ body {
         <span class="po-legend-item"><span class="po-dot below"></span> Below target (&lt; S$4,000)</span>
         <span class="po-legend-item"><span class="po-dot met"></span> Met (S$4,000–5,999)</span>
         <span class="po-legend-item"><span class="po-dot over"></span> Significantly exceeded (≥ S$6,000)</span>
+        <span class="po-legend-item" id="po-fx-note" style="margin-left:auto;color:var(--muted)"></span>
       </div>
       <div class="rev-chart-wrap" id="po-chart-wrap" style="height:240px;display:none"><canvas id="po-chart"></canvas></div>
       <div id="po-empty" class="po-empty" style="display:none">No payouts found since 1 Jan 2026.</div>
@@ -1518,6 +1551,54 @@ body {
 
   </div><!-- /tab-luxfb -->
 
+  <!-- COUNTRIES TAB -->
+  <div class="tab-panel" id="tab-countries">
+    <div class="cty-toolbar">
+      <div class="cty-seg" id="cty-mode">
+        <button class="cty-seg-btn active" data-mode="relevant" onclick="ctySetMode('relevant')">Relevant users</button>
+        <button class="cty-seg-btn" data-mode="active" onclick="ctySetMode('active')">Active only</button>
+        <button class="cty-seg-btn" data-mode="all" onclick="ctySetMode('all')">All users</button>
+      </div>
+      <label class="cty-ctl">Registered within
+        <select id="cty-reg-days" onchange="ctyLoad()">
+          <option value="30">30 days</option><option value="60">60 days</option><option value="90" selected>90 days</option>
+          <option value="180">180 days</option><option value="365">1 year</option>
+        </select>
+      </label>
+      <label class="cty-ctl">Active within
+        <select id="cty-act-days" onchange="ctyLoad()">
+          <option value="30">30 days</option><option value="90">90 days</option><option value="180" selected>180 days</option>
+          <option value="365">1 year</option><option value="730">2 years</option>
+        </select>
+      </label>
+      <button class="usr-btn cty-refresh-btn" onclick="ctyLoad()">Refresh</button>
+    </div>
+    <div class="rev-load-bar" id="cty-status"><span>Loading users by country…</span></div>
+    <div class="rev-kpi-grid cty-kpi-grid">
+      <div class="rev-kpi-card"><div class="rev-kpi-label" id="cty-k-main-label">Relevant users</div><div class="rev-kpi-value" id="cty-k-total">—</div><div class="rev-kpi-yoy flat" id="cty-k-total-sub"></div></div>
+      <div class="rev-kpi-card"><div class="rev-kpi-label">Active last 30 days</div><div class="rev-kpi-value" id="cty-k-30d">—</div><div class="rev-kpi-yoy flat" id="cty-k-30d-sub"></div></div>
+      <div class="rev-kpi-card"><div class="rev-kpi-label">Largest market</div><div class="rev-kpi-value" id="cty-k-top">—</div><div class="rev-kpi-yoy flat" id="cty-k-top-share"></div></div>
+      <div class="rev-kpi-card"><div class="rev-kpi-label">Idle (excluded)</div><div class="rev-kpi-value cty-k-idle" id="cty-k-idle">—</div><div class="rev-kpi-yoy flat" id="cty-k-idle-sub"></div></div>
+    </div>
+    <div class="cty-grid">
+      <div class="rev-chart-card">
+        <div class="rev-card-title" id="cty-chart-title">Relevant users by purchase country</div>
+        <div class="cty-chart-wrap"><canvas id="cty-chart"></canvas></div>
+        <div class="cty-legend" id="cty-legend"></div>
+        <div class="rev-note" id="cty-note"></div>
+      </div>
+      <div class="rev-table-card">
+        <div class="rev-card-title">All countries</div>
+        <div style="overflow-x:auto"><table class="rev-table cty-table" id="cty-table"></table></div>
+        <div class="rev-note">
+          <b>Recent</b> = registered within the “registered within” window (counted even if never used).
+          <b>Active</b> = signed in or synced training progress within the “active within” window (counted however old the purchase).
+          <b>Relevant</b> = recent or active. <b>Idle</b> = neither — mostly accounts imported from the old site that never touched the new platform.
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-countries -->
+
 </div><!-- /app -->
 
 <div class="toast" id="toast"></div>
@@ -1618,7 +1699,6 @@ async function tryLogin() {
     document.getElementById('app').style.display = 'flex';
     document.body.classList.add('app-visible');
     loadMessages();
-    renderRevenue();
   } catch(e) {
     errEl.textContent = 'Connection error. Try again.';
     btn.disabled = false;
@@ -2301,174 +2381,57 @@ function switchTab(name) {
     const el = document.getElementById(id);
     if (el) el.style.display = name === 'support' ? '' : 'none';
   });
-  if (name === 'revenue') renderRevenue();
+  if (name === 'revenue' && payoutData) renderPayouts();
   if (name === 'kb' && !kbLoaded) kbLoad();
   if (name === 'content' && !ctLoaded) ctLoad();
   if (name === 'exam') examLoadStats();
   if (name === 'gp') gpLoadEvents();
   if (name === 'luxfb' && !luxfbLoaded) luxfbLoad();
+  if (name === 'countries') ctyLoad();   // always re-fetch so the chart is live on every open
   // 'users' tab needs no lazy load
 }
 
-// ── REVENUE ───────────────────────────────────────────────────────────────────
-const REV_HISTORY = [
-  { month: '2024-04', eur: 15081.65 },
-  { month: '2024-05', eur: 21369.35 },
-  { month: '2024-06', eur: 19916.16 },
-  { month: '2024-07', eur:  7500.99 },
-  { month: '2024-08', eur:  6353.04 },
-  { month: '2024-09', eur: 10873.29 },
-  { month: '2024-10', eur: 12523.55 },
-  { month: '2024-11', eur: 20671.70 },
-  { month: '2024-12', eur: 19192.93 },
-  { month: '2025-01', eur:  4877.82 },
-  { month: '2025-02', eur: 10247.71 },
-  { month: '2025-03', eur: 12303.46 },
-  { month: '2025-04', eur: 14893.30 },
-  { month: '2025-05', eur: 21010.02 },
-  { month: '2025-06', eur: 19547.69 },
-  { month: '2025-07', eur:  5418.83 },
-  { month: '2025-08', eur:  6639.11 },
-  { month: '2025-09', eur:  9263.03 },
-  { month: '2025-10', eur: 15028.99 },
-  { month: '2025-11', eur: 23586.24 },
-  { month: '2025-12', eur: 21525.76 },
-  { month: '2026-01', eur: 19433.01 },
-  { month: '2026-02', eur: 16523.80 },
+// ── WEEKLY PAYOUTS ──────────────────────────────────────────────────────────
+// ── SGD → EUR conversion (shown in the payout KPI cards) ──
+// Two ECB-backed endpoints, tried in order; .dev is frankfurter's current host,
+// .app the legacy one. Falls back to a fixed rate only if both are unreachable.
+const FX_ENDPOINTS = [
+  { url: 'https://api.frankfurter.dev/v1/latest?base=SGD&symbols=EUR', pick: d => d && d.rates && d.rates.EUR },
+  { url: 'https://api.frankfurter.app/latest?from=SGD&to=EUR',         pick: d => d && d.rates && d.rates.EUR },
 ];
-const REV_FN = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/stripe_metrics_summary';
-let revLiveData = null;
-let revChart = null;
+const EUR_RATE_FALLBACK = 0.71;   // used only if every endpoint fails
+let eurRate = null;               // SGD → EUR multiplier
+let eurRateNote = '';             // provenance, shown next to the legend
 
-function revFmt(n) {
-  if (n == null) return '—';
-  return n >= 1000 ? '€' + (n / 1000).toFixed(1) + 'k' : '€' + Math.round(n);
+async function ensureEurRate() {
+  if (eurRate !== null) return eurRate;
+  for (const ep of FX_ENDPOINTS) {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 8000);
+      let res;
+      try { res = await fetch(ep.url, { signal: ctrl.signal, cache: 'no-store' }); }
+      finally { clearTimeout(t); }
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const d = await res.json();
+      const rate = ep.pick(d);
+      if (!rate) throw new Error('unexpected payload');
+      eurRate = rate;
+      eurRateNote = 'EUR at ECB rate ' + rate.toFixed(4) + ' (' + (d.date || 'latest') + ')';
+      return eurRate;
+    } catch (e) {
+      console.warn('FX lookup failed for ' + ep.url + ': ' + e.message);
+    }
+  }
+  eurRate = EUR_RATE_FALLBACK;
+  eurRateNote = 'EUR at fallback rate ' + EUR_RATE_FALLBACK.toFixed(4) + ' — live FX unavailable';
+  return eurRate;
 }
-function revFmtFull(n) {
-  if (n == null) return '—';
+function eurFmt(n) {
+  if (n == null) return '';
   return '€' + Math.round(n).toLocaleString('en');
 }
-function revYoyBadge(cur, prev) {
-  if (cur == null) return `<span class="rev-kpi-yoy flat">— load for live data</span>`;
-  if (!prev)       return `<span class="rev-kpi-yoy flat">—</span>`;
-  const p = (cur - prev) / prev * 100;
-  const cls = p > 0 ? 'up' : p < 0 ? 'down' : 'flat';
-  const arrow = p > 0 ? '▲' : p < 0 ? '▼' : '–';
-  return `<div class="rev-kpi-yoy ${cls}">${arrow} ${Math.abs(p).toFixed(1)}% vs prior year</div>`;
-}
 
-function renderRevenue() {
-  const L = revLiveData;
-  const today = L ? L.today : null;
-  const wtd   = L ? L.wtd   : null;
-  const mtd   = L ? L.mtd   : null;
-  const ytd2026 = L ? L.ytd      : null;
-  const ytd2025 = L ? L.ytd_prev : null;
-
-  document.getElementById('rev-kpi-grid').innerHTML = [
-    { label: 'Today',         cur: today,   prev: L ? L.today_prev : null },
-    { label: 'Week to date',  cur: wtd,     prev: L ? L.wtd_prev   : null },
-    { label: 'Month to date', cur: mtd,     prev: L ? L.mtd_prev   : null },
-    { label: 'Year to date',  cur: ytd2026, prev: ytd2025 },
-  ].map(k => `
-    <div class="rev-kpi-card">
-      <div class="rev-kpi-label">${k.label}</div>
-      <div class="rev-kpi-value ${k.cur == null ? 'pending' : ''}">${revFmt(k.cur)}</div>
-      ${revYoyBadge(k.cur, k.prev)}
-    </div>`).join('');
-
-  // Chart: months before the current year come from REV_HISTORY; the current
-  // year's months come live from Stripe (avoids stale/missing-month gaps).
-  const curYear = new Date().getFullYear();
-  const pastMonths = REV_HISTORY.filter(d => +d.month.slice(0, 4) < curYear);
-  let curMonths;
-  if (L && L.months && L.months.length) {
-    curMonths = L.months.map(m => ({ month: m.month, eur: m.eur, partial: !!m.partial }));
-  } else {
-    // Not loaded yet — fall back to whatever current-year history we have.
-    curMonths = REV_HISTORY.filter(d => +d.month.slice(0, 4) === curYear);
-  }
-  const chartData = [...pastMonths, ...curMonths].slice(-24);
-  const labels = chartData.map(({ month }) => {
-    const [y, mo] = month.split('-');
-    return new Date(+y, +mo - 1, 1).toLocaleString('default', { month: 'short' }) + " '" + String(+y).slice(2);
-  });
-
-  if (revChart) revChart.destroy();
-  revChart = new Chart(document.getElementById('rev-chart').getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        data: chartData.map(d => d.eur),
-        backgroundColor: chartData.map(d => d.partial ? 'rgba(124,92,232,0.3)' : 'rgba(124,92,232,0.7)'),
-        borderRadius: 4,
-        borderSkipped: false,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => revFmtFull(ctx.raw) + (chartData[ctx.dataIndex].partial ? ' (in progress)' : '')
-          }
-        }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { color: '#7c7a90', font: { size: 10 }, maxRotation: 45 } },
-        y: {
-          beginAtZero: true,
-          grid: { color: 'rgba(255,255,255,0.04)' },
-          ticks: { color: '#7c7a90', font: { size: 10 }, callback: v => v >= 1000 ? '€' + (v/1000).toFixed(0) + 'k' : '€' + v }
-        }
-      }
-    }
-  });
-
-  let html = `<thead><tr><th>Year</th><th>Day</th><th>WTD</th><th>MTD</th><th>YTD</th></tr></thead><tbody>`;
-  html += `<tr>
-    <td>2026${L ? '<span class="rev-live-dot"></span>' : ''}</td>
-    <td>${revFmtFull(today)}</td><td>${revFmtFull(wtd)}</td>
-    <td>${revFmtFull(mtd)}</td><td>${revFmtFull(ytd2026)}</td></tr>`;
-  html += `<tr><td>2025</td>
-    <td>${revFmtFull(L ? L.today_prev : null)}</td><td>${revFmtFull(L ? L.wtd_prev : null)}</td>
-    <td>${revFmtFull(L ? L.mtd_prev : null)}</td><td>${revFmtFull(ytd2025)}</td></tr>`;
-  html += '</tbody>';
-  document.getElementById('rev-yoy-table').innerHTML = html;
-  if (payoutData) renderPayouts();
-}
-
-async function loadRevLive() {
-  if (!adminPw) return;
-  const btn = document.getElementById('rev-load-btn');
-  btn.disabled = true; btn.textContent = 'Loading…';
-  document.getElementById('rev-status').textContent = 'Fetching live data…';
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 90000);
-    let res;
-    try {
-      res = await fetch(REV_FN, { signal: controller.signal, headers: { 'X-Admin-Key': adminPw, 'Content-Type': 'application/json' } });
-    } finally { clearTimeout(timeout); }
-    const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.error || 'Request failed');
-    const cur = data.summary[0], prev = data.summary[1];
-    revLiveData = { today: cur.day_eur, wtd: cur.week_eur, mtd: cur.mtd_eur, ytd: cur.ytd_eur, today_prev: prev.day_eur, wtd_prev: prev.week_eur, mtd_prev: prev.mtd_eur, ytd_prev: prev.ytd_eur, months: data.months || [] };
-    document.getElementById('rev-status').textContent = 'Live · as of ' + data.as_of;
-    btn.textContent = 'Refresh';
-    renderRevenue();
-  } catch(e) {
-    document.getElementById('rev-status').textContent = 'Error: ' + e.message;
-    btn.textContent = 'Retry';
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-// ── WEEKLY PAYOUTS ──────────────────────────────────────────────────────────
 const PAYOUTS_FN = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1/stripe_payouts';
 const PO_TARGET = 4000;          // S$ minimum per weekly payout
 const PO_SIGNIF = PO_TARGET * 1.5; // ≥ this counts as "significantly exceeded"
@@ -2561,23 +2524,23 @@ function renderPayouts() {
   const latest = payoutData[payoutData.length - 1];
   const latestDelta = latest.amount - PO_TARGET;
 
-  // KPIs
+  // KPIs — `eur` carries the SGD amount to convert; omitted where the figure isn't money
   kpis.innerHTML = [
-    { label: 'Latest payout', val: poFmt(latest.amount),
+    { label: 'Latest payout', val: poFmt(latest.amount), eur: latest.amount,
       sub: (latestDelta >= 0 ? '▲ ' : '▼ ') + poFmt(Math.abs(latestDelta)) + ' vs target',
       cls: latestDelta >= 0 ? 'up' : 'down' },
     { label: 'On-target weeks', val: onTarget + ' / ' + payoutData.length,
       sub: Math.round(onTarget / payoutData.length * 100) + '% hit S$4,000+',
       cls: onTarget === payoutData.length ? 'up' : 'flat' },
-    { label: 'Average / week', val: poFmt(avg),
+    { label: 'Average / week', val: poFmt(avg), eur: avg,
       sub: (avg >= PO_TARGET ? '▲ ' : '▼ ') + poFmt(Math.abs(avg - PO_TARGET)) + ' vs target',
       cls: avg >= PO_TARGET ? 'up' : 'down' },
-    { label: 'Total paid out', val: poFmt(total),
+    { label: 'Total paid out', val: poFmt(total), eur: total,
       sub: payoutData.length + ' weeks YTD', cls: 'flat' },
   ].map(k => `
     <div class="rev-kpi-card">
       <div class="rev-kpi-label">${k.label}</div>
-      <div class="rev-kpi-value">${k.val}</div>
+      <div class="rev-kpi-value">${k.val}${k.eur != null ? `<span class="rev-kpi-eur">${eurRate ? eurFmt(k.eur * eurRate) : '…'}</span>` : ''}</div>
       <div class="rev-kpi-yoy ${k.cls}">${k.sub}</div>
     </div>`).join('');
 
@@ -2629,6 +2592,18 @@ function renderPayouts() {
     },
     plugins: [targetLine]
   });
+
+  // fetch the FX rate on first render, then repaint so EUR appears above the bars
+  if (eurRate === null) {
+    ensureEurRate().then(() => {
+      const note = document.getElementById('po-fx-note');
+      if (note) note.textContent = eurRateNote;
+      renderPayouts();   // rate now known — repaint the KPI cards with real EUR figures
+    });
+  } else {
+    const note = document.getElementById('po-fx-note');
+    if (note) note.textContent = eurRateNote;
+  }
 
   // table (most recent first)
   let html = '<thead><tr><th>Week of</th><th>Payout</th><th>vs target</th><th>Status</th></tr></thead><tbody>';
@@ -3396,6 +3371,178 @@ async function luxfbLoad(cycle) {
   } catch (e) {
     statusEl.textContent = 'Network error: ' + e.message;
   }
+}
+
+// ── COUNTRIES TAB ─────────────────────────────────────────────────────────────
+// Calls the users_by_country_activity(reg_days, active_days) RPC (aggregates only):
+//   total_users    all rows in users for that purchase_country
+//   recent_users   registered within reg_days (counted even if never used)
+//   active_users   signed in (auth.users.last_sign_in_at) or synced progress
+//                  (user_sync.updated_at) within active_days
+//   relevant_users recent OR active  — idle legacy imports drop out here
+//   active_30d     active in the last 30 days (fixed window)
+// Re-fetched every time the tab is opened, on Refresh, and when a window changes.
+const CTY_SB = 'https://htgliokekeaovdiafrgs.supabase.co';
+const CTY_SB_KEY = EXAM_SB_KEY;
+// Fixed categorical order (never cycled) — validated for CVD separation on the dark surface.
+const CTY_COLORS = ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767'];
+const CTY_OTHER_COLOR = '#5b5a6e';
+const CTY_MAX_SLICES = 8;
+// purchase_country code -> display name (language-market codes as stored in users.purchase_country)
+const CTY_NAMES = {
+  'da-dk': 'Denmark', 'fr-lu': 'Luxembourg (FR)', 'lb-lu': 'Luxembourg (LB)', 'pt-pt': 'Portugal',
+  'fr-ca': 'Canada (FR)', 'fr-ch': 'Switzerland (FR)', 'fr-fr': 'France', 'sv-fi': 'Finland (SV)',
+  'fi-fi': 'Finland (FI)', 'sv-se': 'Sweden', 'de-at': 'Austria', 'ro-ro': 'Romania', 'es-es': 'Spain',
+  'es': 'Spain', 'is-is': 'Iceland', 'is': 'Iceland', 'sk': 'Slovakia', 'lt-lt': 'Lithuania',
+  'pt-br': 'Brazil', 'en-au': 'Australia', 'en-gb': 'United Kingdom', 'en-ie': 'Ireland', 'pl-pl': 'Poland'
+};
+const CTY_MODES = {
+  relevant: { key: 'relevant', label: 'Relevant users', title: 'Relevant users by purchase country' },
+  active:   { key: 'active',   label: 'Active users',   title: 'Active users by purchase country' },
+  all:      { key: 'total',    label: 'All users',      title: 'All users by purchase country' }
+};
+let ctyChart = null;
+let ctyLoading = false;
+let ctyMode = 'relevant';
+let ctyRows = null;
+
+function ctyName(code) {
+  if (!code) return 'Unknown';
+  return CTY_NAMES[code] || code;
+}
+
+function ctySetMode(mode) {
+  ctyMode = mode;
+  document.querySelectorAll('#cty-mode .cty-seg-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  if (ctyRows) ctyRender(ctyRows);
+}
+
+async function ctyLoad() {
+  if (ctyLoading) return;
+  ctyLoading = true;
+  const status = document.getElementById('cty-status');
+  status.className = 'rev-load-bar';
+  status.innerHTML = '<span>Loading users by country…</span>';
+  const reg_days = parseInt(document.getElementById('cty-reg-days').value) || 90;
+  const active_days = parseInt(document.getElementById('cty-act-days').value) || 180;
+  try {
+    const res = await fetch(CTY_SB + '/rest/v1/rpc/users_by_country_activity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': CTY_SB_KEY, 'Authorization': 'Bearer ' + CTY_SB_KEY },
+      body: JSON.stringify({ reg_days, active_days })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).slice(0, 200));
+    ctyRows = (await res.json()).map(r => ({
+      code: r.purchase_country,
+      total: Number(r.total_users) || 0,
+      recent: Number(r.recent_users) || 0,
+      active: Number(r.active_users) || 0,
+      relevant: Number(r.relevant_users) || 0,
+      a30: Number(r.active_30d) || 0
+    }));
+    ctyRows.forEach(r => r.idle = r.total - r.relevant);
+    ctyRender(ctyRows);
+    status.className = 'rev-load-bar ok';
+  } catch (e) {
+    status.className = 'rev-load-bar err';
+    status.innerHTML = '<span>Could not load users by country: ' + e.message + '</span>';
+    console.error('Countries tab error:', e);
+  } finally {
+    ctyLoading = false;
+  }
+}
+
+function ctyRender(rowsIn) {
+  const mode = CTY_MODES[ctyMode];
+  const key = mode.key;
+  const regDays = document.getElementById('cty-reg-days').value;
+  const actDays = document.getElementById('cty-act-days').value;
+  const rows = rowsIn.slice().sort((a, b) => b[key] - a[key] || b.total - a.total);
+  const sum = k => rows.reduce((s, r) => s + r[k], 0);
+  const total = sum(key);
+  const allTotal = sum('total');
+  const fmt = n => n.toLocaleString('en-GB');
+  const pctOf = (n, d) => d ? (100 * n / d).toFixed(n / d < 0.01 ? 2 : 1) + '%' : '—';
+  const pct = n => pctOf(n, total);
+
+  // KPIs
+  document.getElementById('cty-k-main-label').textContent = mode.label;
+  document.getElementById('cty-k-total').textContent = fmt(total);
+  document.getElementById('cty-k-total-sub').textContent = ctyMode === 'all'
+    ? rows.length + ' markets'
+    : pctOf(total, allTotal) + ' of ' + fmt(allTotal) + ' accounts · ' + rows.length + ' markets';
+  const a30 = sum('a30');
+  document.getElementById('cty-k-30d').textContent = fmt(a30);
+  document.getElementById('cty-k-30d-sub').textContent = pctOf(a30, sum('relevant')) + ' of relevant users';
+  const topRow = rows.find(r => r[key] > 0);
+  document.getElementById('cty-k-top').textContent = topRow ? ctyName(topRow.code) : '—';
+  document.getElementById('cty-k-top-share').textContent = topRow ? pct(topRow[key]) + ' of ' + mode.label.toLowerCase() : '';
+  const idle = sum('idle');
+  document.getElementById('cty-k-idle').textContent = fmt(idle);
+  document.getElementById('cty-k-idle-sub').textContent = 'not registered in ' + regDays + 'd, no use in ' + actDays + 'd';
+
+  // Slices: top N + Other (only countries with a non-zero value in this mode)
+  const nz = rows.filter(r => r[key] > 0);
+  const top = nz.slice(0, CTY_MAX_SLICES);
+  const rest = nz.slice(CTY_MAX_SLICES);
+  const otherN = rest.reduce((s, r) => s + r[key], 0);
+  const slices = top.map((r, i) => ({ label: ctyName(r.code), code: r.code, n: r[key], color: CTY_COLORS[i] }));
+  if (otherN > 0) slices.push({ label: 'Other (' + rest.length + ')', code: '', n: otherN, color: CTY_OTHER_COLOR });
+  const colorByCode = {};
+  top.forEach((r, i) => colorByCode[r.code] = CTY_COLORS[i]);
+
+  document.getElementById('cty-chart-title').textContent = mode.title;
+  if (ctyChart) ctyChart.destroy();
+  ctyChart = new Chart(document.getElementById('cty-chart').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: slices.map(s => s.label),
+      datasets: [{
+        data: slices.map(s => s.n),
+        backgroundColor: slices.map(s => s.color),
+        borderColor: '#13131d',
+        borderWidth: 2,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '58%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ' ' + fmt(ctx.raw) + ' users · ' + pct(ctx.raw) } }
+      }
+    }
+  });
+
+  document.getElementById('cty-legend').innerHTML = slices.map(s =>
+    `<div class="cty-legend-item"><span class="cty-legend-swatch" style="background:${s.color}"></span><b>${s.label}</b> ${fmt(s.n)} · ${pct(s.n)}</div>`
+  ).join('');
+
+  const noteByMode = {
+    relevant: `Relevant = registered in the last ${regDays} days <i>or</i> used the platform in the last ${actDays} days. Idle accounts (${fmt(idle)}) are excluded.`,
+    active:   `Active = signed in or synced training progress in the last ${actDays} days, regardless of purchase date.`,
+    all:      `Every account in the users table, including idle legacy imports.`
+  };
+  document.getElementById('cty-note').innerHTML = 'Top 8 markets as slices; the rest grouped as “Other”. ' + noteByMode[ctyMode] +
+    ' Source: Supabase RPC <code>users_by_country_activity</code>.';
+
+  // Full table — every country, every measure; the active mode's column is highlighted
+  const hi = c => c === key ? ' class="cty-hi"' : '';
+  const maxN = nz[0] ? nz[0][key] : 1;
+  let html = `<thead><tr><th>Country</th><th${hi('total')}>All</th><th${hi('recent')}>Recent</th><th${hi('active')}>Active</th><th>30d</th><th${hi('relevant')}>Relevant</th><th>Idle</th><th>Share</th></tr></thead><tbody>`;
+  rows.forEach(r => {
+    const w = Math.max(r[key] ? 2 : 0, Math.round(60 * r[key] / maxN));
+    const sw = colorByCode[r.code] || CTY_OTHER_COLOR;
+    const cell = (k, cls) => `<td${cls ? ' class="' + cls + '"' : ''}>${fmt(r[k])}</td>`;
+    html += `<tr><td><span class="cty-flag" style="background:${sw}"></span>${ctyName(r.code)}<span class="cty-code">${r.code || '—'}</span></td>` +
+      cell('total', key === 'total' ? 'cty-hi' : '') + cell('recent', key === 'recent' ? 'cty-hi' : '') +
+      cell('active', key === 'active' ? 'cty-hi' : '') + cell('a30') +
+      cell('relevant', key === 'relevant' ? 'cty-hi' : '') + cell('idle', 'cty-dim') +
+      `<td><span class="cty-bar" style="width:${w}px"></span>${pct(r[key])}</td></tr>`;
+  });
+  const tf = k => `<td style="font-weight:600;color:var(--text)">${fmt(sum(k))}</td>`;
+  html += `</tbody><tfoot><tr><td style="font-weight:600;color:var(--text)">Total</td>${tf('total')}${tf('recent')}${tf('active')}${tf('a30')}${tf('relevant')}<td class="cty-dim">${fmt(idle)}</td><td>100%</td></tr></tfoot>`;
+  document.getElementById('cty-table').innerHTML = html;
 }
 
 </script>

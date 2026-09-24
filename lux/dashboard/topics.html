@@ -1,554 +1,251 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
-<link rel="manifest" href="/lux/manifest.json">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title data-i18n="title_topics"></title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title_topics">Tests par thème</title>
+  <link rel="manifest" href="/lux/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="mobile-web-app-capable" content="yes">
 
-  <!-- Core -->
-
-  <link rel="stylesheet" href="/assets/css/dashboard-core-lt.css">
-  <link rel="stylesheet" href="/assets/css/test-core-lu.css">
-  
-
- 
+  <link rel="stylesheet" href="/lux/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/lux/assets/css/test-v2.css">
   <style>
-    .brand svg {
-      width: 30px !important;
-      height: 30px !important;
+    /* Lux: 3 topics × 21 microtopics → grouped micro-cards (Sweden shows one card per topic) */
+    #topicContainer { display: block; }
+    .topic-group { margin-bottom: 26px; }
+    .topic-group-title {
+      display: flex; align-items: center; gap: 10px;
+      margin: 0 0 12px; font-size: 14px; font-weight: 700; letter-spacing: -0.02em; color: var(--text);
     }
-
-    /* --- Light chip UI --- */
-#topicContainer{
-  display:flex;
-  font-family: inherit;
-  flex-direction:column;
-  gap:18px;
-  margin:20px 0;
-}
-
-    .topic-chip {
-      padding: 10px 16px;
-	  font-family: inherit;
-      font-weight: 400;
-      font-size: 14px;
-      border-radius: 18px;
-      background: var(--card);
-      border: 1px solid var(--line);
-      cursor: pointer;
-      font-size: 15px;
-      user-select: none;
-      transition: 0.15s ease;
+    .topic-group-badge {
+      font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px;
+      background: var(--accent-soft); color: var(--accent);
     }
-
-    .topic-chip:hover {
-      background: rgba(0,0,0,0.04);
-    }
-
-    .topic-chip.active {
-      background: var(--brand);
-      color: #fff;
-      border-color: var(--brand);
-    }
-
-    #startBtn {
-      margin-top: 20px;
-      padding: 12px 20px;
-      font-size: 16px;
-      border-radius: 10px;
-      background: var(--brand);
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      display: none; /* shown only after selection */
-    }
-	.topic-chip.mastered {
-  background: #e0ffe4;
-  border-color: #34c759;
-  color: #0a7a2a;
-}
-
-/* --- Grouped layout (real topic → microtopics) --- */
-.topic-group{
-  display:block;
-  font-family: inherit;
-}
-
-.topic-group-title{
-  display:flex;
-  align-items:center;
-  align-items: center;
-  gap: 10px;
-  margin:0 0 10px 0;
-  font-size:15px;
-  font-weight:600;
-  color:var(--text, #111827);
-}
-
-.topic-group-badge {
-  margin-left: 6px;
-
-  padding: 4px 10px;
-  border-radius: 999px;
-
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.4;
-
-  background: rgba(99, 102, 241, 0.10); /* soft indigo */
-  color: rgba(55, 48, 163, 0.85);
-
-  display: inline-flex;
-  align-items: center;
-}
-
-
-.topic-chips{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
-
-/* count inside chip */
-.topic-chip .chip-count {
-  margin-left: 10px;
-
-  padding: 2px 8px;
-  border-radius: 999px;
-
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.4;
-
-  background: rgba(99, 102, 241, 0.08); /* soft indigo */
-  color: rgba(55, 48, 163, 0.85);
-
-  display: inline-flex;
-  align-items: center;
-}
-.topic-chip.active .chip-count {
-  background: rgba(99, 102, 241, 0.15);
-  color: rgba(55, 48, 163, 1);
-}
-.topic-chip:hover .chip-count {
-  background: rgba(99, 102, 241, 0.12);
-}
-.topic-chip.active .chip-count {
-  background: rgba(255, 255, 255, 0.28);
-  color: #ffffff;
-  font-weight: 600;
-}
-
-}
-
+    .topic-group-pct { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-left: auto; }
+    .topic-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+    @media (max-width: 480px) { .topic-cards { grid-template-columns: 1fr 1fr; } }
   </style>
-        <script>
-  document.documentElement.classList.add("i18n-hidden");
-</script>
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
- <script src="/lux/assets/js/lux-auth.js?v=2"></script>
+
+  <script>document.documentElement.classList.add("i18n-hidden");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/lux/assets/js/lux-auth.js?v=2"></script>
 </head>
 
-<body class="test-page">
+<body class="test-page qz-v3">
 
 <button class="menu-toggle" aria-label="Menu">☰</button>
 
 <div class="wrap">
-
-  <!-- SIDEBAR -->
   <aside class="sidebar">
-<div class="brand">
-  CivicLearn®
-  <svg
-    viewBox="0 0 12000 6000"
-    width="30"
-    height="30"
-    style="margin-left:6px;vertical-align:middle;border-radius:3px;overflow:hidden"
-    aria-label="Luxembourg"
-  >
-    <defs>
-      <clipPath id="clip-lu">
-        <rect width="12000" height="6000" />
-      </clipPath>
-    </defs>
-
-    <g clip-path="url(#clip-lu)">
-      <!-- Top: Red -->
-      <rect x="0" y="0" width="12000" height="2000" fill="#ED2939"/>
-
-      <!-- Middle: White -->
-      <rect x="0" y="2000" width="12000" height="2000" fill="#FFFFFF"/>
-
-      <!-- Bottom: Light Blue -->
-      <rect x="0" y="4000" width="12000" height="2000" fill="#00A1DE"/>
-    </g>
-  </svg>
-</div>
-
-
-              <nav class="nav">
-  <a href="index.html"  data-i18n="nav_dashboard"></a>
-  <a href="simulation.html" data-i18n="nav_simulation"></a>
-  <a href="quick.html" data-i18n="nav_quick"></a>
-  <a href="topics.html" class="sub active" data-i18n="nav_topics"></a>
-  <a href="traps.html" data-i18n="nav_traps"></a>
-  <a href="flashcards.html" data-i18n="nav_flashcards"></a>
-  <a href="reference.html"  data-i18n="nav_reference_texts"></a>
-  <a href="history.html" data-i18n="nav_history"></a>
-  <a href="my-list.html" data-i18n="nav_my_list"></a>
-  <a href="help.html" data-i18n="nav_help"></a>
-  <a href="#" data-i18n="nav_logout" id="logoutLink"></a>
-</nav>
-
-   <div class="spacer"></div>
-<div class="profile">
-
-  <div class="global-controls">
-
-  
-    <div class="lang-switch">
-      <button data-lang="fr">FR</button>
-      <button data-lang="de">DE</button>
-      <button data-lang="en">EN</button>
-    </div>
-
-    <button
-      id="readingToggle"
-      class="reading-btn tool"
-      data-i18n="reading_tooltip"
-      data-i18n-attr="title"
-      aria-label="Reading assist"
-    >
-      <svg class="reading-icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M3 9v6h4l5 5V4L7 9H3z"/>
-        <path d="M16.5 12l4.5 4.5-1.5 1.5L15 13.5l-4.5 4.5-1.5-1.5L13.5 12 9 7.5 10.5 6l4.5 4.5 4.5-4.5 1.5 1.5L16.5 12z"/>
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 640 400" aria-label="Luxembourg">
+        <rect x="0" y="0" width="640" height="134" fill="#ED2939"/>
+        <rect x="0" y="133" width="640" height="134" fill="#FFFFFF"/>
+        <rect x="0" y="266" width="640" height="134" fill="#00A1DE"/>
       </svg>
-    </button>
+    </div>
+    <!-- Sidebar gauge -->
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Score estimé</span>
+        <span class="sidebar-gauge-score" id="clGaugeScore">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugePass"></div>
+      </div>
+      <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
+    </div>
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav_dashboard">Tableau de bord</a>
+      <a href="simulation.html" data-i18n="nav_simulation">Simulation du test</a>
+      <a href="quick.html" data-i18n="nav_quick">Test rapide</a>
+      <a href="topics.html" class="active" data-i18n="nav_topics">Tests par thème</a>
+      <a href="traps.html" data-i18n="nav_traps">Pièges fréquents</a>
+      <a href="flashcards.html" data-i18n="nav_flashcards">Flashcards</a>
+      <a href="reference.html" data-i18n="nav_reference_texts">Textes de référence</a>
+      <div class="nav-sep"></div>
+      <a href="history.html" data-i18n="nav_history">Historique</a>
+      <a href="my-list.html" data-i18n="nav_my_list">Ma liste</a>
+      <a href="help.html" data-i18n="nav_help">Aide & contact</a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink">Se déconnecter</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="global-controls">
+      <div class="lang-switch">
+        <button data-lang="fr">FR</button>
+        <button data-lang="de">DE</button>
+        <button data-lang="en">EN</button>
+      </div>
+      <button id="readingToggle" class="reading-btn tool" data-i18n="reading_tooltip" data-i18n-attr="title" aria-label="Reading assist">
+        <svg class="reading-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 9v6h4l5 5V4L7 9H3z"/>
+          <path d="M16.5 12l4.5 4.5-1.5 1.5L15 13.5l-4.5 4.5-1.5-1.5L13.5 12 9 7.5 10.5 6l4.5 4.5 4.5-4.5 1.5 1.5L16.5 12z"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
 
-  </div>
-
-</div>
-
-</aside>
-
-  <!-- OVERLAY -->
   <div class="overlay" id="menuOverlay"></div>
 
-  <!-- MAIN -->
-  <main class="main">
-
-    <header class="ce-header ce-header-top">
-      <h1 data-i18n="title_topics"></h1>
-      
+  <main>
+    <header class="ce-header">
+      <h1 data-i18n="title_topics">Tests par thème</h1>
     </header>
 
-<div class="quiz-container" id="quizArea" style="display:none;">
-	<div class="ce-progress-global">
-  <div class="ce-progress-global-bar" id="topicsProgress"></div>
-</div>
-  <div id="quiz"></div>
-</div>
+    <div class="quiz-container" id="quizArea" style="display:none;">
+      <div class="ce-progress-global">
+        <div class="ce-progress-global-bar" id="topicsProgress"></div>
+      </div>
+      <div id="quiz"></div>
+    </div>
 
-    <section>
-
+    <section style="max-width:960px;">
       <div id="topicContainer"></div>
-
-      <button id="startBtn" data-i18n="topics_start_btn"></button>
-
+      <button id="startBtn" class="btn" data-i18n="topics_start_btn" style="display:none">Commencer</button>
     </section>
   </main>
 </div>
 
-<!-- CONFIG + I18N -->
+<!-- Config + i18n (Lux files live at the CivicLearn root) -->
 <script src="/assets/js/lang-bootstrap-lu.js"></script>
 <script src="/assets/js/config-lu.js?v=2"></script>
 <script src="/assets/js/i18n.js"></script>
-<script>
-  CivicLearnI18n.init();
-</script>
-
-<!-- READING (must come BEFORE engine.js) -->
+<script>CivicLearnI18n.init();</script>
+<!-- Reading assist must load BEFORE the engine -->
 <script src="/assets/js/reading.js"></script>
-
-<!-- ENGINE -->
 <script src="/assets/js/engine-lu.js"></script>
 <script src="/assets/js/sync.js"></script>
 
-<!-- MAIN TOPICS LOGIC -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const cfg = window.CIVICEDGE_CONFIG || {};
- 
   const container = document.getElementById("topicContainer");
   const startBtn = document.getElementById("startBtn");
-  const selected = new Set();
-
+  const selected = new Set();           // microtopic.en keys
   const bankPath = cfg.bank && cfg.bank.path;
   const lang = window.CIVICEDGE_LANG || "fr";
-
-  function normalizeLabel(str) {
-    return (str || "")
-      .normalize("NFD")
-      .replace(/\p{Diacritic}/gu, "")
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, " ");
-  }
-
-  function getTopicLabel(q) {
-    if (!q || !q.topic) return "";
-    if (typeof q.topic === "object") {
-      return q.topic[lang] || q.topic.en || "";
-    }
-    return q.topic;
-  }
-function isTopicMastered(microCanon, progress) {
-  // supports both known progress shapes: progress.topics[...] and progress.microtopics[...]
-  const node =
-    (progress && progress.topics && progress.topics[microCanon]) ||
-    (progress && progress.microtopics && progress.microtopics[microCanon]) ||
-    (progress && progress[microCanon]) ||
-    null;
-
-  if (!node) return false;
-
-  const seen = Number(node.seen ?? node.total ?? node.attempts ?? 0);
-  const correct = Number(node.correct ?? node.right ?? 0);
-
-  // conservative mastery rule (matches “green when completed” behavior)
-  // - must have been seen at least once
-  // - and be mostly correct
-  if (seen <= 0) return false;
-
-  const rate = seen > 0 ? correct / seen : 0;
-  return rate >= 0.8;
-}
+  const Q_FALLBACK = { fr: "questions", de: "Fragen", en: "questions" }[lang] || "questions";
+  const Q_WORD = (window.CivicLearnI18n && typeof CivicLearnI18n.t === "function" && CivicLearnI18n.t("topics_q_word") !== "topics_q_word" && CivicLearnI18n.t("topics_q_word")) || Q_FALLBACK;
 
   async function loadBankTopics() {
     if (!bankPath) return [];
-
     try {
       const res = await fetch(bankPath);
       const raw = await res.json();
       return Array.isArray(raw) ? raw : (raw.questions || []);
-    } catch (e) {
-      console.warn("Failed to load bank for topics", e);
-      return [];
-    }
+    } catch (e) { console.warn("Failed to load bank for topics", e); return []; }
+  }
+
+  function progKey(q) {
+    const microKey = q.microtopic && typeof q.microtopic === "object" ? q.microtopic.en : "";
+    return `${microKey}:${q.id}`;
   }
 
   async function initTopics() {
-    const bankQuestions = await loadBankTopics();
-	
-	const microtopics = new Map();
+    const bank = await loadBankTopics();
+    let progress = {};
+    try { progress = JSON.parse(localStorage.getItem("civicedge_progress") || "{}"); } catch {}
 
-bankQuestions.forEach(q => {
-  if (!q.microtopic || typeof q.microtopic !== "object") return;
+    // topic.en → { label, total, mastered, micros: { microtopic.en → { label, total, mastered } } }
+    const groups = {};
+    bank.forEach(q => {
+      if (!q.topic || typeof q.topic !== "object" || !q.microtopic || typeof q.microtopic !== "object") return;
+      const tc = q.topic.en, mc = q.microtopic.en;
+      if (!tc || !mc) return;
+      if (!groups[tc]) groups[tc] = { label: q.topic[lang] || tc, total: 0, mastered: 0, micros: {} };
+      const g = groups[tc];
+      if (!g.micros[mc]) g.micros[mc] = { label: q.microtopic[lang] || mc, total: 0, mastered: 0 };
+      const entry = progress[progKey(q)];
+      const ok = !!(entry && entry.correct === 1);
+      g.total++; g.micros[mc].total++;
+      if (ok) { g.mastered++; g.micros[mc].mastered++; }
+    });
 
-  const canon = q.microtopic.en;
-  if (!canon) return;
+    container.innerHTML = "";
 
-  if (!microtopics.has(canon)) {
-    microtopics.set(canon, q.microtopic[lang] || canon);
-  }
-});
+    Object.values(groups).forEach(group => {
+      const wrap = document.createElement("div");
+      wrap.className = "topic-group";
 
+      const gpct = group.total ? Math.round((group.mastered / group.total) * 100) : 0;
+      const header = document.createElement("div");
+      header.className = "topic-group-title";
+      header.innerHTML = `<span>${group.label}</span><span class="topic-group-badge">${group.total}</span><span class="topic-group-pct">${gpct}%</span>`;
 
-    // Build map: LT canonical topic → translated label
-// Build map: canonical EN topic → translated label
-const topicLabelMap = {};
-bankQuestions.forEach(q => {
-  if (!q.topic || typeof q.topic !== "object") return;
-  const canon = q.topic.en;
-  if (!canon) return;
-  if (!topicLabelMap[canon]) {
-    topicLabelMap[canon] = q.topic[lang] || canon;
-  }
-});
+      const grid = document.createElement("div");
+      grid.className = "topic-cards";
 
+      Object.entries(group.micros).forEach(([mc, mt]) => {
+        const pct = mt.total ? Math.round((mt.mastered / mt.total) * 100) : 0;
+        const card = document.createElement("button");
+        card.className = "topic-card";
+        if (mt.total > 0 && mt.mastered >= mt.total) card.classList.add("mastered");
+        card.innerHTML = `
+          <div class="topic-card-name">${mt.label}</div>
+          <div class="topic-card-meta">
+            <span class="topic-card-count">${mt.total} ${Q_WORD}</span>
+            <span class="topic-card-pct">${pct}%</span>
+          </div>
+          <div class="topic-card-bar"><div class="topic-card-bar-fill" style="width:${pct}%"></div></div>
+        `;
+        card.addEventListener("click", () => {
+          card.classList.toggle("active");
+          if (card.classList.contains("active")) selected.add(mc); else selected.delete(mc);
+          startBtn.style.display = selected.size > 0 ? "inline-block" : "none";
+          if (selected.size > 0 && window.innerWidth < 768) {
+            setTimeout(() => startBtn.scrollIntoView({ behavior: "smooth", block: "center" }), 150);
+          }
+        });
+        grid.appendChild(card);
+      });
 
-    const progress = JSON.parse(
-      localStorage.getItem("civicedge_progress") || "{}"
-    );
-
-// ===== GROUP QUESTIONS BY REAL TOPIC + MICROTOPIC =====
-const groupedTopics = {};
-// realTopicLabel -> { label, total, micros: { microCanon -> { label, count } } }
-
-bankQuestions.forEach(q => {
-  if (!q.topic || !q.microtopic) return;
-  if (typeof q.topic !== "object" || typeof q.microtopic !== "object") return;
-
-  const realCanon = q.topic.en;
-  if (!realCanon) return;
-
-  const realLabel = q.topic[lang] || realCanon;
-  const microCanon = q.microtopic.en;
-  const microLabel = q.microtopic[lang] || microCanon;
-
-  if (!microCanon) return;
-
-  if (!groupedTopics[realCanon]) {
-    groupedTopics[realCanon] = {
-      label: realLabel,
-      total: 0,
-      micros: {}
-    };
-  }
-
-  groupedTopics[realCanon].total++;
-
-  if (!groupedTopics[realCanon].micros[microCanon]) {
-    groupedTopics[realCanon].micros[microCanon] = {
-      label: microLabel,
-      count: 0
-    };
-  }
-
-  groupedTopics[realCanon].micros[microCanon].count++;
-});
-
-// ===== RENDER GROUPED TOPICS =====
-container.innerHTML = "";
-
-Object.values(groupedTopics).forEach(group => {
-  const groupWrap = document.createElement("div");
-  groupWrap.className = "topic-group";
-
-  const header = document.createElement("div");
-  header.className = "topic-group-title";
-  header.innerHTML = `
-    <span>${group.label}</span>
-    <span class="topic-group-badge">${group.total}</span>
-  `;
-
-  const chipsWrap = document.createElement("div");
-  chipsWrap.className = "topic-chips";
-
-  Object.entries(group.micros).forEach(([microCanon, mt]) => {
-    const chip = document.createElement("button");
-    chip.className = "topic-chip";	
-	if (isMicrotopicMastered(microCanon, bankQuestions, progress)) {
-  chip.classList.add("mastered");
-}
-	// apply mastered state using computed logic
-if (typeof isTopicMastered === "function" && isTopicMastered(microCanon, progress)) {
-  chip.classList.add("mastered");
-}
-
-   chip.dataset.topic = mt.label;
-
-    chip.innerHTML = `
-      ${mt.label}
-      <span class="chip-count">${mt.count}</span>
-    `;
-
-    chip.addEventListener("click", () => {
-  if (chip.classList.contains("active")) {
-    chip.classList.remove("active");
-    selected.delete(microCanon);
-  } else {
-    chip.classList.add("active");
-    selected.add(microCanon);
-  }
-
-  startBtn.style.display =
-    selected.size > 0 ? "inline-block" : "none";
-});
-
-
-    chipsWrap.appendChild(chip);
-  });
-
-  groupWrap.appendChild(header);
-  groupWrap.appendChild(chipsWrap);
-  container.appendChild(groupWrap);
-});
-
+      wrap.appendChild(header);
+      wrap.appendChild(grid);
+      container.appendChild(wrap);
+    });
 
     startBtn.addEventListener("click", () => {
-  const pick = Array.from(selected).map(t => t);
-  const limit =
-    (cfg.topics && cfg.topics.questionCount) || 10;
-
-  document.getElementById("quizArea").style.display = "block";
-  document.querySelector("section").style.display = "none";
-
-  let quiz = document.getElementById("quiz");
-  if (!quiz) {
-    quiz = document.createElement("div");
-    quiz.id = "quiz";
-    document.getElementById("quizArea").appendChild(quiz);
+      const pick = Array.from(selected);
+      const limit = (cfg.topics && cfg.topics.questionCount) || 10;
+      document.getElementById("quizArea").style.display = "block";
+      document.querySelector("section").style.display = "none";
+      CivicEdgeEngine.start("topics", { topics: pick, limit: limit });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
   }
-
-  CivicEdgeEngine.start("topics", {
-    topics: pick,
-    limit: limit
-  });
-
-  window.scrollTo({ top: 0, behavior: "smooth" });
-});
-
-  }
-function isMicrotopicMastered(microCanon, bankQuestions, progress) {
-  const qs = bankQuestions.filter(
-    q => q.microtopic && q.microtopic.en === microCanon
-  );
-
-  for (const q of qs) {
-    const key = `${microCanon}:${q.id}`;
-    const entry = progress[key];
-    if (!(entry && entry.correct === 1)) {
-      return false;
-    }
-  }
-  return qs.length > 0;
-}
 
   initTopics();
 });
 </script>
 
-<!-- Menu -->
+<!-- Mobile menu + lang switch -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const toggle = document.querySelector(".menu-toggle");
   const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
 
-  toggle.addEventListener("click", () => {
-    document.body.classList.toggle("menu-open");
-  });
-  overlay.addEventListener("click", () => {
-    document.body.classList.remove("menu-open");
+  const current = window.CIVICEDGE_LANG;
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    if (btn.dataset.lang === current) btn.classList.add("active");
+    btn.addEventListener("click", () => {
+      if (btn.dataset.lang === current) return;
+      localStorage.setItem("civicedge_lang", btn.dataset.lang);
+      location.reload();
+    });
   });
 });
 </script>
-<script>
-  (function () {
-    const current = window.CIVICEDGE_LANG;
-
-    document.querySelectorAll(".lang-switch button").forEach(btn => {
-      const lang = btn.dataset.lang;
-
-      // Highlight active language
-      if (lang === current) {
-        btn.classList.add("active");
-      }
-
-      btn.addEventListener("click", () => {
-        if (lang === current) return;
-        localStorage.setItem("civicedge_lang", lang);
-        location.reload();
-      });
-    });
-  })();
-</script>
+<script src="/lux/assets/js/gauge-bar.js"></script>
+<script src="/lux/assets/js/study-timer.js"></script>
+<script src="/assets/js/maintenance-bar.js"></script>
 <script src="/assets/js/signout.js"></script>
 </body>
 </html>

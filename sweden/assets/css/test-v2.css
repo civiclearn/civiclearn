@@ -185,6 +185,71 @@
 .ce-option-label { flex: 1; }
 
 /* ── EXPLANATION BOX (Topics mode) ── */
+/* "Bra att veta" card — ported from Lux "Bon à savoir" 18 Sep 2026 */
+.ce-explain {
+  position: relative;
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border: 1px solid #ecdfc4;
+  border-radius: var(--radius-sm, 10px);
+  background: #fdf9f0;
+}
+
+.ce-explain-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8a6417;
+}
+
+.ce-explain-title::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c79a3a;
+}
+
+.ce-explain-body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.62;
+  color: var(--text-mid, #57534e);
+}
+
+.ce-explain-long .ce-explain-body {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ce-explain-long.is-open .ce-explain-body {
+  display: block;
+  overflow: visible;
+}
+
+.ce-explain-toggle {
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #8a6417;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* legacy class, kept for safety */
 .ce-explanation {
   margin: -10px 0 20px;
   padding: 14px 18px;
@@ -533,4 +598,149 @@
 #startBtn {
   margin-top: 16px;
   display: none;
+}
+
+/* ══════════════════════════════════════════════════════════
+   v3 QUIZ LAYER — ported from Luxembourg/Denmark 18 Sep 2026
+   Additive, scoped to body.qz-v3. Delete this block and remove
+   class="qz-v3" from the quiz pages to revert.
+   ══════════════════════════════════════════════════════════ */
+
+body.qz-v3 { background: #faf7f1; }
+
+/* ── HEADER CHIPS ── */
+body.qz-v3 .ce-q-header { gap: 8px; margin-bottom: 18px; }
+body.qz-v3 .ce-q-meta {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: #f6ebd6;
+  color: #8a6417;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+/* ── QUESTION ── */
+body.qz-v3 .ce-question {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.38;
+  letter-spacing: -0.025em;
+}
+
+/* ── OPTIONS: lettered badges ── */
+body.qz-v3 .ce-options { counter-reset: ceopt; gap: 11px; }
+
+body.qz-v3 .ce-option {
+  padding: 15px 18px;
+  border-radius: 13px;
+  gap: 13px;
+  align-items: flex-start;
+}
+
+body.qz-v3 .ce-option::before {
+  counter-increment: ceopt;
+  content: counter(ceopt, upper-alpha);
+  flex: 0 0 auto;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 22px;
+  text-align: center;
+  transition: all 0.18s ease;
+}
+
+body.qz-v3 .ce-option-label { padding-top: 1px; }
+
+body.qz-v3 .ce-option:hover:not(.answered):not(:disabled)::before {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+body.qz-v3 .ce-option.correct::before,
+body.qz-v3 .ce-options.answered .ce-option.correct::before {
+  content: "\2713";
+  background: var(--correct);
+  border-color: var(--correct);
+  color: #ffffff;
+  font-size: 13px;
+}
+body.qz-v3 .ce-option.wrong::before,
+body.qz-v3 .ce-options.answered .ce-option.wrong::before {
+  content: "\2715";
+  background: var(--wrong);
+  border-color: var(--wrong);
+  color: #ffffff;
+  font-size: 12px;
+}
+
+/* ── PROGRESS BAR ──
+   The pages already carry .ce-progress-global, driven by the
+   engine. Restyled here rather than replaced. */
+body.qz-v3 .ce-progress-global {
+  height: 4px;
+  border-radius: 3px;
+  background: #ece9e2;
+  margin-bottom: 20px;
+}
+body.qz-v3 .ce-progress-global-bar {
+  border-radius: 3px;
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── NEXT BUTTON ── */
+body.qz-v3 .ce-next-btn {
+  padding: 13px 30px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+/* ══════════════════════════════════════════════════════════
+   v3 QUIZ — MOBILE
+   The card chrome is dropped so the question sits on the page
+   like an app screen, and the next button becomes a sticky
+   full-width bar within thumb reach.
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  body.qz-v3 .ce-card {
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  body.qz-v3 .ce-progress-global { margin-bottom: 16px; }
+
+  body.qz-v3 .ce-question { font-size: 19px; }
+
+  body.qz-v3 .ce-option {
+    padding: 15px 16px;
+    font-size: 14px;
+    background: var(--surface);
+  }
+
+  body.qz-v3 .ce-options { margin-bottom: 18px; }
+
+  body.qz-v3 .ce-q-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    margin: 0 -16px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, rgba(250, 247, 241, 0) 0%, #faf7f1 22%);
+  }
+
+  body.qz-v3 .ce-next-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 16px;
+    border-radius: 14px;
+    font-size: 15px;
+  }
 }

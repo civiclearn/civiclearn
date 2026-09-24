@@ -560,7 +560,15 @@ __topicsChart = new Chart(ctx, {
       const ctx = trendCanvas.getContext("2d");
       const labels = trendPoints.map((_, i) => `S${i + 1}`);
 
-      new Chart(ctx, {
+      // initDashboard re-runs on civiclearn:progress-updated, so the
+      // previous instance must be released before the canvas is reused
+      // (the global and topics charts above already do this).
+      if (__trendChart) {
+        __trendChart.destroy();
+        __trendChart = null;
+      }
+
+      __trendChart = new Chart(ctx, {
         type: "line",
         data: {
           labels,
@@ -615,6 +623,13 @@ function computeTrendPointsFromFirstAttempts(history) {
         hasFirstAttemptData = true;
         return Math.round((sum / questionsInFirstWave) * 100);
       }
+    }
+
+    // Collapsed sessions (sync v44): question detail was dropped server-side,
+    // but first-attempt accuracy was precomputed from it before dropping.
+    // Must run BEFORE the topics-mode-returns-0 fallback below.
+    if (typeof sess.firstAttemptPct === "number" && !isNaN(sess.firstAttemptPct)) {
+      return Math.round(sess.firstAttemptPct);
     }
 
     // --- FALLBACK LOGIC ---
@@ -922,7 +937,9 @@ if (
       if (gauge) gauge.setAttribute("data-value", mastery.toFixed(3));
 
       // 3. Charts
-      const perTopic = computePerTopicProgressFromHistory(stats.history || []);
+      // v44: per-topic chart now reads civicedge_progress (per-question mastery),
+      // not history question detail, which is trimmed for older sessions.
+      const perTopic = computePerTopicProgressFromProgressRaw(progress || {});
 	  // --- MERGE SEQUENTIAL PER-TOPIC (LU) INTO TOPIC CHART DATA ---
 try {
   const bank = window.__ceBank || [];

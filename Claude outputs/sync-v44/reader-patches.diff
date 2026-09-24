@@ -1,0 +1,313 @@
+diff --git a/assets/js/dashboard-v2-at.js b/assets/js/dashboard-v2-at.js
+index a3c6a6cc..27bf5091 100644
+--- a/assets/js/dashboard-v2-at.js
++++ b/assets/js/dashboard-v2-at.js
+@@ -482,6 +482,13 @@ function computeTrendPointsFromFirstAttempts(history) {
+       }
+     }
+ 
++    // Collapsed sessions (sync v44): question detail was dropped server-side,
++    // but first-attempt accuracy was precomputed from it before dropping.
++    // Must run BEFORE the topics-mode-returns-0 fallback below.
++    if (typeof sess.firstAttemptPct === "number" && !isNaN(sess.firstAttemptPct)) {
++      return Math.round(sess.firstAttemptPct);
++    }
++
+     // --- FALLBACK LOGIC ---
+     
+     // 1. Topics Mode: If it's Topics mode and we have no first-attempt data, we return 0%
+diff --git a/assets/js/dashboard-v2-dk.js b/assets/js/dashboard-v2-dk.js
+index 436a9c95..76bcd3c2 100644
+--- a/assets/js/dashboard-v2-dk.js
++++ b/assets/js/dashboard-v2-dk.js
+@@ -519,6 +519,13 @@ function computeTrendPointsFromFirstAttempts(history) {
+       }
+     }
+ 
++    // Collapsed sessions (sync v44): question detail was dropped server-side,
++    // but first-attempt accuracy was precomputed from it before dropping.
++    // Must run BEFORE the topics-mode-returns-0 fallback below.
++    if (typeof sess.firstAttemptPct === "number" && !isNaN(sess.firstAttemptPct)) {
++      return Math.round(sess.firstAttemptPct);
++    }
++
+     // --- FALLBACK LOGIC ---
+     
+     // 1. Topics Mode: If it's Topics mode and we have no first-attempt data, we return 0%
+diff --git a/assets/js/dashboard-v2-es.js b/assets/js/dashboard-v2-es.js
+index b8733277..f13b1691 100644
+--- a/assets/js/dashboard-v2-es.js
++++ b/assets/js/dashboard-v2-es.js
+@@ -485,6 +485,13 @@ function computeTrendPointsFromFirstAttempts(history) {
+       }
+     }
+ 
++    // Collapsed sessions (sync v44): question detail was dropped server-side,
++    // but first-attempt accuracy was precomputed from it before dropping.
++    // Must run BEFORE the topics-mode-returns-0 fallback below.
++    if (typeof sess.firstAttemptPct === "number" && !isNaN(sess.firstAttemptPct)) {
++      return Math.round(sess.firstAttemptPct);
++    }
++
+     // --- FALLBACK LOGIC ---
+     
+     // 1. Topics Mode: If it's Topics mode and we have no first-attempt data, we return 0%
+diff --git a/assets/js/dashboard-v2-lt.js b/assets/js/dashboard-v2-lt.js
+index 6f6f18e0..06efa297 100644
+--- a/assets/js/dashboard-v2-lt.js
++++ b/assets/js/dashboard-v2-lt.js
+@@ -522,6 +522,13 @@ function computeTrendPointsFromFirstAttempts(history) {
+       }
+     }
+ 
++    // Collapsed sessions (sync v44): question detail was dropped server-side,
++    // but first-attempt accuracy was precomputed from it before dropping.
++    // Must run BEFORE the topics-mode-returns-0 fallback below.
++    if (typeof sess.firstAttemptPct === "number" && !isNaN(sess.firstAttemptPct)) {
++      return Math.round(sess.firstAttemptPct);
++    }
++
+     // --- FALLBACK LOGIC ---
+     
+     // 1. Topics Mode: If it's Topics mode and we have no first-attempt data, we return 0%
+diff --git a/assets/js/dashboard-v2-lu.js b/assets/js/dashboard-v2-lu.js
+index ff597264..3ce491a2 100644
+--- a/assets/js/dashboard-v2-lu.js
++++ b/assets/js/dashboard-v2-lu.js
+@@ -625,6 +625,13 @@ function computeTrendPointsFromFirstAttempts(history) {
+       }
+     }
+ 
++    // Collapsed sessions (sync v44): question detail was dropped server-side,
++    // but first-attempt accuracy was precomputed from it before dropping.
++    // Must run BEFORE the topics-mode-returns-0 fallback below.
++    if (typeof sess.firstAttemptPct === "number" && !isNaN(sess.firstAttemptPct)) {
++      return Math.round(sess.firstAttemptPct);
++    }
++
+     // --- FALLBACK LOGIC ---
+     
+     // 1. Topics Mode: If it's Topics mode and we have no first-attempt data, we return 0%
+@@ -930,7 +937,9 @@ if (
+       if (gauge) gauge.setAttribute("data-value", mastery.toFixed(3));
+ 
+       // 3. Charts
+-      const perTopic = computePerTopicProgressFromHistory(stats.history || []);
++      // v44: per-topic chart now reads civicedge_progress (per-question mastery),
++      // not history question detail, which is trimmed for older sessions.
++      const perTopic = computePerTopicProgressFromProgressRaw(progress || {});
+ 	  // --- MERGE SEQUENTIAL PER-TOPIC (LU) INTO TOPIC CHART DATA ---
+ try {
+   const bank = window.__ceBank || [];
+diff --git a/assets/js/dashboard-v2.js b/assets/js/dashboard-v2.js
+index 8dff9289..245a17a2 100644
+--- a/assets/js/dashboard-v2.js
++++ b/assets/js/dashboard-v2.js
+@@ -477,6 +477,13 @@ function computeTrendPointsFromFirstAttempts(history) {
+       }
+     }
+ 
++    // Collapsed sessions (sync v44): question detail was dropped server-side,
++    // but first-attempt accuracy was precomputed from it before dropping.
++    // Must run BEFORE the topics-mode-returns-0 fallback below.
++    if (typeof sess.firstAttemptPct === "number" && !isNaN(sess.firstAttemptPct)) {
++      return Math.round(sess.firstAttemptPct);
++    }
++
+     // --- FALLBACK LOGIC ---
+     
+     // 1. Topics Mode: If it's Topics mode and we have no first-attempt data, we return 0%
+diff --git a/assets/js/history-lt.js b/assets/js/history-lt.js
+index 42637256..d5f160d1 100644
+--- a/assets/js/history-lt.js
++++ b/assets/js/history-lt.js
+@@ -359,7 +359,16 @@ function getTopicDisplayFromRaw(raw) {
+     // --------------------------
+     // TOPICS MODE (NEW DESIGN)
+     // --------------------------
+-    if (session.mode === "topics" && attemptLog.length > qList.length) {
++    // v44: older sessions keep only their summary (score, duration, topics);
++    // question-by-question detail is retained for the most recent sessions only.
++    if (session.detailTrimmed === true || (qList.length === 0 && attemptLog.length === 0)) {
++      html += `
++        <div class="question-row history-no-detail">
++          ${t("history_detail_trimmed", "Question-by-question detail is kept only for your most recent sessions. The score above is complete.")}
++        </div>
++      `;
++    }
++    else if (session.mode === "topics" && attemptLog.length > qList.length) {
+       const qMap = new Map();
+       qList.forEach((q) => qMap.set(q.id, q));
+ 
+diff --git a/assets/js/history.js b/assets/js/history.js
+index f676aefd..0115a2d3 100644
+--- a/assets/js/history.js
++++ b/assets/js/history.js
+@@ -381,7 +381,16 @@ const localeMap = {
+     // TOPICS MODE (NEW DESIGN)
+     // --------------------------
+ 
+-    if (session.mode === "topics" &&
++    // v44: older sessions keep only their summary (score, duration, topics);
++    // question-by-question detail is retained for the most recent sessions only.
++    if (session.detailTrimmed === true || (qList.length === 0 && attemptLog.length === 0)) {
++      html += `
++        <div class="question-row history-no-detail">
++          ${t("history_detail_trimmed", "Question-by-question detail is kept only for your most recent sessions. The score above is complete.")}
++        </div>
++      `;
++    }
++    else if (session.mode === "topics" &&
+         attemptLog.length > qList.length) {
+ 
+       const qMap = new Map();
+diff --git a/indfodsret/assets/js/history-dk.js b/indfodsret/assets/js/history-dk.js
+index 1e1053b2..c9f49c7f 100644
+--- a/indfodsret/assets/js/history-dk.js
++++ b/indfodsret/assets/js/history-dk.js
+@@ -419,7 +419,16 @@ function getTopicDisplayFromRaw(raw) {
+     // --------------------------
+     // TOPICS MODE (NEW DESIGN)
+     // --------------------------
+-    if (session.mode === "topics" && attemptLog.length > qList.length) {
++    // v44: older sessions keep only their summary (score, duration, topics);
++    // question-by-question detail is retained for the most recent sessions only.
++    if (session.detailTrimmed === true || (qList.length === 0 && attemptLog.length === 0)) {
++      html += `
++        <div class="question-row history-no-detail">
++          ${t("history_detail_trimmed", "Question-by-question detail is kept only for your most recent sessions. The score above is complete.")}
++        </div>
++      `;
++    }
++    else if (session.mode === "topics" && attemptLog.length > qList.length) {
+       const qMap = new Map();
+       qList.forEach((q) => qMap.set(q.id, q));
+ 
+diff --git a/kansalaisuuskoe/assets/js/history-fi.js b/kansalaisuuskoe/assets/js/history-fi.js
+index e67e3aa2..e301d46b 100644
+--- a/kansalaisuuskoe/assets/js/history-fi.js
++++ b/kansalaisuuskoe/assets/js/history-fi.js
+@@ -361,7 +361,16 @@ function getTopicDisplayFromRaw(raw) {
+     // --------------------------
+     // TOPICS MODE (NEW DESIGN)
+     // --------------------------
+-    if (session.mode === "topics" && attemptLog.length > qList.length) {
++    // v44: older sessions keep only their summary (score, duration, topics);
++    // question-by-question detail is retained for the most recent sessions only.
++    if (session.detailTrimmed === true || (qList.length === 0 && attemptLog.length === 0)) {
++      html += `
++        <div class="question-row history-no-detail">
++          ${t("history_detail_trimmed", "Question-by-question detail is kept only for your most recent sessions. The score above is complete.")}
++        </div>
++      `;
++    }
++    else if (session.mode === "topics" && attemptLog.length > qList.length) {
+       const qMap = new Map();
+       qList.forEach((q) => qMap.set(q.id, q));
+ 
+diff --git a/medborgerskab/assets/js/history-dkpr.js b/medborgerskab/assets/js/history-dkpr.js
+index e67e3aa2..e301d46b 100644
+--- a/medborgerskab/assets/js/history-dkpr.js
++++ b/medborgerskab/assets/js/history-dkpr.js
+@@ -361,7 +361,16 @@ function getTopicDisplayFromRaw(raw) {
+     // --------------------------
+     // TOPICS MODE (NEW DESIGN)
+     // --------------------------
+-    if (session.mode === "topics" && attemptLog.length > qList.length) {
++    // v44: older sessions keep only their summary (score, duration, topics);
++    // question-by-question detail is retained for the most recent sessions only.
++    if (session.detailTrimmed === true || (qList.length === 0 && attemptLog.length === 0)) {
++      html += `
++        <div class="question-row history-no-detail">
++          ${t("history_detail_trimmed", "Question-by-question detail is kept only for your most recent sessions. The score above is complete.")}
++        </div>
++      `;
++    }
++    else if (session.mode === "topics" && attemptLog.length > qList.length) {
+       const qMap = new Map();
+       qList.forEach((q) => qMap.set(q.id, q));
+ 
+diff --git a/portugal/assets/js/history-pt.js b/portugal/assets/js/history-pt.js
+index e67e3aa2..e301d46b 100644
+--- a/portugal/assets/js/history-pt.js
++++ b/portugal/assets/js/history-pt.js
+@@ -361,7 +361,16 @@ function getTopicDisplayFromRaw(raw) {
+     // --------------------------
+     // TOPICS MODE (NEW DESIGN)
+     // --------------------------
+-    if (session.mode === "topics" && attemptLog.length > qList.length) {
++    // v44: older sessions keep only their summary (score, duration, topics);
++    // question-by-question detail is retained for the most recent sessions only.
++    if (session.detailTrimmed === true || (qList.length === 0 && attemptLog.length === 0)) {
++      html += `
++        <div class="question-row history-no-detail">
++          ${t("history_detail_trimmed", "Question-by-question detail is kept only for your most recent sessions. The score above is complete.")}
++        </div>
++      `;
++    }
++    else if (session.mode === "topics" && attemptLog.length > qList.length) {
+       const qMap = new Map();
+       qList.forEach((q) => qMap.set(q.id, q));
+ 
+diff --git a/slovensko/assets/js/dashboard-v2-sk.js b/slovensko/assets/js/dashboard-v2-sk.js
+index c3d06e7c..116cac81 100644
+--- a/slovensko/assets/js/dashboard-v2-sk.js
++++ b/slovensko/assets/js/dashboard-v2-sk.js
+@@ -487,6 +487,13 @@ function computeTrendPointsFromFirstAttempts(history) {
+       }
+     }
+ 
++    // Collapsed sessions (sync v44): question detail was dropped server-side,
++    // but first-attempt accuracy was precomputed from it before dropping.
++    // Must run BEFORE the topics-mode-returns-0 fallback below.
++    if (typeof sess.firstAttemptPct === "number" && !isNaN(sess.firstAttemptPct)) {
++      return Math.round(sess.firstAttemptPct);
++    }
++
+     // --- FALLBACK LOGIC ---
+     
+     // 1. Topics Mode: If it's Topics mode and we have no first-attempt data, we return 0%
+diff --git a/slovensko/assets/js/history-sk.js b/slovensko/assets/js/history-sk.js
+index 1355a0d6..c6170538 100644
+--- a/slovensko/assets/js/history-sk.js
++++ b/slovensko/assets/js/history-sk.js
+@@ -483,7 +483,16 @@
+     const attemptLog = Array.isArray(session.attemptLog) ? session.attemptLog : [];
+ 
+     // TOPICS MODE (wave display)
+-    if (session.mode === "topics" && attemptLog.length > qList.length) {
++    // v44: older sessions keep only their summary (score, duration, topics);
++    // question-by-question detail is retained for the most recent sessions only.
++    if (session.detailTrimmed === true || (qList.length === 0 && attemptLog.length === 0)) {
++      html += `
++        <div class="question-row history-no-detail">
++          Podrobnosti o jednotlivých otázkach sa uchovávajú len pri najnovších reláciách. Skóre vyššie je úplné.
++        </div>
++      `;
++    }
++    else if (session.mode === "topics" && attemptLog.length > qList.length) {
+       const qMap = new Map();
+       qList.forEach((q) => qMap.set(q.id, q));
+ 
+diff --git a/sweden/assets/js/history-se.js b/sweden/assets/js/history-se.js
+index e67e3aa2..e301d46b 100644
+--- a/sweden/assets/js/history-se.js
++++ b/sweden/assets/js/history-se.js
+@@ -361,7 +361,16 @@ function getTopicDisplayFromRaw(raw) {
+     // --------------------------
+     // TOPICS MODE (NEW DESIGN)
+     // --------------------------
+-    if (session.mode === "topics" && attemptLog.length > qList.length) {
++    // v44: older sessions keep only their summary (score, duration, topics);
++    // question-by-question detail is retained for the most recent sessions only.
++    if (session.detailTrimmed === true || (qList.length === 0 && attemptLog.length === 0)) {
++      html += `
++        <div class="question-row history-no-detail">
++          ${t("history_detail_trimmed", "Question-by-question detail is kept only for your most recent sessions. The score above is complete.")}
++        </div>
++      `;
++    }
++    else if (session.mode === "topics" && attemptLog.length > qList.length) {
+       const qMap = new Map();
+       qList.forEach((q) => qMap.set(q.id, q));
+ 
