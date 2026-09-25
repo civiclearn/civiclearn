@@ -33,13 +33,13 @@ window.CIVICEDGE_CONFIG = {
     // Keyed by topic.en — must sum to questionCount (25). Every official topic
     // area gets at least one question; the largest banks are weighted heavier.
     topicQuotas: {
-      "Political system and institutions": 4,
+      "Political system": 4,
       "Geography and districts": 3,
-      "Modern history (since 1960)": 3,
+      "Modern history": 3,
       "Customs and traditions": 3,
       "Current affairs": 2,
       "Economy": 2,
-      "Working hours and holidays": 1,
+      "Hours & holidays": 1,
       "Telecommunications": 1,
       "Weather and climate": 1,
       "Transport": 1,
