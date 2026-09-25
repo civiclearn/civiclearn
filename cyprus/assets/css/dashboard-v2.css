@@ -1,0 +1,845 @@
+/* ══════════════════════════════════════════════════════════
+   CivicLearn v2 — Dashboard Styles (final)
+   ══════════════════════════════════════════════════════════ */
+
+.dashboard-container {
+  max-width: 1100px;
+}
+
+/* ── STATS ROW ── */
+.db-stats-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.db-stat-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 18px 16px 16px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.db-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--accent);
+}
+
+.db-stat-value {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  margin-bottom: 3px;
+  color: var(--text);
+  cursor: default;
+}
+
+.db-stat-label {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: -0.01em;
+}
+
+.db-stat-card.cd { cursor: pointer; transition: transform 0.15s; }
+.db-stat-card.cd:hover { transform: translateY(-1px); }
+
+/* Subtle tints on key cards */
+.db-stat-card.cd { background: #fdfcfb; } /* barely warm for countdown */
+.db-stat-card.acc { background: #fafdfb; } /* barely cool for mastery */
+
+/* ── DATE PICKER SHEET ── */
+.date-sheet-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 80;
+  display: none;
+}
+.date-sheet-overlay.active { display: block; }
+
+.date-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  /* Hidden by default — translated down by its OWN height (100%), so works
+     regardless of how tall the sheet content is. */
+  transform: translateX(-50%) translateY(100%);
+  width: 340px;
+  background: var(--surface);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 24px;
+  z-index: 81;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+}
+.date-sheet.active { transform: translateX(-50%) translateY(0); }
+
+.date-sheet h3 {
+  font-size: 15px; font-weight: 700;
+  margin-bottom: 12px; letter-spacing: -0.02em;
+}
+
+.date-sheet input[type="date"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+.date-sheet-actions {
+  display: flex; gap: 8px; justify-content: flex-end;
+}
+
+/* ── ACTION CARDS ── */
+.db-actions-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.db-action-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1.5px solid transparent;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.db-action-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.db-action-icon {
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  margin-bottom: 12px;
+  background: var(--accent-soft);
+}
+
+.db-action-title {
+  font-size: 13.5px; font-weight: 700;
+  letter-spacing: -0.02em; margin-bottom: 4px;
+}
+
+.db-action-desc {
+  font-size: 12px; color: var(--text-mid);
+  line-height: 1.45; flex: 1;
+}
+
+.db-action-go {
+  margin-top: 12px;
+  font-size: 12px; font-weight: 600;
+  color: var(--accent);
+}
+
+/* ── INSIGHT ROW: radar + fact ── */
+.db-insight-row {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: stretch;
+}
+
+.db-chart-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* Chart card with progress background fill */
+.db-polar-card {
+  padding: 20px;
+  background: #fafaf8;
+  border: 1.5px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Progress background — faded Cypriot flag reveal */
+.chart-bg-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 0%;
+  overflow: hidden;
+  transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 0;
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+
+/* Cypriot flag as SVG background — copper island and olive branches on white */
+.chart-bg-fill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Reconstruct the container width so flag isn't squished */
+  width: var(--card-width, 700px);
+  background:
+    url("/assets/images/cy.svg") no-repeat center / contain,
+    linear-gradient(#fbf3e8, #fbf3e8) no-repeat 0 0 / 100% 100%;
+  opacity: 0.08;
+  border-radius: var(--radius);
+}
+
+.chart-mastery-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.chart-mastery-pct {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.chart-mastery-sub {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.polar-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 640px) {
+  .db-polar-card {
+    padding: 16px;
+  }
+}
+
+.db-chart-title {
+  font-size: 12.5px; font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.chart-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.chart-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Fact of the day */
+.db-fact-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.db-fact-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.db-fact-text {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  flex: 1;
+}
+
+.db-fact-source {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── TIPS ROW ── */
+.db-tips-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.db-tip-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  border-left: 3px solid var(--border);
+  transition: border-color 0.2s;
+}
+
+.db-tip-card:hover { border-left-color: var(--accent); }
+
+.db-tip-title {
+  font-size: 12.5px; font-weight: 700;
+  letter-spacing: -0.02em; margin-bottom: 5px;
+}
+
+.db-tip-text {
+  font-size: 12px; color: var(--text-mid);
+  line-height: 1.55;
+}
+
+/* ── REVIEW CARD ── */
+.review-card { padding: 4px 0; }
+.review-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.review-card p { font-size: 13px; color: var(--text-mid); line-height: 1.5; margin-bottom: 12px; }
+.review-card textarea { width: 100%; min-height: 80px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px; font-family: var(--font); font-size: 13px; resize: vertical; margin-bottom: 12px; }
+.review-card textarea:focus { outline: none; border-color: var(--accent); }
+.review-actions { display: flex; gap: 8px; }
+.btn-primary { padding: 8px 20px; border-radius: var(--radius-sm); font-family: var(--font); font-size: 13px; font-weight: 600; background: var(--accent); color: white; border: none; cursor: pointer; }
+.btn-secondary { padding: 8px 20px; border-radius: var(--radius-sm); font-family: var(--font); font-size: 13px; font-weight: 600; background: var(--surface-alt); color: var(--text); border: 1px solid var(--border); cursor: pointer; }
+.review-error { color: var(--wrong); font-size: 12px; margin-top: 8px; }
+.review-thankyou { text-align: center; padding: 20px 0; }
+.review-thankyou h3 { font-size: 18px; margin-bottom: 4px; }
+.review-thankyou p { color: var(--text-muted); font-size: 13px; }
+
+/* ── SEQUENTIAL PRACTICE WIDGET ── */
+#seqCard {
+  display: flex;
+  flex-direction: column;
+}
+
+.seq-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.seq-counter {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-alt);
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+.seq-question {
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-bottom: 14px;
+  flex: 1;
+}
+
+.seq-options {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 14px;
+}
+
+.seq-option {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.seq-option:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.seq-option.seq-correct {
+  border-color: var(--correct);
+  background: var(--correct-bg);
+  color: #166534;
+}
+
+.seq-option.seq-wrong {
+  border-color: var(--wrong);
+  background: var(--wrong-bg);
+  color: #991b1b;
+}
+
+.seq-option.seq-answered {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.seq-option.seq-correct.seq-answered,
+.seq-option.seq-wrong.seq-answered {
+  opacity: 1;
+}
+
+.seq-nav {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: auto;
+}
+
+.seq-nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--accent);
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+.seq-nav-btn:hover { opacity: 1; }
+
+/* ── FOOTER ── */
+.db-footer {
+  padding: 24px 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  max-width: 1100px;
+}
+
+/* ── 100% MASTERY CELEBRATION ── */
+body.mastery-complete {
+  background: linear-gradient(180deg, #e6f5f5 0%, var(--bg) 120px);
+}
+
+body.mastery-complete .sidebar-gauge-fill {
+  background: var(--accent) !important;
+}
+
+body.mastery-complete .db-polar-card {
+  border: 1.5px solid var(--accent);
+}
+
+/* Flag becomes visible at 100% */
+body.mastery-complete .chart-bg-fill {
+  width: 100% !important;
+}
+
+body.mastery-complete .chart-bg-fill::before {
+  opacity: 0.28;
+}
+
+/* Bars hidden — flag is the hero now */
+body.mastery-complete .chart-wrap canvas {
+  opacity: 0 !important;
+}
+
+/* Mastery header celebrates */
+body.mastery-complete .chart-mastery-pct {
+  font-size: 38px;
+}
+
+body.mastery-complete .chart-mastery-sub::after {
+  content: " ★";
+  color: var(--accent);
+}
+
+/* ── V2 MAINTENANCE BAR (overrides maintenance-bar.js styles) ── */
+#maintenance-bar {
+  position: relative !important;
+  top: auto !important;
+  z-index: 10 !important;
+  padding: 10px 18px !important;
+  margin-bottom: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  font-size: 13px !important;
+  font-family: var(--font) !important;
+  border-radius: var(--radius) !important;
+  border: none !important;
+  border-bottom: none !important;
+  max-width: 1100px !important;
+  box-shadow: var(--shadow) !important;
+}
+
+#maintenance-bar[data-type="info"] {
+  background: #e0f2fe !important;
+  color: #075985 !important;
+}
+
+#maintenance-bar[data-type="warning"] {
+  background: #fdf4e8 !important;
+  color: #8a5a1e !important;
+}
+
+#maintenance-bar[data-type="outage"] {
+  background: #f9e4e1 !important;
+  color: #8b3028 !important;
+}
+
+#maintenance-bar[data-type="success"] {
+  background: #e6f5f5 !important;
+  color: #0a5c5f !important;
+}
+
+#maintenance-close {
+  opacity: 0.5;
+  transition: opacity 0.15s;
+  font-size: 16px !important;
+}
+
+#maintenance-close:hover {
+  opacity: 1;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .db-stats-row { grid-template-columns: repeat(3, 1fr); }
+  .db-actions-row { grid-template-columns: repeat(2, 1fr); }
+  .db-insight-row { grid-template-columns: 1fr; }
+  .db-tips-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  /* 4 stat cards on mobile, hide study time */
+  .db-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .db-stat-card.time-card {
+    display: none;
+  }
+
+  /* Compact launchers: 2-col, no desc, hide sim+flashcards */
+  .db-actions-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .db-action-card.hide-mobile {
+    display: none;
+  }
+
+  .db-action-card {
+    padding: 14px;
+  }
+
+  .db-action-icon {
+    width: 28px; height: 28px;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .db-action-title {
+    font-size: 13px;
+  }
+
+  .db-action-desc {
+    display: none;
+  }
+
+  .db-action-go {
+    margin-top: 6px;
+    font-size: 11.5px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   v3 ACCENT LAYER — ported from Luxembourg/Denmark 18 Sep 2026
+   Everything below is additive and scoped to body.db-v3.
+   Delete this block and remove class="db-v3" from
+   dashboard/index.html to return to the previous look.
+   ══════════════════════════════════════════════════════════ */
+
+body.db-v3 {
+  background: #faf7f1;
+  --tile-a:  #14655d;
+  --tile-b:  #0c3f3a;
+  --hero-a:  #0f5850;
+  --hero-b:  #08312d;
+  --amber-a: #d99133;
+  --amber-b: #b26a18;
+}
+
+/* the hero tile takes over from the sidebar gauge on this page */
+body.db-v3 .sidebar-gauge { display: none; }
+
+/* ── STATS ROW: hero + four solid tiles ── */
+body.db-v3 .db-stats-row {
+  grid-template-columns: 1.62fr repeat(4, 1fr);
+}
+
+body.db-v3 .db-stat-card {
+  background: linear-gradient(160deg, var(--tile-a), var(--tile-b));
+  box-shadow: 0 6px 16px rgba(12, 63, 58, 0.16);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 16px;
+}
+body.db-v3 .db-stat-card::before { display: none; }
+body.db-v3 .db-stat-value { color: #ffffff; font-size: 28px; }
+body.db-v3 .db-stat-label { color: #a9c9c5; font-weight: 600; }
+
+body.db-v3 .db-stat-card.streak {
+  background: linear-gradient(160deg, var(--amber-a), var(--amber-b));
+  box-shadow: 0 6px 16px rgba(178, 106, 24, 0.18);
+}
+body.db-v3 .db-stat-card.streak .db-stat-label { color: #f6e3c5; }
+
+/* ── HERO TILE (countdown + estimated-score ring) ── */
+body.db-v3 .db-stat-card.cd {
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  padding: 12px 20px;
+  background: linear-gradient(150deg, var(--hero-a), var(--hero-b));
+  box-shadow: 0 8px 22px rgba(8, 49, 45, 0.24);
+}
+body.db-v3 .hero-ring-slot { flex: 0 0 auto; line-height: 0; }
+body.db-v3 .hero-txt { min-width: 0; }
+body.db-v3 .db-stat-card.cd .db-stat-value { font-size: 27px; margin-bottom: 2px; }
+body.db-v3 #openDateSheet { display: block; color: #79e0d1 !important; }
+
+/* FI: the badge ("Harjoittele lisää") is long, so the hero text column
+   takes the remaining width and never wraps */
+body.db-v3 .hero-txt { flex: 1 1 auto; }
+body.db-v3 .db-stat-card.cd .db-stat-value { white-space: nowrap; font-size: 25px; }
+body.db-v3 .hero-badge { white-space: nowrap; }
+@media (min-width: 769px) and (max-width: 1400px) {
+  body.db-v3 .db-stats-row { grid-template-columns: 1.9fr repeat(4, 1fr); }
+}
+
+body.db-v3 .hero-ring-arc,
+body.db-v3 #clHeroArc {
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+body.db-v3 .hero-ring-score {
+  fill: #ffffff; font-family: var(--font);
+  font-size: 27px; font-weight: 800; letter-spacing: -0.04em;
+}
+body.db-v3 .hero-ring-total {
+  fill: #9fc3be; font-family: var(--font);
+  font-size: 11px; font-weight: 600;
+}
+
+body.db-v3 .hero-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: rgba(47, 163, 150, 0.24);
+  color: #79e0d1;
+}
+body.db-v3 .hero-badge:empty { display: none; }
+body.db-v3 .hero-badge[data-state="close"] { background: rgba(217, 145, 51, 0.22); color: #f0b768; }
+body.db-v3 .hero-badge[data-state="fail"]  { background: rgba(212, 87, 58, 0.22);  color: #f0a08c; }
+
+/* ── ACTION CARDS: real buttons, tinted icons ── */
+body.db-v3 .db-action-go {
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: 12px;
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  transition: background 0.2s ease;
+}
+body.db-v3 .db-action-card:hover .db-action-go { background: #0a5f62; }
+
+body.db-v3 .db-actions-row .db-action-card:nth-child(1) .db-action-icon { background: #e6f0ee; color: #0f5f58; }
+body.db-v3 .db-actions-row .db-action-card:nth-child(2) .db-action-icon { background: #fbf0de; color: #b4761b; }
+body.db-v3 .db-actions-row .db-action-card:nth-child(3) .db-action-icon { background: #e7eff9; color: #2e6fb8; }
+body.db-v3 .db-actions-row .db-action-card:nth-child(4) .db-action-icon { background: #fbebe6; color: #c1573a; }
+
+/* ── MASTERY CHART ──
+   The partial flag reveal reads as a rendering artefact at
+   mid-progress, so it is hidden until 100 %, where the full
+   flag still takes over as the celebration. */
+body.db-v3 .chart-bg-fill { display: none; }
+body.db-v3.mastery-complete .chart-bg-fill { display: block; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  body.db-v3 .db-stats-row { grid-template-columns: repeat(2, 1fr); }
+  body.db-v3 .db-stat-card.cd { grid-column: 1 / -1; }
+}
+
+@media (max-width: 768px) {
+  body.db-v3 .db-stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  body.db-v3 .db-stat-card { padding: 13px 14px; text-align: left; }
+  body.db-v3 .db-stat-value { font-size: 22px; }
+  body.db-v3 .db-stat-card.cd { grid-column: 1 / -1; padding: 13px 16px; }
+  body.db-v3 .db-action-go { margin-top: 8px; padding: 7px 14px; font-size: 11.5px; }
+  /* study time stays visible on mobile here: the hero spans the row,
+     so the four remaining tiles make a clean 2x2 instead of an orphan */
+  body.db-v3 .db-stat-card.time-card { display: flex; }
+}
+
+/* ── MASTERY PANEL: ring + rows ──
+   Built by renderMasteryRing() / renderMasteryRows() in
+   dashboard-extra-cy.js. Replaces the vertical bar chart. */
+body.db-v3 .db-polar-card { justify-content: center; }
+body.db-v3 .chart-mastery-header { display: none; }
+
+body.db-v3 .mastery-split {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+}
+
+body.db-v3 .mastery-ring {
+  flex: 0 0 auto;
+  position: relative;
+  line-height: 0;
+}
+body.db-v3 .mastery-ring-arc {
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+body.db-v3 .mastery-ring-lbl {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.15;
+}
+body.db-v3 .mastery-ring-pct {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--accent);
+}
+body.db-v3 .mastery-ring-sub {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+body.db-v3 .mastery-rows { flex: 1; min-width: 0; }
+
+body.db-v3 .mastery-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+body.db-v3 .mastery-row:last-child { margin-bottom: 0; }
+
+body.db-v3 .mastery-row-label {
+  flex: 0 0 150px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-mid);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.db-v3 .mastery-row-track {
+  flex: 1;
+  height: 11px;
+  border-radius: 6px;
+  background: #eceae4;
+  overflow: hidden;
+}
+body.db-v3 .mastery-row-track i {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+body.db-v3 .mastery-row-pct {
+  flex: 0 0 46px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  /* the ring gives way to the text header; rows stack underneath */
+  body.db-v3 .mastery-split { display: block; }
+  body.db-v3 .mastery-ring { display: none; }
+  body.db-v3 .chart-mastery-header { display: flex; }
+  body.db-v3 .mastery-rows { margin-top: 14px; }
+  body.db-v3 .mastery-row { gap: 10px; margin-bottom: 9px; }
+  body.db-v3 .mastery-row-label { flex: 0 0 122px; font-size: 11.5px; }
+  body.db-v3 .mastery-row-track { height: 9px; }
+  body.db-v3 .mastery-row-pct { flex: 0 0 40px; font-size: 12px; }
+
+  /* all four launchers on mobile, compact (descriptions stay hidden) */
+  body.db-v3 .db-action-card.hide-mobile { display: flex; }
+}
+
+/* SE/FI: many chapters — one compact column so the mastery card stays level
+   with the practice widget beside it while the bars keep their length */
+@media (min-width: 769px) {
+  body.db-v3 .mastery-rows.many .mastery-row { margin-bottom: 7px; gap: 10px; }
+  body.db-v3 .mastery-rows.many .mastery-row-label { flex: 0 0 200px; font-size: 12.5px; }
+  body.db-v3 .mastery-rows.many .mastery-row-track { height: 9px; }
+  body.db-v3 .mastery-rows.many .mastery-row-pct { font-size: 12.5px; flex: 0 0 42px; }
+}
+/* SE/FI: laptop widths — smaller ring and label column so the bars keep length */
+@media (min-width: 769px) and (max-width: 1259px) {
+  body.db-v3 .mastery-split { gap: 20px; }
+  body.db-v3 .mastery-ring svg { width: 118px; height: 118px; }
+  body.db-v3 .mastery-ring-pct { font-size: 24px; }
+  body.db-v3 .mastery-ring-sub { font-size: 10.5px; }
+  body.db-v3 .mastery-rows.many .mastery-row-label { flex: 0 0 150px; font-size: 12px; }
+}
+/* CY: 14 topics with long Greek/Russian names — give the label column more room */
+@media (min-width: 1260px) { body.db-v3 .mastery-row-label { flex-basis: 270px; } }
+@media (min-width: 769px) and (max-width: 1259px) { body.db-v3 .mastery-row-label { flex-basis: 210px; } }

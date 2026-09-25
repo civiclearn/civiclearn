@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title_quick">Quick Test</title>
+  <meta name="apple-mobile-web-app-title" content="CivicLearn">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <link rel="stylesheet" href="/cyprus/assets/css/civic-v2.css">
+  <link rel="stylesheet" href="/cyprus/assets/css/test-v2.css?v=3">
+
+  <script>document.documentElement.classList.add("i18n-hidden");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/cyprus/assets/js/cy-auth.js"></script>
+</head>
+
+<body class="test-page qz-v3">
+
+<button class="menu-toggle" aria-label="Menu">☰</button>
+
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="brand">
+      CivicLearn®
+      <svg class="flag-icon" viewBox="0 0 30 20" aria-label="Cyprus">
+        <rect width="30" height="20" fill="#fff"/>
+        <path d="M11.2 6.4c1.4-.6 3.4-.5 5 .2 1.6.6 3.5 1.3 4.9.6-.3 1.4-1.4 2.1-2.6 2.5-.4 1.2-1.6 2-3 2.3-.7.6-1.9.9-3 .7-1.2.3-2.6-.2-3.2-1.2-1.6-.2-2.4-1.5-2.3-2.9-1-.6-1.4-1.9-.7-2.9 1.3.8 3.3.6 4.9.7z" fill="#d57800"/>
+        <path d="M12.6 14.9c.7-.7 1.7-.9 2.6-.9-.9.9-1.1 1.6-1.4 2.5-.3-.9-.6-1.2-1.2-1.6zm4.8 0c-.7-.7-1.7-.9-2.6-.9.9.9 1.1 1.6 1.4 2.5.3-.9.6-1.2 1.2-1.6z" fill="#4e5b31"/>
+      </svg>
+    </div>
+    <!-- Sidebar gauge -->
+    <div class="sidebar-gauge">
+      <div class="sidebar-gauge-header">
+        <span class="sidebar-gauge-label" data-i18n="dashboard_estimated_score">Est. score</span>
+        <span class="sidebar-gauge-score" id="clGaugeScore">–</span>
+      </div>
+      <div class="sidebar-gauge-track">
+        <div class="sidebar-gauge-fill" id="clGaugeFill"></div>
+        <div class="sidebar-gauge-pass" id="clGaugePass"></div>
+      </div>
+      <div class="sidebar-gauge-badge" id="clGaugeBadge"></div>
+    </div>
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav_dashboard">Dashboard</a>
+      <a href="simulation.html" data-i18n="nav_simulation">Test Simulation</a>
+      <a href="quick.html" class="active" data-i18n="nav_quick">Quick Test</a>
+      <a href="topics.html" data-i18n="nav_topics">Tests by Topic</a>
+      <a href="traps.html" data-i18n="nav_traps">Frequent Traps</a>
+      <a href="flashcards.html" data-i18n="nav_flashcards">Flashcards</a>
+      <div class="nav-sep"></div>
+      <a href="history.html" data-i18n="nav_history">History</a>
+      <a href="my-list.html" data-i18n="nav_my_list">My List</a>
+      <a href="help.html" data-i18n="nav_help">Help & Contact</a>
+      <a href="#" data-i18n="nav_logout" id="logoutLink">Log out</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="global-controls">
+      <div class="lang-switch">
+        <button data-lang="el">EL</button>
+        <button data-lang="en">EN</button>
+        <button data-lang="ru">RU</button>
+      </div>
+      <button id="readingToggle" class="reading-btn" aria-label="Reading assist">🔇</button>
+    </div>
+  </aside>
+
+  <div class="overlay" id="menuOverlay"></div>
+
+  <main>
+    <header class="ce-header">
+      <h1 data-i18n="title_quick">Quick Test</h1>
+    </header>
+
+    <div class="ce-progress-global">
+      <div class="ce-progress-global-bar" id="quickProgress"></div>
+    </div>
+
+    <div class="quiz-container" id="quizArea">
+      <div id="quiz"></div>
+    </div>
+  </main>
+</div>
+
+<script src="/cyprus/assets/js/lang-bootstrap-cy.js"></script>
+<script src="/cyprus/assets/js/config-cy.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script>CivicLearnI18n.init();</script>
+<script src="/assets/js/reading.js"></script>
+<script src="/assets/js/engine-cy.js"></script>
+<script src="/assets/js/sync.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".menu-toggle");
+  const overlay = document.getElementById("menuOverlay");
+  if (toggle) toggle.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+  if (overlay) overlay.addEventListener("click", () => document.body.classList.remove("menu-open"));
+
+  const current = window.CIVICEDGE_LANG;
+  document.querySelectorAll(".lang-switch button").forEach(btn => {
+    if (btn.dataset.lang === current) btn.classList.add("active");
+    btn.addEventListener("click", () => {
+      if (btn.dataset.lang === current) return;
+      localStorage.setItem("civicedge_lang", btn.dataset.lang);
+      location.reload();
+    });
+  });
+
+  setTimeout(() => CivicEdgeEngine.start("quick"), 300);
+
+  document.addEventListener("click", e => {
+    if (["changeTheme","returnBtn","restartBtn","ce-return"].includes(e.target?.id)) {
+      e.preventDefault();
+      location.reload();
+    }
+  });
+});
+</script>
+<script src="/cyprus/assets/js/gauge-bar.js"></script>
+<script src="/cyprus/assets/js/study-timer.js"></script>
+<script src="/assets/js/maintenance-bar.js"></script>
+<script src="/assets/js/signout.js"></script>
+</body>
+</html>
