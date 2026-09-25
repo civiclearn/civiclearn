@@ -285,6 +285,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
 
   var currentEmail = '';
   var paymentIntentId = '';
+  var paymentClientSecret = '';
   var stripeElements = null;
   var isSubmitting = false;
 
@@ -354,8 +355,8 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
   if (returnedPI && returnedSecret) {
     currentEmail = localStorage.getItem('cyprus_checkout_email') || '';
     selectedPlan = 'solo';
-    paymentIntentId = returnedPI;
-    localStorage.setItem('cyprus_checkout_pi', returnedPI);
+    paymentIntentId = returnedPI; paymentClientSecret = returnedSecret || '';
+    localStorage.setItem('cyprus_checkout_pi', returnedPI); if (returnedSecret) localStorage.setItem('cyprus_checkout_cs', returnedSecret);
     if (returnedStatus === 'succeeded') { show('password'); }
     else {
       stripe.retrievePaymentIntent(returnedSecret).then(function(r) {
@@ -366,7 +367,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
     }
   } else {
     var savedPI = localStorage.getItem('cyprus_checkout_pi');
-    if (savedPI) { currentEmail = localStorage.getItem('cyprus_checkout_email') || ''; selectedPlan = 'solo'; paymentIntentId = savedPI; show('password'); }
+    if (savedPI) { currentEmail = localStorage.getItem('cyprus_checkout_email') || ''; selectedPlan = 'solo'; paymentIntentId = savedPI; paymentClientSecret = localStorage.getItem('cyprus_checkout_cs') || ''; show('password'); }
     else { selectPlan(selectedPlan); show('checkout'); }
   }
 
@@ -387,8 +388,8 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
       });
       var data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'An error occurred.');
-      paymentIntentId = data.payment_intent_id;
-      localStorage.setItem('cyprus_checkout_pi', data.payment_intent_id);
+      paymentIntentId = data.payment_intent_id; paymentClientSecret = data.client_secret || '';
+      localStorage.setItem('cyprus_checkout_pi', data.payment_intent_id); localStorage.setItem('cyprus_checkout_cs', paymentClientSecret);
       localStorage.setItem('cyprus_checkout_email', currentEmail);
       localStorage.setItem('cyprus_checkout_plan', selectedPlan);
       var result = await stripe.confirmPayment({
@@ -416,7 +417,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
     try {
       var res = await fetch(FUNCTIONS_URL + '/' + PLANS[selectedPlan].setupFn, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payment_intent_id: paymentIntentId, password: p1 })
+        body: JSON.stringify({ payment_intent_id: paymentIntentId, payment_intent_client_secret: paymentClientSecret, password: p1 })
       });
       var data = await res.json();
       if (!data.success) { err(data.error || 'Could not create the account.'); btn.disabled = false; btn.textContent = 'Create account'; return; }
@@ -425,6 +426,7 @@ main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
       localStorage.removeItem('cyprus_checkout_email');
       localStorage.removeItem('cyprus_checkout_pi');
       localStorage.removeItem('cyprus_checkout_plan');
+      localStorage.removeItem('cyprus_checkout_cs');
       window.history.replaceState({}, '', window.location.pathname);
       document.getElementById('doneEmail').textContent = 'Logged in as: ' + data.email;
       show('done');
