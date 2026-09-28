@@ -1660,7 +1660,7 @@ if (state.fromTopicsUI === true) {
 
   const sub = createEl("p", "muted");
   sub.setAttribute("data-i18n", "result_subtitle");
-  sub.textContent = t("result_subtitle", "Résumé de vos performances");
+  sub.textContent = t("result_subtitle", "Oversigt over dine præstationer");
 
   const scoreBlock = createEl("div", "ce-result-score");
   scoreBlock.textContent = `${correct} / ${total} (${percent}%)`;
@@ -1671,10 +1671,10 @@ if (state.fromTopicsUI === true) {
   liScore.innerHTML = `<strong>${t("result_score", "Score")}:</strong> ${percent}%`;
 
   const liCorrect = createEl("li");
-  liCorrect.innerHTML = `<strong>${t("result_correct_answers", "Bonnes réponses")}:</strong> ${correct}`;
+  liCorrect.innerHTML = `<strong>${t("result_correct_answers", "Rigtige svar")}:</strong> ${correct}`;
 
   const liWrong = createEl("li");
-  liWrong.innerHTML = `<strong>${t("result_wrong_answers", "Mauvaises réponses")}:</strong> ${incorrect}`;
+  liWrong.innerHTML = `<strong>${t("result_wrong_answers", "Forkerte svar")}:</strong> ${incorrect}`;
 
   const liTime = createEl("li");
   liTime.innerHTML = `<strong>${t("result_time", "Tid brugt")}:</strong> ${durationLabel}`;
@@ -1694,7 +1694,7 @@ if (state.fromTopicsUI === true) {
 
   const btnBar = createEl("div", "ce-result-actions");
 
-  const reviewBtn = createEl("button", "btn secondary", t("test_review_errors", "Revoir les erreurs"));
+  const reviewBtn = createEl("button", "btn secondary", t("test_review_errors", "Gennemgå fejl"));
   reviewBtn.id = "reviewErrorsBtn";
 
   const restartBtn = createEl("button", "btn", t("test_restart", "Start forfra"));
@@ -1710,8 +1710,8 @@ if (state.fromTopicsUI === true) {
   if (state.mode === "simulation") {
     const gradeEl = createEl("p", "ce-result-grade");
     gradeEl.innerHTML = passed
-      ? `<span class="ce-result-status pass">${t("result_passed", "Passed")}</span>`
-      : `<span class="ce-result-status fail">${t("result_failed", "Failed")}</span>`;
+      ? `<span class="ce-result-status pass">${t("result_passed", "Bestået")}</span>`
+      : `<span class="ce-result-status fail">${t("result_failed", "Ikke bestået")}</span>`;
     card.appendChild(gradeEl);
 
     if (passed) launchConfetti();
@@ -1937,14 +1937,14 @@ function startReviewMode() {
 
   if (!wrong.length) {
     quizEl.innerHTML = `
-      <div class="ce-card"><p>${t("alert_no_errors", "Aucune erreur")}</p></div>
+      <div class="ce-card"><p>${t("alert_no_errors", "Ingen fejl")}</p></div>
     `;
     return;
   }
 
   let html = `
     <div class="ce-card" style="padding:24px;">
-      <h2 style="margin-bottom:20px;">${t("review_title", "Revoir les erreurs")}</h2>
+      <h2 style="margin-bottom:20px;">${t("review_title", "Gennemgå fejl")}</h2>
   `;
 
   wrong.forEach((q, i) => {
