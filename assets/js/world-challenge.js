@@ -150,4 +150,12 @@
   }
 
   window.CLWorldChallenge = { celebrate: celebrate, inline: inline, show: show };
+
+  // Preview: add ?wc-preview to any dashboard URL to see the card without touching progress
+  try {
+    if (/[?&]wc-preview\b/.test(location.search)) {
+      var run = function () { setTimeout(show, 600); };
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run); else run();
+    }
+  } catch (e) {}
 })();
