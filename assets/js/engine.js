@@ -1057,7 +1057,7 @@ btnBar.appendChild(practiceBtn);
 
 // Show Practice AGAIN ONLY when fully mastered
 if (practiceBtn) {
-  practiceBtn.style.display = remaining === 0 ? "inline-block" : "none";
+  practiceBtn.style.display = remaining === 0 ? "inline-block" : "none"; if (remaining === 0 && window.CLWorldChallenge) window.CLWorldChallenge.celebrate();
 }
 
 
@@ -1152,7 +1152,7 @@ if (practiceBtn) {
         : `<span class="ce-result-status fail">${t("result_failed")}</span>`;
       card.appendChild(gradeEl);
 	    
-  if (passed) launchConfetti();
+  if (passed) launchConfetti(); if (passed && window.CLWorldChallenge) window.CLWorldChallenge.inline(card);
 
     }
 

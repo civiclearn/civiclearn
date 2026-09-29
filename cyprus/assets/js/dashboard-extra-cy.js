@@ -367,7 +367,7 @@
       const CELEBRATED_KEY = "cl_celebrated_100";
       const alreadyCelebrated = localStorage.getItem(CELEBRATED_KEY);
 
-      document.body.classList.add("mastery-complete");
+      document.body.classList.add("mastery-complete"); if (window.CLWorldChallenge) window.CLWorldChallenge.celebrate();
 
       if (!alreadyCelebrated) {
         localStorage.setItem(CELEBRATED_KEY, "1");
