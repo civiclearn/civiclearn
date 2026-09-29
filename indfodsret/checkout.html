@@ -375,6 +375,24 @@ main {
   'use strict';
 
   var FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  // ── Sales source (TikTok, YouTube, Google…) passed on from the country site; stored on the payment ──
+  var CL_ATTR = (function () {
+    var K = 'cl_attr_checkout', clean = function (v) { return String(v || '').replace(/[^\w.\-\/ ]/g, '').slice(0, 80); };
+    try {
+      var q = new URLSearchParams(location.search), ref = '';
+      try { ref = document.referrer ? new URL(document.referrer).hostname : ''; } catch (e) {}
+      if (ref === location.hostname) ref = '';
+      var a = null;
+      if (q.get('utm_source') || q.get('cl_ref')) {
+        a = { source: clean(q.get('utm_source')), medium: clean(q.get('utm_medium')), campaign: clean(q.get('utm_campaign')), ref: clean(q.get('cl_ref')), landing: clean(q.get('cl_land')), t: Date.now() };
+      } else if (ref) {
+        a = { source: '', medium: 'referral', campaign: '', ref: clean(ref), landing: '', t: Date.now() };
+      }
+      if (a) { localStorage.setItem(K, JSON.stringify(a)); return a; }
+      var s = JSON.parse(localStorage.getItem(K) || 'null');
+      return s && (Date.now() - s.t) < 30 * 864e5 ? s : null;
+    } catch (e) { return null; }
+  })();
   var SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
   var SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
   var STRIPE_PK     = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
@@ -632,6 +650,7 @@ main {
         body: JSON.stringify({
           email: currentEmail,
           plan: selectedPlan,
+          attribution: CL_ATTR || undefined,
           promotion_code: (activePromoCode && selectedPlan === 'solo') ? PROMOS[activePromoCode].id : undefined
         })
       });
