@@ -1,431 +1,603 @@
 <!DOCTYPE html>
 <html lang="lt">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CivicLearn – Checkout</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CivicLearn – Saugus mokėjimas</title>
+<link rel="canonical" href="https://civiclearn.com/lt/checkout">
+<meta property="og:title" content="Lietuvos pilietybės egzaminas · Premium prieiga">
+<meta property="og:description" content="Pasiruoškite Lietuvos pilietybės egzaminui (Konstitucijos pagrindai). Vienkartinis mokėjimas.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://civiclearn.com/lt/checkout">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; overflow-x: clip; }
+body {
+  font-family: "Lexend", system-ui, sans-serif;
+  background: #f5efe6;
+  min-height: 100vh; color: #0f172a; overflow-x: clip; width: 100%;
+}
+a { color: inherit; }
 
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/checkout.css">
- <style> 
-
-.checkout-header .lang-switch {
-  display: flex;
-  gap: 8px;
-  align-items: center;
+/* ── HEADER ── */
+.checkout-header {
+  background: rgba(245,239,230,.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  position: sticky; top: 0; z-index: 100;
+}
+.checkout-header-inner {
+  max-width: 600px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .85rem 1.5rem; gap: .5rem;
+}
+.checkout-brand {
+  display: flex; align-items: center; gap: .55rem;
+  font-weight: 700; font-size: .88rem; color: #0f172a;
+}
+.lu-flag {
+  width: 24px; height: 16px; border-radius: 3px;
+  overflow: hidden; flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,.15);
+  display: flex; flex-direction: column;
+}
+.lu-flag-r { flex: 1; background: #FDB913; }
+.lu-flag-w { flex: 1; background: #006A44; }
+.lu-flag-b { flex: 1; background: #C1272D; }
+.header-right { display: flex; align-items: center; gap: .75rem; }
+.header-contact {
+  font-size: .74rem; font-weight: 500; color: #a8a29e;
+  text-decoration: none; display: flex; align-items: center; gap: .28rem;
+  padding: .27rem .52rem; border: 1px solid #e8e0d4; border-radius: .45rem;
+  transition: all .15s; white-space: nowrap;
+}
+.header-contact:hover { border-color: #0d7377; color: #0d7377; background: #e8f4f3; }
+.checkout-powered { font-size: .72rem; color: #a8a29e; }
+.checkout-powered a { color: #78716c; text-decoration: none; font-weight: 500; }
+.checkout-powered a:hover { color: #0f172a; }
+.lang-switch { display: flex; gap: .35rem; }
+.lang-switch button {
+  font-family: "Lexend", sans-serif; font-size: .72rem; font-weight: 600;
+  padding: .22rem .45rem; border: 1.5px solid #e8e0d4; border-radius: .45rem;
+  background: transparent; color: #78716c; cursor: pointer; transition: all .15s;
+}
+.lang-switch button:hover { border-color: #0d7377; color: #0d7377; }
+.lang-switch button.active { background: #0d7377; border-color: #0d7377; color: #fff; }
+@media (max-width: 520px) {
+  .checkout-header-inner { padding: .65rem 1rem; }
+  .checkout-brand { font-size: .82rem; }
+  .header-contact span { display: none; }
+  .header-contact { padding: .25rem .4rem; }
+  .checkout-powered { display: none; }
 }
 
-.checkout-header .lang-switch button {
-  min-width: 38px;
-  height: 32px;
-  padding: 0 10px;
-  border-radius: 10px;
-  border: 1px solid #d8d6e3;
-  background: #f6f5fb;
-  color: #2d2b38;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
+/* ── LAYOUT ── */
+main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+@media (max-width: 520px) { main { padding: 1.8rem 1.15rem 3rem; } }
 
-.checkout-header .lang-switch button:hover {
-  background: #edeafc;
-  border-color: #c8c3f5;
-}
+/* ── TITLE ── */
+.page-title { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2rem; line-height: 1.2; letter-spacing: -.025em; }
 
-.checkout-header .lang-switch button.active {
-  background: #6b4eff;
-  color: #fff;
-  border-color: #6b4eff;
-  box-shadow: 0 4px 12px rgba(107, 78, 255, 0.25);
+/* ── PLAN TOGGLE ── */
+.plan-toggle { display: flex; gap: .65rem; margin-bottom: 1.8rem; }
+.plan-card {
+  flex: 1; padding: 1rem .9rem; border: 2px solid #e8e0d4; border-radius: 1rem;
+  cursor: pointer; background: #fff; transition: border-color .15s, box-shadow .15s;
+  text-align: center;
 }
- </style> 
+.plan-card:hover { border-color: #d4c9b8; }
+.plan-card.selected { border-color: #0d7377; box-shadow: 0 0 0 3px rgba(13, 115, 119,.1); }
+.plan-card-name { font-weight: 600; font-size: .84rem; color: #1c1917; margin-bottom: .35rem; line-height: 1.3; }
+.plan-card-sub { font-weight: 400; font-size: .76rem; color: #a8a29e; }
+.plan-card-price { font-size: 1.2rem; font-weight: 700; color: #0d7377; }
+@media(max-width:420px) { .plan-toggle { flex-direction: column; } }
 
+/* ── PRICE LINE ── */
+.price-line {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding-bottom: 1.6rem; margin-bottom: 1.6rem;
+  border-bottom: 1px solid #e8e0d4;
+}
+.price-line-label { font-size: .82rem; font-weight: 500; color: #78716c; }
+.price-line-meta { font-size: .72rem; color: #a8a29e; margin-top: .2rem; }
+.price-line-amount { font-size: 1.15rem; font-weight: 700; color: #0f172a; letter-spacing: -.01em; white-space: nowrap; }
+
+/* ── STRIPE ── */
+#link-auth-element { margin-bottom: 1.1rem; }
+#payment-element { margin-bottom: 1.4rem; }
+.stripe-loading { text-align: center; color: #a8a29e; font-size: .82rem; padding: 1.5rem 0; }
+
+/* ── PAY BUTTON ── */
+.pay-btn {
+  width: 100%; padding: 1rem 1.2rem;
+  background: #0d7377; color: #fff; border: none; border-radius: .85rem;
+  font-family: "Lexend", sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: opacity .15s, transform .1s; letter-spacing: .01em;
+}
+.pay-btn:hover:not(:disabled) { opacity: .92; transform: translateY(-1px); }
+.pay-btn:active:not(:disabled) { transform: translateY(0); }
+.pay-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── TRUST ── */
+.trust-strip {
+  display: flex; align-items: center; justify-content: center; gap: 1.3rem;
+  margin-top: 1.1rem; flex-wrap: wrap;
+}
+.trust-item { display: flex; align-items: center; gap: .3rem; font-size: .7rem; color: #a8a29e; white-space: nowrap; }
+.trust-item span:first-child { font-size: .82rem; }
+
+/* ── TRUSTPILOT (compact) ── */
+.tp-inline { display: inline-flex; align-items: center; gap: .4rem; text-decoration: none; }
+.tp-inline .tp-stars { display: flex; gap: 2px; flex-shrink: 0; }
+.tp-inline .tp-stars svg { width: 15px; height: 15px; display: block; }
+.tp-inline .tp-logo { display: flex; align-items: center; gap: .25rem; }
+.tp-inline .tp-logo span { font-size: .7rem; font-weight: 600; color: #0f172a; letter-spacing: -.01em; }
+.tp-inline .tp-count { font-size: .68rem; font-weight: 400; color: #a8a29e; }
+
+/* ── PASSWORD / DONE ── */
+.done-icon { font-size: 2.6rem; text-align: center; margin-bottom: .6rem; }
+.done-title { font-size: 1.2rem; font-weight: 700; text-align: center; margin-bottom: .35rem; }
+.done-sub { font-size: .82rem; color: #a8a29e; text-align: center; margin-bottom: 1.2rem; }
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: .82rem; font-weight: 500; margin-bottom: .3rem; color: #374151; }
+.field input {
+  width: 100%; padding: .75rem .9rem; border-radius: .85rem; border: 1.5px solid #e8e0d4;
+  font-size: .92rem; font-family: "Lexend", sans-serif; color: #0f172a;
+  outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.field input:focus { border-color: #0d7377; box-shadow: 0 0 0 3px rgba(13, 115, 119,.1); }
+
+/* ── MESSAGES ── */
+.checkout-message { border-radius: .75rem; padding: .65rem .9rem; font-size: .82rem; margin-top: .75rem; display: none; line-height: 1.45; }
+.checkout-message.error { background: #fff1f2; color: #be123c; }
+.checkout-message.info { background: #e8f4f3; color: #6d28d9; }
+.checkout-message.success { background: #f0fdf4; color: #15803d; }
+
+/* ── FOOTER ── */
+.footer-links {
+  margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e8e0d4;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem;
+}
+.after-text { font-size: .75rem; color: #a8a29e; }
+.after-text a { color: #0d7377; font-weight: 500; text-decoration: none; }
+.after-text a:hover { text-decoration: underline; }
+.details-toggle {
+  display: flex; align-items: center; gap: .3rem;
+  background: none; border: none; cursor: pointer;
+  font-family: "Lexend", sans-serif; font-size: .72rem; font-weight: 500;
+  color: #a8a29e; transition: color .15s;
+}
+.details-toggle:hover { color: #78716c; }
+.details-toggle .arrow { transition: transform .25s; font-size: .55rem; }
+.details-toggle.open .arrow { transform: rotate(180deg); }
+.details-list {
+  display: none; margin-top: .8rem;
+  columns: 2; column-gap: 1.5rem;
+}
+.details-list.open { display: block; }
+.details-list ul { list-style: none; }
+.details-list li {
+  font-size: .72rem; color: #78716c; display: flex; align-items: flex-start; gap: .4rem;
+  padding: .2rem 0; break-inside: avoid;
+}
+.details-list li::before { content: '✓'; color: #0d7377; font-weight: 700; font-size: .65rem; flex-shrink: 0; margin-top: .08rem; }
+@media (max-width: 420px) { .details-list { columns: 1; } }
+
+@keyframes spin { to { transform: rotate(360deg) } }
+</style>
 </head>
-
 <body>
 
 <header class="checkout-header">
   <div class="checkout-header-inner">
-
     <div class="checkout-brand">
-      <img src="/assets/images/lt.svg" alt="Lithuania">
-      <span data-t="brand_title"></span>
+      <div class="lu-flag"><div class="lu-flag-r"></div><div class="lu-flag-w"></div><div class="lu-flag-b"></div></div>
+      CivicLearn Lietuva
     </div>
-
-    <div class="checkout-right">
+    <div class="header-right">
+      <a href="https://civiclearn.com/#contact" target="_blank" class="header-contact">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <span data-t="header_contact">Klausimų?</span>
+      </a>
       <div class="lang-switch">
         <button data-lang="lt">LT</button>
         <button data-lang="en">EN</button>
         <button data-lang="ru">RU</button>
       </div>
-  
     </div>
-
   </div>
 </header>
 
 <main>
-  <div class="layout">
 
-    <!-- LEFT CARD -->
-    <aside class="features">
-      <h2 data-t="plan_title"></h2>
-      <div class="price" data-t="plan_price"></div>
-      <div class="once" data-t="plan_once"></div>
+  <div class="page-title" data-t="page_title">Aktyvuokite Premium prieigą</div>
 
-      <div class="divider"></div>
+  <!-- Single plan: no plan toggle (kept as an empty hook for the shared script) -->
+  <div class="plan-toggle" id="planToggle" style="display:none"></div>
 
-      <h3 data-t="included_title"></h3>
-
-      <ul class="benefits">
-        <li data-t="benefit_1"></li>
-        <li data-t="benefit_2"></li>
-        <li data-t="benefit_3"></li>
-        <li data-t="benefit_4"></li>
-        <li data-t="benefit_5"></li>
-        <li data-t="benefit_6"></li>
-        <li data-t="benefit_7"></li>
-        <li data-t="benefit_8"></li>
-        <li data-t="benefit_9"></li>
-        <li data-t="benefit_10"></li>
-        <li data-t="benefit_11"></li>
-        <li data-t="benefit_12"></li>
-      </ul>
-
-      <p class="recommend" data-t="social_proof"></p>
-    </aside>
-
-    <!-- RIGHT CARD -->
-    <section class="right">
-      <div class="checkout-card">
-
-        <h1 data-t="checkout_title"></h1>
-        <div class="secure-line" data-t="secure_line"></div>
-
-        <div class="checkout-flow">
-
-          <!-- STEP 1 -->
-          <div class="checkout-step" id="stepInitial">
-            <button class="pay-btn" id="startCheckout" data-t="cta_start"></button>
-            <p class="small-note" data-t="note_redirect"></p>
-          </div>
-
-          <!-- STEP 2 -->
-          <div class="checkout-step" id="stepEmail" hidden>
-            <p class="email-instructions" data-t="email_instruction"></p>
-
-    <div class="email-field-group">
-  <label for="checkoutEmail" data-t="email_label"></label>
-  <input
-    id="checkoutEmail"
-    type="email"
-    placeholder="you@example.com"
-    autocomplete="email"
-  />
-</div>
-
-
-            <button class="pay-btn" id="continueWithEmail" data-t="cta_continue"></button>
-          </div>
-
-          <!-- STEP 3 -->
-          <div class="checkout-step" id="stepConfirm" hidden>
-            <p data-t="confirm_text"></p>
-            <p class="email-display" id="emailDisplay"></p>
-            <p class="confirm-warning" data-t="confirm_warning"></p>
-
-            <div class="confirm-actions">
-              <button class="pay-btn" id="confirmEmail" data-t="cta_confirm"></button>
-              <button class="link-btn" id="editEmail" data-t="cta_edit"></button>
-            </div>
-          </div>
-
-          <div id="checkoutMessage" class="checkout-message"></div>
-        </div>
-
-        <div class="trust">
-          <div>🔒 <span data-t="trust_secure"></span></div>
-          <div>⚡ <span data-t="trust_instant"></span></div>
-          <div>✔ <span data-t="trust_no_sub"></span></div>
-        </div>
-
-        <div class="after-text">
-          <span data-t="already_account"></span>
-          <a href="/lt/login.html" data-t="login_link"></a>
-        </div>
-
-      </div>
-    </section>
-
+  <!-- PRICE LINE -->
+  <div class="price-line" id="priceLine">
+    <div>
+      <div class="price-line-label" id="priceLabel" data-t="price_label">Pilietybės egzaminas · Premium prieiga</div>
+      <div class="price-line-meta" id="priceMeta" data-t="price_meta">3 kalbos · Neribota prieiga</div>
+    </div>
+    <div style="flex-shrink:0;text-align:right"><span class="price-line-amount" id="priceAmount">€29</span></div>
   </div>
+
+  <!-- ══ CHECKOUT FORM ══ -->
+  <div id="viewCheckout">
+    <div id="link-auth-element"></div>
+    <div id="payment-element"><div class="stripe-loading" data-t="stripe_loading">Įkeliami mokėjimo būdai…</div></div>
+    <button type="button" class="pay-btn" id="payBtn" disabled data-t="pay_solo">Mokėti 29 €</button>
+    <div class="trust-strip">
+      <div class="trust-item"><span>🔒</span><span data-t="ts_secure">Paiement Stripe</span></div>
+      <div class="trust-item"><span>⚡</span><span data-t="ts_instant">Accès immédiat</span></div>
+      <div class="trust-item"><span>✔</span><span data-t="ts_onetime">Paiement unique</span></div>
+      <a class="tp-inline" href="https://www.trustpilot.com/review/civiclearn.com" target="_blank" rel="noopener">
+        <span class="tp-stars">
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="12.5" height="25" fill="#00b67a"/><rect x="12.5" width="12.5" height="25" fill="#dcdce6"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+        </span>
+        <span class="tp-logo"><span>Trustpilot</span></span>
+        <span class="tp-count"><span class="tp-num">30</span>&nbsp;<span data-t="tp_word">avis en</span>&nbsp;<span class="tp-year">2026</span></span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ══ PASSWORD ══ -->
+  <div id="viewPassword" hidden>
+    <div style="text-align:center;font-size:2.4rem;margin-bottom:.6rem">🎉</div>
+    <div class="done-title" data-t="pay_confirmed">Paiement confirmé !</div>
+    <p style="font-size:.85rem;color:#57534e;text-align:center;margin-bottom:1.1rem" data-t="pwd_instr">Choisissez un mot de passe pour votre compte.</p>
+    <div class="field">
+      <label for="pw1" data-t="pwd_label">Mot de passe</label>
+      <input type="password" id="pw1" autocomplete="new-password">
+    </div>
+    <div class="field">
+      <label for="pw2" data-t="pwd_confirm_label">Confirmer</label>
+      <input type="password" id="pw2" autocomplete="new-password">
+    </div>
+    <button type="button" class="pay-btn" id="setupBtn" data-t="cta_create">Créer le compte</button>
+  </div>
+
+  <!-- ══ DONE ══ -->
+  <div id="viewDone" hidden>
+    <div class="done-icon">✅</div>
+    <div class="done-title" data-t="done_title">Votre compte est prêt !</div>
+    <div class="done-sub" id="doneEmail"></div>
+    <a href="/lt/dashboard/" class="pay-btn" id="doneCta"
+       style="text-align:center;text-decoration:none;display:block" data-t="cta_go">Commencer l'entraînement →</a>
+  </div>
+
+  <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
+
+  <!-- FOOTER -->
+  <div class="footer-links">
+    <div class="after-text"><span data-t="already">Déjà un compte ?</span> <a href="/lt/login.html" data-t="signin">Se connecter</a>.</div>
+    <button class="details-toggle" id="detailsToggle">
+      <span data-t="details_toggle">Qu'est-ce qui est inclus ?</span>
+      <span class="arrow">▼</span>
+    </button>
+  </div>
+  <div class="details-list" id="detailsList">
+    <ul id="featureItems"></ul>
+  </div>
+
 </main>
 
-<!-- =========================
-     I18N DICTIONARY
-========================= -->
 <script>
-const I18N = {
-  lt: {
-    brand_title: "CivicLearn Lietuva – Pilietybės egzaminas",
+(function(){
+  document.getElementById('detailsToggle').addEventListener('click', function(){
+    var list = document.getElementById('detailsList');
+    this.classList.toggle('open', list.classList.toggle('open'));
+  });
+})();
+</script>
 
-    plan_title: "Premium prieiga",
-    plan_price: "29 EUR",
-    plan_once: "Vienkartinis mokėjimas · neribota prieiga",
-
-    included_title: "Kas įskaičiuota",
-    benefit_1: "Išsamūs praktikos klausimai pagal Lietuvos Konstituciją",
-    benefit_2: "Valstybės sandara, teisės, pareigos ir institucijos",
-    benefit_3: "Trumpi, fokusuoti kartojimo testai (5–10 minučių)",
-    benefit_4: "Automatinis sudėtingų klausimų sugrupavimas",
-    benefit_5: "Pažangos stebėjimas pagal temas",
-    benefit_6: "Išsami statistika ir rezultatų apžvalga",
-    benefit_7: "Visų spręstų testų istorija",
-    benefit_8: "Kasdieniai mokymosi priminimai",
-    benefit_9: "Optimizuota telefonui, planšetei ir kompiuteriui",
-    benefit_10: "Momentinė prieiga po apmokėjimo",
-    benefit_11: "Nemokami turinio atnaujinimai",
-    benefit_12: "Nėra prenumeratos – tik vienkartinis mokėjimas",
-
-    social_proof: "Naudoja kandidatai, besiruošiantys Lietuvos pilietybės egzaminui.",
-
-    checkout_title: "Aktyvuokite Premium prieigą",
-    secure_line: "100 % saugus mokėjimas per Stripe",
-
-    cta_start: "Tęsti prie saugaus mokėjimo",
-    note_redirect: "Būsite nukreipti į Stripe, kad užbaigtumėte mokėjimą.",
-
-    email_instruction: "Įveskite el. pašto adresą, kuris bus naudojamas paskyrai.",
-    email_label: "El. paštas",
-    cta_continue: "Tęsti",
-
-    confirm_text: "Paskyra bus sukurta naudojant šį el. pašto adresą:",
-    confirm_warning: "Patikrinkite atidžiai – prisijungimo nuoroda bus išsiųsta šiuo adresu.",
-    cta_confirm: "Taip, tęsti prie saugaus mokėjimo",
-    cta_edit: "Keisti el. paštą",
-
-    trust_secure: "Saugus mokėjimas",
-    trust_instant: "Momentinė prieiga",
-    trust_no_sub: "Be prenumeratos",
-
-    already_account: "Jau turite paskyrą?",
-    login_link: "Prisijunkite čia",
-
-    msg_enter_email: "Įveskite el. pašto adresą.",
-    msg_invalid_email: "Neteisingas el. pašto adresas.",
-    msg_connecting: "Jungiama prie Stripe. Prašome palaukti…",
-    msg_error: "Įvyko klaida. Bandykite dar kartą."
-  },
-
-  en: {
-    brand_title: "CivicLearn Lithuania – Citizenship test",
-
-    plan_title: "Premium access",
-    plan_price: "29 EUR",
-    plan_once: "One-time payment · unlimited access",
-
-    included_title: "What’s included",
-    benefit_1: "Practice questions based on the Lithuanian Constitution",
-    benefit_2: "State structure, rights, duties and institutions",
-    benefit_3: "Short, focused revision tests (5–10 minutes)",
-    benefit_4: "Automatic grouping of difficult questions",
-    benefit_5: "Progress tracking by topic",
-    benefit_6: "Detailed statistics and results overview",
-    benefit_7: "Full history of completed tests",
-    benefit_8: "Daily study reminders",
-    benefit_9: "Optimized for phone, tablet and desktop",
-    benefit_10: "Instant access after payment",
-    benefit_11: "Free content updates",
-    benefit_12: "No subscription – one-time payment",
-
-    social_proof: "Used by candidates preparing for the Lithuanian citizenship test.",
-
-    checkout_title: "Activate Premium access",
-    secure_line: "100% secure payment via Stripe",
-
-    cta_start: "Continue to secure payment",
-    note_redirect: "You will be redirected to Stripe to complete payment.",
-
-    email_instruction: "Enter the email address to be used for your account.",
-    email_label: "Email",
-    cta_continue: "Continue",
-
-    confirm_text: "Your account will be created using this email address:",
-    confirm_warning: "Please check carefully. The login link will be sent to this address.",
-    cta_confirm: "Yes, continue to secure payment",
-    cta_edit: "Edit email",
-
-    trust_secure: "Secure payment",
-    trust_instant: "Instant access",
-    trust_no_sub: "No subscription",
-
-    already_account: "Already have an account?",
-    login_link: "Log in here",
-
-    msg_enter_email: "Please enter your email address.",
-    msg_invalid_email: "Invalid email address.",
-    msg_connecting: "Connecting to Stripe. Please wait…",
-    msg_error: "An error occurred. Please try again."
-  },
-
-  ru: {
-    brand_title: "CivicLearn Литва – Экзамен на гражданство",
-
-    plan_title: "Премиум-доступ",
-    plan_price: "29 EUR",
-    plan_once: "Единоразовый платеж · неограниченный доступ",
-
-    included_title: "Что включено",
-    benefit_1: "400 вопросов по Конституции Литвы",
-    benefit_2: "Государственное устройство, права и обязанности",
-    benefit_3: "Короткие тесты для повторения (5–10 минут)",
-    benefit_4: "Автоматическая подборка сложных вопросов",
-    benefit_5: "Отслеживание прогресса по темам",
-    benefit_6: "Подробная статистика и результаты",
-    benefit_7: "История всех выполненных тестов",
-    benefit_8: "Ежедневные напоминания",
-    benefit_9: "Работает на телефоне, планшете и компьютере",
-    benefit_10: "Мгновенный доступ после оплаты",
-    benefit_11: "Бесплатные обновления контента",
-    benefit_12: "Без подписки — один платеж",
-
-    social_proof: "Используется кандидатами, готовящимися к экзамену на гражданство Литвы.",
-
-    checkout_title: "Активировать премиум-доступ",
-    secure_line: "100% безопасная оплата через Stripe",
-
-    cta_start: "Перейти к безопасной оплате",
-    note_redirect: "Вы будете перенаправлены в Stripe для завершения оплаты.",
-
-    email_instruction: "Введите адрес электронной почты для вашей учетной записи.",
-    email_label: "Эл. почта",
-    cta_continue: "Продолжить",
-
-    confirm_text: "Учетная запись будет создана с этим адресом:",
-    confirm_warning: "Проверьте внимательно — ссылка для входа будет отправлена сюда.",
-    cta_confirm: "Да, перейти к оплате",
-    cta_edit: "Изменить email",
-
-    trust_secure: "Безопасная оплата",
-    trust_instant: "Мгновенный доступ",
-    trust_no_sub: "Без подписки",
-
-    already_account: "Уже есть аккаунт?",
-    login_link: "Войти",
-
-    msg_enter_email: "Введите адрес электронной почты.",
-    msg_invalid_email: "Неверный адрес электронной почты.",
-    msg_connecting: "Подключение к Stripe. Пожалуйста, подождите…",
-    msg_error: "Произошла ошибка. Попробуйте снова."
-  }
+<!-- ═══ I18N ═══ -->
+<script>
+var I18N = {
+lt: {
+  header_contact:"Klausimų?",
+  page_title:"Aktyvuokite Premium prieigą",
+  price_label:"Pilietybės egzaminas · Premium prieiga",
+  price_meta:"3 kalbos · Neribota prieiga",
+  stripe_loading:"Įkeliami mokėjimo būdai…",
+  pay_solo:"Mokėti 29 €",
+  ts_secure:"Saugus mokėjimas per Stripe", ts_instant:"Momentinė prieiga", ts_onetime:"Vienkartinis mokėjimas",
+  tp_word:"atsiliepimų",
+  pay_confirmed:"Mokėjimas patvirtintas!", pwd_instr:"Sukurkite savo paskyros slaptažodį.",
+  pwd_label:"Slaptažodis", pwd_confirm_label:"Pakartokite slaptažodį",
+  pwd_placeholder:"Mažiausiai 6 simboliai", pwd_confirm_placeholder:"Pakartokite slaptažodį",
+  cta_create:"Sukurti paskyrą", done_title:"Jūsų paskyra paruošta!", cta_go:"Pradėti mokytis →",
+  already:"Jau turite paskyrą?", signin:"Prisijunkite čia",
+  details_toggle:"Kas įskaičiuota?",
+  feat_solo:["Praktikos klausimai pagal Lietuvos Konstituciją","Valstybės sandara, teisės, pareigos ir institucijos","Trumpi kartojimo testai (5–10 minučių)","Automatinis sudėtingų klausimų sugrupavimas","Pažangos stebėjimas pagal temas","Išsami statistika ir visų testų istorija","Optimizuota telefonui, planšetei ir kompiuteriui","Nemokami turinio atnaujinimai","Be prenumeratos – vienkartinis mokėjimas"],
+  msg_email_required:"Įveskite teisingą el. pašto adresą.", msg_processing:"Apdorojama…",
+  msg_error:"Įvyko klaida.", msg_payment_failed:"Mokėjimas nepavyko.",
+  msg_payment_incomplete:"Mokėjimas nebuvo užbaigtas.",
+  msg_pwd_short:"Slaptažodį turi sudaryti bent 6 simboliai.", msg_pwd_mismatch:"Slaptažodžiai nesutampa.",
+  msg_account_failed:"Nepavyko sukurti paskyros.", msg_creating:"Kuriama paskyra…",
+  msg_connection_error:"Ryšio klaida. Bandykite dar kartą.", msg_logged_in:"Prisijungta kaip: "
+},
+en: {
+  header_contact:"Any questions?",
+  page_title:"Activate Premium access",
+  price_label:"Citizenship test · Premium access",
+  price_meta:"3 languages · Unlimited access",
+  stripe_loading:"Loading payment options…",
+  pay_solo:"Pay €29",
+  ts_secure:"Stripe-secured", ts_instant:"Instant access", ts_onetime:"One-time payment",
+  tp_word:"reviews in",
+  pay_confirmed:"Payment confirmed!", pwd_instr:"Choose a password for your account.",
+  pwd_label:"Password", pwd_confirm_label:"Confirm password",
+  pwd_placeholder:"At least 6 characters", pwd_confirm_placeholder:"Repeat password",
+  cta_create:"Create account", done_title:"Your account is ready!", cta_go:"Start practising →",
+  already:"Already have an account?", signin:"Sign in here",
+  details_toggle:"What's included?",
+  feat_solo:["Practice questions based on the Lithuanian Constitution","State structure, rights, duties and institutions","Short revision tests (5–10 minutes)","Automatic grouping of difficult questions","Progress tracking by topic","Detailed statistics and full test history","Optimised for phone, tablet and desktop","Free content updates","No subscription – one-time payment"],
+  msg_email_required:"Please enter a valid email.", msg_processing:"Processing…",
+  msg_error:"An error occurred.", msg_payment_failed:"Payment failed.",
+  msg_payment_incomplete:"Payment was not completed.",
+  msg_pwd_short:"Password must be at least 6 characters.", msg_pwd_mismatch:"Passwords do not match.",
+  msg_account_failed:"Account creation failed.", msg_creating:"Creating account…",
+  msg_connection_error:"Connection error. Please try again.", msg_logged_in:"Signed in as: "
+},
+ru: {
+  header_contact:"Есть вопросы?",
+  page_title:"Активировать премиум-доступ",
+  price_label:"Экзамен на гражданство · Премиум-доступ",
+  price_meta:"3 языка · Неограниченный доступ",
+  stripe_loading:"Загрузка способов оплаты…",
+  pay_solo:"Оплатить 29 €",
+  ts_secure:"Оплата через Stripe", ts_instant:"Мгновенный доступ", ts_onetime:"Единоразовый платёж",
+  tp_word:"отзывов в",
+  pay_confirmed:"Оплата подтверждена!", pwd_instr:"Придумайте пароль для вашего аккаунта.",
+  pwd_label:"Пароль", pwd_confirm_label:"Повторите пароль",
+  pwd_placeholder:"Не менее 6 символов", pwd_confirm_placeholder:"Повторите пароль",
+  cta_create:"Создать аккаунт", done_title:"Ваш аккаунт готов!", cta_go:"Начать подготовку →",
+  already:"Уже есть аккаунт?", signin:"Войти",
+  details_toggle:"Что включено?",
+  feat_solo:["Вопросы по Конституции Литвы","Государственное устройство, права и обязанности","Короткие тесты для повторения (5–10 минут)","Автоматическая подборка сложных вопросов","Отслеживание прогресса по темам","Подробная статистика и история всех тестов","Работает на телефоне, планшете и компьютере","Бесплатные обновления контента","Без подписки — один платёж"],
+  msg_email_required:"Введите корректный адрес эл. почты.", msg_processing:"Обработка…",
+  msg_error:"Произошла ошибка.", msg_payment_failed:"Оплата не прошла.",
+  msg_payment_incomplete:"Оплата не была завершена.",
+  msg_pwd_short:"Пароль должен содержать не менее 6 символов.", msg_pwd_mismatch:"Пароли не совпадают.",
+  msg_account_failed:"Не удалось создать аккаунт.", msg_creating:"Создание аккаунта…",
+  msg_connection_error:"Ошибка соединения. Попробуйте снова.", msg_logged_in:"Вы вошли как: "
+}
 };
 </script>
 
-<!-- =========================
-     I18N ENGINE
-========================= -->
+<!-- I18N ENGINE -->
 <script>
-let currentLang = "lt";
-
+var currentLang = 'lt';
+function t(k) { return (I18N[currentLang] && I18N[currentLang][k]) || k; }
 function applyLang(lang) {
   currentLang = lang;
   document.documentElement.lang = lang;
-
-  document.querySelectorAll(".lang-switch button").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.lang === lang);
+  document.querySelectorAll('[data-t]').forEach(function(el) {
+    var k = el.dataset.t;
+    if (I18N[lang][k]) el.textContent = I18N[lang][k];
   });
-
-  document.querySelectorAll("[data-t]").forEach(el => {
-    const key = el.getAttribute("data-t");
-    if (I18N[lang][key]) el.textContent = I18N[lang][key];
+  document.querySelectorAll('.lang-switch button').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.lang === lang);
   });
+  if (typeof refreshDynamic === 'function') refreshDynamic();
+  var pw1 = document.getElementById('pw1'), pw2 = document.getElementById('pw2');
+  if (pw1) pw1.placeholder = t('pwd_placeholder');
+  if (pw2) pw2.placeholder = t('pwd_confirm_placeholder');
 }
-
-document.querySelectorAll(".lang-switch button").forEach(btn => {
-  btn.addEventListener("click", () => applyLang(btn.dataset.lang));
+document.querySelectorAll('.lang-switch button').forEach(function(b) {
+  b.onclick = function() { applyLang(b.dataset.lang); };
 });
-
-applyLang(currentLang);
+applyLang('lt');
 </script>
 
-<!-- =========================
-     CHECKOUT LOGIC (UNCHANGED)
-========================= -->
+<!-- STRIPE + SUPABASE -->
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/assets/js/cl-auth-storage.js"></script>
+
 <script>
-(function () {
-  const stepInitial = document.getElementById("stepInitial");
-  const stepEmail = document.getElementById("stepEmail");
-  const stepConfirm = document.getElementById("stepConfirm");
+(function(){
+  'use strict';
 
-  const startBtn = document.getElementById("startCheckout");
-  const continueBtn = document.getElementById("continueWithEmail");
-  const confirmBtn = document.getElementById("confirmEmail");
-  const editBtn = document.getElementById("editEmail");
+  var FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  var SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
+  var SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  var STRIPE_PK     = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
+  var RETURN_URL    = 'https://civiclearn.com/lt/checkout.html';
 
-  const emailInput = document.getElementById("checkoutEmail");
-  const emailDisplay = document.getElementById("emailDisplay");
-  const msgBox = document.getElementById("checkoutMessage");
+  var stripe = Stripe(STRIPE_PK);
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: window.clAuthStorage } });
 
-  let currentEmail = "";
+  var PLANS = {
+    solo: { amount: 2900, currency: 'eur', price: '€29', payKey: 'pay_solo', labelKey: 'price_label', metaKey: 'price_meta', featKey: 'feat_solo' },
+  };
 
-  function showMessage(type, text) {
-    msgBox.className = "checkout-message " + type;
-    msgBox.textContent = text;
-    msgBox.style.display = "block";
+  var selectedPlan = 'solo';
+
+  var currentEmail = '';
+  var paymentIntentId = '';
+  var stripeElements = null;
+  var isSubmitting = false;
+
+  /* ── Views ── */
+  var viewCheckout = document.getElementById('viewCheckout');
+  var viewPassword = document.getElementById('viewPassword');
+  var viewDone     = document.getElementById('viewDone');
+  var planToggle   = document.getElementById('planToggle');
+  var priceLine    = document.getElementById('priceLine');
+  var msg          = document.getElementById('checkoutMessage');
+
+  function show(name) {
+    viewCheckout.hidden = (name !== 'checkout');
+    viewPassword.hidden = (name !== 'password');
+    viewDone.hidden     = (name !== 'done');
+    planToggle.style.display = 'none';
+    priceLine.style.display  = (name === 'checkout') ? 'flex' : 'none';
+    msg.style.display = 'none';
+  }
+  function err(text)  { msg.textContent = text; msg.className = 'checkout-message error'; msg.style.display = 'block'; }
+  function info(text) { msg.textContent = text; msg.className = 'checkout-message info';  msg.style.display = 'block'; }
+
+  /* ── Plan (single) ── */
+  function renderFeatures(items) {
+    document.getElementById('featureItems').innerHTML = items.map(function(item) { return '<li>' + item + '</li>'; }).join('');
   }
 
-  function validateEmail(val) {
-    const email = val.trim();
-    if (!email) return { ok: false, msg: I18N[currentLang].msg_enter_email };
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-      return { ok: false, msg: I18N[currentLang].msg_invalid_email };
-    }
-    return { ok: true, email };
+  function selectPlan(plan) {
+    selectedPlan = plan;
+    document.getElementById('priceLabel').textContent = t(PLANS[plan].labelKey);
+    document.getElementById('priceMeta').textContent = t(PLANS[plan].metaKey);
+    document.getElementById('priceAmount').textContent = PLANS[plan].price;
+    document.getElementById('payBtn').textContent = t(PLANS[plan].payKey);
+    renderFeatures(t(PLANS[plan].featKey));
+    mountStripeElements();
+  }
+  window.refreshDynamic = function() { selectPlan(selectedPlan); };
+
+
+  /* ── Stripe — deferred intent ── */
+  function mountStripeElements() {
+    var plan = PLANS[selectedPlan];
+    stripeElements = stripe.elements({
+      mode: 'payment',
+      amount: plan.amount,
+      currency: plan.currency,
+      appearance: {
+        theme: 'stripe',
+        variables: {
+          fontFamily: '"Lexend", system-ui, sans-serif',
+          borderRadius: '0.85rem',
+          colorPrimary: '#0d7377'
+        }
+      }
+    });
+
+    document.getElementById('link-auth-element').innerHTML = '';
+    var linkAuth = stripeElements.create('linkAuthentication');
+    linkAuth.mount('#link-auth-element');
+    linkAuth.on('change', function(ev) {
+      if (ev.value && ev.value.email) currentEmail = ev.value.email;
+    });
+
+    document.getElementById('payment-element').innerHTML = '';
+    var pe = stripeElements.create('payment', {
+      layout: { type: 'accordion', defaultCollapsed: false, radios: true, spacedAccordionItems: true }
+    });
+    pe.mount('#payment-element');
+    pe.on('ready', function() { document.getElementById('payBtn').disabled = false; });
+    pe.on('change', function(ev) { if (ev.complete) document.getElementById('payBtn').disabled = false; });
   }
 
-  startBtn.onclick = () => {
-    stepInitial.hidden = true;
-    stepEmail.hidden = false;
-    emailInput.focus();
-  };
-
-  continueBtn.onclick = () => {
-    const res = validateEmail(emailInput.value);
-    if (!res.ok) return showMessage("error", res.msg);
-    currentEmail = res.email;
-    emailDisplay.textContent = currentEmail;
-    stepEmail.hidden = true;
-    stepConfirm.hidden = false;
-  };
-
-  editBtn.onclick = () => {
-    stepConfirm.hidden = true;
-    stepEmail.hidden = false;
-  };
-
-  confirmBtn.onclick = async () => {
-    showMessage("info", I18N[currentLang].msg_connecting);
-
-    try {
-      const r = await fetch("https://payments.civiclearn.com/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: currentEmail,
-          product: "lt-citizenship-premium"
-        })
+  /* ── 3DS return + recovery ── */
+  var urlParams = new URLSearchParams(window.location.search);
+  var returnedPI = urlParams.get('payment_intent'), returnedSecret = urlParams.get('payment_intent_client_secret'), returnedStatus = urlParams.get('redirect_status');
+  if (returnedPI && returnedSecret) {
+    currentEmail = localStorage.getItem('lt_checkout_email') || '';
+    selectedPlan = localStorage.getItem('lt_checkout_plan') || selectedPlan;
+    paymentIntentId = returnedPI;
+    localStorage.setItem('lt_checkout_pi', returnedPI);
+    if (returnedStatus === 'succeeded') { show('password'); }
+    else {
+      stripe.retrievePaymentIntent(returnedSecret).then(function(r) {
+        var pi = r.paymentIntent;
+        if (pi && pi.status === 'succeeded') show('password');
+        else { err(t('msg_payment_incomplete')); show('checkout'); }
       });
+    }
+  } else {
+    var savedPI = localStorage.getItem('lt_checkout_pi');
+    if (savedPI) { currentEmail = localStorage.getItem('lt_checkout_email') || ''; selectedPlan = localStorage.getItem('lt_checkout_plan') || selectedPlan; paymentIntentId = savedPI; show('password'); }
+    else { selectPlan(selectedPlan); show('checkout'); }
+  }
 
-      if (!r.ok) throw new Error();
-      const data = await r.json();
-      window.location.href = data.url;
+  /* ── Pay ── */
+  document.getElementById('payBtn').onclick = async function() {
+    if (isSubmitting) return;
+    if (!currentEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(currentEmail)) { err(t('msg_email_required')); return; }
+    isSubmitting = true;
+    var btn = document.getElementById('payBtn'); btn.disabled = true;
+    btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px"></span>' + t('msg_processing');
+    msg.style.display = 'none';
+    try {
+      var submitResult = await stripeElements.submit();
+      if (submitResult.error) { err(submitResult.error.message || t('msg_error')); btn.disabled = false; btn.textContent = t(PLANS[selectedPlan].payKey); isSubmitting = false; return; }
+      var res = await fetch(FUNCTIONS_URL + '/lt-create-payment-intent', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail })
+      });
+      var data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || t('msg_error'));
+      paymentIntentId = data.payment_intent_id;
+      localStorage.setItem('lt_checkout_pi', data.payment_intent_id);
+      localStorage.setItem('lt_checkout_email', currentEmail);
+      localStorage.setItem('lt_checkout_plan', selectedPlan);
+      var result = await stripe.confirmPayment({
+        elements: stripeElements,
+        clientSecret: data.client_secret,
+        confirmParams: { return_url: RETURN_URL, receipt_email: currentEmail },
+        redirect: 'if_required'
+      });
+      if (result.error) { err(result.error.message || t('msg_payment_failed')); btn.disabled = false; btn.textContent = t(PLANS[selectedPlan].payKey); isSubmitting = false; return; }
+      if (result.paymentIntent && result.paymentIntent.status === 'succeeded') { paymentIntentId = result.paymentIntent.id; show('password'); }
+      else if (result.paymentIntent && result.paymentIntent.status === 'processing') { info(t('msg_processing')); }
+    } catch (e) {
+      err(e.message || t('msg_error'));
+      btn.disabled = false; btn.textContent = t(PLANS[selectedPlan].payKey);
+    }
+    isSubmitting = false;
+  };
 
-    } catch {
-      showMessage("error", I18N[currentLang].msg_error);
+  /* ── Password ── */
+  document.getElementById('setupBtn').onclick = async function() {
+    var p1 = document.getElementById('pw1').value, p2 = document.getElementById('pw2').value;
+    if (!p1 || p1.length < 6) { err(t('msg_pwd_short')); return; }
+    if (p1 !== p2) { err(t('msg_pwd_mismatch')); return; }
+    var btn = document.getElementById('setupBtn'); btn.disabled = true; btn.textContent = t('msg_creating'); msg.style.display = 'none';
+    try {
+      var res = await fetch(FUNCTIONS_URL + '/lt-setup-account', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_intent_id: paymentIntentId, password: p1 })
+      });
+      var data = await res.json();
+      if (!data.success) { err(data.error || t('msg_account_failed')); btn.disabled = false; btn.textContent = t('cta_create'); return; }
+      var signIn = await sb.auth.signInWithPassword({ email: data.email, password: p1 });
+      if (signIn.error) console.error('Auto-login failed:', signIn.error);
+      localStorage.removeItem('lt_checkout_email');
+      localStorage.removeItem('lt_checkout_pi');
+      localStorage.removeItem('lt_checkout_plan');
+            window.history.replaceState({}, '', window.location.pathname);
+      document.getElementById('doneEmail').textContent = t('msg_logged_in') + data.email;
+      localStorage.setItem('cl_auth', 'ok');
+      localStorage.setItem('cl_email', data.email);
+      show('done');
+    } catch (e) {
+      err(t('msg_connection_error')); btn.disabled = false; btn.textContent = t('cta_create');
     }
   };
+  document.getElementById('pw2').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('setupBtn').click(); });
+
+})();
+</script>
+
+
+<!-- ── TRUSTPILOT COUNT (reads site_config.trustpilot from Supabase; falls back to hardcoded values) ── -->
+<script>
+(function(){
+  var K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  fetch('https://htgliokekeaovdiafrgs.supabase.co/rest/v1/site_config?key=eq.trustpilot&select=value',{headers:{apikey:K,Authorization:'Bearer '+K}})
+    .then(function(r){return r.json();})
+    .then(function(rows){
+      var v=rows&&rows[0]&&rows[0].value; if(!v) return;
+      document.querySelectorAll('.tp-num').forEach(function(el){el.textContent=v.count;});
+      document.querySelectorAll('.tp-year').forEach(function(el){el.textContent=v.year;});
+    }).catch(function(){});
 })();
 </script>
 
