@@ -521,23 +521,23 @@
   </div>
 
   <div class="hero-map">
-    <svg id="worldmap" viewBox="0 0 1000 625" preserveAspectRatio="xMidYMid meet">
+    <svg id="worldmap" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid meet">
       <defs>
-        <clipPath id="clip-europe"><rect x="0" y="0" width="1000" height="625"/></clipPath>
-        <clipPath id="clip-americas"><rect x="266" y="123" width="214" height="414"/></clipPath>
-        <clipPath id="clip-aunz"><rect x="738" y="388" width="259" height="167"/></clipPath>
+        <clipPath id="clip-europe"><rect x="0" y="0" width="1000" height="560"/></clipPath>
+        <clipPath id="clip-americas"><rect x="266" y="123" width="214" height="304"/></clipPath>
+        <clipPath id="clip-aunz"><rect x="266" y="443" width="214" height="112"/></clipPath>
       </defs>
 
       <!-- Europe map fills the full SVG; it's the default canvas -->
       <g id="panel-europe" clip-path="url(#clip-europe)"></g>
 
       <!-- Americas inset: lean, hugging NA + SA, just left of Ireland -->
-      <rect x="263" y="120" width="220" height="420"
+      <rect x="263" y="120" width="220" height="310"
             fill="#f7f2e8" stroke="rgba(0,0,0,0.18)" stroke-width="0.7" rx="2"/>
       <g id="panel-americas" clip-path="url(#clip-americas)"></g>
 
-      <!-- Oceania inset: enclosed card in the lower-right -->
-      <rect x="735" y="385" width="265" height="173"
+      <!-- Oceania inset: enclosed card below the Americas inset (bottom-right is Cyprus) -->
+      <rect x="263" y="440" width="220" height="118"
             fill="#f7f2e8" stroke="rgba(0,0,0,0.18)" stroke-width="0.7" rx="2"/>
       <g id="panel-aunz" clip-path="url(#clip-aunz)"></g>
     </svg>
@@ -877,9 +877,9 @@
     const svgEl = document.getElementById('worldmap');
     if (!svgEl) return;
     if (window.matchMedia('(max-width: 768px)').matches) {
-      svgEl.setAttribute('viewBox', '220 40 780 585');
+      svgEl.setAttribute('viewBox', '220 40 780 520');
     } else {
-      svgEl.setAttribute('viewBox', '0 0 1000 625');
+      svgEl.setAttribute('viewBox', '0 0 1000 560');
     }
   }
   adjustMapViewBox();
@@ -897,15 +897,15 @@
     {
       id: 'americas',
       projection: d3.geoMercator()
-        .scale(140)
-        .translate([373, 330])
+        .scale(125)
+        .translate([373, 270])
         .center([-72, 5])
     },
     {
       id: 'aunz',
       projection: d3.geoMercator()
-        .scale(210)
-        .translate([870, 470])
+        .scale(145)
+        .translate([373, 495])
         .center([148, -28])
     }
   ];
