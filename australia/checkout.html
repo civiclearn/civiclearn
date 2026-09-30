@@ -1,282 +1,576 @@
 <!DOCTYPE html>
 <html lang="en-AU">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Premium Access – Australian Citizenship Test Preparation</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CivicLearn – Secure payment</title>
+<link rel="canonical" href="https://civiclearn.com/australia/checkout">
+<meta property="og:title" content="Australian Citizenship Test · Premium access">
+<meta property="og:description" content="Prepare for the Australian citizenship test. One-time payment, lifetime access.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://civiclearn.com/australia/checkout">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; overflow-x: clip; }
+body {
+  font-family: "Lexend", system-ui, sans-serif;
+  background: #f5efe6;
+  min-height: 100vh; color: #0f172a; overflow-x: clip; width: 100%;
+}
+a { color: inherit; }
 
-  <!-- SEO -->
-  <meta name="description"
-        content="Activate Premium access to prepare for the Australian Citizenship Test. Realistic simulations, difficult questions, detailed statistics. One-time payment, immediate access." />
-  <link rel="canonical" href="https://civiclearn.com/australia/checkout.html">
+/* ── HEADER ── */
+.checkout-header {
+  background: rgba(245,239,230,.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  position: sticky; top: 0; z-index: 100;
+}
+.checkout-header-inner {
+  max-width: 600px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .85rem 1.5rem; gap: .5rem;
+}
+.checkout-brand {
+  display: flex; align-items: center; gap: .55rem;
+  font-weight: 700; font-size: .88rem; color: #0f172a;
+}
+.lu-flag {
+  width: 24px; height: 16px; border-radius: 3px;
+  overflow: hidden; flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,.15);
+  display: flex; flex-direction: column;
+}
+.lu-flag-r { flex: 1; background: #FDB913; }
+.lu-flag-w { flex: 1; background: #006A44; }
+.lu-flag-b { flex: 1; background: #C1272D; }
+.header-right { display: flex; align-items: center; gap: .75rem; }
+.header-contact {
+  font-size: .74rem; font-weight: 500; color: #a8a29e;
+  text-decoration: none; display: flex; align-items: center; gap: .28rem;
+  padding: .27rem .52rem; border: 1px solid #e8e0d4; border-radius: .45rem;
+  transition: all .15s; white-space: nowrap;
+}
+.header-contact:hover { border-color: #0d7377; color: #0d7377; background: #e8f4f3; }
+.checkout-powered { font-size: .72rem; color: #a8a29e; }
+.checkout-powered a { color: #78716c; text-decoration: none; font-weight: 500; }
+.checkout-powered a:hover { color: #0f172a; }
+.lang-switch { display: flex; gap: .35rem; }
+.lang-switch button {
+  font-family: "Lexend", sans-serif; font-size: .72rem; font-weight: 600;
+  padding: .22rem .45rem; border: 1.5px solid #e8e0d4; border-radius: .45rem;
+  background: transparent; color: #78716c; cursor: pointer; transition: all .15s;
+}
+.lang-switch button:hover { border-color: #0d7377; color: #0d7377; }
+.lang-switch button.active { background: #0d7377; border-color: #0d7377; color: #fff; }
+@media (max-width: 520px) {
+  .checkout-header-inner { padding: .65rem 1rem; }
+  .checkout-brand { font-size: .82rem; }
+  .header-contact span { display: none; }
+  .header-contact { padding: .25rem .4rem; }
+  .checkout-powered { display: none; }
+}
 
-  <meta property="og:title" content="Premium Access – Australian Citizenship Test Preparation">
-  <meta property="og:description"
-        content="Full access: test simulations, hundreds of practice questions, Australian values, government and history. One-time payment, immediate access.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://civiclearn.com/australia/checkout.html">
-  <meta property="og:image" content="https://civiclearn.com/australia/assets/img/og-cover.webp">
+/* ── LAYOUT ── */
+main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+@media (max-width: 520px) { main { padding: 1.8rem 1.15rem 3rem; } }
 
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Premium Access – Australian Citizenship Test">
-  <meta name="twitter:description"
-        content="Activate Premium access: realistic test simulations, difficult questions regrouped, quick practice sessions and detailed statistics.">
-  <meta name="twitter:image" content="https://civiclearn.com/australia/assets/img/og-cover.webp">
+/* ── TITLE ── */
+.page-title { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2rem; line-height: 1.2; letter-spacing: -.025em; }
 
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/checkout.css">
+/* ── PLAN TOGGLE ── */
+.plan-toggle { display: flex; gap: .65rem; margin-bottom: 1.8rem; }
+.plan-card {
+  flex: 1; padding: 1rem .9rem; border: 2px solid #e8e0d4; border-radius: 1rem;
+  cursor: pointer; background: #fff; transition: border-color .15s, box-shadow .15s;
+  text-align: center;
+}
+.plan-card:hover { border-color: #d4c9b8; }
+.plan-card.selected { border-color: #0d7377; box-shadow: 0 0 0 3px rgba(13, 115, 119,.1); }
+.plan-card-name { font-weight: 600; font-size: .84rem; color: #1c1917; margin-bottom: .35rem; line-height: 1.3; }
+.plan-card-sub { font-weight: 400; font-size: .76rem; color: #a8a29e; }
+.plan-card-price { font-size: 1.2rem; font-weight: 700; color: #0d7377; }
+@media(max-width:420px) { .plan-toggle { flex-direction: column; } }
+
+/* ── PRICE LINE ── */
+.price-line {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding-bottom: 1.6rem; margin-bottom: 1.6rem;
+  border-bottom: 1px solid #e8e0d4;
+}
+.price-line-label { font-size: .82rem; font-weight: 500; color: #78716c; }
+.price-line-meta { font-size: .72rem; color: #a8a29e; margin-top: .2rem; }
+.price-line-amount { font-size: 1.15rem; font-weight: 700; color: #0f172a; letter-spacing: -.01em; white-space: nowrap; }
+
+/* ── STRIPE ── */
+#link-auth-element { margin-bottom: 1.1rem; }
+#payment-element { margin-bottom: 1.4rem; }
+.stripe-loading { text-align: center; color: #a8a29e; font-size: .82rem; padding: 1.5rem 0; }
+
+/* ── PAY BUTTON ── */
+.pay-btn {
+  width: 100%; padding: 1rem 1.2rem;
+  background: #0d7377; color: #fff; border: none; border-radius: .85rem;
+  font-family: "Lexend", sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: opacity .15s, transform .1s; letter-spacing: .01em;
+}
+.pay-btn:hover:not(:disabled) { opacity: .92; transform: translateY(-1px); }
+.pay-btn:active:not(:disabled) { transform: translateY(0); }
+.pay-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── TRUST ── */
+.trust-strip {
+  display: flex; align-items: center; justify-content: center; gap: 1.3rem;
+  margin-top: 1.1rem; flex-wrap: wrap;
+}
+.trust-item { display: flex; align-items: center; gap: .3rem; font-size: .7rem; color: #a8a29e; white-space: nowrap; }
+.trust-item span:first-child { font-size: .82rem; }
+
+/* ── TRUSTPILOT (compact) ── */
+.tp-inline { display: inline-flex; align-items: center; gap: .4rem; text-decoration: none; }
+.tp-inline .tp-stars { display: flex; gap: 2px; flex-shrink: 0; }
+.tp-inline .tp-stars svg { width: 15px; height: 15px; display: block; }
+.tp-inline .tp-logo { display: flex; align-items: center; gap: .25rem; }
+.tp-inline .tp-logo span { font-size: .7rem; font-weight: 600; color: #0f172a; letter-spacing: -.01em; }
+.tp-inline .tp-count { font-size: .68rem; font-weight: 400; color: #a8a29e; }
+
+/* ── PASSWORD / DONE ── */
+.done-icon { font-size: 2.6rem; text-align: center; margin-bottom: .6rem; }
+.done-title { font-size: 1.2rem; font-weight: 700; text-align: center; margin-bottom: .35rem; }
+.done-sub { font-size: .82rem; color: #a8a29e; text-align: center; margin-bottom: 1.2rem; }
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: .82rem; font-weight: 500; margin-bottom: .3rem; color: #374151; }
+.field input {
+  width: 100%; padding: .75rem .9rem; border-radius: .85rem; border: 1.5px solid #e8e0d4;
+  font-size: .92rem; font-family: "Lexend", sans-serif; color: #0f172a;
+  outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.field input:focus { border-color: #0d7377; box-shadow: 0 0 0 3px rgba(13, 115, 119,.1); }
+
+/* ── MESSAGES ── */
+.checkout-message { border-radius: .75rem; padding: .65rem .9rem; font-size: .82rem; margin-top: .75rem; display: none; line-height: 1.45; }
+.checkout-message.error { background: #fff1f2; color: #be123c; }
+.checkout-message.info { background: #e8f4f3; color: #6d28d9; }
+.checkout-message.success { background: #f0fdf4; color: #15803d; }
+
+/* ── FOOTER ── */
+.footer-links {
+  margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e8e0d4;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem;
+}
+.after-text { font-size: .75rem; color: #a8a29e; }
+.after-text a { color: #0d7377; font-weight: 500; text-decoration: none; }
+.after-text a:hover { text-decoration: underline; }
+.details-toggle {
+  display: flex; align-items: center; gap: .3rem;
+  background: none; border: none; cursor: pointer;
+  font-family: "Lexend", sans-serif; font-size: .72rem; font-weight: 500;
+  color: #a8a29e; transition: color .15s;
+}
+.details-toggle:hover { color: #78716c; }
+.details-toggle .arrow { transition: transform .25s; font-size: .55rem; }
+.details-toggle.open .arrow { transform: rotate(180deg); }
+.details-list {
+  display: none; margin-top: .8rem;
+  columns: 2; column-gap: 1.5rem;
+}
+.details-list.open { display: block; }
+.details-list ul { list-style: none; }
+.details-list li {
+  font-size: .72rem; color: #78716c; display: flex; align-items: flex-start; gap: .4rem;
+  padding: .2rem 0; break-inside: avoid;
+}
+.details-list li::before { content: '✓'; color: #0d7377; font-weight: 700; font-size: .65rem; flex-shrink: 0; margin-top: .08rem; }
+@media (max-width: 420px) { .details-list { columns: 1; } }
+
+@keyframes spin { to { transform: rotate(360deg) } }
+</style>
 </head>
-
 <body>
 
-<!-- HEADER -->
 <header class="checkout-header">
   <div class="checkout-header-inner">
-
     <div class="checkout-brand">
-      <img src="/assets/images/au.svg" alt="Australia">
-      CivicLearn Australia – Citizenship Test
+      <img src="/assets/images/au.svg" alt="Australia" width="24" height="16" style="border-radius:3px;object-fit:cover;box-shadow:0 1px 3px rgba(0,0,0,.15)">
+      CivicLearn Australia
     </div>
-
-    <div class="checkout-powered">
-      <small>powered by</small>
-      <a href="https://civiclearn.com">CivicLearn</a>
+    <div class="header-right">
+      <a href="https://civiclearn.com/#contact" target="_blank" class="header-contact">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <span data-t="header_contact">Any questions?</span>
+      </a>
     </div>
-
   </div>
 </header>
 
 <main>
 
-  <div class="layout">
+  <div class="page-title" data-t="page_title">Activate your Premium access</div>
 
-    <!-- LEFT: BENEFITS -->
-    <aside class="features">
-      <h2>Premium access</h2>
-      <div class="price">AUD 49</div>
-      <div class="once">One-time payment · lifetime access</div>
+  <!-- Single plan: no plan toggle (kept as an empty hook for the shared script) -->
+  <div class="plan-toggle" id="planToggle" style="display:none"></div>
 
-      <div class="divider"></div>
+  <!-- PRICE LINE -->
+  <div class="price-line" id="priceLine">
+    <div>
+      <div class="price-line-label" id="priceLabel" data-t="price_label">Australian Citizenship Test · Premium access</div>
+      <div class="price-line-meta" id="priceMeta" data-t="price_meta">Lifetime access · No subscription</div>
+    </div>
+    <div style="flex-shrink:0;text-align:right"><span class="price-line-amount" id="priceAmount">A$49</span></div>
+  </div>
 
-      <h3>What’s included</h3>
+  <!-- ══ CHECKOUT FORM ══ -->
+  <div id="viewCheckout">
+    <div id="link-auth-element"></div>
+    <div id="payment-element"><div class="stripe-loading" data-t="stripe_loading">Loading payment options…</div></div>
+    <button type="button" class="pay-btn" id="payBtn" disabled data-t="pay_solo">Pay A$49</button>
+    <div class="trust-strip">
+      <div class="trust-item"><span>🔒</span><span data-t="ts_secure">Stripe-secured</span></div>
+      <div class="trust-item"><span>⚡</span><span data-t="ts_instant">Instant access</span></div>
+      <div class="trust-item"><span>✔</span><span data-t="ts_onetime">One-time payment</span></div>
+      <a class="tp-inline" href="https://www.trustpilot.com/review/civiclearn.com" target="_blank" rel="noopener">
+        <span class="tp-stars">
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="12.5" height="25" fill="#00b67a"/><rect x="12.5" width="12.5" height="25" fill="#dcdce6"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+        </span>
+        <span class="tp-logo"><span>Trustpilot</span></span>
+        <span class="tp-count"><span class="tp-num">30</span>&nbsp;<span data-t="tp_word">reviews in</span>&nbsp;<span class="tp-year">2026</span></span>
+      </a>
+    </div>
+  </div>
 
-      <ul class="benefits">
-        <li>Hundreds of carefully written Australian citizenship questions</li>
-        <li>Realistic simulations matching the official test format</li>
-        <li>Quick practice sessions of 5–10 minutes</li>
-        <li>Automatic regrouping of difficult questions</li>
-        <li>Detailed statistics and progress by topic</li>
-        <li>Full history of all your practice sessions</li>
-        <li>Content aligned with official citizenship requirements</li>
-        <li>Fact of the day for natural daily learning</li>
-        <li>Optional reminders to stay consistent</li>
-        <li>Fully optimised for phone, tablet, and desktop</li>
-        <li>Immediate access after payment</li>
-        <li>Free ongoing content updates</li>
-        <li>Lifetime access to the platform</li>
-      </ul>
+  <!-- ══ PASSWORD ══ -->
+  <div id="viewPassword" hidden>
+    <div style="text-align:center;font-size:2.4rem;margin-bottom:.6rem">🎉</div>
+    <div class="done-title" data-t="pay_confirmed">Payment confirmed!</div>
+    <p style="font-size:.85rem;color:#57534e;text-align:center;margin-bottom:1.1rem" data-t="pwd_instr">Choose a password for your account.</p>
+    <div class="field">
+      <label for="pw1" data-t="pwd_label">Password</label>
+      <input type="password" id="pw1" autocomplete="new-password">
+    </div>
+    <div class="field">
+      <label for="pw2" data-t="pwd_confirm_label">Confirm password</label>
+      <input type="password" id="pw2" autocomplete="new-password">
+    </div>
+    <button type="button" class="pay-btn" id="setupBtn" data-t="cta_create">Create account</button>
+  </div>
 
-      <p class="recommend">
-        Used by candidates who successfully passed the Australian Citizenship Test.
-      </p>
-    </aside>
+  <!-- ══ DONE ══ -->
+  <div id="viewDone" hidden>
+    <div class="done-icon">✅</div>
+    <div class="done-title" data-t="done_title">Your account is ready!</div>
+    <div class="done-sub" id="doneEmail"></div>
+    <a href="/australia/dashboard/" class="pay-btn" id="doneCta"
+       style="text-align:center;text-decoration:none;display:block" data-t="cta_go">Start practising →</a>
+  </div>
 
-    <!-- RIGHT: PAYMENT FLOW -->
-    <section class="right">
-      <div class="checkout-card">
+  <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
 
-        <h1>Activate your Premium access</h1>
-        <div class="secure-line">100% secure payment via Stripe</div>
-
-        <div class="checkout-flow" id="checkoutFlow">
-
-          <!-- STEP 1 -->
-          <div class="checkout-step" id="stepInitial">
-            <button type="button" class="pay-btn" id="startCheckout">
-              Continue to secure payment
-            </button>
-            <p class="small-note">
-              You will be redirected to Stripe to complete your payment.
-            </p>
-          </div>
-
-          <!-- STEP 2 -->
-          <div class="checkout-step" id="stepEmail" hidden>
-            <p class="email-instructions">
-              Enter the email address you want to use for your CivicLearn account.
-            </p>
-
-            <div class="email-field-group">
-              <label for="checkoutEmail">Email</label>
-              <input
-                type="email"
-                id="checkoutEmail"
-                autocomplete="email"
-                placeholder="example@email.com"
-                inputmode="email"
-              />
-            </div>
-
-            <button type="button" class="pay-btn" id="continueWithEmail">
-              Continue
-            </button>
-          </div>
-
-          <!-- STEP 3 -->
-          <div class="checkout-step" id="stepConfirm" hidden>
-            <p class="confirm-text">
-              Your account will be created with this email address:
-            </p>
-
-            <p class="email-display" id="emailDisplay"></p>
-            <p class="confirm-warning">
-              Please check carefully. Your login link will be sent to this address.
-            </p>
-
-            <div class="confirm-actions">
-              <button type="button" class="pay-btn" id="confirmEmail">
-                Yes, continue to secure payment
-              </button>
-              <button type="button" class="link-btn" id="editEmail">
-                Edit email address
-              </button>
-            </div>
-          </div>
-
-          <!-- MESSAGE -->
-          <div id="checkoutMessage" class="checkout-message" aria-live="polite"></div>
-
-        </div>
-
-        <div class="trust">
-          <div>🔒 Secure payment</div>
-          <div>⚡ Immediate access</div>
-          <div>✔ No subscription</div>
-        </div>
-
-        <div class="after-text">
-          Already have an account?
-          <a href="/australia/login.html">Log in here</a>.
-        </div>
-
-      </div>
-    </section>
-
+  <!-- FOOTER -->
+  <div class="footer-links">
+    <div class="after-text"><span data-t="already">Already have an account?</span> <a href="/australia/login.html" data-t="signin">Log in here</a>.</div>
+    <button class="details-toggle" id="detailsToggle">
+      <span data-t="details_toggle">What's included?</span>
+      <span class="arrow">▼</span>
+    </button>
+  </div>
+  <div class="details-list" id="detailsList">
+    <ul id="featureItems"></ul>
   </div>
 
 </main>
 
-<!-- CHECKOUT LOGIC -->
 <script>
-(function() {
-  const stepInitial = document.getElementById("stepInitial");
-  const stepEmail   = document.getElementById("stepEmail");
-  const stepConfirm = document.getElementById("stepConfirm");
-
-  const startBtn     = document.getElementById("startCheckout");
-  const continueBtn  = document.getElementById("continueWithEmail");
-  const confirmBtn   = document.getElementById("confirmEmail");
-  const editEmailBtn = document.getElementById("editEmail");
-
-  const emailInput   = document.getElementById("checkoutEmail");
-  const emailDisplay = document.getElementById("emailDisplay");
-  const messageBox   = document.getElementById("checkoutMessage");
-
-  let currentEmail = "";
-  let isSubmitting = false;
-
-  function showStep(stepId) {
-    stepInitial.hidden = stepId !== "initial";
-    stepEmail.hidden   = stepId !== "email";
-    stepConfirm.hidden = stepId !== "confirm";
-  }
-
-  function clearMessage() {
-    messageBox.textContent = "";
-    messageBox.className = "checkout-message";
-    messageBox.style.display = "none";
-  }
-
-  function showMessage(type, text) {
-    messageBox.textContent = text;
-    messageBox.className = "checkout-message " + type;
-    messageBox.style.display = "block";
-  }
-
-  function validateEmail(value) {
-    const email = value.trim();
-    if (!email) return { ok: false, msg: "Please enter your email address." };
-    const simplePattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-    if (!simplePattern.test(email)) {
-      return { ok: false, msg: "Invalid email address. Please check and try again." };
-    }
-    return { ok: true, email };
-  }
-
-  startBtn.addEventListener("click", () => {
-    clearMessage();
-    showStep("email");
-    emailInput.focus();
+(function(){
+  document.getElementById('detailsToggle').addEventListener('click', function(){
+    var list = document.getElementById('detailsList');
+    this.classList.toggle('open', list.classList.toggle('open'));
   });
+})();
+</script>
 
-  continueBtn.addEventListener("click", () => {
-    clearMessage();
-    const { ok, msg, email } = validateEmail(emailInput.value);
-    if (!ok) {
-      showMessage("error", msg);
-      emailInput.focus();
-      return;
-    }
-    currentEmail = email;
-    emailDisplay.textContent = currentEmail;
-    showStep("confirm");
+<!-- ═══ I18N ═══ -->
+<script>
+var I18N = {
+en: {
+  "header_contact": "Any questions?",
+  "page_title": "Activate your Premium access",
+  "price_label": "Australian Citizenship Test · Premium access",
+  "price_meta": "Lifetime access · No subscription",
+  "stripe_loading": "Loading payment options…",
+  "pay_solo": "Pay A$49",
+  "ts_secure": "Stripe-secured",
+  "ts_instant": "Instant access",
+  "ts_onetime": "One-time payment",
+  "tp_word": "reviews in",
+  "pay_confirmed": "Payment confirmed!",
+  "pwd_instr": "Choose a password for your account.",
+  "pwd_label": "Password",
+  "pwd_confirm_label": "Confirm password",
+  "pwd_placeholder": "At least 6 characters",
+  "pwd_confirm_placeholder": "Repeat password",
+  "cta_create": "Create account",
+  "done_title": "Your account is ready!",
+  "cta_go": "Start practising →",
+  "already": "Already have an account?",
+  "signin": "Log in here",
+  "details_toggle": "What's included?",
+  "feat_solo": [
+    "Hundreds of carefully written Australian citizenship questions",
+    "Realistic simulations matching the official test format",
+    "Quick practice sessions of 5–10 minutes",
+    "Automatic regrouping of difficult questions",
+    "Detailed statistics and progress by topic",
+    "Full history of all your practice sessions",
+    "Fact of the day for natural daily learning",
+    "Fully optimised for phone, tablet and desktop",
+    "Free content updates",
+    "Lifetime access — no subscription"
+  ],
+  "msg_email_required": "Please enter a valid email.",
+  "msg_processing": "Processing…",
+  "msg_error": "An error occurred.",
+  "msg_payment_failed": "Payment failed.",
+  "msg_payment_incomplete": "Payment was not completed.",
+  "msg_pwd_short": "Password must be at least 6 characters.",
+  "msg_pwd_mismatch": "Passwords do not match.",
+  "msg_account_failed": "Account creation failed.",
+  "msg_creating": "Creating account…",
+  "msg_connection_error": "Connection error. Please try again.",
+  "msg_logged_in": "Signed in as: "
+}
+};
+</script>
+
+<!-- I18N ENGINE -->
+<script>
+var currentLang = 'en';
+function t(k) { return (I18N[currentLang] && I18N[currentLang][k]) || k; }
+function applyLang(lang) {
+  currentLang = lang;
+  document.documentElement.lang = 'en-AU';
+  document.querySelectorAll('[data-t]').forEach(function(el) {
+    var k = el.dataset.t;
+    if (I18N[lang][k]) el.textContent = I18N[lang][k];
   });
-
-  editEmailBtn.addEventListener("click", () => {
-    clearMessage();
-    showStep("email");
-    emailInput.focus();
+  document.querySelectorAll('.lang-switch button').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.lang === lang);
   });
+  if (typeof refreshDynamic === 'function') refreshDynamic();
+  var pw1 = document.getElementById('pw1'), pw2 = document.getElementById('pw2');
+  if (pw1) pw1.placeholder = t('pwd_placeholder');
+  if (pw2) pw2.placeholder = t('pwd_confirm_placeholder');
+}
+document.querySelectorAll('.lang-switch button').forEach(function(b) {
+  b.onclick = function() { applyLang(b.dataset.lang); };
+});
+applyLang('en');
+</script>
 
-  confirmBtn.addEventListener("click", async () => {
-    if (isSubmitting) return;
-    if (!currentEmail) {
-      showMessage("error", "Email address not set. Please try again.");
-      showStep("email");
-      return;
-    }
+<!-- STRIPE + SUPABASE -->
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/assets/js/cl-auth-storage.js"></script>
 
-    isSubmitting = true;
-    confirmBtn.disabled = true;
-    confirmBtn.textContent = "Creating payment session…";
+<script>
+(function(){
+  'use strict';
 
-    clearMessage();
-    showMessage("info", "Connecting to Stripe. Please wait…");
+  var FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  var SUPABASE_URL  = 'https://htgliokekeaovdiafrgs.supabase.co';
+  var SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  var STRIPE_PK     = 'pk_live_FLDkT3LcdsvBJu0zHmR91TVE';
+  var RETURN_URL    = 'https://civiclearn.com/australia/checkout.html';
 
-    try {
-      const response = await fetch("https://payments.civiclearn.com/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: currentEmail,
-          product: "australia-premium"
-        })
+  var stripe = Stripe(STRIPE_PK);
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: window.clAuthStorage } });
+
+  var PLANS = {
+    solo: { amount: 4900, currency: 'aud', price: 'A$49', payKey: 'pay_solo', labelKey: 'price_label', metaKey: 'price_meta', featKey: 'feat_solo' },
+  };
+
+  var selectedPlan = 'solo';
+
+  var currentEmail = '';
+  var paymentIntentId = '';
+  var stripeElements = null;
+  var isSubmitting = false;
+
+  /* ── Views ── */
+  var viewCheckout = document.getElementById('viewCheckout');
+  var viewPassword = document.getElementById('viewPassword');
+  var viewDone     = document.getElementById('viewDone');
+  var planToggle   = document.getElementById('planToggle');
+  var priceLine    = document.getElementById('priceLine');
+  var msg          = document.getElementById('checkoutMessage');
+
+  function show(name) {
+    viewCheckout.hidden = (name !== 'checkout');
+    viewPassword.hidden = (name !== 'password');
+    viewDone.hidden     = (name !== 'done');
+    planToggle.style.display = 'none';
+    priceLine.style.display  = (name === 'checkout') ? 'flex' : 'none';
+    msg.style.display = 'none';
+  }
+  function err(text)  { msg.textContent = text; msg.className = 'checkout-message error'; msg.style.display = 'block'; }
+  function info(text) { msg.textContent = text; msg.className = 'checkout-message info';  msg.style.display = 'block'; }
+
+  /* ── Plan (single) ── */
+  function renderFeatures(items) {
+    document.getElementById('featureItems').innerHTML = items.map(function(item) { return '<li>' + item + '</li>'; }).join('');
+  }
+
+  function selectPlan(plan) {
+    selectedPlan = plan;
+    document.getElementById('priceLabel').textContent = t(PLANS[plan].labelKey);
+    document.getElementById('priceMeta').textContent = t(PLANS[plan].metaKey);
+    document.getElementById('priceAmount').textContent = PLANS[plan].price;
+    document.getElementById('payBtn').textContent = t(PLANS[plan].payKey);
+    renderFeatures(t(PLANS[plan].featKey));
+    mountStripeElements();
+  }
+  window.refreshDynamic = function() { selectPlan(selectedPlan); };
+
+
+  /* ── Stripe — deferred intent ── */
+  function mountStripeElements() {
+    var plan = PLANS[selectedPlan];
+    stripeElements = stripe.elements({
+      mode: 'payment',
+      amount: plan.amount,
+      currency: plan.currency,
+      appearance: {
+        theme: 'stripe',
+        variables: {
+          fontFamily: '"Lexend", system-ui, sans-serif',
+          borderRadius: '0.85rem',
+          colorPrimary: '#0d7377'
+        }
+      }
+    });
+
+    document.getElementById('link-auth-element').innerHTML = '';
+    var linkAuth = stripeElements.create('linkAuthentication');
+    linkAuth.mount('#link-auth-element');
+    linkAuth.on('change', function(ev) {
+      if (ev.value && ev.value.email) currentEmail = ev.value.email;
+    });
+
+    document.getElementById('payment-element').innerHTML = '';
+    var pe = stripeElements.create('payment', {
+      layout: { type: 'accordion', defaultCollapsed: false, radios: true, spacedAccordionItems: true }
+    });
+    pe.mount('#payment-element');
+    pe.on('ready', function() { document.getElementById('payBtn').disabled = false; });
+    pe.on('change', function(ev) { if (ev.complete) document.getElementById('payBtn').disabled = false; });
+  }
+
+  /* ── 3DS return + recovery ── */
+  var urlParams = new URLSearchParams(window.location.search);
+  var returnedPI = urlParams.get('payment_intent'), returnedSecret = urlParams.get('payment_intent_client_secret'), returnedStatus = urlParams.get('redirect_status');
+  if (returnedPI && returnedSecret) {
+    currentEmail = localStorage.getItem('au_checkout_email') || '';
+    selectedPlan = localStorage.getItem('au_checkout_plan') || selectedPlan;
+    paymentIntentId = returnedPI;
+    localStorage.setItem('au_checkout_pi', returnedPI);
+    if (returnedStatus === 'succeeded') { show('password'); }
+    else {
+      stripe.retrievePaymentIntent(returnedSecret).then(function(r) {
+        var pi = r.paymentIntent;
+        if (pi && pi.status === 'succeeded') show('password');
+        else { err(t('msg_payment_incomplete')); show('checkout'); }
       });
-
-      if (!response.ok) throw new Error("Error initiating payment.");
-
-      const data = await response.json();
-      if (!data || !data.url) throw new Error("Unexpected response from payment server.");
-
-      window.location.href = data.url;
-
-    } catch (err) {
-      showMessage("error", err.message || "An error occurred. Please try again.");
-      isSubmitting = false;
-      confirmBtn.disabled = false;
-      confirmBtn.textContent = "Yes, continue to secure payment";
     }
-  });
+  } else {
+    var savedPI = localStorage.getItem('au_checkout_pi');
+    if (savedPI) { currentEmail = localStorage.getItem('au_checkout_email') || ''; selectedPlan = localStorage.getItem('au_checkout_plan') || selectedPlan; paymentIntentId = savedPI; show('password'); }
+    else { selectPlan(selectedPlan); show('checkout'); }
+  }
+
+  /* ── Pay ── */
+  document.getElementById('payBtn').onclick = async function() {
+    if (isSubmitting) return;
+    if (!currentEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(currentEmail)) { err(t('msg_email_required')); return; }
+    isSubmitting = true;
+    var btn = document.getElementById('payBtn'); btn.disabled = true;
+    btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px"></span>' + t('msg_processing');
+    msg.style.display = 'none';
+    try {
+      var submitResult = await stripeElements.submit();
+      if (submitResult.error) { err(submitResult.error.message || t('msg_error')); btn.disabled = false; btn.textContent = t(PLANS[selectedPlan].payKey); isSubmitting = false; return; }
+      var res = await fetch(FUNCTIONS_URL + '/au-create-payment-intent', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail })
+      });
+      var data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || t('msg_error'));
+      paymentIntentId = data.payment_intent_id;
+      localStorage.setItem('au_checkout_pi', data.payment_intent_id);
+      localStorage.setItem('au_checkout_email', currentEmail);
+      localStorage.setItem('au_checkout_plan', selectedPlan);
+      var result = await stripe.confirmPayment({
+        elements: stripeElements,
+        clientSecret: data.client_secret,
+        confirmParams: { return_url: RETURN_URL, receipt_email: currentEmail },
+        redirect: 'if_required'
+      });
+      if (result.error) { err(result.error.message || t('msg_payment_failed')); btn.disabled = false; btn.textContent = t(PLANS[selectedPlan].payKey); isSubmitting = false; return; }
+      if (result.paymentIntent && result.paymentIntent.status === 'succeeded') { paymentIntentId = result.paymentIntent.id; show('password'); }
+      else if (result.paymentIntent && result.paymentIntent.status === 'processing') { info(t('msg_processing')); }
+    } catch (e) {
+      err(e.message || t('msg_error'));
+      btn.disabled = false; btn.textContent = t(PLANS[selectedPlan].payKey);
+    }
+    isSubmitting = false;
+  };
+
+  /* ── Password ── */
+  document.getElementById('setupBtn').onclick = async function() {
+    var p1 = document.getElementById('pw1').value, p2 = document.getElementById('pw2').value;
+    if (!p1 || p1.length < 6) { err(t('msg_pwd_short')); return; }
+    if (p1 !== p2) { err(t('msg_pwd_mismatch')); return; }
+    var btn = document.getElementById('setupBtn'); btn.disabled = true; btn.textContent = t('msg_creating'); msg.style.display = 'none';
+    try {
+      var res = await fetch(FUNCTIONS_URL + '/au-setup-account', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_intent_id: paymentIntentId, password: p1 })
+      });
+      var data = await res.json();
+      if (!data.success) { err(data.error || t('msg_account_failed')); btn.disabled = false; btn.textContent = t('cta_create'); return; }
+      var signIn = await sb.auth.signInWithPassword({ email: data.email, password: p1 });
+      if (signIn.error) console.error('Auto-login failed:', signIn.error);
+      localStorage.removeItem('au_checkout_email');
+      localStorage.removeItem('au_checkout_pi');
+      localStorage.removeItem('au_checkout_plan');
+            window.history.replaceState({}, '', window.location.pathname);
+      document.getElementById('doneEmail').textContent = t('msg_logged_in') + data.email;
+      localStorage.setItem('cl_auth', 'ok');
+      localStorage.setItem('cl_email', data.email);
+      show('done');
+    } catch (e) {
+      err(t('msg_connection_error')); btn.disabled = false; btn.textContent = t('cta_create');
+    }
+  };
+  document.getElementById('pw2').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('setupBtn').click(); });
+
+})();
+</script>
+
+
+<!-- ── TRUSTPILOT COUNT (reads site_config.trustpilot from Supabase; falls back to hardcoded values) ── -->
+<script>
+(function(){
+  var K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  fetch('https://htgliokekeaovdiafrgs.supabase.co/rest/v1/site_config?key=eq.trustpilot&select=value',{headers:{apikey:K,Authorization:'Bearer '+K}})
+    .then(function(r){return r.json();})
+    .then(function(rows){
+      var v=rows&&rows[0]&&rows[0].value; if(!v) return;
+      document.querySelectorAll('.tp-num').forEach(function(el){el.textContent=v.count;});
+      document.querySelectorAll('.tp-year').forEach(function(el){el.textContent=v.year;});
+    }).catch(function(){});
 })();
 </script>
 
