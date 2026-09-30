@@ -190,12 +190,23 @@ async function handleSubmit() {
     document.getElementById(`text${i}`).disabled = true;
   });
 
-  // Fire and forget — cils-evaluate runs in background, no waiting here
-  SP.submit({
-    attemptId, elemKey: 'writing',
-    text: combined,
-    json: { tasks }
-  }).catch(err => console.error('Submit error:', err));
+  // Wait until the server has the text (grading then runs in the background).
+  // Leaving the page before this finishes cancels the request.
+  try {
+    await SP.submit({
+      attemptId, elemKey: 'writing',
+      text: combined,
+      json: { tasks }
+    });
+  } catch (err) {
+    console.error('Submit error:', err);
+    submitted = false;
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('submitBtn').textContent = 'Invia';
+    examData.tasks.forEach((_, i) => { document.getElementById(`text${i}`).disabled = false; });
+    SP.toast('Errore durante l’invio. Il testo non è stato perso: riprova.');
+    return;
+  }
 
   window.location.href = `/cilsb1/dashboard/exam.html?sim=${simId}&attempt=${attemptId}`;
 }
