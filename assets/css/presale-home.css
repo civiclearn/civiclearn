@@ -68,7 +68,7 @@ h1,h2,h3{margin:0;line-height:1.15;letter-spacing:-.015em}
 .hdr-right{display:flex;align-items:center;gap:20px}
 .powered{display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-size:.8rem;color:var(--muted);line-height:1.2;white-space:nowrap}
 .powered b{color:var(--brand-dark);font-weight:700}
-.hdr .btn{min-height:42px;padding:0 20px;font-size:.92rem;border-radius:999px;box-shadow:none}
+.hdr .btn{min-height:42px;padding:0 20px;font-size:.92rem;border-radius:999px;box-shadow:none;white-space:nowrap}
 .burger{display:none;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);align-items:center;justify-content:center;cursor:pointer}
 
 /* ---------- Hero ---------- */
@@ -382,9 +382,11 @@ h1,h2,h3,.fact-label{overflow-wrap:break-word;hyphens:manual;-webkit-hyphens:man
 .feat-link{align-self:flex-start;display:inline-flex;align-items:center;gap:.35em;min-height:38px;padding:0 16px;border-radius:99px;background:var(--brand-soft);color:var(--brand-dark);font-weight:600;font-size:.9rem;line-height:1.2;text-decoration:none;white-space:nowrap;transition:background .15s,color .15s}
 .feat-link:hover{background:var(--brand);color:#fff;text-decoration:none}
 @media (max-width:860px){
-  .feature:has(> .feat-link){display:grid}
-  .feature:has(> .feat-link) > p{padding-bottom:0}
-  .feature > .feat-link{grid-column:2;justify-self:start;margin-top:12px}
+  .feature:not(.feature-top):has(> .feat-link){display:grid}
+  .feature:not(.feature-top):has(> .feat-link) > p{padding-bottom:0}
+  .feature:not(.feature-top) > .feat-link{grid-column:2;justify-self:start;margin-top:12px}
+  .feature-top > .feat-link{margin-top:16px}
+  .feature-top:has(> .feat-link) > p{padding-bottom:0}
 }
 .notice-slim{font-size:.95rem;color:var(--ink-2);padding:18px 24px}
 .notice-slim a{font-weight:600;color:var(--brand-dark)}
@@ -427,3 +429,22 @@ h1,h2,h3,.fact-label{overflow-wrap:break-word;hyphens:manual;-webkit-hyphens:man
 .price-card .checks li{position:relative!important;padding-left:28px!important;margin:0!important;font-weight:400!important;background:none!important;border:0!important}
 .price-card .checks li::before{content:""!important;position:absolute!important;left:0!important;top:3px!important;width:18px!important;height:18px!important;border-radius:50%!important;background:var(--brand-soft)!important;opacity:1!important;transform:none!important}
 .price-card .checks li::after{content:""!important;position:absolute!important;left:6px!important;top:7px!important;width:6px!important;height:9px!important;background:none!important;border:solid var(--brand-dark)!important;border-width:0 2px 2px 0!important;transform:rotate(45deg)!important}
+
+/* ---------- header on tablets / small laptops: same compact header as on phones (menu behind the burger) ---------- */
+@media (min-width:861px) and (max-width:1180px){
+  .hdr-in{height:auto;padding-top:10px;padding-bottom:10px;display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;grid-template-areas:"logo powered cta burger" "nav nav nav nav";gap:6px 18px}
+  .logo{grid-area:logo;min-width:0}
+  .logo span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hdr-right{display:contents}
+  .hdr .btn{grid-area:cta}
+  .burger{grid-area:burger;display:flex}
+  .powered{grid-area:powered;display:flex}
+  .nav{grid-area:nav;display:none;flex-direction:column;align-items:stretch;gap:0;margin:4px 0 0;border-top:1px solid var(--line)}
+  .menu-open .nav{display:flex}
+  .nav > a{padding:13px 2px;border-bottom:1px solid var(--line);font-size:1rem}
+  .nav .lang{padding:13px 2px}
+}
+/* long site names on wide screens: the name may take two lines instead of pushing the header out */
+@media (min-width:1181px){
+  .logo-long span{white-space:normal;line-height:1.15;max-width:15em;min-width:min-content}
+}
