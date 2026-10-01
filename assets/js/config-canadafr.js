@@ -44,7 +44,7 @@ window.CIVICEDGE_CONFIG = {
 
   simulation: {
     questionCount: 20,
-    timeLimitMin: 30,
+    timeLimitMin: 45,
     passScore: 15
   },
 
