@@ -138,7 +138,41 @@
   .footer-links { display: flex; gap: 1.2rem; }
   .footer-links a:hover { color: var(--brand); }
 
+  /* Proof line */
+  .proof { display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem 1.4rem; margin-top: 2rem; font-size: 0.8rem; color: var(--muted); }
+  .tp { display: inline-flex; align-items: center; gap: 0.45rem; color: var(--ink); }
+  .tp-stars { display: flex; gap: 2px; }
+  .tp-stars svg { width: 17px; height: 17px; display: block; }
+  .tp b { font-weight: 600; }
+  .tp:hover b { text-decoration: underline; }
+  .proof-sep { width: 1px; height: 18px; background: var(--line); }
+  .proof strong { color: var(--ink); font-weight: 600; }
+
+  /* Language codes */
+  .langs { font-size: 0.66rem; letter-spacing: 0.06em; color: var(--brand-dark); font-weight: 500; }
+
+  /* Product showcase */
+  .showcase { display: grid; grid-template-columns: 1.35fr 1fr; gap: 3rem; align-items: center; padding: 4.5rem 0 1rem; }
+  .showcase-img img { width: 100%; height: auto; display: block; }
+  .showcase-img figcaption { font-size: 0.74rem; color: var(--muted); margin-top: 0.6rem; text-align: center; }
+  .showcase-text p { font-size: 0.93rem; line-height: 1.7; color: var(--muted); margin: 0.9rem 0 1.4rem; }
+  .features { list-style: none; display: grid; gap: 0.9rem; }
+  .features li { display: grid; grid-template-columns: 30px 1fr; gap: 0.75rem; align-items: start; }
+  .features .ic { width: 30px; height: 30px; border-radius: 9px; background: var(--brand-light); color: var(--brand-dark); display: flex; align-items: center; justify-content: center; }
+  .features .ic svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .features b { display: block; font-size: 0.9rem; font-weight: 600; }
+  .features span { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+  /* Contact form states */
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  .form-msg { font-size: 0.85rem; margin-top: 0.8rem; line-height: 1.5; }
+  .form-ok { color: #86efac; }
+  .form-err { color: #fca5a5; }
+  .form-err a { text-decoration: underline; }
+  .contact-form-wrap button:disabled { opacity: .6; cursor: default; }
+
   @media (max-width: 900px) {
+    .showcase { grid-template-columns: 1fr; gap: 1.5rem; padding-top: 3rem; }
     .hero { grid-template-columns: 1fr; padding-top: 2.5rem; }
     .hero-ticker { display: none; }
     .region { grid-template-columns: 1fr; gap: 0.8rem; }
@@ -163,14 +197,15 @@
 <header class="site-header">
   <div class="header-inner">
     <a href="/" class="brand-main">
-      <img src="https://civiclearn.com/assets/images/cl.png" alt="" class="brand-mark">
+      <img src="/assets/images/cl.png" alt="" class="brand-mark">
       <span class="brand-title">CivicLearn</span>
     </a>
     <nav class="header-right">
+      <a href="#exams" class="nav-link">Exams</a>
       <a href="https://civiclearn.com/insights/" class="nav-link hide-sm">Insights</a>
       <a href="passport-ranking.html" class="nav-link hide-sm">Passport rankings</a>
       <a href="https://civiclearn.com/support/" class="nav-link">Support</a>
-      <a href="#contact" class="nav-link">Contact</a>
+      <a href="#contact" class="nav-link hide-sm">Contact</a>
     </nav>
   </div>
 </header>
@@ -181,7 +216,7 @@
   <div class="hero-text">
     <div class="hero-kicker">Exam preparation since 2005</div>
     <h1 class="hero-title">The test that stands between you and your <em>new passport</em>, prepared properly.</h1>
-    <p class="hero-subtitle">CivicLearn builds one dedicated training site per exam: citizenship tests, residency tests and the language exams that come with them. Each one is written around the official material and the real exam format.</p>
+    <p class="hero-subtitle">CivicLearn builds one dedicated training site per exam: citizenship tests, residency tests and the language exams that come with them. Each one is built around the official study material and the format of the exam.</p>
 
     <label class="finder" for="finder">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -189,82 +224,33 @@
     </label>
 
     <dl class="stats">
-      <div><dt>30</dt><dd>exam platforms</dd></div>
-      <div><dt>22</dt><dd>countries</dd></div>
-      <div><dt>20+</dt><dd>years</dd></div>
+      <div><dt id="stat-exams">30</dt><dd>exam platforms</dd></div>
+      <div><dt id="stat-countries">22</dt><dd>countries</dd></div>
+      <div><dt>11,000+</dt><dd>learners</dd></div>
     </dl>
+
+    <div class="proof">
+      <a class="tp" href="https://www.trustpilot.com/review/civiclearn.com" target="_blank" rel="noopener">
+        <span class="tp-stars" aria-label="Trustpilot rating">
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="12.5" height="25" fill="#00b67a"/><rect x="12.5" width="12.5" height="25" fill="#dcdce6"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+        </span>
+        <b>Trustpilot</b>
+      </a>
+      <span><strong class="tp-num">43</strong> reviews in <span class="tp-year">2026</span></span>
+    </div>
   </div>
 
-  <div class="hero-ticker" aria-hidden="true">
-    <ul>
-          <li>Cyprus Citizenship Test</li>
-          <li>Kansalaisuuskoe</li>
-          <li>Staatsbürgerschaftstest</li>
-          <li>CELPE-BRAS</li>
-          <li>YKI — Swedish</li>
-          <li>Citizenship Test NZ</li>
-          <li>Life in the UK Test</li>
-          <li>Indfødsretsprøve</li>
-          <li>Sproochentest</li>
-          <li>Ríkisborgarapróf</li>
-          <li>Australian Citizenship Test</li>
-          <li>Test obywatelski</li>
-          <li>Examen de citoyenneté</li>
-          <li>Naturalisation Genève</li>
-          <li>Pilietybės egzaminas</li>
-          <li>Pohovor o občianstvo</li>
-          <li>CIPLE</li>
-          <li>YKI — Finnish</li>
-          <li>Prueba CCSE</li>
-          <li>Interviu pentru cetățenie</li>
-          <li>Prova de cidadania</li>
-          <li>Examen civique</li>
-          <li>Medborgarskapsprov</li>
-          <li>DELE A2</li>
-          <li>PD3 — Prøve i Dansk 3</li>
-          <li>Medborgerskabsprøven</li>
-          <li>CILS B1</li>
-          <li>Vivre-ensemble</li>
-          <li>Svenska Prov</li>
-          <li>Irish Citizenship Test</li>
-          <li>Cyprus Citizenship Test</li>
-          <li>Kansalaisuuskoe</li>
-          <li>Staatsbürgerschaftstest</li>
-          <li>CELPE-BRAS</li>
-          <li>YKI — Swedish</li>
-          <li>Citizenship Test NZ</li>
-          <li>Life in the UK Test</li>
-          <li>Indfødsretsprøve</li>
-          <li>Sproochentest</li>
-          <li>Ríkisborgarapróf</li>
-          <li>Australian Citizenship Test</li>
-          <li>Test obywatelski</li>
-          <li>Examen de citoyenneté</li>
-          <li>Naturalisation Genève</li>
-          <li>Pilietybės egzaminas</li>
-          <li>Pohovor o občianstvo</li>
-          <li>CIPLE</li>
-          <li>YKI — Finnish</li>
-          <li>Prueba CCSE</li>
-          <li>Interviu pentru cetățenie</li>
-          <li>Prova de cidadania</li>
-          <li>Examen civique</li>
-          <li>Medborgarskapsprov</li>
-          <li>DELE A2</li>
-          <li>PD3 — Prøve i Dansk 3</li>
-          <li>Medborgerskabsprøven</li>
-          <li>CILS B1</li>
-          <li>Vivre-ensemble</li>
-          <li>Svenska Prov</li>
-          <li>Irish Citizenship Test</li>
-    </ul>
-  </div>
+  <div class="hero-ticker" aria-hidden="true"><ul id="ticker"></ul></div>
 </section>
 
-<section class="section directory" id="projects">
+<section class="section directory" id="exams">
   <div class="dir-head">
     <div>
-      <div class="section-kicker">Our platforms</div>
+      <div class="section-kicker">Our exams</div>
       <h2 class="section-title">Find your exam</h2>
     </div>
     <div class="chips" role="group" aria-label="Filter by exam type">
@@ -275,219 +261,30 @@
     </div>
   </div>
 
-    <div class="region">
-      <div class="region-label">Nordics</div>
-      <div class="region-grid">
-      <div class="country" data-country="denmark">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/dk.svg" alt="" width="22" height="22" loading="lazy"><h3>Denmark</h3></div>
-        <a class="exam" href="https://indfodsretsprove.dk" data-kind="citizenship" data-search="denmark indfødsretsprøve  indfodsretsprove.dk">
-          <span class="exam-main"><span class="exam-name">Indfødsretsprøve</span><span class="exam-desc">indfodsretsprove.dk</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-        <a class="exam" href="https://medborgerskabsprove.dk/" data-kind="residency" data-search="denmark medborgerskabsprøven  medborgerskabsprove.dk">
-          <span class="exam-main"><span class="exam-name">Medborgerskabsprøven</span><span class="exam-desc">medborgerskabsprove.dk</span></span>
-          <span class="exam-side"><span class="tag tag-residency">Residency</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-        <a class="exam" href="https://dansk3.dk" data-kind="language" data-search="denmark pd3 — prøve i dansk 3  dansk3.dk">
-          <span class="exam-main"><span class="exam-name">PD3 — Prøve i Dansk 3</span><span class="exam-desc">dansk3.dk</span></span>
-          <span class="exam-side"><span class="tag tag-language">Language</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="sweden">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/se.svg" alt="" width="22" height="22" loading="lazy"><h3>Sweden</h3></div>
-        <a class="exam" href="https://medborgarskapsprov.se" data-kind="citizenship" data-search="sweden medborgarskapsprov  medborgarskapsprov.se">
-          <span class="exam-main"><span class="exam-name">Medborgarskapsprov</span><span class="exam-desc">medborgarskapsprov.se</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-        <a class="exam" href="https://svenskaprov.se" data-kind="citizenship" data-search="sweden svenska prov new test svenskaprov.se">
-          <span class="exam-main"><span class="exam-name">Svenska Prov</span><span class="exam-desc">svenskaprov.se · new test</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="tag tag-soon">Soon</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="finland">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/fi.svg" alt="" width="22" height="22" loading="lazy"><h3>Finland</h3></div>
-        <a class="exam" href="https://kansalaisuuskoe.com" data-kind="citizenship" data-search="finland kansalaisuuskoe  kansalaisuuskoe.com">
-          <span class="exam-main"><span class="exam-name">Kansalaisuuskoe</span><span class="exam-desc">kansalaisuuskoe.com</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-        <a class="exam" href="https://ykifinnish.fi" data-kind="language" data-search="finland yki — finnish  ykifinnish.fi">
-          <span class="exam-main"><span class="exam-name">YKI — Finnish</span><span class="exam-desc">ykifinnish.fi</span></span>
-          <span class="exam-side"><span class="tag tag-language">Language</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-        <a class="exam" href="https://ykisvenska.fi" data-kind="language" data-search="finland yki — swedish  ykisvenska.fi">
-          <span class="exam-main"><span class="exam-name">YKI — Swedish</span><span class="exam-desc">ykisvenska.fi</span></span>
-          <span class="exam-side"><span class="tag tag-language">Language</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="iceland">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/is.svg" alt="" width="22" height="22" loading="lazy"><h3>Iceland</h3></div>
-        <a class="exam" href="https://rikisborgaraprof.is" data-kind="citizenship" data-search="iceland ríkisborgarapróf  rikisborgaraprof.is">
-          <span class="exam-main"><span class="exam-name">Ríkisborgarapróf</span><span class="exam-desc">rikisborgaraprof.is</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      </div>
-    </div>
-    <div class="region">
-      <div class="region-label">Western Europe</div>
-      <div class="region-grid">
-      <div class="country" data-country="united kingdom">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/gb.svg" alt="" width="22" height="22" loading="lazy"><h3>United Kingdom</h3></div>
-        <a class="exam" href="https://lifeintheuktestsupport.co.uk/" data-kind="citizenship" data-search="united kingdom life in the uk test settlement &amp; citizenship lifeintheuktestsupport.co.uk">
-          <span class="exam-main"><span class="exam-name">Life in the UK Test</span><span class="exam-desc">lifeintheuktestsupport.co.uk · settlement &amp; citizenship</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="ireland">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/ie.svg" alt="" width="22" height="22" loading="lazy"><h3>Ireland</h3></div>
-        <a class="exam" href="https://irishcitizenshiptest.com/" data-kind="citizenship" data-search="ireland irish citizenship test planned test irishcitizenshiptest.com">
-          <span class="exam-main"><span class="exam-name">Irish Citizenship Test</span><span class="exam-desc">irishcitizenshiptest.com · planned test</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="tag tag-soon">Soon</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="france">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/fr.svg" alt="" width="22" height="22" loading="lazy"><h3>France</h3></div>
-        <a class="exam" href="https://preparer-examen-civique.fr/" data-kind="citizenship" data-search="france examen civique  preparer-examen-civique.fr">
-          <span class="exam-main"><span class="exam-name">Examen civique</span><span class="exam-desc">preparer-examen-civique.fr</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="luxembourg">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/lu.svg" alt="" width="22" height="22" loading="lazy"><h3>Luxembourg</h3></div>
-        <a class="exam" href="https://vivre-ensemble.lu/" data-kind="citizenship" data-search="luxembourg vivre-ensemble civic course vivre-ensemble.lu">
-          <span class="exam-main"><span class="exam-name">Vivre-ensemble</span><span class="exam-desc">vivre-ensemble.lu · civic course</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-        <a class="exam" href="https://sproochentest.org" data-kind="language" data-search="luxembourg sproochentest  sproochentest.org">
-          <span class="exam-main"><span class="exam-name">Sproochentest</span><span class="exam-desc">sproochentest.org</span></span>
-          <span class="exam-side"><span class="tag tag-language">Language</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="switzerland">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/ch.svg" alt="" width="22" height="22" loading="lazy"><h3>Switzerland</h3></div>
-        <a class="exam" href="https://naturalisationgeneve.ch/" data-kind="citizenship" data-search="switzerland naturalisation genève canton of geneva naturalisationgeneve.ch">
-          <span class="exam-main"><span class="exam-name">Naturalisation Genève</span><span class="exam-desc">naturalisationgeneve.ch · Canton of Geneva</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="austria">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/at.svg" alt="" width="22" height="22" loading="lazy"><h3>Austria</h3></div>
-        <a class="exam" href="https://staatsburgerschaftstest.at/" data-kind="citizenship" data-search="austria staatsbürgerschaftstest  staatsburgerschaftstest.at">
-          <span class="exam-main"><span class="exam-name">Staatsbürgerschaftstest</span><span class="exam-desc">staatsburgerschaftstest.at</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      </div>
-    </div>
-    <div class="region">
-      <div class="region-label">Southern Europe</div>
-      <div class="region-grid">
-      <div class="country" data-country="spain">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/es.svg" alt="" width="22" height="22" loading="lazy"><h3>Spain</h3></div>
-        <a class="exam" href="https://pruebaccse.com" data-kind="citizenship" data-search="spain prueba ccse  pruebaccse.com">
-          <span class="exam-main"><span class="exam-name">Prueba CCSE</span><span class="exam-desc">pruebaccse.com</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-        <a class="exam" href="https://delea2.org" data-kind="language" data-search="spain dele a2  delea2.org">
-          <span class="exam-main"><span class="exam-name">DELE A2</span><span class="exam-desc">delea2.org</span></span>
-          <span class="exam-side"><span class="tag tag-language">Language</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="portugal">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/pt.svg" alt="" width="22" height="22" loading="lazy"><h3>Portugal</h3></div>
-        <a class="exam" href="https://provacidadania.pt/" data-kind="citizenship" data-search="portugal prova de cidadania  provacidadania.pt">
-          <span class="exam-main"><span class="exam-name">Prova de cidadania</span><span class="exam-desc">provacidadania.pt</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-        <a class="exam" href="https://cipleonline.pt/" data-kind="language" data-search="portugal ciple  cipleonline.pt">
-          <span class="exam-main"><span class="exam-name">CIPLE</span><span class="exam-desc">cipleonline.pt</span></span>
-          <span class="exam-side"><span class="tag tag-language">Language</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="italy">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/it.svg" alt="" width="22" height="22" loading="lazy"><h3>Italy</h3></div>
-        <a class="exam" href="https://cilsb1.it/" data-kind="language" data-search="italy cils b1  cilsb1.it">
-          <span class="exam-main"><span class="exam-name">CILS B1</span><span class="exam-desc">cilsb1.it</span></span>
-          <span class="exam-side"><span class="tag tag-language">Language</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="cyprus">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/cy.svg" alt="" width="22" height="22" loading="lazy"><h3>Cyprus</h3></div>
-        <a class="exam" href="https://cypruscitizenshiptest.com/" data-kind="citizenship" data-search="cyprus cyprus citizenship test greek, english, russian cypruscitizenshiptest.com">
-          <span class="exam-main"><span class="exam-name">Cyprus Citizenship Test</span><span class="exam-desc">cypruscitizenshiptest.com · Greek, English, Russian</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      </div>
-    </div>
-    <div class="region">
-      <div class="region-label">Central &amp; Eastern Europe</div>
-      <div class="region-grid">
-      <div class="country" data-country="poland">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/pl.svg" alt="" width="22" height="22" loading="lazy"><h3>Poland</h3></div>
-        <a class="exam" href="https://testobywatelski.com/" data-kind="citizenship" data-search="poland test obywatelski polish, ukrainian, english, russian testobywatelski.com">
-          <span class="exam-main"><span class="exam-name">Test obywatelski</span><span class="exam-desc">testobywatelski.com · Polish, Ukrainian, English, Russian</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="tag tag-soon">Soon</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="lithuania">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/lt.svg" alt="" width="22" height="22" loading="lazy"><h3>Lithuania</h3></div>
-        <a class="exam" href="https://lithuania-citizenship-test.com" data-kind="citizenship" data-search="lithuania pilietybės egzaminas  lithuania-citizenship-test.com">
-          <span class="exam-main"><span class="exam-name">Pilietybės egzaminas</span><span class="exam-desc">lithuania-citizenship-test.com</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="slovakia">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/sk.svg" alt="" width="22" height="22" loading="lazy"><h3>Slovakia</h3></div>
-        <a class="exam" href="https://pohovorobcianstvo.sk" data-kind="citizenship" data-search="slovakia pohovor o občianstvo interview pohovorobcianstvo.sk">
-          <span class="exam-main"><span class="exam-name">Pohovor o občianstvo</span><span class="exam-desc">pohovorobcianstvo.sk · interview</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="romania">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/ro.svg" alt="" width="22" height="22" loading="lazy"><h3>Romania</h3></div>
-        <a class="exam" href="https://interviucetatenie.ro/" data-kind="citizenship" data-search="romania interviu pentru cetățenie interview interviucetatenie.ro">
-          <span class="exam-main"><span class="exam-name">Interviu pentru cetățenie</span><span class="exam-desc">interviucetatenie.ro · interview</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      </div>
-    </div>
-    <div class="region">
-      <div class="region-label">Beyond Europe</div>
-      <div class="region-grid">
-      <div class="country" data-country="canada">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/ca.svg" alt="" width="22" height="22" loading="lazy"><h3>Canada</h3></div>
-        <a class="exam" href="https://examendecitoyennete.ca/" data-kind="citizenship" data-search="canada examen de citoyenneté in french examendecitoyennete.ca">
-          <span class="exam-main"><span class="exam-name">Examen de citoyenneté</span><span class="exam-desc">examendecitoyennete.ca · in French</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="australia">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/au.svg" alt="" width="22" height="22" loading="lazy"><h3>Australia</h3></div>
-        <a class="exam" href="https://australian-citizenship-test.com/" data-kind="citizenship" data-search="australia australian citizenship test  australian-citizenship-test.com">
-          <span class="exam-main"><span class="exam-name">Australian Citizenship Test</span><span class="exam-desc">australian-citizenship-test.com</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="new zealand">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/nz.svg" alt="" width="22" height="22" loading="lazy"><h3>New Zealand</h3></div>
-        <a class="exam" href="https://citizenship-test.nz/" data-kind="citizenship" data-search="new zealand citizenship test nz  citizenship-test.nz">
-          <span class="exam-main"><span class="exam-name">Citizenship Test NZ</span><span class="exam-desc">citizenship-test.nz</span></span>
-          <span class="exam-side"><span class="tag tag-citizenship">Citizenship</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      <div class="country" data-country="brazil">
-        <div class="country-head"><img class="flag" src="https://flagcdn.com/br.svg" alt="" width="22" height="22" loading="lazy"><h3>Brazil</h3></div>
-        <a class="exam" href="https://celpebras.org" data-kind="language" data-search="brazil celpe-bras  celpebras.org">
-          <span class="exam-main"><span class="exam-name">CELPE-BRAS</span><span class="exam-desc">celpebras.org</span></span>
-          <span class="exam-side"><span class="tag tag-language">Language</span><span class="go" aria-hidden="true">→</span></span>
-        </a>
-      </div>
-      </div>
-    </div>
+  <div id="directory"></div>
 
   <p class="empty" id="empty" hidden>No platform for that yet. <a href="#contact">Tell us which exam you need</a> and we'll consider it.</p>
+</section>
+
+<section class="section">
+  <div class="showcase">
+    <figure class="showcase-img">
+      <img src="/indfodsret/assets/images/devices-dk-v2.webp" alt="CivicLearn training platform on a laptop and a phone: dashboard with progress by topic and a timed exam simulation" width="1920" height="1272" loading="lazy">
+      <figcaption>Shown: the Danish citizenship test platform</figcaption>
+    </figure>
+    <div class="showcase-text">
+      <div class="section-kicker">Inside every platform</div>
+      <h2 class="section-title">Practice the way the exam works.</h2>
+      <p>Every CivicLearn platform follows the same proven structure, adapted to its own exam, handbook and language.</p>
+      <ul class="features">
+        <li><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg></span><div><b>Timed exam simulations</b><span>Full-length practice exams under timed conditions.</span></div></li>
+        <li><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 15v-4M12 15V8M16 15v-6"/></svg></span><div><b>Progress by topic</b><span>See which parts of the handbook you've mastered and which need work.</span></div></li>
+        <li><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/></svg></span><div><b>Practice by topic and daily tests</b><span>Short sessions that fit around work and family.</span></div></li>
+        <li><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="14" height="14" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v12"/></svg></span><div><b>Flashcards, study material and audio</b><span>Learn the content, not only the answers.</span></div></li>
+        <li><span class="ic"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span><div><b>Works on any device</b><span>Start on your laptop, continue on your phone.</span></div></li>
+      </ul>
+    </div>
+  </div>
 </section>
 
 <section class="section">
@@ -512,19 +309,22 @@
     <div class="contact-text">
       <div class="ct-kicker">Get in touch</div>
       <h2>Questions about our platforms?</h2>
-      <p>Whether you need help with your account, have questions about a specific exam, or want to explore a partnership — we'd love to hear from you.</p>
+      <p>Whether you need help with your account, have questions about a specific exam, or want to explore a partnership, write to us.</p>
     </div>
-    <div class="contact-form-wrap">
-      <div class="form-row"><input type="text" placeholder="Your name"></div>
-      <div class="form-row"><input type="email" placeholder="Your email"></div>
-      <div class="form-row"><textarea placeholder="Your message" rows="4"></textarea></div>
-      <button type="button">Send message</button>
-    </div>
+    <form class="contact-form-wrap" id="contactForm" novalidate>
+      <input type="text" name="company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="form-row"><input type="text" name="name" placeholder="Your name" required></div>
+      <div class="form-row"><input type="email" name="email" placeholder="Your email" required></div>
+      <div class="form-row"><textarea name="message" placeholder="Your message" rows="4" required></textarea></div>
+      <button type="submit" id="sendBtn">Send message</button>
+      <p class="form-msg form-ok" id="formOk" hidden>Thank you! Your message has been sent. We'll reply to your email.</p>
+      <p class="form-msg form-err" id="formErr" hidden></p>
+    </form>
   </div>
 </section>
 
 <footer class="site-footer">
-  <div>© 2005–2026 CivicLearn · Testrada Pte Ltd</div>
+  <div>© 2005–<span id="year">2026</span> CivicLearn · Testrada Pte Ltd</div>
   <div class="footer-links">
     <a href="legal.html">Legal</a>
     <a href="privacy.html">Privacy</a>
@@ -534,20 +334,108 @@
 </footer>
 
 <script>
+/* ═══════════════════════════════════════════════════════════════
+   THE LIST OF EXAMS — edit only this block to add or change a product.
+   One line per exam. Everything else (country panels, filters, search,
+   the drifting names in the hero, the counts) is built from it.
+
+   region : Nordics | Western Europe | Southern Europe | Central & Eastern Europe | Beyond Europe
+   iso    : two-letter country code (used for the round flag)
+   type   : citizenship | residency | language
+   note   : optional short extra (shown after the web address)
+   langs  : optional languages the platform is available in
+   soon   : true = test not introduced yet (shows a "Soon" label)
+   ═══════════════════════════════════════════════════════════════ */
+var EXAMS = [
+  { region: 'Nordics', country: 'Denmark', iso: 'dk', name: 'Indfødsretsprøve',      type: 'citizenship', url: 'https://indfodsretsprove.dk' },
+  { region: 'Nordics', country: 'Denmark', iso: 'dk', name: 'Medborgerskabsprøven',  type: 'residency',   url: 'https://medborgerskabsprove.dk/', langs: 'DA · EN' },
+  { region: 'Nordics', country: 'Denmark', iso: 'dk', name: 'PD3 — Prøve i Dansk 3', type: 'language',    url: 'https://dansk3.dk' },
+  { region: 'Nordics', country: 'Sweden',  iso: 'se', name: 'Medborgarskapsprov',    type: 'citizenship', url: 'https://medborgarskapsprov.se', langs: 'SV · EN' },
+  { region: 'Nordics', country: 'Sweden',  iso: 'se', name: 'Svenska Prov',          type: 'citizenship', url: 'https://svenskaprov.se', note: 'new test', soon: true },
+  { region: 'Nordics', country: 'Finland', iso: 'fi', name: 'Kansalaisuuskoe',       type: 'citizenship', url: 'https://kansalaisuuskoe.com', langs: 'FI · SV · EN' },
+  { region: 'Nordics', country: 'Finland', iso: 'fi', name: 'YKI — Finnish',         type: 'language',    url: 'https://ykifinnish.fi', langs: 'FI · EN' },
+  { region: 'Nordics', country: 'Finland', iso: 'fi', name: 'YKI — Swedish',         type: 'language',    url: 'https://ykisvenska.fi' },
+  { region: 'Nordics', country: 'Iceland', iso: 'is', name: 'Ríkisborgarapróf',      type: 'citizenship', url: 'https://rikisborgaraprof.is', langs: 'IS · EN' },
+
+  { region: 'Western Europe', country: 'United Kingdom', iso: 'gb', name: 'Life in the UK Test',     type: 'citizenship', url: 'https://lifeintheuktestsupport.co.uk/', note: 'settlement & citizenship' },
+  { region: 'Western Europe', country: 'Ireland',        iso: 'ie', name: 'Irish Citizenship Test',  type: 'citizenship', url: 'https://irishcitizenshiptest.com/', note: 'planned test', soon: true },
+  { region: 'Western Europe', country: 'France',         iso: 'fr', name: 'Examen civique',          type: 'citizenship', url: 'https://preparer-examen-civique.fr/' },
+  { region: 'Western Europe', country: 'Luxembourg',     iso: 'lu', name: 'Vivre-ensemble',          type: 'citizenship', url: 'https://vivre-ensemble.lu/', note: 'civic course', langs: 'FR · DE · EN' },
+  { region: 'Western Europe', country: 'Luxembourg',     iso: 'lu', name: 'Sproochentest',           type: 'language',    url: 'https://sproochentest.org', langs: 'FR · DE · EN' },
+  { region: 'Western Europe', country: 'Switzerland',    iso: 'ch', name: 'Naturalisation Genève',   type: 'citizenship', url: 'https://naturalisationgeneve.ch/', note: 'Canton of Geneva' },
+  { region: 'Western Europe', country: 'Austria',        iso: 'at', name: 'Staatsbürgerschaftstest', type: 'citizenship', url: 'https://staatsburgerschaftstest.at/' },
+
+  { region: 'Southern Europe', country: 'Spain',    iso: 'es', name: 'Prueba CCSE',             type: 'citizenship', url: 'https://pruebaccse.com' },
+  { region: 'Southern Europe', country: 'Spain',    iso: 'es', name: 'DELE A2',                 type: 'language',    url: 'https://delea2.org' },
+  { region: 'Southern Europe', country: 'Portugal', iso: 'pt', name: 'Prova de cidadania',      type: 'citizenship', url: 'https://provacidadania.pt/' },
+  { region: 'Southern Europe', country: 'Portugal', iso: 'pt', name: 'CIPLE',                   type: 'language',    url: 'https://cipleonline.pt/', langs: 'PT · EN' },
+  { region: 'Southern Europe', country: 'Italy',    iso: 'it', name: 'CILS B1',                 type: 'language',    url: 'https://cilsb1.it/' },
+  { region: 'Southern Europe', country: 'Cyprus',   iso: 'cy', name: 'Cyprus Citizenship Test', type: 'citizenship', url: 'https://cypruscitizenshiptest.com/', langs: 'EL · EN · RU' },
+
+  { region: 'Central & Eastern Europe', country: 'Poland',    iso: 'pl', name: 'Test obywatelski',          type: 'citizenship', url: 'https://testobywatelski.com/', note: 'planned test', soon: true, langs: 'PL · UA · EN · RU' },
+  { region: 'Central & Eastern Europe', country: 'Lithuania', iso: 'lt', name: 'Pilietybės egzaminas',      type: 'citizenship', url: 'https://lithuania-citizenship-test.com', langs: 'LT · EN · RU' },
+  { region: 'Central & Eastern Europe', country: 'Slovakia',  iso: 'sk', name: 'Pohovor o občianstvo',      type: 'citizenship', url: 'https://pohovorobcianstvo.sk', note: 'interview' },
+  { region: 'Central & Eastern Europe', country: 'Romania',   iso: 'ro', name: 'Interviu pentru cetățenie', type: 'citizenship', url: 'https://interviucetatenie.ro/', note: 'interview' },
+
+  { region: 'Beyond Europe', country: 'Canada',      iso: 'ca', name: 'Examen de citoyenneté',       type: 'citizenship', url: 'https://examendecitoyennete.ca/', note: 'in French' },
+  { region: 'Beyond Europe', country: 'Australia',   iso: 'au', name: 'Australian Citizenship Test', type: 'citizenship', url: 'https://australian-citizenship-test.com/' },
+  { region: 'Beyond Europe', country: 'New Zealand', iso: 'nz', name: 'Citizenship Test NZ',         type: 'citizenship', url: 'https://citizenship-test.nz/' },
+  { region: 'Beyond Europe', country: 'Brazil',      iso: 'br', name: 'CELPE-BRAS',                  type: 'language',    url: 'https://celpebras.org' }
+];
+</script>
+
+<script>
 (function () {
-  var input = document.getElementById('finder');
-  var chips = document.querySelectorAll('.chip');
-  var empty = document.getElementById('empty');
-  var kind = 'all';
+  var TAG = { citizenship: 'Citizenship', residency: 'Residency', language: 'Language' };
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function domain(u) { return u.replace(/^https?:\/\//, '').replace(/\/$/, ''); }
+
+  // ── Build the directory: region → country → exams (in list order)
+  var regions = [], byRegion = {};
+  EXAMS.forEach(function (x) {
+    if (!byRegion[x.region]) { byRegion[x.region] = { name: x.region, countries: [], byCountry: {} }; regions.push(byRegion[x.region]); }
+    var r = byRegion[x.region];
+    if (!r.byCountry[x.country]) { r.byCountry[x.country] = { name: x.country, iso: x.iso, exams: [] }; r.countries.push(r.byCountry[x.country]); }
+    r.byCountry[x.country].exams.push(x);
+  });
+
+  var countryCount = 0;
+  document.getElementById('directory').innerHTML = regions.map(function (r) {
+    return '<div class="region"><div class="region-label">' + esc(r.name) + '</div><div class="region-grid">' +
+      r.countries.map(function (c) {
+        countryCount++;
+        return '<div class="country"><div class="country-head"><img class="flag" src="https://flagcdn.com/' + c.iso + '.svg" alt="" width="22" height="22" loading="lazy"><h3>' + esc(c.name) + '</h3></div>' +
+          c.exams.map(function (x) {
+            var search = (' ' + [x.country, x.name, domain(x.url), x.note || '', TAG[x.type]].join(' ')).toLowerCase();
+            return '<a class="exam" href="' + esc(x.url) + '" data-kind="' + x.type + '" data-search="' + esc(search) + '">' +
+              '<span class="exam-main"><span class="exam-name">' + esc(x.name) + '</span>' +
+              '<span class="exam-desc">' + esc(domain(x.url)) + (x.note ? ' · ' + esc(x.note) : '') + '</span>' +
+              (x.langs ? '<span class="langs">' + esc(x.langs) + '</span>' : '') + '</span>' +
+              '<span class="exam-side"><span class="tag tag-' + x.type + '">' + TAG[x.type] + '</span>' +
+              (x.soon ? '<span class="tag tag-soon">Soon</span>' : '') + '<span class="go" aria-hidden="true">→</span></span></a>';
+          }).join('') + '</div>';
+      }).join('') + '</div></div>';
+  }).join('');
+
+  document.getElementById('stat-exams').textContent = EXAMS.length;
+  document.getElementById('stat-countries').textContent = countryCount;
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // ── Hero ticker: exam names in a fixed shuffled order, listed twice for a seamless loop
+  var names = EXAMS.map(function (x) { return x.name; });
+  for (var i = names.length - 1, s = 7; i > 0; i--) { s = (s * 9301 + 49297) % 233280; var j = Math.floor(s / 233280 * (i + 1)); var t = names[i]; names[i] = names[j]; names[j] = t; }
+  document.getElementById('ticker').innerHTML = names.concat(names).map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('');
+
+  // ── Search + type filter
+  var input = document.getElementById('finder'), chips = document.querySelectorAll('.chip'), empty = document.getElementById('empty'), kind = 'all';
   function apply() {
-    var q = input.value.trim().toLowerCase();
-    var any = false;
+    var q = input.value.trim().toLowerCase(), any = false;
     document.querySelectorAll('.region').forEach(function (reg) {
       var regAny = false;
       reg.querySelectorAll('.country').forEach(function (c) {
         var cAny = false;
         c.querySelectorAll('.exam').forEach(function (x) {
-          var ok = (kind === 'all' || x.dataset.kind === kind) && (!q || (' ' + x.dataset.search).indexOf(' ' + q) !== -1);
+          var ok = (kind === 'all' || x.dataset.kind === kind) && (!q || x.dataset.search.indexOf(' ' + q) !== -1);
           x.hidden = !ok; if (ok) cAny = true;
         });
         c.hidden = !cAny; if (cAny) regAny = true;
@@ -556,19 +444,58 @@
     });
     empty.hidden = any;
   }
-  input.addEventListener('input', function () {
-    apply();
-    if (input.value.trim().length === 1) document.getElementById('projects').scrollIntoView({behavior: 'smooth', block: 'start'});
-  });
-  input.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Enter') document.getElementById('projects').scrollIntoView({behavior: 'smooth', block: 'start'});
-  });
+  function jump() { document.getElementById('exams').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  input.addEventListener('input', function () { apply(); if (input.value.trim().length === 1) jump(); });
+  input.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') jump(); });
   chips.forEach(function (ch) {
     ch.addEventListener('click', function () {
       chips.forEach(function (o) { o.classList.remove('is-on'); });
       ch.classList.add('is-on'); kind = ch.dataset.filter; apply();
     });
   });
+})();
+</script>
+
+<script>
+// ── Contact form → n8n "Contact from CivicLearn" (Google Sheet inbox + Telegram + contact_messages)
+(function () {
+  var form = document.getElementById('contactForm'), btn = document.getElementById('sendBtn');
+  var ok = document.getElementById('formOk'), err = document.getElementById('formErr');
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    ok.hidden = true; err.hidden = true;
+    if (form.company.value) return; // spam trap
+    var name = form.name.value.trim(), email = form.email.value.trim(), message = form.message.value.trim();
+    if (!name || !message || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      err.textContent = 'Please fill in your name, a valid email and your message.'; err.hidden = false; return;
+    }
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      var res = await fetch('https://civiclearn.app.n8n.cloud/webhook/contact', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ site: location.hostname, page: location.pathname, lang: 'en', name: name, email: email, product: 'civiclearn.com homepage', message: message })
+      });
+      if (!res.ok) throw new Error();
+      form.reset(); ok.hidden = false; btn.textContent = 'Sent';
+    } catch (x) {
+      err.innerHTML = 'Sorry, the message could not be sent. Please email us at <a href="mailto:admin@civiclearn.com">admin@civiclearn.com</a>.';
+      err.hidden = false; btn.disabled = false; btn.textContent = 'Send message';
+    }
+  });
+})();
+</script>
+
+<script>
+// ── Trustpilot review count (same source as the checkout pages: site_config.trustpilot)
+(function () {
+  var K = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  fetch('https://htgliokekeaovdiafrgs.supabase.co/rest/v1/site_config?key=eq.trustpilot&select=value', { headers: { apikey: K, Authorization: 'Bearer ' + K } })
+    .then(function (r) { return r.json(); })
+    .then(function (rows) {
+      var v = rows && rows[0] && rows[0].value; if (!v) return;
+      document.querySelectorAll('.tp-num').forEach(function (el) { el.textContent = v.count; });
+      document.querySelectorAll('.tp-year').forEach(function (el) { el.textContent = v.year; });
+    }).catch(function () {});
 })();
 </script>
 
