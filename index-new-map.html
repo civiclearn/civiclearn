@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CivicLearn – Citizenship & Language Exam Preparation</title>
+<meta name="description" content="CivicLearn builds specialised training for civic knowledge tests, citizenship interviews, residency procedures and language exams. Trusted by learners worldwide since 2005.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="CivicLearn – Citizenship & Language Exam Preparation">
+<meta property="og:description" content="Specialised preparation for civic, citizenship and language tests, focused on real exam requirements. Trusted by learners across multiple countries since 2005.">
+<meta property="og:url" content="https://civiclearn.com/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CivicLearn – Citizenship & Language Exam Preparation">
+<meta name="twitter:description" content="Specialised preparation for civic, citizenship and language tests, focused on real exam requirements. Trusted by learners across multiple countries since 2005.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap">
+<style>
+  :root {
+    --brand: #7c3aed;
+    --brand-dark: #5b21b6;
+    --brand-light: #ede9fe;
+    --bg: #f7f2e8;
+    --paper: #fffdf9;
+    --ink: #17141d;
+    --muted: #6b6575;
+    --line: rgba(23,20,29,0.08);
+    --max-w: 1120px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: "Lexend", system-ui, sans-serif; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  [hidden] { display: none !important; }
+
+  /* Header */
+  .site-header { position: sticky; top: 0; z-index: 50; background: rgba(247,242,232,0.9); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  .header-inner { max-width: var(--max-w); margin: 0 auto; padding: 0.8rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .brand-main { display: flex; align-items: center; gap: 0.55rem; }
+  .brand-mark { width: 28px; height: 28px; }
+  .brand-title { font-weight: 600; font-size: 1.05rem; letter-spacing: -0.01em; }
+  .header-right { display: flex; gap: 1.4rem; }
+  .nav-link { font-size: 0.85rem; color: var(--muted); transition: color .2s; }
+  .nav-link:hover { color: var(--brand); }
+
+  /* Hero */
+  .hero { max-width: var(--max-w); margin: 0 auto; padding: 4rem 2rem 3.5rem; display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 3rem; align-items: center; }
+  .hero-kicker { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 600; color: var(--brand-dark); margin-bottom: 1.2rem; }
+  .hero-title { font-family: "Lora", Georgia, serif; font-size: clamp(2.1rem, 4.2vw, 3.1rem); font-weight: 700; line-height: 1.12; letter-spacing: -0.025em; margin-bottom: 1.2rem; max-width: 16ch; }
+  .hero-title em { color: var(--brand); }
+  .hero-subtitle { font-size: 0.98rem; line-height: 1.7; color: var(--muted); max-width: 500px; margin-bottom: 1.8rem; }
+
+  .finder { display: flex; align-items: center; gap: 0.7rem; max-width: 460px; background: var(--paper); border: 1.5px solid var(--line); border-radius: 999px; padding: 0.4rem 0.5rem 0.4rem 1.1rem; box-shadow: 0 6px 24px rgba(91,33,182,0.07); transition: border-color .2s, box-shadow .2s; cursor: text; }
+  .finder:focus-within { border-color: var(--brand); box-shadow: 0 6px 28px rgba(124,58,237,0.16); }
+  .finder svg { width: 18px; height: 18px; fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; flex: none; }
+  .finder input { flex: 1; border: 0; outline: 0; background: transparent; font: inherit; font-size: 0.95rem; color: var(--ink); padding: 0.55rem 0; min-width: 0; }
+  .finder input::placeholder { color: #9a94a3; }
+
+  .stats { display: flex; gap: 2.2rem; margin-top: 2.2rem; }
+  .stats dt { font-family: "Lora", Georgia, serif; font-size: 1.7rem; font-weight: 700; line-height: 1; }
+  .stats dd { font-size: 0.76rem; color: var(--muted); margin-top: 0.3rem; }
+
+  /* Hero ticker: native exam names drifting upward */
+  .hero-ticker { height: 380px; overflow: hidden; position: relative;
+    -webkit-mask-image: linear-gradient(transparent, #000 22%, #000 78%, transparent);
+            mask-image: linear-gradient(transparent, #000 22%, #000 78%, transparent); }
+  .hero-ticker ul { list-style: none; animation: drift 70s linear infinite; }
+  .hero-ticker li { font-family: "Lora", Georgia, serif; font-style: italic; font-size: 1.55rem; line-height: 2.5rem; color: rgba(91,33,182,0.22); white-space: nowrap; }
+  .hero-ticker li:nth-child(3n+1) { color: rgba(91,33,182,0.55); }
+  .hero-ticker li:nth-child(5n+2) { color: var(--ink); opacity: .75; }
+  @keyframes drift { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .hero-ticker ul { animation: none; } }
+
+  /* Section basics */
+  .section { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+  .section-kicker { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 600; color: var(--brand-dark); margin-bottom: 0.45rem; }
+  .section-title { font-family: "Lora", Georgia, serif; font-size: 1.85rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+
+  /* Directory */
+  .directory { padding-top: 1rem; scroll-margin-top: 70px; }
+  .dir-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-bottom: 1.6rem; border-bottom: 1px solid var(--line); margin-bottom: 0.4rem; }
+  .chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .chip { font: inherit; font-size: 0.8rem; font-weight: 500; padding: 0.42rem 0.95rem; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; transition: all .18s; }
+  .chip:hover { color: var(--brand); border-color: rgba(124,58,237,0.35); }
+  .chip.is-on { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+  .region { display: grid; grid-template-columns: 170px 1fr; gap: 1.5rem; padding: 1.6rem 0; border-bottom: 1px solid var(--line); }
+  .region-label { font-family: "Lora", Georgia, serif; font-style: italic; font-size: 1.05rem; color: var(--muted); padding-top: 0.3rem; }
+  .region-grid { column-count: 2; column-gap: 1.1rem; }
+  .country { break-inside: avoid; margin-bottom: 1.1rem; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 0.35rem; }
+  .country-head { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.75rem 0.45rem; }
+  .flag { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1px rgba(0,0,0,0.08); flex: none; }
+  .country-head h3 { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+
+  .exam { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; padding: 0.65rem 0.75rem; border-radius: 10px; transition: background .15s; }
+  .exam + .exam { border-top: 1px dashed var(--line); }
+  .exam:hover { background: var(--brand-light); }
+  .exam:hover + .exam { border-top-color: transparent; }
+  .exam-main { display: flex; flex-direction: column; min-width: 0; }
+  .exam-name { font-family: "Lora", Georgia, serif; font-weight: 600; font-size: 1.04rem; line-height: 1.3; }
+  .exam-desc { font-size: 0.75rem; color: var(--muted); margin-top: 0.1rem; }
+  .exam-side { display: flex; align-items: center; gap: 0.35rem; flex: none; }
+  .tag { font-size: 0.64rem; font-weight: 600; letter-spacing: 0.04em; padding: 0.2rem 0.5rem; border-radius: 999px; }
+  .tag-citizenship { background: #efe9fb; color: #5b21b6; }
+  .tag-residency   { background: #e3f1ee; color: #19695a; }
+  .tag-language    { background: #fbefe0; color: #8a4b0f; }
+  .tag-soon        { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+  .go { width: 24px; text-align: right; color: var(--brand); opacity: 0; transform: translateX(-4px); transition: all .18s; }
+  .exam:hover .go { opacity: 1; transform: none; }
+
+  .empty { padding: 2.5rem 0; color: var(--muted); font-size: 0.95rem; }
+  .empty a { color: var(--brand); text-decoration: underline; }
+
+  /* About + Insights */
+  .about { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.5rem; padding: 4rem 0 4rem; align-items: stretch; }
+  .about-text p { font-size: 0.93rem; line-height: 1.75; color: var(--muted); margin-top: 0.9rem; max-width: 540px; }
+  .insights { display: flex; flex-direction: column; justify-content: space-between; gap: 1.2rem; background: var(--ink); color: #fff; border-radius: 18px; padding: 1.8rem 2rem; transition: transform .2s; }
+  .insights:hover { transform: translateY(-2px); }
+  .insights .section-kicker { color: #c4b5fd; }
+  .insights h3 { font-family: "Lora", Georgia, serif; font-size: 1.3rem; font-weight: 600; line-height: 1.35; }
+  .insights-action { font-size: 0.85rem; font-weight: 600; color: #c4b5fd; }
+
+  /* Contact (unchanged look) */
+  .contact-section { background: linear-gradient(135deg, #1e1b2e 0%, #2d1b4e 50%, #1e1b2e 100%); padding: 4rem 2rem; }
+  .contact-inner { max-width: var(--max-w); margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+  .contact-text { color: #fff; }
+  .contact-text .ct-kicker { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; color: #a78bfa; margin-bottom: 0.7rem; }
+  .contact-text h2 { font-family: "Lora", Georgia, serif; font-size: 1.8rem; font-weight: 700; margin-bottom: 0.8rem; line-height: 1.2; }
+  .contact-text p { font-size: 0.88rem; line-height: 1.7; color: rgba(255,255,255,0.6); max-width: 380px; }
+  .contact-form-wrap { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 1.4rem; padding: 2rem 2.2rem; }
+  .form-row { margin-bottom: 0.85rem; }
+  .form-row input, .form-row textarea { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.6rem; padding: 0.7rem 0.9rem; color: #fff; font-size: 0.88rem; font-family: "Lexend", sans-serif; outline: none; }
+  .form-row input::placeholder, .form-row textarea::placeholder { color: rgba(255,255,255,0.3); }
+  .form-row input:focus, .form-row textarea:focus { border-color: rgba(124,58,237,0.6); }
+  .form-row textarea { resize: vertical; min-height: 100px; }
+  .contact-form-wrap button { width: 100%; padding: 0.75rem; font-size: 0.88rem; font-weight: 500; background: var(--brand); color: #fff; border: none; border-radius: 999px; cursor: pointer; margin-top: 0.3rem; font-family: "Lexend", sans-serif; transition: background .2s; }
+  .contact-form-wrap button:hover { background: var(--brand-dark); }
+
+  .site-footer { max-width: var(--max-w); margin: 0 auto; padding: 2rem 2rem 2.5rem; display: flex; align-items: center; justify-content: space-between; font-size: 0.76rem; color: var(--muted); }
+  .footer-links { display: flex; gap: 1.2rem; }
+  .footer-links a:hover { color: var(--brand); }
+
+  /* Proof line */
+  .proof { display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem 1.4rem; margin-top: 2rem; font-size: 0.8rem; color: var(--muted); }
+  .tp { display: inline-flex; align-items: center; gap: 0.45rem; color: var(--ink); }
+  .tp-stars { display: flex; gap: 2px; }
+  .tp-stars svg { width: 17px; height: 17px; display: block; }
+  .tp b { font-weight: 600; }
+  .tp:hover b { text-decoration: underline; }
+  .proof-sep { width: 1px; height: 18px; background: var(--line); }
+  .proof strong { color: var(--ink); font-weight: 600; }
+
+  /* Language codes */
+  .langs { font-size: 0.66rem; letter-spacing: 0.06em; color: var(--brand-dark); font-weight: 500; }
+
+  /* Product showcase */
+  .showcase { display: grid; grid-template-columns: 1.35fr 1fr; gap: 3rem; align-items: center; padding: 4.5rem 0 1rem; }
+  .showcase-img img { width: 100%; height: auto; display: block; }
+  .showcase-img figcaption { font-size: 0.74rem; color: var(--muted); margin-top: 0.6rem; text-align: center; }
+  .showcase-text p { font-size: 0.93rem; line-height: 1.7; color: var(--muted); margin: 0.9rem 0 1.4rem; }
+  .features { list-style: none; display: grid; gap: 0.9rem; }
+  .features li { display: grid; grid-template-columns: 30px 1fr; gap: 0.75rem; align-items: start; }
+  .features .ic { width: 30px; height: 30px; border-radius: 9px; background: var(--brand-light); color: var(--brand-dark); display: flex; align-items: center; justify-content: center; }
+  .features .ic svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .features b { display: block; font-size: 0.9rem; font-weight: 600; }
+  .features span { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+  /* Contact form states */
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  .form-msg { font-size: 0.85rem; margin-top: 0.8rem; line-height: 1.5; }
+  .form-ok { color: #86efac; }
+  .form-err { color: #fca5a5; }
+  .form-err a { text-decoration: underline; }
+  .contact-form-wrap button:disabled { opacity: .6; cursor: default; }
+
+  /* Map variant */
+  .hero-map { align-self: center; }
+  .map-wrap { position: relative; }
+  .map-svg { width: 100%; height: auto; display: block;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 80%, transparent 100%), linear-gradient(to bottom, transparent 0, #000 8%, #000 94%, transparent 100%);
+    -webkit-mask-composite: source-in;
+            mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 80%, transparent 100%), linear-gradient(to bottom, transparent 0, #000 8%, #000 94%, transparent 100%);
+            mask-composite: intersect; }
+  .m-land { fill: #fffdf9; stroke: #e4dccd; stroke-width: 0.6; }
+  .m-on { fill: #d9cdfc; stroke: #fff; stroke-width: 0.8; cursor: pointer; transition: fill .15s; outline: none; }
+  .m-on:hover, .m-on:focus { fill: var(--brand); }
+  .map-tip { position: absolute; transform: translate(-50%, -140%); background: var(--ink); color: #fff; font-size: 0.74rem; font-weight: 500; padding: 0.3rem 0.6rem; border-radius: 6px; white-space: nowrap; pointer-events: none; }
+  .map-also { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-top: 0.9rem; font-size: 0.74rem; color: var(--muted); }
+  .map-also span { margin-right: 0.2rem; }
+  .map-also button { display: inline-flex; align-items: center; gap: 0.35rem; font: inherit; font-size: 0.76rem; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 0.28rem 0.7rem 0.28rem 0.32rem; cursor: pointer; transition: border-color .15s, color .15s; }
+  .map-also button:hover { border-color: var(--brand); color: var(--brand); }
+  .map-also img { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1px rgba(0,0,0,.08); }
+  .hero:has(.hero-map) { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 900px) { .hero:has(.hero-map) { grid-template-columns: 1fr; } .hero-map { max-width: 520px; } }
+
+  @media (max-width: 900px) {
+    .showcase { grid-template-columns: 1fr; gap: 1.5rem; padding-top: 3rem; }
+    .hero { grid-template-columns: 1fr; padding-top: 2.5rem; }
+    .hero-ticker { display: none; }
+    .region { grid-template-columns: 1fr; gap: 0.8rem; }
+    .about { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 700px) {
+    .header-inner, .hero, .section, .site-footer { padding-left: 16px; padding-right: 16px; }
+    .hide-sm { display: none; }
+    .header-right { gap: 1rem; }
+    .region-grid { column-count: 1; }
+    .stats { gap: 1.6rem; }
+    .contact-section { padding: 3rem 16px; }
+    .contact-inner { grid-template-columns: 1fr; gap: 2rem; }
+    .contact-form-wrap { padding: 1.4rem; }
+    .site-footer { flex-direction: column; gap: 0.8rem; text-align: center; }
+  }
+</style>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/" class="brand-main">
+      <img src="/assets/images/cl.png" alt="" class="brand-mark">
+      <span class="brand-title">CivicLearn</span>
+    </a>
+    <nav class="header-right">
+      <a href="#exams" class="nav-link">Exams</a>
+      <a href="https://civiclearn.com/insights/" class="nav-link hide-sm">Insights</a>
+      <a href="passport-ranking.html" class="nav-link hide-sm">Passport rankings</a>
+      <a href="https://civiclearn.com/support/" class="nav-link">Support</a>
+      <a href="#contact" class="nav-link hide-sm">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<section class="hero">
+  <div class="hero-text">
+    <div class="hero-kicker">Exam preparation since 2005</div>
+    <h1 class="hero-title">The test that stands between you and your <em>new passport</em>, prepared properly.</h1>
+    <p class="hero-subtitle">CivicLearn builds one dedicated training site per exam: citizenship tests, residency tests and the language exams that come with them. Each one is built around the official study material and the format of the exam.</p>
+
+    <label class="finder" for="finder">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="finder" type="search" placeholder="Which country are you applying to?" autocomplete="off">
+    </label>
+
+    <dl class="stats">
+      <div><dt id="stat-exams">30</dt><dd>exam platforms</dd></div>
+      <div><dt id="stat-countries">22</dt><dd>countries</dd></div>
+      <div><dt>11,000+</dt><dd>learners</dd></div>
+    </dl>
+
+    <div class="proof">
+      <a class="tp" href="https://www.trustpilot.com/review/civiclearn.com" target="_blank" rel="noopener">
+        <span class="tp-stars" aria-label="Trustpilot rating">
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="25" height="25" fill="#00b67a"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+          <svg viewBox="0 0 25 25"><rect width="12.5" height="25" fill="#00b67a"/><rect x="12.5" width="12.5" height="25" fill="#dcdce6"/><path fill="#fff" d="M12.5 4.3l2.1 5.1 5.5.4-4.2 3.6 1.3 5.4-4.7-3-4.7 3 1.3-5.4-4.2-3.6 5.5-.4z"/></svg>
+        </span>
+        <b>Trustpilot</b>
+      </a>
+      <span><strong class="tp-num">43</strong> reviews in <span class="tp-year">2026</span></span>
+    </div>
+  </div>
+
+  <div class="hero-map">
+    <div class="map-wrap">
+      <svg class="map-svg" viewBox="0 0 600 560" role="img" aria-label="Map of the European countries CivicLearn covers"><path class="m-land" d="M292.5,473.1L292.5,473.1L292.5,473.1Z"/><path class="m-land" d="M144.8,350.6L144.8,350.6L144.8,350.6Z"/><path class="m-land" d="M140.6,345.8L140.6,345.8L140.6,345.8Z"/><path class="m-land" d="M136.4,272L132.8,273L136.2,269Z"/><path class="m-land m-on" data-country="United Kingdom" d="M144.8,313.5L138.4,315.9L135.9,315.1L131.7,310.4L127.2,308.3L124.1,309.4L121.5,304.9L123.5,303.5L130.6,301.8L135.3,297.4L135.3,291.6L129.8,292.2L136.2,287L145.1,286L148.2,281.3L147.8,278.6L149.9,274.8L147.2,275L144.6,269.3L147.2,262L142.1,263.9L137.3,263.3L134.9,261.4L133.6,263.6L132.2,260.7L138.2,251.9L137,248.5L138.5,243.4L134.8,245.1L135.9,241.8L133.6,243.2L133.4,245.8L130.4,251.9L128.6,251.5L132.1,241.9L137.9,232.2L133.3,234.7L130,231.1L136.4,224.4L135,221.8L137.3,219.7L136.4,217.6L138.2,214.6L141.8,215.4L140.4,212.6L141.5,209.8L144.2,210L144.5,206L147.3,206.7L160.7,207.4L158.5,211.9L151.3,216.2L151.9,218.5L149,221.7L155.3,220.8L157.8,221.8L166,222.9L167.8,226.4L165.3,229.6L162.3,235.3L158.7,239.3L153.1,241.1L157.6,242.9L150.9,246.2L153.3,247.8L157.2,247.4L160.7,249.9L164.1,255.6L165.3,268.1L170,273L174.4,279.6L173.1,280.9L175.1,287.6L171.6,285.8L174.9,289.7L176.3,294.7L172.9,298.1L174.9,299.9L177.8,297.8L182.3,298.5L187.4,302.3L187.7,306.7L185.3,312.3L182.2,315.7L177.1,316.8L178.1,319.3L175.2,319.8L175.8,321.9L182.7,323.1L182.2,325.9L169.9,330.7L166.2,329.4L160.5,329.3L154.8,326.4L153.4,328.5L148.5,328L148.1,329.9L143.3,328.8L139.2,326.5L135.2,327.1L132.6,331.4L130.3,332.4L127.1,329.3L121.5,329.7L115.9,332.7L113.1,329.3L115.5,329.1L124.4,322.7L125.6,319.8L129.4,317.3L139.3,318.9L147.3,312.1ZM135.7,285.3L133.6,287.8L132.6,283.7ZM166.2,199.1L166.2,199.1L166.2,199.1ZM180.9,181.6L180.9,181.6L180.9,181.6ZM179,180.9L180.7,182.6L178.5,189.1L175.7,184.3L178,183.9L177,181.5ZM183.6,177.3L183.6,177.3L183.6,177.3ZM160.2,204.8L160.2,204.8L160.2,204.8ZM161.9,206L161.9,206L161.9,206ZM161.7,201.4L162.9,203.8L159.4,201.9L160.1,199.6ZM164.7,199.5L164.7,199.5L164.7,199.5ZM125.7,232.1L125.7,232.1L125.7,232.1ZM134.4,251.9L132.6,251L133.4,247.6ZM131.7,237.3L128.2,237.4L130,232.2L132.3,235.1ZM127.4,242.8L126.8,247L124.8,247.3L124.4,243.6ZM128.3,244.8L129.4,241.4L131.4,240.8ZM135.1,206.4L131.4,209.8L132.2,211.1L127,214.1L128.4,211.7L127.1,210.1L128.3,206.9L135.3,204.2ZM129.7,227.1L129.7,227.1L129.7,227.1ZM132.6,219.3L132,222.1L135.5,224.3L132.6,226.5L132.5,224L130.1,223.5L127.5,219.1L132.3,216.9ZM124.8,214.6L124.8,214.6L124.8,214.6ZM122.4,223L122.4,223L122.4,223ZM120.4,224.9L120.4,224.9L120.4,224.9ZM120.3,270L116.4,269.6L114.2,263.6L110.5,267.2L106.6,264.7L105,261.2L109,259L115.2,253.1L122.1,252.4L124.9,253.4L127.1,260.2L125.3,261.8L127.8,262.7L126.3,268.5L121.9,271ZM157.6,330.1L155.1,331.2L153.3,329.2Z"><title>United Kingdom</title></path><path class="m-land" d="M551.5,336.1L545.2,339L544.1,342L535.2,349.8L530.9,352L527.3,359L526,356.8L523.5,361.8L527.4,367.9L523,365.5L511.4,365.6L511.4,367.6L507,367.8L500.1,371.6L491.9,370.3L493.8,368L488.6,367.6L497.1,366.2L498.6,363.5L494.2,365.2L487.9,366.1L481,370L480,377.5L478,381.8L472.4,386.4L475.3,392.4L469.7,391.6L465.5,395.5L458.9,393.7L461.7,392L461,389.8L464.2,382.8L462.5,377.3L464.3,375.2L472.1,375.8L474.7,373.9L472.2,372.8L470.5,368.6L466.8,367.5L465.4,363.4L460.6,361.4L460.1,357.2L457.9,353.9L454.2,352.6L451.2,353.8L440.7,350.4L437.9,352.8L434.1,353.5L432.3,355.9L429.4,357.5L428.7,361L422,363.8L416.8,367.9L413,365.3L409,366.5L401,366.8L398.1,365.8L395.8,368.4L394.3,366.2L387.1,362.8L389.4,352.1L392.2,352.4L389.2,344.8L392,338.8L397.1,330.3L399.6,329.3L399.5,322.6L394,316.4L392.8,313.4L395.9,311.8L398.8,306.8L406.9,304L413.1,303L424.8,302.8L426.5,304.6L439,302.5L440.6,303.8L443.6,300.1L446.5,303L453.5,299.5L458,301.6L456.5,296.7L458.5,289L465.3,286L469.9,284.3L471,280.9L474.7,280.5L476.5,278.5L481.7,276.7L490.4,282.8L488.4,285.1L491.6,291L499.3,288.9L502.4,290.4L506,297.3L509.4,299.2L510.9,297.1L518.8,297.8L524.9,292.1L529.2,295.3L533.4,296.7L534.6,294L541.9,294.7L544,293.3L551.3,294.9L553.4,293.5L556.2,298L553.9,303.2L557.6,304.1L556.1,309.2L558.1,309.1L561,312.4L561.5,319.3L553.6,322.5L549.5,329.2ZM494.9,371.3L494.9,371.3L494.9,371.3Z"/><path class="m-land" d="M453.6,479.8L453.6,479.8L453.6,479.8ZM600,491.6L594.7,491.3L595.3,496.9L597.7,499.8L595,501.9L594.2,508L590.6,507.9L587.4,502.4L590,495.5L586.9,492.5L581,500.4L572.8,499.6L570.4,500.7L565.7,509.8L562.6,513.5L552.4,519.4L546.6,518.8L540.5,514.9L531.1,513.4L522.3,515L521.9,525.4L519.7,525L513.7,529.2L505.9,527.4L503.4,523.2L493.9,523.8L486.5,528L492.3,520.7L481.4,523.6L483.1,520.8L478.4,518.3L475.6,514.2L476.4,509.3L468.9,507.5L463.9,507.4L465.3,501.4L467.1,504.4L473.1,503L468,499.4L470.3,496L464.9,490.8L465.7,486.2L457.6,489.7L456.6,481.5L461.6,473.7L467.7,471.4L470.4,472.9L474.5,470.9L488.2,466.6L484.7,465.7L486.2,463.8L495.9,459.3L490.1,459.8L485.7,457.8L487.9,453.7L495,452.9L499.6,450.8L505.3,451L510.2,449.1L511.5,445.3L519,436.2L529.4,428.1L544.7,423.7L546.9,421.2L551.8,424.9L555.2,425.2L560.3,422.5L563.1,425.7L567.6,426.7L569.9,424.1L574.1,425.4L582.3,423.9L590,423.3L600,416L600,491.6ZM470.2,446.4L470.4,448.2L475.9,453L484.9,454.5L482.8,459.1L475.5,459.3L468.2,462.9L466.5,467.9L461.6,472.2L456.5,480.2L456.3,476.4L461.4,470.2L453.5,472.2L452.3,470.7L454.9,466.4L453.9,462.1L456.7,458.8L455.5,456L452.1,454.9L454.2,450.7L461.8,446.8L465.1,448.5Z"/><path class="m-land" d="M243.1,560L241.5,558.1L246.3,551.2L253.5,547.2L260.4,545L266.8,547.1L266.7,549.8L269.6,554.6L271.6,552.2L277.6,549.1L278.6,552.2L274.5,558.3L272.4,560L243.1,560Z"/><path class="m-land" d="M600,526.4L598.9,526.7L595.1,518L591,513.6L590.6,507.9L590.6,507.9L594.2,508L595,501.9L597.7,499.8L595.3,496.9L594.7,491.3L600,491.6L600,526.4Z"/><path class="m-land m-on" data-country="Switzerland" d="M259.4,386.8L259.4,390.6L259.9,393.9L266.2,396.9L269.1,396.9L268.9,401.7L266.4,400.6L263.7,404.6L259.3,405.4L256.5,402.8L256.4,405.7L253.1,412.7L247.9,406.2L247.1,403.1L240.7,411L238,410L232.5,410.6L230,406.9L230,403L226.5,402.6L222.6,406.8L222.6,402.4L233.1,389.2L233.8,386.7L237.6,387.3L239.7,385.3L247.9,385.6L250.1,382.9L255.9,384.5Z"><title>Switzerland</title></path><path class="m-land m-on" data-country="Sweden" d="M338.1,224.5L336.3,226.7L337.6,231.3L332.2,239.3L333.1,236.7L331.3,234L331,229.6L333.8,225.1L336.6,223.4ZM319.6,250.3L318.3,246.1L320.4,240.8L322.3,233.8L323,234.1L321,242.2ZM275.3,210.6L277.3,212.3L278.4,206.6L277.4,202L279.2,197.8L283.4,193.9L284,188.6L281.5,180.2L284.4,179.4L285.6,174.6L280.1,169.1L280.9,160.4L279.4,155.7L279.9,149.3L278.3,144.8L279.3,140.1L282.5,134.6L286.8,132.3L291.3,133.1L292.4,130.5L291.7,126L288.8,124.3L293.6,112.8L294.1,104.2L293.2,99.8L296.3,99L299,96.6L298.4,93.7L303.7,84.4L301.5,78.7L304,75.2L304.8,70.9L307.7,67.3L311.4,69.1L312.5,65.2L311.8,60L313,59.4L322.7,61.4L324,59.3L322.2,58.5L323.8,54.9L322,50.8L324.8,50.1L334,57L338.9,58.3L345.1,64.2L344.6,65.6L345.6,72.2L347.3,72.3L347.3,76.2L350.7,81.5L349.9,87L351.1,91.4L352.2,91.9L354.8,96.8L351.8,97.1L348.3,99.2L345.7,97.5L343.4,98.4L343.3,102.3L339.4,106L340.1,109.7L338.1,115.7L341.5,120.6L338.8,125.5L337.8,130.5L332.6,135.3L331.6,137.8L329.1,137.9L327.3,141.9L324.5,143.2L324,147.7L320.1,149.1L321.5,152.5L318.4,155.2L317.2,154.4L318.5,159.6L318,164.4L318.9,167.1L316.9,166.7L318.9,182.4L322.2,184.6L324.4,183.5L331.6,190.5L333.6,195.3L328.4,201.1L330.7,201.1L329.5,205.8L323.4,210.4L319.9,213.9L313.9,214.7L318.5,215.1L317.6,217.5L318.9,220.8L317.7,227L319,231.7L317.8,235.5L318.6,238.4L315.2,251.7L304.5,253.8L300.5,258.7L301.8,263.3L300.5,265.4L297.3,265.1L293.2,266.5L289.3,265.7L289.6,259.7L285.6,252.4L288.1,252.7L286.8,250.1L288.6,247.3L284.5,243L278.5,230.8L278.1,226.9L276.1,224.7L274.5,219.2L273.7,210ZM338.6,223L338.6,223L338.6,223ZM330.6,206.9L330.6,206.9L330.6,206.9ZM331.2,200L331.2,200L331.2,200Z"><title>Sweden</title></path><path class="m-land m-on" data-country="Spain" d="M161.4,517.9L161.4,517.9L161.4,517.9ZM182,502.5L185.6,503.3L182.6,508.9L180.4,510L175.5,505.5L172.4,504.3L177.8,501.1L182.4,499.7ZM195.8,502.9L190.6,500.4L195.2,499.9ZM160,513.9L159.2,511.2L162.4,512.3ZM132.3,439.3L136.2,442.5L135,445L142.7,448.3L144.4,450.7L147.6,450.8L150.2,453.3L157.9,454.3L158.9,452L166,455.3L166.7,456.9L169.7,458.7L173.1,461.4L175.2,460.6L180.2,462.4L184,460.8L186.7,461.6L186.4,469.2L183.3,471.6L174.8,475.5L171.9,477.9L159.2,480L155,483.2L156.9,485L153.2,486.3L143.7,496.6L139.9,501.7L140.4,509L144.6,514.4L136.8,518.4L132.9,522.4L129.4,531L123.1,530.3L116.5,534.5L114,538.6L110.3,541.3L105.4,539.4L102.7,540.4L96.9,538.7L83,536.6L78.5,539.1L72.1,539L68.7,543L65,544L60.4,540.3L57.5,527.1L53.6,522.3L47.1,521L47.5,514.5L53,509L55.1,508.9L52.8,501.6L54.5,497.9L59.1,493.5L57.3,491.8L55,482.7L61.1,483.4L63.8,479L63.1,475.9L66,474.4L67.1,464L77.1,458L73.8,455L73.9,450.7L68.1,448.7L64.7,450.2L55.7,446.9L56.8,443.4L49.7,444.6L49.2,441.8L52,439.9L51.6,431.3L48.9,427.7L50.3,425L54.3,423.5L61.5,423.7L62,421.6L68.7,420.3L72.8,424.1L90.2,428.3L102.2,433.5L112.6,434L118.4,437.4L120.5,436.5L126.1,439.5Z"><title>Spain</title></path><path class="m-land m-on" data-country="Slovakia" d="M389.4,352.1L387.1,362.8L383.6,364.5L379.9,361.8L370.3,363.6L369.3,367.3L365.2,370.5L362.3,369.5L360.9,371.4L354.2,373.9L354,377.3L344.1,378.7L337.5,375.7L334,370.2L334.6,366.9L336.6,362.7L342.2,361.6L345.2,358.6L345.6,355.6L349.5,351.5L351.8,350.9L355.2,352.2L357.6,348.8L361.4,351.8L361.5,354.4L364.6,354.3L365.3,352.1L369.6,350.3L373.1,351L374.1,349.3L379.6,348.5L383.9,350.9Z"><title>Slovakia</title></path><path class="m-land" d="M333.1,399.4L324.2,404.7L324.6,410.3L320.9,412.2L321.9,416.2L316.6,416.6L313.1,414.1L311.5,416.7L306.2,417.8L302.9,416.6L304.4,415.5L306,415L302.6,411.8L301.5,408.7L303,406.5L300.2,405.3L303.4,401.2L312,402.2L317,398.7L327,397.1L328.2,394.2L330.2,394.1Z"/><path class="m-land" d="M404.1,424.9L401.6,429L402.2,433.6L404.6,437.1L410,440.3L407.8,445.5L405.3,446.6L407,452.6L405.3,454.9L404,454.5L396.6,457.4L397.7,450.6L393.4,450L388.9,445.4L385.2,443.4L381.5,450.7L381.3,449.7L371.8,446L367.1,441.6L370.1,438.6L366.8,434.9L370.4,433.2L365.1,429.9L364.7,426.4L366.1,420.7L362.5,421.4L363.2,416.2L365.2,414.8L361.4,413.3L361.7,411.3L358.8,406.8L359.3,405.3L365.5,401L373.1,400.7L379.6,405.3L380.2,409.4L387.9,412.7L387.9,417.9L396.7,421.4L400.6,418.2L403.3,419.3L401.3,422.3Z"/><path class="m-land" d="M292,442.1L292,442.1L292,442.1Z"/><path class="m-land" d="M600,375.8L597.6,375.8L592.3,377.6L591.5,380.5L573.2,373.8L567,374.2L562,371.6L557.3,372.9L553.9,370.3L547.4,370.3L549.4,366.8L556,362.7L554.6,358.7L555.2,352.7L560.2,349.1L549.9,344.3L556.9,341L555.4,339.1L561.8,331.5L559.9,329.6L557.9,332L551.5,336.1L549.5,329.2L553.6,322.5L561.5,319.3L561,312.4L558.1,309.1L556.1,309.2L557.6,304.1L553.9,303.2L556.2,298L553.4,293.5L551.3,294.9L544,293.3L541.9,294.7L534.6,294L533.4,296.7L529.2,295.3L524.9,292.1L518.8,297.8L510.9,297.1L509.4,299.2L506,297.3L502.4,290.4L499.3,288.9L491.6,291L488.4,285.1L490.4,282.8L481.7,276.7L476.5,278.5L474.7,280.5L471,280.9L469.9,284.3L465.3,286L462.7,283.4L460.1,276.5L456.7,274L457.3,271L464.1,270.5L467.8,265.4L463.9,260.9L457.4,261.1L456.6,257.4L452.7,256.4L448.7,251L444.9,249.4L445.3,245L442.9,242.1L442.4,237.6L437.7,235.5L433.2,235.9L430.1,239.4L428.2,235.9L425.5,235.3L422.9,237L420.9,235.4L417.2,235.6L415.3,229.7L411.7,225.6L410.4,226.2L410.5,219.8L405.6,216.6L406.1,212.2L407.6,211.2L403.9,205.4L401.6,196.9L403.3,189.5L404.8,187.6L403.4,186.3L402.5,182.7L405,182.5L405.8,179.8L409,179.3L409.8,176.3L417.6,176.2L417.6,174.8L413.3,172.3L408.5,173.7L404.6,171.8L402.5,167.5L397.8,171L400.8,164.5L405.3,157L414,133.9L414.3,128.6L410.4,124.6L404,121.7L400.2,118.9L402.3,113.8L401.6,111.1L398.2,109.4L396.6,106.8L396.3,103.5L394.3,103.4L392.4,101.3L393.1,98.8L391.5,97.4L391.2,91.8L392.4,89.6L389.5,83.8L381.4,73.7L380.8,71.8L383.4,61.7L383,59.4L377.7,54.8L373.5,53.8L371,49.6L371.4,44.8L369,43.2L371.6,40.6L372.7,35.7L375.6,33.3L375.8,29.2L379.6,29.7L378.6,25.9L382.1,26.4L384.5,23.2L383.6,21.5L389.7,22.9L390.6,24.7L386,25.4L388.1,28.1L393.6,26.8L394.8,31.3L395.9,28.3L398.8,27.3L402.7,27.3L404.6,25.8L408.1,25.9L421.1,29.4L426.9,32.8L429.2,32.3L434.8,34.3L435.2,32.6L440.8,35.8L444.8,36.1L448.7,42.1L450.3,42.3L451.9,48.2L450.6,55.4L449.2,58.6L445.5,63.1L440.7,66.3L435.8,67.2L433.2,66.6L421.8,68.2L416.5,66.5L407.8,67L402.8,64.4L403,63.2L396.6,64.1L400.9,65.3L401.1,66.7L407.4,71L410.5,71.4L409.3,73.7L414.4,73.7L420.3,77.6L421.1,83.2L420.5,85.4L425.1,90.5L427.7,96.6L432.5,98.4L433.6,97.5L437.8,99L440.3,101.2L448.2,101.3L451,96.6L448.5,92.6L446.7,92.1L443.1,93.3L436.5,88.5L436.9,83L441.2,82.3L445.5,84.4L458.1,84.2L458.7,80.6L461,79.5L458.6,76.8L453.4,73L452,69.4L454,65.9L454.8,61.9L458.2,57.5L459.8,49.9L462.6,50.2L466.3,48.5L474.1,51.7L472.4,48.6L471.4,41.3L467.2,35.9L464.2,35.9L462.4,32.3L460.3,23.5L457.6,19L451.6,17L451.4,15.8L455.4,16.1L460.5,12.9L465.4,12.1L473.4,16.9L474.4,18.5L469,23.2L468,28.8L468.9,30.5L473.5,31L478.3,34.4L481.4,33.6L486.3,27.6L483.8,20.3L482.6,18.6L486.7,13.6L484.5,12.2L486.9,10.8L489.2,5.7L491,0L600,0ZM430.3,85.3L431.2,88.4L428.7,86.4ZM461.3,45.9L461.3,45.9L461.3,45.9ZM477.8,0L477.4,0.5L475.7,0.2L475.4,0L477.8,0ZM359.3,261L356.8,265.9L362.1,265.8L361.7,260.8L369.4,262.7L373.7,262L376.6,264.9L376.2,270.3L377.3,272.2L354.7,274.9L349.3,275.1L351.7,270.2L351.6,267.6L356.2,265.8L358.8,260.9ZM511.4,367.6L511.4,365.6L523,365.5L527.4,367.9L533.2,372L535.3,371.9L541.9,367L545.1,366.8L545.1,372.2L540.1,375.1L536.5,374.6L533.2,381L529.4,382.4L523.2,391.4L517.5,390.6L517.5,384.9L515.9,382.3L508.1,380.9L503.7,381.4L508.5,374.2L512.8,369.5Z"/><path class="m-land m-on" data-country="Romania" d="M458.9,393.7L465.5,395.5L469.7,391.6L475.3,392.4L475.5,399L470.4,401.7L468.8,398.4L468,409.8L469.6,418.2L463.5,418.5L461.1,416.5L456,417.2L451.8,415.9L443,420.6L436.3,427.4L424.3,428L422.1,428.9L410.8,429.4L407.6,430.6L408.1,427.2L404.1,424.9L401.3,422.3L403.3,419.3L400.6,418.2L396.7,421.4L387.9,417.9L387.9,412.7L380.2,409.4L379.6,405.3L373.1,400.7L381.2,397.4L386.8,382.6L388,376.7L390.4,372.8L394.2,371L395.8,368.4L398.1,365.8L401,366.8L409,366.5L413,365.3L416.8,367.9L422,363.8L428.7,361L429.4,357.5L432.3,355.9L436.3,356.6L441.7,363.4L448.9,369.9L451.6,371.4L454.6,376L455.7,386.3Z"><title>Romania</title></path><path class="m-land m-on" data-country="Portugal" d="M49.7,444.6L56.8,443.4L55.7,446.9L64.7,450.2L68.1,448.7L73.9,450.7L73.8,455L77.1,458L67.1,464L66,474.4L63.1,475.9L63.8,479L61.1,483.4L55,482.7L57.3,491.8L59.1,493.5L54.5,497.9L52.8,501.6L55.1,508.9L53,509L47.5,514.5L47.1,521L41.2,522.3L32.3,518.1L27.1,518.2L31,512.7L34.4,497L30.4,495.9L32.6,491.7L28.5,490.8L32.2,481.9L35.7,479.6L41.7,471.9L41.4,470.8L47.4,458.7L48.2,445.9Z"><title>Portugal</title></path><path class="m-land m-on" data-country="Poland" d="M392.8,313.4L394,316.4L399.5,322.6L399.6,329.3L397.1,330.3L392,338.8L389.2,344.8L392.2,352.4L389.4,352.1L383.9,350.9L379.6,348.5L374.1,349.3L373.1,351L369.6,350.3L365.3,352.1L364.6,354.3L361.5,354.4L361.4,351.8L357.6,348.8L355.2,352.2L351.8,350.9L348.5,345.7L343,343.9L341.6,345L336.7,341.2L331.2,339.1L332.5,341.9L329.7,344.3L324.7,339.8L326.5,337.3L322.5,337.1L316,334.5L312.3,331.7L310.7,334.2L312.2,328L309.2,324.1L307.7,319.5L308.9,315.6L306.7,311.5L307.2,308.9L302.3,303.8L304.6,297.5L302.7,290.8L305.8,291.9L305.4,289.2L302.2,288.6L302.1,287.4L319.4,281L322.3,276.6L328.2,273.4L337.4,270.7L341.1,276.5L344,277.4L349.3,275.1L354.7,274.9L377.3,272.2L383,273.6L384.8,277.3L391,290.3L391.7,295.8L388.2,298.8L387,303.1L391.8,305.5Z"><title>Poland</title></path><path class="m-land" d="M324.8,50.1L322,50.8L323.8,54.9L322.2,58.5L324,59.3L322.7,61.4L313,59.4L311.8,60L312.5,65.2L311.4,69.1L307.7,67.3L304.8,70.9L304,75.2L301.5,78.7L303.7,84.4L298.4,93.7L299,96.6L296.3,99L293.2,99.8L294.1,104.2L293.6,112.8L288.8,124.3L291.7,126L292.4,130.5L291.3,133.1L286.8,132.3L282.5,134.6L279.3,140.1L278.3,144.8L279.9,149.3L279.4,155.7L280.9,160.4L280.1,169.1L285.6,174.6L284.4,179.4L281.5,180.2L284,188.6L283.4,193.9L279.2,197.8L277.4,202L278.4,206.6L277.3,212.3L275.3,210.6L270.9,208.4L268.7,202.2L267.4,203.3L267.7,207L265.7,211.1L261.9,211.1L252.4,221.9L249.5,224.2L243.7,225.9L240,225.7L239.4,223.9L236.4,224L235.2,221.8L230,217.6L228.6,214.4L229.6,210L233.4,212.4L231.9,209.4L232.6,205.8L235.3,202.3L227.8,207.5L226.1,206.5L227.9,200.2L231.5,200.2L235.1,197.7L231.4,197L234.8,191.5L237.8,189L237.7,192.9L240.1,187.7L235,189.8L229.5,197.5L226.4,199.7L227.6,193.3L229.2,192.4L227.6,189.9L228.3,185.9L227,183.7L227.1,178.6L234.4,177.9L242.2,178.7L246,177.5L239.5,176.7L229.5,177.7L227.4,175.4L227.4,172.5L230,171.9L227.2,168.2L227.8,165.3L231.3,165.6L235.2,167.6L236.1,166.6L229.2,164.5L229.2,161.4L235,157.8L236.2,158.9L237.7,155.3L241.1,154.7L247.8,155.7L246.8,154.4L250.4,152.9L241.4,153.7L243.2,149.8L247.3,147.7L251,148L254.6,151.9L251.4,146.9L254.4,144.6L253.2,141.1L256.3,139.5L259.6,140.7L262.2,139.9L264.2,143.4L269.6,142.4L269.3,139.8L273.7,137L272.4,135.5L273.2,133.2L270.6,135.2L270.7,137.5L266.7,140.7L263.8,141.5L261.7,137.2L268.1,127.5L274.5,122.3L272.9,122.2L274.2,118.7L278.5,115.4L279.5,108.3L282.3,103.1L282.1,100.8L287.6,99.3L289.4,97L284.1,98.7L284.4,92.2L286.8,89.7L286.9,87.9L289.6,84.4L297.5,81.8L291.5,81.4L294.3,76.9L297.5,78.6L296.1,73.7L293.1,75.3L294.4,70.8L297.6,70L295.8,68.9L299.7,66L301.7,71.3L302.2,68L300.6,65.1L301.7,63.3L304.6,63.6L308.5,62L302.8,62L302.9,59.4L306.9,56.2L308.2,51.3L310.3,50.1L309.9,47.5L310.8,44.9L312.8,45.4L314.6,43.1L315.3,40L318.1,39L318.5,44.8L319.8,37.2L321.6,37.1L321.7,42.5L322.9,42.3L322.8,36.2L325.8,36.2L326.9,34L330.2,36.7L329.5,33.7L326,30.5L328.3,30.2L332.7,27.1L334.3,27.9L336.9,32.6L336.8,28.4L339.6,24L340.9,20.1L339.7,18.3L341.7,14.9L344.8,17L347.4,16.2L345.9,21.6L345.5,27.1L346.1,28.8L351,14.4L352.4,15.1L352.2,18.2L353.3,22.2L355,20.1L355.1,16.2L356.7,14.4L354.6,13L355.9,10.2L360.4,11L360.6,15.5L362.1,22.1L362.4,14.1L364.5,11.8L369.1,14.3L370.2,12.9L371.7,15.2L373.7,14.9L376.7,18.2L372.1,22.5L365.9,23.4L371,24.9L372,27.9L374.9,27.6L374.6,26.1L378.6,25.9L379.6,29.7L375.8,29.2L375.6,33.3L372.7,35.7L371.6,40.6L370.3,38.4L371.7,33.1L369.8,30.3L365.3,29L361.5,26L358,29.5L354.8,30.1L352.9,34.8L353,41.7L353.8,45.5L352.1,48L350.6,52.7L343.8,50.6L341.2,53.6L335.8,53.5L334.8,51.5L329.9,45.6L326.9,47.4L327.3,49.7ZM226.7,177.9L226.7,177.9L226.7,177.9ZM226.9,189.9L226.9,189.9L226.9,189.9ZM373.6,27.1L373.6,27.1L373.6,27.1ZM277.1,108.4L277.1,108.4L277.1,108.4ZM253.8,139.1L253.8,139.1L253.8,139.1ZM251.1,144.2L251.1,144.2L251.1,144.2ZM335.4,19.3L334.1,23.2L330.6,25.1L328.3,23.2L333.2,21.5ZM345.4,11.9L348.8,13.5L346.1,14.7L344.4,13.9ZM337.1,23.4L337.2,25.7L335.5,28.1L333.9,25.7L336.6,22.4ZM339.2,22.7L337.3,22.6L337.4,20.1ZM287.1,66.3L286.7,68.9L283.5,70.8L285.2,66.7ZM282.1,72.8L282.1,72.8L282.1,72.8ZM294.2,55.1L295.4,57.5L294.6,60.2L290.6,60.2L290.6,57.3L292,57.6L293.2,54.2ZM317.4,32.1L319.4,33.6L317.8,34.3ZM323.2,33.3L321,32.6L323.1,31.4ZM315,34.8L317,36.1L314.8,39L313.4,42.9L310.6,44L310.6,40.2L312.2,38L314.4,32ZM280.4,104L280.4,104L280.4,104ZM279.7,101.8L279.7,101.8L279.7,101.8ZM272.5,120.4L269.9,120.8L271.8,118.7ZM306.2,43.5L309.2,44.6L309.4,49.6L306.8,49.9L305.2,52.8L304,51.1L303.8,47.5ZM297.8,60.9L300.7,55.6L302.1,59.3L299,63.5L295.6,64L291.6,67.1L289.5,67.4L291.2,63.9L294.1,63.1L295.8,60.2L296.3,56L295.6,53.3L297.7,49.4L299,50.3L297.5,53.5L298.6,58.1ZM164.7,12.4L165,11.2L169.1,8.5L171,8.3L170.5,10.5Z"/><path class="m-land" d="M225.6,336.3L222.3,334.7L224.3,330.5L221.1,327.9L214.5,324.3L209.3,325.5L205.5,324.8L202.2,322.5L209.2,322L207.2,318.8L212.9,311.6L215.3,304.1L221.8,300.2L223.5,297.7L228.5,295.8L235.4,295.7L238.7,298.2L238.5,302.5L236.7,308.1L234.2,307.9L234.1,310.5L236.7,311.9L233.6,316.4L233.6,319L226,320.8L228.1,325.2L227.2,330.3L224.9,332.7ZM209.3,325.5L206,327.9L201,324.9ZM231,294.4L231,294.4L231,294.4ZM227.3,295L227.3,295L227.3,295ZM219.7,296.8L219.7,296.8L219.7,296.8ZM221.8,295.8L221.8,295.8L221.8,295.8ZM217.5,300.3L217.5,300.3L217.5,300.3ZM207.1,319.9L207.1,319.9L207.1,319.9ZM234.7,293.5L234.7,293.5L234.7,293.5Z"/><path class="m-land" d="M52.2,560L60.4,546.8L69,546.8L67.7,549.1L72.5,557.7L76.8,560L52.2,560Z"/><path class="m-land" d="M367.1,441.6L371.8,446L381.3,449.7L381.5,450.7L378.1,452.6L379,455.4L376,457L374.1,454.8L370.8,462.4L372.1,467L366.3,461.8L361.6,459.5L360.5,457.6L361.5,455.7L359.8,451.3L361.7,450.2L364.4,442.5Z"/><path class="m-land" d="M432.3,355.9L434.1,353.5L437.9,352.8L440.7,350.4L451.2,353.8L454.2,352.6L457.9,353.9L460.1,357.2L460.6,361.4L465.4,363.4L466.8,367.5L470.5,368.6L472.2,372.8L474.7,373.9L472.1,375.8L464.3,375.2L462.5,377.3L464.2,382.8L461,389.8L461.7,392L458.9,393.7L455.7,386.3L454.6,376L451.6,371.4L448.9,369.9L441.7,363.4L436.3,356.6Z"/><path class="m-land" d="M235.7,444.4L235,444.6L235.7,444.4Z"/><path class="m-land" d="M396.6,457.4L404,454.5L405.3,454.9L411.8,458.8L414.5,462.7L414.5,468.7L410.2,472.9L403.7,474.2L400.2,478.6L393.1,480L390.4,479.5L386.6,474.3L385.6,470.6L386.1,465L391.1,459.5L393.8,460.2Z"/><path class="m-land m-on" data-country="Luxembourg" d="M226.3,346L226.4,348.2L229.7,351.1L228,356.3L222.6,354.7L222.4,348.8L225,345.2Z"><title>Luxembourg</title></path><path class="m-land m-on" data-country="Lithuania" d="M359.3,261L358.8,260.9L359.3,261ZM377.3,272.2L376.2,270.3L376.6,264.9L373.7,262L369.4,262.7L361.7,260.8L358.2,248.9L362.7,244.4L366.1,242.4L372.7,241.4L383.5,241.4L389.5,238.1L391.5,240.7L396.1,240.8L403.2,245.2L406.1,245.8L406.1,250.9L408.8,251L408,253.8L405.3,254.3L402.4,258.4L401.7,267.7L396,274.5L384.8,277.3L383,273.6Z"><title>Lithuania</title></path><path class="m-land" d="M259.9,393.9L259.4,390.6L259.9,393.9Z"/><path class="m-land" d="M600,553L596.7,554L597,534L598.9,526.7L598.9,526.7L600,526.4L600,553Z"/><path class="m-land" d="M406.1,245.8L403.2,245.2L396.1,240.8L391.5,240.7L389.5,238.1L383.5,241.4L372.7,241.4L366.1,242.4L362.7,244.4L358.2,248.9L356.6,237.5L358.5,234.2L358.6,229.4L360.2,225.3L366.5,221.9L372.3,227L374.2,230.3L377.4,231.6L382,227.5L382.6,225L380.3,217L385.9,212.8L393.6,214.6L399,218.2L402.2,216.2L405.6,216.6L410.5,219.8L410.4,226.2L411.7,225.6L415.3,229.7L417.2,235.6L415.4,237.1L413.8,241.9L409.3,242.5Z"/><path class="m-land" d="M381.5,450.7L385.2,443.4L388.9,445.4L393.4,450L397.7,450.6L396.6,457.4L393.8,460.2L391.1,459.5L386.1,465L384.4,459.7L379,455.4L378.1,452.6Z"/><path class="m-land m-on" data-country="Italy" d="M232.5,410.6L238,410L240.7,411L247.1,403.1L247.9,406.2L253.1,412.7L256.4,405.7L256.5,402.8L259.3,405.4L263.7,404.6L266.4,400.6L268.9,401.7L269.1,396.9L275.1,397.9L276.2,395.7L282.9,394.8L287,393.2L289.5,399L303.4,401.2L300.2,405.3L303,406.5L301.5,408.7L302.6,411.8L306,415L304.4,415.5L303.2,412.7L298.7,412.9L296.9,415.1L288.9,418.3L288.4,421.5L291.8,425.6L289,429.5L290.8,437.1L294.2,440.5L303.6,446L305.8,449.4L310,460L312.1,462.7L320.4,469.3L324,470.9L333.2,470.1L335.6,472.7L333,475L334.4,477.8L347.6,482.4L358.3,487.7L363.2,491.6L365.5,495.5L364.4,500.1L361,498.7L357.9,493.6L353.2,493.6L349.4,491L346.5,492L342.6,501.8L343.8,505.1L350.4,508.6L351.7,514.5L346.8,516.7L344.6,519.6L344.9,524.4L341.9,527.2L339.5,532.3L335.4,532.7L334.1,529L336.2,526.8L337.5,520.3L340.2,519.3L337.2,510.2L332.5,500.6L327.6,499.7L323.3,497.4L323.6,495.2L320.7,490.8L315.7,492.2L317,490.1L312.7,488.8L308,482.7L300.5,483L295,479.7L283.1,467.3L279.1,465.3L272.3,457.4L267.9,448.5L267.1,443.3L264.8,440.7L256.5,436L250.7,434.4L248.3,435.5L242.9,442L236.3,444.1L238.5,439.3L235.2,438.5L230.1,435.1L229.6,432.4L231.8,429.3L227.7,422.9L232.6,421.2L233.6,418.8L230,413.9ZM292.5,473.1L292.5,473.1L292.5,473.1ZM292,442.1L292,442.1L292,442.1ZM268.8,458.7L268.8,458.7L268.8,458.7ZM310.9,490.8L310.9,490.8L310.9,490.8ZM290.3,553.8L290.3,553.8L290.3,553.8ZM333.2,528.4L329.5,535.6L328.2,540.8L331.2,547.7L329.2,553L321.4,551.7L316.6,547.2L313.6,547.4L300.9,540.6L298.1,540.7L294.7,536.9L298.2,531L300.4,533.3L303.4,530.7L310,533.4L320.2,532.1L324.3,529.8ZM260,489.4L261.9,494.5L260.1,498.9L260.7,501.7L259.7,513.3L258.1,516.6L252.8,515L250.7,520.1L247.8,519.8L245.1,515.4L245,511.1L246.9,505.5L245.2,504.2L246.1,498.4L242.9,492.7L243.4,488.6L247.5,489.7L255.3,483.5L259.9,487.5ZM245.8,517.6L245.8,517.6L245.8,517.6ZM244.2,486.7L244.2,486.7L244.2,486.7Z"><title>Italy</title></path><path class="m-land" d="M597,560L596.7,554L600,553L600,560Z"/><path class="m-land m-on" data-country="Ireland" d="M87.2,264.3L87.2,264.3L87.2,264.3ZM115.2,253.1L109,259L105,261.2L106.6,264.7L110.5,267.2L114.2,263.6L116.4,269.6L120.3,270L118.9,271.3L119.2,277.8L118,287.7L115,293.1L112.1,295.5L113,297.2L101.6,296.8L99.8,298.2L87.8,301.3L83.1,301.4L78.1,300.2L81.2,297.9L75.9,297.8L80.3,295.5L77,295.4L74.8,293.2L79.7,290.3L75.8,289.2L78.7,287.7L81.8,289.1L81.3,286.5L84.3,285.1L92.5,285.3L81.9,284.1L86.3,282L89.5,277.8L93.2,277.1L88.6,275.4L86.4,272.3L83.9,271.3L84.2,269.2L87.9,269.4L86.9,267.1L90.3,265.7L87.3,265.1L88.8,261.8L87.7,259L94.3,260.1L100.7,262.8L100.4,261.1L105.8,257.8L100.5,255.8L104.6,253.6L106.5,250L112.9,250.9L116,249.2L118,251.4Z"><title>Ireland</title></path><path class="m-land m-on" data-country="Iceland" d="M105.8,70.6L110.7,69.8L107.7,73L109.7,75.5L107.6,78.7L110.3,79.6L110.2,81.3L113.7,85.2L111.7,87.3L111.3,92.4L106.3,96L104.9,95L103,98.5L98.5,100.2L95.3,99.6L90.9,100.4L85.8,102.5L77.4,101.7L74.5,104.2L70.3,103.9L61.4,97.5L57.3,89.1L55.5,89.6L47.8,86.5L49.3,82.8L49.8,84.6L53.2,84.9L57.9,81.5L55.4,81.7L56.8,78.9L55.3,76.3L55.6,73.5L50.5,70.5L46.9,69.9L46.8,67.9L55,69.3L60.7,71.6L58.5,67.4L63.7,66.1L58.4,61.2L51.4,60.7L48.9,57.8L52.3,57.5L52.7,55.1L55,57.7L57.4,57.7L54.9,54.7L56.9,55.2L57.1,51.9L59.9,51.4L60.6,55.2L64.5,55.6L62.6,52.1L65.4,52.8L62.5,49.9L64.5,49.1L67,50.5L70.1,59.1L69.7,61.5L67.6,63.6L66.3,67L66.7,70.6L69.8,66.9L71.6,66.1L72.7,68.1L76.3,61.8L78.3,62.4L79.1,67.4L82.2,63.7L86.3,63.9L88.3,70.4L89.1,65.2L91.3,66.3L92.3,69.8L96.1,67.3L97.5,69.2L100,68.9L101.1,65.1L104.7,65.4Z"><title>Iceland</title></path><path class="m-land" d="M387.1,362.8L394.3,366.2L395.8,368.4L394.2,371L390.4,372.8L388,376.7L386.8,382.6L381.2,397.4L373.1,400.7L365.5,401L359.3,405.3L354.7,408.4L347.9,408.8L343.4,406.8L335.7,400.4L333.1,399.4L330.2,394.1L328.2,394.2L331.8,391.7L331.1,385.7L332.9,384.8L331.8,380.3L337.1,380.4L337.5,375.7L344.1,378.7L354,377.3L354.2,373.9L360.9,371.4L362.3,369.5L365.2,370.5L369.3,367.3L370.3,363.6L379.9,361.8L383.6,364.5Z"/><path class="m-land" d="M489.5,529.2L489.5,529.2L489.5,529.2ZM394.7,518.8L397.3,523.4L394.3,523.3L392.6,519.6ZM399.5,527.3L398.9,529.7L396.1,527.1ZM395.1,515.2L395.1,515.2L395.1,515.2ZM396.7,519.4L396.7,519.4L396.7,519.4ZM385.9,503.5L383.5,503.3L380.1,499.6L382.2,497.9ZM427.2,504.2L428.1,505.7L436.2,507L439.8,513.5L443.5,513.9L443.3,516.8L439.3,515.3L436.4,511.5L432.9,512L425.6,507L420.8,506.8L425.7,503.2ZM431.1,500.9L431.1,500.9L431.1,500.9ZM432.2,500L432.2,500L432.2,500ZM442.7,503.5L442.7,503.5L442.7,503.5ZM438.1,475.6L435,475.7L436.9,473.1ZM431.8,519.8L431.8,519.8L431.8,519.8ZM430.7,548L430.7,548L430.7,548ZM485.1,548.1L483.3,546.4L484.4,542.5ZM477.6,525.5L477.6,525.5L477.6,525.5ZM477.6,529.3L477.6,529.3L477.6,529.3ZM459.4,529.6L456.7,528.5L458.4,526.1ZM455.7,528.8L455.7,528.8L455.7,528.8ZM460.6,538.7L460.6,538.7L460.6,538.7ZM458.4,534.6L458.4,534.6L458.4,534.6ZM472.1,513L475.2,513.9L469.4,515.1ZM463.4,519.6L463.4,519.6L463.4,519.6ZM463.9,531.5L463.9,531.5L463.9,531.5ZM472.1,532.9L472.1,532.9L472.1,532.9ZM442.8,523.3L442.8,523.3L442.8,523.3ZM444.5,526.7L444.5,526.7L444.5,526.7ZM447.5,535.4L447.5,535.4L447.5,535.4ZM450.2,523.1L450.2,523.1L450.2,523.1ZM450,518.8L450,518.8L450,518.8ZM453.7,520.6L453.7,520.6L453.7,520.6ZM449.3,532.5L449.3,532.5L449.3,532.5ZM461.8,508.8L457.5,504L461.4,503.7ZM461.6,490.9L464.7,495L459.7,496.3L455.3,494.5L458.6,491ZM449.3,476.2L449.3,476.2L449.3,476.2ZM447.9,483.6L447.5,486.4L443.9,486.5L443.4,484.3ZM456.1,523L456.1,523L456.1,523ZM446.3,529.9L446.3,529.9L446.3,529.9ZM491.7,538.9L489.2,535.5L494.6,529.9L494.2,536ZM440,560L439.3,558.9L441,554.7L442.8,556.3L442.8,556.3L449.2,557.8L454.2,555.8L464.2,555.6L467.3,554.2L468.2,557.4L473.3,555L474.9,557.4L466.9,560L440,560ZM452.1,454.9L455.5,456L456.7,458.8L453.9,462.1L454.9,466.4L452.3,470.7L449.9,469.4L440.7,469L437.5,471.8L433.6,471.2L429.7,475.5L426,475.9L428.2,480.7L426.8,483.1L430.3,485.1L430.5,487.5L426.4,484.2L422.3,485L416.9,483.1L416.7,480.2L413.5,482.2L414.3,489.4L424.7,499.4L419.4,500.8L421.6,504.1L417.5,507L426.1,509.1L432.2,512.9L435.8,513.5L438.6,522L437.7,522.7L432,518.4L425.7,521.7L428.4,525.4L432.5,527.5L428.8,529.9L422.8,527.7L427.6,535.2L428.9,542.9L425.6,539.3L423.5,539.8L421.3,544.5L420.8,541.5L416.2,537L414.6,542L409.9,537.3L410.7,533.5L408.5,530.1L402.4,526.1L404.9,520.3L408,520.1L409.7,517.4L424,520.8L426.2,516.9L416.6,514.4L405.4,518.2L400.8,517.9L395.5,510.1L399.1,510.2L399.4,507.9L395.3,508.8L388.8,504.7L384.4,499.3L386.9,499.8L388.7,497.2L387.5,494.6L391.3,491.8L392.3,486.5L394.4,483.4L393.1,480L400.2,478.6L403.7,474.2L410.2,472.9L414.5,468.7L422.6,466.4L427,463.3L432.2,461.9L441.6,464.8L451.2,460.4L449.4,456.2Z"/><path class="m-land" d="M259.4,386.8L255.9,384.5L250.1,382.9L247.9,385.6L239.7,385.3L239.6,378.1L242.5,369.4L245.6,364.3L238.8,361.4L231.6,361L228,356.3L229.7,351.1L226.4,348.2L226.3,346L228.8,343.1L227.8,338.8L225.6,336.3L224.9,332.7L227.2,330.3L228.1,325.2L226,320.8L233.6,319L233.6,316.4L236.7,311.9L234.1,310.5L234.2,307.9L236.7,308.1L238.5,302.5L238.7,298.2L237.5,296.7L239.8,292.2L246.3,292.3L248.4,296L250.6,295L251.9,289.5L258.1,289.9L255.1,288.8L254.6,283.7L252.3,281.6L255.1,279.5L252.6,273.9L258.5,275.4L262,275.2L264.5,277.5L263.2,280.5L265.6,280.3L270.8,282.9L273.3,281.9L272.5,287.8L276.9,288.5L280.4,285.4L283.2,284.9L287.2,280.2L291.2,280.9L295.1,284.9L297.6,284.6L299.1,289.1L302.7,290.8L304.6,297.5L302.3,303.8L307.2,308.9L306.7,311.5L308.9,315.6L307.7,319.5L309.2,324.1L312.2,328L310.7,334.2L307.6,332.1L306.4,333.8L298.4,337.4L298,338.6L288.2,343.1L286,347L289.1,350L287.9,352.5L290.5,356.6L302.8,366.7L301.6,370.5L299.6,369.7L299,372.6L293.1,376.4L295.9,384.1L295.6,386.8L292,384L287.1,383.4L286.9,385L282.1,385.7L274.5,388.6L273.4,386.8L268.8,386.5L267.6,390L261.7,386ZM297.3,281.1L294.3,283.3L292.5,278.8L294.5,276.4ZM302.1,287.4L302.2,288.6L299.6,288.6L298.5,284.9ZM275.7,281.3L275.7,281.3L275.7,281.3ZM249.4,275.6L249.4,273.7L252.3,274ZM251.9,276.8L251.9,276.8L251.9,276.8Z"/><path class="m-land" d="M600,382L599,382.2L591.5,380.5L592.3,377.6L597.6,375.8L600,375.8L600,382Z"/><path class="m-land m-on" data-country="France" d="M258.4,459.5L259.2,469.5L254.8,481.5L250.4,478.3L251.4,476.5L248.4,472.9L249.3,470.4L247.9,466.3L249.6,463.3L254.5,460.6L256.2,461.2L257.1,456.2ZM239.7,385.3L237.6,387.3L233.8,386.7L233.1,389.2L222.6,402.4L222.6,406.8L226.5,402.6L230,403L230,406.9L232.5,410.6L230,413.9L233.6,418.8L232.6,421.2L227.7,422.9L231.8,429.3L229.6,432.4L230.1,435.1L235.2,438.5L238.5,439.3L236.3,444.1L235.7,444.4L235,444.6L227.4,449.8L224.7,452.9L220.4,454.2L212.5,451.3L208.9,447.7L204,448.2L197.8,444.5L188.3,449.9L185.6,454L186.7,461.6L184,460.8L180.2,462.4L175.2,460.6L173.1,461.4L169.7,458.7L166.7,456.9L166,455.3L158.9,452L157.9,454.3L150.2,453.3L147.6,450.8L144.4,450.7L142.7,448.3L135,445L136.2,442.5L132.3,439.3L136.1,437.4L141.2,422.7L143.2,413.6L145.3,408.1L148.2,412L146.3,405.1L146.5,396.2L140.3,392L138.2,387.1L139.2,383.7L137.7,381.5L140.3,379.7L134.9,378.7L136.1,376.4L132.7,375.2L129.3,371.7L122.2,368.1L118,367.5L115,363.5L118.9,362.3L115.6,358.6L116.1,355.9L123.2,354.7L126.6,355.4L131.8,354.3L133.9,355.5L136.3,359.9L139,358.6L149.7,360.4L148.2,357.8L149,351.7L147.5,344L153.4,345L153.8,349.6L163.2,352.4L169.3,350.9L166.6,349.6L167.5,346.8L172.1,344.9L178.5,343.6L182.3,340.2L183.1,332.8L186.7,329.3L192.7,328.4L195.1,334.5L197.8,333.8L199.1,337.7L202.4,339.1L202.6,341.2L207.4,342.8L206.8,346.8L211.9,346.9L214,345L213.7,350.3L217.6,352.2L219.7,354.9L222.6,354.7L228,356.3L231.6,361L238.8,361.4L245.6,364.3L242.5,369.4L239.6,378.1ZM145.1,402.3L145.1,402.3L145.1,402.3Z"><title>France</title></path><path class="m-land" d="M340.1,185.2L342.4,186.3L341,189.1L338,187.3ZM338,188L338,188L338,188ZM345.6,189.3L345.6,189.3L345.6,189.3Z"/><path class="m-land m-on" data-country="Finland" d="M354.8,96.8L352.2,91.9L351.1,91.4L349.9,87L350.7,81.5L347.3,76.2L347.3,72.3L345.6,72.2L344.6,65.6L345.1,64.2L338.9,58.3L334,57L324.8,50.1L327.3,49.7L326.9,47.4L329.9,45.6L334.8,51.5L335.8,53.5L341.2,53.6L343.8,50.6L350.6,52.7L352.1,48L353.8,45.5L353,41.7L352.9,34.8L354.8,30.1L358,29.5L361.5,26L365.3,29L369.8,30.3L371.7,33.1L370.3,38.4L371.6,40.6L369,43.2L371.4,44.8L371,49.6L373.5,53.8L377.7,54.8L383,59.4L383.4,61.7L380.8,71.8L381.4,73.7L389.5,83.8L392.4,89.6L391.2,91.8L391.5,97.4L393.1,98.8L392.4,101.3L394.3,103.4L396.3,103.5L396.6,106.8L398.2,109.4L401.6,111.1L402.3,113.8L400.2,118.9L404,121.7L410.4,124.6L414.3,128.6L414,133.9L405.3,157L400.8,164.5L397.8,171L395.6,172.7L393.7,172L386.5,175.8L383.6,178.6L382.7,177.8L379.4,180.7L369.3,186.3L367.3,186.4L364,189.5L365.2,186.3L362.2,183.8L362,186L359.6,187.1L359.6,181.7L357.1,181.8L350.4,179.8L349,174.3L349.2,164.5L345.7,158.8L345.9,155.1L343.1,149.3L343.4,146.6L345.9,142.3L344.8,139.9L349.8,137.4L350.4,132L354.5,127.3L359.6,116.5L360.5,111.7L365.1,109.8L363.4,100.3L357.6,97ZM355.3,183.1L355.3,183.1L355.3,183.1ZM342.4,139.7L342.4,139.7L342.4,139.7ZM356.5,182.4L356.5,182.4L356.5,182.4ZM350.7,180.8L350.7,180.8L350.7,180.8ZM354.6,186.3L354.6,186.3L354.6,186.3ZM353.1,187L353.1,187L353.1,187ZM361.8,108.4L361.8,108.4L361.8,108.4Z"><title>Finland</title></path><path class="m-land" d="M405.6,216.6L402.2,216.2L399,218.2L393.6,214.6L385.9,212.8L380.3,217L380.4,209.4L377.4,211.4L374.4,210.5L372.1,207.6L370.1,202.5L369.8,198.3L374.1,196L375.8,192.8L383.8,190.3L383.9,188.5L392.6,187.8L395.6,188.7L402.7,187.5L403.4,186.3L404.8,187.6L403.3,189.5L401.6,196.9L403.9,205.4L407.6,211.2L406.1,212.2ZM364.6,208.2L370.3,209.3L366.5,214L362.4,215.9L359.7,214.7L358.9,211.1L362.1,210.4ZM366.4,204.7L363.8,207.3L362.3,204.9L359.3,204.1L363.1,201.3L365.8,202.2ZM370.5,208.2L370.5,208.2L370.5,208.2Z"/><path class="m-land" d="M87.7,0L87.6,0.8L84.3,0L87.7,0ZM83.1,0L82.8,1.7L79.9,0.8L79.2,2.5L69.3,5.1L67.4,6.8L61.7,7.7L50.4,5.4L44.8,4.7L41.8,2.6L39.2,3.1L37,0.7L36.4,2.9L34.1,2.5L32.5,0.2L32.5,0L83.1,0ZM25,0L19.4,1L15.2,3.3L13.1,5.3L6.5,9.4L4,9.4L1.1,11.2L0,11.2L0,0Z"/><path class="m-land" d="M144,154L144,154L144,154ZM142.2,159.3L142.2,159.3L142.2,159.3ZM141.2,148.1L141.2,148.1L141.2,148.1ZM145.5,147.7L143.9,151.1L141.9,145.9ZM147.1,147.6L147.1,147.6L147.1,147.6Z"/><path class="m-land m-on" data-country="Denmark" d="M286.4,260.1L283.5,265.1L285.3,267.8L282.5,269.4L282.4,275.1L280.7,275.7L278.7,269.5L275.5,269.3L272.7,261.4L275.7,260.9L276.9,258L278.8,258.4L280,261.7L280.3,257.5L283.2,255.1L286.3,255.8ZM262,275.2L258.5,275.4L252.6,273.9L252.3,266L248.2,263.1L248.9,257.3L248.3,254.9L248.9,247.7L253.1,249.5L256.5,245L257.6,246.4L258.1,241.7L255.9,241.6L254,246.1L251.4,246.9L250,244L252.8,240.1L258.5,239.7L260.6,238.3L264,233L268.7,230.7L268,233.3L268.7,238.2L266.8,241.9L266.7,247.7L271.4,249.2L271.6,252.7L267,254L265.9,259.3L260.8,264.9L261.5,268.4L259.5,271.9ZM269.9,263.2L271.4,267.5L271.2,270.4L268.2,271.7L264.2,270L263.1,264.6ZM276.3,274L279.6,275.2L279.9,277.2L277.2,278L273.4,275.9L273.6,273.3ZM270.8,276.3L269.8,274.7L272.4,271.5ZM286.7,272.6L283.5,273.8L284.5,271.6ZM287.3,263L287.3,263L287.3,263ZM268.6,274.8L268.6,274.8L268.6,274.8ZM264.8,274.2L264.8,274.2L264.8,274.2ZM269.5,260.5L269.5,260.5L269.5,260.5ZM273,238L273,238L273,238ZM308.8,270.6L305.2,269.6L305.7,266.6L309.1,268.7Z"><title>Denmark</title></path><path class="m-land" d="M351.8,350.9L349.5,351.5L345.6,355.6L345.2,358.6L342.2,361.6L336.6,362.7L334.6,366.9L329.6,364.3L325.4,365.3L317.6,362.6L314.2,362.7L314,365.9L311.8,368.7L305.3,369.1L302.8,366.7L290.5,356.6L287.9,352.5L289.1,350L286,347L288.2,343.1L298,338.6L298.4,337.4L306.4,333.8L307.6,332.1L310.7,334.2L312.3,331.7L316,334.5L322.5,337.1L326.5,337.3L324.7,339.8L329.7,344.3L332.5,341.9L331.2,339.1L336.7,341.2L341.6,345L343,343.9L348.5,345.7Z"/><path class="m-land" d="M572.2,529L566.4,531.5L564,530.2L558,533.4L555.7,532.8L557.4,528.6L564.1,527.3L570.8,522.6L575.8,517.7L570.3,525.9Z"/><path class="m-land m-on" data-country="Cyprus" d="M555.7,532.8L558,533.4L564,530.2L566.4,531.5L572.2,529L561.5,540.9L554.6,540.6L551.8,537.7Z"><title>Cyprus</title></path><path class="m-land" d="M302.9,416.6L306.2,417.8L311.5,416.7L313.1,414.1L316.6,416.6L321.9,416.2L320.9,412.2L324.6,410.3L324.2,404.7L333.1,399.4L335.7,400.4L343.4,406.8L347.9,408.8L354.7,408.4L359.3,405.3L358.8,406.8L361.7,411.3L361.4,413.3L365.2,414.8L363.2,416.2L362.5,421.4L358.4,418.7L351,418.5L349.1,419.7L341.6,419.1L339.2,417.7L335.1,419L332.8,422.4L329.7,419.9L327.1,420.3L327.1,426.7L331.7,430.8L333,434.7L339.1,440.9L345.9,445.4L346.3,447.6L350.5,451.2L350.2,452.9L341.8,446.7L335.9,444.9L331.4,445.6L330.7,443.6L325.5,440L320.9,435L324.7,434.5L317.9,428.3L317.1,422.5L311,419L307.7,426.9L303.8,422.9ZM339.6,453L339.6,453L339.6,453ZM345.5,450.4L339.7,451L336.1,450ZM340.7,448.7L340.7,448.7L340.7,448.7ZM322.3,437.9L322.3,437.9L322.3,437.9ZM316.7,424.2L312.6,422.6L313.9,420.5ZM317.2,427.5L317.2,427.5L317.2,427.5ZM321.5,433.7L321.5,433.7L321.5,433.7ZM322,440.1L322,440.1L322,440.1ZM324,439.2L324,439.2L324,439.2ZM313.5,429.3L311.2,425.1L311.6,421.5ZM350.7,455.5L350.7,455.5L350.7,455.5ZM360.5,457.6L361.6,459.5L351.2,453.4Z"/><path class="m-land" d="M470.2,446.4L465.1,448.5L461.8,446.8L454.2,450.7L452.1,454.9L449.4,456.2L451.2,460.4L441.6,464.8L432.2,461.9L427,463.3L422.6,466.4L414.5,468.7L414.5,462.7L411.8,458.8L405.3,454.9L407,452.6L405.3,446.6L407.8,445.5L410,440.3L404.6,437.1L402.2,433.6L401.6,429L404.1,424.9L408.1,427.2L407.6,430.6L410.8,429.4L422.1,428.9L424.3,428L436.3,427.4L443,420.6L451.8,415.9L456,417.2L461.1,416.5L463.5,418.5L469.6,418.2L469.7,423.8L466,424.7L464.6,428.4L465.8,435.1L462.4,440.4L465.4,441.6Z"/><path class="m-land" d="M367.1,441.6L364.4,442.5L361.7,450.2L359.8,451.3L361.5,455.7L360.5,457.6L351.2,453.4L350.2,452.9L350.5,451.2L346.3,447.6L345.9,445.4L339.1,440.9L333,434.7L331.7,430.8L327.1,426.7L327.1,420.3L329.7,419.9L332.8,422.4L335.1,419L339.2,417.7L341.6,419.1L349.1,419.7L351,418.5L358.4,418.7L362.5,421.4L366.1,420.7L364.7,426.4L365.1,429.9L370.4,433.2L366.8,434.9L370.1,438.6Z"/><path class="m-land" d="M209.3,325.5L214.5,324.3L221.1,327.9L224.3,330.5L222.3,334.7L225.6,336.3L227.8,338.8L228.8,343.1L226.3,346L225,345.2L222.4,348.8L222.6,354.7L219.7,354.9L217.6,352.2L213.7,350.3L214,345L211.9,346.9L206.8,346.8L207.4,342.8L202.6,341.2L202.4,339.1L199.1,337.7L197.8,333.8L195.1,334.5L192.7,328.4L201,324.9L206,327.9Z"/><path class="m-land" d="M465.3,286L458.5,289L456.5,296.7L458,301.6L453.5,299.5L446.5,303L443.6,300.1L440.6,303.8L439,302.5L426.5,304.6L424.8,302.8L413.1,303L406.9,304L398.8,306.8L395.9,311.8L392.8,313.4L391.8,305.5L387,303.1L388.2,298.8L391.7,295.8L391,290.3L384.8,277.3L396,274.5L401.7,267.7L402.4,258.4L405.3,254.3L408,253.8L408.8,251L406.1,250.9L406.1,245.8L409.3,242.5L413.8,241.9L415.4,237.1L417.2,235.6L420.9,235.4L422.9,237L425.5,235.3L428.2,235.9L430.1,239.4L433.2,235.9L437.7,235.5L442.4,237.6L442.9,242.1L445.3,245L444.9,249.4L448.7,251L452.7,256.4L456.6,257.4L457.4,261.1L463.9,260.9L467.8,265.4L464.1,270.5L457.3,271L456.7,274L460.1,276.5L462.7,283.4Z"/><path class="m-land m-on" data-country="Austria" d="M259.4,390.6L259.4,386.8L261.7,386L267.6,390L268.8,386.5L273.4,386.8L274.5,388.6L282.1,385.7L286.9,385L287.1,383.4L292,384L295.6,386.8L295.9,384.1L293.1,376.4L299,372.6L299.6,369.7L301.6,370.5L302.8,366.7L305.3,369.1L311.8,368.7L314,365.9L314.2,362.7L317.6,362.6L325.4,365.3L329.6,364.3L334.6,366.9L334,370.2L337.5,375.7L337.1,380.4L331.8,380.3L332.9,384.8L331.1,385.7L331.8,391.7L328.2,394.2L327,397.1L317,398.7L312,402.2L303.4,401.2L289.5,399L287,393.2L282.9,394.8L276.2,395.7L275.1,397.9L269.1,396.9L266.2,396.9L259.9,393.9Z"><title>Austria</title></path><path class="m-land" d="M169.7,458.7L166.7,456.9L169.7,458.7Z"/><path class="m-land" d="M126.5,560L130.4,558.7L136.5,558.9L143.2,554L153.2,551.2L170.2,551.8L175.3,549.4L182.2,549.9L185.6,548.6L198,549.6L203.3,553.4L206.2,553.6L216.9,550.1L220,547.9L225.4,550.8L229.1,548.2L237.8,552.2L246.3,551.2L246.3,551.2L241.5,558.1L243.1,560L126.5,560Z"/><path class="m-land" d="M372.1,467L370.8,462.4L374.1,454.8L376,457L379,455.4L384.4,459.7L386.1,465L385.6,470.6L386.6,474.3L390.4,479.5L393.1,480L394.4,483.4L392.3,486.5L391.3,491.8L387.5,494.6L388.7,497.2L386.9,499.8L384.4,499.3L381.9,494.4L377.2,492.4L374.5,485.6L375.4,481.2L374.2,473.7L375,467.9Z"/></svg>
+      <div class="map-tip" id="mapTip" hidden></div>
+    </div>
+    <div class="map-also"><span>Also in</span>
+      <button type="button" data-country="Canada"><img src="https://flagcdn.com/ca.svg" alt="">Canada</button>
+      <button type="button" data-country="Australia"><img src="https://flagcdn.com/au.svg" alt="">Australia</button>
+      <button type="button" data-country="New Zealand"><img src="https://flagcdn.com/nz.svg" alt="">New Zealand</button>
+      <button type="button" data-country="Brazil"><img src="https://flagcdn.com/br.svg" alt="">Brazil</button>
+    </div>
+  </div>
+</section>
+
+<section class="section directory" id="exams">
+  <div class="dir-head">
+    <div>
+      <div class="section-kicker">Our exams</div>
+      <h2 class="section-title">Find your exam</h2>
+    </div>
+    <div class="chips" role="group" aria-label="Filter by exam type">
+      <button class="chip is-on" data-filter="all">All</button>
+      <button class="chip" data-filter="citizenship">Citizenship</button>
+      <button class="chip" data-filter="residency">Residency</button>
+      <button class="chip" data-filter="language">Language</button>
+    </div>
+  </div>
+
+  <div id="directory"></div>
+
+  <p class="empty" id="empty" hidden>No platform for that yet. <a href="#contact">Tell us which exam you need</a> and we'll consider it.</p>
+</section>
+
+<section class="section">
+  <div class="showcase">
+    <figure class="showcase-img">
+      <img src="/indfodsret/assets/images/devices-dk-v2.webp" alt="CivicLearn training platform on a laptop and a phone: dashboard with progress by topic and a timed exam simulation" width="1920" height="1272" loading="lazy">
+      <figcaption>Shown: the Danish citizenship test platform</figcaption>
+    </figure>
+    <div class="showcase-text">
+      <div class="section-kicker">Inside every platform</div>
+      <h2 class="section-title">Practice the way the exam works.</h2>
+      <p>Every CivicLearn platform follows the same proven structure, adapted to its own exam, handbook and language.</p>
+      <ul class="features">
+        <li><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg></span><div><b>Timed exam simulations</b><span>Full-length practice exams under timed conditions.</span></div></li>
+        <li><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 15v-4M12 15V8M16 15v-6"/></svg></span><div><b>Progress by topic</b><span>See which parts of the handbook you've mastered and which need work.</span></div></li>
+        <li><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/></svg></span><div><b>Practice by topic and daily tests</b><span>Short sessions that fit around work and family.</span></div></li>
+        <li><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="14" height="14" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v12"/></svg></span><div><b>Flashcards, study material and audio</b><span>Learn the content, not only the answers.</span></div></li>
+        <li><span class="ic"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span><div><b>Works on any device</b><span>Start on your laptop, continue on your phone.</span></div></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="about">
+    <div class="about-text">
+      <div class="section-kicker">About</div>
+      <h2 class="section-title">One exam, one site, done thoroughly.</h2>
+      <p>CivicLearn is developed by Testrada, an educational company creating preparation programs since 2005. Rather than one generic course for every country, each platform covers a single official exam: its handbook, its question style and its rules, in the languages candidates actually use.</p>
+    </div>
+    <a href="https://civiclearn.com/insights/" class="insights">
+      <div class="section-kicker">CivicLearn Insights</div>
+      <h3>What citizenship tests reveal about the countries that write them.</h3>
+      <span class="insights-action">Read the articles →</span>
+    </a>
+  </div>
+</section>
+
+</main>
+
+<section class="contact-section" id="contact">
+  <div class="contact-inner">
+    <div class="contact-text">
+      <div class="ct-kicker">Get in touch</div>
+      <h2>Questions about our platforms?</h2>
+      <p>Whether you need help with your account, have questions about a specific exam, or want to explore a partnership, write to us.</p>
+    </div>
+    <form class="contact-form-wrap" id="contactForm" novalidate>
+      <input type="text" name="company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="form-row"><input type="text" name="name" placeholder="Your name" required></div>
+      <div class="form-row"><input type="email" name="email" placeholder="Your email" required></div>
+      <div class="form-row"><textarea name="message" placeholder="Your message" rows="4" required></textarea></div>
+      <button type="submit" id="sendBtn">Send message</button>
+      <p class="form-msg form-ok" id="formOk" hidden>Thank you! Your message has been sent. We'll reply to your email.</p>
+      <p class="form-msg form-err" id="formErr" hidden></p>
+    </form>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div>© 2005–<span id="year">2026</span> CivicLearn · Testrada Pte Ltd</div>
+  <div class="footer-links">
+    <a href="legal.html">Legal</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="https://civiclearn.com/support/">Support</a>
+    <a href="#contact">Contact</a>
+  </div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   THE LIST OF EXAMS — edit only this block to add or change a product.
+   One line per exam. Everything else (country panels, filters, search,
+   the drifting names in the hero, the counts) is built from it.
+
+   region : Nordics | Western Europe | Southern Europe | Central & Eastern Europe | Beyond Europe
+   iso    : two-letter country code (used for the round flag)
+   type   : citizenship | residency | language
+   note   : optional short extra (shown after the web address)
+   langs  : optional languages the platform is available in
+   soon   : true = test not introduced yet (shows a "Soon" label)
+   ═══════════════════════════════════════════════════════════════ */
+var EXAMS = [
+  { region: 'Nordics', country: 'Denmark', iso: 'dk', name: 'Indfødsretsprøve',      type: 'citizenship', url: 'https://indfodsretsprove.dk' },
+  { region: 'Nordics', country: 'Denmark', iso: 'dk', name: 'Medborgerskabsprøven',  type: 'residency',   url: 'https://medborgerskabsprove.dk/', langs: 'DA · EN' },
+  { region: 'Nordics', country: 'Denmark', iso: 'dk', name: 'PD3 — Prøve i Dansk 3', type: 'language',    url: 'https://dansk3.dk' },
+  { region: 'Nordics', country: 'Sweden',  iso: 'se', name: 'Medborgarskapsprov',    type: 'citizenship', url: 'https://medborgarskapsprov.se', langs: 'SV · EN' },
+  { region: 'Nordics', country: 'Sweden',  iso: 'se', name: 'Svenska Prov',          type: 'citizenship', url: 'https://svenskaprov.se', note: 'new test', soon: true },
+  { region: 'Nordics', country: 'Finland', iso: 'fi', name: 'Kansalaisuuskoe',       type: 'citizenship', url: 'https://kansalaisuuskoe.com', langs: 'FI · SV · EN' },
+  { region: 'Nordics', country: 'Finland', iso: 'fi', name: 'YKI — Finnish',         type: 'language',    url: 'https://ykifinnish.fi', langs: 'FI · EN' },
+  { region: 'Nordics', country: 'Finland', iso: 'fi', name: 'YKI — Swedish',         type: 'language',    url: 'https://ykisvenska.fi' },
+  { region: 'Nordics', country: 'Iceland', iso: 'is', name: 'Ríkisborgarapróf',      type: 'citizenship', url: 'https://rikisborgaraprof.is', langs: 'IS · EN' },
+
+  { region: 'Western Europe', country: 'United Kingdom', iso: 'gb', name: 'Life in the UK Test',     type: 'citizenship', url: 'https://lifeintheuktestsupport.co.uk/', note: 'settlement & citizenship' },
+  { region: 'Western Europe', country: 'Ireland',        iso: 'ie', name: 'Irish Citizenship Test',  type: 'citizenship', url: 'https://irishcitizenshiptest.com/', note: 'planned test', soon: true },
+  { region: 'Western Europe', country: 'France',         iso: 'fr', name: 'Examen civique',          type: 'citizenship', url: 'https://preparer-examen-civique.fr/' },
+  { region: 'Western Europe', country: 'Luxembourg',     iso: 'lu', name: 'Vivre-ensemble',          type: 'citizenship', url: 'https://vivre-ensemble.lu/', note: 'civic course', langs: 'FR · DE · EN' },
+  { region: 'Western Europe', country: 'Luxembourg',     iso: 'lu', name: 'Sproochentest',           type: 'language',    url: 'https://sproochentest.org', langs: 'FR · DE · EN' },
+  { region: 'Western Europe', country: 'Switzerland',    iso: 'ch', name: 'Naturalisation Genève',   type: 'citizenship', url: 'https://naturalisationgeneve.ch/', note: 'Canton of Geneva' },
+  { region: 'Western Europe', country: 'Austria',        iso: 'at', name: 'Staatsbürgerschaftstest', type: 'citizenship', url: 'https://staatsburgerschaftstest.at/' },
+
+  { region: 'Southern Europe', country: 'Spain',    iso: 'es', name: 'Prueba CCSE',             type: 'citizenship', url: 'https://pruebaccse.com' },
+  { region: 'Southern Europe', country: 'Spain',    iso: 'es', name: 'DELE A2',                 type: 'language',    url: 'https://delea2.org' },
+  { region: 'Southern Europe', country: 'Portugal', iso: 'pt', name: 'Prova de cidadania',      type: 'citizenship', url: 'https://provacidadania.pt/' },
+  { region: 'Southern Europe', country: 'Portugal', iso: 'pt', name: 'CIPLE',                   type: 'language',    url: 'https://cipleonline.pt/', langs: 'PT · EN' },
+  { region: 'Southern Europe', country: 'Italy',    iso: 'it', name: 'CILS B1',                 type: 'language',    url: 'https://cilsb1.it/' },
+  { region: 'Southern Europe', country: 'Cyprus',   iso: 'cy', name: 'Cyprus Citizenship Test', type: 'citizenship', url: 'https://cypruscitizenshiptest.com/', langs: 'EL · EN · RU' },
+
+  { region: 'Central & Eastern Europe', country: 'Poland',    iso: 'pl', name: 'Test obywatelski',          type: 'citizenship', url: 'https://testobywatelski.com/', note: 'planned test', soon: true, langs: 'PL · UA · EN · RU' },
+  { region: 'Central & Eastern Europe', country: 'Lithuania', iso: 'lt', name: 'Pilietybės egzaminas',      type: 'citizenship', url: 'https://lithuania-citizenship-test.com', langs: 'LT · EN · RU' },
+  { region: 'Central & Eastern Europe', country: 'Slovakia',  iso: 'sk', name: 'Pohovor o občianstvo',      type: 'citizenship', url: 'https://pohovorobcianstvo.sk', note: 'interview' },
+  { region: 'Central & Eastern Europe', country: 'Romania',   iso: 'ro', name: 'Interviu pentru cetățenie', type: 'citizenship', url: 'https://interviucetatenie.ro/', note: 'interview' },
+
+  { region: 'Beyond Europe', country: 'Canada',      iso: 'ca', name: 'Examen de citoyenneté',       type: 'citizenship', url: 'https://examendecitoyennete.ca/', note: 'in French' },
+  { region: 'Beyond Europe', country: 'Australia',   iso: 'au', name: 'Australian Citizenship Test', type: 'citizenship', url: 'https://australian-citizenship-test.com/' },
+  { region: 'Beyond Europe', country: 'New Zealand', iso: 'nz', name: 'Citizenship Test NZ',         type: 'citizenship', url: 'https://citizenship-test.nz/' },
+  { region: 'Beyond Europe', country: 'Brazil',      iso: 'br', name: 'CELPE-BRAS',                  type: 'language',    url: 'https://celpebras.org' }
+];
+</script>
+
+<script>
+(function () {
+  var TAG = { citizenship: 'Citizenship', residency: 'Residency', language: 'Language' };
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function domain(u) { return u.replace(/^https?:\/\//, '').replace(/\/$/, ''); }
+
+  // ── Build the directory: region → country → exams (in list order)
+  var regions = [], byRegion = {};
+  EXAMS.forEach(function (x) {
+    if (!byRegion[x.region]) { byRegion[x.region] = { name: x.region, countries: [], byCountry: {} }; regions.push(byRegion[x.region]); }
+    var r = byRegion[x.region];
+    if (!r.byCountry[x.country]) { r.byCountry[x.country] = { name: x.country, iso: x.iso, exams: [] }; r.countries.push(r.byCountry[x.country]); }
+    r.byCountry[x.country].exams.push(x);
+  });
+
+  var countryCount = 0;
+  document.getElementById('directory').innerHTML = regions.map(function (r) {
+    return '<div class="region"><div class="region-label">' + esc(r.name) + '</div><div class="region-grid">' +
+      r.countries.map(function (c) {
+        countryCount++;
+        return '<div class="country"><div class="country-head"><img class="flag" src="https://flagcdn.com/' + c.iso + '.svg" alt="" width="22" height="22" loading="lazy"><h3>' + esc(c.name) + '</h3></div>' +
+          c.exams.map(function (x) {
+            var search = (' ' + [x.country, x.name, domain(x.url), x.note || '', TAG[x.type]].join(' ')).toLowerCase();
+            return '<a class="exam" href="' + esc(x.url) + '" data-kind="' + x.type + '" data-search="' + esc(search) + '">' +
+              '<span class="exam-main"><span class="exam-name">' + esc(x.name) + '</span>' +
+              '<span class="exam-desc">' + esc(domain(x.url)) + (x.note ? ' · ' + esc(x.note) : '') + '</span>' +
+              (x.langs ? '<span class="langs">' + esc(x.langs) + '</span>' : '') + '</span>' +
+              '<span class="exam-side"><span class="tag tag-' + x.type + '">' + TAG[x.type] + '</span>' +
+              (x.soon ? '<span class="tag tag-soon">Soon</span>' : '') + '<span class="go" aria-hidden="true">→</span></span></a>';
+          }).join('') + '</div>';
+      }).join('') + '</div></div>';
+  }).join('');
+
+  document.getElementById('stat-exams').textContent = EXAMS.length;
+  document.getElementById('stat-countries').textContent = countryCount;
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+
+
+  // ── Search + type filter
+  var input = document.getElementById('finder'), chips = document.querySelectorAll('.chip'), empty = document.getElementById('empty'), kind = 'all';
+  function apply() {
+    var q = input.value.trim().toLowerCase(), any = false;
+    document.querySelectorAll('.region').forEach(function (reg) {
+      var regAny = false;
+      reg.querySelectorAll('.country').forEach(function (c) {
+        var cAny = false;
+        c.querySelectorAll('.exam').forEach(function (x) {
+          var ok = (kind === 'all' || x.dataset.kind === kind) && (!q || x.dataset.search.indexOf(' ' + q) !== -1);
+          x.hidden = !ok; if (ok) cAny = true;
+        });
+        c.hidden = !cAny; if (cAny) regAny = true;
+      });
+      reg.hidden = !regAny; if (regAny) any = true;
+    });
+    empty.hidden = any;
+  }
+  function jump() { document.getElementById('exams').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  input.addEventListener('input', function () { apply(); if (input.value.trim().length === 1) jump(); });
+  input.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') jump(); });
+  // ── Map: click a country (or an "Also in" button) to show its exams
+  var counts = {};
+  EXAMS.forEach(function (x) { counts[x.country] = (counts[x.country] || 0) + 1; });
+  var tip = document.getElementById('mapTip'), wrap = document.querySelector('.map-wrap');
+  function pick(country) {
+    chips.forEach(function (o) { o.classList.toggle('is-on', o.dataset.filter === 'all'); }); kind = 'all';
+    input.value = country; apply(); jump();
+  }
+  document.querySelectorAll('.m-on').forEach(function (p) {
+    var c = p.dataset.country, n = counts[c] || 0;
+    p.setAttribute('tabindex', '0');
+    p.addEventListener('click', function () { pick(c); });
+    p.addEventListener('keydown', function (e) { if (e.key === 'Enter') pick(c); });
+    p.addEventListener('mousemove', function (e) {
+      var r = wrap.getBoundingClientRect();
+      tip.textContent = c + ' · ' + n + (n === 1 ? ' exam' : ' exams');
+      tip.style.left = (e.clientX - r.left) + 'px'; tip.style.top = (e.clientY - r.top) + 'px'; tip.hidden = false;
+    });
+    p.addEventListener('mouseleave', function () { tip.hidden = true; });
+  });
+  document.querySelectorAll('.map-also button').forEach(function (bt) {
+    bt.addEventListener('click', function () { pick(bt.dataset.country); });
+  });
+  chips.forEach(function (ch) {
+    ch.addEventListener('click', function () {
+      chips.forEach(function (o) { o.classList.remove('is-on'); });
+      ch.classList.add('is-on'); kind = ch.dataset.filter; apply();
+    });
+  });
+})();
+</script>
+
+<script>
+// ── Contact form → n8n "Contact from CivicLearn" (Google Sheet inbox + Telegram + contact_messages)
+(function () {
+  var form = document.getElementById('contactForm'), btn = document.getElementById('sendBtn');
+  var ok = document.getElementById('formOk'), err = document.getElementById('formErr');
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    ok.hidden = true; err.hidden = true;
+    if (form.company.value) return; // spam trap
+    var name = form.name.value.trim(), email = form.email.value.trim(), message = form.message.value.trim();
+    if (!name || !message || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      err.textContent = 'Please fill in your name, a valid email and your message.'; err.hidden = false; return;
+    }
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      var res = await fetch('https://civiclearn.app.n8n.cloud/webhook/contact', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ site: location.hostname, page: location.pathname, lang: 'en', name: name, email: email, product: 'civiclearn.com homepage', message: message })
+      });
+      if (!res.ok) throw new Error();
+      form.reset(); ok.hidden = false; btn.textContent = 'Sent';
+    } catch (x) {
+      err.innerHTML = 'Sorry, the message could not be sent. Please email us at <a href="mailto:admin@civiclearn.com">admin@civiclearn.com</a>.';
+      err.hidden = false; btn.disabled = false; btn.textContent = 'Send message';
+    }
+  });
+})();
+</script>
+
+<script>
+// ── Trustpilot review count (same source as the checkout pages: site_config.trustpilot)
+(function () {
+  var K = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0Z2xpb2tla2Vhb3ZkaWFmcmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTcxMzMsImV4cCI6MjA3OTEzMzEzM30.nGWQn8GJn7aJct3Fu36p63NQvCqnifiPYQnF8QJKLYs';
+  fetch('https://htgliokekeaovdiafrgs.supabase.co/rest/v1/site_config?key=eq.trustpilot&select=value', { headers: { apikey: K, Authorization: 'Bearer ' + K } })
+    .then(function (r) { return r.json(); })
+    .then(function (rows) {
+      var v = rows && rows[0] && rows[0].value; if (!v) return;
+      document.querySelectorAll('.tp-num').forEach(function (el) { el.textContent = v.count; });
+      document.querySelectorAll('.tp-year').forEach(function (el) { el.textContent = v.year; });
+    }).catch(function () {});
+})();
+</script>
+
+</body>
+</html>
