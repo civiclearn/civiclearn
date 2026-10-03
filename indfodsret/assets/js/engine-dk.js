@@ -1036,6 +1036,24 @@ if (
 
 card.appendChild(questionWrap);
 
+// Optional note on past-exam questions whose wording has dated (bank field "note").
+// First sentence is shown in bold, e.g. "Fra en prøve før 2024. I dag er ..."
+const qNote = q._raw && typeof q._raw.note === "string" ? q._raw.note.trim() : "";
+if (qNote) {
+  const noteEl = createEl("div", "ce-q-note");
+  noteEl.appendChild(createEl("span", "ce-q-note-ic", "🕰️"));
+  const noteTxt = createEl("span", "ce-q-note-txt");
+  const cut = qNote.indexOf(". ");
+  if (cut > 0) {
+    noteTxt.appendChild(createEl("b", null, qNote.slice(0, cut + 1)));
+    noteTxt.appendChild(document.createTextNode(" " + qNote.slice(cut + 2)));
+  } else {
+    noteTxt.textContent = qNote;
+  }
+  noteEl.appendChild(noteTxt);
+  card.appendChild(noteEl);
+}
+
 
   // ---- Options ----
   const optionsWrap = createEl("div", "ce-options");
