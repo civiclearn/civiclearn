@@ -375,6 +375,20 @@ main {
   'use strict';
 
   var FUNCTIONS_URL = 'https://htgliokekeaovdiafrgs.supabase.co/functions/v1';
+  /* ── Abandoned-checkout lead capture: records the email as soon as it is valid (edge fn: checkout-lead) ── */
+  var __clLeadLast = '', __clLeadTimer = null;
+  function clLead(email) {
+    clearTimeout(__clLeadTimer);
+    __clLeadTimer = setTimeout(function() {
+      var e = String(email || '').trim().toLowerCase();
+      if (!e || e === __clLeadLast || !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(e)) return;
+      __clLeadLast = e;
+      try {
+        fetch(FUNCTIONS_URL + '/checkout-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true,
+          body: JSON.stringify({ email: e, path: location.pathname, plan: (typeof selectedPlan !== 'undefined' ? selectedPlan : null), lang: document.documentElement.lang || null, page_url: location.href.split('#')[0].slice(0, 300), attribution: (typeof CL_ATTR !== 'undefined' && CL_ATTR) || undefined }) }).catch(function() {});
+      } catch (_) {}
+    }, 1500);
+  }
   // ── Sales source (TikTok, YouTube, Google…) passed on from the country site; stored on the payment ──
   var CL_ATTR = (function () {
     var K = 'cl_attr_checkout', clean = function (v) { return String(v || '').replace(/[^\w.\-\/ ]/g, '').slice(0, 80); };
@@ -586,6 +600,7 @@ main {
     linkAuthElement.mount('#link-auth-element');
     linkAuthElement.on('change', function(ev) {
       if (ev.value && ev.value.email) currentEmail = ev.value.email;
+      if (ev.complete && ev.value && ev.value.email) clLead(ev.value.email);
     });
 
     document.getElementById('payment-element').innerHTML = '';
