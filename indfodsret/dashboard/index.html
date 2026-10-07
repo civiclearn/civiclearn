@@ -145,6 +145,14 @@
             <input type="radio" name="examDate" value="2026-11-25">
             <span class="exam-date-label">25. november 2026</span>
           </label>
+          <label class="exam-date-card">
+            <input type="radio" name="examDate" value="2027-05-26">
+            <span class="exam-date-label">26. maj 2027</span>
+          </label>
+          <label class="exam-date-card">
+            <input type="radio" name="examDate" value="2027-11-24">
+            <span class="exam-date-label">24. november 2027</span>
+          </label>
           <label class="exam-date-card muted">
             <input type="radio" name="examDate" value="">
             <span class="exam-date-label">Senere / ikke besluttet endnu</span>
@@ -307,8 +315,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let saved = localStorage.getItem("civicedge_testDate");
 
     if (!saved) {
-      // Next official sitting. 2027 dates not published yet — add them here when SIRI announces them.
-      saved = "2026-11-25";
+      // Default to the next official sitting (SIRI prøvedatoer). Add new dates here as they are published.
+      const DATES = ["2026-11-25", "2027-05-26", "2027-11-24"];
+      const todayISO = new Date().toISOString().slice(0, 10);
+      saved = DATES.find(d => d >= todayISO) || DATES[DATES.length - 1];
       localStorage.setItem("civicedge_testDate", saved);
     }
 
